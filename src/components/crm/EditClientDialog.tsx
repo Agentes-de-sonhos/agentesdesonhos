@@ -50,28 +50,15 @@ const clientSchema = z.object({
 type ClientFormData = z.infer<typeof clientSchema>;
 
 interface Props {
-  client: Pick<
-    Client,
-    | "id"
-    | "name"
-    | "email"
-    | "phone"
-    | "city"
-    | "notes"
-    | "status"
-    | "travel_preferences"
-    | "internal_notes"
-    | "birthday_day"
-    | "birthday_month"
-    | "birthday_year"
-  > | null;
+  clientId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function EditClientDialog({ client, open, onOpenChange }: Props) {
-  const { updateClient } = useClients();
+export function EditClientDialog({ clientId, open, onOpenChange }: Props) {
+  const { clients, updateClient } = useClients();
   const { user } = useAuth();
+  const client = clients.find((c) => c.id === clientId) || null;
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
