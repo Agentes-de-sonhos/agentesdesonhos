@@ -56,6 +56,7 @@ import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
+import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles, Wallet } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
@@ -1180,6 +1181,12 @@ export default function GerarOrcamento() {
             userId={quote.user_id}
             isOpen={true}
             onToggle={() => {}}
+          />
+        )}
+        renderAdvanced={() => (
+          <QuoteAdvancedSettings
+            quote={quote}
+            onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
           />
         )}
       />

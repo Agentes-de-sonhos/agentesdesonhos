@@ -2,9 +2,9 @@ import { useState, ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MapPin, CreditCard, CalendarIcon, Paperclip, ChevronLeft, ChevronRight, Check, ListChecks } from "lucide-react";
+import { MapPin, CreditCard, CalendarIcon, Paperclip, ChevronLeft, ChevronRight, Check, ListChecks, Settings2 } from "lucide-react";
 
-export type QuoteSettingsStep = "destination" | "included" | "payment" | "validity" | "documents";
+export type QuoteSettingsStep = "destination" | "included" | "payment" | "validity" | "documents" | "advanced";
 
 interface StepDef {
   key: QuoteSettingsStep;
@@ -18,6 +18,7 @@ const STEPS: StepDef[] = [
   { key: "payment",     title: "Apresentação do Investimento", icon: CreditCard },
   { key: "validity",    title: "Validade e Termos", icon: CalendarIcon },
   { key: "documents",   title: "Documentos do Orçamento", icon: Paperclip },
+  { key: "advanced",    title: "Configurações Avançadas", icon: Settings2 },
 ];
 
 interface Props {
@@ -29,11 +30,12 @@ interface Props {
   renderPayment: () => ReactNode;
   renderValidity: () => ReactNode;
   renderDocuments: () => ReactNode;
+  renderAdvanced: () => ReactNode;
 }
 
 export function QuoteSettingsModal({
   open, onOpenChange, initialStep = "destination",
-  renderDestination, renderIncluded, renderPayment, renderValidity, renderDocuments,
+  renderDestination, renderIncluded, renderPayment, renderValidity, renderDocuments, renderAdvanced,
 }: Props) {
   const [active, setActive] = useState<QuoteSettingsStep>(initialStep);
   const idx = STEPS.findIndex(s => s.key === active);
@@ -46,6 +48,7 @@ export function QuoteSettingsModal({
     payment: renderPayment(),
     validity: renderValidity(),
     documents: renderDocuments(),
+    advanced: renderAdvanced(),
   };
 
   return (
