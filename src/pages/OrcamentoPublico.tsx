@@ -1374,17 +1374,22 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           <div className="flex items-center gap-3 px-4 py-3 max-w-4xl mx-auto">
             {(quote as any).show_investment_section !== false ? (() => {
               const mode = (quote as any).payment_display_mode || "full_payment";
-              const installments = (quote as any).installments_count || 10;
+              const installments = (quote as any).installments_count || 0;
               const entryPct = (quote as any).entry_percentage || 0;
               const discountPct = (quote as any).full_payment_discount_percent || 0;
               const total = totalForBar;
 
-              // When discount applies, show discounted total as "from" baseline
-              const baseTotal = mode === "full_payment" && discountPct > 0
-                ? total * (1 - discountPct / 100)
-                : total;
+              const hasInstallments =
+                (mode === "installments" || mode === "installments_with_entry") &&
+                installments > 1;
 
-              const installmentValue = baseTotal / (installments || 1);
+              if (!hasInstallments) {
+                // No installment plan configured — keep left side empty so the CTA stays visible
+                return <div className="flex-1 min-w-0" aria-hidden="true" />;
+              }
+
+              const baseTotal = total;
+              const installmentValue = baseTotal / installments;
 
               return (
                 <div className="flex-1 min-w-0">
@@ -1397,11 +1402,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
                     {mode === "installments_with_entry"
                       ? `Entrada de ${formatCurrency(total * (entryPct / 100))} + ${installments}x sem juros`
-                      : mode === "installments"
-                        ? `Em até ${installments}x sem juros`
-                        : discountPct > 0
-                          ? `Condição especial à vista`
-                          : `Parcelamento disponível`}
+                      : `Em até ${installments}x sem juros`}
                   </p>
                 </div>
               );
