@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import {
   Plus, Trash2, ExternalLink, Image as ImageIcon,
   Upload, MessageCircle, Loader2, Store, Copy, Eye, Star, ChevronUp, ChevronDown,
-  Settings, Share2, Zap, Check
+  Settings, Zap, Check
 } from "lucide-react";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
@@ -253,11 +253,6 @@ function MinhaVitrineContent() {
     setSettingsOpen(true);
   };
 
-  const shareWhatsApp = () => {
-    const ogProxyUrl = `https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/public-og?type=showcase&slug=${showcase?.slug || ""}&url=${encodeURIComponent(publicUrl)}`;
-    const text = encodeURIComponent(`Confira nossa vitrine de ofertas: ${ogProxyUrl}`);
-    window.open(`https://wa.me/?text=${text}`, "_blank");
-  };
 
   if (loadingShowcase) {
     return (
@@ -383,40 +378,37 @@ function MinhaVitrineContent() {
     <DashboardLayout>
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Store className="h-6 w-6 text-primary" /> Minha Vitrine de Ofertas
-            </h1>
-            <p className="text-sm text-muted-foreground">Gerencie a sua vitrine de ofertas profissional.</p>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
-              <Copy className="h-4 w-4 mr-1" /> Copiar link
-            </Button>
-            <Button variant="outline" size="sm" onClick={shareWhatsApp}>
-              <Share2 className="h-4 w-4 mr-1" /> WhatsApp
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a href={`/${showcase.slug}/ofertas`} target="_blank" rel="noopener noreferrer">
-                <Eye className="h-4 w-4 mr-1" /> Visualizar
-              </a>
-            </Button>
-            <Button variant="outline" size="sm" onClick={openSettingsDialog}>
-              <Settings className="h-4 w-4 mr-1" /> Configurações
-            </Button>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Store className="h-6 w-6 text-primary" /> Minha Vitrine de Ofertas
+          </h1>
+          <p className="text-sm text-muted-foreground">Gerencie a sua vitrine de ofertas profissional.</p>
         </div>
 
-        <div className="text-sm text-muted-foreground bg-muted/50 rounded-md p-3 flex items-center gap-2 flex-wrap">
-          <ExternalLink className="h-4 w-4" />
-          <span className="font-medium">{publicUrl}</span>
+        {/* URL + Actions */}
+        <div className="flex items-center gap-2 flex-wrap bg-muted/50 rounded-md p-3">
+          <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="text-sm font-medium text-foreground">{publicUrl}</span>
           {showcase.showcase_mode !== "manual" && (
             <Badge variant="secondary" className="text-xs">
               <Zap className="h-3 w-3 mr-1" />
               {showcase.showcase_mode === "auto" ? "Automática" : "Combinada"}
             </Badge>
           )}
+          <div className="flex-1" />
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Link copiado!"); }}>
+              <Copy className="h-3.5 w-3.5 mr-1" /> Copiar Link
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={`/${showcase.slug}/ofertas`} target="_blank" rel="noopener noreferrer">
+                <Eye className="h-3.5 w-3.5 mr-1" /> Visualizar
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" onClick={openSettingsDialog}>
+              <Settings className="h-3.5 w-3.5 mr-1" /> Configurações
+            </Button>
+          </div>
         </div>
 
         {/* Add button */}
