@@ -57,21 +57,6 @@ export function NotificationsDropdown() {
               variant="ghost"
               size="sm"
               className="h-7 text-xs text-muted-foreground hover:text-foreground"
-              onClick={markAllAsRead}
-            >
-              <CheckCheck className="h-3.5 w-3.5 mr-1" />
-              Marcar todas como lidas
-            </Button>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h4 className="font-semibold text-sm">Notificações</h4>
-          {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs text-muted-foreground hover:text-foreground"
               onClick={() => markAllRead.mutate()}
             >
               <CheckCheck className="h-3.5 w-3.5 mr-1" />
