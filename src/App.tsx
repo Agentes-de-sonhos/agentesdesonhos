@@ -275,6 +275,7 @@ const App = () => (
           <WhatsAppSupportButton />
           </SubscriptionProvider>
         </AuthProvider>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
