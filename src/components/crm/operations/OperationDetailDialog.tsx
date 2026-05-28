@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Plus, Trash2, Upload, FileText, Clock, ListChecks, Paperclip,
-  Info, Copy, ExternalLink, MessageCircle, ArrowRight,
+  Info, Copy, ExternalLink, MessageCircle, ArrowRight, MoreVertical, Save, RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -25,9 +25,17 @@ import {
   useOperationTimeline,
   useOperationAttachments,
   useOperations,
+  useChecklistTemplates,
 } from "@/hooks/useOperations";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { STAGE_CHECKLISTS } from "@/types/operations";
 import type { Operation, OperationStage } from "@/types/operations";
-import { OPERATION_STAGES, STAGE_CHECKLISTS, getStageMeta } from "@/types/operations";
+import { OPERATION_STAGES, getStageMeta } from "@/types/operations";
 
 function StageChip({ stage }: { stage: OperationStage }) {
   const meta = getStageMeta(stage);
@@ -51,6 +59,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
   const { tasks, seedChecklist, toggleTask, addTask, removeTask } = useOperationTasks(operation?.id ?? null);
   const { events, addNote } = useOperationTimeline(operation?.id ?? null);
   const { attachments, uploadFile, removeAttachment } = useOperationAttachments(operation?.id ?? null);
+  const { saveTemplate, resetTemplate, isSaving } = useChecklistTemplates();
 
   const [form, setForm] = useState<Partial<Operation>>({});
   const [newTaskLabel, setNewTaskLabel] = useState("");
