@@ -27,6 +27,7 @@ import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles, FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
+import { ImportQuoteAsNewWalletDialog } from "@/components/trip/ImportQuoteAsNewWalletDialog";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
@@ -102,6 +103,7 @@ function TripWalletContent() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
   const [showImportQuote, setShowImportQuote] = useState(false);
+  const [showImportQuoteAsNew, setShowImportQuoteAsNew] = useState(false);
   const [accordionValue, setAccordionValue] = useState<string[]>([]);
 
   const openServicesAccordion = () => {
@@ -453,6 +455,18 @@ function TripWalletContent() {
                       };
                     })()}
                   />
+                  <div className="mt-4 pt-4 border-t flex flex-col items-center gap-2">
+                    <p className="text-xs text-muted-foreground">ou aproveite informações já cadastradas</p>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={() => setShowImportQuoteAsNew(true)}
+                    >
+                      <FileTextIcon className="h-4 w-4 mr-2" />
+                      Importar de um Orçamento
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -462,6 +476,10 @@ function TripWalletContent() {
             </TabsContent>
           </Tabs>
         </div>
+        <ImportQuoteAsNewWalletDialog
+          open={showImportQuoteAsNew}
+          onOpenChange={setShowImportQuoteAsNew}
+        />
       </DashboardLayout>
     );
   }
