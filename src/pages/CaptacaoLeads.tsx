@@ -180,7 +180,7 @@ export default function CaptacaoLeads() {
                 const badgeClass = isConv
                   ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
                   : "bg-pink-100 text-pink-700 hover:bg-pink-100";
-                const dot = isConv ? "🟢" : "🩷";
+                const Icon = MessageCircle;
                 return (
                   <Card key={`${lead.source}-${lead.id}`} className="hover:shadow-md transition-all">
                     <CardContent className="p-4">
@@ -188,8 +188,9 @@ export default function CaptacaoLeads() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="font-semibold text-foreground">{lead.lead_name}</span>
-                            <Badge className={`text-xs ${badgeClass}`}>
-                              {dot} {isConv ? "Formulário Conversacional" : "Página de Vendas"}
+                            <Badge className={`text-xs gap-1 ${badgeClass}`}>
+                              <Icon className="h-3 w-3" />
+                              {isConv ? "Formulário Conversacional" : "Página de Vendas"}
                             </Badge>
                           </div>
                           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
