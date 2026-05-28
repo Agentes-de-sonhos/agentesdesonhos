@@ -5,6 +5,18 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
+import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+
+const INCLUDED_EMOJI: Record<string, string> = {
+  hotel: "🏨",
+  flight: "✈️",
+  car: "🚗",
+  transfer: "🚐",
+  attraction: "🎟️",
+  insurance: "🛡️",
+  cruise: "🚢",
+  sparkles: "✨",
+};
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea",
