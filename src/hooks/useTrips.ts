@@ -50,6 +50,7 @@ export function useTrips() {
           status: "active",
           share_token: shareToken,
           access_password: password,
+          opportunity_id: formData.opportunity_id || null,
         } as any)
         .select()
         .single();
