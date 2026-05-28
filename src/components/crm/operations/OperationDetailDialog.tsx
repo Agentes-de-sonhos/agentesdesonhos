@@ -52,9 +52,10 @@ interface Props {
   operation: Operation | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultTab?: "overview" | "checklist" | "timeline" | "attachments";
 }
 
-export function OperationDetailDialog({ operation, open, onOpenChange }: Props) {
+export function OperationDetailDialog({ operation, open, onOpenChange, defaultTab = "overview" }: Props) {
   const { updateOperation, deleteOperation } = useOperations();
   const { tasks, seedChecklist, toggleTask, addTask, removeTask } = useOperationTasks(operation?.id ?? null);
   const { events, addNote } = useOperationTimeline(operation?.id ?? null);
@@ -111,12 +112,12 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="overview" className="mt-2">
+        <Tabs key={`${operation.id}-${defaultTab}`} defaultValue={defaultTab} className="mt-2">
           <div className="-mx-1 overflow-x-auto sm:mx-0 sm:overflow-visible">
             <TabsList className="inline-flex w-max gap-1 sm:grid sm:w-full sm:grid-cols-4">
               <TabsTrigger value="overview" className="gap-1 whitespace-nowrap px-3"><Info className="h-3.5 w-3.5 shrink-0" />Visão geral</TabsTrigger>
               <TabsTrigger value="checklist" className="gap-1 whitespace-nowrap px-3"><ListChecks className="h-3.5 w-3.5 shrink-0" />Checklist</TabsTrigger>
-              <TabsTrigger value="timeline" className="gap-1 whitespace-nowrap px-3"><Clock className="h-3.5 w-3.5 shrink-0" />Timeline</TabsTrigger>
+              <TabsTrigger value="timeline" className="gap-1 whitespace-nowrap px-3"><Clock className="h-3.5 w-3.5 shrink-0" />Anotações</TabsTrigger>
               <TabsTrigger value="attachments" className="gap-1 whitespace-nowrap px-3"><Paperclip className="h-3.5 w-3.5 shrink-0" />Anexos</TabsTrigger>
             </TabsList>
           </div>
