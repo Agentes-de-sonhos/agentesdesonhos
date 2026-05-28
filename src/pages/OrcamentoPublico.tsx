@@ -1125,6 +1125,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </section>
         )}
 
+        {/* ─── Documentos anexados (integrados ao roteiro, logo após os serviços) ─── */}
+        <PublicQuoteDocuments quoteId={quote.id} />
+
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
         {(quote as any).show_investment_section !== false && (() => {
           const mode = (quote as any).payment_display_mode || "full_payment";
