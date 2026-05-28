@@ -439,7 +439,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
 
       {/* Edit Client Dialog */}
       <Dialog open={showEditClient} onOpenChange={setShowEditClient}>
-        <DialogContent>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Cliente</DialogTitle>
           </DialogHeader>
@@ -479,21 +479,125 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                     <FormItem>
                       <FormLabel>Telefone/WhatsApp</FormLabel>
                       <FormControl>
-                        <Input placeholder="Número de telefone" {...field} />
+                        <InternationalPhoneInput
+                          value={field.value}
+                          onChange={(v) => field.onChange(v ?? "")}
+                          placeholder="Número de telefone"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={clientForm.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cidade</FormLabel>
+                      <FormControl>
+                        <Input placeholder="São Paulo, SP" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={clientForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(CLIENT_STATUS_LABELS).map(([value, label]) => (
+                            <SelectItem key={value} value={value}>
+                              {label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <FormLabel className="flex items-center gap-1.5">
+                  <Cake className="h-4 w-4" />
+                  Data de Aniversário
+                </FormLabel>
+                <div className="grid grid-cols-3 gap-2">
+                  <FormField
+                    control={clientForm.control}
+                    name="birthday_day"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Dia" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                                <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={clientForm.control}
+                    name="birthday_month"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Mês" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"].map((m, i) => (
+                                <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={clientForm.control}
+                    name="birthday_year"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input type="number" placeholder="Ano (opcional)" min={1920} max={new Date().getFullYear()} {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
               <FormField
                 control={clientForm.control}
-                name="city"
+                name="travel_preferences"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cidade</FormLabel>
+                    <FormLabel>Preferências de Viagem</FormLabel>
                     <FormControl>
-                      <Input placeholder="São Paulo, SP" {...field} />
+                      <Textarea placeholder="Ex: Prefere praias, viaja em família, classe executiva..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -504,9 +608,22 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Observações</FormLabel>
+                    <FormLabel>Observações Gerais</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Anotações sobre o cliente..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={clientForm.control}
+                name="internal_notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Observações Internas</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Notas internas (não visíveis ao cliente)..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
