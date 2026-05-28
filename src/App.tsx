@@ -14,6 +14,7 @@ import { WhatsAppSupportButton } from "./components/layout/WhatsAppSupportButton
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingScreen } from "./components/auth/LoadingScreen";
+import { NewLeadAlertProvider } from "./components/leads/NewLeadAlertProvider";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -137,6 +138,7 @@ const App = () => (
         <AuthProvider>
           <ImpersonationBanner />
           <SubscriptionProvider>
+          <NewLeadAlertProvider>
           <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/auth" element={
@@ -273,6 +275,7 @@ const App = () => (
           </Routes>
           </Suspense>
           <WhatsAppSupportButton />
+          </NewLeadAlertProvider>
           </SubscriptionProvider>
         </AuthProvider>
         </ErrorBoundary>
