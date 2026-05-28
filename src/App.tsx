@@ -12,6 +12,8 @@ import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 import { WhatsAppSupportButton } from "./components/layout/WhatsAppSupportButton";
 import { Loader2 } from "lucide-react";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { LoadingScreen } from "./components/auth/LoadingScreen";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -131,10 +133,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ErrorBoundary>
         <AuthProvider>
           <ImpersonationBanner />
           <SubscriptionProvider>
-          <Suspense fallback={<PageFallback />}>
+          <Suspense fallback={<LoadingScreen />}>
           <Routes>
             <Route path="/auth" element={
               window.location.hostname.startsWith("ativar-cartao") ? (
@@ -272,6 +275,7 @@ const App = () => (
           <WhatsAppSupportButton />
           </SubscriptionProvider>
         </AuthProvider>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
