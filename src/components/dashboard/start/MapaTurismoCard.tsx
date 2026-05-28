@@ -46,7 +46,7 @@ interface MapaTurismoCardProps {
 
 export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps = {}) {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const isCollapsed = alwaysExpanded ? false : collapsed;
 
   return (
