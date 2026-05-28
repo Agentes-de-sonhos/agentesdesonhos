@@ -284,6 +284,16 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   const { currency } = getQuoteCurrencyInfo(quote);
   const formatCurrency = (v: number) => formatQuoteCurrency(v, currency);
 
+  // Abrir a janela ANTES do await para evitar bloqueio de popup pelo navegador.
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    try {
+      printWindow.document.write(
+        '<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Gerando PDF do orçamento…</body></html>',
+      );
+    } catch {}
+  }
+
   const quoteDocuments = quote?.id ? await fetchQuoteDocumentsForPDF(quote.id) : [];
 
   const startDate = parseLocalDate(quote.start_date);
