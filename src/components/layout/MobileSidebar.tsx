@@ -521,7 +521,6 @@ export function MobileSidebar() {
               expanded ? "gap-0.5 px-3" : "items-center gap-1 px-2"
             )}
           >
-            {renderMenuItem(dashboardItem)}
             {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(minhaAgendaItem)}
             {renderMenuItem(meuPerfilItem)}

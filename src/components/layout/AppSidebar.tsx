@@ -600,13 +600,13 @@ export function AppSidebar() {
       >
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
-          <Link to="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
+          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl gradient-primary">
               <Cloud className="h-5 w-5 text-primary-foreground" />
             </div>
             {!collapsed && (
-              <div className="animate-fade-in">
-                <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
+              <div className="animate-fade-in min-w-0">
+                <h1 className="font-display text-base font-semibold text-sidebar-foreground whitespace-nowrap">
                   Agentes de Sonhos
                 </h1>
               </div>
@@ -631,7 +631,6 @@ export function AppSidebar() {
         <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
           {/* Início */}
           <nav className="flex flex-col gap-0.5 px-3">
-            {renderSingleItem(isStartPlan ? startDashboardItem : dashboardItem)}
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
             {/* meuPerfilItem removido */}
