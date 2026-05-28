@@ -793,37 +793,35 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           if (mode === "installments") {
             const iv = total / (installments || 1);
             paymentHtml = `
-              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
-              <p style="font-size:20px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">${installments}x de</p>
-              <p style="font-size:38px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">${formatCurrency(iv)}</p>
-              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">A partir de</p>
+              <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
             `;
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const iv = remainder / (installments || 1);
             paymentHtml = `
-              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
-              <p style="font-size:18px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">Entrada de ${formatCurrency(entryValue)}</p>
-              <p style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">+ ${installments}x de ${formatCurrency(iv)}</p>
-              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Condição especial</p>
+              <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:#0f172a;">Entrada de ${formatCurrency(entryValue)} + ${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
-              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
-              <p style="font-size:40px;font-weight:800;letter-spacing:-1px;margin:2px 0 0;line-height:1.15;">${formatCurrency(discountedTotal)}</p>
-              ${discountPct > 0 ? `<p style="font-size:13px;opacity:0.7;text-decoration:line-through;margin:2px 0 0;line-height:1.3;">${formatCurrency(total)}</p><p style="font-size:13px;opacity:0.9;margin:2px 0 0;line-height:1.3;">🎉 ${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
-              ${discountPct === 0 && methodLabel ? `<p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">${methodLabel}</p>` : ""}
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Investimento</p>
+              <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(discountedTotal)}</p>
+              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:#94a3b8;">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:#0f766e;font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">${methodLabel}</p>` : ""}
             `;
           }
 
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:18px 20px;margin-bottom:16px;text-align:center;box-shadow:0 8px 18px rgba(15,118,110,0.18);">
+            <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:11px;opacity:0.7;margin:4px 0 0;line-height:1.3;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:10px;margin:10px 0 0;line-height:1.3;color:#94a3b8;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
             </div>
           `;
         })()}
