@@ -251,7 +251,7 @@ const planoStartSection: MenuSection = {
   ],
 };
 
-const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+
 const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: CreditCard };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
