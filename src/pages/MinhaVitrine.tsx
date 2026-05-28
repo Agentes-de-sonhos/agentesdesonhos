@@ -17,8 +17,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import {
   Plus, Trash2, ExternalLink, Image as ImageIcon,
-  Upload, MessageCircle, Loader2, Store, Copy, Eye, Star, ChevronUp, ChevronDown,
-  Settings, Share2, Zap, Check
+  Upload, Loader2, Store, Copy, Eye, Star, ChevronUp, ChevronDown,
+  Settings, Zap, Check
 } from "lucide-react";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
