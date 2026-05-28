@@ -3898,6 +3898,7 @@ export type Database = {
           additional_info: string | null
           agent_user_id: string
           ai_suggestion: string | null
+          attended_at: string | null
           budget: string | null
           created_at: string | null
           destination: string | null
@@ -3915,6 +3916,7 @@ export type Database = {
           additional_info?: string | null
           agent_user_id: string
           ai_suggestion?: string | null
+          attended_at?: string | null
           budget?: string | null
           created_at?: string | null
           destination?: string | null
@@ -3932,6 +3934,7 @@ export type Database = {
           additional_info?: string | null
           agent_user_id?: string
           ai_suggestion?: string | null
+          attended_at?: string | null
           budget?: string | null
           created_at?: string | null
           destination?: string | null
@@ -7327,9 +7330,11 @@ export type Database = {
       }
       sales_landing_leads: {
         Row: {
+          attended_at: string | null
           client_id: string | null
           created_at: string
           id: string
+          is_read: boolean
           landing_id: string
           lead_name: string
           lead_phone: string
@@ -7337,9 +7342,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attended_at?: string | null
           client_id?: string | null
           created_at?: string
           id?: string
+          is_read?: boolean
           landing_id: string
           lead_name: string
           lead_phone: string
@@ -7347,9 +7354,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          attended_at?: string | null
           client_id?: string | null
           created_at?: string
           id?: string
+          is_read?: boolean
           landing_id?: string
           lead_name?: string
           lead_phone?: string
