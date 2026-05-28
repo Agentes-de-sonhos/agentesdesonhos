@@ -33,6 +33,7 @@ const ClientesCard = lazy(() => import("@/components/dashboard/ClientesCard").th
 const FinanceiroCard = lazy(() => import("@/components/dashboard/FinanceiroCard").then(m => ({ default: m.FinanceiroCard })));
 const SalesResourcesCard = lazy(() => import("@/components/dashboard/SalesResourcesCard").then(m => ({ default: m.SalesResourcesCard })));
 const GuidesReferencesCard = lazy(() => import("@/components/dashboard/GuidesReferencesCard").then(m => ({ default: m.GuidesReferencesCard })));
+const LeadsAwaitingCard = lazy(() => import("@/components/dashboard/LeadsAwaitingCard").then(m => ({ default: m.LeadsAwaitingCard })));
 
 
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
@@ -189,6 +190,11 @@ export default function Dashboard() {
             <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
               <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
+            </section>
+
+            {/* 2b. Leads aguardando atendimento */}
+            <section className="order-[2.5]">
+              <LeadsAwaitingCard />
             </section>
 
             {/* 3. Radar do Turismo & EducaTravel Academy */}
