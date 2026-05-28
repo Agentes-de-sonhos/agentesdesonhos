@@ -99,6 +99,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
       destination: values.destination,
       start_date: formatLocalDate(from),
       end_date: formatLocalDate(to),
+      opportunity_id: defaultValues?.opportunity_id || null,
     });
   };
 
