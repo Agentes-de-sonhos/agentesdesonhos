@@ -401,7 +401,7 @@ function MinhaVitrineContent() {
               <Copy className="h-3.5 w-3.5 mr-1" /> Copiar Link
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <a href={`/${showcase.slug}/ofertas`} target="_blank" rel="noopener noreferrer">
+              <a href={publicUrl} target="_blank" rel="noopener noreferrer">
                 <Eye className="h-3.5 w-3.5 mr-1" /> Visualizar
               </a>
             </Button>
