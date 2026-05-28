@@ -5300,6 +5300,111 @@ export type Database = {
         }
         Relationships: []
       }
+      operation_label_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          label_id: string
+          operation_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label_id: string
+          operation_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label_id?: string
+          operation_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operation_label_assignments_label_id_fkey"
+            columns: ["label_id"]
+            isOneToOne: false
+            referencedRelation: "operation_labels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operation_label_assignments_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operation_labels: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      operation_pipeline_stages: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_protected: boolean
+          key: string
+          legacy_key: string | null
+          name: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_protected?: boolean
+          key: string
+          legacy_key?: string | null
+          name: string
+          position?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_protected?: boolean
+          key?: string
+          legacy_key?: string | null
+          name?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       operation_stage_checklist_templates: {
         Row: {
           created_at: string
@@ -9816,6 +9921,10 @@ export type Database = {
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
+      ensure_default_operation_stages: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       generate_certificate_number: { Args: never; Returns: string }
       generate_itinerary_access_code: { Args: never; Returns: string }
       generate_public_access_code: { Args: never; Returns: string }
