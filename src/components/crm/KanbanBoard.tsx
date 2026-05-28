@@ -337,13 +337,16 @@ export function KanbanBoard() {
                 strategy={horizontalListSortingStrategy}
               >
                 <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-                  {stages.map((stage) => {
+                  {stages.map((stage, index) => {
                     const stageOpps = getOpportunitiesForStage(stage.id);
                     const total = getTotalValue(stage.id);
                     const avgTime = getAverageTimeInStage(stage.id);
                     const overdueCount = stageOpps.filter(hasOverdueFollowUp).length;
                     const tokens = getStageTokens(stage.color);
-                    const isFirstStage = stages[0]?.id === stage.id;
+                    const isFirstStage = index === 0;
+                    const isLastStage = index === stages.length - 1;
+                    const isSecondToLastStage = index === stages.length - 2;
+                    const isProtected = isFirstStage || isLastStage || isSecondToLastStage;
 
                     return (
                       <SortableColumn key={stage.id} stage={stage}>
@@ -375,6 +378,7 @@ export function KanbanBoard() {
                                 onDuplicate={() => duplicateStage(stage.id)}
                                 onRequestDelete={() => setDeleteTarget(stage)}
                                 onQuickAdd={isFirstStage ? () => setQuickAddOpen(true) : undefined}
+                                isProtected={isProtected}
                               />
 
                               <div className="space-y-2.5 min-h-[100px]">
