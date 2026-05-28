@@ -215,8 +215,52 @@ export function OperationDetailDialog({ operation, open, onOpenChange }: Props) 
 
           {/* CHECKLIST */}
           <TabsContent value="checklist" className="space-y-3 mt-4">
-            <div className="text-sm text-muted-foreground">
-              Checklist sugerido para a etapa <strong>{meta.label}</strong>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-sm text-muted-foreground">
+                Checklist da etapa <strong>{meta.label}</strong>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 gap-1">
+                    <MoreVertical className="h-4 w-4" />
+                    <span className="hidden sm:inline">Ações</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuItem
+                    disabled={isSaving || currentStageTasks.length === 0}
+                    onClick={async () => {
+                      const labels = currentStageTasks.map((t) => t.label).filter(Boolean);
+                      if (labels.length === 0) {
+                        toast.error("Adicione ao menos uma tarefa antes de salvar.");
+                        return;
+                      }
+                      try {
+                        await saveTemplate({ stage: operation.stage, labels });
+                        toast.success("Checklist salvo como padrão para esta etapa.");
+                      } catch (e: any) {
+                        toast.error(e?.message || "Não foi possível salvar o modelo");
+                      }
+                    }}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar como padrão desta etapa
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      try {
+                        await resetTemplate(operation.stage);
+                        toast.success("Modelo personalizado removido. Novas operações usarão o checklist sugerido.");
+                      } catch (e: any) {
+                        toast.error(e?.message || "Não foi possível restaurar");
+                      }
+                    }}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Restaurar checklist sugerido original
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="space-y-2">
               {currentStageTasks.map((task) => (
