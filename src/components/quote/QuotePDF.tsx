@@ -6,6 +6,55 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+import { supabase } from "@/integrations/supabase/client";
+
+type QuoteDocument = {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: number | null;
+};
+
+async function fetchQuoteDocumentsForPDF(quoteId: string): Promise<Array<QuoteDocument & { signedUrl: string }>> {
+  try {
+    const { data, error } = await supabase
+      .from("quote_documents")
+      .select("id, file_name, file_path, file_type, file_size")
+      .eq("quote_id", quoteId)
+      .eq("is_public", true)
+      .order("created_at", { ascending: true });
+    if (error || !data) return [];
+    const withUrls = await Promise.all(
+      data.map(async (doc: any) => {
+        const { data: signed } = await supabase.storage
+          .from("quote-documents")
+          .createSignedUrl(doc.file_path, 60 * 60 * 24 * 7);
+        return { ...doc, signedUrl: signed?.signedUrl || "" };
+      }),
+    );
+    return withUrls;
+  } catch {
+    return [];
+  }
+}
+
+function emojiForDoc(fileName: string, fileType: string | null): string {
+  const name = (fileName || "").toLowerCase();
+  const type = (fileType || "").toLowerCase();
+  if (type.includes("pdf") || name.endsWith(".pdf")) return "📄";
+  if (type.includes("image") || /\.(jpg|jpeg|png|webp|gif)$/.test(name)) return "🖼️";
+  if (/\.(xlsx?|csv)$/.test(name) || type.includes("sheet")) return "📊";
+  if (/\.(docx?)$/.test(name) || type.includes("word")) return "📝";
+  return "📎";
+}
+
+function formatDocSizePDF(bytes: number | null): string {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const INCLUDED_EMOJI: Record<string, string> = {
   hotel: "🏨",
