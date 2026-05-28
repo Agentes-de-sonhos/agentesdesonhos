@@ -32,6 +32,7 @@ interface Props {
   avgTimeLabel?: string | null;
   dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
   isDragging?: boolean;
+  isProtected?: boolean;
   onRename: (name: string) => void | Promise<void>;
   onChangeColor: (color: StageColor) => void | Promise<void>;
   onDuplicate: () => void | Promise<void>;
@@ -48,6 +49,7 @@ export function StageColumnHeader({
   totalLabel,
   avgTimeLabel,
   dragHandleProps,
+  isProtected = false,
   onRename,
   onChangeColor,
   onDuplicate,
@@ -85,17 +87,19 @@ export function StageColumnHeader({
 
       <div className="flex items-center justify-between mb-1 gap-1">
         <div className="flex items-center gap-1 min-w-0 flex-1">
-          <button
-            type="button"
-            {...dragHandleProps}
-            className={cn(
-              "p-0.5 -ml-1 rounded text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/60 cursor-grab active:cursor-grabbing transition-opacity",
-              "opacity-0 group-hover/header:opacity-100 sm:opacity-0 md:group-hover/header:opacity-100"
-            )}
-            aria-label="Arrastar coluna"
-          >
-            <GripVertical className="h-4 w-4" />
-          </button>
+          {!isProtected && (
+            <button
+              type="button"
+              {...dragHandleProps}
+              className={cn(
+                "p-0.5 -ml-1 rounded text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/60 cursor-grab active:cursor-grabbing transition-opacity",
+                "opacity-0 group-hover/header:opacity-100 sm:opacity-0 md:group-hover/header:opacity-100"
+              )}
+              aria-label="Arrastar coluna"
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
+          )}
 
           {editing ? (
             <div className="flex items-center gap-1 flex-1">
@@ -210,9 +214,11 @@ export function StageColumnHeader({
                 <DropdownMenuItem onClick={() => setEditing(true)}>
                   <Pencil className="mr-2 h-4 w-4" /> Editar nome
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onDuplicate()}>
-                  <Copy className="mr-2 h-4 w-4" /> Duplicar coluna
-                </DropdownMenuItem>
+                {!isProtected && (
+                  <DropdownMenuItem onClick={() => onDuplicate()}>
+                    <Copy className="mr-2 h-4 w-4" /> Duplicar coluna
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs flex items-center gap-2">
                   <Palette className="h-3.5 w-3.5" /> Cor
@@ -236,13 +242,17 @@ export function StageColumnHeader({
                     );
                   })}
                 </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={onRequestDelete}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Excluir coluna
-                </DropdownMenuItem>
+                {!isProtected && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={onRequestDelete}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Excluir coluna
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
