@@ -70,7 +70,7 @@ export function CommunitySocialFeed() {
     deleteComment,
   } = useCommunityFeed();
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
