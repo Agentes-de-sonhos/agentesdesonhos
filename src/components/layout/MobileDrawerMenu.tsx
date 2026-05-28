@@ -345,6 +345,11 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
           <Icon className="h-4 w-4" />
           <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left whitespace-nowrap">{section.title}</span>
           <ChevronDown
+            className={cn(
+              "h-3.5 w-3.5 transition-transform duration-200",
+              isOpen ? "rotate-180 text-white/70" : "text-muted-foreground/50"
+            )}
+          />
         </button>
         {isOpen && (
           <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
