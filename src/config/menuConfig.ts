@@ -13,7 +13,6 @@ export const MAIN_MENU_ITEMS: MenuItemConfig[] = [
   { key: "section_guias", label: "Guias e Referências", isSection: true, sectionKey: "guias" },
   { key: "section_recursos_vendas", label: "Recursos de Vendas", isSection: true, sectionKey: "recursos_vendas" },
   { key: "section_criar", label: "Criar", isSection: true, sectionKey: "criar" },
-  { key: "meus_projetos", label: "Meus Projetos" },
   { key: "section_clientes", label: "Clientes", isSection: true, sectionKey: "clientes" },
   { key: "section_financeiro", label: "Financeiro", isSection: true, sectionKey: "financeiro" },
   { key: "section_marketing", label: "Ferramentas de Marketing", isSection: true, sectionKey: "marketing" },
@@ -32,7 +31,6 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
     { key: "requisitos_viagem", label: "Central de Requisitos" },
     { key: "hotel_raio_x", label: "Raio-X do Hotel" },
     { key: "travel_advisor", label: "Travel Advisor" },
-    { key: "agenda", label: "Minha Agenda" },
   ],
   recursos_vendas: [
     { key: "bloqueios_aereos", label: "Bloqueios Aéreos" },

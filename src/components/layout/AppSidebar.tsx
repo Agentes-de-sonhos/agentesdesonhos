@@ -130,7 +130,6 @@ const guiasSection: MenuSection = {
     { key: "requisitos_viagem", title: "Central de Requisitos", url: "/requisitos-viagem", icon: Shield, requiredFeature: "travel_requirements", isPremium: true },
     { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
     { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass, requiredFeature: "travel_advisor" },
-    { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
   ],
 };
 
@@ -228,6 +227,8 @@ const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Ment
 
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
+const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
+const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
 
 // Custom section shown ONLY for Start plan users (always at the top)
 const planoStartSection: MenuSection = {
@@ -290,7 +291,7 @@ export function AppSidebar() {
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [meusProjetosItem, comunidadeItem, mentoriasItem],
+    () => [comunidadeItem, mentoriasItem],
     []
   );
 
@@ -631,6 +632,9 @@ export function AppSidebar() {
           {/* Início */}
           <nav className="flex flex-col gap-0.5 px-3">
             {renderSingleItem(isStartPlan ? startDashboardItem : dashboardItem)}
+            {renderSingleItem(meusProjetosItem)}
+            {renderSingleItem(minhaAgendaItem)}
+            {renderSingleItem(meuPerfilItem)}
           </nav>
 
           <div className="px-3 py-1">
