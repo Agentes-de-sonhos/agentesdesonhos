@@ -2,9 +2,9 @@ import { useState, ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MapPin, CreditCard, CalendarIcon, Paperclip, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { MapPin, CreditCard, CalendarIcon, Paperclip, ChevronLeft, ChevronRight, Check, ListChecks } from "lucide-react";
 
-export type QuoteSettingsStep = "destination" | "payment" | "validity" | "documents";
+export type QuoteSettingsStep = "destination" | "included" | "payment" | "validity" | "documents";
 
 interface StepDef {
   key: QuoteSettingsStep;
@@ -14,6 +14,7 @@ interface StepDef {
 
 const STEPS: StepDef[] = [
   { key: "destination", title: "Apresentação do Destino", icon: MapPin },
+  { key: "included",    title: "O que está incluso", icon: ListChecks },
   { key: "payment",     title: "Apresentação do Investimento", icon: CreditCard },
   { key: "validity",    title: "Validade e Termos", icon: CalendarIcon },
   { key: "documents",   title: "Documentos do Orçamento", icon: Paperclip },
@@ -24,6 +25,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   initialStep?: QuoteSettingsStep;
   renderDestination: () => ReactNode;
+  renderIncluded: () => ReactNode;
   renderPayment: () => ReactNode;
   renderValidity: () => ReactNode;
   renderDocuments: () => ReactNode;
@@ -31,7 +33,7 @@ interface Props {
 
 export function QuoteSettingsModal({
   open, onOpenChange, initialStep = "destination",
-  renderDestination, renderPayment, renderValidity, renderDocuments,
+  renderDestination, renderIncluded, renderPayment, renderValidity, renderDocuments,
 }: Props) {
   const [active, setActive] = useState<QuoteSettingsStep>(initialStep);
   const idx = STEPS.findIndex(s => s.key === active);
@@ -40,6 +42,7 @@ export function QuoteSettingsModal({
 
   const content: Record<QuoteSettingsStep, ReactNode> = {
     destination: renderDestination(),
+    included: renderIncluded(),
     payment: renderPayment(),
     validity: renderValidity(),
     documents: renderDocuments(),

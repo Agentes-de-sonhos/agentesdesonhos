@@ -6883,6 +6883,7 @@ export type Database = {
           user_id: string
           valid_until: string | null
           validity_disclaimer: string
+          whats_included: Json | null
         }
         Insert: {
           adults_count?: number
@@ -6920,6 +6921,7 @@ export type Database = {
           user_id: string
           valid_until?: string | null
           validity_disclaimer?: string
+          whats_included?: Json | null
         }
         Update: {
           adults_count?: number
@@ -6957,6 +6959,7 @@ export type Database = {
           user_id?: string
           valid_until?: string | null
           validity_disclaimer?: string
+          whats_included?: Json | null
         }
         Relationships: [
           {

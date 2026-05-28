@@ -19,6 +19,7 @@ import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPubli
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
+import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -941,25 +942,25 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     ? quote.services.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
     : quote.total_amount;
 
-  // Smart highlights inferred from services
+  // Highlights: custom edited list (if any) or auto-generated from services.
   const svcTypes = new Set((quote.services || []).map(s => s.service_type));
   const hotelSvc = (quote.services || []).find(s => s.service_type === "hotel") as any;
   const flightSvc = (quote.services || []).find(s => s.service_type === "flight") as any;
-  const highlights: { icon: React.ReactNode; text: string }[] = [];
-  if (hotelSvc?.service_data) {
-    const meal = (hotelSvc.service_data.meal_plan || "").toLowerCase();
-    const isAI = meal.includes("all") || meal.includes("inclu");
-    highlights.push({ icon: <Hotel className="h-4 w-4" />, text: `${hotelSvc.service_data.hotel_name || "Hospedagem selecionada"}${isAI ? " • All Inclusive" : ""}` });
-  }
-  if (flightSvc?.service_data) {
-    highlights.push({ icon: <Plane className="h-4 w-4" />, text: `Voos${flightSvc.service_data.origin_city ? ` saindo de ${flightSvc.service_data.origin_city}` : ""}` });
-  }
-  if (svcTypes.has("car_rental")) highlights.push({ icon: <Car className="h-4 w-4" />, text: "Carro à disposição" });
-  if (svcTypes.has("transfer")) highlights.push({ icon: <ArrowRightLeft className="h-4 w-4" />, text: "Transfers privativos inclusos" });
-  if (svcTypes.has("attraction")) highlights.push({ icon: <Ticket className="h-4 w-4" />, text: "Experiências e passeios selecionados" });
-  if (svcTypes.has("insurance")) highlights.push({ icon: <Shield className="h-4 w-4" />, text: "Seguro viagem incluso" });
-  if (svcTypes.has("cruise")) highlights.push({ icon: <Ship className="h-4 w-4" />, text: "Cruzeiro reservado" });
-  if (highlights.length === 0) highlights.push({ icon: <Sparkles className="h-4 w-4" />, text: "Roteiro personalizado pela sua agência" });
+  const includedTexts = resolveWhatsIncluded(quote);
+  const iconFor: Record<string, React.ReactNode> = {
+    hotel: <Hotel className="h-4 w-4" />,
+    flight: <Plane className="h-4 w-4" />,
+    car: <Car className="h-4 w-4" />,
+    transfer: <ArrowRightLeft className="h-4 w-4" />,
+    attraction: <Ticket className="h-4 w-4" />,
+    insurance: <Shield className="h-4 w-4" />,
+    cruise: <Ship className="h-4 w-4" />,
+    sparkles: <Sparkles className="h-4 w-4" />,
+  };
+  const highlights = includedTexts.map((text) => ({
+    icon: iconFor[iconKeyForIncludedItem(text)] || iconFor.sparkles,
+    text,
+  }));
 
   // Timeline nodes
   const timelineNodes: { icon: React.ReactNode; label: string }[] = [];

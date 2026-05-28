@@ -5,6 +5,18 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
+import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+
+const INCLUDED_EMOJI: Record<string, string> = {
+  hotel: "🏨",
+  flight: "✈️",
+  car: "🚗",
+  transfer: "🚐",
+  attraction: "🎟️",
+  insurance: "🛡️",
+  cruise: "🚢",
+  sparkles: "✨",
+};
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea",
@@ -642,6 +654,35 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           return `
             <div class="pdf-block destination-intro" style="margin-bottom:20px;">
               <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
+            </div>
+          `;
+        })()}
+
+        <!-- O que está incluso -->
+        ${(() => {
+          const items = resolveWhatsIncluded(quote);
+          if (!items.length) return "";
+          const cells = items
+            .map((text) => {
+              const emoji = INCLUDED_EMOJI[iconKeyForIncludedItem(text)] || "✨";
+              const safe = String(text).replace(/</g, "&lt;");
+              return `
+                <td style="width:50%;vertical-align:top;padding:6px 8px;">
+                  <div style="display:flex;align-items:flex-start;gap:8px;">
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:#ecfeff;color:#0f766e;font-size:13px;flex:0 0 auto;">${emoji}</span>
+                    <span style="font-size:13px;color:#0f172a;line-height:1.5;font-weight:500;">${safe}</span>
+                  </div>
+                </td>`;
+            });
+          // group in pairs of 2 columns
+          const rows: string[] = [];
+          for (let i = 0; i < cells.length; i += 2) {
+            rows.push(`<tr>${cells[i] || ""}${cells[i + 1] || '<td style="width:50%"></td>'}</tr>`);
+          }
+          return `
+            <div class="pdf-block whats-included" style="border:1px solid #e2e8f0;border-radius:16px;padding:18px 20px;margin-bottom:18px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+              <p style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#0f766e;margin:0 0 10px;">O que está incluso</p>
+              <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">${rows.join("")}</table>
             </div>
           `;
         })()}

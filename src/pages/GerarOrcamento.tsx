@@ -55,6 +55,7 @@ import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
+import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles, Wallet } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
@@ -915,6 +916,14 @@ export default function GerarOrcamento() {
             introText={(quote as any).destination_intro_text || null}
             introImages={(quote as any).destination_intro_images || []}
             onUpdate={() => {}}
+          />
+        )}
+        renderIncluded={() => (
+          <WhatsIncludedEditor
+            quote={quote}
+            onUpdated={() => {
+              queryClient.invalidateQueries({ queryKey: ["quote", id] });
+            }}
           />
         )}
         renderPayment={() => (
