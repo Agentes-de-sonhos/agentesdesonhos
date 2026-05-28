@@ -19,6 +19,7 @@ import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPubli
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
+import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
