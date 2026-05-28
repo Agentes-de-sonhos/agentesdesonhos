@@ -591,7 +591,6 @@ export function AppSidebar() {
   return (
     <TooltipProvider delayDuration={300}>
       <aside
-      <aside
         id="app-sidebar"
         style={{ '--sidebar-current-width': collapsed ? '64px' : '288px' } as React.CSSProperties}
         className={cn(
