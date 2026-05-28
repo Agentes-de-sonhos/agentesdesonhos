@@ -6,6 +6,55 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+import { supabase } from "@/integrations/supabase/client";
+
+type QuoteDocument = {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_type: string | null;
+  file_size: number | null;
+};
+
+async function fetchQuoteDocumentsForPDF(quoteId: string): Promise<Array<QuoteDocument & { signedUrl: string }>> {
+  try {
+    const { data, error } = await supabase
+      .from("quote_documents")
+      .select("id, file_name, file_path, file_type, file_size")
+      .eq("quote_id", quoteId)
+      .eq("is_public", true)
+      .order("created_at", { ascending: true });
+    if (error || !data) return [];
+    const withUrls = await Promise.all(
+      data.map(async (doc: any) => {
+        const { data: signed } = await supabase.storage
+          .from("quote-documents")
+          .createSignedUrl(doc.file_path, 60 * 60 * 24 * 7);
+        return { ...doc, signedUrl: signed?.signedUrl || "" };
+      }),
+    );
+    return withUrls;
+  } catch {
+    return [];
+  }
+}
+
+function emojiForDoc(fileName: string, fileType: string | null): string {
+  const name = (fileName || "").toLowerCase();
+  const type = (fileType || "").toLowerCase();
+  if (type.includes("pdf") || name.endsWith(".pdf")) return "📄";
+  if (type.includes("image") || /\.(jpg|jpeg|png|webp|gif)$/.test(name)) return "🖼️";
+  if (/\.(xlsx?|csv)$/.test(name) || type.includes("sheet")) return "📊";
+  if (/\.(docx?)$/.test(name) || type.includes("word")) return "📝";
+  return "📎";
+}
+
+function formatDocSizePDF(bytes: number | null): string {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const INCLUDED_EMOJI: Record<string, string> = {
   hotel: "🏨",
@@ -231,9 +280,21 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   `;
 }
 
-export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
+export async function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const formatCurrency = (v: number) => formatQuoteCurrency(v, currency);
+
+  // Abrir a janela ANTES do await para evitar bloqueio de popup pelo navegador.
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    try {
+      printWindow.document.write(
+        '<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Gerando PDF do orçamento…</body></html>',
+      );
+    } catch {}
+  }
+
+  const quoteDocuments = quote?.id ? await fetchQuoteDocumentsForPDF(quote.id) : [];
 
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
@@ -697,6 +758,36 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
+        <!-- Documentos anexados (logo após os serviços, como item integrado do roteiro) -->
+        ${quoteDocuments.length > 0 ? `
+          <div class="pdf-block quote-documents" style="border:1px solid #e2e8f0;border-radius:16px;margin-bottom:18px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(90deg,rgba(15,118,110,0.10),rgba(15,118,110,0.03));border-bottom:1px solid #e2e8f0;">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#ffffff;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">📎</span>
+              <div style="flex:1;">
+                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:#0f766e;margin:0;">Anexos</p>
+                <p style="font-size:14px;font-weight:700;color:#0f172a;margin:1px 0 0;">Documentos do seu orçamento</p>
+              </div>
+              <span style="font-size:11px;color:#94a3b8;">${quoteDocuments.length} ${quoteDocuments.length === 1 ? "arquivo" : "arquivos"}</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              ${quoteDocuments.map((doc, idx) => `
+                <tr style="${idx > 0 ? "border-top:1px solid #f1f5f9;" : ""}">
+                  <td style="padding:12px 18px;vertical-align:middle;width:44px;">
+                    <div style="width:36px;height:36px;border-radius:10px;background:#ecfeff;display:inline-flex;align-items:center;justify-content:center;font-size:16px;">${emojiForDoc(doc.file_name, doc.file_type)}</div>
+                  </td>
+                  <td style="padding:12px 8px 12px 0;vertical-align:middle;">
+                    <p style="font-size:13px;font-weight:600;color:#0f172a;margin:0;word-break:break-word;">${(doc.file_name || "").replace(/</g, "&lt;")}</p>
+                    ${doc.file_size ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${formatDocSizePDF(doc.file_size)}</p>` : ""}
+                  </td>
+                  <td style="padding:12px 18px;vertical-align:middle;text-align:right;white-space:nowrap;">
+                    ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#0f766e;text-decoration:none;border:1px solid #0f766e;border-radius:999px;padding:6px 12px;">Abrir</a>` : ""}
+                  </td>
+                </tr>
+              `).join("")}
+            </table>
+          </div>
+        ` : ""}
+
         <!-- Total -->
         ${(() => {
           const total = quote.services && quote.services.length > 0
@@ -712,37 +803,35 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
           if (mode === "installments") {
             const iv = total / (installments || 1);
             paymentHtml = `
-              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
-              <p style="font-size:20px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">${installments}x de</p>
-              <p style="font-size:38px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">${formatCurrency(iv)}</p>
-              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">A partir de</p>
+              <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
             `;
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const iv = remainder / (installments || 1);
             paymentHtml = `
-              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
-              <p style="font-size:18px;font-weight:700;opacity:0.95;margin:2px 0 0;line-height:1.2;">Entrada de ${formatCurrency(entryValue)}</p>
-              <p style="font-size:32px;font-weight:800;letter-spacing:-1px;margin:0;line-height:1.15;">+ ${installments}x de ${formatCurrency(iv)}</p>
-              <p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Condição especial</p>
+              <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:#0f172a;">Entrada de ${formatCurrency(entryValue)} + ${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
-              <p style="font-size:12px;opacity:0.85;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin:0;line-height:1.3;">Investimento Total</p>
-              <p style="font-size:40px;font-weight:800;letter-spacing:-1px;margin:2px 0 0;line-height:1.15;">${formatCurrency(discountedTotal)}</p>
-              ${discountPct > 0 ? `<p style="font-size:13px;opacity:0.7;text-decoration:line-through;margin:2px 0 0;line-height:1.3;">${formatCurrency(total)}</p><p style="font-size:13px;opacity:0.9;margin:2px 0 0;line-height:1.3;">🎉 ${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
-              ${discountPct === 0 && methodLabel ? `<p style="font-size:13px;opacity:0.8;margin:2px 0 0;line-height:1.3;">${methodLabel}</p>` : ""}
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Investimento</p>
+              <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(discountedTotal)}</p>
+              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:#94a3b8;">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:#0f766e;font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">${methodLabel}</p>` : ""}
             `;
           }
 
           if (quote.show_investment_section === false) return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:linear-gradient(135deg,#0f766e 0%,#14b8a6 100%);color:white;border-radius:16px;padding:18px 20px;margin-bottom:16px;text-align:center;box-shadow:0 8px 18px rgba(15,118,110,0.18);">
+            <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:11px;opacity:0.7;margin:4px 0 0;line-height:1.3;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:10px;margin:10px 0 0;line-height:1.3;color:#94a3b8;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
             </div>
           `;
         })()}
@@ -776,7 +865,6 @@ export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: A
     </html>
   `;
 
-  const printWindow = window.open("", "_blank");
   if (printWindow) {
     printWindow.document.write(html);
     printWindow.document.close();

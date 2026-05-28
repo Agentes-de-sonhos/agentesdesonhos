@@ -781,59 +781,69 @@ function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
   if (isLoading || documents.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-border/40 bg-white shadow-sm p-6 sm:p-8">
-      <div className="flex items-center gap-2 mb-4">
-        <Paperclip className="h-5 w-5 text-primary" />
-        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-          Documentos do seu orçamento
-        </h3>
+    <section className="space-y-3 animate-fade-up">
+      <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
+        <div className="flex items-center gap-3 px-5 sm:px-6 py-4 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/40">
+          <div className="h-9 w-9 rounded-xl bg-white/80 backdrop-blur flex items-center justify-center shadow-sm">
+            <Paperclip className="h-4 w-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/80">Anexos</p>
+            <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              Documentos do seu orçamento
+            </h3>
+          </div>
+          <span className="text-xs text-muted-foreground hidden sm:inline">
+            {documents.length} {documents.length === 1 ? "arquivo" : "arquivos"}
+          </span>
+        </div>
+        <ul className="divide-y divide-border/40">
+          {documents.map((doc) => {
+            const Icon = getDocIcon(doc.file_type, doc.file_name);
+            return (
+              <li
+                key={doc.id}
+                className="flex items-center gap-3 px-5 sm:px-6 py-4 bg-white hover:bg-muted/30 transition-colors"
+              >
+                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate" title={doc.file_name}>
+                    {doc.file_name}
+                  </p>
+                  {doc.file_size ? (
+                    <p className="text-xs text-muted-foreground">{formatDocSize(doc.file_size)}</p>
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 px-2.5 text-xs"
+                    onClick={() => openDoc(doc, false)}
+                    title="Visualizar"
+                  >
+                    <Eye className="h-4 w-4 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Ver</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 px-2.5 text-xs"
+                    onClick={() => openDoc(doc, true)}
+                    title="Baixar"
+                  >
+                    <Download className="h-4 w-4 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Baixar</span>
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       </div>
-      <ul className="divide-y divide-border/40 rounded-md border border-border/40 overflow-hidden">
-        {documents.map((doc) => {
-          const Icon = getDocIcon(doc.file_type, doc.file_name);
-          return (
-            <li
-              key={doc.id}
-              className="flex items-center gap-3 px-3 py-3 bg-white hover:bg-muted/30 transition-colors"
-            >
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Icon className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate" title={doc.file_name}>
-                  {doc.file_name}
-                </p>
-                {doc.file_size ? (
-                  <p className="text-xs text-muted-foreground">{formatDocSize(doc.file_size)}</p>
-                ) : null}
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-xs"
-                  onClick={() => openDoc(doc, false)}
-                  title="Visualizar"
-                >
-                  <Eye className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Ver</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-xs"
-                  onClick={() => openDoc(doc, true)}
-                  title="Baixar"
-                >
-                  <Download className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Baixar</span>
-                </Button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    </section>
   );
 }
 
@@ -1125,6 +1135,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </section>
         )}
 
+        {/* ─── Documentos anexados (integrados ao roteiro, logo após os serviços) ─── */}
+        <PublicQuoteDocuments quoteId={quote.id} />
+
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
         {(quote as any).show_investment_section !== false && (() => {
           const mode = (quote as any).payment_display_mode || "full_payment";
@@ -1145,13 +1158,13 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = total / (installments || 1);
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   A partir de
                 </span>
-                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
                   {installments}x de {formatCurrency(installmentValue)}
                 </span>
-                <span className="text-xs text-muted-foreground mt-1">
+                <span className="text-xs text-muted-foreground mt-1.5">
                   sem juros{methodLabel ? ` • ${methodLabel}` : ""}
                 </span>
               </div>
@@ -1171,14 +1184,14 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const installmentValue = remainder / (installments || 1);
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   Condição especial
                 </span>
-                <span className="text-[2.2rem] sm:text-[3rem] font-extrabold tracking-tight text-foreground leading-none text-center">
+                <span className="text-[1.5rem] sm:text-[2rem] font-bold tracking-tight text-foreground leading-tight text-center">
                   Entrada de {formatCurrency(entryValue)} + {installments}x de {formatCurrency(installmentValue)}
                 </span>
                 {methodLabel && (
-                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
+                  <span className="text-xs text-muted-foreground mt-1.5">{methodLabel}</span>
                 )}
               </div>
             );
@@ -1191,10 +1204,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           } else if (discountPct > 0) {
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-primary/80">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
                   Condição especial à vista
                 </span>
-                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
                   {formatCurrency(headlineTotal)}
                 </span>
                 <span className="text-sm text-muted-foreground line-through mt-1">{formatCurrency(total)}</span>
@@ -1208,14 +1221,14 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           } else {
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   Investimento
                 </span>
-                <span className="text-[2.6rem] sm:text-[3.4rem] font-extrabold tracking-tight text-foreground leading-none">
+                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
                   {formatCurrency(headlineTotal)}
                 </span>
                 {methodLabel && (
-                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
+                  <span className="text-xs text-muted-foreground mt-1.5">{methodLabel}</span>
                 )}
               </div>
             );
@@ -1225,14 +1238,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           }
 
           return (
-            <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.28)] animate-fade-up">
-              <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-              <div className="relative text-center space-y-4 sm:space-y-5">
+            <section className="relative overflow-hidden rounded-2xl border border-border/40 bg-white p-6 sm:p-8 shadow-sm animate-fade-up">
+              <div className="relative text-center space-y-3">
                 {primaryDisplay}
                 {secondaryDisplay}
                 {quote.services && quote.services.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground/80">
                     {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
                   </p>
                 )}
@@ -1301,9 +1312,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </p>
           )}
         </div>
-
-        {/* ─── Documentos ─── */}
-        <PublicQuoteDocuments quoteId={quote.id} />
 
         {/* ─── Agent Signature ─── */}
         {agentProfile && (
