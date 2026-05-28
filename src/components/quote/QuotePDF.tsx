@@ -280,9 +280,11 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   `;
 }
 
-export function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
+export async function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const formatCurrency = (v: number) => formatQuoteCurrency(v, currency);
+
+  const quoteDocuments = quote?.id ? await fetchQuoteDocumentsForPDF(quote.id) : [];
 
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
