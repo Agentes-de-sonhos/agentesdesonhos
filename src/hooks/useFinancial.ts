@@ -520,9 +520,13 @@ export function useFinancial() {
   // Update sale product mutation
   const updateSaleProductMutation = useMutation({
     mutationFn: async ({ id, ...formData }: SaleProductFormData & { id: string }) => {
+      const sanitized: any = { ...formData };
+      ["expected_date", "invoice_issued_date", "invoice_sent_date"].forEach((k) => {
+        if (sanitized[k] === "" || sanitized[k] === undefined) sanitized[k] = null;
+      });
       const { data, error } = await supabase
         .from("sale_products")
-        .update(formData)
+        .update(sanitized)
         .eq("id", id)
         .select()
         .single();
