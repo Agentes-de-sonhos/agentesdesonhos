@@ -1305,9 +1305,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           )}
         </div>
 
-        {/* ─── Documentos ─── */}
-        <PublicQuoteDocuments quoteId={quote.id} />
-
         {/* ─── Agent Signature ─── */}
         {agentProfile && (
           <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
