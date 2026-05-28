@@ -750,6 +750,31 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!linkedDialog} onOpenChange={(o) => !o && setLinkedDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {linkedDialog?.kind === "quote"
+                ? "Já existe um orçamento vinculado"
+                : "Já existe uma carteira digital vinculada"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta oportunidade já possui {linkedDialog?.kind === "quote" ? "um orçamento" : "uma carteira"}{" "}
+              criada. O que você deseja fazer?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-end gap-2">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <Button variant="outline" onClick={createAnotherLinked}>
+              Criar novo(a)
+            </Button>
+            <AlertDialogAction onClick={openExistingLinked}>
+              Abrir existente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
