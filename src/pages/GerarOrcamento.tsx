@@ -917,6 +917,9 @@ export default function GerarOrcamento() {
             onUpdate={() => {}}
           />
         )}
+        renderIncluded={() => (
+          <WhatsIncludedEditor quote={quote} onUpdated={() => refetch?.()} />
+        )}
         renderPayment={() => (
           <div className="space-y-4">
             <div className="flex items-center justify-between rounded-xl border bg-muted/30 px-4 py-3">
