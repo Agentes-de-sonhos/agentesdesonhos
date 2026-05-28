@@ -508,9 +508,9 @@ export function AppSidebar() {
                 <p className="text-sm font-medium">{section.title}</p>
               </TooltipContent>
             </Tooltip>
-            <PopoverContent side="right" align="start" className="w-56 p-2" sideOffset={8}>
+            <PopoverContent side="right" align="start" className="w-64 p-2" sideOffset={8}>
               <p className={cn(
-                "text-[11px] font-bold uppercase tracking-wider px-2 py-1.5 rounded-lg",
+                "text-[11px] font-bold uppercase tracking-wider px-2 py-1.5 rounded-lg whitespace-nowrap",
                 section.headerBg
               )}>
                 {section.title}
@@ -565,9 +565,10 @@ export function AppSidebar() {
           )}
         >
           <Icon className="h-4 w-4" />
-          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left">
+          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left whitespace-nowrap">
             {section.title}
           </span>
+          <ChevronDown
           <ChevronDown
             className={cn(
               "h-3.5 w-3.5 transition-transform duration-200",
@@ -591,12 +592,14 @@ export function AppSidebar() {
   return (
     <TooltipProvider delayDuration={300}>
       <aside
+      <aside
         id="app-sidebar"
-        style={{ '--sidebar-current-width': collapsed ? '64px' : '256px' } as React.CSSProperties}
+        style={{ '--sidebar-current-width': collapsed ? '64px' : '288px' } as React.CSSProperties}
         className={cn(
           "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 flex-col hidden lg:flex",
-          collapsed ? "w-16" : "w-64"
+          collapsed ? "w-16" : "w-72"
         )}
+      >
       >
         {/* Header */}
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">

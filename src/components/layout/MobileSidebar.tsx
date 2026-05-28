@@ -433,11 +433,11 @@ export function MobileSidebar() {
               ? cn(section.headerBg, section.headerHoverBg)
               : cn("text-sidebar-foreground", section.hoverColor)
           )}
-        >
           <Icon className="h-4 w-4" />
-          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left">
+          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left whitespace-nowrap">
             {section.title}
           </span>
+          <ChevronDown
           <ChevronDown
             className={cn(
               "h-3.5 w-3.5 transition-transform duration-200",
