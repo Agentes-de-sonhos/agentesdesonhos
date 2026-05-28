@@ -865,7 +865,6 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
     </html>
   `;
 
-  const printWindow = window.open("", "_blank");
   if (printWindow) {
     printWindow.document.write(html);
     printWindow.document.close();
