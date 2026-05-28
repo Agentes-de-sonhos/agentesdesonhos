@@ -26,6 +26,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { InternationalPhoneInput } from "@/components/ui/international-phone-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Cake } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Form,
   FormControl,
@@ -71,7 +82,7 @@ import {
   useOpportunityNotesCounts,
   useOpportunityLabelAssignments,
 } from "@/hooks/useOpportunityExtras";
-import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, type Opportunity, type OpportunityStage } from "@/types/crm";
+import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, CLIENT_STATUS_LABELS, type Opportunity, type OpportunityStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
 
 interface OpportunityCardProps {
@@ -94,6 +105,12 @@ const clientSchema = z.object({
   phone: z.string().optional(),
   city: z.string().optional(),
   notes: z.string().optional(),
+  status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]).optional(),
+  travel_preferences: z.string().optional(),
+  internal_notes: z.string().optional(),
+  birthday_day: z.string().optional(),
+  birthday_month: z.string().optional(),
+  birthday_year: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
@@ -102,6 +119,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const navigate = useNavigate();
   const { deleteOpportunity } = useOpportunities();
   const { updateClient } = useClients();
+  const { user } = useAuth();
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
   const [isEditing, setIsEditing] = useState(false);
@@ -122,6 +140,12 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
       phone: opportunity.client?.phone || "",
       city: opportunity.client?.city || "",
       notes: opportunity.client?.notes || "",
+      status: (opportunity.client?.status as any) || "lead",
+      travel_preferences: opportunity.client?.travel_preferences || "",
+      internal_notes: opportunity.client?.internal_notes || "",
+      birthday_day: opportunity.client?.birthday_day?.toString() || "",
+      birthday_month: opportunity.client?.birthday_month?.toString() || "",
+      birthday_year: opportunity.client?.birthday_year?.toString() || "",
     },
   });
 
@@ -166,6 +190,12 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         phone: opportunity.client.phone || "",
         city: opportunity.client.city || "",
         notes: opportunity.client.notes || "",
+        status: (opportunity.client.status as any) || "lead",
+        travel_preferences: opportunity.client.travel_preferences || "",
+        internal_notes: opportunity.client.internal_notes || "",
+        birthday_day: opportunity.client.birthday_day?.toString() || "",
+        birthday_month: opportunity.client.birthday_month?.toString() || "",
+        birthday_year: opportunity.client.birthday_year?.toString() || "",
       });
     }
     setShowEditClient(true);
@@ -173,6 +203,9 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
 
   const handleUpdateClient = async (data: ClientFormData) => {
     if (!opportunity.client) return;
+    const bDay = data.birthday_day ? parseInt(data.birthday_day) : null;
+    const bMonth = data.birthday_month ? parseInt(data.birthday_month) : null;
+    const bYear = data.birthday_year ? parseInt(data.birthday_year) : null;
     await updateClient({
       id: opportunity.client.id,
       name: data.name,
@@ -180,7 +213,39 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
       phone: data.phone || null,
       city: data.city || null,
       notes: data.notes || null,
+      status: data.status || "lead",
+      travel_preferences: data.travel_preferences || null,
+      internal_notes: data.internal_notes || null,
+      birthday_day: bDay,
+      birthday_month: bMonth,
+      birthday_year: bYear,
     });
+
+    // Sync birthday agency event
+    if (user) {
+      await supabase
+        .from("agency_events")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("client_id", opportunity.client.id)
+        .eq("event_type", "aniversario");
+      if (bDay && bMonth) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const birthdayThisYear = new Date(currentYear, bMonth - 1, bDay);
+        const targetYear = birthdayThisYear < now ? currentYear + 1 : currentYear;
+        const eventDate = `${targetYear}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}`;
+        await supabase.from("agency_events").insert({
+          user_id: user.id,
+          client_id: opportunity.client.id,
+          title: `🎂 Aniversário: ${data.name}`,
+          event_type: "aniversario",
+          event_date: eventDate,
+          color: "#ec4899",
+        });
+      }
+    }
+
     setShowEditClient(false);
   };
 
