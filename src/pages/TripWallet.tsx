@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -414,7 +415,52 @@ function TripWalletContent() {
             subtitle="Organize vouchers, documentos e serviços das viagens"
             icon={Wallet}
           />
-          <TripWalletList agencyName={agentProfile?.agency_name || undefined} />
+          <Tabs defaultValue="create" className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="create">Nova Carteira</TabsTrigger>
+              <TabsTrigger value="list">Minhas Carteiras</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="create" className="mt-6">
+              <Card className="max-w-2xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5 text-primary" />
+                    Informações da Viagem
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TripForm
+                    onSubmit={handleCreateTrip}
+                    isLoading={isCreating}
+                    defaultValues={(() => {
+                      const s = (location.state as {
+                        opportunity_id?: string;
+                        client_id?: string;
+                        client_name?: string;
+                        destination?: string;
+                        start_date?: string | null;
+                        end_date?: string | null;
+                      } | null) || null;
+                      if (!s) return undefined;
+                      return {
+                        client_id: s.client_id,
+                        client_name: s.client_name || "",
+                        destination: s.destination || "",
+                        start_date: s.start_date || "",
+                        end_date: s.end_date || "",
+                        opportunity_id: s.opportunity_id || null,
+                      };
+                    })()}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="list" className="mt-6">
+              <TripWalletList agencyName={agentProfile?.agency_name || undefined} />
+            </TabsContent>
+          </Tabs>
         </div>
       </DashboardLayout>
     );

@@ -32,6 +32,7 @@ import { ServiceForm } from "@/components/quote/ServiceForms";
 import { ServiceList } from "@/components/quote/ServiceCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
@@ -563,67 +564,79 @@ export default function GerarOrcamento() {
             </div>
           )}
 
-          <div className="grid gap-6 lg:grid-cols-5">
-            {/* ── New Quote Form ── */}
-            <Card className="lg:col-span-2">
-              <CardHeader><CardTitle>Novo Orçamento</CardTitle></CardHeader>
-              <CardContent>
-                <QuoteClientForm
-                  onSubmit={handleCreateQuote}
-                  isLoading={isCreating}
-                  defaults={
-                    opportunityPrefill
-                      ? {
-                          client_id: opportunityPrefill.client_id,
-                          client_name: opportunityPrefill.client_name,
-                          destination: opportunityPrefill.destination,
-                          start_date: opportunityPrefill.start_date,
-                          end_date: opportunityPrefill.end_date,
-                          adults_count: opportunityPrefill.adults_count,
-                          children_count: opportunityPrefill.children_count,
-                        }
-                      : undefined
-                  }
-                />
-              </CardContent>
-            </Card>
-
-            {/* ── Quote History ── */}
-            <Card className="lg:col-span-3">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <FileText className="h-4 w-4" />
-                  Meus Orçamentos
-                  {quotes.length > 0 && (
-                    <Badge variant="secondary" className="text-xs ml-1">{quotes.length}</Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {quotesLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  </div>
-                ) : quotes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">
-                    Nenhum orçamento criado ainda. Crie o primeiro ao lado!
-                  </p>
-                ) : (
-                  <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                    {quotes.map((q) => (
-                      <QuoteHistoryRow
-                        key={q.id}
-                        q={q}
-                        onEdit={() => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
-                        onDuplicate={() => handleDuplicate(q.id)}
-                        onDelete={() => setDeleteConfirmId(q.id)}
-                      />
-                    ))}
-                  </div>
+          <Tabs defaultValue="create" className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="create">Novo Orçamento</TabsTrigger>
+              <TabsTrigger value="list">
+                Meus Orçamentos
+                {quotes.length > 0 && (
+                  <Badge variant="secondary" className="text-xs ml-2">{quotes.length}</Badge>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="create" className="mt-6">
+              <Card className="max-w-3xl">
+                <CardHeader><CardTitle>Novo Orçamento</CardTitle></CardHeader>
+                <CardContent>
+                  <QuoteClientForm
+                    onSubmit={handleCreateQuote}
+                    isLoading={isCreating}
+                    defaults={
+                      opportunityPrefill
+                        ? {
+                            client_id: opportunityPrefill.client_id,
+                            client_name: opportunityPrefill.client_name,
+                            destination: opportunityPrefill.destination,
+                            start_date: opportunityPrefill.start_date,
+                            end_date: opportunityPrefill.end_date,
+                            adults_count: opportunityPrefill.adults_count,
+                            children_count: opportunityPrefill.children_count,
+                          }
+                        : undefined
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="list" className="mt-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <FileText className="h-4 w-4" />
+                    Meus Orçamentos
+                    {quotes.length > 0 && (
+                      <Badge variant="secondary" className="text-xs ml-1">{quotes.length}</Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {quotesLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : quotes.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                      Nenhum orçamento criado ainda. Volte à aba "Novo Orçamento" para criar o primeiro.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {quotes.map((q) => (
+                        <QuoteHistoryRow
+                          key={q.id}
+                          q={q}
+                          onEdit={() => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
+                          onDuplicate={() => handleDuplicate(q.id)}
+                          onDelete={() => setDeleteConfirmId(q.id)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
           {/* Delete confirmation dialog */}
           <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
