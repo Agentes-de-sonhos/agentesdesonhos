@@ -7,21 +7,31 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useOperations } from "@/hooks/useOperations";
-import { OPERATION_STAGES, type Operation, type OperationStage } from "@/types/operations";
-import { OperationCard } from "./OperationCard";
+import { useOperationStages } from "@/hooks/useOperationStages";
+import { getStageTokens } from "@/types/crm";
+import { type Operation } from "@/types/operations";
+import { OperationCard, type OperationCardTab } from "./OperationCard";
 import { OperationDetailDialog } from "./OperationDetailDialog";
 import { CreateOperationDialog } from "./CreateOperationDialog";
+import { OperationStageColumnHeader } from "./OperationStageColumnHeader";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function OperationsModule() {
   const { operations, isLoading, moveStage } = useOperations();
+  const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<Operation | null>(null);
+  const [selectedTab, setSelectedTab] = useState<OperationCardTab>("overview");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [calDate, setCalDate] = useState<Date | undefined>(new Date());
+  const [deleteStageTarget, setDeleteStageTarget] = useState<{ id: string; name: string } | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -38,11 +48,14 @@ export function OperationsModule() {
   );
 
   const byStage = useMemo(() => {
-    const m = new Map<OperationStage, Operation[]>();
-    OPERATION_STAGES.forEach((s) => m.set(s.key, []));
-    filtered.forEach((o) => m.get(o.stage)?.push(o));
+    const m = new Map<string, Operation[]>();
+    stages.forEach((s) => m.set(s.key, []));
+    filtered.forEach((o) => {
+      if (!m.has(o.stage)) m.set(o.stage, []);
+      m.get(o.stage)!.push(o);
+    });
     return m;
-  }, [filtered]);
+  }, [filtered, stages]);
 
   // Calendar events: travel_start_date (embarque) + travel_end_date (retorno)
   const eventsByDate = useMemo(() => {
@@ -76,12 +89,12 @@ export function OperationsModule() {
     e.dataTransfer.dropEffect = "move";
   };
 
-  const handleDrop = async (e: React.DragEvent, stage: OperationStage) => {
+  const handleDrop = async (e: React.DragEvent, stage: string) => {
     e.preventDefault();
     if (!draggedId) return;
     const op = operations.find((o) => o.id === draggedId);
     if (op && op.stage !== stage) {
-      await moveStage({ id: draggedId, stage });
+      await moveStage({ id: draggedId, stage: stage as any });
     }
     setDraggedId(null);
   };
@@ -120,28 +133,35 @@ export function OperationsModule() {
           ) : (
             <div className="overflow-x-auto pb-4 touch-pan-x">
               <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-                {OPERATION_STAGES.map((stage) => {
+                {stages.map((stage) => {
                   const ops = byStage.get(stage.key) || [];
+                  const tokens = getStageTokens(stage.color);
                   return (
                     <div
-                      key={stage.key}
+                      key={stage.id}
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, stage.key)}
-                      className={cn("w-[290px] flex-shrink-0 rounded-xl border p-3 min-h-[400px]", stage.bg, stage.border)}
+                      className={cn(
+                        "w-[290px] flex-shrink-0 rounded-xl border p-3 min-h-[400px]",
+                        tokens.bg,
+                        tokens.border
+                      )}
                     >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className={cn("w-2 h-2 rounded-full", stage.color)} />
-                          <h3 className={cn("font-semibold text-sm", stage.text)}>{stage.label}</h3>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">{ops.length}</Badge>
-                      </div>
+                      <OperationStageColumnHeader
+                        stage={stage}
+                        count={ops.length}
+                        onRename={(name) => updateStage({ id: stage.id, name })}
+                        onChangeColor={(color) => updateStage({ id: stage.id, color })}
+                        onDuplicate={() => duplicateStage(stage.id)}
+                        onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
+                      />
                       <div className="space-y-2.5">
                         {ops.map((op) => (
                           <OperationCard
                             key={op.id}
                             operation={op}
-                            onClick={() => setSelected(op)}
+                            onClick={() => { setSelectedTab("overview"); setSelected(op); }}
+                            onOpenTab={(t) => { setSelectedTab(t); setSelected(op); }}
                             onDragStart={handleDragStart}
                           />
                         ))}
@@ -154,6 +174,17 @@ export function OperationsModule() {
                     </div>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const name = prompt("Nome da nova coluna");
+                    if (name && name.trim()) createStage({ name: name.trim() });
+                  }}
+                  className="w-[290px] flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3 min-h-[400px]"
+                >
+                  <Plus className="h-5 w-5 mb-1" />
+                  <span className="text-sm font-medium">Adicionar coluna</span>
+                </button>
               </div>
             </div>
           )}
@@ -209,7 +240,39 @@ export function OperationsModule() {
         operation={selected}
         open={!!selected}
         onOpenChange={(o) => !o && setSelected(null)}
+        defaultTab={selectedTab}
       />
+
+      <AlertDialog
+        open={!!deleteStageTarget}
+        onOpenChange={(o) => !o && setDeleteStageTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir coluna "{deleteStageTarget?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              As operações desta coluna serão movidas para a primeira coluna do funil.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!deleteStageTarget) return;
+                const first = stages[0];
+                await deleteStage({
+                  id: deleteStageTarget.id,
+                  moveToStageKey: first?.key,
+                });
+                setDeleteStageTarget(null);
+              }}
+              className="bg-destructive text-destructive-foreground"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
