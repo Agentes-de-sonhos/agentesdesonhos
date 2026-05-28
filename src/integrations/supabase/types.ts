@@ -9898,6 +9898,7 @@ export type Database = {
       }
     }
     Functions: {
+      _normalize_phone: { Args: { p: string }; Returns: string }
       admin_export_users: {
         Args: never
         Returns: {
@@ -9934,6 +9935,19 @@ export type Database = {
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
+      ensure_client_and_opportunity_for_lead: {
+        Args: {
+          _destination: string
+          _email: string
+          _name: string
+          _phone: string
+          _user_id: string
+        }
+        Returns: {
+          client_id: string
+          opportunity_id: string
+        }[]
+      }
       ensure_default_operation_stages: {
         Args: { _user_id: string }
         Returns: undefined
