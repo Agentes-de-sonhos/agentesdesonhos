@@ -527,8 +527,10 @@ export function useFinancial() {
   const updateSaleProductMutation = useMutation({
     mutationFn: async ({ id, ...formData }: SaleProductFormData & { id: string }) => {
       const sanitized: any = { ...formData };
-      ["expected_date", "invoice_issued_date", "invoice_sent_date"].forEach((k) => {
-        if (sanitized[k] === "" || sanitized[k] === undefined) sanitized[k] = null;
+      Object.keys(sanitized).forEach((k) => {
+        if (k.endsWith("_date") && (sanitized[k] === "" || sanitized[k] === undefined)) {
+          sanitized[k] = null;
+        }
       });
       const { data, error } = await supabase
         .from("sale_products")
@@ -538,7 +540,7 @@ export function useFinancial() {
         .single();
       if (error) throw error;
       // Sync income entry with updated data
-      await syncIncomeEntry(id, data.sale_id, formData);
+      await syncIncomeEntry(id, data.sale_id, sanitized);
       // Auto-sync sale_amount from products
       await syncSaleAmount(data.sale_id);
       return data;
