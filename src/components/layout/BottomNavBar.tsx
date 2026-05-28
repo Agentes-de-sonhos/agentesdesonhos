@@ -48,7 +48,6 @@ const navItems: NavItem[] = [
       { label: "Carteira Digital", icon: Wallet, path: "/ferramentas-ia/trip-wallet", requiredFeature: "trip_wallet" },
       { label: "Orçamento", icon: Calculator, path: "/ferramentas-ia/gerar-orcamento", requiredFeature: "quote_generator" },
       { label: "Roteiros", icon: Route, path: "/ferramentas-ia/criar-roteiro", requiredFeature: "itinerary" },
-      { label: "Conteúdo", icon: FileText, path: "/ferramentas-ia/criar-conteudo", requiredFeature: "content_creator" },
     ],
   },
   {

@@ -42,7 +42,6 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
     { key: "carteira_digital", label: "Carteira Digital" },
     { key: "orcamento", label: "Orçamento" },
     { key: "roteiros", label: "Roteiros" },
-    { key: "conteudo", label: "Conteúdo" },
     { key: "bloco_notas", label: "Bloco de Notas" },
   ],
   clientes: [
@@ -65,5 +64,6 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
     { key: "vitrine_ofertas", label: "Vitrine de Ofertas" },
     { key: "personalizador_laminas", label: "Personalizador de Lâminas" },
     { key: "captacao_leads", label: "Captação de Leads" },
+    { key: "conteudo", label: "Conteúdo" },
   ],
 };
