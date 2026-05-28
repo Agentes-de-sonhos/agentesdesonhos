@@ -253,11 +253,6 @@ function MinhaVitrineContent() {
     setSettingsOpen(true);
   };
 
-  const shareWhatsApp = () => {
-    const ogProxyUrl = `https://mlwwpckahhfsixplxwif.supabase.co/functions/v1/public-og?type=showcase&slug=${showcase?.slug || ""}&url=${encodeURIComponent(publicUrl)}`;
-    const text = encodeURIComponent(`Confira nossa vitrine de ofertas: ${ogProxyUrl}`);
-    window.open(`https://wa.me/?text=${text}`, "_blank");
-  };
 
   if (loadingShowcase) {
     return (
