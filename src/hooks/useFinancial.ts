@@ -327,8 +327,10 @@ export function useFinancial() {
     mutationFn: async ({ saleId, ...formData }: SaleProductFormData & { saleId: string }) => {
       if (!user) throw new Error("User not authenticated");
       const sanitized: any = { ...formData };
-      ["expected_date", "invoice_issued_date", "invoice_sent_date"].forEach((k) => {
-        if (sanitized[k] === "" || sanitized[k] === undefined) sanitized[k] = null;
+      Object.keys(sanitized).forEach((k) => {
+        if (k.endsWith("_date") && (sanitized[k] === "" || sanitized[k] === undefined)) {
+          sanitized[k] = null;
+        }
       });
       const { data, error } = await supabase
         .from("sale_products")
