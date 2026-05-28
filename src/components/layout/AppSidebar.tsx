@@ -569,7 +569,6 @@ export function AppSidebar() {
             {section.title}
           </span>
           <ChevronDown
-          <ChevronDown
             className={cn(
               "h-3.5 w-3.5 transition-transform duration-200",
               isOpen ? "rotate-180 text-white/70" : "text-muted-foreground/50"
