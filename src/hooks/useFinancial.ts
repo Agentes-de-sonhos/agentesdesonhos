@@ -343,7 +343,7 @@ export function useFinancial() {
         .single();
       if (error) throw error;
       // Auto-generate income entry
-      await syncIncomeEntry(data.id, saleId, formData);
+      await syncIncomeEntry(data.id, saleId, sanitized);
       // Auto-sync sale_amount from products
       await syncSaleAmount(saleId);
       return data;
