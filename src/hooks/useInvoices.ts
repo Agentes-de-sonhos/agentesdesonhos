@@ -99,7 +99,7 @@ export function useInvoices() {
           pix_key: input.pix_key ?? null,
           currency: input.currency ?? "BRL",
           ...totals,
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
@@ -122,7 +122,7 @@ export function useInvoices() {
             final_amount: t.final_amount,
           };
         });
-        const { error: sErr } = await supabase.from("invoice_services").insert(svcRows);
+        const { error: sErr } = await supabase.from("invoice_services").insert(svcRows as any);
         if (sErr) throw sErr;
       }
 
@@ -135,7 +135,7 @@ export function useInvoices() {
           amount: p.amount,
           due_date: p.due_date ?? null,
         }));
-        const { error: iErr } = await supabase.from("invoice_installments").insert(insRows);
+        const { error: iErr } = await supabase.from("invoice_installments").insert(insRows as any);
         if (iErr) throw iErr;
       } else {
         // single installment by default
@@ -146,7 +146,7 @@ export function useInvoices() {
           label: "Pagamento único",
           amount: totals.total_amount,
           due_date: input.due_date ?? null,
-        });
+        } as any);
       }
 
       return inv as Invoice;
@@ -162,7 +162,7 @@ export function useInvoices() {
 
   const updateInvoiceStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: Invoice["status"] }) => {
-      const { error } = await supabase.from("invoices").update({ status }).eq("id", id);
+      const { error } = await supabase.from("invoices").update({ status } as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
@@ -200,7 +200,7 @@ export function useInvoices() {
           method: p.method ?? "pix",
           notes: p.notes ?? null,
           receipt_number: "", // trigger fills
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
