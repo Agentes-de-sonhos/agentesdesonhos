@@ -346,7 +346,9 @@ export function KanbanBoard() {
                     const isFirstStage = index === 0;
                     const isLastStage = index === stages.length - 1;
                     const isSecondToLastStage = index === stages.length - 2;
-                    const isProtected = isFirstStage || isLastStage || isSecondToLastStage;
+                    const isQuoteSentStage = stage.legacy_key === "quote_sent";
+                    const isProtected =
+                      isFirstStage || isLastStage || isSecondToLastStage || isQuoteSentStage;
 
                     return (
                       <SortableColumn key={stage.id} stage={stage}>
