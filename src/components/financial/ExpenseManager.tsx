@@ -41,6 +41,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useFinancial } from "@/hooks/useFinancial";
 import { EXPENSE_CATEGORIES, type ExpenseFormData, type ExpenseCategory } from "@/types/financial";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 export function ExpenseManager() {
   const { expenseEntries, createExpense, deleteExpense, isCreating } = useFinancial();
@@ -112,7 +113,7 @@ export function ExpenseManager() {
               expenseEntries.map((entry) => (
                 <TableRow key={entry.id}>
                   <TableCell>
-                    {format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}
+                    {format(parseLocalDate(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell>{entry.description}</TableCell>
                   <TableCell>
