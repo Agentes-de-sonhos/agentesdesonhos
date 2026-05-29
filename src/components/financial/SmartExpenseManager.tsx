@@ -109,15 +109,20 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
 
   const suggestCategory = (desc: string) => {
     const d = desc.toLowerCase();
-    if (d.includes("sistema") || d.includes("software") || d.includes("crm")) return "sistema";
-    if (d.includes("market") || d.includes("anúncio") || d.includes("google") || d.includes("meta") || d.includes("facebook")) return "marketing";
-    if (d.includes("internet") || d.includes("telefone") || d.includes("celular")) return "internet";
-    if (d.includes("aluguel") || d.includes("sala") || d.includes("escritório")) return "aluguel";
-    if (d.includes("salário") || d.includes("funcionário") || d.includes("colaborador")) return "salarios";
-    if (d.includes("café") || d.includes("almoço") || d.includes("reunião") || d.includes("lanche")) return "cafe_reuniao";
-    if (d.includes("presente") || d.includes("brinde") || d.includes("mimo")) return "presente_fornecedor";
-    if (d.includes("taxa") || d.includes("imposto") || d.includes("darf") || d.includes("simples")) return "taxas";
-    if (d.includes("uber") || d.includes("gasolina") || d.includes("estacionamento")) return "transporte";
+    if (d.includes("sistema") || d.includes("software") || d.includes("crm") || d.includes("workspace") || d.includes("canva") || d.includes("twilio") || d.includes("microsoft")) return "sistema";
+    if (d.includes("market") || d.includes("anúncio") || d.includes("ads") || d.includes("google ads") || d.includes("meta") || d.includes("facebook") || d.includes("tráfego") || d.includes("designer") || d.includes("conteúdo")) return "marketing";
+    if (d.includes("internet") || d.includes("telefone") || d.includes("celular") || d.includes("telefonia")) return "internet";
+    if (d.includes("aluguel") || d.includes("sala") || d.includes("escritório") || d.includes("coworking") || d.includes("condomínio") || d.includes("iptu")) return "aluguel";
+    if (d.includes("salário") || d.includes("funcionário") || d.includes("colaborador") || d.includes("pró-labore") || d.includes("encargo") || d.includes("benefício")) return "salarios";
+    if (d.includes("comissão") || d.includes("comissao") || d.includes("bonifica")) return "comissao";
+    if (d.includes("contabil") || d.includes("cartório") || d.includes("correios") || d.includes("certificado digital") || d.includes("escritório")) return "administrativo";
+    if (d.includes("tarifa banc") || d.includes("maquininha") || d.includes("juros") || d.includes("multa") || d.includes("iof") || d.includes("antecipação")) return "financeiro";
+    if (d.includes("café") || d.includes("almoço") || d.includes("reunião") || d.includes("lanche") || d.includes("networking") || d.includes("visita")) return "comercial";
+    if (d.includes("presente") || d.includes("brinde") || d.includes("mimo") || d.includes("fideliza")) return "relacionamento";
+    if (d.includes("freelancer") || d.includes("prestador") || d.includes("assistente") || d.includes("consultoria")) return "operacional";
+    if (d.includes("curso") || d.includes("treinamento") || d.includes("evento") || d.includes("feira") || d.includes("convenção") || d.includes("certificação")) return "capacitacao";
+    if (d.includes("uber") || d.includes("táxi") || d.includes("taxi") || d.includes("gasolina") || d.includes("combustível") || d.includes("estacionamento") || d.includes("pedágio")) return "transporte";
+    if (d.includes("taxa") || d.includes("imposto") || d.includes("darf") || d.includes("simples") || d.includes("das") || d.includes("iss") || d.includes("tributo")) return "taxas";
     return null;
   };
 
