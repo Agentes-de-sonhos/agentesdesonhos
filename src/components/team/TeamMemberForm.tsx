@@ -26,11 +26,11 @@ function useOwnerStages(ownerId?: string) {
     queryFn: async () => {
       const [opps, ops] = await Promise.all([
         supabase.from('pipeline_stages').select('id, name, color, position').eq('user_id', ownerId!).order('position'),
-        supabase.from('operation_pipeline_stages' as any).select('id, name, color, position').eq('user_id', ownerId!).order('position'),
+        supabase.from('operation_pipeline_stages' as any).select('id, name, color, position').eq('user_id', ownerId!).order('position') as any,
       ])
       return {
         opportunities: (opps.data ?? []) as StageRow[],
-        operations: (ops.data ?? []) as StageRow[],
+        operations: ((ops as any).data ?? []) as StageRow[],
       }
     },
     staleTime: 60_000,
