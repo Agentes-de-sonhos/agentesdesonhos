@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { TeamMembersButton } from "@/components/team/TeamMembersButton";
 import { Button } from "@/components/ui/button";
 import { SmartDashboard } from "@/components/financial/SmartDashboard";
 import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager";

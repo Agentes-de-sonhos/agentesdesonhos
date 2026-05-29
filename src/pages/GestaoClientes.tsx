@@ -52,8 +52,9 @@ function GestaoClientesContent() {
           subtitle="Gerencie clientes, oportunidades e metas de vendas"
           icon={Users}
           adminTab="crm"
-          actions={<TeamMembersButton />}
-        />
+        >
+          <TeamMembersButton />
+        </PageHeader>
 
         <Tabs value={getCurrentTab()} onValueChange={handleTabChange} className="w-full">
           {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
