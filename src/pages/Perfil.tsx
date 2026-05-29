@@ -31,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { CommunityProfileCard } from "@/components/profile/CommunityProfileCard";
 
 const brazilianStates = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -589,6 +590,9 @@ export default function Perfil() {
             </Button>
           </div>
         )}
+
+        {/* Community profile - full width below */}
+        <CommunityProfileCard />
       </div>
     </DashboardLayout>
   );
