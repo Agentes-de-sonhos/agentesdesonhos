@@ -275,7 +275,12 @@ export function prepareDashboardExport(
 ) {
   const filteredSales = filterByPeriod(sales, "sale_date", period.start, period.end);
   const filteredIncome = filterByPeriod(incomeEntries, "entry_date", period.start, period.end);
-  const filteredExpenses = filterByPeriod(expenseEntries, "entry_date", period.start, period.end);
+  // Projeta despesas recorrentes para o período do relatório.
+  const startIso = period.start.toISOString().split("T")[0];
+  const endIso = period.end.toISOString().split("T")[0];
+  // import dinâmico evita ciclo entre utils
+  const { projectExpensesInRange } = require("@/utils/expenseRecurrence");
+  const filteredExpenses = projectExpensesInRange(expenseEntries, startIso, endIso);
 
   const totalVendido = filteredSales.reduce((s, i) => s + Number(i.sale_amount), 0);
   const totalEntradas = filteredIncome.reduce((s, i) => s + Number(i.amount), 0);
