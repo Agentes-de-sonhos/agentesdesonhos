@@ -433,3 +433,33 @@ function ImportTripPicker({ onPick }: { onPick: (id: string) => void }) {
     </div>
   );
 }
+
+function ImportOpportunityPicker({ onPick }: { onPick: (id: string) => void }) {
+  const { user } = useAuth();
+  const [opps, setOpps] = useState<any[] | null>(null);
+  const load = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("opportunities")
+      .select("id, destination, estimated_value, stage, clients(name)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setOpps(data || []);
+  };
+  return (
+    <div className="pt-2">
+      <Label>Importar de uma Oportunidade</Label>
+      <Select onOpenChange={(o) => o && opps === null && load()} onValueChange={onPick}>
+        <SelectTrigger><SelectValue placeholder="Escolha uma oportunidade" /></SelectTrigger>
+        <SelectContent>
+          {(opps || []).map((o) => (
+            <SelectItem key={o.id} value={o.id}>
+              {o.destination || "Oportunidade"} — {o.clients?.name || ""}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
