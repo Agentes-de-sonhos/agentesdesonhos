@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { parseLocalDate, parseLocalDateSafe } from "@/lib/dateParsing";
 import { ptBR } from "date-fns/locale";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
