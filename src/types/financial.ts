@@ -201,4 +201,6 @@ export interface ExpenseFormData {
   amount: number;
   entry_date: string;
   notes?: string;
+  expense_type?: string;
+  is_recurring?: boolean;
 }
