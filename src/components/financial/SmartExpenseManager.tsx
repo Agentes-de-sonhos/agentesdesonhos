@@ -322,6 +322,52 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
                 </Select>
               </div>
             </div>
+            {formData.expense_type === "fixed" && (
+              <div className="space-y-3 rounded-md border border-blue-500/20 bg-blue-500/5 p-3">
+                <div className="text-xs font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                  <Repeat className="h-3.5 w-3.5" /> Recorrência mensal
+                </div>
+                <div className="space-y-2">
+                  <Label>Duração</Label>
+                  <Select
+                    value={formData.recurrence_end_type}
+                    onValueChange={(v) => setFormData({ ...formData, recurrence_end_type: v as any })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="indefinite">Sem data final (indeterminada)</SelectItem>
+                      <SelectItem value="until_date">Até uma data específica</SelectItem>
+                      <SelectItem value="occurrences">Quantidade de parcelas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {formData.recurrence_end_type === "until_date" && (
+                  <div className="space-y-2">
+                    <Label>Data final</Label>
+                    <Input
+                      type="date"
+                      value={formData.recurrence_end_date}
+                      onChange={(e) => setFormData({ ...formData, recurrence_end_date: e.target.value })}
+                    />
+                  </div>
+                )}
+                {formData.recurrence_end_type === "occurrences" && (
+                  <div className="space-y-2">
+                    <Label>Número de parcelas (incluindo a primeira)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={formData.recurrence_occurrences}
+                      onChange={(e) => setFormData({ ...formData, recurrence_occurrences: Number(e.target.value) })}
+                    />
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground">
+                  Lançamentos futuros são projetados automaticamente. Alterar ou excluir esta despesa
+                  no futuro não afeta os meses já realizados.
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Observações</Label>
               <Textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações opcionais" />
