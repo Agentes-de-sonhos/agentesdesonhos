@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareEntradasExport } from "@/utils/financialExport";
