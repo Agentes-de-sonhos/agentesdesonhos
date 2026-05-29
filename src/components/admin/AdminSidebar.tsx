@@ -37,6 +37,7 @@ import {
   Globe,
   CheckCircle2,
   Send,
+  FolderLock,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -113,6 +114,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "drive-import", label: "Drive", icon: HardDrive },
       { id: "support-mode", label: "Modo Suporte", icon: Eye },
       { id: "plan-switcher", label: "Testar Planos", icon: Eye },
+      { id: "user-projects", label: "Projetos Usuários", icon: FolderLock },
     ],
   },
 ];

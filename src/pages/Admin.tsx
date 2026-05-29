@@ -47,6 +47,7 @@ import { AdminPendingApprovalsManager } from "@/components/admin/AdminPendingApp
 import { AdminTourGuidesManager } from "@/components/admin/AdminTourGuidesManager";
 import { AdminTelegramManager } from "@/components/admin/AdminTelegramManager";
 import { AdminTradeEventsManager } from "@/components/admin/AdminTradeEventsManager";
+import { AdminUserProjectsManager } from "@/components/admin/AdminUserProjectsManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TAB_LABELS: Record<string, string> = {
@@ -84,6 +85,7 @@ const TAB_LABELS: Record<string, string> = {
   "tour-guides": "Guias de Turismo",
   telegram: "Telegram",
   "trade-events": "Agenda do Trade",
+  "user-projects": "Projetos dos Usuários",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -192,6 +194,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminTravelMeetManager />;
     case "tour-guides":
       return <AdminTourGuidesManager />;
+    case "user-projects":
+      return <AdminUserProjectsManager />;
     default:
       return <AdminUserManager />;
   }
