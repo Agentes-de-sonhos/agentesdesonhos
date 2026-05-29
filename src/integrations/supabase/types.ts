@@ -2693,6 +2693,9 @@ export type Database = {
           id: string
           is_recurring: boolean
           notes: string | null
+          recurrence_end_date: string | null
+          recurrence_end_type: string
+          recurrence_occurrences: number | null
           sale_id: string | null
           updated_at: string
           user_id: string
@@ -2707,6 +2710,9 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           notes?: string | null
+          recurrence_end_date?: string | null
+          recurrence_end_type?: string
+          recurrence_occurrences?: number | null
           sale_id?: string | null
           updated_at?: string
           user_id: string
@@ -2721,6 +2727,9 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           notes?: string | null
+          recurrence_end_date?: string | null
+          recurrence_end_type?: string
+          recurrence_occurrences?: number | null
           sale_id?: string | null
           updated_at?: string
           user_id?: string
