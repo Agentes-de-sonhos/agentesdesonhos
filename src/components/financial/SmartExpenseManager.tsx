@@ -246,11 +246,16 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
               <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma despesa encontrada</TableCell></TableRow>
             ) : (
               filteredExpenses.map((entry) => (
-                <TableRow key={entry.id}>
+                <TableRow key={entry.id} className={entry.is_projection ? "opacity-90" : ""}>
                   <TableCell>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   <TableCell className="flex items-center gap-2">
                     {entry.description}
                     {entry.is_recurring && <Repeat className="h-3 w-3 text-muted-foreground" />}
+                    {entry.is_projection && (
+                      <Badge variant="outline" className="text-[10px] border-blue-500/30 text-blue-600 dark:text-blue-400">
+                        Recorrência
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="gap-1"><Tag className="h-3 w-3" />{EXPENSE_CATEGORIES_EXPANDED[entry.category] || entry.category}</Badge>
@@ -266,7 +271,7 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
                       <Button variant="ghost" size="icon" onClick={() => openEdit(entry)}>
                         <Pencil className="h-4 w-4 text-muted-foreground" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(entry.id)}>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(entry.source_id || entry.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
