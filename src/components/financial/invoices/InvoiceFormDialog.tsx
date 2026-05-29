@@ -193,7 +193,7 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
               onPick={async (oppId: string) => {
                 const { data: op } = await supabase
                   .from("opportunities")
-                  .select("*, clients(name, email, phone, document, company)")
+                  .select("*, clients(name, email, phone)")
                   .eq("id", oppId).maybeSingle();
                 if (!op) { toast({ title: "Oportunidade não encontrada", variant: "destructive" }); return; }
                 const c = (op as any).clients || {};
@@ -202,8 +202,6 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
                   client_name: c.name || prev.client_name,
                   client_email: c.email || prev.client_email,
                   client_phone: c.phone || prev.client_phone,
-                  client_document: c.document || prev.client_document,
-                  client_company: c.company || prev.client_company,
                 }));
                 setTrip({
                   destination: (op as any).destination ?? "",
