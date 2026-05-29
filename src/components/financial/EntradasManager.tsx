@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareEntradasExport } from "@/utils/financialExport";
@@ -150,7 +151,7 @@ export function EntradasManager() {
                 )}
               </div>
               <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
-                <span>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</span>
+                <span>{format(parseLocalDate(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</span>
                 {(entry as any).expected_date && (entry as any).status === "pending" && (
                   <><span>•</span><span>Previsto: {format(new Date((entry as any).expected_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}</span></>
                 )}

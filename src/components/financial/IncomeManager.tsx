@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { Plus, Trash2, CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,7 +113,7 @@ export function IncomeManager() {
               incomeEntries.map((entry) => (
                 <TableRow key={entry.id}>
                   <TableCell>
-                    {format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}
+                    {format(parseLocalDate(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell>
                     {entry.sale ? (

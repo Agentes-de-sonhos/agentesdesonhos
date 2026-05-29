@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { format, startOfDay, startOfWeek, startOfMonth, startOfYear, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { Filter, TrendingUp, TrendingDown, DollarSign, PiggyBank } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -53,7 +54,7 @@ export function FinancialReports() {
     ) => {
       if (!startDate) return items;
       return items.filter((item) => {
-        const itemDate = new Date(item[dateField] as string);
+        const itemDate = parseLocalDate(item[dateField] as string);
         return itemDate >= startDate;
       });
     };

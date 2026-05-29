@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
 import { projectExpensesForMonth, type ProjectedExpense } from "@/utils/expenseRecurrence";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_LABELS } from "@/types/financial";
 
@@ -239,7 +240,7 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
             ) : (
               filteredExpenses.map((entry) => (
                 <TableRow key={entry.id} className={entry.is_projection ? "opacity-90" : ""}>
-                  <TableCell>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
+                  <TableCell>{format(parseLocalDate(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   <TableCell className="flex items-center gap-2">
                     {entry.description}
                     {entry.is_recurring && <Repeat className="h-3 w-3 text-muted-foreground" />}

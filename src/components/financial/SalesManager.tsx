@@ -7,6 +7,7 @@ import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRigh
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -348,7 +349,7 @@ export function SalesManager() {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-3 w-3" /> {sale.destination}
                             <span className="mx-2">•</span>
-                            {format(new Date(sale.sale_date), "dd/MM/yyyy", { locale: ptBR })}
+                            {format(parseLocalDate(sale.sale_date), "dd/MM/yyyy", { locale: ptBR })}
                             {(sale as any).seller_id && (() => {
                               const seller = sellers.find(s => s.id === (sale as any).seller_id);
                               return seller ? <><span className="mx-2">•</span><Users className="h-3 w-3" />{seller.name}</> : null;
