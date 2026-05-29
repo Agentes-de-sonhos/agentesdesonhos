@@ -140,6 +140,8 @@ export function SmartExpenseManager() {
       description: formData.description, category: formData.category as any,
       amount: formData.amount, entry_date: formData.entry_date,
       notes: formData.notes || undefined,
+      expense_type: formData.expense_type,
+      is_recurring: formData.expense_type === "fixed" ? true : formData.is_recurring,
     };
     if (editingId) {
       await updateExpense({ id: editingId, ...payload });
