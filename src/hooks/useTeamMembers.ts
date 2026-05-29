@@ -44,7 +44,7 @@ export function useTeamQuota() {
       const { data, error } = await supabase.rpc('team_member_quota')
       if (error) throw error
       const row = Array.isArray(data) ? data[0] : data
-      return { used: row?.used ?? 0, total: row?.total ?? 6 }
+      return { used: row?.used ?? 0, total: row?.total ?? 3 }
     },
     staleTime: 30_000,
   })
