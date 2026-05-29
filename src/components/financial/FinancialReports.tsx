@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
+import { projectExpensesInRange } from "@/utils/expenseRecurrence";
 
 type PeriodFilter = "day" | "week" | "month" | "year" | "all";
 
@@ -59,7 +60,11 @@ export function FinancialReports() {
 
     const filteredSales = filterByDate(sales, "sale_date");
     const filteredIncome = filterByDate(incomeEntries, "entry_date");
-    const filteredExpenses = filterByDate(expenseEntries, "entry_date");
+    // Despesas: respeitar recorrência. Variáveis somente na data; fixas recorrentes
+    // se projetam mensalmente até hoje (ou até o término configurado).
+    const today = endOfDay(new Date()).toISOString().split("T")[0];
+    const startIso = startDate ? startDate.toISOString().split("T")[0] : "1970-01-01";
+    const filteredExpenses = projectExpensesInRange(expenseEntries, startIso, today);
 
     const totalSales = filteredSales.reduce((sum, s) => sum + Number(s.sale_amount), 0);
     const totalIncome = filteredIncome.reduce((sum, e) => sum + Number(e.amount), 0);
