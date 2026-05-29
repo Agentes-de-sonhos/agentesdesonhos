@@ -19,11 +19,11 @@ export function NotificationsDropdown() {
   const markRead = useMarkLeadRead();
   const markAllRead = useMarkAllLeadsRead();
 
-  // Auto-cleanup (client-side): hide read leads older than 30 days,
+  // Auto-cleanup (client-side): hide read leads older than 24 hours,
   // and cap the list to the most recent 100 items to keep the panel performant.
   const cleanedLeads = useMemo(() => {
-    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-    const cutoff = Date.now() - THIRTY_DAYS_MS;
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - ONE_DAY_MS;
     return leads
       .filter((l) => {
         if (!l.is_read) return true;
