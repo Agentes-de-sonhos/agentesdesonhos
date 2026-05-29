@@ -237,7 +237,7 @@ export default function Financeiro() {
                 <SmartDashboard viewMonth={viewMonth} viewYear={viewYear} />
               )}
               {activeTab === "entradas" && <EntradasManager />}
-              {activeTab === "despesas" && <SmartExpenseManager />}
+              {activeTab === "despesas" && <SmartExpenseManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "faturas" && <InvoicesManager />}
               {activeTab === "vendas" && <SalesManager />}
               {activeTab === "comissoes" && <CommissionsReceivable />}
