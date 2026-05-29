@@ -22,7 +22,7 @@ export function TeamMembersDialog({ open, onOpenChange }: Props) {
   const [confirmDelete, setConfirmDelete] = useState<TeamMemberRow | null>(null)
 
   const used = quota?.used ?? 0
-  const total = quota?.total ?? 6
+  const total = quota?.total ?? 3
   const atLimit = used >= total
 
   const toggleStatus = (m: TeamMemberRow) => {
