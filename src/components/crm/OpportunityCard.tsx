@@ -426,9 +426,11 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                   <History className="mr-2 h-4 w-4" /> Histórico
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleCreateQuote}>
-                  <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
-                </DropdownMenuItem>
+                {canGenerateQuote && (
+                  <DropdownMenuItem onClick={handleCreateQuote}>
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleCreateTripWallet}>
                   <Wallet className="mr-2 h-4 w-4" /> Gerar Carteira Digital
                 </DropdownMenuItem>
