@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Megaphone, CheckCheck, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,23 @@ export function NotificationsDropdown() {
   );
   const unreadCount = unreadLeads.length;
   const visibleLeads = cleanedLeads;
+
+  // Auto-mark all as read when the panel opens (after a short delay so the
+  // user can briefly see which items were new). Prevents the badge from
+  // staying stuck after the user has clearly seen the notifications.
+  const autoMarkedRef = useRef(false);
+  useEffect(() => {
+    if (!isOpen) {
+      autoMarkedRef.current = false;
+      return;
+    }
+    if (autoMarkedRef.current || unreadCount === 0) return;
+    autoMarkedRef.current = true;
+    const t = setTimeout(() => {
+      markAllRead.mutate();
+    }, 1200);
+    return () => clearTimeout(t);
+  }, [isOpen, unreadCount, markAllRead]);
 
   const handleLeadClick = (lead: LeadItem) => {
     if (!lead.is_read) markRead.mutate({ id: lead.id, source: lead.source });
