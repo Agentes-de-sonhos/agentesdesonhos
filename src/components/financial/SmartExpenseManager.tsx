@@ -28,20 +28,7 @@ import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
 import { projectExpensesForMonth, type ProjectedExpense } from "@/utils/expenseRecurrence";
 
-const EXPENSE_CATEGORIES_EXPANDED: Record<string, string> = {
-  sistema: "Sistema / Software",
-  marketing: "Marketing",
-  internet: "Internet / Telefone",
-  aluguel: "Aluguel",
-  salarios: "Salários",
-  cafe_reuniao: "Café / Reunião",
-  presente_fornecedor: "Presente Fornecedor",
-  taxas: "Taxas / Impostos",
-  fornecedor: "Fornecedor",
-  comissao: "Comissão",
-  transporte: "Transporte",
-  outros: "Outros",
-};
+import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_LABELS } from "@/types/financial";
 
 interface ExpenseFormState {
   description: string;
@@ -258,7 +245,7 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="gap-1"><Tag className="h-3 w-3" />{EXPENSE_CATEGORIES_EXPANDED[entry.category] || entry.category}</Badge>
+                    <Badge variant="secondary" className="gap-1"><Tag className="h-3 w-3" />{EXPENSE_CATEGORY_LABELS[entry.category] || entry.category}</Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={cn("text-xs", entry.expense_type === "fixed" ? "border-blue-500/30 text-blue-600 dark:text-blue-400" : "")}>
@@ -298,7 +285,7 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
                 <Label>Categoria</Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{Object.entries(EXPENSE_CATEGORIES_EXPANDED).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
+                  <SelectContent>{Object.entries(EXPENSE_CATEGORIES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
