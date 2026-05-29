@@ -10427,6 +10427,7 @@ export type Database = {
           zip_code: string
         }[]
       }
+      admin_list_user_projects: { Args: never; Returns: Json }
       admin_update_user_role: {
         Args: {
           _new_role: Database["public"]["Enums"]["app_role"]
