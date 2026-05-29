@@ -94,10 +94,10 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
         return {
           category: catMap[s.service_type] || "outros",
           description: s.title || s.description || "",
-          fare: Number(s.sale_price || 0),
+          fare: Number(s.amount || 0),
           taxes: 0,
           discount: 0,
-          commission: Number(s.commission_value || 0),
+          commission: 0,
           rav: 0,
         };
       }));
