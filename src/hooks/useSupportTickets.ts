@@ -176,7 +176,8 @@ export function useTicketMessages(ticketId: string | null) {
   const uploadAttachment = async (file: File): Promise<string> => {
     const ext = file.name.split(".").pop() || "file";
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `${ticketId}/${Date.now()}_${safeName}`;
+    if (!user) throw new Error("Sessão expirada. Faça login novamente.");
+    const path = `${user.id}/tickets/${ticketId}/${Date.now()}_${safeName}`;
     const { error } = await supabase.storage
       .from("ticket-attachments")
       .upload(path, file);
