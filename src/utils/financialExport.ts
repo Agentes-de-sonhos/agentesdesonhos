@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import type { ExportFormat } from "@/components/financial/ExportModal";
+import { projectExpensesInRange } from "@/utils/expenseRecurrence";
 
 type Row = Record<string, string | number>;
 
@@ -275,7 +276,10 @@ export function prepareDashboardExport(
 ) {
   const filteredSales = filterByPeriod(sales, "sale_date", period.start, period.end);
   const filteredIncome = filterByPeriod(incomeEntries, "entry_date", period.start, period.end);
-  const filteredExpenses = filterByPeriod(expenseEntries, "entry_date", period.start, period.end);
+  // Projeta despesas recorrentes para o período do relatório.
+  const startIso = period.start.toISOString().split("T")[0];
+  const endIso = period.end.toISOString().split("T")[0];
+  const filteredExpenses = projectExpensesInRange(expenseEntries, startIso, endIso);
 
   const totalVendido = filteredSales.reduce((s, i) => s + Number(i.sale_amount), 0);
   const totalEntradas = filteredIncome.reduce((s, i) => s + Number(i.amount), 0);

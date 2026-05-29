@@ -97,6 +97,9 @@ export interface ExpenseEntry {
   notes: string | null;
   expense_type: string;
   is_recurring: boolean;
+  recurrence_end_type?: 'indefinite' | 'until_date' | 'occurrences';
+  recurrence_end_date?: string | null;
+  recurrence_occurrences?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -203,4 +206,7 @@ export interface ExpenseFormData {
   notes?: string;
   expense_type?: string;
   is_recurring?: boolean;
+  recurrence_end_type?: 'indefinite' | 'until_date' | 'occurrences';
+  recurrence_end_date?: string | null;
+  recurrence_occurrences?: number | null;
 }

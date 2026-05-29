@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
+import { projectExpensesForMonth, type ProjectedExpense } from "@/utils/expenseRecurrence";
 
 const EXPENSE_CATEGORIES_EXPANDED: Record<string, string> = {
   sistema: "Sistema / Software",
@@ -50,6 +51,9 @@ interface ExpenseFormState {
   expense_type: string;
   is_recurring: boolean;
   notes: string;
+  recurrence_end_type: "indefinite" | "until_date" | "occurrences";
+  recurrence_end_date: string;
+  recurrence_occurrences: number;
 }
 
 interface SmartExpenseManagerProps {
@@ -72,6 +76,7 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
     description: "", category: "outros", amount: 0,
     entry_date: new Date().toISOString().split("T")[0],
     expense_type: "variable", is_recurring: false, notes: "",
+    recurrence_end_type: "indefinite", recurrence_end_date: "", recurrence_occurrences: 12,
   });
 
   // Extract unique seller names from commission expenses
@@ -98,11 +103,14 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
   const effYear = viewYear ?? now.getFullYear();
   const monthPrefix = `${effYear}-${String(effMonth).padStart(2, "0")}`;
 
-  // Despesas restritas ao mês selecionado — cada lançamento (fixo ou variável)
-  // aparece apenas no mês de sua entry_date. Não há replicação automática.
-  const filteredExpenses = useMemo(
-    () => sellerFilteredExpenses.filter(e => (e.entry_date || "").startsWith(monthPrefix)),
-    [sellerFilteredExpenses, monthPrefix]
+  // Projeção do mês selecionado:
+  //  - Despesas variáveis aparecem apenas no mês de origem.
+  //  - Despesas fixas + recorrentes se projetam para os meses futuros,
+  //    respeitando o término configurado (indeterminado / até data / nº parcelas).
+  const filteredExpenses = useMemo<ProjectedExpense[]>(
+    () => projectExpensesForMonth(sellerFilteredExpenses, effYear, effMonth)
+      .sort((a, b) => (b.entry_date || "").localeCompare(a.entry_date || "")),
+    [sellerFilteredExpenses, effYear, effMonth]
   );
 
   const formatCurrency = (value: number) =>
@@ -135,28 +143,45 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
   };
 
   const resetForm = () => {
-    setFormData({ description: "", category: "outros", amount: 0, entry_date: new Date().toISOString().split("T")[0], expense_type: "variable", is_recurring: false, notes: "" });
+    setFormData({
+      description: "", category: "outros", amount: 0,
+      entry_date: new Date().toISOString().split("T")[0],
+      expense_type: "variable", is_recurring: false, notes: "",
+      recurrence_end_type: "indefinite", recurrence_end_date: "", recurrence_occurrences: 12,
+    });
     setEditingId(null);
   };
 
-  const openEdit = (entry: typeof expenseEntries[0]) => {
-    setEditingId(entry.id);
+  const openEdit = (entry: ProjectedExpense) => {
+    // Sempre edita a despesa-mãe (a projeção é apenas visual).
+    const sourceId = entry.source_id || entry.id;
+    const source = expenseEntries.find(e => e.id === sourceId) || (entry as any);
+    setEditingId(sourceId);
     setFormData({
-      description: entry.description, category: entry.category,
-      amount: Number(entry.amount), entry_date: entry.entry_date,
-      expense_type: entry.expense_type || "variable",
-      is_recurring: entry.is_recurring || false, notes: entry.notes || "",
+      description: source.description, category: source.category,
+      amount: Number(source.amount), entry_date: source.entry_date,
+      expense_type: source.expense_type || "variable",
+      is_recurring: source.is_recurring || false, notes: source.notes || "",
+      recurrence_end_type: (source as any).recurrence_end_type || "indefinite",
+      recurrence_end_date: (source as any).recurrence_end_date || "",
+      recurrence_occurrences: Number((source as any).recurrence_occurrences) || 12,
     });
     setIsDialogOpen(true);
   };
 
   const handleSubmit = async () => {
-    const payload = {
+    const isFixed = formData.expense_type === "fixed";
+    const payload: any = {
       description: formData.description, category: formData.category as any,
       amount: formData.amount, entry_date: formData.entry_date,
       notes: formData.notes || undefined,
       expense_type: formData.expense_type,
-      is_recurring: formData.expense_type === "fixed" ? true : formData.is_recurring,
+      is_recurring: isFixed ? true : false,
+      recurrence_end_type: isFixed ? formData.recurrence_end_type : "indefinite",
+      recurrence_end_date: isFixed && formData.recurrence_end_type === "until_date" && formData.recurrence_end_date
+        ? formData.recurrence_end_date : null,
+      recurrence_occurrences: isFixed && formData.recurrence_end_type === "occurrences"
+        ? (Number(formData.recurrence_occurrences) || 1) : null,
     };
     if (editingId) {
       await updateExpense({ id: editingId, ...payload });
@@ -221,11 +246,16 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
               <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma despesa encontrada</TableCell></TableRow>
             ) : (
               filteredExpenses.map((entry) => (
-                <TableRow key={entry.id}>
+                <TableRow key={entry.id} className={entry.is_projection ? "opacity-90" : ""}>
                   <TableCell>{format(new Date(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                   <TableCell className="flex items-center gap-2">
                     {entry.description}
                     {entry.is_recurring && <Repeat className="h-3 w-3 text-muted-foreground" />}
+                    {entry.is_projection && (
+                      <Badge variant="outline" className="text-[10px] border-blue-500/30 text-blue-600 dark:text-blue-400">
+                        Recorrência
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="gap-1"><Tag className="h-3 w-3" />{EXPENSE_CATEGORIES_EXPANDED[entry.category] || entry.category}</Badge>
@@ -241,7 +271,7 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
                       <Button variant="ghost" size="icon" onClick={() => openEdit(entry)}>
                         <Pencil className="h-4 w-4 text-muted-foreground" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(entry.id)}>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(entry.source_id || entry.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -292,6 +322,52 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
                 </Select>
               </div>
             </div>
+            {formData.expense_type === "fixed" && (
+              <div className="space-y-3 rounded-md border border-blue-500/20 bg-blue-500/5 p-3">
+                <div className="text-xs font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                  <Repeat className="h-3.5 w-3.5" /> Recorrência mensal
+                </div>
+                <div className="space-y-2">
+                  <Label>Duração</Label>
+                  <Select
+                    value={formData.recurrence_end_type}
+                    onValueChange={(v) => setFormData({ ...formData, recurrence_end_type: v as any })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="indefinite">Sem data final (indeterminada)</SelectItem>
+                      <SelectItem value="until_date">Até uma data específica</SelectItem>
+                      <SelectItem value="occurrences">Quantidade de parcelas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {formData.recurrence_end_type === "until_date" && (
+                  <div className="space-y-2">
+                    <Label>Data final</Label>
+                    <Input
+                      type="date"
+                      value={formData.recurrence_end_date}
+                      onChange={(e) => setFormData({ ...formData, recurrence_end_date: e.target.value })}
+                    />
+                  </div>
+                )}
+                {formData.recurrence_end_type === "occurrences" && (
+                  <div className="space-y-2">
+                    <Label>Número de parcelas (incluindo a primeira)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={formData.recurrence_occurrences}
+                      onChange={(e) => setFormData({ ...formData, recurrence_occurrences: Number(e.target.value) })}
+                    />
+                  </div>
+                )}
+                <p className="text-[11px] text-muted-foreground">
+                  Lançamentos futuros são projetados automaticamente. Alterar ou excluir esta despesa
+                  no futuro não afeta os meses já realizados.
+                </p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Observações</Label>
               <Textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações opcionais" />

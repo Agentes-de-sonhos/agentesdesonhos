@@ -9,6 +9,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareDashboardExport } from "@/utils/financialExport";
+import { projectExpensesInRange, projectExpensesForMonth } from "@/utils/expenseRecurrence";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,7 +96,13 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   const periodSales = useMemo(() => sales.filter(s => s.sale_date >= periodStart && s.sale_date < periodEnd), [sales, periodStart, periodEnd]);
   const periodSaleIds = useMemo(() => new Set(periodSales.map(s => s.id)), [periodSales]);
   const periodProducts = useMemo(() => saleProducts.filter(p => periodSaleIds.has(p.sale_id)), [saleProducts, periodSaleIds]);
-  const periodExpenses = useMemo(() => expenseEntries.filter(e => e.entry_date >= periodStart && e.entry_date < periodEnd), [expenseEntries, periodStart, periodEnd]);
+  const periodExpenses = useMemo(() => {
+    // periodEnd é exclusivo (primeiro dia do mês seguinte). projectExpensesInRange
+    // espera uma data final inclusiva, então passamos o último dia do mês corrente.
+    const lastDay = new Date(viewYear, viewMonth, 0).getDate();
+    const endInclusive = `${viewYear}-${String(viewMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+    return projectExpensesInRange(expenseEntries, periodStart, endInclusive);
+  }, [expenseEntries, periodStart, viewMonth, viewYear]);
   const periodIncome = useMemo(() => incomeEntries.filter(e => e.entry_date >= periodStart && e.entry_date < periodEnd), [incomeEntries, periodStart, periodEnd]);
 
   // KPIs
@@ -155,7 +162,8 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
       const mSaleIds = new Set(mSales.map(s => s.id));
       const mProducts = saleProducts.filter(p => mSaleIds.has(p.sale_id));
       const mCommission = mProducts.reduce((s, p) => s + calcProductCommission(p), 0);
-      const mExpenses = expenseEntries.filter(e => e.entry_date.startsWith(ms)).reduce((s, e) => s + Number(e.amount), 0);
+      const mExpenses = projectExpensesForMonth(expenseEntries, y, m)
+        .reduce((s, e) => s + Number(e.amount), 0);
       months.push({ month: `${SHORT_MONTHS[m]}/${String(y).slice(2)}`, receitas: Math.round(mCommission), despesas: Math.round(mExpenses) });
     }
     return months;
