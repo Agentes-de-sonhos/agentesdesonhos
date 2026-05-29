@@ -78,6 +78,7 @@ import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
 import { QuickLabelPicker } from "./QuickLabelPicker";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
+import { usePipelineStages } from "@/hooks/usePipelineStages";
 import {
   useOpportunityNotesCounts,
   useOpportunityLabelAssignments,
@@ -122,6 +123,16 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const { user } = useAuth();
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
+  const { stages } = usePipelineStages();
+  // Show "Gerar Orçamento" only up to the stage immediately before "Orçamento Enviado"
+  const quoteSentStage = stages.find((s) => s.legacy_key === "quote_sent");
+  const currentStage = stages.find(
+    (s) => s.id === opportunity.stage_id || s.legacy_key === opportunity.stage
+  );
+  const canGenerateQuote =
+    !quoteSentStage ||
+    !currentStage ||
+    currentStage.position < quoteSentStage.position;
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -415,9 +426,11 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                   <History className="mr-2 h-4 w-4" /> Histórico
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleCreateQuote}>
-                  <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
-                </DropdownMenuItem>
+                {canGenerateQuote && (
+                  <DropdownMenuItem onClick={handleCreateQuote}>
+                    <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleCreateTripWallet}>
                   <Wallet className="mr-2 h-4 w-4" /> Gerar Carteira Digital
                 </DropdownMenuItem>
