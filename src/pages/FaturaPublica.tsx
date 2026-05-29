@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, FileText } from "lucide-react";
+import { Loader2, Download, FileText, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { generateInvoicePdf } from "@/lib/generateInvoicePdf";
+import { buildPixBrCode } from "@/lib/pixBrCode";
+import QRCode from "qrcode";
+import { useToast } from "@/hooks/use-toast";
 import {
   INVOICE_SERVICE_CATEGORIES, INVOICE_STATUS_LABELS, INVOICE_PAYMENT_METHODS,
   type Invoice, type InvoiceService, type InvoiceInstallment, type InvoicePayment,
@@ -22,6 +25,7 @@ const fmtDate = (d?: string | null) => {
 
 export default function FaturaPublica() {
   const { agencySlug, code } = useParams();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<{
@@ -29,6 +33,8 @@ export default function FaturaPublica() {
     installments: InvoiceInstallment[]; payments: InvoicePayment[];
     agent_profile: any;
   } | null>(null);
+  const [pixQr, setPixQr] = useState<string | null>(null);
+  const [pixPayload, setPixPayload] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -43,6 +49,26 @@ export default function FaturaPublica() {
       setLoading(false);
     })();
   }, [agencySlug, code]);
+
+  useEffect(() => {
+    (async () => {
+      if (!data?.invoice?.pix_key || (data.invoice.balance ?? 0) <= 0) return;
+      try {
+        const payload = data.invoice.pix_qr_payload || buildPixBrCode({
+          pixKey: data.invoice.pix_key,
+          amount: data.invoice.balance,
+          merchantName: data.agent_profile?.agency_name || "RECEBEDOR",
+          merchantCity: "BRASIL",
+          txid: data.invoice.invoice_number.replace(/[^A-Z0-9]/gi, "").slice(0, 25),
+        });
+        const url = await QRCode.toDataURL(payload, { margin: 1, width: 240 });
+        setPixPayload(payload);
+        setPixQr(url);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, [data?.invoice?.id]);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -189,9 +215,37 @@ export default function FaturaPublica() {
 
             {invoice.pix_key && (
               <section className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                <h2 className="text-sm font-semibold text-emerald-800 mb-1">Pagar via PIX</h2>
-                <p className="text-xs text-emerald-700 mb-2">Chave PIX:</p>
-                <code className="text-sm break-all">{invoice.pix_key}</code>
+                <h2 className="text-sm font-semibold text-emerald-800 mb-3">Pagar via PIX</h2>
+                <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start">
+                  {pixQr ? (
+                    <img src={pixQr} alt="QR Code PIX" className="h-40 w-40 rounded bg-white p-2 border border-emerald-200" />
+                  ) : (
+                    <div className="h-40 w-40 rounded bg-white border border-emerald-200 flex items-center justify-center text-xs text-emerald-700">
+                      Gerando QR...
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0 space-y-2 w-full">
+                    <p className="text-xs text-emerald-700">Chave PIX:</p>
+                    <code className="text-sm break-all block bg-white border border-emerald-200 rounded p-2">{invoice.pix_key}</code>
+                    {pixPayload && (
+                      <>
+                        <p className="text-xs text-emerald-700">PIX Copia e Cola:</p>
+                        <code className="text-xs break-all block bg-white border border-emerald-200 rounded p-2 max-h-24 overflow-y-auto">{pixPayload}</code>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-emerald-300 text-emerald-800 hover:bg-emerald-100"
+                          onClick={() => {
+                            navigator.clipboard.writeText(pixPayload);
+                            toast({ title: "Código PIX copiado" });
+                          }}
+                        >
+                          <Copy className="h-3 w-3 mr-1" /> Copiar código PIX
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
               </section>
             )}
 

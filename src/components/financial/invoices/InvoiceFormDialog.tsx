@@ -189,6 +189,34 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
               </Select>
             </div>
             <ImportTripPicker onPick={handleImportFromTrip} />
+            <ImportOpportunityPicker
+              onPick={async (oppId: string) => {
+                const { data: op } = await supabase
+                  .from("opportunities")
+                  .select("*, clients(name, email, phone)")
+                  .eq("id", oppId).maybeSingle();
+                if (!op) { toast({ title: "Oportunidade não encontrada", variant: "destructive" }); return; }
+                const c = (op as any).clients || {};
+                setClient((prev) => ({
+                  ...prev,
+                  client_name: c.name || prev.client_name,
+                  client_email: c.email || prev.client_email,
+                  client_phone: c.phone || prev.client_phone,
+                }));
+                setTrip({
+                  destination: (op as any).destination ?? "",
+                  travel_start: (op as any).start_date ?? "",
+                  travel_end: (op as any).end_date ?? "",
+                });
+                setServices([{
+                  category: "pacote",
+                  description: `Pacote - ${(op as any).destination}`,
+                  fare: Number((op as any).estimated_value || 0),
+                  taxes: 0, discount: 0, commission: 0, rav: 0,
+                }]);
+                toast({ title: "Dados importados da oportunidade" });
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="cliente" className="space-y-3 pt-4">
@@ -396,6 +424,36 @@ function ImportTripPicker({ onPick }: { onPick: (id: string) => void }) {
           {(trips || []).map((t) => (
             <SelectItem key={t.id} value={t.id}>
               {t.trip_title || t.destination || "Carteira"} — {t.client_name || ""}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function ImportOpportunityPicker({ onPick }: { onPick: (id: string) => void }) {
+  const { user } = useAuth();
+  const [opps, setOpps] = useState<any[] | null>(null);
+  const load = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("opportunities")
+      .select("id, destination, estimated_value, stage, clients(name)")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setOpps(data || []);
+  };
+  return (
+    <div className="pt-2">
+      <Label>Importar de uma Oportunidade</Label>
+      <Select onOpenChange={(o) => o && opps === null && load()} onValueChange={onPick}>
+        <SelectTrigger><SelectValue placeholder="Escolha uma oportunidade" /></SelectTrigger>
+        <SelectContent>
+          {(opps || []).map((o) => (
+            <SelectItem key={o.id} value={o.id}>
+              {o.destination || "Oportunidade"} — {o.clients?.name || ""}
             </SelectItem>
           ))}
         </SelectContent>

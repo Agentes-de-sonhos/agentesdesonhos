@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Invoice } from "@/types/invoice";
 import { INVOICE_SERVICE_CATEGORIES, INVOICE_STATUS_LABELS, INVOICE_PAYMENT_METHODS } from "@/types/invoice";
+import QRCode from "qrcode";
+import { buildPixBrCode } from "@/lib/pixBrCode";
 
 interface AgencyInfo {
   name?: string | null;
@@ -212,6 +214,37 @@ export async function generateInvoicePdf(invoice: Invoice, agency: AgencyInfo, p
     const notes = doc.splitTextToSize(invoice.notes, pageW - marginL - marginR);
     doc.text(notes, marginL, y);
     y += notes.length * 4 + 4;
+  }
+
+  // PIX QR Code
+  if (invoice.pix_key && invoice.balance > 0) {
+    if (y > 220) { doc.addPage(); y = 20; }
+    try {
+      const payload = invoice.pix_qr_payload || buildPixBrCode({
+        pixKey: invoice.pix_key,
+        amount: invoice.balance,
+        merchantName: agency.name || "RECEBEDOR",
+        merchantCity: "BRASIL",
+        txid: invoice.invoice_number.replace(/[^A-Z0-9]/gi, "").slice(0, 25),
+      });
+      const dataUrl = await QRCode.toDataURL(payload, { margin: 1, width: 220 });
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text("PAGAR VIA PIX", marginL, y);
+      y += 4;
+      doc.addImage(dataUrl, "PNG", marginL, y, 38, 38);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(60, 60, 60);
+      doc.text("Escaneie o QR Code ou copie o código abaixo:", marginL + 42, y + 6);
+      const wrap = doc.splitTextToSize(payload, pageW - marginL - marginR - 44);
+      doc.setFontSize(7);
+      doc.text(wrap.slice(0, 5), marginL + 42, y + 11);
+      y += 42;
+    } catch (err) {
+      console.error("Falha ao gerar QR PIX", err);
+    }
   }
 
   // Footer
