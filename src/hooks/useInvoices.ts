@@ -8,6 +8,9 @@ import type {
 } from "@/types/invoice";
 import { computeInvoiceTotals, computeServiceTotals } from "@/types/invoice";
 
+// Tables are newly created; types may lag behind. Cast through a relaxed client.
+const db = supabase as any;
+
 export interface CreateInvoiceInput {
   client_id?: string | null;
   client_name: string;
@@ -41,7 +44,7 @@ export function useInvoices() {
     queryKey: ["invoices", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("invoices")
         .select("*")
         .eq("user_id", user.id)
@@ -55,13 +58,13 @@ export function useInvoices() {
   });
 
   const getInvoiceDetail = async (invoiceId: string): Promise<Invoice | null> => {
-    const { data: inv, error } = await supabase
+    const { data: inv, error } = await db
       .from("invoices").select("*").eq("id", invoiceId).maybeSingle();
     if (error || !inv) return null;
     const [{ data: services }, { data: installments }, { data: payments }] = await Promise.all([
-      supabase.from("invoice_services").select("*").eq("invoice_id", invoiceId).order("order_index"),
-      supabase.from("invoice_installments").select("*").eq("invoice_id", invoiceId).order("installment_number"),
-      supabase.from("invoice_payments").select("*").eq("invoice_id", invoiceId).order("payment_date"),
+      db.from("invoice_services").select("*").eq("invoice_id", invoiceId).order("order_index"),
+      db.from("invoice_installments").select("*").eq("invoice_id", invoiceId).order("installment_number"),
+      db.from("invoice_payments").select("*").eq("invoice_id", invoiceId).order("payment_date"),
     ]);
     return {
       ...(inv as Invoice),
@@ -75,7 +78,7 @@ export function useInvoices() {
     mutationFn: async (input: CreateInvoiceInput) => {
       if (!user) throw new Error("Não autenticado");
       const totals = computeInvoiceTotals(input.services);
-      const { data: inv, error } = await supabase
+      const { data: inv, error } = await db
         .from("invoices")
         .insert({
           user_id: user.id,
@@ -122,7 +125,7 @@ export function useInvoices() {
             final_amount: t.final_amount,
           };
         });
-        const { error: sErr } = await supabase.from("invoice_services").insert(svcRows as any);
+        const { error: sErr } = await db.from("invoice_services").insert(svcRows);
         if (sErr) throw sErr;
       }
 
@@ -135,11 +138,11 @@ export function useInvoices() {
           amount: p.amount,
           due_date: p.due_date ?? null,
         }));
-        const { error: iErr } = await supabase.from("invoice_installments").insert(insRows as any);
+        const { error: iErr } = await db.from("invoice_installments").insert(insRows);
         if (iErr) throw iErr;
       } else {
         // single installment by default
-        await supabase.from("invoice_installments").insert({
+        await db.from("invoice_installments").insert({
           invoice_id: inv.id,
           user_id: user.id,
           installment_number: 1,
@@ -162,7 +165,7 @@ export function useInvoices() {
 
   const updateInvoiceStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: Invoice["status"] }) => {
-      const { error } = await supabase.from("invoices").update({ status } as any).eq("id", id);
+      const { error } = await db.from("invoices").update({ status }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["invoices"] }),
@@ -170,7 +173,7 @@ export function useInvoices() {
 
   const deleteInvoice = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("invoices").delete().eq("id", id);
+      const { error } = await db.from("invoices").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -189,7 +192,7 @@ export function useInvoices() {
       notes?: string;
     }) => {
       if (!user) throw new Error("Não autenticado");
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("invoice_payments")
         .insert({
           invoice_id: p.invoice_id,
