@@ -9,6 +9,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareDashboardExport } from "@/utils/financialExport";
+import { projectExpensesInRange, projectExpensesForMonth } from "@/utils/expenseRecurrence";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
