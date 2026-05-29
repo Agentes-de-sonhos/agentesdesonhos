@@ -285,7 +285,7 @@ export function useTrip(id: string | undefined) {
           voucher_name: voucher_name || null,
           attachments: (attachments || []) as any,
           order_index: nextOrderIndex,
-          image_urls: image_urls && image_urls.length > 0 ? image_urls : null,
+          image_urls: image_urls && image_urls.length > 0 ? image_urls : [],
           place_id: place_id || null,
         })
         .select()
