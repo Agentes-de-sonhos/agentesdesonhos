@@ -19,9 +19,25 @@ export function NotificationsDropdown() {
   const markRead = useMarkLeadRead();
   const markAllRead = useMarkAllLeadsRead();
 
-  const unreadLeads = useMemo(() => leads.filter((l) => !l.is_read), [leads]);
+  // Auto-cleanup (client-side): hide read leads older than 30 days,
+  // and cap the list to the most recent 100 items to keep the panel performant.
+  const cleanedLeads = useMemo(() => {
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - THIRTY_DAYS_MS;
+    return leads
+      .filter((l) => {
+        if (!l.is_read) return true;
+        return new Date(l.created_at).getTime() >= cutoff;
+      })
+      .slice(0, 100);
+  }, [leads]);
+
+  const unreadLeads = useMemo(
+    () => cleanedLeads.filter((l) => !l.is_read),
+    [cleanedLeads]
+  );
   const unreadCount = unreadLeads.length;
-  const visibleLeads = useMemo(() => leads.slice(0, 12), [leads]);
+  const visibleLeads = cleanedLeads;
 
   const handleLeadClick = (lead: LeadItem) => {
     if (!lead.is_read) markRead.mutate({ id: lead.id, source: lead.source });
@@ -35,16 +51,17 @@ export function NotificationsDropdown() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
+          className="relative h-9 w-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80 overflow-visible"
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <span
               className={cn(
-                "absolute -top-1.5 -right-1.5 z-10 flex items-center justify-center rounded-full bg-green-500 text-white text-[10px] font-bold shadow-lg",
-                unreadCount > 9 ? "px-1.5 h-5 min-w-5" : "h-5 w-5",
-                "animate-[notification-badge-pulse_2s_ease-in-out_infinite]"
+                "absolute -top-1 -right-1 z-10 flex items-center justify-center rounded-full bg-green-500 text-white text-[10px] font-bold leading-none ring-2 ring-background",
+                unreadCount > 9 ? "px-1 h-[18px] min-w-[18px]" : "h-[18px] w-[18px]",
+                "animate-[notification-badge-pulse_2s_ease-in-out_infinite] will-change-transform"
               )}
+              style={{ transformOrigin: "center" }}
             >
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
@@ -52,11 +69,11 @@ export function NotificationsDropdown() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-80 p-0"
+        className="w-[22rem] p-0 overflow-hidden"
         align="end"
         sideOffset={8}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b bg-background">
           <h4 className="font-semibold text-sm">Notificações</h4>
           {unreadCount > 0 && (
             <Button
@@ -71,7 +88,7 @@ export function NotificationsDropdown() {
           )}
         </div>
 
-        <ScrollArea className="max-h-80">
+        <ScrollArea className="h-[420px]">
           {visibleLeads.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
               <Bell className="h-10 w-10 text-muted-foreground/30 mb-3" />
@@ -90,7 +107,7 @@ export function NotificationsDropdown() {
                   onClick={() => handleLeadClick(lead)}
                   className={cn(
                     "w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors",
-                    !lead.is_read && "bg-primary/5"
+                    !lead.is_read && "bg-primary/5 border-l-2 border-l-primary"
                   )}
                 >
                   <div className="mt-0.5">
@@ -101,7 +118,7 @@ export function NotificationsDropdown() {
                       <p
                         className={cn(
                           "text-sm truncate",
-                          !lead.is_read && "font-medium"
+                          !lead.is_read && "font-semibold text-foreground"
                         )}
                       >
                         Novo lead: {lead.lead_name}
@@ -114,7 +131,7 @@ export function NotificationsDropdown() {
                       {lead.lead_phone}
                       {lead.destination ? ` · ${lead.destination}` : ""}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-1.5">
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                       <Badge
                         variant="secondary"
                         className={cn(
