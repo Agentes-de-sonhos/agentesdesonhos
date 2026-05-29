@@ -413,6 +413,201 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_team_audit_log: {
+        Row: {
+          action: string
+          agency_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          team_member_id: string | null
+        }
+        Insert: {
+          action: string
+          agency_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          team_member_id?: string | null
+        }
+        Update: {
+          action?: string
+          agency_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          team_member_id?: string | null
+        }
+        Relationships: []
+      }
+      agency_team_members: {
+        Row: {
+          agency_id: string
+          created_at: string
+          full_name: string
+          id: string
+          last_login_at: string | null
+          login: string
+          login_normalized: string | null
+          password_hash: string
+          role_title: string | null
+          status: Database["public"]["Enums"]["team_member_status"]
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          full_name: string
+          id?: string
+          last_login_at?: string | null
+          login: string
+          login_normalized?: string | null
+          password_hash: string
+          role_title?: string | null
+          status?: Database["public"]["Enums"]["team_member_status"]
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          full_name?: string
+          id?: string
+          last_login_at?: string | null
+          login?: string
+          login_normalized?: string | null
+          password_hash?: string
+          role_title?: string | null
+          status?: Database["public"]["Enums"]["team_member_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agency_team_permissions: {
+        Row: {
+          agency_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          module_key: string
+          permission_key: string
+          team_member_id: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_key: string
+          permission_key: string
+          team_member_id: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_key?: string
+          permission_key?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_team_permissions_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_team_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          last_seen_at: string
+          team_member_id: string
+          token_hash: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          team_member_id: string
+          token_hash: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          team_member_id?: string
+          token_hash?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_team_sessions_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_team_stage_permissions: {
+        Row: {
+          agency_id: string
+          can_edit: boolean
+          can_move: boolean
+          can_view: boolean
+          created_at: string
+          id: string
+          pipeline_type: Database["public"]["Enums"]["team_pipeline_type"]
+          stage_id: string
+          team_member_id: string
+        }
+        Insert: {
+          agency_id: string
+          can_edit?: boolean
+          can_move?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          pipeline_type: Database["public"]["Enums"]["team_pipeline_type"]
+          stage_id: string
+          team_member_id: string
+        }
+        Update: {
+          agency_id?: string
+          can_edit?: boolean
+          can_move?: boolean
+          can_view?: boolean
+          created_at?: string
+          id?: string
+          pipeline_type?: Database["public"]["Enums"]["team_pipeline_type"]
+          stage_id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_team_stage_permissions_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agenda_filter_preferences: {
         Row: {
           created_at: string
@@ -10144,6 +10339,36 @@ export type Database = {
         Returns: Json
       }
       supplier_slug_exists: { Args: { p_slug: string }; Returns: boolean }
+      team_get_member_detail: { Args: { _member_id: string }; Returns: Json }
+      team_list_members: {
+        Args: never
+        Returns: {
+          created_at: string
+          full_name: string
+          id: string
+          last_login_at: string
+          login: string
+          permissions_count: number
+          role_title: string
+          stage_permissions_count: number
+          status: Database["public"]["Enums"]["team_member_status"]
+        }[]
+      }
+      team_member_quota: {
+        Args: never
+        Returns: {
+          total: number
+          used: number
+        }[]
+      }
+      team_replace_permissions: {
+        Args: {
+          _member_id: string
+          _permissions: Json
+          _stage_permissions: Json
+        }
+        Returns: undefined
+      }
       track_sales_landing_view: {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined
@@ -10174,6 +10399,8 @@ export type Database = {
         | "fundador"
         | "start"
         | "fornecedor_parceiro"
+      team_member_status: "active" | "blocked"
+      team_pipeline_type: "opportunities" | "operations"
       trade_event_status: "pendente" | "aprovado" | "recusado"
       trade_event_type:
         | "treinamento"
@@ -10329,6 +10556,8 @@ export const Constants = {
         "start",
         "fornecedor_parceiro",
       ],
+      team_member_status: ["active", "blocked"],
+      team_pipeline_type: ["opportunities", "operations"],
       trade_event_status: ["pendente", "aprovado", "recusado"],
       trade_event_type: [
         "treinamento",

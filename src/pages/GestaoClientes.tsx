@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { TeamMembersButton } from "@/components/team/TeamMembersButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Kanban, Target, Briefcase, LayoutDashboard } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
@@ -51,7 +52,9 @@ function GestaoClientesContent() {
           subtitle="Gerencie clientes, oportunidades e metas de vendas"
           icon={Users}
           adminTab="crm"
-        />
+        >
+          <TeamMembersButton />
+        </PageHeader>
 
         <Tabs value={getCurrentTab()} onValueChange={handleTabChange} className="w-full">
           {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}

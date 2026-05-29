@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
+import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
+import { TeamRouteGuard } from "@/components/team/TeamRouteGuard";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
@@ -136,10 +138,12 @@ const App = () => (
       <BrowserRouter>
         <ErrorBoundary>
         <AuthProvider>
+          <TeamSessionProvider>
           <ImpersonationBanner />
           <SubscriptionProvider>
           <NewLeadAlertProvider>
           <Suspense fallback={<LoadingScreen />}>
+          <TeamRouteGuard />
           <Routes>
             <Route path="/auth" element={
               window.location.hostname.startsWith("ativar-cartao") ? (
@@ -277,6 +281,7 @@ const App = () => (
           <WhatsAppSupportButton />
           </NewLeadAlertProvider>
           </SubscriptionProvider>
+          </TeamSessionProvider>
         </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>
