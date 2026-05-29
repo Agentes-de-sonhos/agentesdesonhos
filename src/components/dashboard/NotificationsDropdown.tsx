@@ -39,9 +39,8 @@ export function NotificationsDropdown() {
   const unreadCount = unreadLeads.length;
   const visibleLeads = cleanedLeads;
 
-  // Auto-mark all as read when the panel opens (after a short delay so the
-  // user can briefly see which items were new). Prevents the badge from
-  // staying stuck after the user has clearly seen the notifications.
+  // Auto-mark all as read as soon as the panel opens. This prevents the badge
+  // and unread highlight from staying active after the user has seen the list.
   const autoMarkedRef = useRef(false);
   useEffect(() => {
     if (!isOpen) {
@@ -50,10 +49,7 @@ export function NotificationsDropdown() {
     }
     if (autoMarkedRef.current || unreadCount === 0) return;
     autoMarkedRef.current = true;
-    const t = setTimeout(() => {
-      markAllRead.mutate();
-    }, 1200);
-    return () => clearTimeout(t);
+    markAllRead.mutate();
   }, [isOpen, unreadCount, markAllRead]);
 
   const handleLeadClick = (lead: LeadItem) => {
