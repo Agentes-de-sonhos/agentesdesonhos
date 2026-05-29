@@ -251,7 +251,27 @@ export function prepareEntradasExport(entries: any[], sales: any[], period: { st
 
 export function prepareExpensesExport(expenses: any[], period: { start: Date; end: Date }) {
   const filtered = filterByPeriod(expenses, "entry_date", period.start, period.end);
-  const CATS: Record<string, string> = { sistema: "Sistema", marketing: "Marketing", internet: "Internet/Telefone", aluguel: "Aluguel", salarios: "Salários", cafe_reuniao: "Café/Reunião", presente_fornecedor: "Presente Fornecedor", taxas: "Taxas/Impostos", fornecedor: "Fornecedor", comissao: "Comissão", transporte: "Transporte", outros: "Outros" };
+  const CATS: Record<string, string> = {
+    sistema: "Sistema / Software",
+    marketing: "Marketing",
+    internet: "Internet / Telefone",
+    aluguel: "Aluguel",
+    salarios: "Salários",
+    comissao: "Comissões",
+    administrativo: "Administrativo",
+    financeiro: "Financeiro",
+    comercial: "Despesas Comerciais",
+    relacionamento: "Relacionamento",
+    operacional: "Operacional",
+    capacitacao: "Capacitação",
+    transporte: "Transporte",
+    taxas: "Taxas / Impostos",
+    outros: "Outros",
+    // legados
+    fornecedor: "Operacional",
+    cafe_reuniao: "Despesas Comerciais",
+    presente_fornecedor: "Relacionamento",
+  };
   const columns = [
     { key: "description", header: "Descrição", width: 25 },
     { key: "category", header: "Categoria", width: 18 },

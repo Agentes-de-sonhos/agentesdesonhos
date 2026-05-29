@@ -104,21 +104,52 @@ export interface ExpenseEntry {
   updated_at: string;
 }
 
-export type ExpenseCategory = 'fornecedor' | 'comissao' | 'taxas' | 'marketing' | 'sistema' | 'internet' | 'aluguel' | 'salarios' | 'cafe_reuniao' | 'presente_fornecedor' | 'transporte' | 'outros';
+export type ExpenseCategory =
+  | 'sistema'
+  | 'marketing'
+  | 'internet'
+  | 'aluguel'
+  | 'salarios'
+  | 'comissao'
+  | 'administrativo'
+  | 'financeiro'
+  | 'comercial'
+  | 'relacionamento'
+  | 'operacional'
+  | 'capacitacao'
+  | 'transporte'
+  | 'taxas'
+  | 'outros'
+  // Chaves legadas mantidas para compatibilidade com lançamentos antigos
+  | 'fornecedor'
+  | 'cafe_reuniao'
+  | 'presente_fornecedor';
 
+// Categorias ativas (ordem usada nos selects e relatórios).
 export const EXPENSE_CATEGORIES: Record<string, string> = {
   sistema: 'Sistema / Software',
   marketing: 'Marketing',
   internet: 'Internet / Telefone',
   aluguel: 'Aluguel',
   salarios: 'Salários',
-  cafe_reuniao: 'Café / Reunião',
-  presente_fornecedor: 'Presente Fornecedor',
-  taxas: 'Taxas / Impostos',
-  fornecedor: 'Fornecedor',
-  comissao: 'Comissão',
+  comissao: 'Comissões',
+  administrativo: 'Administrativo',
+  financeiro: 'Financeiro',
+  comercial: 'Despesas Comerciais',
+  relacionamento: 'Relacionamento',
+  operacional: 'Operacional',
+  capacitacao: 'Capacitação',
   transporte: 'Transporte',
+  taxas: 'Taxas / Impostos',
   outros: 'Outros',
+};
+
+// Labels completos (inclui chaves legadas) para exibição de lançamentos existentes.
+export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
+  ...EXPENSE_CATEGORIES,
+  fornecedor: 'Operacional',
+  cafe_reuniao: 'Despesas Comerciais',
+  presente_fornecedor: 'Relacionamento',
 };
 
 export const PAYMENT_METHODS: Record<string, string> = {
