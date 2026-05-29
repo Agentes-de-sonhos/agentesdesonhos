@@ -57,7 +57,7 @@ export function useTeamMemberDetail(id: string | null) {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('team_get_member_detail', { _member_id: id })
       if (error) throw error
-      return data as TeamMemberDetail | null
+      return (data as unknown) as TeamMemberDetail | null
     },
   })
 }
