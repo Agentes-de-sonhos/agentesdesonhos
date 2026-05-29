@@ -50,11 +50,13 @@ export const PRODUCT_TYPES: Record<ProductType, string> = {
 export interface CustomerPayment {
   id: string;
   user_id: string;
-  sale_id: string;
+  sale_id: string | null;
   amount: number;
   payment_date: string;
   payment_method: string;
   notes: string | null;
+  source: 'manual' | 'invoice';
+  source_id: string | null;
   created_at: string;
   updated_at: string;
   sale?: Sale;
