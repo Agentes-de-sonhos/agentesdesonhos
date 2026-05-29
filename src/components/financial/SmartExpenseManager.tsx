@@ -52,7 +52,12 @@ interface ExpenseFormState {
   notes: string;
 }
 
-export function SmartExpenseManager() {
+interface SmartExpenseManagerProps {
+  viewMonth?: number; // 1-12
+  viewYear?: number;
+}
+
+export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManagerProps = {}) {
   const { expenseEntries, createExpense, updateExpense, deleteExpense, isCreating, isUpdating } = useFinancial();
   const { showExport, setShowExport, agencyName } = useFinancialExport("Despesas");
   const handleExportExpenses = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
@@ -80,22 +85,32 @@ export function SmartExpenseManager() {
     return Array.from(names).sort();
   }, [expenseEntries]);
 
-  const filteredExpenses = useMemo(() => {
+  // Filter by seller first
+  const sellerFilteredExpenses = useMemo(() => {
     if (sellerFilter === "all") return expenseEntries;
     if (sellerFilter === "no_commission") return expenseEntries.filter(e => e.category !== 'comissao');
     return expenseEntries.filter(e => e.description === `Comissão - ${sellerFilter}`);
   }, [expenseEntries, sellerFilter]);
 
+  // Bounds of the selected month (falls back to current month if props not provided)
+  const now = new Date();
+  const effMonth = viewMonth ?? now.getMonth() + 1;
+  const effYear = viewYear ?? now.getFullYear();
+  const monthPrefix = `${effYear}-${String(effMonth).padStart(2, "0")}`;
+
+  // Despesas restritas ao mês selecionado — cada lançamento (fixo ou variável)
+  // aparece apenas no mês de sua entry_date. Não há replicação automática.
+  const filteredExpenses = useMemo(
+    () => sellerFilteredExpenses.filter(e => (e.entry_date || "").startsWith(monthPrefix)),
+    [sellerFilteredExpenses, monthPrefix]
+  );
+
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  const monthStartStr = monthStart.toISOString().split("T")[0];
-  const monthlyExpenses = filteredExpenses.filter(e => e.entry_date >= monthStartStr);
-  const totalMonth = monthlyExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  const fixedTotal = monthlyExpenses.filter(e => e.expense_type === "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
-  const variableTotal = monthlyExpenses.filter(e => e.expense_type !== "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
+  const totalMonth = filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const fixedTotal = filteredExpenses.filter(e => e.expense_type === "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
+  const variableTotal = filteredExpenses.filter(e => e.expense_type !== "fixed").reduce((sum, e) => sum + Number(e.amount), 0);
 
   const suggestCategory = (desc: string) => {
     const d = desc.toLowerCase();
