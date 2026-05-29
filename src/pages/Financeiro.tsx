@@ -116,7 +116,9 @@ export default function Financeiro() {
             title="Gestão Financeira"
             subtitle="Controle simples e inteligente da sua agência"
             icon={DollarSign}
-          />
+          >
+            <TeamMembersButton />
+          </PageHeader>
 
 
           {showPeriodSelector && (
