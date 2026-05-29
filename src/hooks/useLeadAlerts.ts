@@ -98,7 +98,23 @@ export function useMarkLeadRead() {
       const { error } = await supabase.from(table).update({ is_read: true }).eq("id", lead.id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onMutate: async (lead) => {
+      const queryKey = ["leads-unified", user?.id];
+      await qc.cancelQueries({ queryKey });
+      const previous = qc.getQueryData<LeadItem[]>(queryKey);
+      qc.setQueryData<LeadItem[]>(queryKey, (old = []) =>
+        old.map((item) =>
+          item.id === lead.id && item.source === lead.source ? { ...item, is_read: true } : item
+        )
+      );
+      return { previous };
+    },
+    onError: (_error, _lead, context) => {
+      if (context?.previous) {
+        qc.setQueryData(["leads-unified", user?.id], context.previous);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["leads-unified", user?.id] });
     },
   });
@@ -128,12 +144,28 @@ export function useMarkAllLeadsRead() {
   return useMutation({
     mutationFn: async () => {
       if (!user?.id) return;
-      await Promise.all([
+      const [convRes, landingRes] = await Promise.all([
         supabase.from("lead_captures").update({ is_read: true }).eq("agent_user_id", user.id).eq("is_read", false),
         supabase.from("sales_landing_leads").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false),
       ]);
+      if (convRes.error) throw convRes.error;
+      if (landingRes.error) throw landingRes.error;
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      const queryKey = ["leads-unified", user?.id];
+      await qc.cancelQueries({ queryKey });
+      const previous = qc.getQueryData<LeadItem[]>(queryKey);
+      qc.setQueryData<LeadItem[]>(queryKey, (old = []) =>
+        old.map((item) => ({ ...item, is_read: true }))
+      );
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) {
+        qc.setQueryData(["leads-unified", user?.id], context.previous);
+      }
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["leads-unified", user?.id] });
     },
   });
