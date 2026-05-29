@@ -111,6 +111,7 @@ const RequisitosViagem = lazy(() => import("./pages/RequisitosViagem"));
 const Blog = lazy(() => import("./pages/Blog"));
 const DashboardFornecedor = lazy(() => import("./pages/DashboardFornecedor"));
 const AgendaTrade = lazy(() => import("./pages/AgendaTrade"));
+const FaturaPublica = lazy(() => import("./pages/FaturaPublica"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -248,6 +249,7 @@ const App = () => (
             <Route path="/atualizacoes" element={<ProtectedRoute><Atualizacoes /></ProtectedRoute>} />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
+            <Route path="/fatura/:agencySlug/:code" element={<FaturaPublica />} />
             <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/formulario/:token" element={<LeadFormPublic />} />
             <Route path="/meus-leads" element={<ProtectedRoute><CaptacaoLeads /></ProtectedRoute>} />

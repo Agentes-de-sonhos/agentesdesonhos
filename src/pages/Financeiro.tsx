@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
   ShoppingBag, ArrowUpCircle, Receipt, Users,
-  ChevronLeft, ChevronRight, Calendar,
+  ChevronLeft, ChevronRight, Calendar, FileText,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -15,6 +15,7 @@ import { SalesManager } from "@/components/financial/SalesManager";
 import { EntradasManager } from "@/components/financial/EntradasManager";
 import { CommissionsReceivable } from "@/components/financial/CommissionsReceivable";
 import { SellersManager } from "@/components/financial/SellersManager";
+import { InvoicesManager } from "@/components/financial/invoices/InvoicesManager";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ const FINANCEIRO_TABS = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "entradas", label: "Entradas", icon: ArrowUpCircle },
   { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
+  { key: "faturas", label: "Faturas", icon: FileText },
 ] as const;
 
 const GESTAO_TABS = [
@@ -236,6 +238,7 @@ export default function Financeiro() {
               )}
               {activeTab === "entradas" && <EntradasManager />}
               {activeTab === "despesas" && <SmartExpenseManager />}
+              {activeTab === "faturas" && <InvoicesManager />}
               {activeTab === "vendas" && <SalesManager />}
               {activeTab === "comissoes" && <CommissionsReceivable />}
               {activeTab === "vendedores" && <SellersManager />}

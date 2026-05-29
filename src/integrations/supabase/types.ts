@@ -3730,6 +3730,292 @@ export type Database = {
           },
         ]
       }
+      invoice_installments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string | null
+          id: string
+          installment_number: number
+          invoice_id: string
+          label: string | null
+          paid_at: string | null
+          status: Database["public"]["Enums"]["invoice_installment_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          installment_number: number
+          invoice_id: string
+          label?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_installment_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          installment_number?: number
+          invoice_id?: string
+          label?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_installment_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_installments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          installment_id: string | null
+          invoice_id: string
+          method: string
+          notes: string | null
+          payment_date: string
+          receipt_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          installment_id?: string | null
+          invoice_id: string
+          method?: string
+          notes?: string | null
+          payment_date?: string
+          receipt_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          installment_id?: string | null
+          invoice_id?: string
+          method?: string
+          notes?: string | null
+          payment_date?: string
+          receipt_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_services: {
+        Row: {
+          category: Database["public"]["Enums"]["invoice_service_category"]
+          commission: number
+          created_at: string
+          description: string | null
+          discount: number
+          fare: number
+          final_amount: number
+          id: string
+          invoice_id: string
+          net_amount: number
+          order_index: number
+          rav: number
+          taxes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["invoice_service_category"]
+          commission?: number
+          created_at?: string
+          description?: string | null
+          discount?: number
+          fare?: number
+          final_amount?: number
+          id?: string
+          invoice_id: string
+          net_amount?: number
+          order_index?: number
+          rav?: number
+          taxes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["invoice_service_category"]
+          commission?: number
+          created_at?: string
+          description?: string | null
+          discount?: number
+          fare?: number
+          final_amount?: number
+          id?: string
+          invoice_id?: string
+          net_amount?: number
+          order_index?: number
+          rav?: number
+          taxes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_services_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          agency_slug: string | null
+          balance: number
+          client_company: string | null
+          client_document: string | null
+          client_email: string | null
+          client_id: string | null
+          client_name: string
+          client_phone: string | null
+          commission_total: number
+          created_at: string
+          currency: string
+          destination: string | null
+          discount_total: number
+          due_date: string | null
+          estimated_profit: number
+          id: string
+          invoice_number: string
+          issue_date: string
+          notes: string | null
+          paid_amount: number
+          passengers: Json | null
+          pix_key: string | null
+          pix_qr_payload: string | null
+          public_access_code: string | null
+          rav_total: number
+          source_id: string | null
+          source_type: Database["public"]["Enums"]["invoice_source_type"]
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          taxes_total: number
+          terms: string | null
+          total_amount: number
+          travel_end: string | null
+          travel_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agency_slug?: string | null
+          balance?: number
+          client_company?: string | null
+          client_document?: string | null
+          client_email?: string | null
+          client_id?: string | null
+          client_name: string
+          client_phone?: string | null
+          commission_total?: number
+          created_at?: string
+          currency?: string
+          destination?: string | null
+          discount_total?: number
+          due_date?: string | null
+          estimated_profit?: number
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          notes?: string | null
+          paid_amount?: number
+          passengers?: Json | null
+          pix_key?: string | null
+          pix_qr_payload?: string | null
+          public_access_code?: string | null
+          rav_total?: number
+          source_id?: string | null
+          source_type?: Database["public"]["Enums"]["invoice_source_type"]
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          taxes_total?: number
+          terms?: string | null
+          total_amount?: number
+          travel_end?: string | null
+          travel_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agency_slug?: string | null
+          balance?: number
+          client_company?: string | null
+          client_document?: string | null
+          client_email?: string | null
+          client_id?: string | null
+          client_name?: string
+          client_phone?: string | null
+          commission_total?: number
+          created_at?: string
+          currency?: string
+          destination?: string | null
+          discount_total?: number
+          due_date?: string | null
+          estimated_profit?: number
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          notes?: string | null
+          paid_amount?: number
+          passengers?: Json | null
+          pix_key?: string | null
+          pix_qr_payload?: string | null
+          public_access_code?: string | null
+          rav_total?: number
+          source_id?: string | null
+          source_type?: Database["public"]["Enums"]["invoice_source_type"]
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          taxes_total?: number
+          terms?: string | null
+          total_amount?: number
+          travel_end?: string | null
+          travel_start?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       itineraries: {
         Row: {
           budget_level: string
@@ -10157,9 +10443,12 @@ export type Database = {
         Returns: undefined
       }
       generate_certificate_number: { Args: never; Returns: string }
+      generate_invoice_access_code: { Args: never; Returns: string }
+      generate_invoice_number: { Args: { _user_id: string }; Returns: string }
       generate_itinerary_access_code: { Args: never; Returns: string }
       generate_public_access_code: { Args: never; Returns: string }
       generate_quote_access_code: { Args: never; Returns: string }
+      generate_receipt_number: { Args: { _user_id: string }; Returns: string }
       generate_secure_share_token: { Args: never; Returns: string }
       generate_supplier_slug: {
         Args: { p_existing_id?: string; p_name: string }
@@ -10205,6 +10494,10 @@ export type Database = {
           user_id: string
           user_name: string
         }[]
+      }
+      get_invoice_by_public_code: {
+        Args: { p_agency_slug: string; p_code: string }
+        Returns: Json
       }
       get_itinerary_by_public_code: {
         Args: { p_agency_slug: string; p_code: string }
@@ -10390,6 +10683,30 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "agente" | "promotor" | "fornecedor"
+      invoice_installment_status: "pending" | "paid" | "overdue"
+      invoice_service_category:
+        | "aereo"
+        | "hotel"
+        | "cruzeiro"
+        | "seguro"
+        | "passeio"
+        | "transfer"
+        | "ingresso"
+        | "pacote"
+        | "outros"
+      invoice_source_type:
+        | "manual"
+        | "quote"
+        | "trip"
+        | "opportunity"
+        | "operation"
+      invoice_status:
+        | "draft"
+        | "sent"
+        | "partial"
+        | "paid"
+        | "cancelled"
+        | "overdue"
       subscription_plan:
         | "essencial"
         | "profissional"
@@ -10546,6 +10863,33 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "agente", "promotor", "fornecedor"],
+      invoice_installment_status: ["pending", "paid", "overdue"],
+      invoice_service_category: [
+        "aereo",
+        "hotel",
+        "cruzeiro",
+        "seguro",
+        "passeio",
+        "transfer",
+        "ingresso",
+        "pacote",
+        "outros",
+      ],
+      invoice_source_type: [
+        "manual",
+        "quote",
+        "trip",
+        "opportunity",
+        "operation",
+      ],
+      invoice_status: [
+        "draft",
+        "sent",
+        "partial",
+        "paid",
+        "cancelled",
+        "overdue",
+      ],
       subscription_plan: [
         "essencial",
         "profissional",
