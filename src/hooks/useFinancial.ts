@@ -128,6 +128,9 @@ export function useFinancial() {
         category: e.category as ExpenseCategory,
         expense_type: (e as any).expense_type || 'variable',
         is_recurring: (e as any).is_recurring || false,
+        recurrence_end_type: (e as any).recurrence_end_type || 'indefinite',
+        recurrence_end_date: (e as any).recurrence_end_date || null,
+        recurrence_occurrences: (e as any).recurrence_occurrences ?? null,
       })) as ExpenseEntry[];
     },
     enabled: !!user,
