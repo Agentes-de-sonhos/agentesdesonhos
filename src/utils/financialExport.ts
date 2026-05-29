@@ -173,11 +173,13 @@ function exportPdf(config: ExportConfig) {
 // --- Data preparation helpers ---
 
 const fmtCurrency = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
-const fmtDate = (d: string) => { try { return format(new Date(d), "dd/MM/yyyy"); } catch { return d; } };
+const fmtDate = (d: string) => { const parsed = parseLocalDateSafe(d); return parsed ? format(parsed, "dd/MM/yyyy") : d; };
 
 export function filterByPeriod<T extends Record<string, any>>(items: T[], dateField: string, start: Date, end: Date): T[] {
   return items.filter(item => {
-    const d = new Date(item[dateField]);
+    const raw = item[dateField];
+    const d = typeof raw === "string" ? parseLocalDateSafe(raw) : null;
+    if (!d) return false;
     return d >= start && d <= end;
   });
 }
