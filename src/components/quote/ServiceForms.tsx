@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type {
   ServiceType, FlightData, HotelData, CarRentalData, TransferData,
   AttractionData, InsuranceData, CruiseData, OtherServiceData,
@@ -1813,6 +1814,7 @@ const MAX_IMAGES_PER_SERVICE = 5;
 
 function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [compressionInfo, setCompressionInfo] = useState<string>("");
@@ -1849,8 +1851,16 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
 
       setUploadStatus("Enviando…");
 
-      // Upload full version
-      const fullPath = `${crypto.randomUUID()}.webp`;
+      if (!user?.id) {
+        setUploadStatus("Sessão expirada. Faça login novamente.");
+        setTimeout(() => setUploadStatus(""), 3000);
+        setUploading(false);
+        return;
+      }
+
+      // Upload full version (path scoped to user_id for ownership-based RLS)
+      const fileId = crypto.randomUUID();
+      const fullPath = `${user.id}/quotes/${fileId}.webp`;
       const { error } = await supabase.storage.from("quote-images").upload(fullPath, result.full, {
         upsert: true,
         contentType: "image/webp",
@@ -1863,8 +1873,8 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
         return;
       }
 
-      // Upload thumbnail
-      const thumbPath = `thumb_${fullPath}`;
+      // Upload thumbnail (same user folder)
+      const thumbPath = `${user.id}/quotes/thumb_${fileId}.webp`;
       await supabase.storage.from("quote-images").upload(thumbPath, result.thumb, {
         upsert: true,
         contentType: "image/webp",

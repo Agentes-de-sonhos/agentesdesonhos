@@ -290,8 +290,12 @@ function TripWalletContent() {
   const handleUploadServiceImage = async (serviceId: string, file: File) => {
     try {
       setIsUploading(true);
+      if (!user?.id) {
+        toast({ title: "Sessão expirada", description: "Faça login novamente.", variant: "destructive" });
+        return;
+      }
       const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `trip-services/${id}/${crypto.randomUUID()}.${fileExt}`;
+      const path = `${user.id}/trip-services/${id}/${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from("quote-images")
         .upload(path, file, { upsert: true, contentType: file.type });
