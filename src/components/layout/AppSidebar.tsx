@@ -43,6 +43,7 @@ import {
   FolderOpen,
   Sparkles,
   Rss,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -228,6 +229,7 @@ const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Ment
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
 const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
+const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
 
 
 // Custom section shown ONLY for Start plan users (always at the top)
@@ -632,7 +634,7 @@ export function AppSidebar() {
           <nav className="flex flex-col gap-0.5 px-3">
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
-            {/* meuPerfilItem removido */}
+            {renderSingleItem(meuPerfilItem)}
           </nav>
 
           <div className="px-3 py-1">
