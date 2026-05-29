@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, ArrowUpCircle, ArrowDownCircle, Loader2 } from "lucide-react";
+import { Plus, Trash2, ArrowUpCircle, ArrowDownCircle, Loader2, FileText, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFinancial } from "@/hooks/useFinancial";
 import type { CustomerPaymentFormData, SupplierPaymentFormData } from "@/types/financial";
 import { PAYMENT_METHODS } from "@/types/financial";
@@ -245,7 +247,17 @@ export function CashFlowManager() {
                         {format(new Date(payment.payment_date), "dd/MM/yyyy", { locale: ptBR })}
                       </TableCell>
                       <TableCell>
-                        {payment.sale?.client_name || "-"} - {payment.sale?.destination || "-"}
+                        {payment.source === 'invoice' ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Badge variant="secondary" className="gap-1">
+                              <FileText className="h-3 w-3" />
+                              Origem: Fatura
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">{payment.notes}</span>
+                          </span>
+                        ) : (
+                          <>{payment.sale?.client_name || "-"} - {payment.sale?.destination || "-"}</>
+                        )}
                       </TableCell>
                       <TableCell>
                         {PAYMENT_METHODS[payment.payment_method] || payment.payment_method}
@@ -254,13 +266,28 @@ export function CashFlowManager() {
                         {formatCurrency(Number(payment.amount))}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteCustomerId(payment.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        {payment.source === 'invoice' ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" disabled>
+                                  <Lock className="h-4 w-4 text-muted-foreground" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Edite ou exclua este pagamento pela tela de Faturas.
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setDeleteCustomerId(payment.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
