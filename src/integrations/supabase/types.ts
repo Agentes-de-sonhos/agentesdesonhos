@@ -600,13 +600,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "agency_team_stage_permissions_stage_id_fkey"
-            columns: ["stage_id"]
-            isOneToOne: false
-            referencedRelation: "pipeline_stages"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "agency_team_stage_permissions_team_member_id_fkey"
             columns: ["team_member_id"]
             isOneToOne: false
