@@ -253,7 +253,7 @@ export function MobileSidebar() {
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [comunidadeItem, mentoriasItem],
+    () => [],
     []
   );
 
