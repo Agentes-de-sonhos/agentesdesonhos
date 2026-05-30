@@ -5,6 +5,7 @@ import {
   GraduationCap, Newspaper, Map, Compass, Tag, CalendarDays,
   Wallet, Calculator, Route, FileText,
   ShoppingCart, Lock, Megaphone, LayoutDashboard,
+  StickyNote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
