@@ -637,23 +637,7 @@ export function AppSidebar() {
           </Link>
         </div>
 
-        {/* Edge toggle on the right border (desktop) */}
-        <button
-          type="button"
-          aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-          onClick={(e) => {
-            e.stopPropagation();
-            clearCollapseTimer();
-            setCollapsed((c) => !c);
-          }}
-          className={cn(
-            "absolute top-[18px] -right-3 z-50 hidden lg:flex h-7 w-7 items-center justify-center",
-            "rounded-full border border-sidebar-border bg-background text-muted-foreground shadow-sm",
-            "transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:scale-110 hover:shadow-md"
-          )}
-        >
-          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
-        </button>
+        {/* Toggle visual removido: o hover sobre o menu já expande/recolhe automaticamente */}
 
         {/* Scrollable Navigation */}
         <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
