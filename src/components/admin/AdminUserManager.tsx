@@ -280,6 +280,32 @@ export function AdminUserManager() {
       toast({ title: "Erro ao forçar logout", description: err.message, variant: "destructive" });
     },
   });
+
+  const generateSetupLinkMutation = useMutation({
+    mutationFn: async (user: UserWithDetails) => {
+      const resp = await supabase.functions.invoke("admin-reset-password", {
+        body: {
+          user_id: user.user_id,
+          return_link: true,
+          redirect_to: `${window.location.origin}/reset-password`,
+        },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao gerar link");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return { user, link: resp.data?.action_link as string };
+    },
+    onSuccess: ({ user, link }) => {
+      if (!link) {
+        toast({ title: "Não foi possível obter o link", variant: "destructive" });
+        return;
+      }
+      setSetupLinkUser(user);
+      setSetupLinkUrl(link);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao gerar link", description: err.message, variant: "destructive" });
+    },
+  });
   const createUserMutation = useMutation({
     mutationFn: async (userData: typeof newUser) => {
       const { data: { session } } = await supabase.auth.getSession();
