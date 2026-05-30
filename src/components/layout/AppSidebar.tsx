@@ -450,7 +450,8 @@ export function AppSidebar() {
         to={isLocked ? "#" : item.url}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
-          "group flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-300",
+          "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300",
+          collapsed ? "py-1" : "py-1.5",
           isActive && !isLocked && sectionBgColor
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
@@ -509,14 +510,14 @@ export function AppSidebar() {
 
     if (collapsed) {
       return (
-        <nav key={section.title} className="flex flex-col gap-0.5 px-3">
+        <nav key={section.title} className="flex flex-col gap-[2px] px-3">
           <Popover>
             <Tooltip>
               <TooltipTrigger asChild>
                 <PopoverTrigger asChild>
                   <button
                     className={cn(
-                      "group flex items-center justify-center rounded-xl px-3 py-1.5 transition-all duration-300 w-full",
+                      "group flex items-center justify-center rounded-xl px-3 py-1 transition-all duration-300 w-full",
                       isActive
                         ? cn(section.headerBg)
                         : cn("text-sidebar-foreground", section.hoverColor)
@@ -640,16 +641,16 @@ export function AppSidebar() {
         {/* Toggle visual removido: o hover sobre o menu já expande/recolhe automaticamente */}
 
         {/* Scrollable Navigation */}
-        <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
+        <div className={cn("flex-1 py-2", collapsed ? "overflow-hidden space-y-[2px]" : "overflow-y-auto space-y-0.5")}>
           {/* Início */}
-          <nav className="flex flex-col gap-0.5 px-3">
+          <nav className={cn("flex flex-col", collapsed ? "gap-[2px] px-3" : "gap-0.5 px-3")}>
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
             {renderSingleItem(meuPerfilItem)}
             {renderSingleItem(comunidadeItem)}
           </nav>
 
-          <div className="px-3 py-1">
+          <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
             <Separator className="bg-sidebar-border" />
           </div>
 
@@ -659,7 +660,7 @@ export function AppSidebar() {
               return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
             }
             return (
-              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-[2px] px-2" : "gap-0.5 px-3")}>
                 {renderSingleItem(entry.item)}
               </nav>
             );
@@ -667,16 +668,16 @@ export function AppSidebar() {
         </div>
 
         {/* Bottom Section - Compact */}
-        <div className="flex-shrink-0 border-t border-sidebar-border px-3 py-2 space-y-0.5">
+        <div className={cn("flex-shrink-0 border-t border-sidebar-border px-3", collapsed ? "py-1 space-y-[2px]" : "py-2 space-y-0.5")}>
           {isAdmin && renderSingleItem(adminMenuItem)}
 
           {collapsed ? (
-            <div className="flex flex-col items-center gap-0.5">
+            <div className="flex flex-col items-center gap-[2px]">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
                     to="/suporte"
-                    className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                    className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
                   >
                     <Headset className="h-4 w-4" />
                   </Link>
@@ -690,7 +691,7 @@ export function AppSidebar() {
                   <TooltipTrigger asChild>
                     <Link
                       to="/minha-conta"
-                      className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                      className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
                     >
                       <Settings className="h-4 w-4" />
                     </Link>
@@ -705,7 +706,7 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="w-full h-7 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                    className="w-full h-6 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
