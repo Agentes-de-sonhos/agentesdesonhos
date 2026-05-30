@@ -720,28 +720,28 @@ export function AppSidebar() {
               <div className="flex items-center gap-1">
                 <Link
                   to="/suporte"
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors whitespace-nowrap"
                 >
                   <Headset className="h-3.5 w-3.5" />
-                  Suporte
+                  <span className="whitespace-nowrap">Suporte</span>
                 </Link>
                 {!isFornecedor && (
                   <Link
                     to="/minha-conta"
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors flex-1"
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors whitespace-nowrap"
                   >
                     <Settings className="h-3.5 w-3.5" />
-                    Minha Conta
+                    <span className="whitespace-nowrap">Minha Conta</span>
                   </Link>
                 )}
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive text-xs"
+                  className="h-7 px-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive text-xs whitespace-nowrap"
                   onClick={handleLogout}
                 >
                   <LogOut className="h-3.5 w-3.5 mr-1" />
-                  Sair
+                  <span className="whitespace-nowrap">Sair</span>
                 </Button>
               </div>
               <div className="text-center pt-1">
