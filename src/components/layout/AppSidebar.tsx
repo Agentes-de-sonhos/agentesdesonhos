@@ -273,6 +273,25 @@ export function AppSidebar() {
   const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
 
+  // Hover-to-expand on desktop with delayed collapse to avoid accidental close
+  const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearCollapseTimer = () => {
+    if (collapseTimerRef.current) {
+      clearTimeout(collapseTimerRef.current);
+      collapseTimerRef.current = null;
+    }
+  };
+  const handleSidebarMouseEnter = () => {
+    clearCollapseTimer();
+    if (collapsed) setCollapsed(false);
+  };
+  const handleSidebarMouseLeave = () => {
+    clearCollapseTimer();
+    collapseTimerRef.current = setTimeout(() => {
+      setCollapsed(true);
+    }, 300);
+  };
+
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
