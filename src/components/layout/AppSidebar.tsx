@@ -109,10 +109,10 @@ const conhecimentoSection: MenuSection = {
   borderColor: "border-blue-600",
   items: [
     { key: "educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap },
     { key: "noticias", title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
   ],
 };
-
 const meusProjetosItem: MenuItem = { key: "meus_projetos", title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
 const comunidadeItem: MenuItem = { key: "comunidade", title: "Comunidade", url: "/comunidade", icon: Heart };
 
@@ -313,7 +313,7 @@ export function AppSidebar() {
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [comunidadeItem, mentoriasItem],
+    () => [],
     []
   );
 
@@ -646,6 +646,7 @@ export function AppSidebar() {
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
             {renderSingleItem(meuPerfilItem)}
+            {renderSingleItem(comunidadeItem)}
           </nav>
 
           <div className="px-3 py-1">

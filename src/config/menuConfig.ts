@@ -16,13 +16,12 @@ export const MAIN_MENU_ITEMS: MenuItemConfig[] = [
   { key: "section_clientes", label: "Clientes", isSection: true, sectionKey: "clientes" },
   { key: "section_financeiro", label: "Financeiro", isSection: true, sectionKey: "financeiro" },
   { key: "section_marketing", label: "Ferramentas de Marketing", isSection: true, sectionKey: "marketing" },
-  { key: "comunidade", label: "Comunidade" },
-  { key: "cursos_mentorias", label: "Cursos e Mentorias" },
 ];
 
 export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
   conhecimento: [
     { key: "educa_academy", label: "EducaTravel Academy" },
+    { key: "cursos_mentorias", label: "Cursos e Mentorias" },
     { key: "noticias", label: "Notícias do Trade" },
   ],
   guias: [
