@@ -532,6 +532,7 @@ export function MobileSidebar() {
             {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(minhaAgendaItem)}
             {renderMenuItem(meuPerfilItem)}
+            {renderMenuItem(comunidadeItem)}
           </nav>
 
           <div className={cn("py-2", expanded ? "px-3" : "px-2")}>
