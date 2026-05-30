@@ -39,6 +39,7 @@ const navItems: NavItem[] = [
     color: "text-blue-600", bgColor: "bg-blue-50",
     subItems: [
       { label: "EducaTravel Academy", icon: GraduationCap, path: "/educa-academy" },
+      { label: "Cursos e Mentorias", icon: GraduationCap, path: "/cursos" },
       { label: "Notícias do Trade", icon: Newspaper, path: "/noticias", requiredFeature: "news" },
     ],
   },
