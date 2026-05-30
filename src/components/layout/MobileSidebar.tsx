@@ -100,6 +100,7 @@ const conhecimentoSection: MenuSection = {
   borderColor: "border-blue-600",
   items: [
     { key: "educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: MonitorPlay },
     { key: "noticias", title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
   ],
 };
