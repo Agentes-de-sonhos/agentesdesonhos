@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +47,8 @@ import {
   Pencil,
   RefreshCw,
   ArrowDown,
+  ArrowUp,
+  Search,
   ExternalLink,
   Brain,
   Trash2,
@@ -74,18 +76,71 @@ interface NoticiasDashboard {
 
 const CATEGORIAS = ["Aéreo", "Turismo", "Destinos", "Cruzeiros", "Mercado", "Eventos"];
 
+const FILTERS_STORAGE_KEY = "admin-news-curation-filters-v1";
+
+type SortField = "relevancia_score" | "score_perfil" | "data_publicacao" | "created_at";
+type SortDir = "desc" | "asc";
+type ScoreRange = "all" | "0-3" | "4-6" | "7-8" | "9-10";
+type PerfilRange = "all" | "low" | "mid" | "high";
+
+interface PersistedFilters {
+  filterStatus: string;
+  filterCategoria: string;
+  filterFonte: string;
+  sortField: SortField;
+  sortDir: SortDir;
+  scoreRange: ScoreRange;
+  perfilRange: PerfilRange;
+  search: string;
+}
+
+const DEFAULT_FILTERS: PersistedFilters = {
+  filterStatus: "pendente",
+  filterCategoria: "todas",
+  filterFonte: "todas",
+  sortField: "relevancia_score",
+  sortDir: "desc",
+  scoreRange: "all",
+  perfilRange: "all",
+  search: "",
+};
+
+function loadPersistedFilters(): PersistedFilters {
+  try {
+    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
+    if (!raw) return DEFAULT_FILTERS;
+    return { ...DEFAULT_FILTERS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_FILTERS;
+  }
+}
+
 export function AdminNewsCurationManager() {
   const [editingItem, setEditingItem] = useState<NoticiasDashboard | null>(null);
   const [editForm, setEditForm] = useState({ titulo_curto: "", resumo: "", categoria: "", tipo_exibicao: "" });
-  const [filterStatus, setFilterStatus] = useState<string>("pendente");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
-  const [filterCategoria, setFilterCategoria] = useState<string>("todas");
-  const [filterFonte, setFilterFonte] = useState<string>("todas");
+  const initial = loadPersistedFilters();
+  const [filterStatus, setFilterStatus] = useState<string>(initial.filterStatus);
+  const [sortField, setSortField] = useState<SortField>(initial.sortField);
+  const [sortDir, setSortDir] = useState<SortDir>(initial.sortDir);
+  const [filterCategoria, setFilterCategoria] = useState<string>(initial.filterCategoria);
+  const [filterFonte, setFilterFonte] = useState<string>(initial.filterFonte);
+  const [scoreRange, setScoreRange] = useState<ScoreRange>(initial.scoreRange);
+  const [perfilRange, setPerfilRange] = useState<PerfilRange>(initial.perfilRange);
+  const [search, setSearch] = useState<string>(initial.search);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   useAuth();
+
+  // Persiste filtros
+  useEffect(() => {
+    const payload: PersistedFilters = {
+      filterStatus, filterCategoria, filterFonte, sortField, sortDir,
+      scoreRange, perfilRange, search,
+    };
+    try { localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(payload)); } catch { /* ignore */ }
+  }, [filterStatus, filterCategoria, filterFonte, sortField, sortDir, scoreRange, perfilRange, search]);
 
   // Estatísticas de aprendizado da curadoria
   const { data: stats } = useQuery({
@@ -105,12 +160,12 @@ export function AdminNewsCurationManager() {
   });
 
   const { data: noticias, isLoading } = useQuery({
-    queryKey: ["admin-noticias-curadas", filterStatus, sortOrder, filterCategoria, filterFonte],
+    queryKey: ["admin-noticias-curadas", filterStatus, filterCategoria, filterFonte],
     queryFn: async () => {
       let query = supabase
         .from("noticias_dashboard")
         .select("*")
-        .order("data_publicacao", { ascending: sortOrder === "asc" });
+        .order("created_at", { ascending: false });
 
       if (filterStatus !== "todos") {
         query = query.eq("status", filterStatus);
@@ -122,11 +177,56 @@ export function AdminNewsCurationManager() {
         query = query.eq("fonte", filterFonte);
       }
 
-      const { data, error } = await query.limit(100);
+      const { data, error } = await query.limit(500);
       if (error) throw error;
       return data as NoticiasDashboard[];
     },
   });
+
+  // Filtragem e ordenação client-side (com tie-break por perfil)
+  const filteredNoticias = useMemo(() => {
+    const list = (noticias || []).filter((n) => {
+      // Faixa de nota
+      const s = n.relevancia_score ?? 0;
+      if (scoreRange === "0-3" && !(s >= 0 && s <= 3)) return false;
+      if (scoreRange === "4-6" && !(s >= 4 && s <= 6)) return false;
+      if (scoreRange === "7-8" && !(s >= 7 && s <= 8)) return false;
+      if (scoreRange === "9-10" && !(s >= 9 && s <= 10)) return false;
+      // Faixa de perfil
+      const p = n.score_perfil ?? -1;
+      if (perfilRange === "low" && !(p >= 0 && p <= 4)) return false;
+      if (perfilRange === "mid" && !(p >= 5 && p <= 7)) return false;
+      if (perfilRange === "high" && !(p >= 8)) return false;
+      // Busca
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        const hay = `${n.titulo_curto ?? ""} ${n.resumo ?? ""} ${n.fonte ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    const dirMul = sortDir === "desc" ? -1 : 1;
+    const getVal = (n: NoticiasDashboard, f: SortField): number => {
+      if (f === "relevancia_score") return n.relevancia_score ?? -1;
+      if (f === "score_perfil") return n.score_perfil ?? -1;
+      if (f === "data_publicacao") return new Date(n.data_publicacao || 0).getTime();
+      return new Date(n.created_at || 0).getTime();
+    };
+
+    list.sort((a, b) => {
+      const av = getVal(a, sortField);
+      const bv = getVal(b, sortField);
+      if (av !== bv) return (av - bv) * dirMul;
+      // Tie-break: se ordenando por nota, desempata por perfil desc; caso contrário por nota desc
+      if (sortField === "relevancia_score") {
+        return ((b.score_perfil ?? -1) - (a.score_perfil ?? -1));
+      }
+      return ((b.relevancia_score ?? -1) - (a.relevancia_score ?? -1));
+    });
+
+    return list;
+  }, [noticias, scoreRange, perfilRange, search, sortField, sortDir]);
 
   // Extract unique sources for filter
   const { data: fontes } = useQuery({
@@ -267,8 +367,8 @@ export function AdminNewsCurationManager() {
   };
 
   const toggleSelectAll = () => {
-    const pendentes = (noticias || []).filter((n) => n.status === "pendente").map((n) => n.id);
-    setSelectedIds((prev) => (prev.size === pendentes.length ? new Set() : new Set(pendentes)));
+    const ids = filteredNoticias.map((n) => n.id);
+    setSelectedIds((prev) => (prev.size === ids.length && ids.length > 0 ? new Set() : new Set(ids)));
   };
 
   const handleEdit = (item: NoticiasDashboard) => {
@@ -288,9 +388,15 @@ export function AdminNewsCurationManager() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 9) return "text-green-600 bg-green-100";
-    if (score >= 7) return "text-yellow-600 bg-yellow-100";
-    return "text-red-600 bg-red-100";
+    if (score >= 8) return "text-green-700 bg-green-100";
+    if (score >= 5) return "text-yellow-700 bg-yellow-100";
+    return "text-red-700 bg-red-100";
+  };
+
+  const getPerfilColor = (score: number) => {
+    if (score >= 8) return "bg-green-100 text-green-700 border-green-300";
+    if (score >= 5) return "bg-yellow-100 text-yellow-700 border-yellow-300";
+    return "bg-red-100 text-red-700 border-red-300";
   };
 
   const getStatusBadge = (status: string) => {
@@ -389,49 +495,82 @@ export function AdminNewsCurationManager() {
             </span>
           </div>
         )}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[130px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pendente">Pendentes</SelectItem>
-              <SelectItem value="aprovado">Aprovados</SelectItem>
-              <SelectItem value="rejeitado">Rejeitados</SelectItem>
-              <SelectItem value="todos">Todos</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as "asc" | "desc")}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="desc">Mais recentes</SelectItem>
-              <SelectItem value="asc">Mais antigas</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterCategoria} onValueChange={setFilterCategoria}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas categorias</SelectItem>
-              {CATEGORIAS.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filterFonte} onValueChange={setFilterFonte}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Fonte" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas fontes</SelectItem>
-              {fontes?.map((f) => (
-                <SelectItem key={f} value={f}>{f}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col gap-2">
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por título, resumo ou fonte..."
+              className="pl-9"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos status</SelectItem>
+                <SelectItem value="pendente">Pendentes</SelectItem>
+                <SelectItem value="aprovado">Aprovados</SelectItem>
+                <SelectItem value="rejeitado">Rejeitados</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterFonte} onValueChange={setFilterFonte}>
+              <SelectTrigger className="w-[170px]"><SelectValue placeholder="Fonte" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas fontes</SelectItem>
+                {fontes?.map((f) => (
+                  <SelectItem key={f} value={f}>{f}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterCategoria} onValueChange={setFilterCategoria}>
+              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Categoria" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas categorias</SelectItem>
+                {CATEGORIAS.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={scoreRange} onValueChange={(v) => setScoreRange(v as ScoreRange)}>
+              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Nota" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Qualquer nota</SelectItem>
+                <SelectItem value="9-10">Nota 9 a 10</SelectItem>
+                <SelectItem value="7-8">Nota 7 a 8</SelectItem>
+                <SelectItem value="4-6">Nota 4 a 6</SelectItem>
+                <SelectItem value="0-3">Nota 0 a 3</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={perfilRange} onValueChange={(v) => setPerfilRange(v as PerfilRange)}>
+              <SelectTrigger className="w-[170px]"><SelectValue placeholder="Perfil" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Qualquer perfil</SelectItem>
+                <SelectItem value="high">Alto interesse (8-10)</SelectItem>
+                <SelectItem value="mid">Médio interesse (5-7)</SelectItem>
+                <SelectItem value="low">Baixo interesse (0-4)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortField} onValueChange={(v) => setSortField(v as SortField)}>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Ordenar por" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevancia_score">Ordenar por Nota</SelectItem>
+                <SelectItem value="score_perfil">Ordenar por Perfil</SelectItem>
+                <SelectItem value="data_publicacao">Data de publicação</SelectItem>
+                <SelectItem value="created_at">Data de importação</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortDir(sortDir === "desc" ? "asc" : "desc")}
+              title={sortDir === "desc" ? "Maior primeiro" : "Menor primeiro"}
+            >
+              {sortDir === "desc" ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
+              <span className="ml-1 text-xs">{sortDir === "desc" ? "Maior" : "Menor"}</span>
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -439,29 +578,31 @@ export function AdminNewsCurationManager() {
           <div className="flex justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-        ) : noticias?.length === 0 ? (
+        ) : filteredNoticias.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-40" />
-            <p>Nenhuma notícia {filterStatus !== "todos" ? filterStatus : ""} encontrada</p>
-            <p className="text-sm mt-1">Clique em "Coletar Agora" para buscar novas notícias</p>
+            <p>Nenhuma notícia encontrada com os filtros atuais</p>
+            <p className="text-sm mt-1">Ajuste os filtros ou clique em "Coletar Agora" para buscar novas notícias</p>
           </div>
         ) : (
           <div className="space-y-3">
+            <div className="text-xs text-muted-foreground px-1">
+              {filteredNoticias.length} {filteredNoticias.length === 1 ? "notícia encontrada" : "notícias encontradas"}
+            </div>
             {(() => {
-              const pendentes = (noticias || []).filter((n) => n.status === "pendente");
-              const allSelected = pendentes.length > 0 && selectedIds.size === pendentes.length;
+              const allSelected = filteredNoticias.length > 0 && selectedIds.size === filteredNoticias.length;
               return (
                 <div className="flex items-center justify-between gap-3 p-3 rounded-md border bg-muted/40 sticky top-0 z-10">
                   <div className="flex items-center gap-2 text-sm">
                     <Checkbox
                       checked={allSelected}
                       onCheckedChange={() => toggleSelectAll()}
-                      disabled={pendentes.length === 0}
+                      disabled={filteredNoticias.length === 0}
                     />
                     <span className="text-muted-foreground">
                       {selectedIds.size > 0
                         ? `${selectedIds.size} selecionada${selectedIds.size === 1 ? "" : "s"}`
-                        : "Selecionar todas pendentes"}
+                        : "Selecionar todas visíveis"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -498,18 +639,16 @@ export function AdminNewsCurationManager() {
                 </div>
               );
             })()}
-            {noticias?.map((item) => (
+            {filteredNoticias.map((item) => (
               <div
                 key={item.id}
                 className="flex flex-col sm:flex-row sm:items-start gap-3 p-4 rounded-lg border bg-card"
               >
-                {item.status === "pendente" && (
-                  <Checkbox
-                    className="mt-1"
-                    checked={selectedIds.has(item.id)}
-                    onCheckedChange={() => toggleSelect(item.id)}
-                  />
-                )}
+                <Checkbox
+                  className="mt-1"
+                  checked={selectedIds.has(item.id)}
+                  onCheckedChange={() => toggleSelect(item.id)}
+                />
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="secondary">{item.categoria}</Badge>
@@ -521,13 +660,7 @@ export function AdminNewsCurationManager() {
                     {item.score_perfil != null && (
                       <span
                         title={item.score_explicacao || "Score ajustado ao seu padrão de curadoria"}
-                        className={`text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 border ${
-                          item.score_perfil >= 8
-                            ? "bg-violet-100 text-violet-700 border-violet-300"
-                            : item.score_perfil >= 5
-                            ? "bg-violet-50 text-violet-600 border-violet-200"
-                            : "bg-slate-100 text-slate-600 border-slate-200"
-                        }`}
+                        className={`text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 border ${getPerfilColor(item.score_perfil)}`}
                       >
                         <Brain className="h-3 w-3" />
                         Perfil {item.score_perfil}/10
