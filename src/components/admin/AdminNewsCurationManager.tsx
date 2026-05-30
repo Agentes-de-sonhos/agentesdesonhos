@@ -660,13 +660,7 @@ export function AdminNewsCurationManager() {
                     {item.score_perfil != null && (
                       <span
                         title={item.score_explicacao || "Score ajustado ao seu padrão de curadoria"}
-                        className={`text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 border ${
-                          item.score_perfil >= 8
-                            ? "bg-violet-100 text-violet-700 border-violet-300"
-                            : item.score_perfil >= 5
-                            ? "bg-violet-50 text-violet-600 border-violet-200"
-                            : "bg-slate-100 text-slate-600 border-slate-200"
-                        }`}
+                        className={`text-xs font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1 border ${getPerfilColor(item.score_perfil)}`}
                       >
                         <Brain className="h-3 w-3" />
                         Perfil {item.score_perfil}/10
