@@ -668,16 +668,16 @@ export function AppSidebar() {
         </div>
 
         {/* Bottom Section - Compact */}
-        <div className="flex-shrink-0 border-t border-sidebar-border px-3 py-2 space-y-0.5">
+        <div className={cn("flex-shrink-0 border-t border-sidebar-border px-3", collapsed ? "py-1 space-y-[2px]" : "py-2 space-y-0.5")}>
           {isAdmin && renderSingleItem(adminMenuItem)}
 
           {collapsed ? (
-            <div className="flex flex-col items-center gap-0.5">
+            <div className="flex flex-col items-center gap-[2px]">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
                     to="/suporte"
-                    className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                    className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
                   >
                     <Headset className="h-4 w-4" />
                   </Link>
@@ -691,7 +691,7 @@ export function AppSidebar() {
                   <TooltipTrigger asChild>
                     <Link
                       to="/minha-conta"
-                      className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+                      className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
                     >
                       <Settings className="h-4 w-4" />
                     </Link>
@@ -706,7 +706,7 @@ export function AppSidebar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="w-full h-7 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                    className="w-full h-6 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
