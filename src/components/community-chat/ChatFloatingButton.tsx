@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
+import { useOverlayPresence } from "@/hooks/useOverlayPresence";
 
 type ChatView = "menu" | "room" | "dm" | "conversations";
 
@@ -47,6 +48,7 @@ export function ChatFloatingButton() {
     totalUnread,
   } = useDirectMessages(activeConversationId);
   const { onlineUsers, onlineCount } = usePresence();
+  const hasOverlay = useOverlayPresence();
 
   const handleAgentChat = useCallback(
     async (agent: OnlineAgent) => {
@@ -79,6 +81,9 @@ export function ChatFloatingButton() {
   const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
   const shouldShow = isDashboard || totalUnread > 0 || isOpen;
   if (!shouldShow) return null;
+  // Hide button when other overlays (modals, drawers, expanded sidebar) are open,
+  // unless the chat panel itself is the active overlay.
+  const hideForOverlay = hasOverlay && !isOpen;
 
   const openRoom = (room: CommunityRoom) => {
     setActiveRoomId(room.id);
@@ -131,7 +136,10 @@ export function ChatFloatingButton() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-24 right-3 lg:bottom-6 lg:right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center"
+        className={`fixed bottom-24 right-3 lg:bottom-6 lg:right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center ${
+          hideForOverlay ? "opacity-0 pointer-events-none translate-y-4" : "opacity-100"
+        }`}
+        aria-hidden={hideForOverlay}
       >
         {isOpen ? (
           <X className="h-6 w-6" />
