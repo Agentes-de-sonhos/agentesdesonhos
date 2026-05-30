@@ -919,6 +919,87 @@ export function AdminUserManager() {
             userName={featureAccessUser.name}
           />
         )}
+
+        {/* Password Setup Link Dialog */}
+        <Dialog
+          open={!!setupLinkUser}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSetupLinkUser(null);
+              setSetupLinkUrl("");
+            }
+          }}
+        >
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Link para criar senha</DialogTitle>
+              <DialogDescription>
+                Envie este link para <strong>{setupLinkUser?.name}</strong> ({setupLinkUser?.email}).
+                Ao clicar, o usuário poderá definir a própria senha. O link expira em ~1 hora.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input value={setupLinkUrl} readOnly className="font-mono text-xs" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  title="Copiar link"
+                  onClick={() => {
+                    navigator.clipboard.writeText(setupLinkUrl);
+                    toast({ title: "Link copiado!" });
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {setupLinkUser?.phone && (
+                  <Button
+                    variant="default"
+                    className="gap-2"
+                    onClick={() => {
+                      const phone = (setupLinkUser.phone || "").replace(/\D/g, "");
+                      const text = encodeURIComponent(
+                        `Olá ${setupLinkUser.name}! Bem-vindo(a) à Agentes de Sonhos. Para acessar sua conta, crie sua senha neste link: ${setupLinkUrl}`
+                      );
+                      window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+                    }}
+                  >
+                    <MessageCircle className="h-4 w-4" /> Enviar por WhatsApp
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => {
+                    const subject = encodeURIComponent("Crie sua senha — Agentes de Sonhos");
+                    const body = encodeURIComponent(
+                      `Olá ${setupLinkUser?.name},\n\nSua conta foi criada. Clique no link abaixo para definir sua senha:\n${setupLinkUrl}\n\nEste link expira em 1 hora.`
+                    );
+                    window.open(
+                      `mailto:${setupLinkUser?.email}?subject=${subject}&body=${body}`,
+                      "_blank"
+                    );
+                  }}
+                >
+                  Enviar por e-mail
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSetupLinkUser(null);
+                  setSetupLinkUrl("");
+                }}
+              >
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
