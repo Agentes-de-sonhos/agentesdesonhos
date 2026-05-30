@@ -57,7 +57,6 @@ const conhecimentoSection: MenuSection = {
 };
 
 const meusProjetosItem: MenuItem = { key: "meus_projetos", title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
-const comunidadeItem: MenuItem = { key: "comunidade", title: "Comunidade", url: "/comunidade", icon: Heart };
 
 const guiasSection: MenuSection = {
   title: "Guias e Referências", key: "section_guias", icon: BookMarked,
