@@ -641,16 +641,16 @@ export function AppSidebar() {
         {/* Toggle visual removido: o hover sobre o menu já expande/recolhe automaticamente */}
 
         {/* Scrollable Navigation */}
-        <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
+        <div className={cn("flex-1 py-2", collapsed ? "overflow-hidden space-y-[2px]" : "overflow-y-auto space-y-0.5")}>
           {/* Início */}
-          <nav className="flex flex-col gap-0.5 px-3">
+          <nav className={cn("flex flex-col", collapsed ? "gap-[2px] px-3" : "gap-0.5 px-3")}>
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
             {renderSingleItem(meuPerfilItem)}
             {renderSingleItem(comunidadeItem)}
           </nav>
 
-          <div className="px-3 py-1">
+          <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
             <Separator className="bg-sidebar-border" />
           </div>
 
@@ -660,7 +660,7 @@ export function AppSidebar() {
               return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
             }
             return (
-              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-1 px-2" : "gap-0.5 px-3")}>
+              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-[2px] px-2" : "gap-0.5 px-3")}>
                 {renderSingleItem(entry.item)}
               </nav>
             );
