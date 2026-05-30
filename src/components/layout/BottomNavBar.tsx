@@ -5,6 +5,7 @@ import {
   GraduationCap, Newspaper, Map, Compass, Tag, CalendarDays,
   Wallet, Calculator, Route, FileText,
   ShoppingCart, Lock, Megaphone, LayoutDashboard,
+  StickyNote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
@@ -38,6 +39,7 @@ const navItems: NavItem[] = [
     color: "text-blue-600", bgColor: "bg-blue-50",
     subItems: [
       { label: "EducaTravel Academy", icon: GraduationCap, path: "/educa-academy" },
+      { label: "Cursos e Mentorias", icon: GraduationCap, path: "/cursos" },
       { label: "Notícias do Trade", icon: Newspaper, path: "/noticias", requiredFeature: "news" },
     ],
   },
@@ -48,16 +50,17 @@ const navItems: NavItem[] = [
       { label: "Carteira Digital", icon: Wallet, path: "/ferramentas-ia/trip-wallet", requiredFeature: "trip_wallet" },
       { label: "Orçamento", icon: Calculator, path: "/ferramentas-ia/gerar-orcamento", requiredFeature: "quote_generator" },
       { label: "Roteiros", icon: Route, path: "/ferramentas-ia/criar-roteiro", requiredFeature: "itinerary" },
+      { label: "Bloco de Notas", icon: StickyNote, path: "/bloco-notas" },
     ],
   },
   {
     label: "GESTÃO DE CLIENTES", icon: Users,
     color: "text-cyan-600", bgColor: "bg-cyan-50",
     subItems: [
+      { label: "Dashboard", icon: LayoutDashboard, path: "/gestao-clientes/dashboard", requiredFeature: "crm_basic" },
       { label: "Clientes", icon: Users, path: "/gestao-clientes/clientes", requiredFeature: "crm_basic" },
       { label: "Oportunidades", icon: ShoppingCart, path: "/gestao-clientes/funil", requiredFeature: "crm_basic" },
       { label: "Operações", icon: CalendarDays, path: "/gestao-clientes/operacoes", requiredFeature: "crm_basic" },
-      { label: "Dashboard", icon: LayoutDashboard, path: "/gestao-clientes/dashboard", requiredFeature: "crm_basic" },
       { label: "Meta de Vendas", icon: Calculator, path: "/gestao-clientes/metas", requiredFeature: "financial" },
     ],
   },
