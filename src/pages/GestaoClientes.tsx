@@ -48,7 +48,7 @@ function GestaoClientesContent() {
       <div className="space-y-6 animate-fade-in">
         <PageHeader
           pageKey="gestao-clientes"
-          title="Gestão de Clientes"
+          title="Clientes"
           subtitle="Gerencie clientes, oportunidades e metas de vendas"
           icon={Users}
           adminTab="crm"
