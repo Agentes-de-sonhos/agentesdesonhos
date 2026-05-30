@@ -180,6 +180,13 @@ export function useInvoices() {
       qc.invalidateQueries({ queryKey: ["invoices"] });
       toast({ title: "Fatura excluída" });
     },
+    onError: (err: any) => {
+      toast({
+        title: "Erro ao excluir fatura",
+        description: err?.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    },
   });
 
   const addPayment = useMutation({
