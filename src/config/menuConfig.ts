@@ -21,6 +21,7 @@ export const MAIN_MENU_ITEMS: MenuItemConfig[] = [
 export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
   conhecimento: [
     { key: "educa_academy", label: "EducaTravel Academy" },
+    { key: "cursos_mentorias", label: "Cursos e Mentorias" },
     { key: "noticias", label: "Notícias do Trade" },
   ],
   guias: [
