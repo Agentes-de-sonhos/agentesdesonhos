@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map, Newspaper, User, Cloud, LogOut, Shield, Megaphone, Plane, Users,
   GraduationCap, Lock, Calculator, Heart, ChevronDown, MessageCircleQuestion,
-  Store, CreditCard, Wallet, Home, BookOpen, Compass, CalendarDays, BookMarked,
+  Store, CreditCard, Wallet, StickyNote, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
   X, Building2, FolderOpen, DollarSign, ShoppingBag, ArrowUpCircle, ArrowDownCircle, LayoutDashboard,
   Sparkles, Rss, Receipt,
@@ -51,6 +51,7 @@ const conhecimentoSection: MenuSection = {
   bgColor: "bg-blue-50", textColor: "text-blue-700", borderColor: "border-blue-600",
   items: [
     { key: "educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
+    { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap },
     { key: "noticias", title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
   ],
 };
@@ -64,8 +65,10 @@ const guiasSection: MenuSection = {
   bgColor: "bg-emerald-50", textColor: "text-emerald-700", borderColor: "border-emerald-600",
   items: [
     { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
     { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
+    { key: "requisitos_viagem", title: "Central de Requisitos", url: "/requisitos-viagem", icon: Shield, requiredFeature: "travel_requirements", isPremium: true },
+    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
+    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
   ],
 };
 
@@ -74,9 +77,8 @@ const recursosVendasSection: MenuSection = {
   hoverColor: "hover:bg-orange-600 hover:text-white", headerBg: "bg-orange-600 text-white", headerHoverBg: "hover:bg-orange-700",
   bgColor: "bg-orange-50", textColor: "text-orange-700", borderColor: "border-orange-600",
   items: [
-    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane },
+    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane, requiredFeature: "flight_blocks" },
     { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2 },
   ],
 };
 
@@ -88,6 +90,7 @@ const criarSection: MenuSection = {
     { key: "carteira_digital", title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
     { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
     { key: "roteiros", title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
+    { key: "bloco_notas", title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote, requiredFeature: "notepad" },
   ],
 };
 
@@ -407,6 +410,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
             {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(minhaAgendaItem)}
             {renderMenuItem(meuPerfilItem)}
+            {renderMenuItem(comunidadeItem)}
           </nav>
 
           <div className="py-2 px-3">
