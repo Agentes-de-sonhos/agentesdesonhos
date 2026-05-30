@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +47,8 @@ import {
   Pencil,
   RefreshCw,
   ArrowDown,
+  ArrowUp,
+  Search,
   ExternalLink,
   Brain,
   Trash2,
@@ -74,18 +76,71 @@ interface NoticiasDashboard {
 
 const CATEGORIAS = ["Aéreo", "Turismo", "Destinos", "Cruzeiros", "Mercado", "Eventos"];
 
+const FILTERS_STORAGE_KEY = "admin-news-curation-filters-v1";
+
+type SortField = "relevancia_score" | "score_perfil" | "data_publicacao" | "created_at";
+type SortDir = "desc" | "asc";
+type ScoreRange = "all" | "0-3" | "4-6" | "7-8" | "9-10";
+type PerfilRange = "all" | "low" | "mid" | "high";
+
+interface PersistedFilters {
+  filterStatus: string;
+  filterCategoria: string;
+  filterFonte: string;
+  sortField: SortField;
+  sortDir: SortDir;
+  scoreRange: ScoreRange;
+  perfilRange: PerfilRange;
+  search: string;
+}
+
+const DEFAULT_FILTERS: PersistedFilters = {
+  filterStatus: "pendente",
+  filterCategoria: "todas",
+  filterFonte: "todas",
+  sortField: "relevancia_score",
+  sortDir: "desc",
+  scoreRange: "all",
+  perfilRange: "all",
+  search: "",
+};
+
+function loadPersistedFilters(): PersistedFilters {
+  try {
+    const raw = localStorage.getItem(FILTERS_STORAGE_KEY);
+    if (!raw) return DEFAULT_FILTERS;
+    return { ...DEFAULT_FILTERS, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_FILTERS;
+  }
+}
+
 export function AdminNewsCurationManager() {
   const [editingItem, setEditingItem] = useState<NoticiasDashboard | null>(null);
   const [editForm, setEditForm] = useState({ titulo_curto: "", resumo: "", categoria: "", tipo_exibicao: "" });
-  const [filterStatus, setFilterStatus] = useState<string>("pendente");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
-  const [filterCategoria, setFilterCategoria] = useState<string>("todas");
-  const [filterFonte, setFilterFonte] = useState<string>("todas");
+  const initial = loadPersistedFilters();
+  const [filterStatus, setFilterStatus] = useState<string>(initial.filterStatus);
+  const [sortField, setSortField] = useState<SortField>(initial.sortField);
+  const [sortDir, setSortDir] = useState<SortDir>(initial.sortDir);
+  const [filterCategoria, setFilterCategoria] = useState<string>(initial.filterCategoria);
+  const [filterFonte, setFilterFonte] = useState<string>(initial.filterFonte);
+  const [scoreRange, setScoreRange] = useState<ScoreRange>(initial.scoreRange);
+  const [perfilRange, setPerfilRange] = useState<PerfilRange>(initial.perfilRange);
+  const [search, setSearch] = useState<string>(initial.search);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   useAuth();
+
+  // Persiste filtros
+  useEffect(() => {
+    const payload: PersistedFilters = {
+      filterStatus, filterCategoria, filterFonte, sortField, sortDir,
+      scoreRange, perfilRange, search,
+    };
+    try { localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(payload)); } catch { /* ignore */ }
+  }, [filterStatus, filterCategoria, filterFonte, sortField, sortDir, scoreRange, perfilRange, search]);
 
   // Estatísticas de aprendizado da curadoria
   const { data: stats } = useQuery({
@@ -105,12 +160,12 @@ export function AdminNewsCurationManager() {
   });
 
   const { data: noticias, isLoading } = useQuery({
-    queryKey: ["admin-noticias-curadas", filterStatus, sortOrder, filterCategoria, filterFonte],
+    queryKey: ["admin-noticias-curadas", filterStatus, filterCategoria, filterFonte],
     queryFn: async () => {
       let query = supabase
         .from("noticias_dashboard")
         .select("*")
-        .order("data_publicacao", { ascending: sortOrder === "asc" });
+        .order("created_at", { ascending: false });
 
       if (filterStatus !== "todos") {
         query = query.eq("status", filterStatus);
@@ -122,11 +177,56 @@ export function AdminNewsCurationManager() {
         query = query.eq("fonte", filterFonte);
       }
 
-      const { data, error } = await query.limit(100);
+      const { data, error } = await query.limit(500);
       if (error) throw error;
       return data as NoticiasDashboard[];
     },
   });
+
+  // Filtragem e ordenação client-side (com tie-break por perfil)
+  const filteredNoticias = useMemo(() => {
+    const list = (noticias || []).filter((n) => {
+      // Faixa de nota
+      const s = n.relevancia_score ?? 0;
+      if (scoreRange === "0-3" && !(s >= 0 && s <= 3)) return false;
+      if (scoreRange === "4-6" && !(s >= 4 && s <= 6)) return false;
+      if (scoreRange === "7-8" && !(s >= 7 && s <= 8)) return false;
+      if (scoreRange === "9-10" && !(s >= 9 && s <= 10)) return false;
+      // Faixa de perfil
+      const p = n.score_perfil ?? -1;
+      if (perfilRange === "low" && !(p >= 0 && p <= 4)) return false;
+      if (perfilRange === "mid" && !(p >= 5 && p <= 7)) return false;
+      if (perfilRange === "high" && !(p >= 8)) return false;
+      // Busca
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        const hay = `${n.titulo_curto ?? ""} ${n.resumo ?? ""} ${n.fonte ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    const dirMul = sortDir === "desc" ? -1 : 1;
+    const getVal = (n: NoticiasDashboard, f: SortField): number => {
+      if (f === "relevancia_score") return n.relevancia_score ?? -1;
+      if (f === "score_perfil") return n.score_perfil ?? -1;
+      if (f === "data_publicacao") return new Date(n.data_publicacao || 0).getTime();
+      return new Date(n.created_at || 0).getTime();
+    };
+
+    list.sort((a, b) => {
+      const av = getVal(a, sortField);
+      const bv = getVal(b, sortField);
+      if (av !== bv) return (av - bv) * dirMul;
+      // Tie-break: se ordenando por nota, desempata por perfil desc; caso contrário por nota desc
+      if (sortField === "relevancia_score") {
+        return ((b.score_perfil ?? -1) - (a.score_perfil ?? -1));
+      }
+      return ((b.relevancia_score ?? -1) - (a.relevancia_score ?? -1));
+    });
+
+    return list;
+  }, [noticias, scoreRange, perfilRange, search, sortField, sortDir]);
 
   // Extract unique sources for filter
   const { data: fontes } = useQuery({
@@ -267,8 +367,8 @@ export function AdminNewsCurationManager() {
   };
 
   const toggleSelectAll = () => {
-    const pendentes = (noticias || []).filter((n) => n.status === "pendente").map((n) => n.id);
-    setSelectedIds((prev) => (prev.size === pendentes.length ? new Set() : new Set(pendentes)));
+    const ids = filteredNoticias.map((n) => n.id);
+    setSelectedIds((prev) => (prev.size === ids.length && ids.length > 0 ? new Set() : new Set(ids)));
   };
 
   const handleEdit = (item: NoticiasDashboard) => {
@@ -288,9 +388,15 @@ export function AdminNewsCurationManager() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 9) return "text-green-600 bg-green-100";
-    if (score >= 7) return "text-yellow-600 bg-yellow-100";
-    return "text-red-600 bg-red-100";
+    if (score >= 8) return "text-green-700 bg-green-100";
+    if (score >= 5) return "text-yellow-700 bg-yellow-100";
+    return "text-red-700 bg-red-100";
+  };
+
+  const getPerfilColor = (score: number) => {
+    if (score >= 8) return "bg-green-100 text-green-700 border-green-300";
+    if (score >= 5) return "bg-yellow-100 text-yellow-700 border-yellow-300";
+    return "bg-red-100 text-red-700 border-red-300";
   };
 
   const getStatusBadge = (status: string) => {
