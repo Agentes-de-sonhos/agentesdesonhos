@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useOverlayPresence } from "@/hooks/useOverlayPresence";
 
 const HIDDEN_ROUTES = ["/cadastro-fornecedor", "/meu-perfil-empresa", "/cadastro-guia", "/minha-vitrine"];
 
@@ -36,6 +37,7 @@ export function WhatsAppSupportButton() {
   const location = useLocation();
   const sidebarWidth = useSidebarWidth();
   const [isDesktop, setIsDesktop] = useState(false);
+  const hasOverlay = useOverlayPresence();
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
@@ -49,8 +51,11 @@ export function WhatsAppSupportButton() {
 
   return (
     <div
-      className="fixed bottom-24 left-3 lg:bottom-6 z-40 flex items-center gap-3 transition-[left] duration-300 ease-in-out"
+      className={`fixed bottom-24 left-3 lg:bottom-6 z-40 flex items-center gap-3 transition-all duration-300 ease-in-out ${
+        hasOverlay ? "opacity-0 pointer-events-none translate-y-4" : "opacity-100"
+      }`}
       style={isDesktop ? { left: `calc(${sidebarWidth}px + 16px)` } : undefined}
+      aria-hidden={hasOverlay}
     >
       <a
         href={WHATSAPP_URL}
