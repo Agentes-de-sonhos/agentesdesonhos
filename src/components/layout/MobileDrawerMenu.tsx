@@ -155,7 +155,7 @@ const planoStartSection: MenuSection = {
   ],
 };
 
-const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
@@ -187,7 +187,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [comunidadeItem, mentoriasItem],
+    () => [],
     []
   );
 
@@ -409,7 +409,6 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
             {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(minhaAgendaItem)}
             {renderMenuItem(meuPerfilItem)}
-            {renderMenuItem(comunidadeItem)}
           </nav>
 
           <div className="py-2 px-3">
@@ -435,7 +434,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
           </p>
           {isAdmin && renderMenuItem(adminMenuItem)}
           {renderMenuItem(suporteMenuItem)}
-          {renderMenuItem(profileMenuItem)}
+          {renderMenuItem(minhaContaMenuItem)}
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
