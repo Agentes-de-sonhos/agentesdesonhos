@@ -220,7 +220,7 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
+
 
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
