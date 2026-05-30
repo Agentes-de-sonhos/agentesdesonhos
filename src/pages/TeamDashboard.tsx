@@ -56,7 +56,7 @@ export default function TeamDashboard() {
                   <Users className="h-6 w-6" />
                 </div>
               </div>
-              <h2 className="mt-6 text-xl font-semibold">Gestão de Clientes</h2>
+              <h2 className="mt-6 text-xl font-semibold">Clientes</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Clientes, oportunidades, operações e metas.
               </p>

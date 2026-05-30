@@ -92,12 +92,12 @@ const criarSection: MenuSection = {
 };
 
 const clientesSection: MenuSection = {
-  title: "Clientes", key: "section_clientes", icon: Users,
+  title: "GESTÃO DE CLIENTES", key: "section_clientes", icon: Users,
   hoverColor: "hover:bg-cyan-600 hover:text-white", headerBg: "bg-cyan-600 text-white", headerHoverBg: "hover:bg-cyan-700",
   bgColor: "bg-cyan-50", textColor: "text-cyan-700", borderColor: "border-cyan-600",
   items: [
     { key: "dashboard_clientes", title: "Dashboard", url: "/gestao-clientes/dashboard", icon: LayoutDashboard, requiredFeature: "crm_basic" },
-    { key: "gestao_clientes", title: "Gestão de Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
+    { key: "gestao_clientes", title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
     { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
     { key: "operacoes", title: "Operações", url: "/gestao-clientes/operacoes", icon: CalendarDays, requiredFeature: "crm_basic" },
     { key: "meta_vendas", title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
