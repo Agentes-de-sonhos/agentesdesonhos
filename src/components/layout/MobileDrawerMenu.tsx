@@ -57,7 +57,6 @@ const conhecimentoSection: MenuSection = {
 };
 
 const meusProjetosItem: MenuItem = { key: "meus_projetos", title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
-const comunidadeItem: MenuItem = { key: "comunidade", title: "Comunidade", url: "/comunidade", icon: Heart };
 
 const guiasSection: MenuSection = {
   title: "Guias e Referências", key: "section_guias", icon: BookMarked,
@@ -135,7 +134,7 @@ const marketingSection: MenuSection = {
   ],
 };
 
-const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
+
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
 const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
@@ -156,7 +155,7 @@ const planoStartSection: MenuSection = {
   ],
 };
 
-const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
@@ -188,7 +187,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [comunidadeItem, mentoriasItem],
+    () => [],
     []
   );
 
@@ -410,7 +409,6 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
             {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(minhaAgendaItem)}
             {renderMenuItem(meuPerfilItem)}
-            {renderMenuItem(comunidadeItem)}
           </nav>
 
           <div className="py-2 px-3">
@@ -436,7 +434,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
           </p>
           {isAdmin && renderMenuItem(adminMenuItem)}
           {renderMenuItem(suporteMenuItem)}
-          {renderMenuItem(profileMenuItem)}
+          {renderMenuItem(minhaContaMenuItem)}
           <Button
             variant="ghost"
             className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"

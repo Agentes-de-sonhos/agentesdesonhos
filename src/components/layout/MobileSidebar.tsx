@@ -225,7 +225,7 @@ const marketingSection: MenuSection = {
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
 const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
-const profileMenuItem: MenuItem = { title: "Perfil", url: "/perfil", icon: User };
+const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
 
@@ -532,7 +532,6 @@ export function MobileSidebar() {
             {renderMenuItem(meusProjetosItem)}
             {renderMenuItem(minhaAgendaItem)}
             {renderMenuItem(meuPerfilItem)}
-            {renderMenuItem(comunidadeItem)}
           </nav>
 
           <div className={cn("py-2", expanded ? "px-3" : "px-2")}>
@@ -567,7 +566,7 @@ export function MobileSidebar() {
 
           {isAdmin && renderMenuItem(adminMenuItem)}
           {renderMenuItem(suporteMenuItem)}
-          {renderMenuItem(profileMenuItem)}
+          {renderMenuItem(minhaContaMenuItem)}
 
           {/* Logout */}
           {expanded ? (
