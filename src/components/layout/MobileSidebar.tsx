@@ -120,8 +120,10 @@ const guiasSection: MenuSection = {
   borderColor: "border-emerald-600",
   items: [
     { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
     { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
+    { key: "requisitos_viagem", title: "Central de Requisitos", url: "/requisitos-viagem", icon: Shield, requiredFeature: "travel_requirements", isPremium: true },
+    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
+    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
   ],
 };
 
