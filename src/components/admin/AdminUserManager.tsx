@@ -53,6 +53,9 @@ import {
   Settings2,
   LogOut,
   Download,
+  Link2,
+  Copy,
+  MessageCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
