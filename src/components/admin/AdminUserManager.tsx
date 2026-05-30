@@ -109,6 +109,8 @@ export function AdminUserManager() {
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial", password: "" });
   const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [featureAccessUser, setFeatureAccessUser] = useState<UserWithDetails | null>(null);
+  const [setupLinkUser, setSetupLinkUser] = useState<UserWithDetails | null>(null);
+  const [setupLinkUrl, setSetupLinkUrl] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
