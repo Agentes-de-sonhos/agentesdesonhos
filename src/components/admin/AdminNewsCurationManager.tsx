@@ -495,49 +495,82 @@ export function AdminNewsCurationManager() {
             </span>
           </div>
         )}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[130px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pendente">Pendentes</SelectItem>
-              <SelectItem value="aprovado">Aprovados</SelectItem>
-              <SelectItem value="rejeitado">Rejeitados</SelectItem>
-              <SelectItem value="todos">Todos</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as "asc" | "desc")}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="desc">Mais recentes</SelectItem>
-              <SelectItem value="asc">Mais antigas</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterCategoria} onValueChange={setFilterCategoria}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas categorias</SelectItem>
-              {CATEGORIAS.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filterFonte} onValueChange={setFilterFonte}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Fonte" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas fontes</SelectItem>
-              {fontes?.map((f) => (
-                <SelectItem key={f} value={f}>{f}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col gap-2">
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por título, resumo ou fonte..."
+              className="pl-9"
+            />
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos status</SelectItem>
+                <SelectItem value="pendente">Pendentes</SelectItem>
+                <SelectItem value="aprovado">Aprovados</SelectItem>
+                <SelectItem value="rejeitado">Rejeitados</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterFonte} onValueChange={setFilterFonte}>
+              <SelectTrigger className="w-[170px]"><SelectValue placeholder="Fonte" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas fontes</SelectItem>
+                {fontes?.map((f) => (
+                  <SelectItem key={f} value={f}>{f}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterCategoria} onValueChange={setFilterCategoria}>
+              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Categoria" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas categorias</SelectItem>
+                {CATEGORIAS.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={scoreRange} onValueChange={(v) => setScoreRange(v as ScoreRange)}>
+              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Nota" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Qualquer nota</SelectItem>
+                <SelectItem value="9-10">Nota 9 a 10</SelectItem>
+                <SelectItem value="7-8">Nota 7 a 8</SelectItem>
+                <SelectItem value="4-6">Nota 4 a 6</SelectItem>
+                <SelectItem value="0-3">Nota 0 a 3</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={perfilRange} onValueChange={(v) => setPerfilRange(v as PerfilRange)}>
+              <SelectTrigger className="w-[170px]"><SelectValue placeholder="Perfil" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Qualquer perfil</SelectItem>
+                <SelectItem value="high">Alto interesse (8-10)</SelectItem>
+                <SelectItem value="mid">Médio interesse (5-7)</SelectItem>
+                <SelectItem value="low">Baixo interesse (0-4)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortField} onValueChange={(v) => setSortField(v as SortField)}>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Ordenar por" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevancia_score">Ordenar por Nota</SelectItem>
+                <SelectItem value="score_perfil">Ordenar por Perfil</SelectItem>
+                <SelectItem value="data_publicacao">Data de publicação</SelectItem>
+                <SelectItem value="created_at">Data de importação</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortDir(sortDir === "desc" ? "asc" : "desc")}
+              title={sortDir === "desc" ? "Maior primeiro" : "Menor primeiro"}
+            >
+              {sortDir === "desc" ? <ArrowDown className="h-4 w-4" /> : <ArrowUp className="h-4 w-4" />}
+              <span className="ml-1 text-xs">{sortDir === "desc" ? "Maior" : "Menor"}</span>
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -545,29 +578,31 @@ export function AdminNewsCurationManager() {
           <div className="flex justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-        ) : noticias?.length === 0 ? (
+        ) : filteredNoticias.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-40" />
-            <p>Nenhuma notícia {filterStatus !== "todos" ? filterStatus : ""} encontrada</p>
-            <p className="text-sm mt-1">Clique em "Coletar Agora" para buscar novas notícias</p>
+            <p>Nenhuma notícia encontrada com os filtros atuais</p>
+            <p className="text-sm mt-1">Ajuste os filtros ou clique em "Coletar Agora" para buscar novas notícias</p>
           </div>
         ) : (
           <div className="space-y-3">
+            <div className="text-xs text-muted-foreground px-1">
+              {filteredNoticias.length} {filteredNoticias.length === 1 ? "notícia encontrada" : "notícias encontradas"}
+            </div>
             {(() => {
-              const pendentes = (noticias || []).filter((n) => n.status === "pendente");
-              const allSelected = pendentes.length > 0 && selectedIds.size === pendentes.length;
+              const allSelected = filteredNoticias.length > 0 && selectedIds.size === filteredNoticias.length;
               return (
                 <div className="flex items-center justify-between gap-3 p-3 rounded-md border bg-muted/40 sticky top-0 z-10">
                   <div className="flex items-center gap-2 text-sm">
                     <Checkbox
                       checked={allSelected}
                       onCheckedChange={() => toggleSelectAll()}
-                      disabled={pendentes.length === 0}
+                      disabled={filteredNoticias.length === 0}
                     />
                     <span className="text-muted-foreground">
                       {selectedIds.size > 0
                         ? `${selectedIds.size} selecionada${selectedIds.size === 1 ? "" : "s"}`
-                        : "Selecionar todas pendentes"}
+                        : "Selecionar todas visíveis"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -604,18 +639,16 @@ export function AdminNewsCurationManager() {
                 </div>
               );
             })()}
-            {noticias?.map((item) => (
+            {filteredNoticias.map((item) => (
               <div
                 key={item.id}
                 className="flex flex-col sm:flex-row sm:items-start gap-3 p-4 rounded-lg border bg-card"
               >
-                {item.status === "pendente" && (
-                  <Checkbox
-                    className="mt-1"
-                    checked={selectedIds.has(item.id)}
-                    onCheckedChange={() => toggleSelect(item.id)}
-                  />
-                )}
+                <Checkbox
+                  className="mt-1"
+                  checked={selectedIds.has(item.id)}
+                  onCheckedChange={() => toggleSelect(item.id)}
+                />
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="secondary">{item.categoria}</Badge>
