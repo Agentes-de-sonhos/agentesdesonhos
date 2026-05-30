@@ -49,12 +49,13 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
     { key: "meta_vendas", label: "Meta de Vendas" },
   ],
   financeiro: [
-    { key: "dashboard_fin", label: "Dashboard" },
+    { key: "vendas_fin", label: "Vendas" },
     { key: "entradas", label: "Entradas" },
     { key: "despesas", label: "Despesas" },
-    { key: "vendas_fin", label: "Vendas" },
+    { key: "faturas", label: "Faturas" },
     { key: "comissoes", label: "Comissões" },
     { key: "vendedores", label: "Vendedores" },
+    { key: "dashboard_fin", label: "Dashboard" },
   ],
   marketing: [
     { key: "cartao_visitas", label: "Cartão de Visitas" },
