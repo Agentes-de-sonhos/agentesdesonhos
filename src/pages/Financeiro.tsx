@@ -7,7 +7,9 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { TeamMembersButton } from "@/components/team/TeamMembersButton";
+import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsTeamMember } from "@/contexts/TeamSessionContext";
 import { Button } from "@/components/ui/button";
 import { SmartDashboard } from "@/components/financial/SmartDashboard";
 import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager";
@@ -24,20 +26,17 @@ const MONTH_NAMES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-const FINANCEIRO_TABS = [
+const ALL_TABS_DEF = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "vendas", label: "Vendas", icon: ShoppingBag },
   { key: "entradas", label: "Entradas", icon: ArrowUpCircle },
   { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
   { key: "faturas", label: "Faturas", icon: FileText },
-] as const;
-
-const GESTAO_TABS = [
-  { key: "vendas", label: "Vendas", icon: ShoppingBag },
   { key: "comissoes", label: "Comissões", icon: Receipt },
   { key: "vendedores", label: "Vendedores", icon: Users },
 ] as const;
 
-const ALL_TABS = [...FINANCEIRO_TABS, ...GESTAO_TABS].map(t => t.key);
+const ALL_TABS = ALL_TABS_DEF.map(t => t.key);
 
 type PeriodPreset = "this_month" | "last_month" | "last_3_months";
 
@@ -75,6 +74,10 @@ export default function Financeiro() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const activeTab = ALL_TABS.includes(tabParam as any) ? tabParam! : "dashboard";
+  const { user } = useAuth();
+  const isTeam = useIsTeamMember();
+  const canShowTeamMembers = !!user && !isTeam;
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
 
   // Global period state — month navigator
   const now = new Date();
@@ -101,13 +104,15 @@ export default function Financeiro() {
     setSearchParams({ tab: value }, { replace: true });
   };
 
-  const handleNewSale = () => {
-    setSearchParams({ tab: "vendas" }, { replace: true });
-  };
-
-  const isFinanceiroTab = FINANCEIRO_TABS.some(t => t.key === activeTab);
-  const isGestaoTab = GESTAO_TABS.some(t => t.key === activeTab);
   const showPeriodSelector = true;
+
+  const tabClass = (isActive: boolean) =>
+    cn(
+      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap",
+      isActive
+        ? "bg-primary text-primary-foreground shadow-sm"
+        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+    );
 
   return (
     <DashboardLayout>
@@ -118,9 +123,7 @@ export default function Financeiro() {
             title="Gestão Financeira"
             subtitle="Controle simples e inteligente da sua agência"
             icon={DollarSign}
-          >
-            <TeamMembersButton />
-          </PageHeader>
+          />
 
 
           {showPeriodSelector && (
@@ -150,86 +153,30 @@ export default function Financeiro() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-1">
-              {/* Dashboard */}
-              {(() => {
-                const dashTab = FINANCEIRO_TABS[0];
-                const Icon = dashTab.icon;
-                const isActive = activeTab === dashTab.key;
-                return (
-                  <button
-                    key={dashTab.key}
-                    onClick={() => handleTabChange(dashTab.key)}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{dashTab.label}</span>
-                  </button>
-                );
-              })()}
-
-              {/* Nova Venda - between Dashboard and Entradas */}
-              {(() => {
-                const isActive = activeTab === "vendas";
-                return (
-                  <button
-                    onClick={handleNewSale}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    <ShoppingBag className="h-4 w-4" />
-                    <span className="hidden sm:inline">Vendas</span>
-                  </button>
-                );
-              })()}
-
-              {/* Entradas + Despesas */}
-              {FINANCEIRO_TABS.slice(1).map(tab => {
+            <div className="flex items-center gap-1 flex-wrap">
+              {ALL_TABS_DEF.map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
                 return (
                   <button
                     key={tab.key}
                     onClick={() => handleTabChange(tab.key)}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground"
-                    )}
+                    className={tabClass(isActive)}
                   >
                     <Icon className="h-4 w-4" />
                     <span className="hidden sm:inline">{tab.label}</span>
                   </button>
                 );
               })}
-
-              {GESTAO_TABS.filter(t => t.key !== "vendas").map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => handleTabChange(tab.key)}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all bg-accent text-primary-foreground",
-                      isActive ? "shadow-lg" : "hover:shadow-lg"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </button>
-                );
-              })}
+              {canShowTeamMembers && (
+                <button
+                  onClick={() => setTeamDialogOpen(true)}
+                  className={tabClass(false)}
+                >
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Usuários da Equipe</span>
+                </button>
+              )}
             </div>
 
             <div>
@@ -244,6 +191,9 @@ export default function Financeiro() {
               {activeTab === "vendedores" && <SellersManager />}
             </div>
           </div>
+        )}
+        {canShowTeamMembers && (
+          <TeamMembersDialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
         )}
       </div>
     </DashboardLayout>
