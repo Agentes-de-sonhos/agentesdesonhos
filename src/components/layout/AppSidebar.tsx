@@ -11,6 +11,7 @@ import {
   LogOut,
   Shield,
   Megaphone,
+  MonitorPlay,
   Plane,
   Users,
   GraduationCap,
