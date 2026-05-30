@@ -647,7 +647,7 @@ export function AppSidebar() {
             setCollapsed((c) => !c);
           }}
           className={cn(
-            "absolute top-20 -right-3 z-50 hidden lg:flex h-7 w-7 items-center justify-center",
+            "absolute top-[18px] -right-3 z-50 hidden lg:flex h-7 w-7 items-center justify-center",
             "rounded-full border border-sidebar-border bg-background text-muted-foreground shadow-sm",
             "transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:scale-110 hover:shadow-md"
           )}
