@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { user_id } = await req.json();
+    const { user_id, return_link, redirect_to } = await req.json();
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: "user_id é obrigatório" }), {
@@ -70,10 +70,17 @@ Deno.serve(async (req) => {
 
     const email = targetUser.user.email;
 
-    // Generate password reset link and send email
+    // Determine redirect URL for the recovery flow
+    const origin = req.headers.get("origin") || "https://app.agentesdesonhos.com.br";
+    const finalRedirect = typeof redirect_to === "string" && redirect_to.length > 0
+      ? redirect_to
+      : `${origin}/reset-password`;
+
+    // Generate password reset link
     const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
       type: "recovery",
       email,
+      options: { redirectTo: finalRedirect },
     });
 
     if (linkError) {
@@ -84,7 +91,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, email }), {
+    const actionLink = (linkData as any)?.properties?.action_link ?? null;
+
+    return new Response(JSON.stringify({
+      success: true,
+      email,
+      action_link: actionLink,
+      mode: return_link ? "link_only" : "email_sent",
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
