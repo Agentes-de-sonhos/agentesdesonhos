@@ -668,6 +668,16 @@ export function AdminUserManager() {
                           <KeyRound className="h-4 w-4" />
                         </Button>
                         <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Gerar link para criar senha"
+                          className="text-blue-600 hover:text-blue-700"
+                          onClick={() => generateSetupLinkMutation.mutate(user)}
+                          disabled={generateSetupLinkMutation.isPending}
+                        >
+                          <Link2 className="h-4 w-4" />
+                        </Button>
+                        <Button
                           variant="outline"
                           size="icon"
                           onClick={() => {
