@@ -105,7 +105,7 @@ const clientesSection: MenuSection = {
 };
 
 const financeiroSection: MenuSection = {
-  title: "Financeiro", key: "section_financeiro", icon: DollarSign,
+  title: "GESTÃO FINANCEIRA", key: "section_financeiro", icon: DollarSign,
   hoverColor: "hover:bg-emerald-600 hover:text-white", headerBg: "bg-emerald-600 text-white", headerHoverBg: "hover:bg-emerald-700",
   bgColor: "bg-emerald-50", textColor: "text-emerald-700", borderColor: "border-emerald-600",
   items: [
