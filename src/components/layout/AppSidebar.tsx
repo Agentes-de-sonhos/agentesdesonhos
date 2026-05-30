@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useMemo, Fragment } from "react";
+import React, { useState, useCallback, useMemo, useRef, Fragment } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
   Newspaper,
   Settings,
   ChevronLeft,
+  ChevronRight,
   ChevronDown,
   Cloud,
   LogOut,
@@ -271,6 +272,25 @@ export function AppSidebar() {
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
+
+  // Hover-to-expand on desktop with delayed collapse to avoid accidental close
+  const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearCollapseTimer = () => {
+    if (collapseTimerRef.current) {
+      clearTimeout(collapseTimerRef.current);
+      collapseTimerRef.current = null;
+    }
+  };
+  const handleSidebarMouseEnter = () => {
+    clearCollapseTimer();
+    if (collapsed) setCollapsed(false);
+  };
+  const handleSidebarMouseLeave = () => {
+    clearCollapseTimer();
+    collapseTimerRef.current = setTimeout(() => {
+      setCollapsed(true);
+    }, 300);
+  };
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
@@ -599,6 +619,8 @@ export function AppSidebar() {
           "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 flex-col hidden lg:flex",
           collapsed ? "w-16" : "w-72"
         )}
+        onMouseEnter={handleSidebarMouseEnter}
+        onMouseLeave={handleSidebarMouseLeave}
       >
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
           <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} className="flex items-center gap-3 min-w-0">
@@ -613,20 +635,25 @@ export function AppSidebar() {
               </div>
             )}
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-sidebar-foreground"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            <ChevronLeft
-              className={cn(
-                "h-4 w-4 transition-transform duration-300",
-                collapsed && "rotate-180"
-              )}
-            />
-          </Button>
         </div>
+
+        {/* Edge toggle on the right border (desktop) */}
+        <button
+          type="button"
+          aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+          onClick={(e) => {
+            e.stopPropagation();
+            clearCollapseTimer();
+            setCollapsed((c) => !c);
+          }}
+          className={cn(
+            "absolute top-20 -right-3 z-50 hidden lg:flex h-7 w-7 items-center justify-center",
+            "rounded-full border border-sidebar-border bg-background text-muted-foreground shadow-sm",
+            "transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:scale-110 hover:shadow-md"
+          )}
+        >
+          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
+        </button>
 
         {/* Scrollable Navigation */}
         <div className="flex-1 overflow-y-auto py-2 space-y-0.5">
