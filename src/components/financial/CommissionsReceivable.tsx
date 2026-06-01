@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { isInMonth } from "@/utils/monthFilter";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
@@ -133,8 +134,16 @@ function NoteDialog({ commission, open, onOpenChange }: { commission: Commission
   );
 }
 
-export function CommissionsReceivable() {
-  const { data: commissions = [], isLoading } = useCommissionsReceivable();
+export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
+  const { data: allCommissions = [], isLoading } = useCommissionsReceivable();
+  const commissions = useMemo(() => {
+    if (!viewMonth || !viewYear) return allCommissions;
+    return allCommissions.filter(c =>
+      isInMonth(c.expected_date, viewMonth, viewYear) ||
+      isInMonth(c.received_date, viewMonth, viewYear) ||
+      isInMonth((c as any).sale_date, viewMonth, viewYear)
+    );
+  }, [allCommissions, viewMonth, viewYear]);
   const { showExport, setShowExport, agencyName } = useFinancialExport("Comissões");
   const handleExportCommissions = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
     const { columns, rows, totals } = prepareCommissionsExport(filtered, period);
