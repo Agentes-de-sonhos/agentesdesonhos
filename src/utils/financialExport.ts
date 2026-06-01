@@ -330,3 +330,110 @@ export function prepareDashboardExport(
   ];
   return { columns, rows, totals: [] };
 }
+
+// --- Seller commissions export (grouped by seller, with subtotals) ---
+
+export interface SellerCommissionRow {
+  seller_name: string;
+  sale_date: string;
+  client: string;
+  sale_number: string;
+  destination: string;
+  sale_amount: number;
+  commission_percent: number;
+  commission_amount: number;
+  status: "Paga" | "Pendente";
+  payment_date: string | null;
+}
+
+export function prepareSellerCommissionsExport(
+  rows: SellerCommissionRow[],
+  period: { start: Date; end: Date }
+) {
+  const columns = [
+    { key: "sale_date", header: "Data Venda", width: 12 },
+    { key: "client", header: "Cliente", width: 22 },
+    { key: "sale_number", header: "Nº Venda", width: 12 },
+    { key: "destination", header: "Destino", width: 18 },
+    { key: "sale_amount", header: "Valor Venda", width: 14 },
+    { key: "commission_percent", header: "% Com.", width: 8 },
+    { key: "commission_amount", header: "Comissão", width: 14 },
+    { key: "status", header: "Status", width: 10 },
+    { key: "payment_date", header: "Pagamento", width: 12 },
+  ];
+
+  // Group by seller, intercalando linhas de cabeçalho/subtotal
+  const grouped: Record<string, SellerCommissionRow[]> = {};
+  rows.forEach(r => {
+    (grouped[r.seller_name] ||= []).push(r);
+  });
+
+  const sellerNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  const finalRows: Row[] = [];
+
+  let grandSaleTotal = 0;
+  let grandCommissionTotal = 0;
+  let grandPaid = 0;
+  let grandPending = 0;
+
+  sellerNames.forEach(seller => {
+    const items = grouped[seller];
+    const saleSum = items.reduce((s, r) => s + r.sale_amount, 0);
+    const commSum = items.reduce((s, r) => s + r.commission_amount, 0);
+    const paidSum = items.filter(r => r.status === "Paga").reduce((s, r) => s + r.commission_amount, 0);
+    const pendSum = commSum - paidSum;
+
+    grandSaleTotal += saleSum;
+    grandCommissionTotal += commSum;
+    grandPaid += paidSum;
+    grandPending += pendSum;
+
+    finalRows.push({
+      sale_date: `▸ ${seller}`,
+      client: `${items.length} venda(s)`,
+      sale_number: "",
+      destination: "",
+      sale_amount: "",
+      commission_percent: "",
+      commission_amount: "",
+      status: "",
+      payment_date: "",
+    });
+    items.forEach(r => {
+      finalRows.push({
+        sale_date: fmtDate(r.sale_date),
+        client: r.client,
+        sale_number: r.sale_number,
+        destination: r.destination,
+        sale_amount: fmtCurrency(r.sale_amount),
+        commission_percent: `${r.commission_percent.toFixed(1)}%`,
+        commission_amount: fmtCurrency(r.commission_amount),
+        status: r.status,
+        payment_date: r.payment_date ? fmtDate(r.payment_date) : "—",
+      });
+    });
+    finalRows.push({
+      sale_date: "",
+      client: `Subtotal ${seller}`,
+      sale_number: "",
+      destination: "",
+      sale_amount: fmtCurrency(saleSum),
+      commission_percent: "",
+      commission_amount: fmtCurrency(commSum),
+      status: `${fmtCurrency(paidSum)} pg`,
+      payment_date: `${fmtCurrency(pendSum)} pend.`,
+    });
+    finalRows.push({ sale_date: "", client: "", sale_number: "", destination: "", sale_amount: "", commission_percent: "", commission_amount: "", status: "", payment_date: "" });
+  });
+
+  const totals = [
+    { label: "Total Geral Vendido", value: fmtCurrency(grandSaleTotal) },
+    { label: "Total Geral Comissões", value: fmtCurrency(grandCommissionTotal) },
+    { label: "Comissões Pagas", value: fmtCurrency(grandPaid) },
+    { label: "Comissões Pendentes", value: fmtCurrency(grandPending) },
+    { label: "Vendedores no relatório", value: String(sellerNames.length) },
+    { label: "Total de vendas com comissão", value: String(rows.length) },
+  ];
+
+  return { columns, rows: finalRows, totals };
+}

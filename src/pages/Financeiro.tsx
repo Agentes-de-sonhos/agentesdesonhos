@@ -17,6 +17,7 @@ import { SalesManager } from "@/components/financial/SalesManager";
 import { EntradasManager } from "@/components/financial/EntradasManager";
 import { CommissionsReceivable } from "@/components/financial/CommissionsReceivable";
 import { SellersManager } from "@/components/financial/SellersManager";
+import { SellersCommissionReport } from "@/components/financial/SellersCommissionReport";
 import { InvoicesManager } from "@/components/financial/invoices/InvoicesManager";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
@@ -188,7 +189,12 @@ export default function Financeiro() {
               {activeTab === "faturas" && <InvoicesManager />}
               {activeTab === "vendas" && <SalesManager />}
               {activeTab === "comissoes" && <CommissionsReceivable />}
-              {activeTab === "vendedores" && <SellersManager />}
+              {activeTab === "vendedores" && (
+                <div className="space-y-8">
+                  <SellersManager />
+                  <SellersCommissionReport />
+                </div>
+              )}
             </div>
           </div>
         )}
