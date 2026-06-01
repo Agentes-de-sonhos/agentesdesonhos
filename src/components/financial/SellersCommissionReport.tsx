@@ -54,7 +54,7 @@ export function SellersCommissionReport() {
   // Index of commission-payment expenses by sale_id (1st match)
   const commissionPaymentBySale = useMemo(() => {
     const map = new Map<string, { entry_date: string; amount: number }>();
-    expenseEntries.forEach(e => {
+    expenseEntries.forEach((e: any) => {
       if (e.category === "comissao" && e.sale_id && !map.has(e.sale_id)) {
         map.set(e.sale_id, { entry_date: e.entry_date, amount: Number(e.amount) });
       }
@@ -68,7 +68,7 @@ export function SellersCommissionReport() {
     if (!start || !end) return [];
 
     return sales
-      .filter(s => {
+      .filter((s: any) => {
         if (!s.seller_id) return false;
         const pct = Number((s as any).seller_commission_percent);
         if (!pct || pct <= 0) return false;
@@ -81,7 +81,7 @@ export function SellersCommissionReport() {
         }
         return true;
       })
-      .map(s => {
+      .map((s: any) => {
         const seller = sellers.find(sl => sl.id === s.seller_id);
         const pct = Number((s as any).seller_commission_percent) || 0;
         const sale_amount = Number(s.sale_amount) || 0;
