@@ -184,15 +184,15 @@ export default function Financeiro() {
               {activeTab === "dashboard" && (
                 <SmartDashboard viewMonth={viewMonth} viewYear={viewYear} />
               )}
-              {activeTab === "entradas" && <EntradasManager />}
+              {activeTab === "entradas" && <EntradasManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "despesas" && <SmartExpenseManager viewMonth={viewMonth} viewYear={viewYear} />}
-              {activeTab === "faturas" && <InvoicesManager />}
-              {activeTab === "vendas" && <SalesManager />}
-              {activeTab === "comissoes" && <CommissionsReceivable />}
+              {activeTab === "faturas" && <InvoicesManager viewMonth={viewMonth} viewYear={viewYear} />}
+              {activeTab === "vendas" && <SalesManager viewMonth={viewMonth} viewYear={viewYear} />}
+              {activeTab === "comissoes" && <CommissionsReceivable viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "vendedores" && (
                 <div className="space-y-8">
                   <SellersManager />
-                  <SellersCommissionReport />
+                  <SellersCommissionReport viewMonth={viewMonth} viewYear={viewYear} />
                 </div>
               )}
             </div>
