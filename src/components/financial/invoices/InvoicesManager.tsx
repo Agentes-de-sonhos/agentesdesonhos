@@ -23,6 +23,7 @@ import {
   type Invoice, type InvoiceStatus, type InvoicePayment,
 } from "@/types/invoice";
 import { useToast } from "@/hooks/use-toast";
+import { isInMonth } from "@/utils/monthFilter";
 
 const fmt = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
@@ -36,10 +37,17 @@ const STATUS_COLOR: Record<InvoiceStatus, string> = {
   cancelled: "bg-zinc-200 text-zinc-600",
 };
 
-export function InvoicesManager() {
+export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { invoices, isLoading, getInvoiceDetail, deleteInvoice, updateInvoiceStatus } = useInvoices();
+  const { invoices: allInvoices, isLoading, getInvoiceDetail, deleteInvoice, updateInvoiceStatus } = useInvoices();
+  const invoices = useMemo(() => {
+    if (!viewMonth || !viewYear) return allInvoices;
+    return allInvoices.filter(i =>
+      isInMonth(i.issue_date, viewMonth, viewYear) ||
+      isInMonth(i.due_date, viewMonth, viewYear)
+    );
+  }, [allInvoices, viewMonth, viewYear]);
   const [openForm, setOpenForm] = useState(false);
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
