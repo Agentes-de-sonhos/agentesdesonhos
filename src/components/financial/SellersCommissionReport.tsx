@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -33,7 +33,7 @@ function shortId(id: string) {
   return id.slice(0, 8).toUpperCase();
 }
 
-export function SellersCommissionReport() {
+export function SellersCommissionReport({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
   const { sales, expenseEntries } = useFinancial();
   const { sellers } = useSellers();
   const agencyName = useAgencyName();
@@ -45,6 +45,15 @@ export function SellersCommissionReport() {
 
   const [startDate, setStartDate] = useState(defaultStart);
   const [endDate, setEndDate] = useState(defaultEnd);
+
+  // Sync date range with the global month/year selector when provided.
+  useEffect(() => {
+    if (!viewMonth || !viewYear) return;
+    const s = format(new Date(viewYear, viewMonth - 1, 1), "yyyy-MM-dd");
+    const e = format(new Date(viewYear, viewMonth, 0), "yyyy-MM-dd");
+    setStartDate(s);
+    setEndDate(e);
+  }, [viewMonth, viewYear]);
   const [sellerFilter, setSellerFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [clientSearch, setClientSearch] = useState("");

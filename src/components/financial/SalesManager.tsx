@@ -35,9 +35,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/types/financial";
 import { PRODUCT_TYPES } from "@/types/financial";
+import { isInMonth } from "@/utils/monthFilter";
 
-export function SalesManager() {
-  const { sales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
+export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
+  const { sales: allSales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
+  const sales = useMemo(() => {
+    if (!viewMonth || !viewYear) return allSales;
+    return allSales.filter(s => isInMonth(s.sale_date, viewMonth, viewYear));
+  }, [allSales, viewMonth, viewYear]);
   const { closedOpportunities } = useClosedOpportunities();
   const { sellers } = useSellers();
   const { user } = useAuth();
