@@ -29,9 +29,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { isInMonth } from "@/utils/monthFilter";
 
-export function EntradasManager() {
-  const { incomeEntries, sales, createIncome, updateIncome, deleteIncome, isCreating, isUpdating } = useFinancial();
+export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
+  const { incomeEntries: allIncomeEntries, sales, createIncome, updateIncome, deleteIncome, isCreating, isUpdating } = useFinancial();
+  const incomeEntries = (!viewMonth || !viewYear)
+    ? allIncomeEntries
+    : allIncomeEntries.filter(e =>
+        isInMonth(e.entry_date, viewMonth, viewYear) ||
+        isInMonth((e as any).expected_date, viewMonth, viewYear)
+      );
   const { showExport, setShowExport, agencyName } = useFinancialExport("Entradas");
   const handleExportEntradas = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
     const { columns, rows, totals } = prepareEntradasExport(incomeEntries, sales, period);
