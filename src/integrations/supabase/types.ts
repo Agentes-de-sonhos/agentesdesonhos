@@ -10435,6 +10435,39 @@ export type Database = {
         }
         Returns: boolean
       }
+      admin_user_usage_report: {
+        Args: { _end: string; _start: string }
+        Returns: {
+          agency_name: string
+          business_cards_count: number
+          clients_count: number
+          created_at: string
+          customer_payments_count: number
+          email: string
+          expense_entries_count: number
+          income_entries_count: number
+          invoices_count: number
+          is_active: boolean
+          itineraries_count: number
+          last_active_at: string
+          lead_forms_count: number
+          name: string
+          operations_count: number
+          opportunities_count: number
+          phone: string
+          plan: string
+          quotes_count: number
+          role: string
+          sales_count: number
+          sales_landings_count: number
+          sellers_count: number
+          showcases_count: number
+          team_members_count: number
+          total_actions: number
+          user_id: string
+          wallets_count: number
+        }[]
+      }
       can_use_feature: {
         Args: { _feature: string; _user_id: string }
         Returns: boolean
