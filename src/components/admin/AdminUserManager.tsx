@@ -65,6 +65,7 @@ import { useNavigate } from "react-router-dom";
 import { clearImpersonationData, setImpersonationData, type ImpersonationData } from "@/lib/impersonation";
 import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
 import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
+import { AdminUserUsageReport } from "./AdminUserUsageReport";
 
 const ROLE_OPTIONS: { value: "admin" | "agente" | "promotor" | "fornecedor"; label: string }[] = [
   { value: "agente", label: "Agente" },
@@ -455,6 +456,7 @@ export function AdminUserManager() {
             </CardDescription>
           </div>
           <div className="flex gap-2">
+            <AdminUserUsageReport />
             <Button
               variant="outline"
               onClick={() => {
