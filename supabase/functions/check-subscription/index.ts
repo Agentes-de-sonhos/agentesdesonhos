@@ -10,6 +10,7 @@ const corsHeaders = {
 const PLAN_MAP: Record<string, string> = {
   "prod_U9J9e1DdfeYvXg": "fundador",
   "prod_U9jMtBbO6vmjsl": "profissional",
+  "prod_UKcjZEKLKqEckX": "premium",
 };
 
 serve(async (req) => {
@@ -69,7 +70,26 @@ serve(async (req) => {
     const subscription = subscriptions.data[0];
     const firstItem = subscription.items.data[0];
     const productId = firstItem?.price?.product as string;
-    const plan = PLAN_MAP[productId] || "profissional";
+    const mappedPlan = PLAN_MAP[productId];
+
+    if (!mappedPlan) {
+      // Unknown product — do NOT downgrade the user. Log and exit without updating the DB.
+      console.error("check-subscription: unknown Stripe product, skipping plan update", {
+        userId: user.id,
+        email: user.email,
+        productId,
+        subscriptionId: subscription.id,
+      });
+      return new Response(JSON.stringify({
+        subscribed: true,
+        plan: null,
+        unknown_product: productId,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const plan = mappedPlan;
 
     const rawPeriodEnd =
       (firstItem as { current_period_end?: number | string | null } | undefined)?.current_period_end ??
