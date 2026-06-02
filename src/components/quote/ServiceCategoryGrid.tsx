@@ -1,4 +1,4 @@
-import { Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Map, Package, Plus, Sparkles, PackageOpen, LucideIcon } from "lucide-react";
+import { Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Map, Package, Plus, Sparkles, Package2, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ServiceType } from "@/types/quote";
 import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
@@ -38,25 +38,6 @@ export function ServiceCategoryGrid({ countByType = {}, onSelect, onOpenAIImport
       className="grid gap-3 w-full"
       style={{ gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))" }}
     >
-      {showFullPackage && onOpenFullPackage && (
-        <button
-          type="button"
-          onClick={onOpenFullPackage}
-          aria-label="Importar Pacote Completo"
-          className={cn(
-            "relative flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-semibold transition-all duration-200 border",
-            "bg-gradient-to-br from-fuchsia-500/15 via-primary/15 to-sky-500/15 text-foreground",
-            "border-primary/30 hover:scale-[1.02] hover:shadow-md hover:border-primary/60"
-          )}
-        >
-          <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-0.5 rounded-full bg-primary/90 text-primary-foreground px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide">
-            <Sparkles className="h-2.5 w-2.5" /> IA
-          </span>
-          <PackageOpen className="h-6 w-6 text-primary" />
-          <span className="text-center leading-tight px-1">Pacote Completo</span>
-        </button>
-      )}
-
       {showAIImport && onOpenAIImport && (
       <button
         type="button"
@@ -102,6 +83,25 @@ export function ServiceCategoryGrid({ countByType = {}, onSelect, onOpenAIImport
           </button>
         );
       })}
+
+      {showFullPackage && onOpenFullPackage && (
+        <button
+          type="button"
+          onClick={onOpenFullPackage}
+          aria-label="Importar Pacote Completo"
+          className={cn(
+            "group relative flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
+            "bg-gradient-to-br from-fuchsia-100 to-fuchsia-50 text-fuchsia-700",
+            "border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/60"
+          )}
+        >
+          <span className="absolute top-2 right-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/80 text-foreground/70 shadow-sm opacity-80 group-hover:opacity-100">
+            <Plus className="h-3 w-3" />
+          </span>
+          <Package2 className="h-6 w-6 text-fuchsia-500" />
+          <span className="text-center leading-tight px-1">Pacote</span>
+        </button>
+      )}
     </div>
   );
 }
