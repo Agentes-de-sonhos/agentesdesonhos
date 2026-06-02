@@ -1,4 +1,4 @@
-import { Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Map, Package, Plus, Sparkles, PackageOpen, LucideIcon } from "lucide-react";
+import { Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Map, Package, Plus, Sparkles, Package2, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ServiceType } from "@/types/quote";
 import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
