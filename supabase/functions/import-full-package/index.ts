@@ -34,7 +34,16 @@ type ServiceType = typeof ALLOWED_TYPES[number];
 const SYSTEM_PROMPT = `Você é um EXTRATOR DE PACOTES DE VIAGEM COMPLETOS para agências brasileiras.
 Receberá UM documento (PDF, imagem ou texto) que pode conter VÁRIOS serviços da MESMA viagem: passagem aérea, hospedagem, locação de veículo, transfer/traslado, ingressos/atrações/passeios, seguro viagem, cruzeiro, circuito e outros serviços.
 
-OBJETIVO ÚNICO: identificar cada serviço, separar em blocos e chamar a função "extract_full_package" com TODOS os dados que conseguir ler. NUNCA retorne texto explicativo — SEMPRE chame a função.
+OBJETIVO ÚNICO: identificar cada serviço, separar em blocos e RETORNAR UM ÚNICO JSON VÁLIDO no formato exato abaixo. NUNCA retorne texto explicativo, markdown ou code fences — APENAS o JSON cru.
+
+ENVELOPE OBRIGATÓRIO (raiz):
+{
+  "trip_meta": { "destination": "...", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD", "adults": 0, "children": 0, "currency": "BRL", "total_amount": null, "total_amount_brl": null, "passenger_names": [] },
+  "blocks": [ { "type": "...", "confidence": 0.0, "label": "...", "raw_excerpt": "...", "missing_fields": [], "unexpected": false, "data": { ... } } ],
+  "warnings": []
+}
+
+REGRA CRÍTICA SOBRE "data": é OBRIGATÓRIO preencher o objeto "data" de CADA bloco com TODOS os campos que você conseguir ler do documento, usando o schema do TYPE correspondente abaixo. NUNCA devolva "data": {} — se devolver vazio, a importação inteira está INCORRETA.
 
 REGRAS CRÍTICAS:
 1. NUNCA invente dados. Campos ausentes ficam vazios/null. Liste em "missing_fields" do bloco.
