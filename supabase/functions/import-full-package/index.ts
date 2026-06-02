@@ -34,7 +34,16 @@ type ServiceType = typeof ALLOWED_TYPES[number];
 const SYSTEM_PROMPT = `Você é um EXTRATOR DE PACOTES DE VIAGEM COMPLETOS para agências brasileiras.
 Receberá UM documento (PDF, imagem ou texto) que pode conter VÁRIOS serviços da MESMA viagem: passagem aérea, hospedagem, locação de veículo, transfer/traslado, ingressos/atrações/passeios, seguro viagem, cruzeiro, circuito e outros serviços.
 
-OBJETIVO ÚNICO: identificar cada serviço, separar em blocos e chamar a função "extract_full_package" com TODOS os dados que conseguir ler. NUNCA retorne texto explicativo — SEMPRE chame a função.
+OBJETIVO ÚNICO: identificar cada serviço, separar em blocos e RETORNAR UM ÚNICO JSON VÁLIDO no formato exato abaixo. NUNCA retorne texto explicativo, markdown ou code fences — APENAS o JSON cru.
+
+ENVELOPE OBRIGATÓRIO (raiz):
+{
+  "trip_meta": { "destination": "...", "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD", "adults": 0, "children": 0, "currency": "BRL", "total_amount": null, "total_amount_brl": null, "passenger_names": [] },
+  "blocks": [ { "type": "...", "confidence": 0.0, "label": "...", "raw_excerpt": "...", "missing_fields": [], "unexpected": false, "data": { ... } } ],
+  "warnings": []
+}
+
+REGRA CRÍTICA SOBRE "data": é OBRIGATÓRIO preencher o objeto "data" de CADA bloco com TODOS os campos que você conseguir ler do documento, usando o schema do TYPE correspondente abaixo. NUNCA devolva "data": {} — se devolver vazio, a importação inteira está INCORRETA.
 
 REGRAS CRÍTICAS:
 1. NUNCA invente dados. Campos ausentes ficam vazios/null. Liste em "missing_fields" do bloco.
@@ -77,53 +86,18 @@ trip_meta deve conter o que conseguir identificar do PACOTE como um todo: destin
 
 warnings = lista curta de alertas em português (ex.: "Valor total do pacote sem valores individuais", "Datas sem ano explícito", "Política de cancelamento não localizada").`;
 
-const BLOCK_DATA_SCHEMA = { type: "object", additionalProperties: true };
-
-const TOOL_SCHEMA = {
-  type: "function",
-  function: {
-    name: "extract_full_package",
-    description: "Extrai dados estruturados de um pacote de viagem completo (vários serviços em um único documento).",
-    parameters: {
-      type: "object",
-      properties: {
-        trip_meta: {
-          type: "object",
-          properties: {
-            destination: { type: "string" },
-            start_date: { type: "string", description: "YYYY-MM-DD" },
-            end_date: { type: "string", description: "YYYY-MM-DD" },
-            adults: { type: ["integer", "null"] },
-            children: { type: ["integer", "null"] },
-            currency: { type: "string" },
-            total_amount: { type: ["number", "null"] },
-            total_amount_brl: { type: ["number", "null"] },
-            passenger_names: { type: "array", items: { type: "string" } },
-          },
-          additionalProperties: true,
-        },
-        blocks: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              type: { type: "string", enum: [...ALLOWED_TYPES] },
-              confidence: { type: "number" },
-              label: { type: "string", description: "Resumo curto humano (ex.: 'Aéreo GRU↔CDG', 'Hotel Marriott Paris')" },
-              raw_excerpt: { type: "string", description: "Trecho literal do documento que sustenta este bloco" },
-              missing_fields: { type: "array", items: { type: "string" } },
-              unexpected: { type: "boolean", description: "true se o serviço não estava em expected_types" },
-              data: BLOCK_DATA_SCHEMA,
-            },
-            required: ["type", "data"],
-          },
-        },
-        warnings: { type: "array", items: { type: "string" } },
-      },
-      required: ["blocks"],
-    },
-  },
-};
+/**
+ * Observação importante:
+ * Não usamos mais tool/function calling com schema rígido para o pacote completo.
+ * Motivo: o Gemini, ao receber `data: { type:"object", additionalProperties:true }`
+ * (sem properties listadas), frequentemente retornava `data: {}` em todos os blocos,
+ * porque tecnicamente "objeto vazio" satisfaz o schema. Resultado: a tela de
+ * conferência ficava em branco.
+ *
+ * Trocamos para `response_format: json_object` + prompt com o schema descrito.
+ * Isso obriga o modelo a entregar JSON e, livre da rigidez do tool-call, ele
+ * preenche os campos descritos no system prompt.
+ */
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -220,8 +194,7 @@ Deno.serve(async (req) => {
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },
         ],
-        tools: [TOOL_SCHEMA],
-        tool_choice: { type: "function", function: { name: "extract_full_package" } },
+        response_format: { type: "json_object" },
         temperature: 0,
         max_tokens: 12000,
       }),
@@ -238,22 +211,16 @@ Deno.serve(async (req) => {
 
     const aiJson = await aiResp.json();
     const choice = aiJson?.choices?.[0];
-    const toolCall = choice?.message?.tool_calls?.[0];
-    const argsStr: string | undefined = toolCall?.function?.arguments;
-    const fallbackText: string | undefined = choice?.message?.content;
-    rawAi = argsStr || fallbackText || JSON.stringify(aiJson).slice(0, 4000);
+    const contentText: string | undefined = choice?.message?.content;
+    rawAi = contentText || JSON.stringify(aiJson).slice(0, 4000);
 
     stage = "json_parse";
     let parsed: any = null;
-    let parseErr: string | null = null;
-    if (argsStr) {
-      try { parsed = JSON.parse(argsStr); }
-      catch (e) {
-        parseErr = String(e);
-        try { parsed = extractJSON(argsStr); } catch (e2) { parseErr += ` | fallback: ${e2}`; }
+    if (contentText) {
+      try { parsed = JSON.parse(contentText); }
+      catch {
+        try { parsed = extractJSON(contentText); } catch { /* noop */ }
       }
-    } else if (fallbackText) {
-      try { parsed = extractJSON(fallbackText); } catch (e) { parseErr = String(e); }
     }
     if (!parsed || typeof parsed !== "object") {
       return fail(stage, "parse_error", "A IA retornou uma resposta sem estrutura reconhecível. Tente novamente com um arquivo mais nítido.", 422, { raw_ai_response: rawAi });
