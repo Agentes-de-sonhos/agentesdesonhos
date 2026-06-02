@@ -3007,6 +3007,54 @@ export type Database = {
           },
         ]
       }
+      full_package_imports: {
+        Row: {
+          ai_blocks: Json
+          created_at: string
+          expected_types: string[]
+          id: string
+          quote_id: string | null
+          review_status: Json
+          source_kind: string
+          source_text: string | null
+          source_url: string | null
+          trip_meta: Json
+          updated_at: string
+          user_id: string
+          warnings: Json
+        }
+        Insert: {
+          ai_blocks?: Json
+          created_at?: string
+          expected_types?: string[]
+          id?: string
+          quote_id?: string | null
+          review_status?: Json
+          source_kind: string
+          source_text?: string | null
+          source_url?: string | null
+          trip_meta?: Json
+          updated_at?: string
+          user_id: string
+          warnings?: Json
+        }
+        Update: {
+          ai_blocks?: Json
+          created_at?: string
+          expected_types?: string[]
+          id?: string
+          quote_id?: string | null
+          review_status?: Json
+          source_kind?: string
+          source_text?: string | null
+          source_url?: string | null
+          trip_meta?: Json
+          updated_at?: string
+          user_id?: string
+          warnings?: Json
+        }
+        Relationships: []
+      }
       fun_trips: {
         Row: {
           available_spots: number
