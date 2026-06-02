@@ -1,118 +1,97 @@
-# Módulo Faturas & Recibos — Gestão Financeira
+## Objetivo
 
-Vou criar um módulo completo de **Faturas, Recibos, Cobranças e Pagamentos Recebidos** integrado a Orçamentos, Carteira Digital, Oportunidades e Operações, com geração de PDF profissional e link público.
+Criar uma camada de orquestração "Pacote Completo" que recebe um único PDF/imagem/texto contendo múltiplos serviços, identifica e separa cada bloco com IA, e encaminha cada um para a tela de conferência do importador individual já existente (aéreo, hotel, locação, transfer, atração, seguro, cruzeiro, circuito, outros). Nada é gravado no orçamento sem confirmação da agência.
 
----
+## Arquitetura
 
-## 1. Banco de dados (migração)
+```text
+[Modal Pacote Completo]
+  1. Checkbox de tipos esperados
+  2. Upload PDF / imagem / texto
+        |
+        v
+[Edge Function: import-full-package]
+  - Gemini multimodal (PDF/imagem) ou texto
+  - Retorna: { trip_meta, blocks[], warnings[] }
+        |
+        v
+[Tela Resumo]
+  - Esperados x Encontrados x Faltando x Extras
+  - Período, passageiros, total
+  - Alertas de baixa confiança
+        |
+        v
+[Stepper de Conferência]
+  - Para cada block: abre o componente de conferência
+    já existente (HotelSmartImport, AirfareSmartImport,
+    CarRentalSmartImport, GenericServiceSmartImport...)
+    em modo "prefill" recebendo o JSON do bloco
+  - Agência revisa/edita/confirma → adiciona ao orçamento
+  - Pode pular ou descartar bloco
+        |
+        v
+[Log: full_package_imports]
+```
 
-Novas tabelas (todas com RLS por `user_id` + GRANTs):
+## Mudanças no código
 
-- **`invoices`** — Faturas
-  - Identificação: `invoice_number` (auto, sequencial por agência: `FAT-2026-000123`), `issue_date`, `due_date`, `status` (`draft|sent|partial|paid|cancelled|overdue`)
-  - Origem: `source_type` (`manual|quote|trip|opportunity|operation`), `source_id`
-  - Cliente: `client_id`, snapshot de nome/empresa/cpf_cnpj/email/telefone
-  - Viagem: `destination`, `travel_start`, `travel_end`, `passengers` (jsonb)
-  - Totais: `subtotal`, `taxes_total`, `discount_total`, `commission_total`, `rav_total`, `total_amount`, `paid_amount`, `balance`, `estimated_profit`
-  - Observações, termos, `public_access_code` (único), `agency_slug`
-  - QR PIX opcional: `pix_key`, `pix_qr_payload`
+### Backend
+- **Nova edge function** `supabase/functions/import-full-package/index.ts`
+  - Input: `{ quote_id?, expected_types: ServiceType[], file_base64?, mime?, text? }`
+  - Usa Lovable AI Gateway (`google/gemini-2.5-pro` para PDF/imagem por melhor multimodal; fallback `gemini-3-flash-preview` para texto puro).
+  - Prompt instrui a IA a:
+    - Devolver JSON estruturado com `trip_meta` (destination, start_date, end_date, adults, children, total_amount, currency) e `blocks[]`.
+    - Cada `block`: `{ id, type: ServiceType, confidence: 0-1, raw_excerpt, normalized_data, missing_fields[], notes }`.
+    - `normalized_data` deve seguir o mesmo formato que cada importador individual já consome (reuso de `FlightData`, `HotelData`, etc.).
+    - Não inventar valores ausentes.
+  - Sanitiza erros em português, valida payload com Zod, rate limit por usuário.
 
-- **`invoice_services`** — itens da fatura
-  - `invoice_id`, `order_index`, `category` (aereo/hotel/cruzeiro/seguro/passeio/transfer/ingresso/pacote/outros)
-  - `description`, `fare`, `taxes`, `discount`, `commission`, `rav`, `net_amount`, `final_amount`
+### Migration
+- Nova tabela `public.full_package_imports`:
+  - `id`, `user_id`, `quote_id` (nullable), `expected_types text[]`, `source_kind` (`pdf|image|text`), `source_url` (storage path, opcional), `source_text` (texto colado, truncado), `ai_blocks jsonb`, `trip_meta jsonb`, `review_status jsonb` (status por bloco), `created_at`.
+  - RLS por `user_id`, GRANT padrão para `authenticated` + `service_role`.
+- Bucket privado `full-package-imports` para arquivos originais (signed URLs).
 
-- **`invoice_installments`** — parcelas
-  - `invoice_id`, `installment_number`, `label` (Entrada/2ª/...), `amount`, `due_date`, `status` (`pending|paid|overdue`), `paid_at`
+### Frontend
+- **Novo card "Pacote Completo"** em `ServiceCategoryGrid.tsx`
+  - Posicionado no topo (junto/próximo do "Importar com IA"), com ícone `PackageOpen` e visual destacado (gradiente).
+  - Nova prop `onOpenFullPackage` + `showFullPackage`.
+- **Novo modal** `src/components/quote/full-package-import/FullPackageImportModal.tsx`
+  - Step 1: Seleção de tipos (checkboxes) — orienta a IA.
+  - Step 2: Upload PDF (drag&drop) / imagem / textarea (uma das três fontes).
+  - Step 3: Loading com status (analisando, identificando blocos…).
+  - Step 4: Tela **Resumo** com cards comparando esperado x encontrado, período, passageiros, total, alertas.
+  - Step 5: **Stepper de Conferência** sequencial. Para cada bloco, monta o componente do importador individual existente em modo `prefillData` (sem refazer upload), reaproveitando suas telas de conferência/edição e seu `onConfirm` que devolve um `QuoteService` para salvar.
+  - Botões: "Pular este", "Confirmar e adicionar", "Adicionar todos restantes" (apenas alta confiança), "Finalizar".
+- **Refatores leves nos importadores existentes** para aceitar prop opcional `prefillData` e `mode="review-only"` (pular o upload, ir direto à tela de conferência). Hoje cada importador faz upload→AI→conferência; só vamos pular as duas primeiras etapas quando o orquestrador já tiver o JSON.
+- Integração em `GerarOrcamento.tsx`: passar `onOpenFullPackage` para `ServiceCategoryGrid`, controlar `showFullPackage`, e ao finalizar inserir cada `QuoteService` confirmado via o mesmo handler de salvamento de serviço já usado.
 
-- **`invoice_payments`** — pagamentos recebidos
-  - `invoice_id`, `installment_id` (opcional), `amount`, `payment_date`, `method` (pix/cartao/dinheiro/transferencia/boleto/outros), `notes`, `receipt_number` (auto), `receipt_generated_at`
+### Regras de UX preservadas
+- Nada adicionado automaticamente; cada serviço exige clique de confirmação.
+- Alertas visuais por baixa confiança (`<0.6`) e por campos faltando.
+- Esperado mas não encontrado → alerta amarelo no Resumo.
+- Encontrado mas não esperado → marcado "possivelmente encontrado", agência aceita ou ignora.
+- Valor total do pacote vai para `trip_meta.total_amount`; não distribuído entre serviços.
+- Múltiplas hospedagens/transfers/passeios → blocos separados.
+- Aéreo ida/volta preserva estrutura `outbound_legs`/`return_legs`.
 
-- **`invoice_number_seq`** e **`receipt_number_seq`** — sequências por usuário (controladas em função PL/pgSQL)
+## Detalhes técnicos
 
-Triggers:
-- Auto-gerar `invoice_number`, `receipt_number`, `public_access_code`
-- Recalcular `paid_amount`, `balance` e `status` ao inserir/atualizar/deletar pagamentos
-- Marcar parcelas como `overdue` quando `due_date < now()` e não pagas (via cron leve no frontend ou função RPC)
+- Prompt do Gemini construído server-side com a lista de `expected_types` e um schema JSON exato (mesmas chaves dos `ServiceData`).
+- Limite: PDF/imagem até 10MB; texto até 50k chars.
+- Persistência: salva `full_package_imports` antes de retornar para o cliente (auditoria/replay).
+- Storage: se PDF/imagem, upload do arquivo para bucket privado, mantém `source_url`.
+- Sem mudanças em tabelas existentes de quotes/services.
 
-RPC pública: `get_invoice_by_public_code(agency_slug, code)` retornando fatura + serviços + parcelas + pagamentos + perfil do agente (mesma pattern do `get_quote_by_public_code`).
+## Entrega em ordem
+1. Migration + bucket.
+2. Edge function `import-full-package` com prompt + validação.
+3. Refator mínimo dos importadores existentes para aceitar `prefillData`.
+4. Modal `FullPackageImportModal` (steps 1–5).
+5. Card "Pacote Completo" no grid + wiring em `GerarOrcamento.tsx`.
+6. QA manual: PDF com aéreo+hotel+transfer+2 passeios.
 
-## 2. Frontend — Estrutura
-
-Em `src/pages/Financeiro.tsx`, adicionar abas no grupo principal:
-- **Faturas** (lista, criar, editar)
-- **Recibos** (lista derivada de `invoice_payments`)
-- **Cobranças** (parcelas pendentes/vencidas, com ação de enviar cobrança WhatsApp)
-- **Pagamentos Recebidos** (lista de `invoice_payments` + filtros)
-
-Novos componentes em `src/components/financial/invoices/`:
-- `InvoicesManager.tsx` — listagem com filtros (status, cliente, período)
-- `InvoiceFormDialog.tsx` — modal de criação/edição com tabs (Geral, Serviços, Parcelas, Pagamentos)
-- `InvoiceImportPicker.tsx` — botões "Importar de Orçamento / Carteira / Oportunidade / Operação" abrindo seletor
-- `InvoiceServicesEditor.tsx` — tabela de serviços com cálculo em tempo real
-- `InvoiceInstallmentsEditor.tsx` — parcelamento (único ou parcelado)
-- `InvoicePaymentsList.tsx` — registrar/listar pagamentos, gerar recibo
-- `ReceiptsManager.tsx`, `ChargesManager.tsx`, `PaymentsReceivedManager.tsx`
-- `InvoiceDashboardCards.tsx` — adicionar KPIs no `SmartDashboard`: Total Faturado, Recebido, Pendente, Vencido, Comissão Gerada, Lucro Estimado
-
-Hook: `src/hooks/useInvoices.ts` com React Query (list, byId, create, update, delete, addPayment, importFrom*).
-
-Conversores em `src/utils/`:
-- `quoteToInvoice.ts`, `tripToInvoice.ts`, `opportunityToInvoice.ts`, `operationToInvoice.ts`
-
-## 3. PDF Profissional
-
-`src/lib/generateInvoicePdf.ts` (jsPDF) e `generateReceiptPdf.ts` (reaproveitar/expandir o existente):
-- Cabeçalho com logo + dados da agência
-- Bloco cliente + viagem + passageiros
-- Tabela de serviços com colunas (Cat | Descrição | Tarifa | Taxas | Desc | Total)
-- Resumo financeiro destacado
-- Parcelas com status
-- Pagamentos recebidos
-- Observações/termos
-- QR Code PIX (lib `qrcode` — já disponível, senão instalar)
-- Rodapé com link público + número da fatura
-
-## 4. Link público
-
-Nova rota `/fatura/:agencySlug/:code` em `App.tsx` → `src/pages/FaturaPublica.tsx`:
-- Visualizar fatura, baixar PDF, ver parcelas, ver pagamentos, baixar recibos individuais
-- Domínio futuro `fatura.agentesdesonhos.com.br` (precisa configurar DNS — alerto que isso é etapa manual no provedor)
-
-## 5. Integrações
-
-- **Orçamento → Fatura**: botão "Gerar Fatura" no `OrcamentoPublicoV2`/listagem de Quotes copiando serviços e cliente
-- **Carteira → Fatura**: botão na `TripWallet` que importa `trip_services` como itens
-- **Oportunidade/Operação → Fatura**: botões no `OpportunityCard` e `OperationsModule`
-- **CRM**: ao registrar pagamento, atualizar `clients.last_interaction_at` e exibir badge "Valor recebido / Saldo" no perfil do cliente
-- **Operações**: ao quitar fatura vinculada a operação, marcar `payment_status='pago'` automaticamente via trigger
-
-## 6. Notas técnicas
-
-- Sequências por usuário com fallback (`ano-corrente-000001`)
-- `balance = total_amount - paid_amount` calculado por trigger
-- Status auto: `paid` se balance=0; `partial` se 0<paid<total; `overdue` se due_date<hoje e balance>0
-- Compartilhamento WhatsApp já segue padrão usado em quotes (template + link público)
-- Permissões de Equipe: novos `permission_key` no módulo `financial`: `invoices.view`, `invoices.create`, `invoices.edit`, `invoices.delete`, `payments.register`
-
-## 7. Escopo desta entrega
-
-Dado o tamanho, proponho implementar em **2 fases** dentro deste loop:
-
-**Fase 1 (esta resposta)** — Fundação:
-- Migração SQL completa (tabelas + triggers + RPC pública + GRANTs/RLS)
-- Hook `useInvoices.ts`
-- `InvoicesManager` + `InvoiceFormDialog` com serviços, parcelas e pagamentos
-- Geração de PDF da fatura e do recibo
-- Importação de Orçamento e Carteira Digital
-- Aba Faturas no Financeiro
-- Rota e página pública `/fatura/:slug/:code`
-
-**Fase 2 (próxima mensagem após aprovar Fase 1)**:
-- Abas Recibos / Cobranças / Pagamentos Recebidos
-- Importação de Oportunidade e Operação
-- Botões "Gerar Fatura" nos módulos de origem
-- KPIs no Dashboard Financeiro
-- QR PIX
-- Permissões de Equipe granulares
-
-Confirma que posso iniciar pela **Fase 1**?
+## Fora de escopo
+- Não alterar prompts/comportamento dos importadores individuais.
+- Não criar novos campos de orçamento.
+- Não automatizar inserção sem confirmação.
