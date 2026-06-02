@@ -37,6 +37,7 @@ import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
 import { ServiceModal } from "@/components/quote/ServiceModal";
+import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
@@ -157,6 +158,7 @@ export default function GerarOrcamento() {
   );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [showAIImport, setShowAIImport] = useState(false);
+  const [showFullPackage, setShowFullPackage] = useState(false);
   const [showExportWallet, setShowExportWallet] = useState(false);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
@@ -798,6 +800,8 @@ export default function GerarOrcamento() {
                 <ServiceCategoryGrid
                   countByType={serviceCountByType}
                   onSelect={(type) => { setEditingService(null); setSelectedServiceType(type); }}
+                  onOpenFullPackage={() => setShowFullPackage(true)}
+                  showFullPackage
                 />
               </CardContent>
             </Card>
@@ -1209,6 +1213,20 @@ export default function GerarOrcamento() {
         onOpenChange={setShowAIImport}
         allowedTypes={["flight","hotel","car_rental","transfer","attraction","insurance","cruise","other"]}
         onImport={handleAIImport}
+      />
+      <FullPackageImportModal
+        open={showFullPackage}
+        onOpenChange={setShowFullPackage}
+        quoteId={id}
+        onConfirmService={async (svc: FullPackageImportResult) => {
+          await addService({
+            service_type: svc.service_type,
+            service_data: svc.service_data as any,
+            amount: Number(svc.amount) || 0,
+            option_label: svc.option_label ?? null,
+            description: svc.description ?? null,
+          } as any);
+        }}
       />
       <ExportQuoteToWalletDialog
         open={showExportWallet}
