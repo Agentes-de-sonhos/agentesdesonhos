@@ -9,8 +9,14 @@ const corsHeaders = {
 
 const PLAN_MAP: Record<string, string> = {
   "prod_U9J9e1DdfeYvXg": "fundador",
+  // Profissional — todos os produtos historicamente usados
   "prod_U9jMtBbO6vmjsl": "profissional",
+  "prod_UKcjnwreCMcYFP": "profissional",
+  "prod_USjfjtOo19XfO3": "profissional",
+  "prod_USjfnyL30dLI1v": "profissional", // Promo 50%
+  // Premium — todos os produtos historicamente usados
   "prod_UKcjZEKLKqEckX": "premium",
+  "prod_USjgoJCa9N6ra9": "premium", // Promo 50% (produto ativo em produção)
 };
 
 serve(async (req) => {
