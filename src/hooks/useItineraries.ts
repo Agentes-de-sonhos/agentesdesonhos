@@ -540,6 +540,7 @@ export function useItineraries() {
     deleteActivity,
     addActivity,
     moveActivity,
+    reorderActivities,
     updateItineraryStatus,
     updateItineraryDetails,
     deleteItinerary,
