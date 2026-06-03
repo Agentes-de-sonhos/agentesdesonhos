@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { resolveGooglePlacePhotoUrl } from "../_shared/google-photo.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,9 +84,14 @@ serve(async (req) => {
             const refs: any[] = detData?.result?.photos ?? candidate.photos ?? [];
             for (const p of refs.slice(0, want)) {
               if (!p?.photo_reference) continue;
+              const [full, thumb] = await Promise.all([
+                resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 1600),
+                resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 320),
+              ]);
+              if (!full) continue;
               photos.push({
-                photo_url: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=1200&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`,
-                thumb_url: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=320&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`,
+                photo_url: full,
+                thumb_url: thumb || full,
                 source: "google_places",
                 attributions: p.html_attributions ?? [],
               });
@@ -209,12 +215,19 @@ serve(async (req) => {
           }
 
           if (photoRef) {
-            const photo_url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${photoRef}&key=${GOOGLE_PLACES_API_KEY}`;
-            const thumb_url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=240&photo_reference=${photoRef}&key=${GOOGLE_PLACES_API_KEY}`;
-            return await persistAndReturn({
-              photo_url, thumb_url, place_id: candidate.place_id,
-              source: "google_places", attributions,
-            });
+            const [photo_url, thumb_url] = await Promise.all([
+              resolveGooglePlacePhotoUrl(photoRef, GOOGLE_PLACES_API_KEY, 1600),
+              resolveGooglePlacePhotoUrl(photoRef, GOOGLE_PLACES_API_KEY, 320),
+            ]);
+            if (photo_url) {
+              return await persistAndReturn({
+                photo_url,
+                thumb_url: thumb_url || photo_url,
+                place_id: candidate.place_id,
+                source: "google_places",
+                attributions,
+              });
+            }
           }
         }
       } catch (e) {

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { resolveGooglePlacePhotoUrl } from "../_shared/google-photo.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -68,9 +69,15 @@ Deno.serve(async (req) => {
 
       const r = data.result;
       const photos = (r.photos || []).slice(0, 6);
-      const photoUrls = photos.map((p: any) =>
-        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`
-      );
+      // Resolve each to its final googleusercontent.com URL so we never
+      // store API-key-bearing or photo_reference-bound URLs in the cache.
+      const photoUrls = (
+        await Promise.all(
+          photos.map((p: any) =>
+            resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 1600),
+          ),
+        )
+      ).filter((u): u is string => Boolean(u));
 
       const placeData: any = {
         place_id: r.place_id,
