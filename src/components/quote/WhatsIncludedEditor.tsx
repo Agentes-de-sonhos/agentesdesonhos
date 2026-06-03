@@ -65,7 +65,7 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
         .eq("id", quote.id);
       if (error) throw error;
       setDirty(false);
-      toast.success(value === null ? "Sugestão automática restaurada" : "Lista salva");
+      if (value === null) toast.success("Sugestão automática restaurada");
       onUpdated?.();
     } catch (e: any) {
       toast.error("Não foi possível salvar a lista");
