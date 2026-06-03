@@ -402,6 +402,23 @@ export function useItineraries() {
     },
   });
 
+  const reorderActivities = useMutation({
+    mutationFn: async (
+      updates: { id: string; orderIndex: number }[]
+    ) => {
+      for (const u of updates) {
+        const { error } = await supabase
+          .from("itinerary_activities")
+          .update({ order_index: u.orderIndex })
+          .eq("id", u.id);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+    },
+  });
+
   const deleteActivity = useMutation({
     mutationFn: async (activityId: string) => {
       const { error } = await supabase
@@ -523,6 +540,7 @@ export function useItineraries() {
     deleteActivity,
     addActivity,
     moveActivity,
+    reorderActivities,
     updateItineraryStatus,
     updateItineraryDetails,
     deleteItinerary,

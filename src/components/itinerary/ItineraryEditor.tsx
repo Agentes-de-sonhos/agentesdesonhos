@@ -7,12 +7,18 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
-  useDraggable,
   useDroppable,
   DragOverlay,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   Sun,
   Sunset,
@@ -109,12 +115,16 @@ function DroppablePeriod({
   );
 }
 
-function DraggableActivity({
+function SortableActivityWrap({
   activityId,
+  dayId,
+  period,
   isApproved,
   children,
 }: {
   activityId: string;
+  dayId: string;
+  period: "manha" | "tarde" | "noite";
   isApproved?: boolean;
   children: (handle: {
     setActivatorNodeRef: (el: HTMLElement | null) => void;
@@ -128,14 +138,21 @@ function DraggableActivity({
     listeners,
     setNodeRef,
     setActivatorNodeRef,
+    transform,
+    transition,
     isDragging,
-  } = useDraggable({
-    id: `drag-${activityId}`,
-    data: { activityId },
+  } = useSortable({
+    id: `activity-${activityId}`,
+    data: { activityId, dayId, period, type: "activity" },
   });
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
   return (
     <div
       ref={setNodeRef}
+      style={style}
       className={cn(
         "ml-6 rounded-lg border p-3 transition-all duration-150 will-change-transform",
         isApproved
@@ -222,6 +239,7 @@ interface ItineraryEditorProps {
   onDeleteActivity: (activityId: string) => void;
   onAddActivity: (dayId: string, activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
   onMoveActivity?: (activityId: string, dayId: string, period: "manha" | "tarde" | "noite") => void;
+  onReorderActivities?: (updates: { id: string; orderIndex: number }[]) => void;
   onApproveAll: () => void;
   aiContext?: AIContext;
 }
@@ -233,6 +251,7 @@ export function ItineraryEditor({
   onDeleteActivity,
   onAddActivity,
   onMoveActivity,
+  onReorderActivities,
   onApproveAll,
   aiContext,
 }: ItineraryEditorProps) {
@@ -318,18 +337,44 @@ export function ItineraryEditor({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDragId(null);
-    if (!over || !onMoveActivity) return;
-    const activityId = (active.data.current as { activityId?: string } | undefined)?.activityId;
-    const target = over.data.current as { dayId?: string; period?: "manha" | "tarde" | "noite" } | undefined;
-    if (!activityId || !target?.dayId || !target?.period) return;
+    if (!over) return;
+    const activeData = active.data.current as
+      | { activityId?: string; dayId?: string; period?: "manha" | "tarde" | "noite" }
+      | undefined;
+    const overData = over.data.current as
+      | { activityId?: string; dayId?: string; period?: "manha" | "tarde" | "noite"; type?: string }
+      | undefined;
+    const activityId = activeData?.activityId;
+    if (!activityId) return;
 
-    // skip if dropped on its current slot
     const current = days
       .flatMap((d) => d.activities.map((a) => ({ a, dayId: d.id! })))
       .find((x) => x.a.id === activityId);
-    if (current && current.dayId === target.dayId && current.a.period === target.period) return;
+    if (!current) return;
 
-    onMoveActivity(activityId, target.dayId, target.period);
+    const targetDayId = overData?.dayId;
+    const targetPeriod = overData?.period;
+    if (!targetDayId || !targetPeriod) return;
+
+    const sameSlot = current.dayId === targetDayId && current.a.period === targetPeriod;
+    const isOverActivity = overData?.type === "activity" && !!overData.activityId;
+
+    if (sameSlot) {
+      if (!isOverActivity || !onReorderActivities) return;
+      const dayActs = days.find((d) => d.id === targetDayId)?.activities ?? [];
+      const periodActs = dayActs.filter((a) => a.period === targetPeriod);
+      const oldIndex = periodActs.findIndex((a) => a.id === activityId);
+      const newIndex = periodActs.findIndex((a) => a.id === overData.activityId);
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return;
+      const reordered = arrayMove(periodActs, oldIndex, newIndex);
+      onReorderActivities(
+        reordered.map((a, idx) => ({ id: a.id!, orderIndex: idx }))
+      );
+      return;
+    }
+
+    if (!onMoveActivity) return;
+    onMoveActivity(activityId, targetDayId, targetPeriod);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -517,10 +562,16 @@ export function ItineraryEditor({
                         onCreate={(a) => onAddActivity(day.id!, a)}
                       />
                     ) : (
-                      periodActivities.map((activity) => (
-                        <DraggableActivity
+                      <SortableContext
+                        items={periodActivities.map((a) => `activity-${a.id}`)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                      {periodActivities.map((activity) => (
+                        <SortableActivityWrap
                           key={activity.id}
                           activityId={activity.id!}
+                          dayId={day.id!}
+                          period={period}
                           isApproved={activity.isApproved}
                         >
                           {(handle) => (
@@ -735,8 +786,9 @@ export function ItineraryEditor({
                             </div>
                           </div>
                           )}
-                        </DraggableActivity>
-                      ))
+                        </SortableActivityWrap>
+                      ))}
+                      </SortableContext>
                     )}
                   </DroppablePeriod>
                 );

@@ -70,6 +70,7 @@ export default function CriarRoteiro() {
     deleteActivity,
     addActivity,
     moveActivity,
+    reorderActivities,
     updateItineraryStatus,
     updateItineraryDetails,
     deleteItinerary,
@@ -236,6 +237,19 @@ export default function CriarRoteiro() {
         },
       }
     );
+  };
+
+  const handleReorderActivities = (
+    updates: { id: string; orderIndex: number }[]
+  ) => {
+    if (!updates.length) return;
+    reorderActivities.mutate(updates, {
+      onSuccess: () => {
+        if (currentItinerary) {
+          loadItinerary(currentItinerary.id);
+        }
+      },
+    });
   };
 
   const handleApproveAll = async () => {
@@ -741,6 +755,7 @@ export default function CriarRoteiro() {
                 onDeleteActivity={handleDeleteActivity}
                 onAddActivity={handleAddActivity}
                 onMoveActivity={handleMoveActivity}
+                onReorderActivities={handleReorderActivities}
                 onApproveAll={handleApproveAll}
                 aiContext={{
                   destination: currentItinerary.destination,
