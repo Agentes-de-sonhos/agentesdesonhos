@@ -43,48 +43,184 @@ ENVELOPE OBRIGATÓRIO (raiz):
   "warnings": []
 }
 
-REGRA CRÍTICA SOBRE "data": é OBRIGATÓRIO preencher o objeto "data" de CADA bloco com TODOS os campos que você conseguir ler do documento, usando o schema do TYPE correspondente abaixo. NUNCA devolva "data": {} — se devolver vazio, a importação inteira está INCORRETA.
+============================================================
+POSTURA DE EXTRAÇÃO — LEIA ANTES DE TUDO
+============================================================
+- LEIA O DOCUMENTO INTEIRO, PÁGINA POR PÁGINA, ANTES DE COMEÇAR. Não pare na primeira página.
+- VARRA TODOS OS CAMPOS DE TODOS OS FORMULÁRIOS abaixo. Cada serviço tem dezenas de campos — preencha o MÁXIMO possível, não apenas os 3-4 óbvios (nome, data, valor).
+- O objetivo é que a tela de conferência apareça PRÉ-PREENCHIDA o máximo possível, de modo que o operador só precise revisar e clicar "Salvar".
+- Para CADA bloco, percorra MENTALMENTE a lista de campos do schema correspondente e tente extrair UM POR UM. Só deixe null quando o documento realmente não disser.
+- NÃO RESUMA. NÃO AGRUPE. Se o doc tem 4 voos, "voos" tem 4 itens. Se tem 3 passeios, são 3 blocos attraction. Se tem 2 hotéis (cidades diferentes ou datas diferentes), são 2 blocos hotel.
+- NUNCA devolva "data": {} — isso quebra a importação. Se você só conseguiu identificar o tipo e mais nada, NÃO crie o bloco.
+- NUNCA invente dados. Campos ausentes ficam null/"" e vão em "missing_fields".
+- NUNCA invente ANO. Se o ano não está visível, preserve "DD MMM" exato e marque "ano_pendente" em missing_fields.
+- NUNCA invente VALORES. Se só há valor total do pacote, vai em trip_meta.total_amount; valores individuais ficam null.
+- A agência informa "expected_types": use como GUIA, mas não invente blocos faltantes nem ignore blocos extras (marque "unexpected": true).
 
-REGRAS CRÍTICAS:
-1. NUNCA invente dados. Campos ausentes ficam vazios/null. Liste em "missing_fields" do bloco.
-2. NUNCA invente ANO em datas. Se o ano não estiver visível, preserve a data curta como aparece (ex.: "25 Set") e marque "ano_pendente" em missing_fields.
-3. NUNCA invente VALORES. Se só há um valor total do pacote, coloque em trip_meta.total_amount e DEIXE OS VALORES INDIVIDUAIS DOS SERVIÇOS COMO null.
-4. CRIE UM BLOCO POR SERVIÇO. Se há 2 passeios distintos, crie 2 blocos type="attraction". Se há 2 hospedagens (cidades diferentes), crie 2 blocos type="hotel". Se há ida+volta em aéreo, é UM ÚNICO bloco type="flight" com os voos organizados em "voos".
-5. CONFIANÇA por bloco (0 a 1) reflete sua certeza real.
-6. A agência informa em "expected_types" quais serviços ela acredita estar no documento. Use isso como GUIA mas:
-   - Se um expected_type não aparecer no documento, NÃO invente um bloco.
-   - Se aparecer um serviço NÃO listado em expected_types, AINDA assim crie o bloco com "unexpected: true".
+============================================================
+SCHEMAS DE CADA TIPO — PREENCHA TODOS OS CAMPOS POSSÍVEIS
+============================================================
 
-FORMATO DOS BLOCOS (cada type usa um schema próprio, em chaves portuguesas):
+── type="flight" (AÉREO) ─────────────────────────────────
+data = {
+  resumo: {
+    trecho_geral,                     // ex.: "GRU > CDG - 10 Jul - CDG > GRU - 20 Jul - 2 ADT"
+    origem_inicial, destino_final,    // IATA 3 letras
+    data_ida, data_retorno,           // YYYY-MM-DD (ou curto se ano ausente)
+    quantidade_passageiros,           // "2", "1+1", etc.
+    tipo_passageiro,                  // ADT / CHD / INF
+    tipo_tarifa,                      // RT, OW, MT
+    moeda_original,                   // USD, EUR, BRL...
+    valor_total_original, valor_total_brl,
+    cambio, data_cambio
+  },
+  voos: [ {                           // UM ITEM POR LINHA DA TABELA DE VOOS
+    ordem, companhia_aerea, numero_voo,
+    data_saida, hora_saida, data_chegada, hora_chegada, duracao,
+    origem_codigo, origem_nome, destino_codigo, destino_nome,
+    numero_escalas, equipamento, cabine, base_tarifaria,
+    bagagem_texto, bagagem_mochila_bolsa, bagagem_mao,
+    bagagem_despachada, quantidade_bagagem_despachada,
+    alerta,
+    segment_type    // "outbound" | "outbound_connection" | "internal" | "return_connection" | "return" | "other"
+  } ],
+  valores: { tipo, taxa_combustivel, total_moeda_original, total_brl },
+  observacoes: [],                    // capture TODAS as regras tarifárias/observações do rodapé
+  campos_nao_identificados: [],
+  confianca_extracao: { geral, voos, valores, bagagem, observacoes }
+}
+Dicas de companhia (logo→nome): LA/JJ→LATAM, LH→Lufthansa, IB→IBERIA, AF→Air France, AA→American Airlines, BA→British Airways, AD→Azul, G3→GOL, UA→United, DL→Delta, AC→Air Canada, KL→KLM, TP→TAP, AZ→ITA Airways, EK→Emirates, QR→Qatar, TK→Turkish.
+Ida+volta = UM ÚNICO bloco flight (não dois).
 
-- type="flight" → data segue o schema do importador AÉREO:
-  { resumo: { trecho_geral, origem_inicial, destino_final, data_ida, data_retorno, quantidade_passageiros, tipo_passageiro, tipo_tarifa, moeda_original, valor_total_original, valor_total_brl, cambio, data_cambio },
-    voos: [ { ordem, companhia_aerea, numero_voo, data_saida, hora_saida, data_chegada, hora_chegada, duracao, origem_codigo, origem_nome, destino_codigo, destino_nome, numero_escalas, equipamento, cabine, base_tarifaria, bagagem_texto, bagagem_mochila_bolsa, bagagem_mao, bagagem_despachada, quantidade_bagagem_despachada, alerta, segment_type } ],
-    valores: { tipo, taxa_combustivel, total_moeda_original, total_brl },
-    observacoes: [], campos_nao_identificados: [], confianca_extracao: { geral, voos, valores, bagagem, observacoes } }
+── type="hotel" (HOSPEDAGEM) ─────────────────────────────
+UM hotel = UM bloco. Hotéis diferentes (cidade ou datas) = blocos separados.
+data = {
+  nome_hotel, cidade, pais, endereco,
+  check_in, check_out,                // YYYY-MM-DD
+  horario_check_in, horario_check_out,// HH:mm
+  noites,                             // calcule se possível
+  tipo_acomodacao, categoria_quarto,  // ex.: "Standard", "Suíte", "Deluxe Vista Mar"
+  regime_alimentacao,                 // "Café da manhã", "Meia pensão", "All Inclusive"...
+  hospedes_adultos, hospedes_criancas, hospedes_total, quantidade_quartos,
+  moeda, valor_total, valor_total_brl, valor_diaria, cambio, data_cambio,
+  taxas: [ { nome, valor, moeda } ],  // ISS, taxa de turismo, resort fee...
+  politica_cancelamento,              // texto literal
+  inclusos: [], nao_inclusos: [],
+  observacoes: [],
+  codigo_reserva, localizador, link_reserva, fornecedor,
+  confianca_extracao: { geral, dados_principais, valores, politicas }
+}
 
-- type="hotel" → data segue o schema do importador HOSPEDAGEM (UM hotel por bloco):
-  { nome_hotel, cidade, pais, endereco, check_in, check_out, horario_check_in, horario_check_out, noites, tipo_acomodacao, categoria_quarto, regime_alimentacao, hospedes_adultos, hospedes_criancas, hospedes_total, quantidade_quartos, moeda, valor_total, valor_total_brl, valor_diaria, cambio, data_cambio, taxas: [{nome, valor, moeda}], politica_cancelamento, inclusos: [], nao_inclusos: [], observacoes: [], codigo_reserva, localizador, link_reserva, fornecedor, confianca_extracao: { geral, dados_principais, valores, politicas } }
+── type="car_rental" (LOCAÇÃO DE VEÍCULO) ────────────────
+data = {
+  locadora,                           // Localiza, Movida, Hertz, Avis...
+  categoria_veiculo, modelo_veiculo,  // ex.: "Compacto", "SUV", "Toyota Corolla"
+  transmissao,                        // manual / automático
+  combustivel,                        // flex, gasolina, elétrico
+  passageiros, portas, bagagens, ar_condicionado,
+  local_retirada, endereco_retirada,
+  local_devolucao, endereco_devolucao,
+  data_retirada, hora_retirada, data_devolucao, hora_devolucao,
+  diarias, quilometragem,             // "Livre", "200 km/dia"
+  protecao_seguro,                    // "Cobertura total", "LDW", etc.
+  franquia,
+  moeda, valor_total, valor_total_brl, valor_diaria,
+  taxas: [], extras: [],              // GPS, cadeirinha, motorista adicional
+  inclusos: [], nao_inclusos: [],
+  politica_cancelamento, observacoes: [],
+  codigo_reserva, fornecedor,
+  confianca_extracao: { geral }
+}
 
-- type="car_rental" → data segue o schema da LOCAÇÃO:
-  { locadora, categoria_veiculo, modelo_veiculo, transmissao, combustivel, passageiros, portas, bagagens, ar_condicionado, local_retirada, endereco_retirada, local_devolucao, endereco_devolucao, data_retirada, hora_retirada, data_devolucao, hora_devolucao, diarias, quilometragem, protecao_seguro, franquia, moeda, valor_total, valor_total_brl, valor_diaria, taxas: [], extras: [], inclusos: [], nao_inclusos: [], politica_cancelamento, observacoes: [], codigo_reserva, fornecedor, confianca_extracao: { geral } }
+── type="transfer" (TRASLADO) ────────────────────────────
+UM trecho = UM bloco. Se houver ida E volta no mesmo serviço, use tipo_transfer="round_trip" e preencha data_volta/hora_volta.
+data = {
+  empresa, fornecedor, codigo_reserva,
+  tipo_transfer,                      // "arrival" | "departure" | "round_trip"
+  categoria,                          // "private" | "regular"
+  origem, destino, trajeto,           // trajeto = string única "A ↔ B"
+  data, hora, data_volta, hora_volta,
+  passageiros, veiculo,               // Sedan, Van, Minibus...
+  moeda, valor_total, valor_total_brl,
+  observacoes: [],
+  confianca_extracao: { geral }
+}
 
-- type="transfer" → { empresa, tipo_transfer ("arrival"|"departure"|"round_trip"), categoria ("private"|"regular"), origem, destino, trajeto, data, hora, data_volta, hora_volta, passageiros, veiculo, moeda, valor_total, valor_total_brl, fornecedor, codigo_reserva, observacoes: [], confianca_extracao: { geral } }
+── type="attraction" (INGRESSO / PASSEIO) ────────────────
+UM passeio/ingresso = UM bloco. Tours diferentes = blocos separados.
+data = {
+  nome_produto,                       // "Disney 5 dias Park Hopper", "City Tour Roma"
+  tipo_ingresso,                      // "Park Hopper", "Skip the Line", "Tour Privado"
+  cidade, data, hora, duracao,
+  quantidade_adultos, quantidade_criancas,
+  valor_adulto, valor_crianca,
+  ponto_encontro,
+  moeda, valor_total, valor_total_brl,
+  inclusos: [], nao_inclusos: [],     // o que está/não está incluso
+  observacoes: [],
+  confianca_extracao: { geral }
+}
 
-- type="attraction" → UM passeio/ingresso por bloco:
-  { nome_produto, tipo_ingresso, cidade, data, hora, duracao, quantidade_adultos, quantidade_criancas, valor_adulto, valor_crianca, ponto_encontro, moeda, valor_total, valor_total_brl, inclusos: [], nao_inclusos: [], observacoes: [], confianca_extracao: { geral } }
+── type="insurance" (SEGURO VIAGEM) ──────────────────────
+data = {
+  seguradora,                         // Assist Card, Travel Ace, GTA...
+  plano,                              // "Mundo 60", "Europa 100K"...
+  cobertura,                          // "USD 60.000"
+  destino_cobertura,                  // "Mundo todo", "Europa"
+  data_inicio, data_fim, dias,
+  quantidade_passageiros, valor_por_pessoa,
+  apolice,
+  moeda, valor_total, valor_total_brl,
+  coberturas_detalhadas: [],          // lista de coberturas (médico, bagagem, cancelamento...)
+  observacoes: [],
+  confianca_extracao: { geral }
+}
 
-- type="insurance" → { seguradora, plano, cobertura, destino_cobertura, data_inicio, data_fim, dias, quantidade_passageiros, valor_por_pessoa, apolice, moeda, valor_total, valor_total_brl, coberturas_detalhadas: [], observacoes: [], confianca_extracao: { geral } }
+── type="cruise" (CRUZEIRO) ──────────────────────────────
+data = {
+  companhia, nome_navio, rota,
+  porto_embarque, porto_desembarque,
+  data_embarque, data_desembarque, noites,
+  tipo_cabine,                        // "interna" | "externa" | "varanda" | "suite"
+  numero_cabine,
+  regime,                             // "Pensão completa", "All inclusive bebidas"...
+  passageiros, taxas_portuarias,
+  moeda, valor_total, valor_total_brl,
+  portos_visitados: [],               // lista de portos na ordem
+  observacoes: [],
+  confianca_extracao: { geral }
+}
 
-- type="cruise" → { companhia, nome_navio, rota, porto_embarque, porto_desembarque, data_embarque, data_desembarque, noites, tipo_cabine, numero_cabine, regime, passageiros, taxas_portuarias, moeda, valor_total, valor_total_brl, portos_visitados: [], observacoes: [], confianca_extracao: { geral } }
+── type="circuit" (CIRCUITO / PACOTE GUIADO) ─────────────
+data = {
+  nome_circuito, operadora, duracao,
+  data_inicio, data_fim, passageiros,
+  moeda, valor_total, valor_total_brl,
+  cidades: [],                        // ordem do roteiro
+  itinerario,                         // texto detalhado dia a dia se houver
+  inclusos: [], nao_inclusos: [],
+  hoteis_previstos: [],
+  observacoes: [],
+  confianca_extracao: { geral }
+}
 
-- type="circuit" → { nome_circuito, operadora, duracao, data_inicio, data_fim, passageiros, moeda, valor_total, valor_total_brl, cidades: [], itinerario, inclusos: [], nao_inclusos: [], hoteis_previstos: [], observacoes: [], confianca_extracao: { geral } }
+── type="other" (OUTROS SERVIÇOS) ────────────────────────
+data = {
+  titulo,                             // "Chip Internacional 10GB", "Estacionamento aeroporto"
+  empresa, data,
+  moeda, valor_total, valor_total_brl,
+  descricao,                          // texto descritivo livre
+  observacoes: [],
+  confianca_extracao: { geral }
+}
 
-- type="other" → { titulo, empresa, data, moeda, valor_total, valor_total_brl, descricao, observacoes: [], confianca_extracao: { geral } }
+============================================================
+TRIP_META E WARNINGS
+============================================================
+trip_meta = visão geral do PACOTE: destination (cidade/país principal), start_date, end_date, adults, children, currency, total_amount, passenger_names (se aparecerem).
+warnings = lista curta em português de alertas relevantes (ex.: "Valor total do pacote sem valores individuais", "Datas sem ano explícito", "Política de cancelamento não localizada", "Bagagem não informada para o voo de retorno").
 
-trip_meta deve conter o que conseguir identificar do PACOTE como um todo: destination, start_date, end_date, adults, children, currency, total_amount.
-
-warnings = lista curta de alertas em português (ex.: "Valor total do pacote sem valores individuais", "Datas sem ano explícito", "Política de cancelamento não localizada").`;
+LEMBRETE FINAL: o sucesso da importação é medido pela QUANTIDADE DE CAMPOS PREENCHIDOS em cada bloco. Quanto mais profundo e detalhado, melhor. Releia o documento se necessário antes de fechar o JSON.`;
 
 /**
  * Observação importante:
