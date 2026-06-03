@@ -278,20 +278,32 @@ export function AppSidebar() {
   const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
 
-  // Hover-to-expand on desktop with delayed collapse to avoid accidental close
+  // Hover-to-expand on desktop with delayed expand/collapse to avoid accidental open/close
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const clearCollapseTimer = () => {
+  const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTimers = () => {
     if (collapseTimerRef.current) {
       clearTimeout(collapseTimerRef.current);
       collapseTimerRef.current = null;
     }
+    if (expandTimerRef.current) {
+      clearTimeout(expandTimerRef.current);
+      expandTimerRef.current = null;
+    }
   };
+
   const handleSidebarMouseEnter = () => {
-    clearCollapseTimer();
-    if (collapsed) setCollapsed(false);
+    clearTimers();
+    if (collapsed) {
+      expandTimerRef.current = setTimeout(() => {
+        setCollapsed(false);
+      }, 700);
+    }
   };
+
   const handleSidebarMouseLeave = () => {
-    clearCollapseTimer();
+    clearTimers();
     collapseTimerRef.current = setTimeout(() => {
       setCollapsed(true);
     }, 300);
