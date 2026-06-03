@@ -52,26 +52,15 @@ export function ServiceModal(props: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-3 border-b">
-          <DialogTitle className="flex items-center gap-2">
-            {title}
-            {optionNumber && (
-              <span className="text-xs font-normal text-muted-foreground">
-                (Opção {optionNumber})
-              </span>
-            )}
+        <DialogHeader className="sr-only">
+          <DialogTitle>
+            {title}{optionNumber ? ` (Opção ${optionNumber})` : ""}
           </DialogTitle>
-          <DialogDescription className="sr-only">
+          <DialogDescription>
             Preencha os dados do serviço. As alterações são salvas ao clicar em Salvar.
           </DialogDescription>
-          {tripStartDate && tripEndDate && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mt-2 w-fit">
-              <CalendarIcon className="h-3.5 w-3.5" />
-              Período da viagem: {format(tripStartDate, "dd/MM", { locale: ptBR })} a {format(tripEndDate, "dd/MM/yyyy", { locale: ptBR })}
-            </div>
-          )}
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 pt-10 pb-4">
           <ServiceForm
             key={editingService?.id || `new-${serviceType}`}
             serviceType={serviceType}
