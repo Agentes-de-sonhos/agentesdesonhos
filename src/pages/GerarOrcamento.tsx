@@ -950,16 +950,21 @@ export default function GerarOrcamento() {
             }}
           />
         )}
-        renderPayment={() => (
+        renderPayment={() => {
+          const investOn = showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false;
+          const detailedOn = showDetailed;
+          const currentViewMode: "investment" | "detailed" | "both" =
+            investOn && detailedOn ? "both" : investOn ? "investment" : "detailed";
+          const activePaymentModeOptions = currentViewMode === "both"
+            ? PAYMENT_MODE_OPTIONS_BOTH
+            : PAYMENT_MODE_OPTIONS_INVESTMENT;
+          return (
           <div className="space-y-4">
                   {/* Tri-state display selector — centralizes financial display logic */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
                     {(() => {
-                      const investOn = showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false;
-                      const detailedOn = showDetailed;
-                      const currentMode: "investment" | "detailed" | "both" =
-                        investOn && detailedOn ? "both" : investOn ? "investment" : "detailed";
+                      const currentMode = currentViewMode;
                       const modes: { value: "investment" | "detailed" | "both"; label: string; description: string }[] = [
                         { value: "investment", label: "Valor Total do Orçamento", description: "Exibe apenas o valor total da viagem e as condições de pagamento." },
                         { value: "detailed", label: "Valores Detalhados por Serviço", description: "Exibe os valores individualmente para cada serviço do orçamento." },
@@ -1016,12 +1021,14 @@ export default function GerarOrcamento() {
                     })()}
                   </div>
 
-                  <Separator />
+                  {currentViewMode !== "detailed" && (
+                    <>
+                      <Separator />
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      {PAYMENT_MODE_OPTIONS.map((opt) => (
+                      {activePaymentModeOptions.map((opt) => (
                         <button
                           key={opt.value}
                           type="button"
@@ -1132,7 +1139,18 @@ export default function GerarOrcamento() {
                     </div>
                   )}
 
-                  <Separator />
+                      {paymentDisplayMode === "total_only" && quote && (
+                        <div className="rounded-lg bg-muted/50 p-3">
+                          <p className="text-sm font-medium text-primary">
+                            Destaque: <span className="font-bold">{fmt(quote.total_amount)}</span>
+                            <span className="text-xs text-muted-foreground ml-1">(valor total da viagem)</span>
+                          </p>
+                        </div>
+                      )}
+
+                      <Separator />
+                    </>
+                  )}
 
                   <div className="space-y-1.5">
                     <Label className="text-sm">Observações adicionais de pagamento</Label>
@@ -1148,7 +1166,8 @@ export default function GerarOrcamento() {
                     Salvar Configuração
                   </Button>
           </div>
-        )}
+          );
+        }}
         renderValidity={() => (
           <div className="space-y-3">
                   <div className="grid gap-4 sm:grid-cols-2">
