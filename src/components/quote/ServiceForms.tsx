@@ -2229,7 +2229,7 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
         {/* Render chooser behind so user returns there on close */}
         <FlightModeChooser onChoose={(m) => setMode(m)} />
         <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
-          <DialogContent className="max-w-5xl w-[95vw] h-[92vh] sm:h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+          <DialogContent className="max-w-5xl w-[95vw] max-h-[calc(100vh-48px)] p-0 gap-0 flex flex-col overflow-hidden">
             <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
               <DialogTitle>Preencher passagem aérea passo a passo</DialogTitle>
               <DialogDescription>
