@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveGooglePlacePhotoUrl } from "../_shared/google-photo.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -42,13 +43,27 @@ serve(async (req) => {
       );
     }
 
-    const photos = (data.result.photos || []).slice(0, 10).map((p: any) => ({
-      url: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`,
-      thumb_url: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&photo_reference=${p.photo_reference}&key=${GOOGLE_PLACES_API_KEY}`,
-      width: p.width,
-      height: p.height,
-      attributions: p.html_attributions || [],
-    }));
+    // Resolve every photo to its final googleusercontent.com URL so we
+    // never leak the API key in public HTML and avoid broken photo_reference
+    // tokens once Google rotates them.
+    const refs = (data.result.photos || []).slice(0, 10);
+    const resolved = await Promise.all(
+      refs.map(async (p: any) => {
+        const [full, thumb] = await Promise.all([
+          resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 1600),
+          resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 320),
+        ]);
+        if (!full) return null;
+        return {
+          url: full,
+          thumb_url: thumb || full,
+          width: p.width,
+          height: p.height,
+          attributions: p.html_attributions || [],
+        };
+      }),
+    );
+    const photos = resolved.filter(Boolean);
 
     return new Response(
       JSON.stringify({ hotel_name: data.result.name || "", photos }),
