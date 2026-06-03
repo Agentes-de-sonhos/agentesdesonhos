@@ -309,11 +309,16 @@ Deno.serve(async (req) => {
       text:
         "Este documento é um PACOTE DE VIAGEM COMPLETO com VÁRIOS serviços. " +
         expectedListPt +
-        " Separe cada serviço em um bloco individual no formato exato pedido em system. " +
-        "Crie 1 bloco por serviço (1 passeio = 1 bloco; 2 hospedagens distintas = 2 blocos). " +
-        "Se houver ida e volta no aéreo, mantenha em UM ÚNICO bloco flight com todos os voos. " +
-        "Se só houver valor total do pacote, coloque em trip_meta.total_amount e NÃO invente valor individual. " +
-        "SEMPRE chame extract_full_package.",
+        " Leia o documento INTEIRO antes de responder. Separe cada serviço em um bloco no formato exato do system prompt. " +
+        "Para CADA bloco, percorra TODOS os campos do schema do TYPE correspondente e preencha o MÁXIMO possível — não apenas nome/data/valor. " +
+        "Crie 1 bloco por serviço (1 passeio = 1 bloco; 2 hospedagens distintas = 2 blocos; ida+volta aéreo = 1 bloco flight com todos os voos). " +
+        "Para HOTEL preencha também: endereço, horários check-in/out, regime de alimentação, categoria do quarto, política de cancelamento, taxas, inclusos/não inclusos, código de reserva, fornecedor. " +
+        "Para VOOS preencha cada linha da tabela como um item em 'voos' com companhia, número, datas/horas, IATA, duração, cabine, base tarifária e bagagem. " +
+        "Para PASSEIOS/INGRESSOS preencha duração, ponto de encontro, quantidades adulto/criança, valor adulto/criança, inclusos e não inclusos. " +
+        "Para LOCAÇÃO preencha locadora, modelo, transmissão, retirada/devolução (local+endereço+data+hora), proteção, franquia e extras. " +
+        "Para TRANSFER preencha empresa, tipo (arrival/departure/round_trip), categoria (private/regular), trajeto, datas, horas e veículo. " +
+        "Se só houver valor total do pacote, coloque em trip_meta.total_amount e DEIXE os valores individuais como null. " +
+        "Retorne APENAS o JSON cru do envelope. NUNCA 'data': {} — se um bloco ficaria vazio, não o crie.",
     });
     if (text) userContent.push({ type: "text", text: `TEXTO DO DOCUMENTO:\n\n${text}` });
     if (fileBase64) {
@@ -332,7 +337,7 @@ Deno.serve(async (req) => {
         ],
         response_format: { type: "json_object" },
         temperature: 0,
-        max_tokens: 12000,
+        max_tokens: 24000,
       }),
     });
 
