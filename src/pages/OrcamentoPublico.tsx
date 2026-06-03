@@ -1103,8 +1103,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </section>
         )}
 
-        {/* ─── Destination Intro (text + extra images carousel) ─── */}
-        {(quote as any).show_destination_intro !== false && (introText || introImages.length > 1) && (
+        {/* ─── Destination Intro (auto-shown when content exists) ─── */}
+        {(introText || introImages.length > 1) && (
           <DestinationIntroPublic
             text={introText}
             images={introImages.slice(1)}

@@ -62,8 +62,8 @@ export function QuoteSettingsModal({
         </DialogHeader>
 
         {/* Step tabs */}
-        <div className="border-b bg-muted/30 px-3 sm:px-6 py-3 overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max">
+        <div className="border-b bg-muted/30 px-3 sm:px-6 py-3">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
               const isActive = s.key === active;

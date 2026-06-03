@@ -674,14 +674,13 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         <!-- Destination Intro (igual ao link público) -->
         ${(() => {
-          const showIntro = (quote as any).show_destination_intro !== false;
           const introText: string = (quote as any).destination_intro_text || "";
           const introImages: string[] = Array.isArray((quote as any).destination_intro_images)
             ? (quote as any).destination_intro_images
             : [];
           const hasText = !!introText.trim();
           const hasImages = introImages.length > 0;
-          if (!showIntro || (!hasText && !hasImages)) return "";
+          if (!hasText && !hasImages) return "";
 
           // PDF: APENAS a primeira imagem; layout 2 colunas (img 25% / texto 75%)
           const firstImg = hasImages ? introImages[0] : null;

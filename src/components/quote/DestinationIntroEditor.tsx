@@ -247,24 +247,10 @@ export function DestinationIntroEditor({
   if (embedded) {
     return (
       <div className="space-y-4">
-        {/* Toggle inside the collapsible body */}
-        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="show-destination-embedded" className="text-sm font-medium cursor-pointer">
-              Exibir apresentação do destino para o cliente
-            </Label>
-          </div>
-          <Switch
-            id="show-destination-embedded"
-            checked={enabled}
-            onCheckedChange={handleToggle}
-          />
-        </div>
-
-        {enabled && (
-          <>
-            {images.length > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          A apresentação do destino aparece automaticamente no orçamento quando há texto ou imagens. Se nenhum conteúdo for adicionado, a seção fica oculta para o cliente.
+        </p>
+        {images.length > 0 ? (
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {images.map((url, i) => (
                   <div key={i} className="relative shrink-0 group">
@@ -351,8 +337,6 @@ export function DestinationIntroEditor({
               rows={3}
               className="resize-none text-sm"
             />
-          </>
-        )}
       </div>
     );
   }
