@@ -53,7 +53,7 @@ export function QuoteSettingsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[92vh] sm:h-[88vh] p-0 flex flex-col gap-0 overflow-hidden">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-3 border-b">
           <DialogTitle>Configurações do Orçamento</DialogTitle>
           <DialogDescription>
