@@ -348,7 +348,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
           {step === "select-types" && (
             <SelectTypesStep expected={expected} toggleType={toggleType} />
           )}
@@ -383,7 +383,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
               onSkip={() => handleSkipBlock(activeBlockIdx)}
             />
           )}
-        </ScrollArea>
+        </div>
 
         <div className="border-t px-6 py-3 flex flex-wrap gap-2 justify-between items-center bg-muted/30">
           <StepIndicator step={step} />
