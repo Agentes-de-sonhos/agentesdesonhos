@@ -128,6 +128,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   const [statusByBlock, setStatusByBlock] = useState<Record<string, ReviewStatus>>({});
   const [activeBlockIdx, setActiveBlockIdx] = useState(0);
   const [hardError, setHardError] = useState<string | null>(null);
+  const [bulkImporting, setBulkImporting] = useState(false);
 
   /* progress animation */
   useEffect(() => {
@@ -293,6 +294,39 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
     const nextIdx = findNextPending(idx, blocks, { ...statusByBlock, [b.id]: "skipped" });
     if (nextIdx === -1) setStep("summary");
     else setActiveBlockIdx(nextIdx);
+  };
+
+  const handleImportAllPending = async () => {
+    const pendingBlocks = blocks.filter((b) => (statusByBlock[b.id] || "pending") === "pending");
+    if (pendingBlocks.length === 0) {
+      onOpenChange(false);
+      return;
+    }
+    setBulkImporting(true);
+    const newStatus = { ...statusByBlock };
+    let added = 0;
+    let failed = 0;
+    for (const b of pendingBlocks) {
+      const mapped = mapBlockToService(b);
+      if (!mapped) { failed++; continue; }
+      try {
+        await onConfirmService(mapped);
+        newStatus[b.id] = "confirmed";
+        added++;
+      } catch (e: any) {
+        failed++;
+        console.error("Bulk import failed for block", b.id, e);
+      }
+    }
+    setStatusByBlock(newStatus);
+    setBulkImporting(false);
+    setStep("summary");
+    toast({
+      title: failed === 0 ? "Pacote importado com sucesso" : "Importação parcial",
+      description: `${added} serviço(s) adicionado(s)${failed ? ` · ${failed} falhou(aram)` : ""}.`,
+      variant: failed === 0 ? "default" : "destructive",
+    });
+    if (failed === 0) onOpenChange(false);
   };
 
   const handleClose = () => onOpenChange(false);
