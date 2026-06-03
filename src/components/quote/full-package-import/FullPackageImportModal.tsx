@@ -306,27 +306,44 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
     const newStatus = { ...statusByBlock };
     let added = 0;
     let failed = 0;
+    const failures: string[] = [];
     for (const b of pendingBlocks) {
       const mapped = mapBlockToService(b);
-      if (!mapped) { failed++; continue; }
+      if (!mapped) {
+        failed++;
+        failures.push(`${b.label || b.type}: não foi possível mapear`);
+        console.error("[FullPackageImport] mapBlockToService returned null for block", b);
+        continue;
+      }
       try {
+        console.log("[FullPackageImport] confirming block", b.id, mapped);
         await onConfirmService(mapped);
         newStatus[b.id] = "confirmed";
         added++;
       } catch (e: any) {
         failed++;
-        console.error("Bulk import failed for block", b.id, e);
+        const msg = e?.message || String(e);
+        failures.push(`${b.label || b.type}: ${msg}`);
+        console.error("[FullPackageImport] onConfirmService failed for block", b.id, e);
       }
     }
     setStatusByBlock(newStatus);
     setBulkImporting(false);
     setStep("summary");
-    toast({
-      title: failed === 0 ? "Pacote importado com sucesso" : "Importação parcial",
-      description: `${added} serviço(s) adicionado(s)${failed ? ` · ${failed} falhou(aram)` : ""}.`,
-      variant: failed === 0 ? "default" : "destructive",
-    });
-    if (failed === 0) onOpenChange(false);
+    if (failed === 0) {
+      toast({
+        title: "Pacote importado com sucesso",
+        description: `${added} serviço(s) adicionado(s) ao orçamento.`,
+      });
+      onOpenChange(false);
+    } else {
+      toast({
+        title: added > 0 ? "Importação parcial" : "Nenhum serviço foi adicionado",
+        description: `${added} adicionado(s) · ${failed} falhou(aram).\n${failures.slice(0, 3).join("\n")}`,
+        variant: "destructive",
+      });
+      setHardError(`Falhas na importação:\n${failures.join("\n")}`);
+    }
   };
 
   const handleClose = () => onOpenChange(false);
@@ -349,6 +366,15 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
         </DialogHeader>
 
         <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+          {hardError && step !== "source" && step !== "processing" && (
+            <div className="mb-4 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive whitespace-pre-wrap">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <div className="flex-1">{hardError}</div>
+              <button type="button" onClick={() => setHardError(null)} className="text-destructive/70 hover:text-destructive">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
           {step === "select-types" && (
             <SelectTypesStep expected={expected} toggleType={toggleType} />
           )}
