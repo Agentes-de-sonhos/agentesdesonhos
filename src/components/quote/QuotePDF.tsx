@@ -815,6 +815,11 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:#0f172a;">Entrada de ${formatCurrency(entryValue)} + ${installments}x de ${formatCurrency(iv)}</p>
               <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
+          } else if (mode === "total_only") {
+            paymentHtml = `
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Valor total da viagem</p>
+              <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(total)}</p>
+            `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `

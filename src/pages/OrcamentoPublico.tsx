@@ -1150,6 +1150,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           const headlineTotal = mode === "full_payment" && discountPct > 0
             ? total * (1 - discountPct / 100)
             : total;
+          const isTotalOnly = mode === "total_only";
 
           let primaryDisplay: React.ReactNode = null;
           let secondaryDisplay: React.ReactNode = null;
@@ -1201,7 +1202,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 <span className="font-medium text-foreground/80">{formatCurrency(total)}</span>
               </div>
             );
-          } else if (discountPct > 0) {
+          } else if (!isTotalOnly && discountPct > 0) {
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
@@ -1222,19 +1223,19 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                  Investimento
+                  {isTotalOnly ? "Valor total da viagem" : "Investimento"}
                 </span>
                 <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
-                  {formatCurrency(headlineTotal)}
+                  {formatCurrency(total)}
                 </span>
-                {methodLabel && (
+                {!isTotalOnly && methodLabel && (
                   <span className="text-xs text-muted-foreground mt-1.5">{methodLabel}</span>
                 )}
               </div>
             );
-            secondaryDisplay = (
-              <p className="text-sm text-muted-foreground">Parcelamento disponível</p>
-            );
+            secondaryDisplay = isTotalOnly
+              ? null
+              : <p className="text-sm text-muted-foreground">Parcelamento disponível</p>;
           }
 
           return (
