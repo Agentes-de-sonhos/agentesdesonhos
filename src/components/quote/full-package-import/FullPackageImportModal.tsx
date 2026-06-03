@@ -128,6 +128,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   const [statusByBlock, setStatusByBlock] = useState<Record<string, ReviewStatus>>({});
   const [activeBlockIdx, setActiveBlockIdx] = useState(0);
   const [hardError, setHardError] = useState<string | null>(null);
+  const [bulkImporting, setBulkImporting] = useState(false);
 
   /* progress animation */
   useEffect(() => {
@@ -295,6 +296,39 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
     else setActiveBlockIdx(nextIdx);
   };
 
+  const handleImportAllPending = async () => {
+    const pendingBlocks = blocks.filter((b) => (statusByBlock[b.id] || "pending") === "pending");
+    if (pendingBlocks.length === 0) {
+      onOpenChange(false);
+      return;
+    }
+    setBulkImporting(true);
+    const newStatus = { ...statusByBlock };
+    let added = 0;
+    let failed = 0;
+    for (const b of pendingBlocks) {
+      const mapped = mapBlockToService(b);
+      if (!mapped) { failed++; continue; }
+      try {
+        await onConfirmService(mapped);
+        newStatus[b.id] = "confirmed";
+        added++;
+      } catch (e: any) {
+        failed++;
+        console.error("Bulk import failed for block", b.id, e);
+      }
+    }
+    setStatusByBlock(newStatus);
+    setBulkImporting(false);
+    setStep("summary");
+    toast({
+      title: failed === 0 ? "Pacote importado com sucesso" : "Importação parcial",
+      description: `${added} serviço(s) adicionado(s)${failed ? ` · ${failed} falhou(aram)` : ""}.`,
+      variant: failed === 0 ? "default" : "destructive",
+    });
+    if (failed === 0) onOpenChange(false);
+  };
+
   const handleClose = () => onOpenChange(false);
 
   /* ─────────────── Render ─────────────── */
@@ -361,6 +395,8 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
             blocks={blocks}
             statusByBlock={statusByBlock}
             activeBlockIdx={activeBlockIdx}
+            bulkImporting={bulkImporting}
+            onImportAll={handleImportAllPending}
             onBack={() => {
               if (step === "source") setStep("select-types");
               else if (step === "summary") setStep("source");
@@ -859,13 +895,15 @@ function StepActions(props: {
   blocks: AiBlock[];
   statusByBlock: Record<string, ReviewStatus>;
   activeBlockIdx: number;
+  bulkImporting: boolean;
+  onImportAll: () => void;
   onBack: () => void;
   onNext: () => void;
   onClose: () => void;
   onPrevBlock: () => void;
   onNextBlock: () => void;
 }) {
-  const { step, expected, uploadFile, pastedText, blocks, statusByBlock, onBack, onNext, onClose, onPrevBlock, onNextBlock } = props;
+  const { step, expected, uploadFile, pastedText, blocks, statusByBlock, bulkImporting, onImportAll, onBack, onNext, onClose, onPrevBlock, onNextBlock } = props;
 
   if (step === "select-types") {
     return (
@@ -893,12 +931,21 @@ function StepActions(props: {
   if (step === "summary") {
     const pending = blocks.filter((b) => statusByBlock[b.id] === "pending").length;
     return (
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button variant="ghost" onClick={onClose}>Fechar</Button>
         {pending > 0 && (
-          <Button onClick={onNext}>
-            Conferir {pending} pendente(s) <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
+          <>
+            <Button variant="outline" onClick={onNext} disabled={bulkImporting}>
+              Conferir 1 a 1 <ArrowRight className="h-4 w-4 ml-1" />
+            </Button>
+            <Button onClick={onImportAll} disabled={bulkImporting}>
+              {bulkImporting ? (
+                <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Importando…</>
+              ) : (
+                <><CheckCircle2 className="h-4 w-4 mr-1" /> Importar {pending} serviço(s)</>
+              )}
+            </Button>
+          </>
         )}
         {pending === 0 && blocks.length > 0 && (
           <Button onClick={onClose}><CheckCircle2 className="h-4 w-4 mr-1" /> Concluir</Button>
