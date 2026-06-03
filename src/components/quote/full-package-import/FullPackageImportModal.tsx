@@ -366,6 +366,15 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
         </DialogHeader>
 
         <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
+          {hardError && step !== "source" && step !== "processing" && (
+            <div className="mb-4 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive whitespace-pre-wrap">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <div className="flex-1">{hardError}</div>
+              <button type="button" onClick={() => setHardError(null)} className="text-destructive/70 hover:text-destructive">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
           {step === "select-types" && (
             <SelectTypesStep expected={expected} toggleType={toggleType} />
           )}
