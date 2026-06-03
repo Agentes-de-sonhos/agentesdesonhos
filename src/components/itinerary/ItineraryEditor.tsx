@@ -9,6 +9,7 @@ import {
   useSensors,
   useDroppable,
   DragOverlay,
+  closestCenter,
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
@@ -99,7 +100,7 @@ function DroppablePeriod({
 }) {
   const { setNodeRef, isOver: over } = useDroppable({
     id: `drop-${dayId}-${period}`,
-    data: { dayId, period },
+    data: { dayId, period, type: "period" },
   });
   return (
     <div
@@ -389,6 +390,7 @@ export function ItineraryEditor({
   return (
     <DndContext
       sensors={sensors}
+      collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveDragId(null)}
