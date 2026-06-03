@@ -313,7 +313,23 @@ export function AdminUserManager() {
       const resp = await supabase.functions.invoke("admin-create-user", {
         body: userData,
       });
-      if (resp.error) throw new Error(resp.error.message || "Erro ao criar usuário");
+      if (resp.error) {
+        let msg = resp.error.message || "Erro ao criar usuário";
+        try {
+          const ctx: any = (resp.error as any).context;
+          if (ctx && typeof ctx.json === "function") {
+            const body = await ctx.json();
+            if (body?.error) msg = body.error;
+          } else if (ctx && typeof ctx.text === "function") {
+            const text = await ctx.text();
+            try {
+              const parsed = JSON.parse(text);
+              if (parsed?.error) msg = parsed.error;
+            } catch {}
+          }
+        } catch {}
+        throw new Error(msg);
+      }
       if (resp.data?.error) throw new Error(resp.data.error);
       return resp.data;
     },
