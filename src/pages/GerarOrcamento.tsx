@@ -82,12 +82,18 @@ function formatDateShort(dateStr: string) {
   } catch { return dateStr; }
 }
 
-type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment";
+type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment" | "total_only";
 
-const PAYMENT_MODE_OPTIONS: { value: PaymentDisplayMode; label: string; description: string }[] = [
+const PAYMENT_MODE_OPTIONS_INVESTMENT: { value: PaymentDisplayMode; label: string; description: string }[] = [
   { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
   { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
   { value: "full_payment", label: "À vista", description: "Ex: R$ 24.000 à vista" },
+];
+
+const PAYMENT_MODE_OPTIONS_BOTH: { value: PaymentDisplayMode; label: string; description: string }[] = [
+  { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
+  { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
+  { value: "total_only", label: "Valor Total", description: "Exibe o valor consolidado da viagem sem destacar uma condição específica de pagamento." },
 ];
 
 const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
