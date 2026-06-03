@@ -231,10 +231,7 @@ function StepShell({
 }: { step: number; total: number; title: string; help?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs font-normal">Etapa {step} de {total}</Badge>
-        </div>
+      <div className="space-y-1">
         <h3 className="text-lg font-semibold">{title}</h3>
         {help && <p className="text-sm text-muted-foreground">{help}</p>}
       </div>
@@ -692,20 +689,19 @@ export function FlightWizard({
 
   return (
     <div className="space-y-4">
-      {/* Top bar: progress + open full form */}
+      {/* Top bar: title + compact step indicator */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Plane className="h-3.5 w-3.5" />
-          <span>Modo Assistido — Passagem Aérea</span>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+          <Plane className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">Modo Assistido — Passagem Aérea</span>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={() => onOpenFullForm(data)}
-          className="text-xs h-7">
-          <ExternalLink className="h-3 w-3 mr-1" /> Abrir edição completa
-        </Button>
+        <span className="text-xs font-medium text-muted-foreground tabular-nums shrink-0">
+          {step + 1}/{totalSteps}
+        </span>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden -mt-2">
         <div className="h-full bg-primary transition-all duration-300"
           style={{ width: `${((step + 1) / totalSteps) * 100}%` }} />
       </div>
