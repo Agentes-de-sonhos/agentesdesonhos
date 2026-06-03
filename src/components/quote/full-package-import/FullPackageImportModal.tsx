@@ -306,27 +306,44 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
     const newStatus = { ...statusByBlock };
     let added = 0;
     let failed = 0;
+    const failures: string[] = [];
     for (const b of pendingBlocks) {
       const mapped = mapBlockToService(b);
-      if (!mapped) { failed++; continue; }
+      if (!mapped) {
+        failed++;
+        failures.push(`${b.label || b.type}: não foi possível mapear`);
+        console.error("[FullPackageImport] mapBlockToService returned null for block", b);
+        continue;
+      }
       try {
+        console.log("[FullPackageImport] confirming block", b.id, mapped);
         await onConfirmService(mapped);
         newStatus[b.id] = "confirmed";
         added++;
       } catch (e: any) {
         failed++;
-        console.error("Bulk import failed for block", b.id, e);
+        const msg = e?.message || String(e);
+        failures.push(`${b.label || b.type}: ${msg}`);
+        console.error("[FullPackageImport] onConfirmService failed for block", b.id, e);
       }
     }
     setStatusByBlock(newStatus);
     setBulkImporting(false);
     setStep("summary");
-    toast({
-      title: failed === 0 ? "Pacote importado com sucesso" : "Importação parcial",
-      description: `${added} serviço(s) adicionado(s)${failed ? ` · ${failed} falhou(aram)` : ""}.`,
-      variant: failed === 0 ? "default" : "destructive",
-    });
-    if (failed === 0) onOpenChange(false);
+    if (failed === 0) {
+      toast({
+        title: "Pacote importado com sucesso",
+        description: `${added} serviço(s) adicionado(s) ao orçamento.`,
+      });
+      onOpenChange(false);
+    } else {
+      toast({
+        title: added > 0 ? "Importação parcial" : "Nenhum serviço foi adicionado",
+        description: `${added} adicionado(s) · ${failed} falhou(aram).\n${failures.slice(0, 3).join("\n")}`,
+        variant: "destructive",
+      });
+      setHardError(`Falhas na importação:\n${failures.join("\n")}`);
+    }
   };
 
   const handleClose = () => onOpenChange(false);
