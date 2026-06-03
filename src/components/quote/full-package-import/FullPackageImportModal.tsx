@@ -395,6 +395,8 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
             blocks={blocks}
             statusByBlock={statusByBlock}
             activeBlockIdx={activeBlockIdx}
+            bulkImporting={bulkImporting}
+            onImportAll={handleImportAllPending}
             onBack={() => {
               if (step === "source") setStep("select-types");
               else if (step === "summary") setStep("source");
