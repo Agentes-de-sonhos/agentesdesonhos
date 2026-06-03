@@ -931,6 +931,9 @@ export default function GerarOrcamento() {
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         initialStep={settingsStep}
+        onBeforeNavigate={async () => {
+          await Promise.all([handleSavePaymentConfig(), handleSaveValidity()]);
+        }}
         renderDestination={() => (
           <DestinationIntroEditor
             embedded
@@ -1162,9 +1165,6 @@ export default function GerarOrcamento() {
                     />
                   </div>
 
-                  <Button variant="outline" size="sm" onClick={() => handleSavePaymentConfig(true)}>
-                    Salvar Configuração
-                  </Button>
           </div>
           );
         }}
@@ -1195,9 +1195,6 @@ export default function GerarOrcamento() {
                       placeholder="Valores sujeitos à alteração..."
                     />
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleSaveValidity(true)}>
-                    Salvar
-                  </Button>
           </div>
         )}
         renderDocuments={() => (

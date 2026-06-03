@@ -25,6 +25,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialStep?: QuoteSettingsStep;
+  onBeforeNavigate?: () => Promise<void> | void;
   renderDestination: () => ReactNode;
   renderIncluded: () => ReactNode;
   renderPayment: () => ReactNode;
@@ -34,13 +35,25 @@ interface Props {
 }
 
 export function QuoteSettingsModal({
-  open, onOpenChange, initialStep = "destination",
+  open, onOpenChange, initialStep = "destination", onBeforeNavigate,
   renderDestination, renderIncluded, renderPayment, renderValidity, renderDocuments, renderAdvanced,
 }: Props) {
   const [active, setActive] = useState<QuoteSettingsStep>(initialStep);
   const idx = STEPS.findIndex(s => s.key === active);
   const isFirst = idx === 0;
   const isLast = idx === STEPS.length - 1;
+
+  const goToStep = async (key: QuoteSettingsStep) => {
+    try { await onBeforeNavigate?.(); } catch { /* noop */ }
+    setActive(key);
+  };
+
+  const handleClose = async (next: boolean) => {
+    if (!next) {
+      try { await onBeforeNavigate?.(); } catch { /* noop */ }
+    }
+    onOpenChange(next);
+  };
 
   const content: Record<QuoteSettingsStep, ReactNode> = {
     destination: renderDestination(),
@@ -52,7 +65,7 @@ export function QuoteSettingsModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-3 border-b">
           <DialogTitle>Configurações do Orçamento</DialogTitle>
@@ -72,7 +85,7 @@ export function QuoteSettingsModal({
                 <button
                   key={s.key}
                   type="button"
-                  onClick={() => setActive(s.key)}
+                  onClick={() => goToStep(s.key)}
                   className={cn(
                     "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap",
                     isActive
@@ -104,7 +117,7 @@ export function QuoteSettingsModal({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setActive(STEPS[Math.max(0, idx - 1)].key)}
+            onClick={() => goToStep(STEPS[Math.max(0, idx - 1)].key)}
             disabled={isFirst}
           >
             <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
@@ -113,11 +126,11 @@ export function QuoteSettingsModal({
             Etapa {idx + 1} de {STEPS.length} — você pode pular e voltar a qualquer momento. Alterações são salvas automaticamente.
           </span>
           {isLast ? (
-            <Button size="sm" onClick={() => onOpenChange(false)}>
+            <Button size="sm" onClick={() => handleClose(false)}>
               Concluir
             </Button>
           ) : (
-            <Button size="sm" onClick={() => setActive(STEPS[Math.min(STEPS.length - 1, idx + 1)].key)}>
+            <Button size="sm" onClick={() => goToStep(STEPS[Math.min(STEPS.length - 1, idx + 1)].key)}>
               Avançar <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           )}

@@ -38,6 +38,14 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quote?.id]);
 
+  // Debounced autosave whenever the list changes
+  useEffect(() => {
+    if (!dirty) return;
+    const t = setTimeout(() => { save(); }, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, dirty]);
+
   const update = (next: string[]) => {
     setItems(next);
     setDirty(true);
@@ -57,7 +65,7 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
         .eq("id", quote.id);
       if (error) throw error;
       setDirty(false);
-      toast.success(value === null ? "Sugestão automática restaurada" : "Lista salva");
+      if (value === null) toast.success("Sugestão automática restaurada");
       onUpdated?.();
     } catch (e: any) {
       toast.error("Não foi possível salvar a lista");
@@ -70,7 +78,6 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
     const fresh = computeAutoWhatsIncluded(quote);
     setItems(fresh);
     setDirty(true);
-    toast.info("Sugestão regerada — clique em Salvar para aplicar");
   };
 
   const restoreAuto = async () => {
@@ -145,18 +152,14 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
         })}
       </ul>
 
-      <Button type="button" variant="outline" size="sm" onClick={() => update([...items, ""])}>
-        <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar item
-      </Button>
-
-      <div className="flex items-center justify-end gap-2 pt-2 border-t">
-        <span className="text-xs text-muted-foreground mr-auto">
-          {dirty ? "Alterações não salvas" : "Tudo salvo"}
-        </span>
-        <Button type="button" size="sm" onClick={() => save()} disabled={saving || !dirty}>
-          {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
-          Salvar
+      <div className="flex items-center justify-between gap-2 pt-2">
+        <Button type="button" variant="outline" size="sm" onClick={() => update([...items, ""])}>
+          <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar item
         </Button>
+        <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+          {saving ? "Salvando…" : dirty ? "Alterações pendentes…" : "Todas as alterações são salvas automaticamente"}
+        </span>
       </div>
     </div>
   );
