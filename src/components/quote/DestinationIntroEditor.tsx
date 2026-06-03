@@ -270,16 +270,13 @@ export function DestinationIntroEditor({
                 {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                 Adicionar imagem
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openGooglePicker}
-                disabled={isResolvingPlace}
-                className="gap-2"
-              >
-                {isResolvingPlace ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
-                {googlePlaceId ? "Fechar fotos do Google" : "Buscar fotos no Google"}
-              </Button>
+              <InternetPhotosPicker
+                query={destination}
+                destination={destination}
+                existingUrls={images}
+                onPick={handleAddGooglePhotos}
+                triggerLabel="Buscar fotos da internet"
+              />
               <Button
                 variant="outline"
                 size="sm"
@@ -295,15 +292,6 @@ export function DestinationIntroEditor({
                 {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
               </Button>
             </div>
-
-            {googlePlaceId && (
-              <GoogleHotelPhotos
-                placeId={googlePlaceId}
-                onPhotosSelected={handleAddGooglePhotos}
-                existingUrls={images}
-                autoShow
-              />
-            )}
 
             <Textarea
               value={text}
