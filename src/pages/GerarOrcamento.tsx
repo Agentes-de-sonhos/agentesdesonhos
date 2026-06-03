@@ -952,29 +952,6 @@ export default function GerarOrcamento() {
         )}
         renderPayment={() => (
           <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-xl border bg-muted/30 px-4 py-3">
-              <div>
-                <p className="text-sm font-semibold">Exibir Apresentação do Investimento</p>
-                <p className="text-xs text-muted-foreground">
-                  Quando desligado, somente os valores detalhados por serviço aparecem para o cliente.
-                </p>
-              </div>
-              <Switch
-                id="show-investment-modal"
-                checked={showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false}
-                onCheckedChange={async (checked) => {
-                  if (!quote) return;
-                  setShowInvestmentLocal(checked);
-                  if (!checked) {
-                    setShowDetailedLocal(true);
-                    await supabase.from("quotes").update({ show_investment_section: false, show_detailed_prices: true } as any).eq("id", quote.id);
-                  } else {
-                    await supabase.from("quotes").update({ show_investment_section: true } as any).eq("id", quote.id);
-                  }
-                }}
-              />
-            </div>
-
                   {/* Tri-state display selector — centralizes financial display logic */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
@@ -984,9 +961,9 @@ export default function GerarOrcamento() {
                       const currentMode: "investment" | "detailed" | "both" =
                         investOn && detailedOn ? "both" : investOn ? "investment" : "detailed";
                       const modes: { value: "investment" | "detailed" | "both"; label: string; description: string }[] = [
-                        { value: "investment", label: "Apenas Apresentação do Investimento", description: "Mostra valor total e condições de pagamento." },
-                        { value: "detailed", label: "Apenas Valores Detalhados por Serviço", description: "Mostra o valor de cada serviço separadamente." },
-                        { value: "both", label: "Ambos (Apresentação + Valores Detalhados)", description: "Exibe a apresentação e o detalhamento por serviço." },
+                        { value: "investment", label: "Valor Total do Orçamento", description: "Exibe apenas o valor total da viagem e as condições de pagamento." },
+                        { value: "detailed", label: "Valores Detalhados por Serviço", description: "Exibe os valores individualmente para cada serviço do orçamento." },
+                        { value: "both", label: "Valor Total + Valores Detalhados", description: "Exibe os valores de cada serviço e também o valor total consolidado da viagem." },
                       ];
                       const applyMode = async (mode: "investment" | "detailed" | "both") => {
                         if (!quote) return;
@@ -994,6 +971,12 @@ export default function GerarOrcamento() {
                         const nextDetailed = mode === "detailed" || mode === "both";
                         setShowInvestmentLocal(nextInvestment);
                         setShowDetailedLocal(nextDetailed);
+                        // Normalize payment_display_mode when switching between investment/both
+                        if (mode === "both" && paymentDisplayMode === "full_payment") {
+                          setPaymentDisplayMode("total_only");
+                        } else if (mode === "investment" && paymentDisplayMode === "total_only") {
+                          setPaymentDisplayMode("full_payment");
+                        }
                         await supabase
                           .from("quotes")
                           .update({
