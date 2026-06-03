@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, Sparkles, MapPin, X, Upload, Camera } from "lucide-react";
+import { Loader2, Sparkles, MapPin, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
+import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
 
 interface DestinationIntroEditorProps {
   quoteId: string;
@@ -37,8 +37,6 @@ export function DestinationIntroEditor({
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFetchingPhotos, setIsFetchingPhotos] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [googlePlaceId, setGooglePlaceId] = useState<string | null>(null);
-  const [isResolvingPlace, setIsResolvingPlace] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -199,29 +197,6 @@ export function DestinationIntroEditor({
     await saveToDb({ destination_intro_images: updated });
   };
 
-  const openGooglePicker = async () => {
-    if (googlePlaceId) {
-      setGooglePlaceId(null); // toggle off
-      return;
-    }
-    setIsResolvingPlace(true);
-    try {
-      const firstCity = destination.split(",")[0]?.trim() || destination;
-      const { data } = await supabase.functions.invoke("places-autocomplete", {
-        body: { input: firstCity, place_type: "city" },
-      });
-      const pid = data?.predictions?.[0]?.place_id;
-      if (pid) {
-        setGooglePlaceId(pid);
-      } else {
-        toast({ title: "Não encontramos esse destino no Google", variant: "destructive" });
-      }
-    } catch {
-      toast({ title: "Erro ao buscar destino", variant: "destructive" });
-    } finally {
-      setIsResolvingPlace(false);
-    }
-  };
 
   if (!enabled && !embedded) {
     return (
@@ -295,16 +270,13 @@ export function DestinationIntroEditor({
                 {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
                 Adicionar imagem
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={openGooglePicker}
-                disabled={isResolvingPlace}
-                className="gap-2"
-              >
-                {isResolvingPlace ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
-                {googlePlaceId ? "Fechar fotos do Google" : "Buscar fotos no Google"}
-              </Button>
+              <InternetPhotosPicker
+                query={destination}
+                destination={destination}
+                existingUrls={images}
+                onPick={handleAddGooglePhotos}
+                triggerLabel="Buscar fotos da internet"
+              />
               <Button
                 variant="outline"
                 size="sm"
@@ -320,15 +292,6 @@ export function DestinationIntroEditor({
                 {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
               </Button>
             </div>
-
-            {googlePlaceId && (
-              <GoogleHotelPhotos
-                placeId={googlePlaceId}
-                onPhotosSelected={handleAddGooglePhotos}
-                existingUrls={images}
-                autoShow
-              />
-            )}
 
             <Textarea
               value={text}
@@ -402,26 +365,14 @@ export function DestinationIntroEditor({
             {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
             Adicionar imagem
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={openGooglePicker}
-            disabled={isResolvingPlace}
-            className="gap-2"
-          >
-            {isResolvingPlace ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
-            {googlePlaceId ? "Fechar fotos do Google" : "Buscar fotos no Google"}
-          </Button>
-        </div>
-
-        {googlePlaceId && (
-          <GoogleHotelPhotos
-            placeId={googlePlaceId}
-            onPhotosSelected={handleAddGooglePhotos}
+          <InternetPhotosPicker
+            query={destination}
+            destination={destination}
             existingUrls={images}
-            autoShow
+            onPick={handleAddGooglePhotos}
+            triggerLabel="Buscar fotos da internet"
           />
-        )}
+        </div>
 
         {/* Text */}
         <Textarea

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Star, Trash2, Plus, ImageIcon, Link2, Search } from "lucide-react";
+import { Loader2, Star, Trash2, Plus, ImageIcon, Link2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
 import type { Itinerary, ItineraryDay } from "@/types/itinerary";
 
 interface PublishReviewDialogProps {
@@ -45,7 +46,6 @@ export function PublishReviewDialog({
   const [showIntro, setShowIntro] = useState(itinerary.showDestinationIntro !== false);
   const [newUrl, setNewUrl] = useState("");
   const [saving, setSaving] = useState(false);
-  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -56,38 +56,10 @@ export function PublishReviewDialog({
     }
   }, [open, itinerary]);
 
-  const handleSearchPhotos = async () => {
-    setSearching(true);
-    try {
-      // Step 1: autocomplete to get a place_id
-      const { data: ac, error: acErr } = await supabase.functions.invoke("places-autocomplete", {
-        body: { input: itinerary.destination, place_type: "city" },
-      });
-      if (acErr) throw acErr;
-      const placeId = ac?.predictions?.[0]?.place_id;
-      if (!placeId) {
-        toast.info("Nenhuma foto encontrada para este destino.");
-        return;
-      }
-      // Step 2: fetch details to get photo_urls
-      const { data: det, error: detErr } = await supabase.functions.invoke("places-autocomplete", {
-        body: { fetch_details: true, place_id: placeId },
-      });
-      if (detErr) throw detErr;
-      const photos: string[] = (det?.place?.photo_urls || []).filter(Boolean);
-      if (photos.length === 0) {
-        toast.info("Nenhuma foto encontrada para este destino.");
-      } else {
-        const merged = Array.from(new Set([...images, ...photos]));
-        setImages(merged);
-        if (!coverUrl && merged[0]) setCoverUrl(merged[0]);
-        toast.success(`${photos.length} foto(s) adicionada(s).`);
-      }
-    } catch (e: any) {
-      toast.error("Erro ao buscar fotos do destino.");
-    } finally {
-      setSearching(false);
-    }
+  const handlePickedPhotos = (picked: string[]) => {
+    const merged = Array.from(new Set([...images, ...picked]));
+    setImages(merged);
+    if (!coverUrl && merged[0]) setCoverUrl(merged[0]);
   };
 
   const handleAddUrl = () => {
@@ -182,16 +154,13 @@ export function PublishReviewDialog({
                 <ImageIcon className="h-4 w-4" />
                 Galeria de fotos
               </Label>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={handleSearchPhotos}
-                disabled={searching}
-              >
-                {searching ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
-                Buscar fotos do destino
-              </Button>
+              <InternetPhotosPicker
+                query={itinerary.destination}
+                destination={itinerary.destination}
+                existingUrls={images}
+                onPick={handlePickedPhotos}
+                triggerLabel="Buscar fotos da internet"
+              />
             </div>
 
             {images.length === 0 ? (
