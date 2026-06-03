@@ -231,10 +231,7 @@ function StepShell({
 }: { step: number; total: number; title: string; help?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs font-normal">Etapa {step} de {total}</Badge>
-        </div>
+      <div className="space-y-1">
         <h3 className="text-lg font-semibold">{title}</h3>
         {help && <p className="text-sm text-muted-foreground">{help}</p>}
       </div>
