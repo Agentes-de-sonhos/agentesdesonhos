@@ -184,9 +184,14 @@ function TripWalletContent() {
           attachments.push(result);
         }
       }
+      const mergedServiceData = {
+        ...(serviceData || {}),
+        ...(addSupplier.operator_id ? { supplier_operator_id: addSupplier.operator_id } : {}),
+        ...(addSupplier.supplier_name ? { supplier_name: addSupplier.supplier_name } : {}),
+      };
       await addService({ 
         service_type: selectedServiceType, 
-        service_data: serviceData, 
+        service_data: mergedServiceData, 
         voucher_url: attachments[0]?.url, 
         voucher_name: attachments[0]?.name,
         attachments,
@@ -196,6 +201,7 @@ function TripWalletContent() {
       setSelectedServiceType(null);
       setAddPlaceId(null);
       setAddImageUrls([]);
+      setAddSupplier({ operator_id: null, supplier_name: "" });
     } finally {
       setIsUploading(false);
     }
@@ -235,9 +241,16 @@ function TripWalletContent() {
           newAttachments.push(result);
         }
       }
+      const mergedServiceData = {
+        ...(serviceData || {}),
+        supplier_operator_id: editSupplier.operator_id ?? null,
+        ...(editSupplier.supplier_name
+          ? { supplier_name: editSupplier.supplier_name }
+          : { supplier_name: null }),
+      };
       await updateService({
         serviceId: editingService.id,
-        service_data: serviceData,
+        service_data: mergedServiceData,
         ...(newAttachments ? { 
           voucher_url: newAttachments[0]?.url, 
           voucher_name: newAttachments[0]?.name,
