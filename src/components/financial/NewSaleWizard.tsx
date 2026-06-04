@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Calendar as CalendarIcon, Check, ChevronRight,
-  Download, FileText, Loader2, MapPin, Package, Pencil, Plus, Receipt,
+  Download, FileText, Loader2, MapPin, Package, Pencil, Plus, Receipt, Search, Wallet,
   Trash2, User as UserIcon, Users, Wand2,
 } from "lucide-react";
 
@@ -28,10 +28,10 @@ import { ClientSelector } from "@/components/shared/ClientSelector";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 
-import { useFinancial } from "@/hooks/useFinancial";
+import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
 import { useSellers } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
-import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
+import { useAgencySupplierTerms, type SupplierTerms } from "@/hooks/useAgencySupplierTerms";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,10 +40,13 @@ import { PRODUCT_TYPES } from "@/types/financial";
 
 // ------------- types -------------
 
-type WizardStep = "origin" | "client" | "destination" | "date" | "products" | "review";
-const STEP_ORDER: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
+type WizardStep = "origin" | "opportunity" | "source" | "client" | "destination" | "date" | "products" | "review";
+const MANUAL_STEPS: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
+const CRM_STEPS: WizardStep[] = ["origin", "opportunity", "source", "review"];
 const STEP_LABELS: Record<WizardStep, string> = {
   origin: "Origem",
+  opportunity: "Oportunidade",
+  source: "Fonte",
   client: "Cliente",
   destination: "Destino",
   date: "Data",
