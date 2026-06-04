@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import {
   Dialog,
   DialogContent,
@@ -73,6 +74,7 @@ export function CashFlowManager() {
   
   const [supplierFormData, setSupplierFormData] = useState<SupplierPaymentFormData>({
     supplier_name: "",
+    operator_id: null,
     amount: 0,
     payment_date: new Date().toISOString().split("T")[0],
     payment_method: "pix",
@@ -125,6 +127,7 @@ export function CashFlowManager() {
     setIsSupplierDialogOpen(false);
     setSupplierFormData({
       supplier_name: "",
+      operator_id: null,
       amount: 0,
       payment_date: new Date().toISOString().split("T")[0],
       payment_method: "pix",
@@ -449,10 +452,12 @@ export function CashFlowManager() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Nome do Fornecedor</Label>
-              <Input
-                value={supplierFormData.supplier_name}
-                onChange={(e) => setSupplierFormData({ ...supplierFormData, supplier_name: e.target.value })}
-                placeholder="Nome do fornecedor"
+              <SupplierSelector
+                value={{
+                  operator_id: supplierFormData.operator_id ?? null,
+                  supplier_name: supplierFormData.supplier_name || "",
+                }}
+                onChange={(v) => setSupplierFormData({ ...supplierFormData, supplier_name: v.supplier_name, operator_id: v.operator_id })}
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">

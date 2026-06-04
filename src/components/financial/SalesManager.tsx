@@ -7,6 +7,7 @@ import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRigh
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
+import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
     product_type: "aereo", description: "", sale_price: 0,
     cost_price: 0, non_commissionable_taxes: 0, commission_type: "percentage", commission_value: 0,
     payment_rule: "after_sale", payment_days: 30, requires_invoice: false,
+    supplier_name: "", operator_id: null,
   };
   const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
 
@@ -205,6 +207,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
       non_commissionable_taxes: Number((product as any).non_commissionable_taxes) || 0,
       commission_type: product.commission_type, commission_value: Number(product.commission_value),
       supplier_name: (product as any).supplier_name || "",
+      operator_id: (product as any).operator_id || null,
       payment_rule: (product as any).payment_rule || "after_sale",
       payment_days: (product as any).payment_days || 30,
       expected_date: (product as any).expected_date || "",
@@ -596,7 +599,13 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Fornecedor</Label>
-                <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
+                <SupplierSelector
+                  value={{
+                    operator_id: productFormData.operator_id ?? null,
+                    supplier_name: productFormData.supplier_name || "",
+                  }}
+                  onChange={(v) => setProductFormData({ ...productFormData, supplier_name: v.supplier_name, operator_id: v.operator_id })}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Preço de Venda *</Label>

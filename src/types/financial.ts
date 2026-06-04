@@ -22,6 +22,8 @@ export interface SaleProduct {
   cost_price: number;
   commission_type: 'percentage' | 'fixed';
   commission_value: number;
+  operator_id?: string | null;
+  supplier_name?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +70,7 @@ export interface SupplierPayment {
   sale_id: string | null;
   sale_product_id: string | null;
   supplier_name: string;
+  operator_id?: string | null;
   amount: number;
   payment_date: string;
   payment_method: string;
@@ -195,6 +198,7 @@ export interface SaleProductFormData {
   commission_type: 'percentage' | 'fixed';
   commission_value: number;
   supplier_name?: string;
+  operator_id?: string | null;
   payment_rule: string;
   payment_days: number;
   expected_date?: string;
@@ -217,6 +221,7 @@ export interface SupplierPaymentFormData {
   sale_id?: string;
   sale_product_id?: string;
   supplier_name: string;
+  operator_id?: string | null;
   amount: number;
   payment_date: string;
   payment_method: string;
