@@ -30,6 +30,7 @@ export interface CommissionReceivable {
   destination: string;
   sale_date: string;
   commission_amount: number;
+  received_amount: number;
 }
 
 function calculateCommission(p: { sale_price: number; non_commissionable_taxes: number; commission_type: string; commission_value: number }): number {
@@ -60,6 +61,7 @@ export function useCommissionsReceivable() {
         destination: row.sale?.destination || "",
         sale_date: row.sale?.sale_date || "",
         commission_amount: calculateCommission(row),
+        received_amount: Number(row.received_amount) || 0,
         status: row.commission_status || "previsao_criada",
       })) as CommissionReceivable[];
     },

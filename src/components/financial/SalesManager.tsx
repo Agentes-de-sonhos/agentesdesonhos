@@ -523,7 +523,18 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Valor Total da Venda</Label>
-                <Input type="number" value={formData.sale_amount} onChange={(e) => setFormData({ ...formData, sale_amount: Number(e.target.value) })} placeholder="0,00" />
+                <Input
+                  type="number"
+                  value={formData.sale_amount}
+                  onChange={(e) => setFormData({ ...formData, sale_amount: Number(e.target.value) })}
+                  placeholder="0,00"
+                  disabled={!!editingSaleId}
+                />
+                {editingSaleId && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Calculado automaticamente pela soma dos produtos vendidos.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Data da Venda</Label>

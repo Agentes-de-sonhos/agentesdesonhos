@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FileText, Send, Edit, FilePlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -24,6 +28,7 @@ export function InvoicesCenter({ commissions }: { commissions: CommissionReceiva
   const qc = useQueryClient();
   const [filter, setFilter] = useState<string>("all");
   const [editing, setEditing] = useState<CommissionReceivable | null>(null);
+  const [confirmDispense, setConfirmDispense] = useState<CommissionReceivable | null>(null);
 
   const needsInvoice = useMemo(
     () => commissions.filter(c => c.requires_invoice && c.status !== "cancelado"),
@@ -125,7 +130,7 @@ export function InvoicesCenter({ commissions }: { commissions: CommissionReceiva
                           </Button>
                         )}
                         {status !== "dispensada" && (
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => markDispensed(c)} title="Dispensar NF">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => setConfirmDispense(c)} title="Dispensar NF">
                             Dispensar
                           </Button>
                         )}
@@ -153,6 +158,29 @@ export function InvoicesCenter({ commissions }: { commissions: CommissionReceiva
           isSaving={mutate.isPending}
         />
       )}
+
+      <AlertDialog open={!!confirmDispense} onOpenChange={(v) => !v && setConfirmDispense(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Dispensar nota fiscal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação marcará esta comissão como dispensada de nota fiscal. Use apenas
+              quando o fornecedor não exigir NF para pagamento.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (confirmDispense) markDispensed(confirmDispense);
+                setConfirmDispense(null);
+              }}
+            >
+              Confirmar dispensa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

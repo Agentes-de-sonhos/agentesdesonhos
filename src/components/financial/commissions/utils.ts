@@ -16,8 +16,15 @@ export const isActive = (c: CommissionReceivable) =>
 
 export const isReceived = (c: CommissionReceivable) => c.status === "recebido";
 
+export const isPartial = (c: CommissionReceivable) =>
+  c.status === "recebido_parcial" ||
+  (isActive(c) && !isReceived(c) && (Number(c.received_amount) || 0) > 0);
+
+export const remainingAmount = (c: CommissionReceivable) =>
+  Math.max((Number(c.commission_amount) || 0) - (Number(c.received_amount) || 0), 0);
+
 export const isOverdue = (c: CommissionReceivable) =>
-  isActive(c) && !isReceived(c) && !!c.expected_date && c.expected_date < todayStr();
+  isActive(c) && !isReceived(c) && remainingAmount(c) > 0 && !!c.expected_date && c.expected_date < todayStr();
 
 export const isDueWithin = (c: CommissionReceivable, days: number) => {
   if (!isActive(c) || isReceived(c) || !c.expected_date) return false;

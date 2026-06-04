@@ -130,11 +130,11 @@ export default function Financeiro() {
 
 
           {showPeriodSelector && (
-            <div className="absolute top-0 right-0 flex items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2 md:mt-0 md:absolute md:top-0 md:right-0">
               <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-foreground" onClick={goToPrevMonth}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="text-center min-w-[140px]">
+              <div className="text-center min-w-[120px] md:min-w-[140px]">
                 <span className="text-sm font-semibold">{periodLabel}</span>
               </div>
               <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-foreground" onClick={goToNextMonth}>
