@@ -611,6 +611,56 @@ function StepClient({
   );
 }
 
+function StepConfirm({
+  client, destination, setDestination, saleDate, setSaleDate, notes, setNotes, importSourceLabel,
+}: {
+  client: { id: string; name: string } | null;
+  destination: string;
+  setDestination: (v: string) => void;
+  saleDate: string;
+  setSaleDate: (v: string) => void;
+  notes: string;
+  setNotes: (v: string) => void;
+  importSourceLabel?: string;
+}) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-base font-semibold">Confirme os dados da venda</h3>
+        <p className="text-xs text-muted-foreground">
+          Revise as informações importadas da oportunidade antes de criar a venda.
+          {importSourceLabel ? ` Produtos importados de: ${importSourceLabel}.` : ""}
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs">Cliente</Label>
+        <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm">
+          <UserIcon className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">{client?.name || "—"}</span>
+          <Badge variant="outline" className="ml-auto text-[10px]">vindo da oportunidade</Badge>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Label className="text-xs">Destino</Label>
+          <Input value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="Ex: Paris, Cancún…" />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs">Data da venda</Label>
+          <Input type="date" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label className="text-xs">Observações</Label>
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[80px]" placeholder="Anotações internas (opcional)" />
+      </div>
+    </div>
+  );
+}
+
 function StepDestination({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="space-y-4">
