@@ -40,13 +40,14 @@ import { PRODUCT_TYPES } from "@/types/financial";
 
 // ------------- types -------------
 
-type WizardStep = "origin" | "opportunity" | "source" | "client" | "destination" | "date" | "products" | "review";
+type WizardStep = "origin" | "opportunity" | "source" | "confirm" | "client" | "destination" | "date" | "products" | "review";
 const MANUAL_STEPS: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
-const CRM_STEPS: WizardStep[] = ["origin", "opportunity", "source", "review"];
+const CRM_STEPS: WizardStep[] = ["origin", "opportunity", "source", "confirm", "review"];
 const STEP_LABELS: Record<WizardStep, string> = {
   origin: "Origem",
   opportunity: "Oportunidade",
   source: "Fonte",
+  confirm: "Confirmar",
   client: "Cliente",
   destination: "Destino",
   date: "Data",
@@ -315,6 +316,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       case "origin": return origin === "manual" || origin === "crm";
       case "opportunity": return !!opportunityId;
       case "source": return !!sourceKind && products.length > 0 && !importing;
+      case "confirm": return !!client && destination.trim().length > 1 && !!saleDate;
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
       case "date": return !!saleDate;
