@@ -15,11 +15,11 @@ interface PromoBarProps {
 }
 
 export function PromoBar({ onCtaClick }: PromoBarProps) {
-  // 31 de maio às 23:59 (horário local do usuário). Ano corrente, ou próximo se já passou.
+  // 30 de junho às 23:59 (horário local do usuário). Ano corrente, ou próximo se já passou.
   const target = (() => {
     const now = new Date();
-    const year = now.getMonth() > 4 || (now.getMonth() === 4 && now.getDate() > 31) ? now.getFullYear() + 1 : now.getFullYear();
-    return new Date(year, 4, 31, 23, 59, 0, 0);
+    const year = now.getMonth() > 5 || (now.getMonth() === 5 && now.getDate() > 30) ? now.getFullYear() + 1 : now.getFullYear();
+    return new Date(year, 5, 30, 23, 59, 0, 0);
   })();
 
   const [remaining, setRemaining] = useState(() => getRemaining(target));
@@ -41,7 +41,7 @@ export function PromoBar({ onCtaClick }: PromoBarProps) {
       <div className="mx-auto flex min-h-[26px] max-w-7xl flex-wrap items-center justify-center gap-x-2 gap-y-0.5 px-4 py-1 text-center">
         <span className="inline-flex items-center gap-1.5">
           <Sparkles className="h-3 w-3" />
-          50% de desconto até 31 de maio
+          50% de desconto até 30 de junho
         </span>
         <span className="text-primary-foreground/60 hidden sm:inline">|</span>
         <span className="text-primary-foreground/90">Sem fidelidade</span>
