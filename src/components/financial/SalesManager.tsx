@@ -606,7 +606,42 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                     operator_id: productFormData.operator_id ?? null,
                     supplier_name: productFormData.supplier_name || "",
                   }}
-                  onChange={(v) => setProductFormData({ ...productFormData, supplier_name: v.supplier_name, operator_id: v.operator_id })}
+                  onChange={(v) => {
+                    setProductFormData((prev) => {
+                      const next: SaleProductFormData = {
+                        ...prev,
+                        supplier_name: v.supplier_name,
+                        operator_id: v.operator_id,
+                      };
+                      // Auto-fill from agency_supplier_terms only when creating a new product
+                      // and the supplier actually changed to a structured one.
+                      const changedOperator = v.operator_id && v.operator_id !== prev.operator_id;
+                      if (!editingProductId && changedOperator) {
+                        const t = termsData?.byOperator.get(v.operator_id!);
+                        if (t) {
+                          if (t.default_commission_type) {
+                            next.commission_type = t.default_commission_type as 'percentage' | 'fixed';
+                            if (t.default_commission_type === 'percentage' && t.default_commission_percent != null) {
+                              next.commission_value = Number(t.default_commission_percent);
+                            } else if (t.default_commission_type === 'fixed' && t.default_commission_fixed != null) {
+                              next.commission_value = Number(t.default_commission_fixed);
+                            }
+                          }
+                          if (t.default_non_commissionable_fees != null) {
+                            next.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
+                          }
+                          if (t.payment_rule && t.payment_rule !== 'manual') {
+                            next.payment_rule = t.payment_rule as any;
+                          }
+                          if (t.payment_days != null) {
+                            next.payment_days = Number(t.payment_days);
+                          }
+                          next.requires_invoice = !!t.requires_invoice;
+                        }
+                      }
+                      return next;
+                    });
+                  }}
                 />
               </div>
               <div className="space-y-2">
