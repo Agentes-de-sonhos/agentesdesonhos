@@ -29,6 +29,7 @@ import { Sparkles, FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
 import { ImportQuoteAsNewWalletDialog } from "@/components/trip/ImportQuoteAsNewWalletDialog";
 import { ClientSelector } from "@/components/shared/ClientSelector";
+import { SupplierSelector, type SupplierSelectorValue } from "@/components/financial/SupplierSelector";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,13 +86,22 @@ function TripWalletContent() {
   // Hotel autocomplete / gallery state for ADD flow
   const [addPlaceId, setAddPlaceId] = useState<string | null>(null);
   const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
+  // Supplier (tour_operators) link for the ADD flow
+  const [addSupplier, setAddSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
   // Hotel place id for EDIT flow (mirrors DB and is updated when user picks new prediction)
   const [editPlaceId, setEditPlaceId] = useState<string | null>(null);
+  // Supplier (tour_operators) link for the EDIT flow
+  const [editSupplier, setEditSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
   const editingService = editingServiceId
     ? trip?.services?.find((s) => s.id === editingServiceId) ?? null
     : null;
   useEffect(() => {
     setEditPlaceId(editingService?.place_id ?? null);
+    const sd = (editingService?.service_data as any) || {};
+    setEditSupplier({
+      operator_id: sd?.supplier_operator_id ?? null,
+      supplier_name: sd?.supplier_name ?? "",
+    });
   }, [editingServiceId, editingService?.place_id]);
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -174,9 +184,14 @@ function TripWalletContent() {
           attachments.push(result);
         }
       }
+      const mergedServiceData = {
+        ...(serviceData || {}),
+        ...(addSupplier.operator_id ? { supplier_operator_id: addSupplier.operator_id } : {}),
+        ...(addSupplier.supplier_name ? { supplier_name: addSupplier.supplier_name } : {}),
+      };
       await addService({ 
         service_type: selectedServiceType, 
-        service_data: serviceData, 
+        service_data: mergedServiceData, 
         voucher_url: attachments[0]?.url, 
         voucher_name: attachments[0]?.name,
         attachments,
@@ -186,6 +201,7 @@ function TripWalletContent() {
       setSelectedServiceType(null);
       setAddPlaceId(null);
       setAddImageUrls([]);
+      setAddSupplier({ operator_id: null, supplier_name: "" });
     } finally {
       setIsUploading(false);
     }
@@ -225,9 +241,16 @@ function TripWalletContent() {
           newAttachments.push(result);
         }
       }
+      const mergedServiceData = {
+        ...(serviceData || {}),
+        supplier_operator_id: editSupplier.operator_id ?? null,
+        ...(editSupplier.supplier_name
+          ? { supplier_name: editSupplier.supplier_name }
+          : { supplier_name: null }),
+      };
       await updateService({
         serviceId: editingService.id,
-        service_data: serviceData,
+        service_data: mergedServiceData,
         ...(newAttachments ? { 
           voucher_url: newAttachments[0]?.url, 
           voucher_name: newAttachments[0]?.name,
@@ -609,6 +632,13 @@ function TripWalletContent() {
               {selectedServiceType && !editingService ? (
                   <div className="space-y-4">
                     <h3 className="font-medium">{SERVICE_TYPE_LABELS[selectedServiceType]}</h3>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">Fornecedor</label>
+                      <SupplierSelector value={addSupplier} onChange={setAddSupplier} />
+                      <p className="text-xs text-muted-foreground">
+                        Selecione um fornecedor cadastrado ou digite livremente.
+                      </p>
+                    </div>
                     <PassengerPoolProvider services={trip.services || []}>
                       <TripServiceForm
                         serviceType={selectedServiceType}
@@ -692,6 +722,13 @@ function TripWalletContent() {
               </DialogHeader>
               {editingService && selectedServiceType && (
                 <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Fornecedor</label>
+                    <SupplierSelector value={editSupplier} onChange={setEditSupplier} />
+                    <p className="text-xs text-muted-foreground">
+                      Selecione um fornecedor cadastrado ou digite livremente.
+                    </p>
+                  </div>
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}

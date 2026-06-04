@@ -7,6 +7,8 @@ import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useEffect, useState } from "react";
+import { SupplierSelector, type SupplierSelectorValue } from "@/components/financial/SupplierSelector";
 
 interface Props {
   open: boolean;
@@ -49,6 +51,39 @@ export function ServiceModal(props: Props) {
     ? (serviceCountByType[serviceType] || 0) + 1
     : null;
 
+  const initialSupplier: SupplierSelectorValue = (() => {
+    const sd: any = editingService?.service_data || {};
+    return {
+      operator_id: sd?.supplier_operator_id ?? null,
+      supplier_name: sd?.supplier_name ?? "",
+    };
+  })();
+  const [supplier, setSupplier] = useState<SupplierSelectorValue>(initialSupplier);
+  useEffect(() => {
+    const sd: any = editingService?.service_data || {};
+    setSupplier({
+      operator_id: sd?.supplier_operator_id ?? null,
+      supplier_name: sd?.supplier_name ?? "",
+    });
+    // Reset when modal closes/opens or target service changes
+  }, [editingService?.id, serviceType, open]);
+
+  const handleSubmit = (
+    service_data: ServiceData,
+    amount: number,
+    option_label?: string,
+    description?: string,
+    image_url?: string,
+    image_urls?: string[],
+  ) => {
+    const merged: any = {
+      ...(service_data as any),
+      supplier_operator_id: supplier.operator_id ?? null,
+      supplier_name: supplier.supplier_name || null,
+    };
+    return onSubmit(merged, amount, option_label, description, image_url, image_urls);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden">
@@ -61,10 +96,17 @@ export function ServiceModal(props: Props) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 pt-10 pb-4">
+          <div className="mb-4 space-y-1.5">
+            <label className="text-sm font-medium">Fornecedor</label>
+            <SupplierSelector value={supplier} onChange={setSupplier} />
+            <p className="text-xs text-muted-foreground">
+              Selecione um fornecedor cadastrado ou digite livremente.
+            </p>
+          </div>
           <ServiceForm
             key={editingService?.id || `new-${serviceType}`}
             serviceType={serviceType}
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit}
             onCancel={() => onOpenChange(false)}
             isLoading={isLoading}
             showOptionLabel={isMulti}
