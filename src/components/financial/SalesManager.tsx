@@ -8,6 +8,7 @@ import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
+import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   const { sellers } = useSellers();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { data: termsData } = useAgencySupplierTerms();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sellerId, setSellerId] = useState<string>("");
   const [sellerCommission, setSellerCommission] = useState<number>(0);
