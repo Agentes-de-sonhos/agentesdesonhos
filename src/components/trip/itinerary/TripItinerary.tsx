@@ -65,7 +65,13 @@ function PeriodDroppable({ dateStr, period, children }: { dateStr: string; perio
     data: { period, dateStr },
   });
   return (
-    <div ref={setNodeRef} className={cn("min-h-[8px] rounded-md transition-colors", isOver && "bg-primary/5")}>
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "min-h-[24px] rounded-lg p-1 -m-1 transition-all duration-150",
+        isOver && "bg-primary/5 ring-2 ring-primary/40 shadow-[0_0_0_4px_hsl(var(--primary)/0.08)]"
+      )}
+    >
       {children}
     </div>
   );
@@ -420,18 +426,23 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
           const serviceCount = dayActivities.filter(a => a.origin === "servico").length;
 
           return (
-            <div key={day.dateStr} className="border border-border rounded-lg overflow-hidden">
+            <div key={day.dateStr} className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
               {/* Day header */}
               <button
                 type="button"
                 onClick={() => toggleDay(day.dateStr)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-muted/40 to-transparent hover:from-muted/60 transition-colors"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-primary">Dia {day.dayNumber}</span>
-                  <span className="text-sm text-muted-foreground">
-                    — {format(day.date, "dd 'de' MMMM", { locale: ptBR })}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-base font-bold text-primary">Dia {day.dayNumber}</span>
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {format(day.date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                   </span>
+                  {activityCount > 0 && (
+                    <span className="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      {activityCount} {activityCount === 1 ? "atividade" : "atividades"}
+                    </span>
+                  )}
                 </div>
                 <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isExpanded && "rotate-180")} />
               </button>
@@ -443,7 +454,7 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                   collisionDetection={closestCenter}
                   onDragEnd={(e) => handleDragEnd(day.dateStr, e)}
                 >
-                <div className="px-4 py-3 space-y-4">
+                <div className="px-4 py-4 space-y-5">
                   {(["morning", "afternoon", "evening"] as Period[]).map((period) => {
                     const PeriodIcon = PERIOD_CONFIG[period].icon;
                     const periodActivities = dayActivities
@@ -452,9 +463,9 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                     const isAddingHere = addingFor?.dateStr === day.dateStr && addingFor?.period === period;
                     return (
                       <div key={period}>
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 text-sm font-medium text-muted-foreground">
                           <PeriodIcon className={cn("h-4 w-4", PERIOD_CONFIG[period].color)} />
-                          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <span>
                             {PERIOD_CONFIG[period].label}
                           </span>
                         </div>
@@ -462,10 +473,11 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                         {/* Activities */}
                         <PeriodDroppable dateStr={day.dateStr} period={period}>
                         <SortableContext items={periodActivities.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-2">
                         {periodActivities.map((activity) => {
                           if (editingActivity?.id === activity.id) {
                             return (
-                              <div key={activity.id} className="ml-6 mb-3 p-3 bg-muted/20 rounded-lg border">
+                              <div key={activity.id} className="p-3 bg-muted/20 rounded-lg border">
                                 <ItineraryActivityForm
                                   tripServices={services}
                                   onSubmit={(data, files, docFiles) => handleUpdateActivity(data, files, docFiles)}
@@ -478,29 +490,39 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                           }
                           const originBadge = ORIGIN_BADGE[activity.origin] || ORIGIN_BADGE.manual;
                           return (
-                            <div key={activity.id} className="ml-4">
-                              <SortableActivity
-                                activity={activity}
-                                linkedService={activity.linked_service_id ? services.find((s) => s.id === activity.linked_service_id) : undefined}
-                                onEdit={() => handleEditClick(activity)}
-                                onDelete={() => deleteActivity(activity.id)}
-                                readOnly={readOnly}
-                                originBadge={originBadge}
-                              />
-                            </div>
+                            <SortableActivity
+                              key={activity.id}
+                              activity={activity}
+                              linkedService={activity.linked_service_id ? services.find((s) => s.id === activity.linked_service_id) : undefined}
+                              onEdit={() => handleEditClick(activity)}
+                              onDelete={() => deleteActivity(activity.id)}
+                              readOnly={readOnly}
+                              originBadge={originBadge}
+                            />
                           );
                         })}
+                        </div>
                         </SortableContext>
                         </PeriodDroppable>
 
                         {/* Empty state for period */}
                         {periodActivities.length === 0 && !isAddingHere && (
-                          <p className="text-xs text-muted-foreground/50 ml-6 italic">Nenhuma atividade</p>
+                          !readOnly ? (
+                            <button
+                              type="button"
+                              onClick={() => setAddingFor({ dateStr: day.dateStr, period })}
+                              className="w-full rounded-lg border border-dashed border-border/70 px-3 py-3 text-xs text-muted-foreground/70 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-colors text-left"
+                            >
+                              <Plus className="inline h-3 w-3 mr-1" /> Adicionar atividade
+                            </button>
+                          ) : (
+                            <p className="text-xs text-muted-foreground/50 italic">Sem atividades neste período</p>
+                          )
                         )}
 
                         {/* Add form */}
                         {isAddingHere ? (
-                          <div className="ml-6 mt-2 p-3 bg-muted/20 rounded-lg border">
+                          <div className="mt-2 p-3 bg-muted/20 rounded-lg border">
                             <ItineraryActivityForm
                               tripServices={services}
                               onSubmit={(data, files, docFiles) => handleAddActivity(day.dateStr, period, data, files, docFiles)}
@@ -509,8 +531,8 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
                             />
                           </div>
                         ) : (
-                          !readOnly && (
-                            <div className="flex flex-wrap gap-1 ml-4 mt-1">
+                          !readOnly && periodActivities.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
