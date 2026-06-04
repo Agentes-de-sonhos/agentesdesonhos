@@ -88,6 +88,79 @@ const productCommission = (p: SaleProductFormData) => {
   return Number(p.commission_value) || 0;
 };
 
+// Map a quote_service/trip_service into a DraftProduct, applying agency
+// supplier terms when the source already references a structured operator.
+function mapServiceTypeToProduct(t?: string): ProductType {
+  switch ((t || "").toLowerCase()) {
+    case "flight": return "aereo";
+    case "hotel": return "hotel";
+    case "car_rental": return "locacao";
+    case "transfer": return "transfer";
+    case "attraction": return "atracao";
+    case "insurance": return "seguro";
+    case "cruise": return "cruzeiro";
+    case "train":
+    case "circuit":
+    case "other":
+    default: return "outro";
+  }
+}
+
+function extractServicePrice(s: any, source: "trip" | "quote"): number {
+  if (source === "quote") return Number(s?.amount) || 0;
+  const d = s?.service_data || {};
+  return Number(d.total_price ?? d.total ?? d.price ?? d.value ?? d.amount ?? 0) || 0;
+}
+
+function extractServiceDescription(s: any): string {
+  const d = s?.service_data || {};
+  return (
+    d.title || d.name || d.hotel_name || d.cruise_name || d.attraction_name ||
+    d.transfer_name || d.car_model || d.insurance_name || d.description ||
+    s?.description || ""
+  );
+}
+
+function serviceToDraftProduct(
+  s: any,
+  source: "trip" | "quote",
+  termsByOperator?: Map<string, SupplierTerms>,
+): DraftProduct {
+  const d = s?.service_data || {};
+  const productType = mapServiceTypeToProduct(s?.service_type);
+  const draft: DraftProduct = {
+    ...defaultProduct(),
+    product_type: productType,
+    description: extractServiceDescription(s) || PRODUCT_TYPES[productType],
+    sale_price: extractServicePrice(s, source),
+    supplier_name: d.supplier_name || "",
+    operator_id: d.supplier_operator_id || null,
+  };
+  // Apply agency commercial rules when the supplier is structured
+  if (draft.operator_id && termsByOperator) {
+    const t = termsByOperator.get(draft.operator_id);
+    if (t) {
+      if (t.default_commission_type) {
+        draft.commission_type = t.default_commission_type;
+        if (t.default_commission_type === "percentage" && t.default_commission_percent != null) {
+          draft.commission_value = Number(t.default_commission_percent);
+        } else if (t.default_commission_type === "fixed" && t.default_commission_fixed != null) {
+          draft.commission_value = Number(t.default_commission_fixed);
+        }
+      }
+      if (t.default_non_commissionable_fees != null) {
+        draft.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
+      }
+      if (t.payment_rule && t.payment_rule !== "manual") {
+        draft.payment_rule = t.payment_rule as any;
+      }
+      if (t.payment_days != null) draft.payment_days = Number(t.payment_days);
+      draft.requires_invoice = !!t.requires_invoice;
+    }
+  }
+  return draft;
+}
+
 // ------------- main component -------------
 
 interface NewSaleWizardProps {
