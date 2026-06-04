@@ -29,6 +29,7 @@ import { Sparkles, FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
 import { ImportQuoteAsNewWalletDialog } from "@/components/trip/ImportQuoteAsNewWalletDialog";
 import { ClientSelector } from "@/components/shared/ClientSelector";
+import { SupplierSelector, type SupplierSelectorValue } from "@/components/financial/SupplierSelector";
 import { useTrips, useTrip } from "@/hooks/useTrips";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,13 +86,22 @@ function TripWalletContent() {
   // Hotel autocomplete / gallery state for ADD flow
   const [addPlaceId, setAddPlaceId] = useState<string | null>(null);
   const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
+  // Supplier (tour_operators) link for the ADD flow
+  const [addSupplier, setAddSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
   // Hotel place id for EDIT flow (mirrors DB and is updated when user picks new prediction)
   const [editPlaceId, setEditPlaceId] = useState<string | null>(null);
+  // Supplier (tour_operators) link for the EDIT flow
+  const [editSupplier, setEditSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
   const editingService = editingServiceId
     ? trip?.services?.find((s) => s.id === editingServiceId) ?? null
     : null;
   useEffect(() => {
     setEditPlaceId(editingService?.place_id ?? null);
+    const sd = (editingService?.service_data as any) || {};
+    setEditSupplier({
+      operator_id: sd?.supplier_operator_id ?? null,
+      supplier_name: sd?.supplier_name ?? "",
+    });
   }, [editingServiceId, editingService?.place_id]);
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
