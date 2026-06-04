@@ -269,7 +269,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
           <div className="space-y-2 pt-2">
             <Progress value={progress} className="h-1.5" />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              {STEP_ORDER.map((s, i) => (
+              {stepOrder.map((s, i) => (
                 <span
                   key={s}
                   className={cn(
