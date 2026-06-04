@@ -66,5 +66,7 @@ export function useCommissionsReceivable() {
       })) as CommissionReceivable[];
     },
     enabled: !!user,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 }

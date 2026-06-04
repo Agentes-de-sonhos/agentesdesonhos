@@ -179,9 +179,9 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["commissions-receivable"] });
       qc.invalidateQueries({ queryKey: ["sale_products"] });
-      toast.success("Comissão atualizada");
+      toast.success("Comissão atualizada com sucesso");
     },
-    onError: () => toast.error("Erro ao atualizar"),
+    onError: () => toast.error("Não foi possível atualizar a comissão. Tente novamente."),
   });
 
   const productTypes = useMemo(() => {
@@ -316,8 +316,14 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="p-8 text-center text-muted-foreground">
-                      Nenhuma comissão encontrada. Adicione produtos às suas vendas para ver as comissões aqui.
+                    <td colSpan={10} className="p-10 text-center">
+                      <div className="space-y-1">
+                        <DollarSign className="h-6 w-6 mx-auto text-muted-foreground/60" />
+                        <p className="text-sm font-medium">Nenhuma comissão encontrada.</p>
+                        <p className="text-xs text-muted-foreground">
+                          Cadastre produtos nas suas vendas para ver as comissões aparecerem aqui.
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : filtered.map((c) => {

@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users } from "lucide-react";
+import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users, ShoppingBag } from "lucide-react";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
@@ -334,7 +334,18 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
 
       <div className="space-y-2">
         {sales.length === 0 ? (
-          <div className="border rounded-lg p-8 text-center text-muted-foreground">Nenhuma venda registrada</div>
+          <div className="border border-dashed rounded-lg p-10 text-center space-y-3">
+            <ShoppingBag className="h-8 w-8 mx-auto text-muted-foreground/60" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Você ainda não possui vendas cadastradas.</p>
+              <p className="text-xs text-muted-foreground">
+                Comece registrando uma venda para acompanhar comissões, recebimentos e notas fiscais.
+              </p>
+            </div>
+            <Button onClick={() => setIsWizardOpen(true)} size="sm">
+              <Plus className="h-4 w-4 mr-2" /> Nova Venda
+            </Button>
+          </div>
         ) : (<>
           {/* Alert: sales without products */}
           {(() => {
