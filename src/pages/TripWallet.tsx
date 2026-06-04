@@ -722,6 +722,13 @@ function TripWalletContent() {
               </DialogHeader>
               {editingService && selectedServiceType && (
                 <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Fornecedor</label>
+                    <SupplierSelector value={editSupplier} onChange={setEditSupplier} />
+                    <p className="text-xs text-muted-foreground">
+                      Selecione um fornecedor cadastrado ou digite livremente.
+                    </p>
+                  </div>
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}
