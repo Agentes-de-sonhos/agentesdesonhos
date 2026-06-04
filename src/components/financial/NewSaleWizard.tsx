@@ -102,6 +102,8 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: termsData } = useAgencySupplierTerms();
+  const { closedOpportunities } = useClosedOpportunities();
 
   const [step, setStep] = useState<WizardStep>("origin");
   const [submitting, setSubmitting] = useState(false);
@@ -162,6 +164,78 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     const commission = products.reduce((s, p) => s + productCommission(p), 0);
     return { sale, taxes, base: sale - taxes, commission };
   }, [products]);
+
+  // ---------- CRM import helpers ----------
+  const opportunity = useMemo(
+    () => closedOpportunities.find((o: any) => o.id === opportunityId) || null,
+    [closedOpportunities, opportunityId],
+  );
+
+  // When an opportunity is selected, detect linked Wallet (trip) and Quote
+  useEffect(() => {
+    if (!opportunity || !user) {
+      setImportDetected({ tripId: null, quoteId: null });
+      setSourceKind(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const [tripRes, quoteRes] = await Promise.all([
+        supabase.from("trips").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
+        supabase.from("quotes").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (cancelled) return;
+      const tripId = tripRes.data?.id || null;
+      const quoteId = quoteRes.data?.id || null;
+      setImportDetected({ tripId, quoteId });
+      // auto-select preferred source
+      if (tripId) setSourceKind("wallet");
+      else if (quoteId) setSourceKind("quote");
+      else setSourceKind(null);
+    })();
+    return () => { cancelled = true; };
+  }, [opportunity, user]);
+
+  // When a source is chosen, fetch + map its services into draft products,
+  // and pre-fill client/destination/saleDate from the opportunity.
+  useEffect(() => {
+    if (origin !== "crm" || !opportunity || !sourceKind) return;
+    let cancelled = false;
+    (async () => {
+      setImporting(true);
+      try {
+        const opp: any = opportunity;
+        // Pre-fill metadata
+        if (opp.client_id) setClient({ id: opp.client_id, name: opp.client?.name || "Cliente" });
+        if (opp.destination) setDestination(opp.destination);
+        if (opp.notes) setNotes(opp.notes);
+
+        let imported: DraftProduct[] = [];
+        if (sourceKind === "wallet" && importDetected.tripId) {
+          const { data } = await supabase
+            .from("trip_services")
+            .select("*")
+            .eq("trip_id", importDetected.tripId)
+            .order("order_index");
+          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "trip", termsData?.byOperator));
+          setImportSourceLabel("Carteira Digital");
+        } else if (sourceKind === "quote" && importDetected.quoteId) {
+          const { data } = await supabase
+            .from("quote_services")
+            .select("*")
+            .eq("quote_id", importDetected.quoteId)
+            .order("order_index");
+          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "quote", termsData?.byOperator));
+          setImportSourceLabel("Orçamento");
+        }
+        if (!cancelled) setProducts(imported);
+      } finally {
+        if (!cancelled) setImporting(false);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [origin, opportunity, sourceKind, importDetected.tripId, importDetected.quoteId]);
 
   const canAdvance = (): boolean => {
     switch (step) {
