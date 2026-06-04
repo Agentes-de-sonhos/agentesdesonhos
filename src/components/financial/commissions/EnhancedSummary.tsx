@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CommissionReceivable } from "@/hooks/useCommissionsReceivable";
 import {
@@ -8,19 +9,22 @@ import {
 } from "./utils";
 
 export function EnhancedSummary({ commissions }: { commissions: CommissionReceivable[] }) {
-  const active = commissions.filter(isActive);
-
-  const prevista = active.reduce((s, c) => s + c.commission_amount, 0);
-  const recebida = active.reduce((s, c) => s + (Number(c.received_amount) || 0), 0);
-  const pendente = Math.max(prevista - recebida, 0);
-
-  const atrasadas = active.filter(isOverdue);
-  const atrasadasValor = atrasadas.reduce((s, c) => s + c.commission_amount, 0);
-
-  const nfPendentes = active.filter(requiresInvoicePending);
-  const due7 = active.filter(c => isDueWithin(c, 7));
-  const due15 = active.filter(c => isDueWithin(c, 15));
-  const due30 = active.filter(c => isDueWithin(c, 30));
+  const {
+    prevista, recebida, pendente, atrasadas, atrasadasValor,
+    nfPendentes, due7, due15, due30,
+  } = useMemo(() => {
+    const active = commissions.filter(isActive);
+    const prevista = active.reduce((s, c) => s + c.commission_amount, 0);
+    const recebida = active.reduce((s, c) => s + (Number(c.received_amount) || 0), 0);
+    const pendente = Math.max(prevista - recebida, 0);
+    const atrasadas = active.filter(isOverdue);
+    const atrasadasValor = atrasadas.reduce((s, c) => s + c.commission_amount, 0);
+    const nfPendentes = active.filter(requiresInvoicePending);
+    const due7 = active.filter(c => isDueWithin(c, 7));
+    const due15 = active.filter(c => isDueWithin(c, 15));
+    const due30 = active.filter(c => isDueWithin(c, 30));
+    return { prevista, recebida, pendente, atrasadas, atrasadasValor, nfPendentes, due7, due15, due30 };
+  }, [commissions]);
 
   return (
     <div className="space-y-3">
@@ -28,8 +32,8 @@ export function EnhancedSummary({ commissions }: { commissions: CommissionReceiv
         <KPI icon={DollarSign} color="text-violet-600 dark:text-violet-400" label="Comissão Prevista" value={`R$ ${fmt(prevista)}`} />
         <KPI icon={CheckCircle} color="text-emerald-600 dark:text-emerald-400" label="Comissão Recebida" value={`R$ ${fmt(recebida)}`} />
         <KPI icon={Clock} color="text-blue-600 dark:text-blue-400" label="Comissão Pendente" value={`R$ ${fmt(pendente)}`} />
-        <KPI icon={AlertTriangle} color="text-red-600 dark:text-red-400" label="Atrasados" value={`R$ ${fmt(atrasadasValor)}`} hint={`${atrasadas.length} recebimentos`} />
-        <KPI icon={FileText} color="text-amber-600 dark:text-amber-400" label="NF Pendentes" value={`${nfPendentes.length}`} hint="Aguardando emissão/envio" />
+        <KPI icon={AlertTriangle} color="text-red-600 dark:text-red-400" label="Recebimentos em Atraso" value={`R$ ${fmt(atrasadasValor)}`} hint={`${atrasadas.length} ${atrasadas.length === 1 ? "recebimento" : "recebimentos"}`} />
+        <KPI icon={FileText} color="text-amber-600 dark:text-amber-400" label="Notas Fiscais Pendentes" value={`${nfPendentes.length}`} hint="Aguardando emissão ou envio" />
       </div>
 
       <Card>
