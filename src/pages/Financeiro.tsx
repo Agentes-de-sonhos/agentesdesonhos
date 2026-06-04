@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
   ShoppingBag, ArrowUpCircle, Receipt, Users,
-  ChevronLeft, ChevronRight, Calendar, FileText,
+  ChevronLeft, ChevronRight, Calendar, FileText, Truck,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -19,6 +19,7 @@ import { CommissionsReceivable } from "@/components/financial/CommissionsReceiva
 import { SellersManager } from "@/components/financial/SellersManager";
 import { SellersCommissionReport } from "@/components/financial/SellersCommissionReport";
 import { InvoicesManager } from "@/components/financial/invoices/InvoicesManager";
+import { SuppliersManager } from "@/components/financial/SuppliersManager";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,7 @@ const ALL_TABS_DEF = [
   { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
   { key: "faturas", label: "Faturas", icon: FileText },
   { key: "comissoes", label: "Comissões", icon: Receipt },
+  { key: "fornecedores", label: "Fornecedores", icon: Truck },
   { key: "vendedores", label: "Vendedores", icon: Users },
 ] as const;
 
@@ -189,6 +191,7 @@ export default function Financeiro() {
               {activeTab === "faturas" && <InvoicesManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "vendas" && <SalesManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "comissoes" && <CommissionsReceivable viewMonth={viewMonth} viewYear={viewYear} />}
+              {activeTab === "fornecedores" && <SuppliersManager />}
               {activeTab === "vendedores" && (
                 <div className="space-y-8">
                   <SellersManager />
