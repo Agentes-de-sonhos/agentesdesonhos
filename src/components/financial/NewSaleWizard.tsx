@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Calendar as CalendarIcon, Check, ChevronRight,
-  Download, FileText, Loader2, MapPin, Package, Pencil, Plus, Receipt,
+  Download, FileText, Loader2, MapPin, Package, Pencil, Plus, Receipt, Search, Wallet,
   Trash2, User as UserIcon, Users, Wand2,
 } from "lucide-react";
 
@@ -28,10 +28,10 @@ import { ClientSelector } from "@/components/shared/ClientSelector";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 
-import { useFinancial } from "@/hooks/useFinancial";
+import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
 import { useSellers } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
-import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
+import { useAgencySupplierTerms, type SupplierTerms } from "@/hooks/useAgencySupplierTerms";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,10 +40,13 @@ import { PRODUCT_TYPES } from "@/types/financial";
 
 // ------------- types -------------
 
-type WizardStep = "origin" | "client" | "destination" | "date" | "products" | "review";
-const STEP_ORDER: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
+type WizardStep = "origin" | "opportunity" | "source" | "client" | "destination" | "date" | "products" | "review";
+const MANUAL_STEPS: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
+const CRM_STEPS: WizardStep[] = ["origin", "opportunity", "source", "review"];
 const STEP_LABELS: Record<WizardStep, string> = {
   origin: "Origem",
+  opportunity: "Oportunidade",
+  source: "Fonte",
   client: "Cliente",
   destination: "Destino",
   date: "Data",
@@ -85,6 +88,79 @@ const productCommission = (p: SaleProductFormData) => {
   return Number(p.commission_value) || 0;
 };
 
+// Map a quote_service/trip_service into a DraftProduct, applying agency
+// supplier terms when the source already references a structured operator.
+function mapServiceTypeToProduct(t?: string): ProductType {
+  switch ((t || "").toLowerCase()) {
+    case "flight": return "aereo";
+    case "hotel": return "hotel";
+    case "car_rental": return "locacao";
+    case "transfer": return "transfer";
+    case "attraction": return "atracao";
+    case "insurance": return "seguro";
+    case "cruise": return "cruzeiro";
+    case "train":
+    case "circuit":
+    case "other":
+    default: return "outro";
+  }
+}
+
+function extractServicePrice(s: any, source: "trip" | "quote"): number {
+  if (source === "quote") return Number(s?.amount) || 0;
+  const d = s?.service_data || {};
+  return Number(d.total_price ?? d.total ?? d.price ?? d.value ?? d.amount ?? 0) || 0;
+}
+
+function extractServiceDescription(s: any): string {
+  const d = s?.service_data || {};
+  return (
+    d.title || d.name || d.hotel_name || d.cruise_name || d.attraction_name ||
+    d.transfer_name || d.car_model || d.insurance_name || d.description ||
+    s?.description || ""
+  );
+}
+
+function serviceToDraftProduct(
+  s: any,
+  source: "trip" | "quote",
+  termsByOperator?: Map<string, SupplierTerms>,
+): DraftProduct {
+  const d = s?.service_data || {};
+  const productType = mapServiceTypeToProduct(s?.service_type);
+  const draft: DraftProduct = {
+    ...defaultProduct(),
+    product_type: productType,
+    description: extractServiceDescription(s) || PRODUCT_TYPES[productType],
+    sale_price: extractServicePrice(s, source),
+    supplier_name: d.supplier_name || "",
+    operator_id: d.supplier_operator_id || null,
+  };
+  // Apply agency commercial rules when the supplier is structured
+  if (draft.operator_id && termsByOperator) {
+    const t = termsByOperator.get(draft.operator_id);
+    if (t) {
+      if (t.default_commission_type) {
+        draft.commission_type = t.default_commission_type;
+        if (t.default_commission_type === "percentage" && t.default_commission_percent != null) {
+          draft.commission_value = Number(t.default_commission_percent);
+        } else if (t.default_commission_type === "fixed" && t.default_commission_fixed != null) {
+          draft.commission_value = Number(t.default_commission_fixed);
+        }
+      }
+      if (t.default_non_commissionable_fees != null) {
+        draft.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
+      }
+      if (t.payment_rule && t.payment_rule !== "manual") {
+        draft.payment_rule = t.payment_rule as any;
+      }
+      if (t.payment_days != null) draft.payment_days = Number(t.payment_days);
+      draft.requires_invoice = !!t.requires_invoice;
+    }
+  }
+  return draft;
+}
+
 // ------------- main component -------------
 
 interface NewSaleWizardProps {
@@ -99,12 +175,20 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { data: termsData } = useAgencySupplierTerms();
+  const { closedOpportunities } = useClosedOpportunities();
 
   const [step, setStep] = useState<WizardStep>("origin");
   const [submitting, setSubmitting] = useState(false);
 
   // step 1
   const [origin, setOrigin] = useState<"manual" | "crm">("manual");
+  // CRM import state
+  const [opportunityId, setOpportunityId] = useState<string | null>(null);
+  const [sourceKind, setSourceKind] = useState<"wallet" | "quote" | null>(null);
+  const [importDetected, setImportDetected] = useState<{ tripId: string | null; quoteId: string | null }>({ tripId: null, quoteId: null });
+  const [importing, setImporting] = useState(false);
+  const [importSourceLabel, setImportSourceLabel] = useState<string>("");
   // step 2
   const [client, setClient] = useState<{ id: string; name: string } | null>(null);
   // step 3
@@ -135,11 +219,17 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       setSellerId("");
       setSellerCommission(0);
       setSubmitting(false);
+      setOpportunityId(null);
+      setSourceKind(null);
+      setImportDetected({ tripId: null, quoteId: null });
+      setImporting(false);
+      setImportSourceLabel("");
     }
   }, [open]);
 
-  const stepIndex = STEP_ORDER.indexOf(step);
-  const progress = ((stepIndex + 1) / STEP_ORDER.length) * 100;
+  const stepOrder = origin === "crm" ? CRM_STEPS : MANUAL_STEPS;
+  const stepIndex = stepOrder.indexOf(step);
+  const progress = ((Math.max(stepIndex, 0) + 1) / stepOrder.length) * 100;
 
   const totals = useMemo(() => {
     const sale = products.reduce((s, p) => s + (Number(p.sale_price) || 0), 0);
@@ -148,9 +238,83 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     return { sale, taxes, base: sale - taxes, commission };
   }, [products]);
 
+  // ---------- CRM import helpers ----------
+  const opportunity = useMemo(
+    () => closedOpportunities.find((o: any) => o.id === opportunityId) || null,
+    [closedOpportunities, opportunityId],
+  );
+
+  // When an opportunity is selected, detect linked Wallet (trip) and Quote
+  useEffect(() => {
+    if (!opportunity || !user) {
+      setImportDetected({ tripId: null, quoteId: null });
+      setSourceKind(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const [tripRes, quoteRes] = await Promise.all([
+        supabase.from("trips").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
+        supabase.from("quotes").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
+      ]);
+      if (cancelled) return;
+      const tripId = tripRes.data?.id || null;
+      const quoteId = quoteRes.data?.id || null;
+      setImportDetected({ tripId, quoteId });
+      // auto-select preferred source
+      if (tripId) setSourceKind("wallet");
+      else if (quoteId) setSourceKind("quote");
+      else setSourceKind(null);
+    })();
+    return () => { cancelled = true; };
+  }, [opportunity, user]);
+
+  // When a source is chosen, fetch + map its services into draft products,
+  // and pre-fill client/destination/saleDate from the opportunity.
+  useEffect(() => {
+    if (origin !== "crm" || !opportunity || !sourceKind) return;
+    let cancelled = false;
+    (async () => {
+      setImporting(true);
+      try {
+        const opp: any = opportunity;
+        // Pre-fill metadata
+        setClient({ id: opp.client_id || "", name: opp.client?.name || "Cliente" });
+        if (opp.destination) setDestination(opp.destination);
+        if (opp.notes) setNotes(opp.notes);
+
+        let imported: DraftProduct[] = [];
+        if (sourceKind === "wallet" && importDetected.tripId) {
+          const { data } = await supabase
+            .from("trip_services")
+            .select("*")
+            .eq("trip_id", importDetected.tripId)
+            .order("order_index");
+          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "trip", termsData?.byOperator));
+          setImportSourceLabel("Carteira Digital");
+        } else if (sourceKind === "quote" && importDetected.quoteId) {
+          const { data } = await supabase
+            .from("quote_services")
+            .select("*")
+            .eq("quote_id", importDetected.quoteId)
+            .order("order_index");
+          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "quote", termsData?.byOperator));
+          setImportSourceLabel("Orçamento");
+        }
+        if (!cancelled) setProducts(imported);
+      } finally {
+        if (!cancelled) setImporting(false);
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [origin, opportunity, sourceKind, importDetected.tripId, importDetected.quoteId]);
+
   const canAdvance = (): boolean => {
     switch (step) {
-      case "origin": return origin === "manual";
+      case "origin": return origin === "manual" || origin === "crm";
+      case "opportunity": return !!opportunityId;
+      case "source": return !!sourceKind && products.length > 0 && !importing;
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
       case "date": return !!saleDate;
@@ -160,12 +324,12 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   };
 
   const next = () => {
-    const i = STEP_ORDER.indexOf(step);
-    if (i < STEP_ORDER.length - 1) setStep(STEP_ORDER[i + 1]);
+    const i = stepOrder.indexOf(step);
+    if (i < stepOrder.length - 1) setStep(stepOrder[i + 1]);
   };
   const back = () => {
-    const i = STEP_ORDER.indexOf(step);
-    if (i > 0) setStep(STEP_ORDER[i - 1]);
+    const i = stepOrder.indexOf(step);
+    if (i > 0) setStep(stepOrder[i - 1]);
   };
 
   // ---------- product handlers ----------
@@ -252,7 +416,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
           <div className="space-y-2 pt-2">
             <Progress value={progress} className="h-1.5" />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              {STEP_ORDER.map((s, i) => (
+              {stepOrder.map((s, i) => (
                 <span
                   key={s}
                   className={cn(
@@ -271,6 +435,27 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
         <div className="py-2 min-h-[280px]">
           {step === "origin" && (
             <StepOrigin value={origin} onChange={setOrigin} />
+          )}
+          {step === "opportunity" && (
+            <StepOpportunity
+              opportunities={closedOpportunities}
+              selectedId={opportunityId}
+              onSelect={setOpportunityId}
+            />
+          )}
+          {step === "source" && (
+            <StepSource
+              detected={importDetected}
+              sourceKind={sourceKind}
+              setSourceKind={setSourceKind}
+              importing={importing}
+              products={products}
+              onAdd={openAddProduct}
+              onEdit={openEditProduct}
+              onRemove={removeProduct}
+              totals={totals}
+              onSwitchToManual={() => { setOrigin("manual"); setStep("client"); }}
+            />
           )}
           {step === "client" && (
             <StepClient client={client} onChange={setClient} />
@@ -309,6 +494,10 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
               setSellerId={setSellerId}
               sellerCommission={sellerCommission}
               setSellerCommission={setSellerCommission}
+              importSourceLabel={origin === "crm" ? importSourceLabel : undefined}
+              onAddProduct={openAddProduct}
+              onEditProduct={openEditProduct}
+              onRemoveProduct={removeProduct}
             />
           )}
         </div>
@@ -370,15 +559,17 @@ function StepOrigin({ value, onChange }: { value: "manual" | "crm"; onChange: (v
         </button>
         <button
           type="button"
-          disabled
-          className="flex flex-col items-start gap-2 rounded-lg border-2 border-dashed border-muted p-4 text-left opacity-60 cursor-not-allowed"
+          onClick={() => onChange("crm")}
+          className={cn(
+            "flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
+            value === "crm" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
+          )}
         >
           <div className="flex items-center gap-2 font-medium">
-            <Download className="h-4 w-4" /> Importar do CRM
-            <Badge variant="secondary" className="ml-auto text-[10px]">Em breve</Badge>
+            <Download className="h-4 w-4 text-primary" /> Importar do CRM
           </div>
           <p className="text-xs text-muted-foreground">
-            Essa opção será liberada na próxima etapa.
+            Transformar uma oportunidade fechada em venda financeira.
           </p>
         </button>
       </div>
@@ -567,6 +758,7 @@ function StepProducts({
 function StepReview({
   client, destination, saleDate, products, totals, notes, setNotes,
   sellers, sellerId, setSellerId, sellerCommission, setSellerCommission,
+  importSourceLabel, onAddProduct, onEditProduct, onRemoveProduct,
 }: {
   client: { id: string; name: string } | null;
   destination: string;
@@ -580,6 +772,10 @@ function StepReview({
   setSellerId: (v: string) => void;
   sellerCommission: number;
   setSellerCommission: (v: number) => void;
+  importSourceLabel?: string;
+  onAddProduct?: () => void;
+  onEditProduct?: (p: DraftProduct) => void;
+  onRemoveProduct?: (id: string) => void;
 }) {
   const dateObj = (() => { const [y,m,d]=saleDate.split("-").map(Number); return new Date(y, m-1, d); })();
   return (
@@ -588,6 +784,13 @@ function StepReview({
         <h3 className="text-base font-semibold">Revisão da venda</h3>
         <p className="text-sm text-muted-foreground">Confira tudo antes de criar.</p>
       </div>
+
+      {importSourceLabel && (
+        <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
+          <Download className="h-3.5 w-3.5" />
+          Dados importados automaticamente de: <strong>{importSourceLabel}</strong>
+        </div>
+      )}
 
       <div className="grid gap-3 rounded-lg border p-4 text-sm sm:grid-cols-2">
         <div>
@@ -609,21 +812,38 @@ function StepReview({
       </div>
 
       <div className="rounded-lg border">
-        <div className="border-b p-3 text-xs font-semibold uppercase text-muted-foreground">
-          Produtos
+        <div className="flex items-center justify-between border-b p-3">
+          <span className="text-xs font-semibold uppercase text-muted-foreground">Produtos</span>
+          {onAddProduct && (
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onAddProduct}>
+              <Plus className="h-3 w-3 mr-1" /> Adicionar
+            </Button>
+          )}
         </div>
         <div className="divide-y">
           {products.map((p) => (
-            <div key={p._tempId} className="flex items-center justify-between p-3 text-sm">
+            <div key={p._tempId} className="flex items-center justify-between gap-2 p-3 text-sm">
               <div className="min-w-0">
                 <p className="font-medium truncate">{p.description || PRODUCT_TYPES[p.product_type]}</p>
                 <p className="text-xs text-muted-foreground truncate">
                   {PRODUCT_TYPES[p.product_type]} • {p.supplier_name || "Sem fornecedor"}
                 </p>
               </div>
-              <div className="text-right shrink-0">
+              <div className="text-right shrink-0 flex items-center gap-2">
+                <div>
                 <p className="font-medium">{fmtCurrency(Number(p.sale_price))}</p>
                 <p className="text-xs text-primary">Comissão {fmtCurrency(productCommission(p))}</p>
+                </div>
+                {onEditProduct && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEditProduct(p)}>
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                )}
+                {onRemoveProduct && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onRemoveProduct(p._tempId)}>
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
@@ -1111,4 +1331,234 @@ function invoiceStatusLabel(s?: string) {
     case "enviada": return "Enviada";
     default: return "—";
   }
+}
+
+// ------------- CRM import step components -------------
+
+function StepOpportunity({
+  opportunities, selectedId, onSelect,
+}: {
+  opportunities: any[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return opportunities;
+    return opportunities.filter((o) =>
+      [o.client?.name, o.destination].filter(Boolean).some((v: string) => v.toLowerCase().includes(q))
+    );
+  }, [query, opportunities]);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-base font-semibold">Qual oportunidade deseja importar?</h3>
+        <p className="text-sm text-muted-foreground">Apenas oportunidades fechadas da sua agência são exibidas.</p>
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Pesquisar por cliente ou destino"
+          className="pl-9"
+        />
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
+          <Package className="h-8 w-8 mx-auto mb-2 opacity-40" />
+          Nenhuma oportunidade fechada disponível.
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+          {filtered.map((o) => {
+            const selected = selectedId === o.id;
+            return (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => onSelect(o.id)}
+                className={cn(
+                  "w-full text-left rounded-lg border-2 p-3 transition-colors",
+                  selected ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{o.client?.name || "Cliente"}</p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      <MapPin className="h-3 w-3 inline mr-1" />
+                      {o.destination || "—"}
+                      {o.updated_at && (
+                        <span className="ml-2">• {format(new Date(o.updated_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-semibold">{fmtCurrency(Number(o.estimated_value) || 0)}</p>
+                    <Badge variant="outline" className="text-[10px] mt-1">{o.stage}</Badge>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StepSource({
+  detected, sourceKind, setSourceKind, importing,
+  products, onAdd, onEdit, onRemove, totals,
+  onSwitchToManual,
+}: {
+  detected: { tripId: string | null; quoteId: string | null };
+  sourceKind: "wallet" | "quote" | null;
+  setSourceKind: (k: "wallet" | "quote" | null) => void;
+  importing: boolean;
+  products: DraftProduct[];
+  onAdd: () => void;
+  onEdit: (p: DraftProduct) => void;
+  onRemove: (id: string) => void;
+  totals: { sale: number; taxes: number; base: number; commission: number };
+  onSwitchToManual: () => void;
+}) {
+  const hasWallet = !!detected.tripId;
+  const hasQuote = !!detected.quoteId;
+  const hasBoth = hasWallet && hasQuote;
+  const hasNone = !hasWallet && !hasQuote;
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-base font-semibold">Fonte dos serviços</h3>
+        <p className="text-sm text-muted-foreground">
+          {hasBoth
+            ? "Encontramos um Orçamento e uma Carteira Digital vinculados a esta oportunidade."
+            : hasWallet
+            ? "Encontramos uma Carteira Digital vinculada a esta oportunidade."
+            : hasQuote
+            ? "Encontramos um Orçamento vinculado a esta oportunidade."
+            : "Não encontramos serviços vinculados a esta oportunidade."}
+        </p>
+      </div>
+
+      {hasNone ? (
+        <div className="rounded-lg border-2 border-dashed p-6 text-center space-y-3">
+          <p className="text-sm text-muted-foreground">Deseja criar a venda manualmente?</p>
+          <Button onClick={onSwitchToManual}>
+            <UserIcon className="h-4 w-4 mr-2" /> Sim, criar manualmente
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {hasWallet && (
+            <button
+              type="button"
+              onClick={() => setSourceKind("wallet")}
+              className={cn(
+                "flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
+                sourceKind === "wallet" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
+              )}
+            >
+              <div className="flex items-center gap-2 font-medium">
+                <Wallet className="h-4 w-4 text-primary" /> Carteira Digital
+                {hasBoth && <Badge variant="secondary" className="ml-1 text-[10px]">Recomendado</Badge>}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Geralmente contém os serviços finais confirmados da viagem.
+              </p>
+            </button>
+          )}
+          {hasQuote && (
+            <button
+              type="button"
+              onClick={() => setSourceKind("quote")}
+              className={cn(
+                "flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
+                sourceKind === "quote" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
+              )}
+            >
+              <div className="flex items-center gap-2 font-medium">
+                <FileText className="h-4 w-4 text-primary" /> Orçamento
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Importar os serviços do orçamento criado para esta oportunidade.
+              </p>
+            </button>
+          )}
+        </div>
+      )}
+
+      {sourceKind && (
+        <>
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-semibold">
+                {importing ? "Importando…" : `Produtos importados (${products.length})`}
+              </h4>
+              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onAdd} disabled={importing}>
+                <Plus className="h-3 w-3 mr-1" /> Adicionar
+              </Button>
+            </div>
+
+            {importing ? (
+              <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Importando serviços…
+              </div>
+            ) : products.length === 0 ? (
+              <div className="border-2 border-dashed rounded-lg p-6 text-center text-sm text-muted-foreground">
+                Nenhum serviço foi importado.
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                {products.map((p) => (
+                  <div key={p._tempId} className="flex items-center gap-3 rounded-lg border p-3">
+                    <Package className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-[10px]">{PRODUCT_TYPES[p.product_type]}</Badge>
+                        <p className="font-medium truncate text-sm">{p.description || "—"}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {p.supplier_name || "Sem fornecedor"} • {fmtCurrency(Number(p.sale_price))} • Comissão {fmtCurrency(productCommission(p))}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(p)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onRemove(p._tempId)}>
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {products.length > 0 && (
+            <div className="grid gap-2 rounded-lg border border-dashed bg-muted/30 p-3 text-sm sm:grid-cols-3">
+              <div>
+                <p className="text-xs text-muted-foreground">Valor total</p>
+                <p className="font-semibold">{fmtCurrency(totals.sale)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Base comissionável</p>
+                <p className="font-semibold">{fmtCurrency(totals.base)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Comissão estimada</p>
+                <p className="font-semibold text-primary">{fmtCurrency(totals.commission)}</p>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
