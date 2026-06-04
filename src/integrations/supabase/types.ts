@@ -413,6 +413,65 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_supplier_terms: {
+        Row: {
+          agency_id: string
+          created_at: string
+          default_commission_fixed: number | null
+          default_commission_percent: number | null
+          default_commission_type: string | null
+          default_non_commissionable_fees: number | null
+          id: string
+          notes: string | null
+          operator_id: string
+          payment_days: number | null
+          payment_rule: string | null
+          preferred_contact_id: string | null
+          requires_invoice: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          default_commission_fixed?: number | null
+          default_commission_percent?: number | null
+          default_commission_type?: string | null
+          default_non_commissionable_fees?: number | null
+          id?: string
+          notes?: string | null
+          operator_id: string
+          payment_days?: number | null
+          payment_rule?: string | null
+          preferred_contact_id?: string | null
+          requires_invoice?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          default_commission_fixed?: number | null
+          default_commission_percent?: number | null
+          default_commission_type?: string | null
+          default_non_commissionable_fees?: number | null
+          id?: string
+          notes?: string | null
+          operator_id?: string
+          payment_days?: number | null
+          payment_rule?: string | null
+          preferred_contact_id?: string | null
+          requires_invoice?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_supplier_terms_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_team_audit_log: {
         Row: {
           action: string
@@ -9038,6 +9097,7 @@ export type Database = {
           created_at: string | null
           employees: number | null
           executive_team: string | null
+          external_id: string | null
           founded_year: number | null
           how_to_sell: string | null
           id: string
@@ -9048,11 +9108,13 @@ export type Database = {
           logo_url: string | null
           materials: Json | null
           name: string
+          owner_agency_id: string | null
           public_slug: string | null
           rejection_reason: string | null
           sales_channels: string | null
           short_description: string | null
           social_links: Json | null
+          source: string | null
           specialties: string | null
           updated_at: string | null
           user_id: string | null
@@ -9069,6 +9131,7 @@ export type Database = {
           created_at?: string | null
           employees?: number | null
           executive_team?: string | null
+          external_id?: string | null
           founded_year?: number | null
           how_to_sell?: string | null
           id?: string
@@ -9079,11 +9142,13 @@ export type Database = {
           logo_url?: string | null
           materials?: Json | null
           name: string
+          owner_agency_id?: string | null
           public_slug?: string | null
           rejection_reason?: string | null
           sales_channels?: string | null
           short_description?: string | null
           social_links?: Json | null
+          source?: string | null
           specialties?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -9100,6 +9165,7 @@ export type Database = {
           created_at?: string | null
           employees?: number | null
           executive_team?: string | null
+          external_id?: string | null
           founded_year?: number | null
           how_to_sell?: string | null
           id?: string
@@ -9110,11 +9176,13 @@ export type Database = {
           logo_url?: string | null
           materials?: Json | null
           name?: string
+          owner_agency_id?: string | null
           public_slug?: string | null
           rejection_reason?: string | null
           sales_channels?: string | null
           short_description?: string | null
           social_links?: Json | null
+          source?: string | null
           specialties?: string | null
           updated_at?: string | null
           user_id?: string | null
