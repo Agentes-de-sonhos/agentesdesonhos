@@ -459,6 +459,18 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
               onSwitchToManual={() => { setOrigin("manual"); setStep("client"); }}
             />
           )}
+          {step === "confirm" && (
+            <StepConfirm
+              client={client}
+              destination={destination}
+              setDestination={setDestination}
+              saleDate={saleDate}
+              setSaleDate={setSaleDate}
+              notes={notes}
+              setNotes={setNotes}
+              importSourceLabel={importSourceLabel}
+            />
+          )}
           {step === "client" && (
             <StepClient client={client} onChange={setClient} />
           )}
