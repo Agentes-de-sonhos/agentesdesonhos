@@ -72,8 +72,9 @@ export function SuppliersRanking({ commissions }: { commissions: CommissionRecei
   const [selected, setSelected] = useState<SupplierAgg | null>(null);
   const aggs = useMemo(() => aggregate(commissions), [commissions]);
 
-  const topComissao = [...aggs].sort((a, b) => b.comissaoPrevista - a.comissaoPrevista).slice(0, 10);
-  const topVendas = [...aggs].sort((a, b) => b.totalVendido - a.totalVendido).slice(0, 10);
+  // Exclui agregados sem comissão para não poluir o ranking de Top Fornecedores
+  const topComissao = [...aggs].filter(a => a.comissaoPrevista > 0).sort((a, b) => b.comissaoPrevista - a.comissaoPrevista).slice(0, 10);
+  const topVendas = [...aggs].filter(a => a.totalVendido > 0).sort((a, b) => b.totalVendido - a.totalVendido).slice(0, 10);
   const topAtraso = [...aggs].filter(a => a.qtdAtrasados > 0).sort((a, b) => b.valorAtrasado - a.valorAtrasado).slice(0, 10);
   const topNF = [...aggs].filter(a => a.qtdNFPendente > 0).sort((a, b) => b.qtdNFPendente - a.qtdNFPendente).slice(0, 10);
 
@@ -81,13 +82,17 @@ export function SuppliersRanking({ commissions }: { commissions: CommissionRecei
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RankingCard icon={Trophy} color="text-amber-600" title="Maiores Comissões Previstas" rows={topComissao}
-          valueFn={(a) => `R$ ${fmt(a.comissaoPrevista)}`} onSelect={setSelected} />
+          valueFn={(a) => `R$ ${fmt(a.comissaoPrevista)}`} onSelect={setSelected}
+          emptyMsg="Cadastre vendas com fornecedores para visualizar o ranking." />
         <RankingCard icon={TrendingUp} color="text-emerald-600" title="Maior Volume de Vendas" rows={topVendas}
-          valueFn={(a) => `R$ ${fmt(a.totalVendido)}`} onSelect={setSelected} />
+          valueFn={(a) => `R$ ${fmt(a.totalVendido)}`} onSelect={setSelected}
+          emptyMsg="Nenhuma venda registrada ainda." />
         <RankingCard icon={AlertTriangle} color="text-red-600" title="Mais Recebimentos Atrasados" rows={topAtraso}
-          valueFn={(a) => `${a.qtdAtrasados} (R$ ${fmt(a.valorAtrasado)})`} onSelect={setSelected} emptyMsg="Sem fornecedores em atraso 🎉" />
-        <RankingCard icon={FileText} color="text-blue-600" title="Mais NF Pendentes" rows={topNF}
-          valueFn={(a) => `${a.qtdNFPendente} pendente(s)`} onSelect={setSelected} emptyMsg="Nenhuma NF pendente 🎉" />
+          valueFn={(a) => `${a.qtdAtrasados} (R$ ${fmt(a.valorAtrasado)})`} onSelect={setSelected}
+          emptyMsg="Nenhum fornecedor com recebimentos em atraso." />
+        <RankingCard icon={FileText} color="text-blue-600" title="Mais Notas Fiscais Pendentes" rows={topNF}
+          valueFn={(a) => `${a.qtdNFPendente} pendente(s)`} onSelect={setSelected}
+          emptyMsg="Nenhuma nota fiscal pendente." />
       </div>
 
       {selected && (
