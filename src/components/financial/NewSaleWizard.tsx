@@ -436,6 +436,27 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
           {step === "origin" && (
             <StepOrigin value={origin} onChange={setOrigin} />
           )}
+          {step === "opportunity" && (
+            <StepOpportunity
+              opportunities={closedOpportunities}
+              selectedId={opportunityId}
+              onSelect={setOpportunityId}
+            />
+          )}
+          {step === "source" && (
+            <StepSource
+              detected={importDetected}
+              sourceKind={sourceKind}
+              setSourceKind={setSourceKind}
+              importing={importing}
+              products={products}
+              onAdd={openAddProduct}
+              onEdit={openEditProduct}
+              onRemove={removeProduct}
+              totals={totals}
+              onSwitchToManual={() => { setOrigin("manual"); setStep("client"); }}
+            />
+          )}
           {step === "client" && (
             <StepClient client={client} onChange={setClient} />
           )}
@@ -473,6 +494,10 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
               setSellerId={setSellerId}
               sellerCommission={sellerCommission}
               setSellerCommission={setSellerCommission}
+              importSourceLabel={origin === "crm" ? importSourceLabel : undefined}
+              onAddProduct={openAddProduct}
+              onEditProduct={openEditProduct}
+              onRemoveProduct={removeProduct}
             />
           )}
         </div>
