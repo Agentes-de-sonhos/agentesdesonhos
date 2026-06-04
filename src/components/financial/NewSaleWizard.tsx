@@ -108,6 +108,12 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
 
   // step 1
   const [origin, setOrigin] = useState<"manual" | "crm">("manual");
+  // CRM import state
+  const [opportunityId, setOpportunityId] = useState<string | null>(null);
+  const [sourceKind, setSourceKind] = useState<"wallet" | "quote" | null>(null);
+  const [importDetected, setImportDetected] = useState<{ tripId: string | null; quoteId: string | null }>({ tripId: null, quoteId: null });
+  const [importing, setImporting] = useState(false);
+  const [importSourceLabel, setImportSourceLabel] = useState<string>("");
   // step 2
   const [client, setClient] = useState<{ id: string; name: string } | null>(null);
   // step 3
@@ -138,11 +144,17 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       setSellerId("");
       setSellerCommission(0);
       setSubmitting(false);
+      setOpportunityId(null);
+      setSourceKind(null);
+      setImportDetected({ tripId: null, quoteId: null });
+      setImporting(false);
+      setImportSourceLabel("");
     }
   }, [open]);
 
-  const stepIndex = STEP_ORDER.indexOf(step);
-  const progress = ((stepIndex + 1) / STEP_ORDER.length) * 100;
+  const stepOrder = origin === "crm" ? CRM_STEPS : MANUAL_STEPS;
+  const stepIndex = stepOrder.indexOf(step);
+  const progress = ((Math.max(stepIndex, 0) + 1) / stepOrder.length) * 100;
 
   const totals = useMemo(() => {
     const sale = products.reduce((s, p) => s + (Number(p.sale_price) || 0), 0);
@@ -153,7 +165,9 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
 
   const canAdvance = (): boolean => {
     switch (step) {
-      case "origin": return origin === "manual";
+      case "origin": return origin === "manual" || origin === "crm";
+      case "opportunity": return !!opportunityId;
+      case "source": return !!sourceKind && products.length > 0 && !importing;
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
       case "date": return !!saleDate;
@@ -163,12 +177,12 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   };
 
   const next = () => {
-    const i = STEP_ORDER.indexOf(step);
-    if (i < STEP_ORDER.length - 1) setStep(STEP_ORDER[i + 1]);
+    const i = stepOrder.indexOf(step);
+    if (i < stepOrder.length - 1) setStep(stepOrder[i + 1]);
   };
   const back = () => {
-    const i = STEP_ORDER.indexOf(step);
-    if (i > 0) setStep(STEP_ORDER[i - 1]);
+    const i = stepOrder.indexOf(step);
+    if (i > 0) setStep(stepOrder[i - 1]);
   };
 
   // ---------- product handlers ----------
