@@ -599,7 +599,13 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Fornecedor</Label>
-                <Input value={productFormData.supplier_name || ""} onChange={(e) => setProductFormData({ ...productFormData, supplier_name: e.target.value })} placeholder="Nome do fornecedor" />
+                <SupplierSelector
+                  value={{
+                    operator_id: productFormData.operator_id ?? null,
+                    supplier_name: productFormData.supplier_name || "",
+                  }}
+                  onChange={(v) => setProductFormData({ ...productFormData, supplier_name: v.supplier_name, operator_id: v.operator_id })}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Preço de Venda *</Label>
