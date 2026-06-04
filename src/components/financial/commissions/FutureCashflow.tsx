@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { CalendarClock } from "lucide-react";
 import { CommissionReceivable } from "@/hooks/useCommissionsReceivable";
 import { fmt, isActive, isReceived, todayStr } from "./utils";
 
@@ -30,9 +31,15 @@ export function FutureCashflow({ commissions }: { commissions: CommissionReceiva
 
   if (grouped.length === 0) {
     return (
-      <Card><CardContent className="p-8 text-center text-muted-foreground">
-        Nenhum recebimento futuro previsto.
-      </CardContent></Card>
+      <Card>
+        <CardContent className="p-10 text-center space-y-2">
+          <CalendarClock className="h-8 w-8 mx-auto text-muted-foreground/60" />
+          <p className="text-sm font-medium">Nenhum recebimento previsto para este período.</p>
+          <p className="text-xs text-muted-foreground">
+            Cadastre vendas com previsão de pagamento para visualizar aqui o fluxo futuro de comissões.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
