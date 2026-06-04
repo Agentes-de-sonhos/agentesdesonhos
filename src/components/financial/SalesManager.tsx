@@ -67,6 +67,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
     product_type: "aereo", description: "", sale_price: 0,
     cost_price: 0, non_commissionable_taxes: 0, commission_type: "percentage", commission_value: 0,
     payment_rule: "after_sale", payment_days: 30, requires_invoice: false,
+    supplier_name: "", operator_id: null,
   };
   const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
 
@@ -205,6 +206,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
       non_commissionable_taxes: Number((product as any).non_commissionable_taxes) || 0,
       commission_type: product.commission_type, commission_value: Number(product.commission_value),
       supplier_name: (product as any).supplier_name || "",
+      operator_id: (product as any).operator_id || null,
       payment_rule: (product as any).payment_rule || "after_sale",
       payment_days: (product as any).payment_days || 30,
       expected_date: (product as any).expected_date || "",
