@@ -7738,6 +7738,7 @@ export type Database = {
           payment_days: number | null
           payment_rule: string | null
           product_type: string
+          received_amount: number
           received_date: string | null
           requires_invoice: boolean | null
           sale_id: string
@@ -7765,6 +7766,7 @@ export type Database = {
           payment_days?: number | null
           payment_rule?: string | null
           product_type: string
+          received_amount?: number
           received_date?: string | null
           requires_invoice?: boolean | null
           sale_id: string
@@ -7792,6 +7794,7 @@ export type Database = {
           payment_days?: number | null
           payment_rule?: string | null
           product_type?: string
+          received_amount?: number
           received_date?: string | null
           requires_invoice?: boolean | null
           sale_id?: string
@@ -10626,6 +10629,25 @@ export type Database = {
       ensure_default_operation_stages: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      fn_calc_commission_amount: {
+        Args: {
+          p_sale_price: number
+          p_taxes: number
+          p_type: string
+          p_value: number
+        }
+        Returns: number
+      }
+      fn_compute_commission_status: {
+        Args: {
+          p_commission_amount: number
+          p_current_status: string
+          p_invoice_status: string
+          p_received_amount: number
+          p_requires_invoice: boolean
+        }
+        Returns: string
       }
       generate_certificate_number: { Args: never; Returns: string }
       generate_invoice_access_code: { Args: never; Returns: string }
