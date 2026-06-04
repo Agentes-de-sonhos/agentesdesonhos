@@ -26,6 +26,7 @@ const COMMISSION_STATUSES: Record<string, { label: string; color: string; icon: 
   aguardando_emissao_nota: { label: "Aguardando Emissão NF", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", icon: "📄" },
   aguardando_envio_nota: { label: "Aguardando Envio NF", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", icon: "📤" },
   aguardando_pagamento: { label: "Aguardando Pagamento", color: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400", icon: "⏳" },
+  recebido_parcial: { label: "Recebido Parcial", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400", icon: "🟦" },
   recebido: { label: "Recebido", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400", icon: "✅" },
   atrasado: { label: "Atrasado", color: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400", icon: "🚨" },
   cancelado: { label: "Cancelado", color: "bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400", icon: "❌" },
@@ -53,7 +54,8 @@ const in7days = () => {
 };
 
 function isOverdue(c: CommissionReceivable) {
-  return c.status !== "recebido" && c.status !== "cancelado" && c.expected_date && c.expected_date < today();
+  const remaining = (Number(c.commission_amount) || 0) - (Number(c.received_amount) || 0);
+  return c.status !== "recebido" && c.status !== "cancelado" && remaining > 0 && c.expected_date && c.expected_date < today();
 }
 
 function isDueToday(c: CommissionReceivable) {
@@ -152,6 +154,7 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
   const qc = useQueryClient();
   const [showFilters, setShowFilters] = useState(false);
   const [noteCommission, setNoteCommission] = useState<CommissionReceivable | null>(null);
+  const [receivePayment, setReceivePayment] = useState<CommissionReceivable | null>(null);
 
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterInvoice, setFilterInvoice] = useState("all");
@@ -391,8 +394,8 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                             </Button>
                           )}
                           {c.status !== "recebido" && c.status !== "cancelado" && (
-                            <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] text-emerald-600" title="Marcar como recebido"
-                              onClick={() => updateCommission.mutate({ id: c.id, status: "recebido", received_date: today() })}>
+                            <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] text-emerald-600" title="Registrar recebimento"
+                              onClick={() => setReceivePayment(c)}>
                               <CheckCircle className="h-3.5 w-3.5" />
                             </Button>
                           )}
@@ -418,6 +421,84 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
           onOpenChange={(v) => !v && setNoteCommission(null)}
         />
       )}
+
+      {receivePayment && (
+        <ReceivePaymentDialog
+          commission={receivePayment}
+          open={!!receivePayment}
+          onOpenChange={(v) => !v && setReceivePayment(null)}
+        />
+      )}
     </div>
+  );
+}
+
+function ReceivePaymentDialog({ commission, open, onOpenChange }: { commission: CommissionReceivable; open: boolean; onOpenChange: (v: boolean) => void }) {
+  const qc = useQueryClient();
+  const expected = Number(commission.commission_amount) || 0;
+  const alreadyReceived = Number(commission.received_amount) || 0;
+  const remaining = Math.max(expected - alreadyReceived, 0);
+  const [amount, setAmount] = useState<number>(remaining);
+  const [date, setDate] = useState<string>(today());
+
+  const saveMutation = useMutation({
+    mutationFn: async (values: { received_amount: number; received_date: string | null }) => {
+      const { error } = await supabase.from("sale_products").update(values as any).eq("id", commission.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["commissions-receivable"] });
+      qc.invalidateQueries({ queryKey: ["sale_products"] });
+      toast.success("Recebimento registrado");
+      onOpenChange(false);
+    },
+    onError: () => toast.error("Erro ao registrar recebimento"),
+  });
+
+  const handleSave = (full: boolean) => {
+    const total = full ? expected : Math.min(alreadyReceived + (Number(amount) || 0), expected);
+    saveMutation.mutate({
+      received_amount: total,
+      received_date: total > 0 ? date : null,
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Registrar recebimento</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <div className="rounded-md border bg-muted/30 p-3 text-sm space-y-1">
+            <div className="flex justify-between"><span className="text-muted-foreground">Comissão prevista</span><span className="font-medium">R$ {fmt(expected)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Já recebido</span><span className="font-medium">R$ {fmt(alreadyReceived)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Saldo pendente</span><span className="font-semibold text-primary">R$ {fmt(remaining)}</span></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Valor recebido agora</Label>
+              <Input type="number" min={0} max={remaining} step="0.01" value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))} />
+            </div>
+            <div>
+              <Label className="text-xs">Data do recebimento</Label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Se o valor cobrir o total previsto, a comissão é marcada como Recebido. Caso contrário, fica como Recebido Parcial.
+          </p>
+        </div>
+        <div className="flex justify-end gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          <Button variant="outline" size="sm" onClick={() => handleSave(true)} disabled={saveMutation.isPending || remaining <= 0}>
+            Receber total
+          </Button>
+          <Button size="sm" onClick={() => handleSave(false)} disabled={saveMutation.isPending || !amount || amount <= 0}>
+            {saveMutation.isPending && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
+            Registrar
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
