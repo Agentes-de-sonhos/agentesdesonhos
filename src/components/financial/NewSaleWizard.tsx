@@ -756,6 +756,7 @@ function StepProducts({
 function StepReview({
   client, destination, saleDate, products, totals, notes, setNotes,
   sellers, sellerId, setSellerId, sellerCommission, setSellerCommission,
+  importSourceLabel, onAddProduct, onEditProduct, onRemoveProduct,
 }: {
   client: { id: string; name: string } | null;
   destination: string;
@@ -769,6 +770,10 @@ function StepReview({
   setSellerId: (v: string) => void;
   sellerCommission: number;
   setSellerCommission: (v: number) => void;
+  importSourceLabel?: string;
+  onAddProduct?: () => void;
+  onEditProduct?: (p: DraftProduct) => void;
+  onRemoveProduct?: (id: string) => void;
 }) {
   const dateObj = (() => { const [y,m,d]=saleDate.split("-").map(Number); return new Date(y, m-1, d); })();
   return (
@@ -777,6 +782,13 @@ function StepReview({
         <h3 className="text-base font-semibold">Revisão da venda</h3>
         <p className="text-sm text-muted-foreground">Confira tudo antes de criar.</p>
       </div>
+
+      {importSourceLabel && (
+        <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
+          <Download className="h-3.5 w-3.5" />
+          Dados importados automaticamente de: <strong>{importSourceLabel}</strong>
+        </div>
+      )}
 
       <div className="grid gap-3 rounded-lg border p-4 text-sm sm:grid-cols-2">
         <div>
@@ -798,21 +810,38 @@ function StepReview({
       </div>
 
       <div className="rounded-lg border">
-        <div className="border-b p-3 text-xs font-semibold uppercase text-muted-foreground">
-          Produtos
+        <div className="flex items-center justify-between border-b p-3">
+          <span className="text-xs font-semibold uppercase text-muted-foreground">Produtos</span>
+          {onAddProduct && (
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onAddProduct}>
+              <Plus className="h-3 w-3 mr-1" /> Adicionar
+            </Button>
+          )}
         </div>
         <div className="divide-y">
           {products.map((p) => (
-            <div key={p._tempId} className="flex items-center justify-between p-3 text-sm">
+            <div key={p._tempId} className="flex items-center justify-between gap-2 p-3 text-sm">
               <div className="min-w-0">
                 <p className="font-medium truncate">{p.description || PRODUCT_TYPES[p.product_type]}</p>
                 <p className="text-xs text-muted-foreground truncate">
                   {PRODUCT_TYPES[p.product_type]} • {p.supplier_name || "Sem fornecedor"}
                 </p>
               </div>
-              <div className="text-right shrink-0">
+              <div className="text-right shrink-0 flex items-center gap-2">
+                <div>
                 <p className="font-medium">{fmtCurrency(Number(p.sale_price))}</p>
                 <p className="text-xs text-primary">Comissão {fmtCurrency(productCommission(p))}</p>
+                </div>
+                {onEditProduct && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEditProduct(p)}>
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                )}
+                {onRemoveProduct && (
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onRemoveProduct(p._tempId)}>
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}
