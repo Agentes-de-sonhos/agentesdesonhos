@@ -7,6 +7,7 @@ import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRigh
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
+import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
