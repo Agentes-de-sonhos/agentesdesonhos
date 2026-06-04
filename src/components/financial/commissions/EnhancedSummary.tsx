@@ -4,14 +4,14 @@ import {
   DollarSign, CheckCircle, Clock, AlertTriangle, FileText, CalendarClock,
 } from "lucide-react";
 import {
-  fmt, isActive, isOverdue, isReceived, isDueWithin, requiresInvoicePending,
+  fmt, isActive, isOverdue, isDueWithin, requiresInvoicePending,
 } from "./utils";
 
 export function EnhancedSummary({ commissions }: { commissions: CommissionReceivable[] }) {
   const active = commissions.filter(isActive);
 
   const prevista = active.reduce((s, c) => s + c.commission_amount, 0);
-  const recebida = active.filter(isReceived).reduce((s, c) => s + c.commission_amount, 0);
+  const recebida = active.reduce((s, c) => s + (Number(c.received_amount) || 0), 0);
   const pendente = Math.max(prevista - recebida, 0);
 
   const atrasadas = active.filter(isOverdue);
