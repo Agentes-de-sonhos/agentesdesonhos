@@ -7734,6 +7734,7 @@ export type Database = {
           invoice_sent_date: string | null
           invoice_status: string | null
           non_commissionable_taxes: number | null
+          operator_id: string | null
           payment_days: number | null
           payment_rule: string | null
           product_type: string
@@ -7760,6 +7761,7 @@ export type Database = {
           invoice_sent_date?: string | null
           invoice_status?: string | null
           non_commissionable_taxes?: number | null
+          operator_id?: string | null
           payment_days?: number | null
           payment_rule?: string | null
           product_type: string
@@ -7786,6 +7788,7 @@ export type Database = {
           invoice_sent_date?: string | null
           invoice_status?: string | null
           non_commissionable_taxes?: number | null
+          operator_id?: string | null
           payment_days?: number | null
           payment_rule?: string | null
           product_type?: string
@@ -7798,6 +7801,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sale_products_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sale_products_sale_id_fkey"
             columns: ["sale_id"]
@@ -8481,6 +8491,7 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          operator_id: string | null
           payment_date: string
           payment_method: string
           sale_id: string | null
@@ -8494,6 +8505,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          operator_id?: string | null
           payment_date?: string
           payment_method?: string
           sale_id?: string | null
@@ -8507,6 +8519,7 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          operator_id?: string | null
           payment_date?: string
           payment_method?: string
           sale_id?: string | null
@@ -8516,6 +8529,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "supplier_payments_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "supplier_payments_sale_id_fkey"
             columns: ["sale_id"]
