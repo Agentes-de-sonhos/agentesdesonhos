@@ -15,7 +15,7 @@ import { SmartDashboard } from "@/components/financial/SmartDashboard";
 import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager";
 import { SalesManager } from "@/components/financial/SalesManager";
 import { EntradasManager } from "@/components/financial/EntradasManager";
-import { CommissionsReceivable } from "@/components/financial/CommissionsReceivable";
+import { CommissionsCenter } from "@/components/financial/commissions/CommissionsCenter";
 import { SellersManager } from "@/components/financial/SellersManager";
 import { SellersCommissionReport } from "@/components/financial/SellersCommissionReport";
 import { InvoicesManager } from "@/components/financial/invoices/InvoicesManager";
@@ -190,7 +190,7 @@ export default function Financeiro() {
               {activeTab === "despesas" && <SmartExpenseManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "faturas" && <InvoicesManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "vendas" && <SalesManager viewMonth={viewMonth} viewYear={viewYear} />}
-              {activeTab === "comissoes" && <CommissionsReceivable viewMonth={viewMonth} viewYear={viewYear} />}
+              {activeTab === "comissoes" && <CommissionsCenter viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "fornecedores" && <SuppliersManager />}
               {activeTab === "vendedores" && (
                 <div className="space-y-8">
