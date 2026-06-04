@@ -279,7 +279,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       try {
         const opp: any = opportunity;
         // Pre-fill metadata
-        if (opp.client_id) setClient({ id: opp.client_id, name: opp.client?.name || "Cliente" });
+        setClient({ id: opp.client_id || "", name: opp.client?.name || "Cliente" });
         if (opp.destination) setDestination(opp.destination);
         if (opp.notes) setNotes(opp.notes);
 
