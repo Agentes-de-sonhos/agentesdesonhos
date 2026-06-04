@@ -55,9 +55,12 @@ export function InvoicesCenter({ commissions }: { commissions: CommissionReceiva
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["commissions-receivable"] });
-      toast.success("Nota fiscal atualizada");
+      toast.success("Nota fiscal atualizada com sucesso");
     },
-    onError: () => toast.error("Erro ao atualizar nota fiscal"),
+    onError: (err: any) =>
+      toast.error("Não foi possível atualizar a nota fiscal", {
+        description: err?.message ? "Tente novamente em instantes." : undefined,
+      }),
   });
 
   const markIssued = (c: CommissionReceivable) =>
@@ -103,7 +106,15 @@ export function InvoicesCenter({ commissions }: { commissions: CommissionReceiva
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhuma nota fiscal nesta visão.</td></tr>
+                <tr><td colSpan={7} className="p-10 text-center">
+                  <div className="space-y-1">
+                    <FileText className="h-6 w-6 mx-auto text-muted-foreground/60" />
+                    <p className="text-sm font-medium">Nenhuma nota fiscal encontrada para os filtros selecionados.</p>
+                    <p className="text-xs text-muted-foreground">
+                      Marque "Requer nota fiscal" ao cadastrar produtos para acompanhá-las aqui.
+                    </p>
+                  </div>
+                </td></tr>
               ) : filtered.map(c => {
                 const status = c.invoice_status || "a_emitir";
                 return (
@@ -120,21 +131,25 @@ export function InvoicesCenter({ commissions }: { commissions: CommissionReceiva
                     <td className="p-3">
                       <div className="flex items-center justify-center gap-1 flex-wrap">
                         {status === "a_emitir" && (
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => markIssued(c)} title="Registrar NF emitida">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={mutate.isPending}
+                            onClick={() => markIssued(c)} title="Marca como emitida e registra a data de hoje">
                             <FilePlus className="h-3.5 w-3.5 mr-1" /> Emitir
                           </Button>
                         )}
                         {status === "emitida" && (
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => markSent(c)} title="Registrar envio">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={mutate.isPending}
+                            onClick={() => markSent(c)} title="Marca como enviada e registra a data de hoje">
                             <Send className="h-3.5 w-3.5 mr-1" /> Enviar
                           </Button>
                         )}
                         {status !== "dispensada" && (
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => setConfirmDispense(c)} title="Dispensar NF">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={mutate.isPending}
+                            onClick={() => setConfirmDispense(c)} title="Marcar como dispensada (não exige nota fiscal)">
                             Dispensar
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" onClick={() => setEditing(c)} title="Editar dados da NF">
+                        <Button size="sm" variant="ghost" className="h-7 px-2 text-[11px]" disabled={mutate.isPending}
+                          onClick={() => setEditing(c)} title="Editar número e datas da nota fiscal">
                           <Edit className="h-3.5 w-3.5" />
                         </Button>
                       </div>
