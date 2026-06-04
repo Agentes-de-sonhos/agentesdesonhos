@@ -271,7 +271,7 @@ const faqs = [
   },
   {
     q: "A promoção de 50% é por tempo limitado?",
-    a: "Sim. A condição promocional de 50% de desconto é válida por tempo limitado, até 31 de maio, conforme disponibilidade da campanha vigente.",
+    a: "Sim. A condição promocional de 50% de desconto é válida por tempo limitado, até 30 de junho, conforme disponibilidade da campanha vigente.",
   },
 ];
 
