@@ -559,15 +559,17 @@ function StepOrigin({ value, onChange }: { value: "manual" | "crm"; onChange: (v
         </button>
         <button
           type="button"
-          disabled
-          className="flex flex-col items-start gap-2 rounded-lg border-2 border-dashed border-muted p-4 text-left opacity-60 cursor-not-allowed"
+          onClick={() => onChange("crm")}
+          className={cn(
+            "flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
+            value === "crm" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
+          )}
         >
           <div className="flex items-center gap-2 font-medium">
-            <Download className="h-4 w-4" /> Importar do CRM
-            <Badge variant="secondary" className="ml-auto text-[10px]">Em breve</Badge>
+            <Download className="h-4 w-4 text-primary" /> Importar do CRM
           </div>
           <p className="text-xs text-muted-foreground">
-            Essa opção será liberada na próxima etapa.
+            Transformar uma oportunidade fechada em venda financeira.
           </p>
         </button>
       </div>
