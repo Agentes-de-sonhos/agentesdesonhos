@@ -9,6 +9,7 @@ import { ExportButton, ExportModal, type ExportFormat } from "@/components/finan
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
+import { NewSaleWizard } from "@/components/financial/NewSaleWizard";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   const [sellerId, setSellerId] = useState<string>("");
   const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
@@ -77,7 +79,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   // Auto-open dialog when action=new
   useEffect(() => {
     if (searchParams.get("action") === "new") {
-      setIsDialogOpen(true);
+      setIsWizardOpen(true);
       setSearchParams({ tab: "vendas" }, { replace: true });
     }
   }, [searchParams]);
@@ -308,12 +310,18 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
         <h3 className="text-lg font-semibold">Vendas</h3>
         <div className="flex items-center gap-2">
           <ExportButton onClick={() => setShowExport(true)} />
-          <Button onClick={() => { resetSaleForm(); setIsDialogOpen(true); }}>
+          <Button onClick={() => setIsWizardOpen(true)}>
             <Plus className="h-4 w-4 mr-2" /> Nova Venda
           </Button>
         </div>
       </div>
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Vendas" onExport={handleExportSales} />
+
+      <NewSaleWizard
+        open={isWizardOpen}
+        onOpenChange={setIsWizardOpen}
+        onCreated={(id) => setExpandedSales((prev) => new Set(prev).add(id))}
+      />
 
       {availableOpportunities.length > 0 && (
         <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
