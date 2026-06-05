@@ -659,16 +659,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 const hotelSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
-  hotel_name: z.string().optional(),
-  city: z.string().optional(),
-  check_in: z.date().optional().nullable(),
-  check_out: z.date().optional().nullable(),
-  room_type: z.string().optional(),
-  meal_plan: z.string().optional(),
+  hotel_name: z.string().min(1, "Informe o nome do hotel"),
+  city: z.string().min(1, "Informe a cidade"),
+  check_in: z.date({ required_error: "Selecione a data de check-in", invalid_type_error: "Selecione a data de check-in" }),
+  check_out: z.date({ required_error: "Selecione a data de check-out", invalid_type_error: "Selecione a data de check-out" }),
+  room_type: z.string().min(1, "Selecione o tipo de quarto"),
+  meal_plan: z.string().min(1, "Selecione o regime de alimentação"),
   price: z.number().min(0),
   adult_price: z.number().min(0).optional(),
   child_price: z.number().min(0).optional(),
   notes: z.string().optional(),
+}).refine((v) => !v.check_in || !v.check_out || v.check_out >= v.check_in, {
+  message: "Check-out deve ser igual ou posterior ao check-in",
+  path: ["check_out"],
 });
 
 function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
