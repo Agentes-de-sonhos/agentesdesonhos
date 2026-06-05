@@ -1798,6 +1798,14 @@ function RailTransportForm({
                   </PopoverContent>
                 </Popover><FormMessage /></FormItem>
             )} />
+            <FormField control={form.control} name="departure_time" render={({ field }) => (
+              <FormItem><FormLabel>Horário de saída</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="arrival_time" render={({ field }) => (
+              <FormItem><FormLabel>Horário de chegada</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="operator" render={({ field }) => (
               <FormItem><FormLabel>Operadora ferroviária</FormLabel><FormControl><Input placeholder="SNCF, Trenitalia, Eurostar..." {...field} /></FormControl><FormMessage /></FormItem>
             )} />
