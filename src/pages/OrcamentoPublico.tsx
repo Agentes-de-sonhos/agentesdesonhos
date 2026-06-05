@@ -111,6 +111,7 @@ function getServiceName(service: QuoteService): string {
     case "attraction": return data.product_name || data.name;
     case "insurance": return data.provider;
     case "cruise": return data.ship_name;
+    case "rail_transport": return `${data.origin_city || ""} → ${data.destination_city || ""}`.trim();
     case "circuit": return data.circuit_name || "Circuito";
     case "other": return data.company_name || "Outros Serviços";
     default: return "Serviço";
