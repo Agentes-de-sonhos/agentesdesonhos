@@ -125,7 +125,10 @@ Deno.serve(async (req) => {
         language: "pt-BR",
       });
       if (googleType === "(cities)") {
-        p.set("types", "(cities)");
+        // Use `geocode` instead of strict `(cities)` so destinations
+        // classified as natural_feature/island (e.g. Fernando de Noronha
+        // archipelago) or administrative regions still appear.
+        p.set("types", "geocode");
       } else {
         p.set("types", "establishment");
       }
