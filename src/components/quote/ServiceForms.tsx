@@ -2700,7 +2700,8 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
           <Input placeholder="Ex: Wemoov, TourTransfer..." value={transferCompanyName} onChange={(e) => setTransferCompanyName(e.target.value)} />
         </div>
       )}
-      {!(['flight','hotel','car_rental','transfer','attraction','insurance','cruise','rail_transport','circuit','other'] as ServiceType[]).includes(serviceType) && photoSlotElement}
+      {!(['flight','hotel','car_rental','transfer','attraction','insurance','cruise','circuit','other'] as ServiceType[]).includes(serviceType) && photoSlotElement}
+      {serviceType === 'rail_transport' && photoSlotElement}
       {formElement}
     </div>
   );
