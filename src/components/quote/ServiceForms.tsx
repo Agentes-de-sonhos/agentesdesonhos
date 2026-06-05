@@ -1676,6 +1676,8 @@ const railSchema = z.object({
   destination_city: z.string().min(1, "Informe a cidade de destino"),
   destination_station: z.string().optional(),
   travel_date: z.date().optional().nullable(),
+  departure_time: z.string().optional(),
+  arrival_time: z.string().optional(),
   operator: z.string().optional(),
   rail_type: z.enum(["high_speed", "regional", "night", "panoramic", "other"]),
   travel_class: z.enum(["economy", "second", "first", "executive", "sleeper"]),
@@ -1691,8 +1693,6 @@ const railSchema = z.object({
   assigned_seat: z.boolean().optional(),
   private_cabin: z.boolean().optional(),
   panoramic_view: z.boolean().optional(),
-  cost_value: z.number().min(0).optional(),
-  fees: z.number().min(0).optional(),
   price: z.number().min(0),
 });
 
@@ -1709,6 +1709,8 @@ function RailTransportForm({
       destination_city: init.destination_city || "",
       destination_station: init.destination_station || "",
       travel_date: init.travel_date ? parseLocalDate(init.travel_date) : tripStartDate,
+      departure_time: init.departure_time || "",
+      arrival_time: init.arrival_time || "",
       operator: init.operator || "",
       rail_type: (init.rail_type as RailTransportType) || "high_speed",
       travel_class: (init.travel_class as RailTransportClass) || "economy",
@@ -1724,17 +1726,9 @@ function RailTransportForm({
       assigned_seat: !!init.features?.assigned_seat,
       private_cabin: !!init.features?.private_cabin,
       panoramic_view: !!init.features?.panoramic_view,
-      cost_value: typeof init.cost_value === "number" ? init.cost_value : 0,
-      fees: typeof init.fees === "number" ? init.fees : 0,
       price: typeof init.price === "number" ? init.price : (initialData?.amount || 0),
     },
   });
-
-  const watchCost = form.watch("cost_value") || 0;
-  const watchFees = form.watch("fees") || 0;
-  const watchPrice = form.watch("price") || 0;
-  const profit = Math.max(0, watchPrice - watchCost - watchFees);
-  const margin = watchPrice > 0 ? (profit / watchPrice) * 100 : 0;
 
   const handleSubmit = (values: z.infer<typeof railSchema>) => {
     const payload: RailTransportData = {
@@ -1743,6 +1737,8 @@ function RailTransportForm({
       destination_city: values.destination_city,
       destination_station: values.destination_station || undefined,
       travel_date: values.travel_date ? format(values.travel_date, "yyyy-MM-dd") : "",
+      departure_time: values.departure_time || undefined,
+      arrival_time: values.arrival_time || undefined,
       operator: values.operator || "",
       rail_type: values.rail_type,
       travel_class: values.travel_class,
@@ -1760,8 +1756,6 @@ function RailTransportForm({
         private_cabin: !!values.private_cabin,
         panoramic_view: !!values.panoramic_view,
       },
-      cost_value: values.cost_value || 0,
-      fees: values.fees || 0,
       price: values.price,
     };
     onSubmit(payload as any, values.price, undefined, values.description || undefined);
@@ -1804,6 +1798,14 @@ function RailTransportForm({
                   </PopoverContent>
                 </Popover><FormMessage /></FormItem>
             )} />
+            <FormField control={form.control} name="departure_time" render={({ field }) => (
+              <FormItem><FormLabel>Horário de saída</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="arrival_time" render={({ field }) => (
+              <FormItem><FormLabel>Horário de chegada</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="operator" render={({ field }) => (
               <FormItem><FormLabel>Operadora ferroviária</FormLabel><FormControl><Input placeholder="SNCF, Trenitalia, Eurostar..." {...field} /></FormControl><FormMessage /></FormItem>
             )} />
@@ -1886,27 +1888,12 @@ function RailTransportForm({
 
         <section className="space-y-3 border-t pt-4">
           <h3 className="text-sm font-semibold text-foreground">Valores</h3>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <FormField control={form.control} name="cost_value" render={({ field }) => (
-              <FormItem><FormLabel>Valor de custo</FormLabel><FormControl>
-                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
-              </FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="fees" render={({ field }) => (
-              <FormItem><FormLabel>Taxas</FormLabel><FormControl>
-                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
-              </FormControl><FormMessage /></FormItem>
-            )} />
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="price" render={({ field }) => (
               <FormItem><FormLabel>Valor de venda</FormLabel><FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
               </FormControl><FormMessage /></FormItem>
             )} />
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3">
-            <div>Lucro: <span className="font-semibold text-foreground">R$ {profit.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></div>
-            <div>Comissão (taxas): <span className="font-semibold text-foreground">R$ {watchFees.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></div>
-            <div>Margem: <span className="font-semibold text-foreground">{margin.toFixed(1)}%</span></div>
           </div>
         </section>
 
