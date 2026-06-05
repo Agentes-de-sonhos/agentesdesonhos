@@ -118,47 +118,55 @@ Deno.serve(async (req) => {
     const searchInput = context_city ? `${input} ${context_city}` : input;
     const googleType = TYPE_FILTERS[place_type || "general"] || "establishment";
 
-    const params = new URLSearchParams({
-      input: searchInput,
-      key: GOOGLE_PLACES_API_KEY,
-      language: "pt-BR",
-    });
-
-    // "(cities)" uses the special types parameter format
-    if (googleType === "(cities)") {
-      params.set("types", "(cities)");
-    } else {
-      params.set("types", "establishment");
-      // We'll filter by type in post-processing for better results
-    }
-
-    // Soft bias toward Brazil for pt-BR users. We use location+radius
-    // (without `strictbounds`) so international destinations (Paris, Roma,
-    // Buenos Aires) still appear, but Brazilian matches for ambiguous names
-    // like "Fernando de Noronha" are prioritized over foreign homonyms.
-    params.set("location", "-14.235,-51.9253"); // Brazil geographic center
-    params.set("radius", "2000000"); // ~2000km
-    params.set("region", "br");
-
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params}`;
-    const resp = await fetch(url);
-    const data = await resp.json();
-
-    if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-      console.error("Places Autocomplete error:", data.status, data.error_message);
-      return new Response(JSON.stringify({ predictions: [] }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const buildParams = (opts: { brOnly?: boolean } = {}) => {
+      const p = new URLSearchParams({
+        input: searchInput,
+        key: GOOGLE_PLACES_API_KEY,
+        language: "pt-BR",
       });
-    }
+      if (googleType === "(cities)") {
+        p.set("types", "(cities)");
+      } else {
+        p.set("types", "establishment");
+      }
+      p.set("location", "-14.235,-51.9253");
+      p.set("radius", "2000000");
+      p.set("region", "br");
+      if (opts.brOnly) p.set("components", "country:br");
+      return p;
+    };
 
-    let predictions = (data.predictions || []).map((p: any) => ({
-      place_id: p.place_id,
-      name: p.structured_formatting?.main_text || p.description,
-      secondary: p.structured_formatting?.secondary_text || "",
-      description: p.description,
-      types: p.types || [],
-      matched_type: matchesType(p.types || [], googleType),
-    }));
+    const fetchPreds = async (brOnly: boolean) => {
+      const u = `https://maps.googleapis.com/maps/api/place/autocomplete/json?${buildParams({ brOnly })}`;
+      const r = await fetch(u);
+      const j = await r.json();
+      if (j.status !== "OK" && j.status !== "ZERO_RESULTS") {
+        console.error("Places Autocomplete error:", j.status, j.error_message);
+        return [];
+      }
+      return (j.predictions || []).map((p: any) => ({
+        place_id: p.place_id,
+        name: p.structured_formatting?.main_text || p.description,
+        secondary: p.structured_formatting?.secondary_text || "",
+        description: p.description,
+        types: p.types || [],
+        matched_type: matchesType(p.types || [], googleType),
+      }));
+    };
+
+    // Always do two calls in parallel: one restricted to Brazil and one
+    // unrestricted. We prepend Brazilian results so ambiguous names like
+    // "Fernando de Noronha" surface the actual brazilian destination first,
+    // while international destinations (Paris, Roma, Buenos Aires) still
+    // appear from the unrestricted call.
+    const [brPreds, intlPreds] = await Promise.all([fetchPreds(true), fetchPreds(false)]);
+    const seen = new Set<string>();
+    let predictions: any[] = [];
+    for (const p of [...brPreds, ...intlPreds]) {
+      if (seen.has(p.place_id)) continue;
+      seen.add(p.place_id);
+      predictions.push(p);
+    }
 
     // Relevance scoring: boost Brazil + known tourist places, demote far-fetched
     // homonyms (e.g. "Fernando de Noronha — Krai de Stavropol, Rússia").
