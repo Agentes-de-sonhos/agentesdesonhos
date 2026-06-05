@@ -1656,6 +1656,258 @@ const otherSchema = z.object({
   price: z.number().min(0),
 });
 
+/* ━━━━━━━━━━━━━━━━━━━ RAIL TRANSPORT FORM ━━━━━━━━━━━━━━━━━━━ */
+const railSchema = z.object({
+  origin_city: z.string().min(1, "Informe a cidade de origem"),
+  origin_station: z.string().optional(),
+  destination_city: z.string().min(1, "Informe a cidade de destino"),
+  destination_station: z.string().optional(),
+  travel_date: z.date().optional().nullable(),
+  operator: z.string().optional(),
+  rail_type: z.enum(["high_speed", "regional", "night", "panoramic", "other"]),
+  travel_class: z.enum(["economy", "second", "first", "executive", "sleeper"]),
+  adults_count: z.number().min(0),
+  children_count: z.number().min(0),
+  infants_count: z.number().min(0),
+  description: z.string().optional(),
+  whats_included: z.string().optional(),
+  notes: z.string().optional(),
+  wifi: z.boolean().optional(),
+  power_outlets: z.boolean().optional(),
+  meal_included: z.boolean().optional(),
+  assigned_seat: z.boolean().optional(),
+  private_cabin: z.boolean().optional(),
+  panoramic_view: z.boolean().optional(),
+  cost_value: z.number().min(0).optional(),
+  fees: z.number().min(0).optional(),
+  price: z.number().min(0),
+});
+
+function RailTransportForm({
+  onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot,
+}: Omit<ServiceFormProps, "serviceType">) {
+  const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
+  const init: any = initialData?.service_data || {};
+  const form = useForm<z.infer<typeof railSchema>>({
+    resolver: zodResolver(railSchema),
+    defaultValues: {
+      origin_city: init.origin_city || "",
+      origin_station: init.origin_station || "",
+      destination_city: init.destination_city || "",
+      destination_station: init.destination_station || "",
+      travel_date: init.travel_date ? parseLocalDate(init.travel_date) : tripStartDate,
+      operator: init.operator || "",
+      rail_type: (init.rail_type as RailTransportType) || "high_speed",
+      travel_class: (init.travel_class as RailTransportClass) || "economy",
+      adults_count: init.adults_count ?? (adultsCount ?? 1),
+      children_count: init.children_count ?? (childrenCount ?? 0),
+      infants_count: init.infants_count ?? 0,
+      description: init.description || "",
+      whats_included: init.whats_included || "",
+      notes: init.notes || "",
+      wifi: !!init.features?.wifi,
+      power_outlets: !!init.features?.power_outlets,
+      meal_included: !!init.features?.meal_included,
+      assigned_seat: !!init.features?.assigned_seat,
+      private_cabin: !!init.features?.private_cabin,
+      panoramic_view: !!init.features?.panoramic_view,
+      cost_value: typeof init.cost_value === "number" ? init.cost_value : 0,
+      fees: typeof init.fees === "number" ? init.fees : 0,
+      price: typeof init.price === "number" ? init.price : (initialData?.amount || 0),
+    },
+  });
+
+  const watchCost = form.watch("cost_value") || 0;
+  const watchFees = form.watch("fees") || 0;
+  const watchPrice = form.watch("price") || 0;
+  const profit = Math.max(0, watchPrice - watchCost - watchFees);
+  const margin = watchPrice > 0 ? (profit / watchPrice) * 100 : 0;
+
+  const handleSubmit = (values: z.infer<typeof railSchema>) => {
+    const payload: RailTransportData = {
+      origin_city: values.origin_city,
+      origin_station: values.origin_station || undefined,
+      destination_city: values.destination_city,
+      destination_station: values.destination_station || undefined,
+      travel_date: values.travel_date ? format(values.travel_date, "yyyy-MM-dd") : "",
+      operator: values.operator || "",
+      rail_type: values.rail_type,
+      travel_class: values.travel_class,
+      adults_count: values.adults_count,
+      children_count: values.children_count,
+      infants_count: values.infants_count,
+      description: values.description || "",
+      whats_included: values.whats_included || "",
+      notes: values.notes || "",
+      features: {
+        wifi: !!values.wifi,
+        power_outlets: !!values.power_outlets,
+        meal_included: !!values.meal_included,
+        assigned_seat: !!values.assigned_seat,
+        private_cabin: !!values.private_cabin,
+        panoramic_view: !!values.panoramic_view,
+      },
+      cost_value: values.cost_value || 0,
+      fees: values.fees || 0,
+      price: values.price,
+    };
+    onSubmit(payload as any, values.price, undefined, values.description || undefined);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <section className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <TramFront className="h-4 w-4 text-primary" /> Trajeto
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField control={form.control} name="origin_city" render={({ field }) => (
+              <FormItem><FormLabel>Cidade de origem</FormLabel><FormControl>
+                <PlacesAutocomplete value={field.value || ""} onChange={field.onChange} placeType="city" placeholder="Ex: Paris" />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="origin_station" render={({ field }) => (
+              <FormItem><FormLabel>Estação de origem <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel><FormControl><Input placeholder="Ex: Gare de Lyon" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="destination_city" render={({ field }) => (
+              <FormItem><FormLabel>Cidade de destino</FormLabel><FormControl>
+                <PlacesAutocomplete value={field.value || ""} onChange={field.onChange} placeType="city" placeholder="Ex: Lyon" />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="destination_station" render={({ field }) => (
+              <FormItem><FormLabel>Estação de destino <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel><FormControl><Input placeholder="Ex: Lyon Part-Dieu" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <FormField control={form.control} name="travel_date" render={({ field }) => (
+              <FormItem className="flex flex-col"><FormLabel>Data da viagem</FormLabel>
+                <Popover><PopoverTrigger asChild><FormControl>
+                  <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                    {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button></FormControl></PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={field.value || undefined} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
+                  </PopoverContent>
+                </Popover><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="operator" render={({ field }) => (
+              <FormItem><FormLabel>Operadora ferroviária</FormLabel><FormControl><Input placeholder="SNCF, Trenitalia, Eurostar..." {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="rail_type" render={({ field }) => (
+              <FormItem><FormLabel>Tipo de transporte</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {(Object.keys(RAIL_TYPE_LABELS) as RailTransportType[]).map(k => (
+                      <SelectItem key={k} value={k}>{RAIL_TYPE_LABELS[k]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select><FormMessage /></FormItem>
+            )} />
+          </div>
+        </section>
+
+        <section className="space-y-3 border-t pt-4">
+          <h3 className="text-sm font-semibold text-foreground">Detalhes</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField control={form.control} name="travel_class" render={({ field }) => (
+              <FormItem><FormLabel>Categoria</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {(Object.keys(RAIL_CLASS_LABELS) as RailTransportClass[]).map(k => (
+                      <SelectItem key={k} value={k}>{RAIL_CLASS_LABELS[k]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select><FormMessage /></FormItem>
+            )} />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <FormField control={form.control} name="adults_count" render={({ field }) => (
+              <FormItem><FormLabel>Adultos</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="children_count" render={({ field }) => (
+              <FormItem><FormLabel>Crianças</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="infants_count" render={({ field }) => (
+              <FormItem><FormLabel>Bebês</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+          <FormField control={form.control} name="description" render={({ field }) => (
+            <FormItem><FormLabel>Descrição para o cliente</FormLabel><FormControl>
+              <TextareaWithTemplate placeholder="Conte ao cliente como será o trajeto, o conforto, o que esperar..." onValueChange={field.onChange} {...field} />
+            </FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="whats_included" render={({ field }) => (
+            <FormItem><FormLabel>O que está incluso</FormLabel><FormControl>
+              <TextareaWithTemplate placeholder="Bilhete, reserva de assento, bagagem permitida..." onValueChange={field.onChange} {...field} />
+            </FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="notes" render={({ field }) => (
+            <FormItem><FormLabel>Observações</FormLabel><FormControl>
+              <TextareaWithTemplate placeholder="Observações internas ou avisos importantes..." onValueChange={field.onChange} {...field} />
+            </FormControl><FormMessage /></FormItem>
+          )} />
+          <div className="space-y-2">
+            <FormLabel>Características</FormLabel>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {([
+                ["wifi", "Wi-Fi"],
+                ["power_outlets", "Tomadas"],
+                ["meal_included", "Refeição incluída"],
+                ["assigned_seat", "Assento marcado"],
+                ["private_cabin", "Cabine privativa"],
+                ["panoramic_view", "Vista panorâmica"],
+              ] as const).map(([key, label]) => (
+                <FormField key={key} control={form.control} name={key as any} render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0">
+                    <FormControl>
+                      <Checkbox checked={!!field.value} onCheckedChange={(v) => field.onChange(!!v)} />
+                    </FormControl>
+                    <FormLabel className="!mt-0 cursor-pointer font-normal">{label}</FormLabel>
+                  </FormItem>
+                )} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-3 border-t pt-4">
+          <h3 className="text-sm font-semibold text-foreground">Valores</h3>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <FormField control={form.control} name="cost_value" render={({ field }) => (
+              <FormItem><FormLabel>Valor de custo</FormLabel><FormControl>
+                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="fees" render={({ field }) => (
+              <FormItem><FormLabel>Taxas</FormLabel><FormControl>
+                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="price" render={({ field }) => (
+              <FormItem><FormLabel>Valor de venda</FormLabel><FormControl>
+                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3">
+            <div>Lucro: <span className="font-semibold text-foreground">R$ {profit.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></div>
+            <div>Comissão (taxas): <span className="font-semibold text-foreground">R$ {watchFees.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></div>
+            <div>Margem: <span className="font-semibold text-foreground">{margin.toFixed(1)}%</span></div>
+          </div>
+        </section>
+
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
+
+        <div className="flex gap-2 justify-end">
+          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 function OtherForm({ onSubmit, onCancel, isLoading, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof otherSchema>>({
@@ -2434,6 +2686,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     case "attraction": formElement = <GenericImportEntry serviceKey="attraction" icon={<Ticket className="h-4 w-4 text-muted-foreground" />} {...formProps}><AttractionForm {...formProps} /></GenericImportEntry>; break;
     case "insurance": formElement = <GenericImportEntry serviceKey="insurance" icon={<Shield className="h-4 w-4 text-muted-foreground" />} {...formProps}><InsuranceForm {...formProps} /></GenericImportEntry>; break;
     case "cruise": formElement = <GenericImportEntry serviceKey="cruise" icon={<Ship className="h-4 w-4 text-muted-foreground" />} {...formProps}><CruiseForm {...formProps} /></GenericImportEntry>; break;
+    case "rail_transport": formElement = <RailTransportForm {...formProps} />; break;
     case "circuit": formElement = <GenericImportEntry serviceKey="circuit" icon={<MapIcon className="h-4 w-4 text-muted-foreground" />} {...formProps}><CircuitForm {...formProps} /></GenericImportEntry>; break;
     case "other": formElement = <GenericImportEntry serviceKey="other" icon={<Package className="h-4 w-4 text-muted-foreground" />} {...formProps}><OtherForm {...formProps} /></GenericImportEntry>; break;
     default: return null;
@@ -2447,7 +2700,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
           <Input placeholder="Ex: Wemoov, TourTransfer..." value={transferCompanyName} onChange={(e) => setTransferCompanyName(e.target.value)} />
         </div>
       )}
-      {!(['flight','hotel','car_rental','transfer','attraction','insurance','cruise','circuit','other'] as ServiceType[]).includes(serviceType) && photoSlotElement}
+      {!(['flight','hotel','car_rental','transfer','attraction','insurance','cruise','rail_transport','circuit','other'] as ServiceType[]).includes(serviceType) && photoSlotElement}
       {formElement}
     </div>
   );
