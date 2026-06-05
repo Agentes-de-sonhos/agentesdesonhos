@@ -127,6 +127,9 @@ function getServiceDetails(service: QuoteService): string[] {
       const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
       const railClassLbl: Record<string, string> = { economy: "Classe Econômica", second: "Segunda Classe", first: "Primeira Classe", executive: "Executiva", sleeper: "Cabine Leito" };
       if (data.travel_date) details.push(`Data: ${formatDate(data.travel_date)}`);
+      if (data.departure_time || data.arrival_time) {
+        details.push(`Horário: ${data.departure_time || "—"} → ${data.arrival_time || "—"}`);
+      }
       if (data.operator) details.push(`Operadora: ${data.operator}`);
       if (data.rail_type) details.push(railTypeLbl[data.rail_type] || data.rail_type);
       if (data.travel_class) details.push(railClassLbl[data.travel_class] || data.travel_class);

@@ -220,6 +220,9 @@ function getServiceDetails(service: QuoteService): string[] {
       if (data.origin_city || data.destination_city) details.push(`${data.origin_city || ""} → ${data.destination_city || ""}`);
       if (data.origin_station || data.destination_station) details.push(`Estações: ${data.origin_station || "—"} → ${data.destination_station || "—"}`);
       if (data.travel_date) details.push(`Data: ${formatDate(data.travel_date)}`);
+      if (data.departure_time || data.arrival_time) {
+        details.push(`Horário: ${data.departure_time || "—"} → ${data.arrival_time || "—"}`);
+      }
       if (data.operator) details.push(`Operadora: ${data.operator}`);
       if (data.rail_type) details.push(`Tipo: ${railTypeLbl[data.rail_type] || data.rail_type}`);
       if (data.travel_class) details.push(`Classe: ${railClassLbl[data.travel_class] || data.travel_class}`);
