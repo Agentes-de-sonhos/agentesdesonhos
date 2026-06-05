@@ -19,8 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   open: boolean;
@@ -80,17 +79,10 @@ export function ServiceModal(props: Props) {
     // Reset when modal closes/opens or target service changes
   }, [editingService?.id, serviceType, open]);
 
-  const [supplierOpen, setSupplierOpen] = useState<boolean>(
-    Boolean(initialSupplier.operator_id || initialSupplier.supplier_name),
-  );
-  useEffect(() => {
-    setSupplierOpen(Boolean(initialSupplier.operator_id || initialSupplier.supplier_name));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editingService?.id, serviceType, open]);
-
-  const supplierRef = useRef<HTMLDivElement | null>(null);
   const pendingSubmitRef = useRef<null | (() => Promise<void> | void)>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [linkMode, setLinkMode] = useState(false);
+  const [pendingSupplier, setPendingSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
 
   const doSubmit = (
     service_data: ServiceData,
@@ -99,11 +91,13 @@ export function ServiceModal(props: Props) {
     description?: string,
     image_url?: string,
     image_urls?: string[],
+    overrideSupplier?: SupplierSelectorValue,
   ) => {
+    const s = overrideSupplier ?? supplier;
     const merged: any = {
       ...(service_data as any),
-      supplier_operator_id: supplier.operator_id ?? null,
-      supplier_name: supplier.supplier_name || null,
+      supplier_operator_id: s.operator_id ?? null,
+      supplier_name: s.supplier_name || null,
     };
     return onSubmit(merged, amount, option_label, description, image_url, image_urls);
   };
@@ -118,8 +112,10 @@ export function ServiceModal(props: Props) {
   ) => {
     const hasSupplier = Boolean(supplier.operator_id || (supplier.supplier_name && supplier.supplier_name.trim()));
     if (!hasSupplier) {
-      pendingSubmitRef.current = () =>
-        doSubmit(service_data, amount, option_label, description, image_url, image_urls);
+      pendingSubmitRef.current = (sup?: SupplierSelectorValue) =>
+        doSubmit(service_data, amount, option_label, description, image_url, image_urls, sup);
+      setPendingSupplier({ operator_id: null, supplier_name: "" });
+      setLinkMode(false);
       setConfirmOpen(true);
       return;
     }
@@ -175,61 +171,60 @@ export function ServiceModal(props: Props) {
               )
             )}
           />
-          <div ref={supplierRef} className="mt-6 border-t pt-4">
-            <Collapsible open={supplierOpen} onOpenChange={setSupplierOpen}>
-              <CollapsibleTrigger className="flex w-full items-center justify-between text-left text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <span className="flex items-center gap-2">
-                  <Building2 className="h-3.5 w-3.5" />
-                  Fornecedor <span className="text-xs">(opcional)</span>
-                  {(supplier.operator_id || supplier.supplier_name) && (
-                    <span className="text-xs text-foreground font-medium ml-1">
-                      · {supplier.supplier_name}
-                    </span>
-                  )}
-                </span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${supplierOpen ? "rotate-180" : ""}`} />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-3 space-y-1.5">
-                <SupplierSelector value={supplier} onChange={setSupplier} />
-                <p className="text-xs text-muted-foreground">
-                  Vincular um fornecedor ajuda no controle financeiro, pagamentos e comissões.
-                </p>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
         </div>
       </DialogContent>
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialog open={confirmOpen} onOpenChange={(o) => { setConfirmOpen(o); if (!o) setLinkMode(false); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Deseja vincular este serviço a um fornecedor?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {linkMode ? "Vincular fornecedor" : "Deseja vincular este serviço a um fornecedor?"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Vincular um fornecedor ajuda no controle financeiro, pagamentos, comissões e acompanhamento operacional. Você pode fazer isso agora ou posteriormente.
+              {linkMode
+                ? "Busque um fornecedor existente ou crie um novo."
+                : "Vincular um fornecedor ajuda no controle financeiro, pagamentos, comissões e acompanhamento operacional. Você pode fazer isso agora ou posteriormente."}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {linkMode && (
+            <div className="py-2">
+              <SupplierSelector value={pendingSupplier} onChange={setPendingSupplier} />
+            </div>
+          )}
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setConfirmOpen(false);
-                setSupplierOpen(true);
-                setTimeout(() => {
-                  supplierRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                }, 50);
-                pendingSubmitRef.current = null;
-              }}
-            >
-              Vincular fornecedor
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                const fn = pendingSubmitRef.current;
-                pendingSubmitRef.current = null;
-                setConfirmOpen(false);
-                if (fn) await fn();
-              }}
-            >
-              Agora não
-            </AlertDialogAction>
+            {linkMode ? (
+              <>
+                <Button variant="outline" onClick={() => setLinkMode(false)}>Voltar</Button>
+                <Button
+                  disabled={!pendingSupplier.operator_id && !(pendingSupplier.supplier_name || "").trim()}
+                  onClick={async () => {
+                    const fn = pendingSubmitRef.current as null | ((s?: SupplierSelectorValue) => Promise<void> | void);
+                    pendingSubmitRef.current = null;
+                    setSupplier(pendingSupplier);
+                    setConfirmOpen(false);
+                    setLinkMode(false);
+                    if (fn) await fn(pendingSupplier);
+                  }}
+                >
+                  Salvar com fornecedor
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setLinkMode(true)}>
+                  Vincular fornecedor
+                </Button>
+                <Button
+                  onClick={async () => {
+                    const fn = pendingSubmitRef.current as null | ((s?: SupplierSelectorValue) => Promise<void> | void);
+                    pendingSubmitRef.current = null;
+                    setConfirmOpen(false);
+                    if (fn) await fn();
+                  }}
+                >
+                  Agora não
+                </Button>
+              </>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
