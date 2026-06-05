@@ -1683,7 +1683,6 @@ const railSchema = z.object({
   travel_class: z.enum(["economy", "second", "first", "executive", "sleeper"]),
   adults_count: z.number().min(0),
   children_count: z.number().min(0),
-  infants_count: z.number().min(0),
   description: z.string().optional(),
   whats_included: z.string().optional(),
   notes: z.string().optional(),
@@ -1693,7 +1692,8 @@ const railSchema = z.object({
   assigned_seat: z.boolean().optional(),
   private_cabin: z.boolean().optional(),
   panoramic_view: z.boolean().optional(),
-  price: z.number().min(0),
+  adult_price: z.number().min(0),
+  child_price: z.number().min(0),
 });
 
 function RailTransportForm({
