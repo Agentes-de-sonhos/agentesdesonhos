@@ -132,6 +132,14 @@ Deno.serve(async (req) => {
       // We'll filter by type in post-processing for better results
     }
 
+    // Soft bias toward Brazil for pt-BR users. We use location+radius
+    // (without `strictbounds`) so international destinations (Paris, Roma,
+    // Buenos Aires) still appear, but Brazilian matches for ambiguous names
+    // like "Fernando de Noronha" are prioritized over foreign homonyms.
+    params.set("location", "-14.235,-51.9253"); // Brazil geographic center
+    params.set("radius", "2000000"); // ~2000km
+    params.set("region", "br");
+
     const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params}`;
     const resp = await fetch(url);
     const data = await resp.json();
@@ -152,10 +160,23 @@ Deno.serve(async (req) => {
       matched_type: matchesType(p.types || [], googleType),
     }));
 
-    // Sort: matched type first
-    if (googleType !== "(cities)" && googleType !== "establishment") {
-      predictions.sort((a: any, b: any) => (b.matched_type ? 1 : 0) - (a.matched_type ? 1 : 0));
-    }
+    // Relevance scoring: boost Brazil + known tourist places, demote far-fetched
+    // homonyms (e.g. "Fernando de Noronha — Krai de Stavropol, Rússia").
+    const score = (p: any): number => {
+      let s = 0;
+      const sec = (p.secondary || "").toLowerCase();
+      const desc = (p.description || "").toLowerCase();
+      if (sec.includes("brasil") || sec.includes("brazil") || desc.includes("brasil") || desc.includes("brazil")) s += 100;
+      // Penalize obvious non-tourism administrative homonyms
+      if (sec.includes("rússia") || sec.includes("россия") || sec.includes("rosiya")) s -= 50;
+      if (p.matched_type) s += 10;
+      // Tourist locality types
+      const types: string[] = p.types || [];
+      if (types.includes("locality") || types.includes("administrative_area_level_2")) s += 5;
+      if (types.includes("tourist_attraction") || types.includes("natural_feature")) s += 8;
+      return s;
+    };
+    predictions.sort((a: any, b: any) => score(b) - score(a));
 
     predictions = predictions.slice(0, 6);
 
