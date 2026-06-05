@@ -1709,6 +1709,8 @@ function RailTransportForm({
       destination_city: init.destination_city || "",
       destination_station: init.destination_station || "",
       travel_date: init.travel_date ? parseLocalDate(init.travel_date) : tripStartDate,
+      departure_time: init.departure_time || "",
+      arrival_time: init.arrival_time || "",
       operator: init.operator || "",
       rail_type: (init.rail_type as RailTransportType) || "high_speed",
       travel_class: (init.travel_class as RailTransportClass) || "economy",
@@ -1724,17 +1726,9 @@ function RailTransportForm({
       assigned_seat: !!init.features?.assigned_seat,
       private_cabin: !!init.features?.private_cabin,
       panoramic_view: !!init.features?.panoramic_view,
-      cost_value: typeof init.cost_value === "number" ? init.cost_value : 0,
-      fees: typeof init.fees === "number" ? init.fees : 0,
       price: typeof init.price === "number" ? init.price : (initialData?.amount || 0),
     },
   });
-
-  const watchCost = form.watch("cost_value") || 0;
-  const watchFees = form.watch("fees") || 0;
-  const watchPrice = form.watch("price") || 0;
-  const profit = Math.max(0, watchPrice - watchCost - watchFees);
-  const margin = watchPrice > 0 ? (profit / watchPrice) * 100 : 0;
 
   const handleSubmit = (values: z.infer<typeof railSchema>) => {
     const payload: RailTransportData = {
@@ -1743,6 +1737,8 @@ function RailTransportForm({
       destination_city: values.destination_city,
       destination_station: values.destination_station || undefined,
       travel_date: values.travel_date ? format(values.travel_date, "yyyy-MM-dd") : "",
+      departure_time: values.departure_time || undefined,
+      arrival_time: values.arrival_time || undefined,
       operator: values.operator || "",
       rail_type: values.rail_type,
       travel_class: values.travel_class,
@@ -1760,8 +1756,6 @@ function RailTransportForm({
         private_cabin: !!values.private_cabin,
         panoramic_view: !!values.panoramic_view,
       },
-      cost_value: values.cost_value || 0,
-      fees: values.fees || 0,
       price: values.price,
     };
     onSubmit(payload as any, values.price, undefined, values.description || undefined);
