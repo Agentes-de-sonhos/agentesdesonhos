@@ -1911,12 +1911,12 @@ function RailTransportForm({
             return (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">
-                  {a} adulto(s) × {formatCurrency(ap)}
-                  {c > 0 && <> + {c} criança(s) × {formatCurrency(cp)}</>}
+                  {a} adulto(s) × {formatCurrencyInline(ap)}
+                  {c > 0 && <> + {c} criança(s) × {formatCurrencyInline(cp)}</>}
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-muted-foreground">Total do Serviço</div>
-                  <div className="text-lg font-semibold text-primary">{formatCurrency(total)}</div>
+                  <div className="text-lg font-semibold text-primary">{formatCurrencyInline(total)}</div>
                 </div>
               </div>
             );
