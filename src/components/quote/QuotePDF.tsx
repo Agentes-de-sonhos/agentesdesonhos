@@ -75,6 +75,7 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   attraction: "Ingressos/Atrações",
   insurance: "Seguro Viagem",
   cruise: "Cruzeiro",
+  rail_transport: "Transporte Ferroviário",
   circuit: "Circuitos",
   other: "Outros Serviços",
 };
@@ -95,6 +96,7 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
   attraction: "🎟️",
   insurance: "🛡️",
   cruise: "🚢",
+  rail_transport: "🚆",
   circuit: "🗺️",
   other: "📦",
 };
@@ -109,6 +111,7 @@ const SERVICE_GRADIENTS: Record<ServiceType, { bg: string; fg: string; iconBg: s
   attraction: { bg: "linear-gradient(90deg,rgba(236,72,153,0.18),rgba(219,39,119,0.05))", fg: "#be185d", iconBg: "rgba(255,255,255,0.85)" },
   insurance:  { bg: "linear-gradient(90deg,rgba(6,182,212,0.18),rgba(8,145,178,0.05))",   fg: "#0e7490", iconBg: "rgba(255,255,255,0.85)" },
   cruise:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.12),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
+  rail_transport: { bg: "linear-gradient(90deg,rgba(20,184,166,0.18),rgba(13,148,136,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
   circuit:    { bg: "linear-gradient(90deg,rgba(99,102,241,0.18),rgba(79,70,229,0.05))",  fg: "#4338ca", iconBg: "rgba(255,255,255,0.85)" },
   other:      { bg: "linear-gradient(90deg,rgba(148,163,184,0.18),rgba(100,116,139,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
 };
@@ -211,6 +214,21 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
       break;
+    case "rail_transport": {
+      const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
+      const railClassLbl: Record<string, string> = { economy: "Classe Econômica", second: "Segunda Classe", first: "Primeira Classe", executive: "Executiva", sleeper: "Cabine Leito" };
+      if (data.origin_city || data.destination_city) details.push(`${data.origin_city || ""} → ${data.destination_city || ""}`);
+      if (data.origin_station || data.destination_station) details.push(`Estações: ${data.origin_station || "—"} → ${data.destination_station || "—"}`);
+      if (data.travel_date) details.push(`Data: ${formatDate(data.travel_date)}`);
+      if (data.operator) details.push(`Operadora: ${data.operator}`);
+      if (data.rail_type) details.push(`Tipo: ${railTypeLbl[data.rail_type] || data.rail_type}`);
+      if (data.travel_class) details.push(`Classe: ${railClassLbl[data.travel_class] || data.travel_class}`);
+      const pax = (Number(data.adults_count) || 0) + (Number(data.children_count) || 0) + (Number(data.infants_count) || 0);
+      if (pax > 0) details.push(`Passageiros: ${pax}`);
+      if (data.whats_included) details.push(`Incluso: ${data.whats_included}`);
+      if (data.notes) details.push(`Obs: ${data.notes}`);
+      break;
+    }
     case "circuit":
       if (data.circuit_name) details.push(`Circuito: ${data.circuit_name}`);
       if (data.duration) details.push(`Duração: ${data.duration}`);
@@ -325,6 +343,11 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           case "attraction": summary = [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name || ""; break;
           case "insurance": summary = data.provider || ""; break;
           case "cruise": summary = `${data.ship_name || ""}${data.route ? ` — ${data.route}` : ""}`; break;
+          case "rail_transport": {
+            const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
+            summary = `${data.origin_city || ""} → ${data.destination_city || ""}${data.rail_type ? ` | ${railTypeLbl[data.rail_type] || data.rail_type}` : ""}`;
+            break;
+          }
           case "circuit": summary = data.circuit_name || "Circuito"; break;
           case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || "Outros Serviços"; break;
         }

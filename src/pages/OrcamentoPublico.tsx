@@ -5,7 +5,7 @@ import { usePublicQuote } from "@/hooks/useQuotes";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -24,7 +24,7 @@ import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsInclude
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", circuit: "Circuitos", other: "Outros Serviços",
+  cruise: "Cruzeiro", rail_transport: "Transporte Ferroviário", circuit: "Circuitos", other: "Outros Serviços",
 };
 
 function getServiceLabel(service: QuoteService): string {
@@ -39,7 +39,7 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
   flight: <Plane className="h-5 w-5" />, hotel: <Hotel className="h-5 w-5" />,
   car_rental: <Car className="h-5 w-5" />, transfer: <ArrowRightLeft className="h-5 w-5" />,
   attraction: <Ticket className="h-5 w-5" />, insurance: <Shield className="h-5 w-5" />,
-  cruise: <Ship className="h-5 w-5" />, circuit: <Map className="h-5 w-5" />, other: <Package className="h-5 w-5" />,
+  cruise: <Ship className="h-5 w-5" />, rail_transport: <TramFront className="h-5 w-5" />, circuit: <Map className="h-5 w-5" />, other: <Package className="h-5 w-5" />,
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
@@ -50,6 +50,7 @@ const SERVICE_COLORS: Record<ServiceType, string> = {
   attraction: "from-pink-500/15 to-pink-600/5 text-pink-600",
   insurance: "from-cyan-500/15 to-cyan-600/5 text-cyan-600",
   cruise: "from-primary/10 to-primary/5 text-primary",
+  rail_transport: "from-teal-500/15 to-teal-600/5 text-teal-600",
   circuit: "from-indigo-500/15 to-indigo-600/5 text-indigo-600",
   other: "from-muted to-muted/50 text-muted-foreground",
 };
@@ -88,6 +89,7 @@ function getServiceSummary(service: QuoteService): string {
     case "attraction": return [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name;
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
+    case "rail_transport": return `${data.origin_city || ""} → ${data.destination_city || ""}`;
     case "circuit": return data.circuit_name || "Circuito";
     case "other": {
       // Para evitar duplicação, mostra empresa OU primeira linha da descrição (curta)
@@ -109,6 +111,7 @@ function getServiceName(service: QuoteService): string {
     case "attraction": return data.product_name || data.name;
     case "insurance": return data.provider;
     case "cruise": return data.ship_name;
+    case "rail_transport": return `${data.origin_city || ""} → ${data.destination_city || ""}`.trim();
     case "circuit": return data.circuit_name || "Circuito";
     case "other": return data.company_name || "Outros Serviços";
     default: return "Serviço";
@@ -195,6 +198,21 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
       break;
+    case "rail_transport": {
+      const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
+      const railClassLbl: Record<string, string> = { economy: "Classe Econômica", second: "Segunda Classe", first: "Primeira Classe", executive: "Executiva", sleeper: "Cabine Leito" };
+      details.push(`Trajeto: ${data.origin_city || ""} → ${data.destination_city || ""}`);
+      if (data.origin_station || data.destination_station) details.push(`Estações: ${data.origin_station || "—"} → ${data.destination_station || "—"}`);
+      if (data.travel_date) details.push(`Data: ${formatDateShort(data.travel_date)}`);
+      if (data.operator) details.push(`Operadora: ${data.operator}`);
+      if (data.rail_type) details.push(`Tipo: ${railTypeLbl[data.rail_type] || data.rail_type}`);
+      if (data.travel_class) details.push(`Classe: ${railClassLbl[data.travel_class] || data.travel_class}`);
+      const pax = (Number(data.adults_count) || 0) + (Number(data.children_count) || 0) + (Number(data.infants_count) || 0);
+      if (pax > 0) details.push(`Passageiros: ${pax}`);
+      if (data.whats_included) details.push(`Incluso: ${data.whats_included}`);
+      if (data.notes) details.push(data.notes);
+      break;
+    }
     case "circuit":
       if (data.duration) details.push(`Duração: ${data.duration}`);
       if (data.itinerary) details.push(data.itinerary);

@@ -43,6 +43,7 @@ export type ServiceType =
   | 'insurance'
   | 'cruise'
   | 'circuit'
+  | 'rail_transport'
   | 'other';
 
 export interface FlightLegDetail {
@@ -197,6 +198,57 @@ export interface CircuitData {
   price: number;
 }
 
+/**
+ * Transporte Ferroviário — estrutura pensada para futura importação por IA
+ * (Rail Europe, Eurail, Eurostar, etc). Campos extras são opcionais para
+ * preservar compatibilidade com importadores e integrações futuras.
+ */
+export type RailTransportType =
+  | 'high_speed'
+  | 'regional'
+  | 'night'
+  | 'panoramic'
+  | 'other';
+
+export type RailTransportClass =
+  | 'economy'
+  | 'second'
+  | 'first'
+  | 'executive'
+  | 'sleeper';
+
+export interface RailTransportData {
+  origin_city: string;
+  origin_station?: string;
+  destination_city: string;
+  destination_station?: string;
+  travel_date: string;
+  operator: string;
+  rail_type: RailTransportType;
+  travel_class: RailTransportClass;
+  adults_count: number;
+  children_count: number;
+  infants_count: number;
+  description?: string;
+  whats_included?: string;
+  notes?: string;
+  features?: {
+    wifi?: boolean;
+    power_outlets?: boolean;
+    meal_included?: boolean;
+    assigned_seat?: boolean;
+    private_cabin?: boolean;
+    panoramic_view?: boolean;
+  };
+  /** Investimento — segue o mesmo padrão dos demais serviços */
+  cost_value?: number;
+  fees?: number;
+  price: number;
+  /** Preparado para integrações futuras (Rail Europe, Eurail, Eurostar) */
+  booking_reference?: string;
+  external_provider?: string;
+}
+
 export type ServiceData = 
   | FlightData 
   | HotelData 
@@ -206,6 +258,7 @@ export type ServiceData =
   | InsuranceData 
   | CruiseData 
   | CircuitData
+  | RailTransportData
   | OtherServiceData;
 
 export interface QuoteFormData {
@@ -231,7 +284,24 @@ export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   insurance: 'Seguro Viagem',
   cruise: 'Cruzeiro',
   circuit: 'Circuitos',
+  rail_transport: 'Transporte Ferroviário',
   other: 'Outros Serviços',
+};
+
+export const RAIL_TYPE_LABELS: Record<RailTransportType, string> = {
+  high_speed: 'Trem de alta velocidade',
+  regional: 'Trem regional',
+  night: 'Trem noturno',
+  panoramic: 'Trem panorâmico',
+  other: 'Outro',
+};
+
+export const RAIL_CLASS_LABELS: Record<RailTransportClass, string> = {
+  economy: 'Classe Econômica',
+  second: 'Segunda Classe',
+  first: 'Primeira Classe',
+  executive: 'Executiva',
+  sleeper: 'Cabine Leito',
 };
 
 export const MULTI_OPTION_TYPES: ServiceType[] = ['flight', 'hotel'];

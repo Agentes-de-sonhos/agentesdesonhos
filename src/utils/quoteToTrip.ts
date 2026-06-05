@@ -1,6 +1,7 @@
 import type {
   Quote, QuoteService, FlightData, HotelData, CarRentalData, TransferData,
   AttractionData, InsuranceData, CruiseData, OtherServiceData, CircuitData,
+  RailTransportData,
 } from "@/types/quote";
 import type {
   TripServiceType, TripServiceData, TripFlightSegment, TripFormData,
@@ -259,6 +260,31 @@ function mapCruise(d: CruiseData): { type: TripServiceType; data: TripServiceDat
   };
 }
 
+function mapRailTransport(d: RailTransportData): { type: TripServiceType; data: TripServiceData } {
+  return {
+    type: "train",
+    data: {
+      origin_city: d.origin_city || "",
+      origin_station: d.origin_station || "",
+      destination_city: d.destination_city || "",
+      destination_station: d.destination_station || "",
+      travel_date: d.travel_date || "",
+      departure_time: "",
+      arrival_time: "",
+      train_company: d.operator || "",
+      train_number: "",
+      travel_class: d.travel_class || "",
+      coach: "",
+      seat: "",
+      platform: "",
+      passengers: [],
+      boarding_notes: d.notes || "",
+      origin_maps_url: "",
+      destination_maps_url: "",
+    } as any,
+  };
+}
+
 function mapOther(d: OtherServiceData | CircuitData, fallbackTitle?: string): { type: TripServiceType; data: TripServiceData } {
   const isCircuit = (d as CircuitData).circuit_name !== undefined;
   const name = isCircuit
@@ -309,6 +335,7 @@ export function mapQuoteServiceToTripService(qs: QuoteService): { type: TripServ
     case "attraction": mapped = mapAttraction(sd as AttractionData); break;
     case "insurance": mapped = mapInsurance(sd as InsuranceData); break;
     case "cruise": mapped = mapCruise(sd as CruiseData); break;
+    case "rail_transport": mapped = mapRailTransport(sd as RailTransportData); break;
     case "circuit":
     case "other":
       mapped = mapOther(sd, qs.option_label || undefined); break;
