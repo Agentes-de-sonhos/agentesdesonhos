@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/hooks/use-toast";
 import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
@@ -659,16 +660,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 const hotelSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
-  hotel_name: z.string().optional(),
-  city: z.string().optional(),
-  check_in: z.date().optional().nullable(),
-  check_out: z.date().optional().nullable(),
-  room_type: z.string().optional(),
-  meal_plan: z.string().optional(),
+  hotel_name: z.string().min(1, "Informe o nome do hotel"),
+  city: z.string().min(1, "Informe a cidade"),
+  check_in: z.date({ required_error: "Selecione a data de check-in", invalid_type_error: "Selecione a data de check-in" }),
+  check_out: z.date({ required_error: "Selecione a data de check-out", invalid_type_error: "Selecione a data de check-out" }),
+  room_type: z.string().min(1, "Selecione o tipo de quarto"),
+  meal_plan: z.string().min(1, "Selecione o regime de alimentação"),
   price: z.number().min(0),
   adult_price: z.number().min(0).optional(),
   child_price: z.number().min(0).optional(),
   notes: z.string().optional(),
+}).refine((v) => !v.check_in || !v.check_out || v.check_out >= v.check_in, {
+  message: "Check-out deve ser igual ou posterior ao check-in",
+  path: ["check_out"],
 });
 
 function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
@@ -738,14 +742,23 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   }, [form, onPlaceIdChange]);
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
-    const data: any = {
-      hotel_name: values.hotel_name, city: values.city,
-      check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
-      room_type: values.room_type, meal_plan: values.meal_plan, price: values.price, notes: values.notes || "",
-    };
-    if (values.adult_price && values.adult_price > 0) data.adult_price = values.adult_price;
-    if (values.child_price && values.child_price > 0) data.child_price = values.child_price;
-    onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
+    try {
+      const data: any = {
+        hotel_name: values.hotel_name, city: values.city,
+        check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
+        room_type: values.room_type, meal_plan: values.meal_plan, price: values.price, notes: values.notes || "",
+      };
+      if (values.adult_price && values.adult_price > 0) data.adult_price = values.adult_price;
+      if (values.child_price && values.child_price > 0) data.child_price = values.child_price;
+      onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
+    } catch (err) {
+      console.error("HotelForm submit failed:", err);
+      toast({
+        title: "Não foi possível salvar a hospedagem",
+        description: "Verifique se as datas e os campos obrigatórios estão preenchidos.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
