@@ -741,14 +741,23 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   }, [form, onPlaceIdChange]);
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
-    const data: any = {
-      hotel_name: values.hotel_name, city: values.city,
-      check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
-      room_type: values.room_type, meal_plan: values.meal_plan, price: values.price, notes: values.notes || "",
-    };
-    if (values.adult_price && values.adult_price > 0) data.adult_price = values.adult_price;
-    if (values.child_price && values.child_price > 0) data.child_price = values.child_price;
-    onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
+    try {
+      const data: any = {
+        hotel_name: values.hotel_name, city: values.city,
+        check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
+        room_type: values.room_type, meal_plan: values.meal_plan, price: values.price, notes: values.notes || "",
+      };
+      if (values.adult_price && values.adult_price > 0) data.adult_price = values.adult_price;
+      if (values.child_price && values.child_price > 0) data.child_price = values.child_price;
+      onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
+    } catch (err) {
+      console.error("HotelForm submit failed:", err);
+      toast({
+        title: "Não foi possível salvar a hospedagem",
+        description: "Verifique se as datas e os campos obrigatórios estão preenchidos.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
