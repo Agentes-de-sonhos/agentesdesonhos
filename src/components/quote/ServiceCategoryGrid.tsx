@@ -1,4 +1,4 @@
-import { Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Map, Package, Plus, Sparkles, Package2, LucideIcon } from "lucide-react";
+import { Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Map, Package, Plus, Sparkles, Package2, TramFront, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ServiceType } from "@/types/quote";
 import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
@@ -19,6 +19,7 @@ const CATEGORIES: CategoryDef[] = [
   { type: "attraction", title: "Ingressos",         icon: Ticket,         color: "bg-pink-100 text-pink-700",       iconColor: "text-pink-500" },
   { type: "insurance",  title: "Seguro",            icon: Shield,         color: "bg-rose-100 text-rose-700",       iconColor: "text-rose-500" },
   { type: "cruise",     title: "Cruzeiros",         icon: Ship,           color: "bg-cyan-100 text-cyan-700",       iconColor: "text-cyan-500" },
+  { type: "rail_transport", title: "Transporte Ferroviário", icon: TramFront, color: "bg-teal-100 text-teal-700", iconColor: "text-teal-500" },
   { type: "circuit",    title: "Circuitos",         icon: Map,            color: "bg-violet-100 text-violet-700",   iconColor: "text-violet-500" },
   { type: "other",      title: "Outros",            icon: Package,        color: "bg-slate-100 text-slate-700",     iconColor: "text-slate-500" },
 ];
