@@ -32,12 +32,14 @@ import { useAuth } from "@/hooks/useAuth";
 import type {
   ServiceType, FlightData, HotelData, CarRentalData, TransferData,
   AttractionData, InsuranceData, CruiseData, OtherServiceData,
+  RailTransportData, RailTransportType, RailTransportClass,
 } from "@/types/quote";
+import { RAIL_TYPE_LABELS, RAIL_CLASS_LABELS } from "@/types/quote";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 import { HotelSmartImport } from "./hotel-import/HotelSmartImport";
 import { CarRentalSmartImport } from "./car-rental-import/CarRentalSmartImport";
-import { Sparkles, Ticket, Shield, Ship, Map as MapIcon, Package } from "lucide-react";
+import { Sparkles, Ticket, Shield, Ship, Map as MapIcon, Package, TramFront } from "lucide-react";
 import { GenericServiceSmartImport, type GenericServiceKey } from "./service-import/GenericServiceSmartImport";
 import { SERVICE_IMPORT_CONFIGS } from "./service-import/serviceImportConfigs";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
