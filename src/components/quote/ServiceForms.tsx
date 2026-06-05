@@ -1841,15 +1841,12 @@ function RailTransportForm({
                 </Select><FormMessage /></FormItem>
             )} />
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="adults_count" render={({ field }) => (
               <FormItem><FormLabel>Adultos</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="children_count" render={({ field }) => (
               <FormItem><FormLabel>Crianças</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="infants_count" render={({ field }) => (
-              <FormItem><FormLabel>Bebês</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
           <FormField control={form.control} name="description" render={({ field }) => (
@@ -1892,17 +1889,45 @@ function RailTransportForm({
         </section>
 
         <section className="space-y-3 border-t pt-4">
-          <h3 className="text-sm font-semibold text-foreground">Valores</h3>
+          <h3 className="text-sm font-semibold text-foreground">Valores por Passageiro</h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField control={form.control} name="price" render={({ field }) => (
-              <FormItem><FormLabel>Valor de venda</FormLabel><FormControl>
+            <FormField control={form.control} name="adult_price" render={({ field }) => (
+              <FormItem><FormLabel>Valor Adulto</FormLabel><FormControl>
+                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="child_price" render={({ field }) => (
+              <FormItem><FormLabel>Valor Criança</FormLabel><FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
               </FormControl><FormMessage /></FormItem>
             )} />
           </div>
+          {(() => {
+            const a = Number(form.watch("adults_count")) || 0;
+            const c = Number(form.watch("children_count")) || 0;
+            const ap = Number(form.watch("adult_price")) || 0;
+            const cp = Number(form.watch("child_price")) || 0;
+            const total = a * ap + c * cp;
+            return (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {a} adulto(s) × {formatCurrency(ap)}
+                  {c > 0 && <> + {c} criança(s) × {formatCurrency(cp)}</>}
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Total do Serviço</div>
+                  <div className="text-lg font-semibold text-primary">{formatCurrency(total)}</div>
+                </div>
+              </div>
+            );
+          })()}
         </section>
 
-        {renderPaymentSlot(paymentSlot, form.watch("price"))}
+        {renderPaymentSlot(
+          paymentSlot,
+          (Number(form.watch("adults_count")) || 0) * (Number(form.watch("adult_price")) || 0) +
+            (Number(form.watch("children_count")) || 0) * (Number(form.watch("child_price")) || 0)
+        )}
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
