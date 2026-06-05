@@ -2701,7 +2701,6 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
         </div>
       )}
       {!(['flight','hotel','car_rental','transfer','attraction','insurance','cruise','circuit','other'] as ServiceType[]).includes(serviceType) && photoSlotElement}
-      {serviceType === 'rail_transport' && photoSlotElement}
       {formElement}
     </div>
   );
