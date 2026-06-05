@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +16,13 @@ import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
 
 const SERVICE_ICONS: Record<ServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
-  attraction: Ticket, insurance: Shield, cruise: Ship, circuit: Map, other: MoreHorizontal,
+  attraction: Ticket, insurance: Shield, cruise: Ship, rail_transport: TramFront, circuit: Map, other: MoreHorizontal,
 };
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
   transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", circuit: "Circuitos", other: "Outros Serviços",
+  cruise: "Cruzeiro", rail_transport: "Transporte Ferroviário", circuit: "Circuitos", other: "Outros Serviços",
 };
 import { formatQuoteCurrency, type QuoteCurrency } from "@/lib/quoteCurrency";
 
@@ -52,6 +52,7 @@ function getServiceDescription(service: QuoteService): string {
     case "attraction": return `${data.name} (${data.quantity || 1}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.ship_name} - ${data.route}`;
+    case "rail_transport": return `${data.origin_city || ""} → ${data.destination_city || ""}`;
     case "circuit": return data.circuit_name || "Circuito";
     case "other": return data.description;
     default: return "Serviço";
@@ -122,6 +123,19 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
       details.push(`Cabine: ${data.cabin_type}`);
       break;
+    case "rail_transport": {
+      const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
+      const railClassLbl: Record<string, string> = { economy: "Classe Econômica", second: "Segunda Classe", first: "Primeira Classe", executive: "Executiva", sleeper: "Cabine Leito" };
+      if (data.travel_date) details.push(`Data: ${formatDate(data.travel_date)}`);
+      if (data.operator) details.push(`Operadora: ${data.operator}`);
+      if (data.rail_type) details.push(railTypeLbl[data.rail_type] || data.rail_type);
+      if (data.travel_class) details.push(railClassLbl[data.travel_class] || data.travel_class);
+      const pax = (Number(data.adults_count) || 0) + (Number(data.children_count) || 0) + (Number(data.infants_count) || 0);
+      if (pax > 0) details.push(`${pax} passageiro(s)`);
+      if (data.origin_station) details.push(`Estação origem: ${data.origin_station}`);
+      if (data.destination_station) details.push(`Estação destino: ${data.destination_station}`);
+      break;
+    }
     case "circuit":
       if (data.duration) details.push(`Duração: ${data.duration}`);
       if (data.itinerary) details.push(data.itinerary);
