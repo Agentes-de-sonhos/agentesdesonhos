@@ -230,7 +230,7 @@ export interface RailTransportData {
   travel_class: RailTransportClass;
   adults_count: number;
   children_count: number;
-  infants_count: number;
+  infants_count?: number;
   description?: string;
   whats_included?: string;
   notes?: string;
@@ -245,6 +245,11 @@ export interface RailTransportData {
   /** Investimento — segue o mesmo padrão dos demais serviços */
   cost_value?: number;
   fees?: number;
+  /** Valor por passageiro adulto */
+  adult_price?: number;
+  /** Valor por passageiro criança */
+  child_price?: number;
+  /** Valor total calculado: (adultos * adult_price) + (crianças * child_price) */
   price: number;
   /** Preparado para integrações futuras (Rail Europe, Eurail, Eurostar) */
   booking_reference?: string;

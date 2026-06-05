@@ -1683,7 +1683,6 @@ const railSchema = z.object({
   travel_class: z.enum(["economy", "second", "first", "executive", "sleeper"]),
   adults_count: z.number().min(0),
   children_count: z.number().min(0),
-  infants_count: z.number().min(0),
   description: z.string().optional(),
   whats_included: z.string().optional(),
   notes: z.string().optional(),
@@ -1693,7 +1692,8 @@ const railSchema = z.object({
   assigned_seat: z.boolean().optional(),
   private_cabin: z.boolean().optional(),
   panoramic_view: z.boolean().optional(),
-  price: z.number().min(0),
+  adult_price: z.number().min(0),
+  child_price: z.number().min(0),
 });
 
 function RailTransportForm({
@@ -1716,7 +1716,6 @@ function RailTransportForm({
       travel_class: (init.travel_class as RailTransportClass) || "economy",
       adults_count: init.adults_count ?? (adultsCount ?? 1),
       children_count: init.children_count ?? (childrenCount ?? 0),
-      infants_count: init.infants_count ?? 0,
       description: init.description || "",
       whats_included: init.whats_included || "",
       notes: init.notes || "",
@@ -1726,11 +1725,15 @@ function RailTransportForm({
       assigned_seat: !!init.features?.assigned_seat,
       private_cabin: !!init.features?.private_cabin,
       panoramic_view: !!init.features?.panoramic_view,
-      price: typeof init.price === "number" ? init.price : (initialData?.amount || 0),
+      adult_price: typeof init.adult_price === "number" ? init.adult_price : 0,
+      child_price: typeof init.child_price === "number" ? init.child_price : 0,
     },
   });
 
   const handleSubmit = (values: z.infer<typeof railSchema>) => {
+    const totalPrice =
+      (values.adults_count || 0) * (values.adult_price || 0) +
+      (values.children_count || 0) * (values.child_price || 0);
     const payload: RailTransportData = {
       origin_city: values.origin_city,
       origin_station: values.origin_station || undefined,
@@ -1744,7 +1747,7 @@ function RailTransportForm({
       travel_class: values.travel_class,
       adults_count: values.adults_count,
       children_count: values.children_count,
-      infants_count: values.infants_count,
+      infants_count: 0,
       description: values.description || "",
       whats_included: values.whats_included || "",
       notes: values.notes || "",
@@ -1756,9 +1759,11 @@ function RailTransportForm({
         private_cabin: !!values.private_cabin,
         panoramic_view: !!values.panoramic_view,
       },
-      price: values.price,
+      adult_price: values.adult_price,
+      child_price: values.child_price,
+      price: totalPrice,
     };
-    onSubmit(payload as any, values.price, undefined, values.description || undefined);
+    onSubmit(payload as any, totalPrice, undefined, values.description || undefined);
   };
 
   return (
@@ -1836,15 +1841,12 @@ function RailTransportForm({
                 </Select><FormMessage /></FormItem>
             )} />
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="adults_count" render={({ field }) => (
               <FormItem><FormLabel>Adultos</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="children_count" render={({ field }) => (
               <FormItem><FormLabel>Crianças</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="infants_count" render={({ field }) => (
-              <FormItem><FormLabel>Bebês</FormLabel><FormControl><Input type="number" min={0} {...field} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
             )} />
           </div>
           <FormField control={form.control} name="description" render={({ field }) => (
@@ -1887,17 +1889,45 @@ function RailTransportForm({
         </section>
 
         <section className="space-y-3 border-t pt-4">
-          <h3 className="text-sm font-semibold text-foreground">Valores</h3>
+          <h3 className="text-sm font-semibold text-foreground">Valores por Passageiro</h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField control={form.control} name="price" render={({ field }) => (
-              <FormItem><FormLabel>Valor de venda</FormLabel><FormControl>
+            <FormField control={form.control} name="adult_price" render={({ field }) => (
+              <FormItem><FormLabel>Valor Adulto</FormLabel><FormControl>
+                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <FormField control={form.control} name="child_price" render={({ field }) => (
+              <FormItem><FormLabel>Valor Criança</FormLabel><FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
               </FormControl><FormMessage /></FormItem>
             )} />
           </div>
+          {(() => {
+            const a = Number(form.watch("adults_count")) || 0;
+            const c = Number(form.watch("children_count")) || 0;
+            const ap = Number(form.watch("adult_price")) || 0;
+            const cp = Number(form.watch("child_price")) || 0;
+            const total = a * ap + c * cp;
+            return (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {a} adulto(s) × {formatCurrencyInline(ap)}
+                  {c > 0 && <> + {c} criança(s) × {formatCurrencyInline(cp)}</>}
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-muted-foreground">Total do Serviço</div>
+                  <div className="text-lg font-semibold text-primary">{formatCurrencyInline(total)}</div>
+                </div>
+              </div>
+            );
+          })()}
         </section>
 
-        {renderPaymentSlot(paymentSlot, form.watch("price"))}
+        {renderPaymentSlot(
+          paymentSlot,
+          (Number(form.watch("adults_count")) || 0) * (Number(form.watch("adult_price")) || 0) +
+            (Number(form.watch("children_count")) || 0) * (Number(form.watch("child_price")) || 0)
+        )}
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
