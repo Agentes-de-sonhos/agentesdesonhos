@@ -2681,14 +2681,10 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [placeId, setPlaceId] = useState<string | null>(null);
-  const [transferCompanyName, setTransferCompanyName] = useState(
-    initialData?.service_data?.company_name || ""
-  );
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-    const finalData = serviceType === 'transfer' ? { ...data, company_name: transferCompanyName } : data;
-    onSubmit(finalData, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
+    onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
   const isHotel = serviceType === 'hotel';
@@ -2724,12 +2720,6 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
 
   return (
     <div className="space-y-4">
-      {serviceType === 'transfer' && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Nome da Empresa</label>
-          <Input placeholder="Ex: Wemoov, TourTransfer..." value={transferCompanyName} onChange={(e) => setTransferCompanyName(e.target.value)} />
-        </div>
-      )}
       {!(['flight','hotel','car_rental','transfer','attraction','insurance','cruise','circuit','other'] as ServiceType[]).includes(serviceType) && photoSlotElement}
       {formElement}
     </div>
