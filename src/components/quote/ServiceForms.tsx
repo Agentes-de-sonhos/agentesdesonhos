@@ -1888,27 +1888,12 @@ function RailTransportForm({
 
         <section className="space-y-3 border-t pt-4">
           <h3 className="text-sm font-semibold text-foreground">Valores</h3>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <FormField control={form.control} name="cost_value" render={({ field }) => (
-              <FormItem><FormLabel>Valor de custo</FormLabel><FormControl>
-                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
-              </FormControl><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="fees" render={({ field }) => (
-              <FormItem><FormLabel>Taxas</FormLabel><FormControl>
-                <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
-              </FormControl><FormMessage /></FormItem>
-            )} />
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="price" render={({ field }) => (
               <FormItem><FormLabel>Valor de venda</FormLabel><FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} />
               </FormControl><FormMessage /></FormItem>
             )} />
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3">
-            <div>Lucro: <span className="font-semibold text-foreground">R$ {profit.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></div>
-            <div>Comissão (taxas): <span className="font-semibold text-foreground">R$ {watchFees.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span></div>
-            <div>Margem: <span className="font-semibold text-foreground">{margin.toFixed(1)}%</span></div>
           </div>
         </section>
 
