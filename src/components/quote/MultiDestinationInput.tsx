@@ -27,9 +27,14 @@ export function MultiDestinationInput({ value, onChange }: MultiDestinationInput
   const update = (next: string[]) => onChange(joinDestinations(next));
 
   const handleSelectPrimary = (val: string) => {
-    const next = [...destinations];
-    next[0] = val;
-    update(next);
+    // Não usar trim/split/join aqui: isso roda a cada keystroke e removeria
+    // o espaço final, impedindo digitar nomes como "Rio de Janeiro".
+    const rest = destinations.slice(1);
+    if (rest.length === 0) {
+      onChange(val);
+    } else {
+      onChange([val, ...rest].join(", "));
+    }
   };
 
   const addDraft = () => {
