@@ -19,8 +19,21 @@ function joinDestinations(arr: string[]): string {
   return arr.map((s) => s.trim()).filter(Boolean).join(", ");
 }
 
+function getPrimaryInputValue(v: string): string {
+  const commaIndex = v.indexOf(",");
+  return commaIndex === -1 ? v : v.slice(0, commaIndex);
+}
+
+function getAdditionalDestinations(v: string): string[] {
+  const commaIndex = v.indexOf(",");
+  if (commaIndex === -1) return [];
+  return splitDestinations(v.slice(commaIndex + 1));
+}
+
 export function MultiDestinationInput({ value, onChange }: MultiDestinationInputProps) {
-  const destinations = splitDestinations(value);
+  const primary = getPrimaryInputValue(value);
+  const additional = getAdditionalDestinations(value);
+  const destinations = [primary.trim(), ...additional].filter(Boolean);
   // Always render at least one input (the "principal").
   const [draft, setDraft] = useState("");
 
@@ -29,11 +42,10 @@ export function MultiDestinationInput({ value, onChange }: MultiDestinationInput
   const handleSelectPrimary = (val: string) => {
     // Não usar trim/split/join aqui: isso roda a cada keystroke e removeria
     // o espaço final, impedindo digitar nomes como "Rio de Janeiro".
-    const rest = destinations.slice(1);
-    if (rest.length === 0) {
+    if (additional.length === 0) {
       onChange(val);
     } else {
-      onChange([val, ...rest].join(", "));
+      onChange([val, ...additional].join(", "));
     }
   };
 
@@ -67,9 +79,6 @@ export function MultiDestinationInput({ value, onChange }: MultiDestinationInput
     update(next);
   };
 
-  const primary = destinations[0] || "";
-  const additional = destinations.slice(1);
-
   return (
     <div className="space-y-2">
       {/* Primary destination input (kept compatible with single-field forms) */}
@@ -87,7 +96,7 @@ export function MultiDestinationInput({ value, onChange }: MultiDestinationInput
         <div className="flex flex-wrap gap-2 pt-1">
           <Badge variant="secondary" className="gap-1">
             <Star className="h-3 w-3 fill-current" />
-            {primary || "Principal"}
+            {primary.trim() || "Principal"}
           </Badge>
           {additional.map((dest, i) => {
             const realIdx = i + 1;
