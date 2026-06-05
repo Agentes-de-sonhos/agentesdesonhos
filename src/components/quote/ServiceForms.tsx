@@ -1676,6 +1676,8 @@ const railSchema = z.object({
   destination_city: z.string().min(1, "Informe a cidade de destino"),
   destination_station: z.string().optional(),
   travel_date: z.date().optional().nullable(),
+  departure_time: z.string().optional(),
+  arrival_time: z.string().optional(),
   operator: z.string().optional(),
   rail_type: z.enum(["high_speed", "regional", "night", "panoramic", "other"]),
   travel_class: z.enum(["economy", "second", "first", "executive", "sleeper"]),
@@ -1691,8 +1693,6 @@ const railSchema = z.object({
   assigned_seat: z.boolean().optional(),
   private_cabin: z.boolean().optional(),
   panoramic_view: z.boolean().optional(),
-  cost_value: z.number().min(0).optional(),
-  fees: z.number().min(0).optional(),
   price: z.number().min(0),
 });
 
