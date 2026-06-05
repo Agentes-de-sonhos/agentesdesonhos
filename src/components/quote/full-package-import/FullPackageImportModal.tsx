@@ -76,6 +76,7 @@ const ALL_TYPES: { type: ServiceType; label: string; icon: typeof Plane }[] = [
   { type: "attraction", label: "Ingressos / Atrações / Passeios", icon: Ticket },
   { type: "insurance",  label: "Seguro viagem",                  icon: Shield },
   { type: "cruise",     label: "Cruzeiros",                      icon: Ship },
+  { type: "rail_transport", label: "Transporte Ferroviário",     icon: Ship },
   { type: "circuit",    label: "Circuitos",                      icon: Map },
   { type: "other",      label: "Outros",                         icon: Package },
 ];
