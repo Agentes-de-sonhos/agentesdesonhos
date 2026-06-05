@@ -20,6 +20,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Building2, X } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Props {
   open: boolean;
@@ -84,6 +86,15 @@ export function ServiceModal(props: Props) {
   const [linkMode, setLinkMode] = useState(false);
   const [pendingSupplier, setPendingSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
 
+  // Show inline supplier section only when editing a service that already has a linked supplier
+  const hasLinkedSupplier = Boolean(
+    editingService && (initialSupplier.operator_id || (initialSupplier.supplier_name && initialSupplier.supplier_name.trim())),
+  );
+  const [editSupplierOpen, setEditSupplierOpen] = useState(false);
+  useEffect(() => {
+    setEditSupplierOpen(false);
+  }, [editingService?.id, serviceType, open]);
+
   const doSubmit = (
     service_data: ServiceData,
     amount: number,
@@ -134,6 +145,75 @@ export function ServiceModal(props: Props) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 pt-10 pb-4">
+          {hasLinkedSupplier && (
+            <div className="mb-4 rounded-md border bg-muted/30 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Fornecedor vinculado</p>
+                    <p className="text-sm font-medium truncate">
+                      {supplier.supplier_name || "Sem nome"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditSupplierOpen((v) => !v)}
+                  >
+                    {editSupplierOpen ? "Fechar" : "Alterar"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSupplier({ operator_id: null, supplier_name: "" })}
+                    title="Remover fornecedor"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <Collapsible open={editSupplierOpen} onOpenChange={setEditSupplierOpen}>
+                <CollapsibleContent className="pt-3">
+                  <SupplierSelector value={supplier} onChange={setSupplier} />
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    A alteração será aplicada ao salvar o serviço.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          )}
+          {editingService && !hasLinkedSupplier && (
+            <div className="mb-4 flex items-center justify-between rounded-md border border-dashed bg-muted/20 p-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Building2 className="h-4 w-4" />
+                Nenhum fornecedor vinculado
+                {supplier.supplier_name ? (
+                  <span className="text-foreground font-medium">· {supplier.supplier_name}</span>
+                ) : null}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditSupplierOpen((v) => !v)}
+              >
+                {editSupplierOpen ? "Fechar" : "Vincular"}
+              </Button>
+            </div>
+          )}
+          {editingService && !hasLinkedSupplier && editSupplierOpen && (
+            <div className="mb-4 rounded-md border bg-muted/30 p-3">
+              <SupplierSelector value={supplier} onChange={setSupplier} />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                A vinculação será aplicada ao salvar o serviço.
+              </p>
+            </div>
+          )}
           <ServiceForm
             key={editingService?.id || `new-${serviceType}`}
             serviceType={serviceType}
