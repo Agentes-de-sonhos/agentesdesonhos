@@ -223,6 +223,8 @@ export interface RailTransportData {
   destination_city: string;
   destination_station?: string;
   travel_date: string;
+  departure_time?: string;
+  arrival_time?: string;
   operator: string;
   rail_type: RailTransportType;
   travel_class: RailTransportClass;
