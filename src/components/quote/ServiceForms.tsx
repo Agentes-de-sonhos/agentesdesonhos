@@ -1716,7 +1716,6 @@ function RailTransportForm({
       travel_class: (init.travel_class as RailTransportClass) || "economy",
       adults_count: init.adults_count ?? (adultsCount ?? 1),
       children_count: init.children_count ?? (childrenCount ?? 0),
-      infants_count: init.infants_count ?? 0,
       description: init.description || "",
       whats_included: init.whats_included || "",
       notes: init.notes || "",
@@ -1726,11 +1725,15 @@ function RailTransportForm({
       assigned_seat: !!init.features?.assigned_seat,
       private_cabin: !!init.features?.private_cabin,
       panoramic_view: !!init.features?.panoramic_view,
-      price: typeof init.price === "number" ? init.price : (initialData?.amount || 0),
+      adult_price: typeof init.adult_price === "number" ? init.adult_price : 0,
+      child_price: typeof init.child_price === "number" ? init.child_price : 0,
     },
   });
 
   const handleSubmit = (values: z.infer<typeof railSchema>) => {
+    const totalPrice =
+      (values.adults_count || 0) * (values.adult_price || 0) +
+      (values.children_count || 0) * (values.child_price || 0);
     const payload: RailTransportData = {
       origin_city: values.origin_city,
       origin_station: values.origin_station || undefined,
@@ -1744,7 +1747,7 @@ function RailTransportForm({
       travel_class: values.travel_class,
       adults_count: values.adults_count,
       children_count: values.children_count,
-      infants_count: values.infants_count,
+      infants_count: 0,
       description: values.description || "",
       whats_included: values.whats_included || "",
       notes: values.notes || "",
@@ -1756,9 +1759,11 @@ function RailTransportForm({
         private_cabin: !!values.private_cabin,
         panoramic_view: !!values.panoramic_view,
       },
-      price: values.price,
+      adult_price: values.adult_price,
+      child_price: values.child_price,
+      price: totalPrice,
     };
-    onSubmit(payload as any, values.price, undefined, values.description || undefined);
+    onSubmit(payload as any, totalPrice, undefined, values.description || undefined);
   };
 
   return (
