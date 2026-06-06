@@ -46,7 +46,7 @@ const emailSchema = z.object({
 });
 
 const loginSchema = z.object({
-  email: z.string().trim().email({ message: "Email inválido" }),
+  email: z.string().trim().min(1, { message: "Informe seu e-mail ou login" }),
   password: z.string().min(1, { message: "Senha é obrigatória" }),
 });
 
