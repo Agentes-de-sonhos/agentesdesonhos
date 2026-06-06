@@ -11,6 +11,10 @@ import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsTeamMember } from "@/contexts/TeamSessionContext";
 import { Button } from "@/components/ui/button";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PermissionGate } from "@/components/permissions/PermissionGate";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SmartDashboard } from "@/components/financial/SmartDashboard";
 import { SmartExpenseManager } from "@/components/financial/SmartExpenseManager";
 import { SalesManager } from "@/components/financial/SalesManager";
@@ -79,8 +83,18 @@ export default function Financeiro() {
   const activeTab = ALL_TABS.includes(tabParam as any) ? tabParam! : "dashboard";
   const { user } = useAuth();
   const isTeam = useIsTeamMember();
+  const { can } = usePermissions();
+  const navigate = useNavigate();
   const canShowTeamMembers = !!user && !isTeam;
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+
+  // Bloqueio total para team member sem financial.access
+  const hasFinancialAccess = can('financial.access');
+  useEffect(() => {
+    if (isTeam && !hasFinancialAccess) {
+      navigate('/team-dashboard', { replace: true });
+    }
+  }, [isTeam, hasFinancialAccess, navigate]);
 
   // Global period state — month navigator
   const now = new Date();
@@ -120,6 +134,7 @@ export default function Financeiro() {
   return (
     <DashboardLayout>
       <div className="space-y-4 animate-fade-in relative">
+        <PermissionGate permission="financial.access">
         <div className="relative">
           <PageHeader
             pageKey="financeiro"
@@ -204,6 +219,7 @@ export default function Financeiro() {
         {canShowTeamMembers && (
           <TeamMembersDialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
         )}
+        </PermissionGate>
       </div>
     </DashboardLayout>
   );

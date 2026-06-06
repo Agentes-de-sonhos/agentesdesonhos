@@ -60,6 +60,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useClients } from "@/hooks/useCRM";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { ClientProfile } from "./ClientProfile";
 import type { Client, ClientStatus } from "@/types/crm";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
@@ -86,6 +87,10 @@ type ClientFormData = z.infer<typeof clientSchema>;
 export function ClientsModule() {
   const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
   const { user } = useAuth();
+  const { can } = usePermissions();
+  const canCreate = can('clients.create');
+  const canEdit = can('clients.edit');
+  const canDelete = can('clients.delete');
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -284,15 +289,19 @@ export function ClientsModule() {
             ))}
           </SelectContent>
         </Select>
-        <Button variant="outline" onClick={() => setIsImportOpen(true)} className="gap-2">
-          <Upload className="h-4 w-4" /> Importar Contatos
-        </Button>
+        {canCreate && (
+          <Button variant="outline" onClick={() => setIsImportOpen(true)} className="gap-2">
+            <Upload className="h-4 w-4" /> Importar Contatos
+          </Button>
+        )}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="mr-2 h-4 w-4" /> Novo Cliente
-            </Button>
-          </DialogTrigger>
+          {canCreate && (
+            <DialogTrigger asChild>
+              <Button onClick={() => handleOpenDialog()}>
+                <Plus className="mr-2 h-4 w-4" /> Novo Cliente
+              </Button>
+            </DialogTrigger>
+          )}
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingClient ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
@@ -570,22 +579,26 @@ export function ClientsModule() {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleOpenDialog(client)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => setDeleteId(client.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {canEdit && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleOpenDialog(client)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => setDeleteId(client.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

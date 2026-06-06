@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
 import type { Client, Opportunity, OpportunityStage, SalesGoal, ClientStatus } from "@/types/crm";
+import { ensurePermission, denyAction } from "@/hooks/usePermissions";
+import { logTeamAction } from "@/lib/audit";
 
 export function useClients() {
   const { user } = useAuth();
@@ -41,6 +43,7 @@ export function useClients() {
       birthday_month?: number | null;
       birthday_year?: number | null;
     }) => {
+      if (!ensurePermission('clients.create')) denyAction();
       if (!user) throw new Error("Not authenticated");
       const { data: result, error } = await supabase
         .from("clients")
@@ -58,36 +61,46 @@ export function useClients() {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({ title: "Cliente criado com sucesso" });
       if (result?.id) awardGamificationPoints(result.user_id, POINTS_CONFIG.create_client, "create_client", result.id);
+      if (result?.id) logTeamAction({ action: 'client.create', entity_type: 'client', entity_id: result.id, details: { name: result.name } });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao criar cliente", description: error.message, variant: "destructive" });
     },
   });
 
   const updateClientMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<Client> & { id: string }) => {
+      if (!ensurePermission('clients.edit')) denyAction();
       const { error } = await supabase.from("clients").update(data).eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({ title: "Cliente atualizado" });
+      logTeamAction({ action: 'client.update', entity_type: 'client', entity_id: id });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao atualizar cliente", description: error.message, variant: "destructive" });
     },
   });
 
   const deleteClientMutation = useMutation({
     mutationFn: async (id: string) => {
+      if (!ensurePermission('clients.delete')) denyAction();
       const { error } = await supabase.from("clients").delete().eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({ title: "Cliente excluído" });
+      logTeamAction({ action: 'client.delete', entity_type: 'client', entity_id: id });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao excluir cliente", description: error.message, variant: "destructive" });
     },
   });
@@ -303,6 +316,7 @@ export function useOpportunities() {
       notes?: string;
       follow_up_date?: string;
     }) => {
+      if (!ensurePermission('opportunities.create')) denyAction();
       if (!user) throw new Error("Not authenticated");
       // Resolve first stage (lowest position) for this user
       const { data: firstStage } = await supabase
@@ -336,22 +350,28 @@ export function useOpportunities() {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       toast({ title: "Oportunidade criada" });
       if (user) awardGamificationPoints(user.id, POINTS_CONFIG.create_opportunity, "create_opportunity");
+      logTeamAction({ action: 'opportunity.create', entity_type: 'opportunity', details: { destination: variables.destination } });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao criar oportunidade", description: error.message, variant: "destructive" });
     },
   });
 
   const updateOpportunityMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<Opportunity> & { id: string }) => {
+      if (!ensurePermission('opportunities.edit')) denyAction();
       const { error } = await supabase.from("opportunities").update(data).eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       toast({ title: "Oportunidade atualizada" });
+      logTeamAction({ action: 'opportunity.update', entity_type: 'opportunity', entity_id: id });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
     },
   });
@@ -384,27 +404,34 @@ export function useOpportunities() {
         to_stage: toStageLabel || toStage,
       });
       if (historyError) throw historyError;
+      return { id, fromStageLabel, toStageLabel };
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["sales-stats"] });
+      logTeamAction({ action: 'opportunity.stage_move', entity_type: 'opportunity', entity_id: res?.id, details: { from: res?.fromStageLabel, to: res?.toStageLabel } });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao mover", description: error.message, variant: "destructive" });
     },
   });
 
   const deleteOpportunityMutation = useMutation({
     mutationFn: async (id: string) => {
+      if (!ensurePermission('opportunities.delete')) denyAction();
       const { error } = await supabase.from("opportunities").delete().eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       toast({ title: "Oportunidade excluída" });
+      logTeamAction({ action: 'opportunity.delete', entity_type: 'opportunity', entity_id: id });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
     },
   });
@@ -444,6 +471,7 @@ export function useSalesGoals(month: number, year: number) {
 
   const setGoalMutation = useMutation({
     mutationFn: async (targetAmount: number) => {
+      if (!ensurePermission('goals.edit')) denyAction();
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase.from("sales_goals").upsert(
         {
@@ -455,12 +483,15 @@ export function useSalesGoals(month: number, year: number) {
         { onConflict: "user_id,month,year" }
       );
       if (error) throw error;
+      return targetAmount;
     },
-    onSuccess: () => {
+    onSuccess: (targetAmount) => {
       queryClient.invalidateQueries({ queryKey: ["sales-goal"] });
       toast({ title: "Meta definida com sucesso" });
+      logTeamAction({ action: 'goal.update', details: { month, year, target_amount: targetAmount } });
     },
     onError: (error) => {
+      if (error?.name === 'PermissionDeniedError') return;
       toast({ title: "Erro ao definir meta", description: error.message, variant: "destructive" });
     },
   });

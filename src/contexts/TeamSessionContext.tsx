@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
 import { supabase } from '@/integrations/supabase/client'
+import { updatePermissionsSnapshot } from '@/hooks/usePermissions'
 
 export interface TeamMember {
   id: string
@@ -71,6 +72,15 @@ export function TeamSessionProvider({ children }: { children: ReactNode }) {
     })
     return () => subscription.unsubscribe()
   }, [load])
+
+  // Sincroniza snapshot global usado por guards síncronos em mutations
+  useEffect(() => {
+    updatePermissionsSnapshot({
+      isTeamMember: !!state.member,
+      permissions: state.permissions,
+      stagePermissions: state.stagePermissions,
+    })
+  }, [state])
 
   const refresh = useCallback(async () => { await load() }, [load])
 

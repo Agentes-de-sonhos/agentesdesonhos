@@ -27,6 +27,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useSalesGoals, useSalesStats } from "@/hooks/useCRM";
 import { cn } from "@/lib/utils";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export function SalesGoalsModule() {
   const currentDate = new Date();
@@ -35,6 +36,8 @@ export function SalesGoalsModule() {
 
   const { goal, setGoal, isSettingGoal } = useSalesGoals(currentMonth, currentYear);
   const { stats, isLoading } = useSalesStats(currentMonth, currentYear);
+  const { can } = usePermissions();
+  const canEditGoal = can('goals.edit');
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [targetAmount, setTargetAmount] = useState(goal?.target_amount?.toString() || "");
@@ -70,12 +73,14 @@ export function SalesGoalsModule() {
           <p className="text-sm sm:text-base text-muted-foreground">Acompanhe seu progresso de vendas</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline">
-              <Edit2 className="mr-2 h-4 w-4" />
-              {goal ? "Editar Meta" : "Definir Meta"}
-            </Button>
-          </DialogTrigger>
+          {canEditGoal && (
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Edit2 className="mr-2 h-4 w-4" />
+                {goal ? "Editar Meta" : "Definir Meta"}
+              </Button>
+            </DialogTrigger>
+          )}
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Definir Meta Mensal</DialogTitle>
