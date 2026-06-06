@@ -405,7 +405,7 @@ export function AppSidebar() {
     }
 
     return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan]);
+  }, [allSections, standaloneItems, orderMap, isStartPlan, isPermittedForTeam]);
 
   const toggleSection = (title: string) => {
     setUserInteracted(true);
