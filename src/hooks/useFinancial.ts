@@ -45,7 +45,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as Sale[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
     staleTime: 2 * 60 * 1000,
   });
 
@@ -82,7 +82,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as CustomerPayment[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch supplier payments
@@ -98,7 +98,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as SupplierPayment[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch income entries (legacy)
@@ -114,7 +114,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as IncomeEntry[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch expense entries (legacy)
@@ -138,7 +138,7 @@ export function useFinancial() {
         recurrence_occurrences: (e as any).recurrence_occurrences ?? null,
       })) as ExpenseEntry[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Helper: calculate product-based total for a sale
@@ -695,7 +695,7 @@ export function useClosedOpportunities() {
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   return { closedOpportunities, isLoading };
