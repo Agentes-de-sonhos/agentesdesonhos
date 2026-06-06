@@ -10,6 +10,11 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 }
 
+function syntheticEmail(login: string, ownerId: string) {
+  const safe = String(login).toLowerCase().replace(/[^a-z0-9._-]/g, '')
+  return `${safe}.${ownerId.slice(0, 8)}@team.agentesdesonhos.local`
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -44,19 +49,41 @@ Deno.serve(async (req) => {
       const { count } = await admin.from('agency_team_members')
         .select('id', { count: 'exact', head: true })
         .eq('agency_id', ownerId).eq('status', 'active')
-      if ((count ?? 0) >= 6) return json({ error: 'Limite de 6 usuários atingido' }, 400)
+      if ((count ?? 0) >= 3) return json({ error: 'Limite de 3 usuários atingido' }, 400)
 
       // Login único global
       const { data: existing } = await admin.from('agency_team_members')
         .select('id').eq('login_normalized', String(login).toLowerCase().trim()).maybeSingle()
       if (existing) return json({ error: 'Este login já está em uso' }, 400)
 
+      // Cria usuário no Supabase Auth
+      const email = syntheticEmail(login, ownerId)
+      const { data: authCreated, error: authErr } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          name: full_name,
+          is_team_member: true,
+          agency_id: ownerId,
+          team_login: login.trim(),
+        },
+      })
+      if (authErr || !authCreated?.user) {
+        return json({ error: `Erro ao criar usuário: ${authErr?.message ?? 'desconhecido'}` }, 400)
+      }
+      const authUserId = authCreated.user.id
+
       const password_hash = await bcrypt.hash(password, 10)
       const { data: created, error } = await admin.from('agency_team_members').insert({
         agency_id: ownerId, full_name, login: login.trim(), password_hash,
         role_title: role_title ?? null, status: 'active',
+        auth_user_id: authUserId, synthetic_email: email,
       }).select('id').single()
-      if (error) return json({ error: error.message }, 400)
+      if (error) {
+        await admin.auth.admin.deleteUser(authUserId).catch(() => {})
+        return json({ error: error.message }, 400)
+      }
 
       // Permissões iniciais
       if (Array.isArray(permissions) && permissions.length > 0) {
@@ -87,7 +114,7 @@ Deno.serve(async (req) => {
     if (action === 'update') {
       const { id, full_name, role_title, password, permissions, stage_permissions } = body
       const { data: member } = await admin.from('agency_team_members')
-        .select('id, agency_id').eq('id', id).maybeSingle()
+        .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
 
       const patch: any = { updated_at: new Date().toISOString() }
@@ -95,6 +122,11 @@ Deno.serve(async (req) => {
       if (role_title !== undefined) patch.role_title = role_title
       if (password && password.length >= 6) patch.password_hash = await bcrypt.hash(password, 10)
       await admin.from('agency_team_members').update(patch).eq('id', id)
+
+      // Reflete senha no Supabase Auth
+      if (password && password.length >= 6 && member.auth_user_id) {
+        await admin.auth.admin.updateUserById(member.auth_user_id, { password }).catch(() => {})
+      }
 
       if (Array.isArray(permissions)) {
         await admin.from('agency_team_permissions').delete().eq('team_member_id', id)
@@ -127,13 +159,18 @@ Deno.serve(async (req) => {
       const { id, status } = body
       if (!['active', 'blocked'].includes(status)) return json({ error: 'Status inválido' }, 400)
       const { data: member } = await admin.from('agency_team_members')
-        .select('id, agency_id').eq('id', id).maybeSingle()
+        .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
 
       const { error } = await admin.from('agency_team_members').update({ status }).eq('id', id)
       if (error) return json({ error: error.message }, 400)
       if (status === 'blocked') {
         await admin.from('agency_team_sessions').delete().eq('team_member_id', id)
+        if (member.auth_user_id) {
+          await admin.auth.admin.updateUserById(member.auth_user_id, { ban_duration: '876000h' }).catch(() => {})
+        }
+      } else if (status === 'active' && member.auth_user_id) {
+        await admin.auth.admin.updateUserById(member.auth_user_id, { ban_duration: 'none' }).catch(() => {})
       }
       await admin.from('agency_team_audit_log').insert({
         agency_id: ownerId, team_member_id: id, action: `set_status_${status}`,
@@ -144,9 +181,12 @@ Deno.serve(async (req) => {
     if (action === 'delete') {
       const { id } = body
       const { data: member } = await admin.from('agency_team_members')
-        .select('id, agency_id').eq('id', id).maybeSingle()
+        .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
       await admin.from('agency_team_members').delete().eq('id', id)
+      if (member.auth_user_id) {
+        await admin.auth.admin.deleteUser(member.auth_user_id).catch(() => {})
+      }
       await admin.from('agency_team_audit_log').insert({
         agency_id: ownerId, team_member_id: id, action: 'delete_member',
       })
