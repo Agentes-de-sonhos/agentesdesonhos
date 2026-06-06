@@ -1,97 +1,98 @@
-## Objetivo
+# Fase 1 — Usuários da Equipe: acesso real ao CRM e Financeiro
 
-Criar uma camada de orquestração "Pacote Completo" que recebe um único PDF/imagem/texto contendo múltiplos serviços, identifica e separa cada bloco com IA, e encaminha cada um para a tela de conferência do importador individual já existente (aéreo, hotel, locação, transfer, atração, seguro, cruzeiro, circuito, outros). Nada é gravado no orçamento sem confirmação da agência.
+## Arquitetura adotada
 
-## Arquitetura
+Substituir o login "fake" (token customizado em `agency_team_sessions`) por **usuários reais do Supabase Auth**, cada um vinculado à agência do master via uma tabela `agency_membership`. As RLS de CRM/Financeiro passam a aceitar `auth.uid() = owner OR mesma agência do owner`. Sem proxy de Edge Functions para CRUD — queries continuam diretas com React Query e Realtime.
 
 ```text
-[Modal Pacote Completo]
-  1. Checkbox de tipos esperados
-  2. Upload PDF / imagem / texto
-        |
-        v
-[Edge Function: import-full-package]
-  - Gemini multimodal (PDF/imagem) ou texto
-  - Retorna: { trip_meta, blocks[], warnings[] }
-        |
-        v
-[Tela Resumo]
-  - Esperados x Encontrados x Faltando x Extras
-  - Período, passageiros, total
-  - Alertas de baixa confiança
-        |
-        v
-[Stepper de Conferência]
-  - Para cada block: abre o componente de conferência
-    já existente (HotelSmartImport, AirfareSmartImport,
-    CarRentalSmartImport, GenericServiceSmartImport...)
-    em modo "prefill" recebendo o JSON do bloco
-  - Agência revisa/edita/confirma → adiciona ao orçamento
-  - Pode pular ou descartar bloco
-        |
-        v
-[Log: full_package_imports]
+auth.users (master)  ──┐
+                       ├──► agency_membership (agency_id, user_id, role)
+auth.users (team)    ──┘            │
+                                    ▼
+                    helper: public.same_agency(uid_a, uid_b) → boolean
+                                    │
+                                    ▼
+                RLS em clients, opportunities, operations, sales,
+                expenses, invoices, etc.: owner OR same_agency(owner, auth.uid())
 ```
 
-## Mudanças no código
+## Passos de implementação
 
-### Backend
-- **Nova edge function** `supabase/functions/import-full-package/index.ts`
-  - Input: `{ quote_id?, expected_types: ServiceType[], file_base64?, mime?, text? }`
-  - Usa Lovable AI Gateway (`google/gemini-2.5-pro` para PDF/imagem por melhor multimodal; fallback `gemini-3-flash-preview` para texto puro).
-  - Prompt instrui a IA a:
-    - Devolver JSON estruturado com `trip_meta` (destination, start_date, end_date, adults, children, total_amount, currency) e `blocks[]`.
-    - Cada `block`: `{ id, type: ServiceType, confidence: 0-1, raw_excerpt, normalized_data, missing_fields[], notes }`.
-    - `normalized_data` deve seguir o mesmo formato que cada importador individual já consome (reuso de `FlightData`, `HotelData`, etc.).
-    - Não inventar valores ausentes.
-  - Sanitiza erros em português, valida payload com Zod, rate limit por usuário.
+### 1. Banco de dados (migração)
 
-### Migration
-- Nova tabela `public.full_package_imports`:
-  - `id`, `user_id`, `quote_id` (nullable), `expected_types text[]`, `source_kind` (`pdf|image|text`), `source_url` (storage path, opcional), `source_text` (texto colado, truncado), `ai_blocks jsonb`, `trip_meta jsonb`, `review_status jsonb` (status por bloco), `created_at`.
-  - RLS por `user_id`, GRANT padrão para `authenticated` + `service_role`.
-- Bucket privado `full-package-imports` para arquivos originais (signed URLs).
+- Nova tabela `public.agency_membership(agency_id uuid, user_id uuid PK, role text 'master'|'team', created_at)`. GRANT + RLS (cada user lê apenas suas próprias linhas; service_role gerencia).
+- Backfill: para cada `profiles.user_id` existente, inserir `(agency_id = user_id, user_id = user_id, role = 'master')`.
+- Adicionar `auth_user_id uuid` em `agency_team_members` (nullable, unique).
+- Funções `SECURITY DEFINER`:
+  - `public.current_agency_id()` → retorna `agency_id` do `auth.uid()` (do `agency_membership`, cacheável `STABLE`).
+  - `public.is_same_agency(_owner uuid)` → `current_agency_id() = (select agency_id from agency_membership where user_id = _owner)`. Stable, evita recursão.
+- Atualizar RLS de **todas** as tabelas do CRM e Financeiro (lista no anexo técnico) para:
+  ```sql
+  USING (user_id = auth.uid() OR public.is_same_agency(user_id))
+  WITH CHECK (user_id = auth.uid() OR public.is_same_agency(user_id))
+  ```
+  As inserções de membros da equipe preservam `user_id = <master_id>` (helper `agency_owner_id()` para defaults no app).
+- Trigger em `agency_team_members`: ao criar/ativar, garante linha em `agency_membership(agency_id = master, user_id = auth_user_id, role='team')`. Ao bloquear/excluir, remove a linha.
 
-### Frontend
-- **Novo card "Pacote Completo"** em `ServiceCategoryGrid.tsx`
-  - Posicionado no topo (junto/próximo do "Importar com IA"), com ícone `PackageOpen` e visual destacado (gradiente).
-  - Nova prop `onOpenFullPackage` + `showFullPackage`.
-- **Novo modal** `src/components/quote/full-package-import/FullPackageImportModal.tsx`
-  - Step 1: Seleção de tipos (checkboxes) — orienta a IA.
-  - Step 2: Upload PDF (drag&drop) / imagem / textarea (uma das três fontes).
-  - Step 3: Loading com status (analisando, identificando blocos…).
-  - Step 4: Tela **Resumo** com cards comparando esperado x encontrado, período, passageiros, total, alertas.
-  - Step 5: **Stepper de Conferência** sequencial. Para cada bloco, monta o componente do importador individual existente em modo `prefillData` (sem refazer upload), reaproveitando suas telas de conferência/edição e seu `onConfirm` que devolve um `QuoteService` para salvar.
-  - Botões: "Pular este", "Confirmar e adicionar", "Adicionar todos restantes" (apenas alta confiança), "Finalizar".
-- **Refatores leves nos importadores existentes** para aceitar prop opcional `prefillData` e `mode="review-only"` (pular o upload, ir direto à tela de conferência). Hoje cada importador faz upload→AI→conferência; só vamos pular as duas primeiras etapas quando o orquestrador já tiver o JSON.
-- Integração em `GerarOrcamento.tsx`: passar `onOpenFullPackage` para `ServiceCategoryGrid`, controlar `showFullPackage`, e ao finalizar inserir cada `QuoteService` confirmado via o mesmo handler de salvamento de serviço já usado.
+### 2. Edge Function `team-admin`
 
-### Regras de UX preservadas
-- Nada adicionado automaticamente; cada serviço exige clique de confirmação.
-- Alertas visuais por baixa confiança (`<0.6`) e por campos faltando.
-- Esperado mas não encontrado → alerta amarelo no Resumo.
-- Encontrado mas não esperado → marcado "possivelmente encontrado", agência aceita ou ignora.
-- Valor total do pacote vai para `trip_meta.total_amount`; não distribuído entre serviços.
-- Múltiplas hospedagens/transfers/passeios → blocos separados.
-- Aéreo ida/volta preserva estrutura `outbound_legs`/`return_legs`.
+- Ao criar membro: também chama `supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { agency_id, full_name, is_team_member: true } })`.
+- Salva `auth_user_id` em `agency_team_members`.
+- Email derivado: usar `login@team.<agency_slug>.local` quando o master não informar email real (permite login via `signInWithPassword` usando o email gerado, mas usuário digita só `login`).
+- Ao bloquear: `auth.admin.updateUserById(id, { ban_duration: '876000h' })`. Ao desbloquear: remove ban. Ao excluir: `auth.admin.deleteUser`.
+- Limite alinhado em 3 (corrigir hardcode 6).
 
-## Detalhes técnicos
+### 3. Frontend de login
 
-- Prompt do Gemini construído server-side com a lista de `expected_types` e um schema JSON exato (mesmas chaves dos `ServiceData`).
-- Limite: PDF/imagem até 10MB; texto até 50k chars.
-- Persistência: salva `full_package_imports` antes de retornar para o cliente (auditoria/replay).
-- Storage: se PDF/imagem, upload do arquivo para bucket privado, mantém `source_url`.
-- Sem mudanças em tabelas existentes de quotes/services.
+- `Auth.tsx`: continuar com email/senha padrão. Para membros que digitam apenas o "login", resolver email via nova Edge Function leve `team-resolve-login` (retorna o email sintético) e em seguida `supabase.auth.signInWithPassword`. Remove dependência de `team-login`/`team-session`/`agency_team_sessions` para o fluxo de dados.
+- `TeamSessionContext`: passa a derivar `member`, `permissions` e `stagePermissions` de uma RPC `team_self()` que lê `agency_team_members + permissions + stage_permissions` a partir de `auth.uid()`. Token customizado fica deprecated (mantido apenas para limpeza).
+- `useAuth` agora vale para todos — queries existentes (`enabled: !!user`) destravam automaticamente.
 
-## Entrega em ordem
-1. Migration + bucket.
-2. Edge function `import-full-package` com prompt + validação.
-3. Refator mínimo dos importadores existentes para aceitar `prefillData`.
-4. Modal `FullPackageImportModal` (steps 1–5).
-5. Card "Pacote Completo" no grid + wiring em `GerarOrcamento.tsx`.
-6. QA manual: PDF com aéreo+hotel+transfer+2 passeios.
+### 4. RLS de CRM e Financeiro
 
-## Fora de escopo
-- Não alterar prompts/comportamento dos importadores individuais.
-- Não criar novos campos de orçamento.
-- Não automatizar inserção sem confirmação.
+Tabelas afetadas (todas com mesma política `owner OR same_agency`):
+- CRM: `clients`, `opportunities`, `operations`, `operation_timeline`, `pipeline_stages`, `operation_pipeline_stages`, `sales_goals`, `client_notes`, `client_history`, `client_categories`, `operation_labels`.
+- Financeiro: `sales`, `sale_products`, `expenses`, `invoices`, `invoice_payments`, `customer_payments`, `commissions_receivable`, `tour_operators`, `sellers`, `financial_goals`.
+
+(Lista final validada lendo cada tabela antes de escrever a migração; qualquer tabela do CRM/Financeiro fora desta lista recebe a mesma política.)
+
+### 5. Compatibilidade
+
+- Master continua escrevendo com `user_id = auth.uid()` — inalterado.
+- Membros da equipe inserem com `user_id = current_agency_id()` (helper no app: hook `useAgencyOwnerId`). Hooks de criação (clientes, vendas, despesas, etc.) passam a usar esse helper em vez de `user.id` direto.
+- Orçamentos, Carteira Digital e Roteiros mantêm RLS atual baseada em `user_id` do master — membros os acessam pelo mesmo helper.
+
+### 6. Limpeza
+
+- `team-login`, `team-session`, `agency_team_sessions` ficam apenas como fallback durante uma janela curta; novos logins usam Supabase Auth. (Remoção total fica para Fase 2.)
+- Corrigir mensagem de limite (3) na Edge Function.
+
+## Critérios de aceite verificáveis
+
+1. Master loga e vê seus dados (regressão zero).
+2. Membro da equipe loga via `signInWithPassword`, `useAuth().user` populado.
+3. Membro vê os mesmos clientes/oportunidades/vendas/despesas do master.
+4. Membro cria registros que aparecem para o master.
+5. Tentativa de SQL cross-agency retorna 0 linhas (RLS bloqueia).
+6. Realtime do CRM/Financeiro continua funcionando para o membro.
+
+## Risco e escopo
+
+Mudança grande: ~1 migração ampla (≥15 tabelas), `team-admin` reescrita, nova função `team-resolve-login`, `TeamSessionContext` simplificado, ajustes em hooks de criação para usar `agency_owner_id`. Espera-se 1 PR único.
+
+## Anexo — arquivos a alterar (estimado)
+
+- `supabase/migrations/<novo>.sql`
+- `supabase/functions/team-admin/index.ts`
+- `supabase/functions/team-resolve-login/index.ts` (novo)
+- `src/contexts/TeamSessionContext.tsx`
+- `src/pages/Auth.tsx`
+- `src/hooks/useAgencyOwnerId.ts` (novo)
+- Hooks de criação de registro em CRM e Financeiro (substituir `user.id` por `agencyOwnerId` no insert)
+
+## Fase 2 (fora deste escopo)
+
+- Aplicar `has(permission)` e `canStage()` em ações reais (gating de criar/editar/mover).
+- Rate-limit + política de senha forte.
+- Remoção definitiva de `team-login`/`agency_team_sessions`.
+- Audit log expandido por ação.
