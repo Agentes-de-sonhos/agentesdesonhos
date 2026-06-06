@@ -58,6 +58,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
+import { usePermissions } from "@/hooks/usePermissions";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
@@ -82,6 +83,7 @@ interface MenuItem {
   isPremium?: boolean;
   isHighlighted?: boolean;
   key?: string;
+  requiredPermission?: string;
 }
 
 interface MenuSection {
@@ -182,11 +184,11 @@ const clientesSection: MenuSection = {
   textColor: "text-cyan-700",
   borderColor: "border-cyan-600",
   items: [
-    { key: "dashboard_clientes", title: "Dashboard", url: "/gestao-clientes/dashboard", icon: LayoutDashboard, requiredFeature: "crm_basic" },
-    { key: "gestao_clientes", title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
-    { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
-    { key: "operacoes", title: "Operações", url: "/gestao-clientes/operacoes", icon: CalendarDays, requiredFeature: "crm_basic" },
-    { key: "meta_vendas", title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
+    { key: "dashboard_clientes", title: "Dashboard", url: "/gestao-clientes/dashboard", icon: LayoutDashboard, requiredFeature: "crm_basic", requiredPermission: "dashboard.view" },
+    { key: "gestao_clientes", title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", requiredPermission: "clients.view" },
+    { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic", requiredPermission: "opportunities.view" },
+    { key: "operacoes", title: "Operações", url: "/gestao-clientes/operacoes", icon: CalendarDays, requiredFeature: "crm_basic", requiredPermission: "operations.view" },
+    { key: "meta_vendas", title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial", requiredPermission: "goals.view" },
   ],
 };
 
@@ -201,13 +203,13 @@ const financeiroSection: MenuSection = {
   textColor: "text-emerald-700",
   borderColor: "border-emerald-600",
   items: [
-    { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
-    { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
-    { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
-    { key: "faturas", title: "Faturas", url: "/financeiro?tab=faturas", icon: FileText, requiredFeature: "financial" },
-    { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial" },
-    { key: "vendedores", title: "Vendedores", url: "/financeiro?tab=vendedores", icon: Users, requiredFeature: "financial" },
-    { key: "dashboard_fin", title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
+    { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "faturas", title: "Faturas", url: "/financeiro?tab=faturas", icon: FileText, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "vendedores", title: "Vendedores", url: "/financeiro?tab=vendedores", icon: Users, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "dashboard_fin", title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
   ],
 };
 
@@ -277,6 +279,15 @@ export function AppSidebar() {
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
+  const { can: canPerm, isTeamMember } = usePermissions();
+
+  // Filtra itens por permissão de equipe (master bypassa)
+  const isPermittedForTeam = useCallback((item: MenuItem) => {
+    if (!isTeamMember) return true;
+    // Para team member: só mostra itens com requiredPermission liberado
+    if (!item.requiredPermission) return false;
+    return canPerm(item.requiredPermission);
+  }, [isTeamMember, canPerm]);
 
   // Hover-to-expand on desktop with delayed expand/collapse to avoid accidental open/close
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -345,7 +356,9 @@ export function AppSidebar() {
     const entries: MenuEntry[] = [];
 
     for (const section of allSections) {
-      const sortedItems = [...section.items].sort((a, b) => {
+      const filteredItems = section.items.filter(isPermittedForTeam);
+      if (isTeamMember && filteredItems.length === 0) continue;
+      const sortedItems = filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
