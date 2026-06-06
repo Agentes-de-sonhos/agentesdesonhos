@@ -4,6 +4,7 @@ import { useTeamSession } from '@/contexts/TeamSessionContext'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { usePermissions } from '@/hooks/usePermissions'
 
 function greeting() {
   const h = new Date().getHours()
@@ -13,7 +14,8 @@ function greeting() {
 }
 
 export default function TeamDashboard() {
-  const { member, hasModule, loading } = useTeamSession()
+  const { member, loading } = useTeamSession()
+  const { can } = usePermissions()
   const navigate = useNavigate()
 
   if (loading) return null
@@ -23,8 +25,8 @@ export default function TeamDashboard() {
   }
 
   const firstName = member.full_name.split(' ')[0]
-  const canClients = hasModule('clients')
-  const canFinancial = hasModule('financial')
+  const canClients = can('clients.view') || can('opportunities.view') || can('operations.view') || can('goals.view') || can('dashboard.view')
+  const canFinancial = can('financial.access')
 
   return (
     <div className="min-h-screen bg-background">
