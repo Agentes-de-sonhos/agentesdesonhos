@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import type { 
   Sale, 
   SaleProduct,
@@ -25,6 +26,10 @@ export function useFinancial() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { can } = usePermissions();
+  // Team member sem financial.access NÃO dispara nenhuma query financeira.
+  // Master (não-team-member) sempre passa.
+  const financialEnabled = !!user && can('financial.access');
 
   // Fetch sales with products
   const { data: sales = [], isLoading: salesLoading } = useQuery({
@@ -61,7 +66,7 @@ export function useFinancial() {
         commission_type: p.commission_type as 'percentage' | 'fixed',
       })) as SaleProduct[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch customer payments
