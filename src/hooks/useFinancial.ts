@@ -681,6 +681,8 @@ export function useFinancial() {
 // Hook to fetch closed opportunities for auto-import
 export function useClosedOpportunities() {
   const { user } = useAuth();
+  const { can } = usePermissions();
+  const financialEnabled = !!user && can('financial.access');
 
   const { data: closedOpportunities = [], isLoading } = useQuery({
     queryKey: ["closed-opportunities", user?.id],
