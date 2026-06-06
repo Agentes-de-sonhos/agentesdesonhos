@@ -396,6 +396,9 @@ export function useOpportunities() {
       // Guards de permissão de etapa (origem + destino).
       // Master sempre passa; team member sem can_move recebe deny.
       if (toStageId && !ensureStagePermission('opportunities', toStageId, 'move')) denyAction();
+      // @ts-ignore - fromStageId é opcional, vem do Kanban
+      const fromStageId = (arguments as any)?.[0]?.fromStageId as string | undefined;
+      if (fromStageId && !ensureStagePermission('opportunities', fromStageId, 'move')) denyAction();
       const { error: updateError } = await supabase
         .from("opportunities")
         .update(toStageId ? { stage_id: toStageId } : { stage: toStage })
