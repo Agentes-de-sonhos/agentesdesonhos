@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Users, DollarSign, LogOut } from 'lucide-react'
 import { useTeamSession } from '@/contexts/TeamSessionContext'
+import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
@@ -12,7 +13,7 @@ function greeting() {
 }
 
 export default function TeamDashboard() {
-  const { member, hasModule, signOut, loading } = useTeamSession()
+  const { member, hasModule, loading } = useTeamSession()
   const navigate = useNavigate()
 
   if (loading) return null
@@ -33,7 +34,7 @@ export default function TeamDashboard() {
             <span className="text-xs text-muted-foreground">Área do colaborador</span>
             <span className="text-sm font-medium">{member.full_name}{member.role_title ? ` · ${member.role_title}` : ''}</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => { void signOut().then(() => navigate('/auth')) }}>
+          <Button variant="ghost" size="sm" onClick={() => { void supabase.auth.signOut().then(() => navigate('/auth')) }}>
             <LogOut className="mr-2 h-4 w-4" /> Sair
           </Button>
         </div>

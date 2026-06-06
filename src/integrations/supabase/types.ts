@@ -362,6 +362,27 @@ export type Database = {
           },
         ]
       }
+      agency_membership: {
+        Row: {
+          agency_id: string
+          created_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agency_showcases: {
         Row: {
           auto_categories: string[] | null
@@ -505,6 +526,7 @@ export type Database = {
       agency_team_members: {
         Row: {
           agency_id: string
+          auth_user_id: string | null
           created_at: string
           full_name: string
           id: string
@@ -514,10 +536,12 @@ export type Database = {
           password_hash: string
           role_title: string | null
           status: Database["public"]["Enums"]["team_member_status"]
+          synthetic_email: string | null
           updated_at: string
         }
         Insert: {
           agency_id: string
+          auth_user_id?: string | null
           created_at?: string
           full_name: string
           id?: string
@@ -527,10 +551,12 @@ export type Database = {
           password_hash: string
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
+          synthetic_email?: string | null
           updated_at?: string
         }
         Update: {
           agency_id?: string
+          auth_user_id?: string | null
           created_at?: string
           full_name?: string
           id?: string
@@ -540,6 +566,7 @@ export type Database = {
           password_hash?: string
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
+          synthetic_email?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -10613,6 +10640,7 @@ export type Database = {
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
+      current_agency_id: { Args: never; Returns: string }
       ensure_client_and_opportunity_for_lead: {
         Args: {
           _destination: string
@@ -10823,6 +10851,7 @@ export type Database = {
         Args: { _user_id: string; _year: number }
         Returns: boolean
       }
+      is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
@@ -10869,6 +10898,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      team_self: { Args: never; Returns: Json }
       track_sales_landing_view: {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined

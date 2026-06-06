@@ -1,8 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 
-const TOKEN_KEY = 'team_session_token'
-
 export interface TeamMember {
   id: string
   agency_id: string
@@ -28,14 +26,11 @@ export interface TeamStagePermissionRow {
 interface TeamSessionState {
   loading: boolean
   member: TeamMember | null
-  token: string | null
   permissions: TeamPermissionRow[]
   stagePermissions: TeamStagePermissionRow[]
 }
 
 interface TeamSessionContextValue extends TeamSessionState {
-  signIn: (login: string, password: string) => Promise<{ error: string | null }>
-  signOut: () => Promise<void>
   refresh: () => Promise<void>
   has: (permissionKey: string) => boolean
   hasModule: (module: 'clients' | 'financial') => boolean
@@ -46,64 +41,38 @@ const TeamSessionContext = createContext<TeamSessionContextValue | undefined>(un
 
 export function TeamSessionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TeamSessionState>({
-    loading: true, member: null, token: null, permissions: [], stagePermissions: [],
+    loading: true, member: null, permissions: [], stagePermissions: [],
   })
 
-  const validate = useCallback(async (token: string) => {
-    const { data, error } = await supabase.functions.invoke('team-session', {
-      body: { token, action: 'validate' },
-    })
-    if (error || !data || (data as any).error) {
-      localStorage.removeItem(TOKEN_KEY)
-      setState({ loading: false, member: null, token: null, permissions: [], stagePermissions: [] })
+  const load = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setState({ loading: false, member: null, permissions: [], stagePermissions: [] })
       return
     }
+    const { data, error } = await supabase.rpc('team_self')
+    if (error || !data) {
+      setState({ loading: false, member: null, permissions: [], stagePermissions: [] })
+      return
+    }
+    const payload = data as any
     setState({
       loading: false,
-      member: (data as any).member,
-      token,
-      permissions: (data as any).permissions ?? [],
-      stagePermissions: (data as any).stage_permissions ?? [],
+      member: payload.member,
+      permissions: payload.permissions ?? [],
+      stagePermissions: payload.stage_permissions ?? [],
     })
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem(TOKEN_KEY)
-    if (!token) {
-      setState(s => ({ ...s, loading: false }))
-      return
-    }
-    void validate(token)
-  }, [validate])
-
-  const signIn = useCallback(async (login: string, password: string) => {
-    const { data, error } = await supabase.functions.invoke('team-login', {
-      body: { login, password },
+    void load()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      void load()
     })
-    if (error) return { error: 'Não foi possível autenticar' }
-    const payload = data as any
-    if (payload?.error) return { error: payload.error }
-    localStorage.setItem(TOKEN_KEY, payload.token)
-    setState({
-      loading: false, member: payload.member, token: payload.token,
-      permissions: payload.permissions ?? [], stagePermissions: payload.stage_permissions ?? [],
-    })
-    return { error: null }
-  }, [])
+    return () => subscription.unsubscribe()
+  }, [load])
 
-  const signOut = useCallback(async () => {
-    const token = localStorage.getItem(TOKEN_KEY)
-    if (token) {
-      try { await supabase.functions.invoke('team-session', { body: { token, action: 'logout' } }) } catch {}
-    }
-    localStorage.removeItem(TOKEN_KEY)
-    setState({ loading: false, member: null, token: null, permissions: [], stagePermissions: [] })
-  }, [])
-
-  const refresh = useCallback(async () => {
-    const token = localStorage.getItem(TOKEN_KEY)
-    if (token) await validate(token)
-  }, [validate])
+  const refresh = useCallback(async () => { await load() }, [load])
 
   const has = useCallback((permissionKey: string) => {
     return state.permissions.some(p => p.permission_key === permissionKey && p.enabled)
@@ -123,8 +92,8 @@ export function TeamSessionProvider({ children }: { children: ReactNode }) {
   }, [state.stagePermissions])
 
   const value = useMemo<TeamSessionContextValue>(() => ({
-    ...state, signIn, signOut, refresh, has, hasModule, canStage,
-  }), [state, signIn, signOut, refresh, has, hasModule, canStage])
+    ...state, refresh, has, hasModule, canStage,
+  }), [state, refresh, has, hasModule, canStage])
 
   return <TeamSessionContext.Provider value={value}>{children}</TeamSessionContext.Provider>
 }
