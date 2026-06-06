@@ -188,26 +188,27 @@ export default function Auth() {
       await new Promise((r) => setTimeout(r, attempt.waitMs));
     }
 
-    const { error: signInError } = await signIn(data.email, data.password);
+    // Se não for um e-mail, tenta resolver como login de membro da equipe
+    let effectiveEmail = data.email;
+    if (!data.email.includes('@')) {
+      try {
+        const { data: resolved } = await supabase.functions.invoke('team-resolve-login', {
+          body: { login: data.email },
+        });
+        if ((resolved as any)?.email) {
+          if ((resolved as any).status === 'blocked') {
+            setIsLoading(false);
+            setError('Usuário bloqueado. Entre em contato com a sua agência.');
+            return;
+          }
+          effectiveEmail = (resolved as any).email as string;
+        }
+      } catch { /* segue com o valor digitado */ }
+    }
+
+    const { error: signInError } = await signIn(effectiveEmail, data.password);
 
     if (signInError) {
-      // Fallback: tentar autenticar como Usuário da Equipe
-      try {
-        const { useTeamSession } = await import('@/contexts/TeamSessionContext');
-        // Como hooks só funcionam em componentes, usamos invoke direto:
-        const { supabase } = await import('@/integrations/supabase/client');
-        const { data: teamData } = await supabase.functions.invoke('team-login', {
-          body: { login: data.email, password: data.password },
-        });
-        if (teamData && !(teamData as any).error && (teamData as any).token) {
-          localStorage.setItem('team_session_token', (teamData as any).token);
-          setIsLoading(false);
-          recordSuccess();
-          window.location.href = '/team-dashboard';
-          return;
-        }
-      } catch { /* segue fluxo de erro normal */ }
-
       setIsLoading(false);
       recordFailedAttempt();
       // Inactive user message
