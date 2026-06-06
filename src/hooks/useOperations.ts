@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { ensurePermission, ensureStagePermission, denyAction } from "@/hooks/usePermissions";
+import { logTeamAction } from "@/lib/audit";
 import type {
   Operation,
   OperationStage,
@@ -32,6 +34,7 @@ export function useOperations() {
 
   const createOperation = useMutation({
     mutationFn: async (input: Partial<Operation>) => {
+      if (!ensurePermission('operations.create')) denyAction();
       if (!user?.id) throw new Error("Não autenticado");
       const payload: any = {
         user_id: user.id,
@@ -59,54 +62,76 @@ export function useOperations() {
       if (error) throw error;
       return data as unknown as Operation;
     },
-    onSuccess: () => {
+    onSuccess: (op: any) => {
       qc.invalidateQueries({ queryKey: ["operations", user?.id] });
       toast.success("Operação criada");
+      logTeamAction({ action: 'operation.create', entity_type: 'operation', entity_id: op?.id });
     },
-    onError: (e: any) => toast.error(e.message || "Erro ao criar operação"),
+    onError: (e: any) => {
+      if (e?.name === 'PermissionDeniedError') return;
+      toast.error(e.message || "Erro ao criar operação");
+    },
   });
 
   const updateOperation = useMutation({
     mutationFn: async ({ id, ...patch }: { id: string } & Partial<Operation>) => {
+      if (!ensurePermission('operations.edit')) denyAction();
       const { error } = await supabase
         .from("operations" as any)
         .update(patch as any)
         .eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       qc.invalidateQueries({ queryKey: ["operations", user?.id] });
       qc.invalidateQueries({ queryKey: ["operation-tasks"] });
       qc.invalidateQueries({ queryKey: ["operation-timeline"] });
+      logTeamAction({ action: 'operation.update', entity_type: 'operation', entity_id: id });
     },
-    onError: (e: any) => toast.error(e.message || "Erro ao atualizar"),
+    onError: (e: any) => {
+      if (e?.name === 'PermissionDeniedError') return;
+      toast.error(e.message || "Erro ao atualizar");
+    },
   });
 
   const moveStage = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: OperationStage }) => {
+      if (!ensurePermission('operations.edit')) denyAction();
       const { error } = await supabase
         .from("operations" as any)
         .update({ stage } as any)
         .eq("id", id);
       if (error) throw error;
+      return { id, stage };
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["operations", user?.id] });
       qc.invalidateQueries({ queryKey: ["operation-timeline"] });
+      logTeamAction({ action: 'operation.stage_move', entity_type: 'operation', entity_id: res?.id, details: { stage: res?.stage } });
     },
-    onError: (e: any) => toast.error(e.message || "Erro ao mover"),
+    onError: (e: any) => {
+      if (e?.name === 'PermissionDeniedError') return;
+      toast.error(e.message || "Erro ao mover");
+    },
   });
 
   const deleteOperation = useMutation({
     mutationFn: async (id: string) => {
+      if (!ensurePermission('operations.delete')) denyAction();
       const { error } = await supabase.from("operations" as any).delete().eq("id", id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
       qc.invalidateQueries({ queryKey: ["operations", user?.id] });
       toast.success("Operação removida");
+      logTeamAction({ action: 'operation.delete', entity_type: 'operation', entity_id: id });
     },
-    onError: (e: any) => toast.error(e.message || "Erro ao remover"),
+    onError: (e: any) => {
+      if (e?.name === 'PermissionDeniedError') return;
+      toast.error(e.message || "Erro ao remover");
+    },
   });
 
   return {

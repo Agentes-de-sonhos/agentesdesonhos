@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useOperations } from "@/hooks/useOperations";
 import { useOperationStages } from "@/hooks/useOperationStages";
+import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "sonner";
+import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import { getStageTokens } from "@/types/crm";
 import { type Operation } from "@/types/operations";
 import { OperationCard, type OperationCardTab } from "./OperationCard";
@@ -25,6 +28,9 @@ import { ptBR } from "date-fns/locale";
 export function OperationsModule() {
   const { operations, isLoading, moveStage } = useOperations();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
+  const { can, isTeamMember } = usePermissions();
+  const canCreate = can('operations.create');
+  const canEdit = can('operations.edit');
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<Operation | null>(null);
@@ -80,6 +86,11 @@ export function OperationsModule() {
   }, [calDate, eventsByDate]);
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
+    if (isTeamMember && !canEdit) {
+      e.preventDefault();
+      toast.error(DENY_MESSAGE);
+      return;
+    }
     setDraggedId(id);
     e.dataTransfer.effectAllowed = "move";
   };
@@ -111,9 +122,11 @@ export function OperationsModule() {
             className="pl-9"
           />
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Nova Operação
-        </Button>
+        {canCreate && (
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Nova Operação
+          </Button>
+        )}
       </div>
 
       <Tabs defaultValue="kanban">
