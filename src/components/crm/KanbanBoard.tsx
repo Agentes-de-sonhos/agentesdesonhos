@@ -44,6 +44,9 @@ import { DeleteStageDialog } from "./DeleteStageDialog";
 import { QuickAddClientDialog } from "./QuickAddClientDialog";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
+import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "sonner";
+import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import {
   getStageTokens,
   type Opportunity,
@@ -86,6 +89,9 @@ function SortableColumn({
 export function KanbanBoard() {
   const { opportunities, isLoading, updateStage } = useOpportunities();
   const { clients } = useClients();
+  const { can, canStage, isTeamMember } = usePermissions();
+  const canCreateOpp = can('opportunities.create');
+  const canEditOpp = can('opportunities.edit');
   const {
     stages,
     isLoading: stagesLoading,
@@ -177,6 +183,15 @@ export function KanbanBoard() {
     opportunitiesByStage.get(stageId) || [];
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
+    if (isTeamMember) {
+      const opp = opportunities.find(o => o.id === id);
+      const fromStageRow = stages.find(s => s.id === opp?.stage_id || s.legacy_key === opp?.stage);
+      if (fromStageRow && !canStage('opportunities', fromStageRow.id, 'move')) {
+        e.preventDefault();
+        toast.error(DENY_MESSAGE);
+        return;
+      }
+    }
     setDraggedId(id);
     e.dataTransfer.effectAllowed = "move";
   };
@@ -192,9 +207,21 @@ export function KanbanBoard() {
 
     const opportunity = opportunities.find((o) => o.id === draggedId);
     if (opportunity && opportunity.stage_id !== toStage.id) {
+      // Guard de destino
+      if (isTeamMember && !canStage('opportunities', toStage.id, 'move')) {
+        toast.error(DENY_MESSAGE);
+        setDraggedId(null);
+        return;
+      }
       const fromStage = stages.find(
         (s) => s.id === opportunity.stage_id || s.legacy_key === opportunity.stage
       );
+      // Guard de origem
+      if (isTeamMember && fromStage && !canStage('opportunities', fromStage.id, 'move')) {
+        toast.error(DENY_MESSAGE);
+        setDraggedId(null);
+        return;
+      }
       await updateStage({
         id: draggedId,
         fromStage: fromStage?.legacy_key || opportunity.stage,
@@ -271,11 +298,13 @@ export function KanbanBoard() {
             </SelectContent>
           </Select>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Nova Oportunidade
-              </Button>
-            </DialogTrigger>
+            {canCreateOpp && (
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" /> Nova Oportunidade
+                </Button>
+              </DialogTrigger>
+            )}
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Nova Oportunidade</DialogTitle>
@@ -337,7 +366,9 @@ export function KanbanBoard() {
                 strategy={horizontalListSortingStrategy}
               >
                 <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-                  {stages.map((stage, index) => {
+                  {stages
+                    .filter(s => canStage('opportunities', s.id, 'view'))
+                    .map((stage, index) => {
                     const stageOpps = getOpportunitiesForStage(stage.id);
                     const total = getTotalValue(stage.id);
                     const avgTime = getAverageTimeInStage(stage.id);
@@ -349,6 +380,7 @@ export function KanbanBoard() {
                     const isQuoteSentStage = stage.legacy_key === "quote_sent";
                     const isProtected =
                       isFirstStage || isLastStage || isSecondToLastStage || isQuoteSentStage;
+                    const stageCanMove = canStage('opportunities', stage.id, 'move');
 
                     return (
                       <SortableColumn key={stage.id} stage={stage}>
