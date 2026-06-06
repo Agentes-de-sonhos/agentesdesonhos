@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import type { 
   Sale, 
   SaleProduct,
@@ -25,6 +26,10 @@ export function useFinancial() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { can } = usePermissions();
+  // Team member sem financial.access NÃO dispara nenhuma query financeira.
+  // Master (não-team-member) sempre passa.
+  const financialEnabled = !!user && can('financial.access');
 
   // Fetch sales with products
   const { data: sales = [], isLoading: salesLoading } = useQuery({
@@ -40,7 +45,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as Sale[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
     staleTime: 2 * 60 * 1000,
   });
 
@@ -61,7 +66,7 @@ export function useFinancial() {
         commission_type: p.commission_type as 'percentage' | 'fixed',
       })) as SaleProduct[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch customer payments
@@ -77,7 +82,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as CustomerPayment[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch supplier payments
@@ -93,7 +98,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as SupplierPayment[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch income entries (legacy)
@@ -109,7 +114,7 @@ export function useFinancial() {
       if (error) throw error;
       return data as IncomeEntry[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Fetch expense entries (legacy)
@@ -133,7 +138,7 @@ export function useFinancial() {
         recurrence_occurrences: (e as any).recurrence_occurrences ?? null,
       })) as ExpenseEntry[];
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   // Helper: calculate product-based total for a sale
@@ -676,6 +681,8 @@ export function useFinancial() {
 // Hook to fetch closed opportunities for auto-import
 export function useClosedOpportunities() {
   const { user } = useAuth();
+  const { can } = usePermissions();
+  const financialEnabled = !!user && can('financial.access');
 
   const { data: closedOpportunities = [], isLoading } = useQuery({
     queryKey: ["closed-opportunities", user?.id],
@@ -690,7 +697,7 @@ export function useClosedOpportunities() {
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: financialEnabled,
   });
 
   return { closedOpportunities, isLoading };

@@ -227,6 +227,7 @@ export function KanbanBoard() {
         fromStage: fromStage?.legacy_key || opportunity.stage,
         toStage: toStage.legacy_key || toStage.id,
         toStageId: toStage.id,
+        fromStageId: fromStage?.id,
         fromStageLabel: fromStage?.name,
         toStageLabel: toStage.name,
       });

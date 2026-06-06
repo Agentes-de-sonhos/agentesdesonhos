@@ -37,6 +37,7 @@ import {
 import { Cake } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   Form,
   FormControl,
@@ -121,6 +122,10 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const { deleteOpportunity } = useOpportunities();
   const { updateClient } = useClients();
   const { user } = useAuth();
+  const { can } = usePermissions();
+  const canEditOpp = can('opportunities.edit');
+  const canDeleteOpp = can('opportunities.delete');
+  const canEditClient = can('clients.edit');
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
   const { stages } = usePipelineStages();
@@ -416,12 +421,16 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 <DropdownMenuItem onClick={() => setShowDetails(true)}>
                   <MessageSquare className="mr-2 h-4 w-4" /> Anotações
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                  <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleEditClientClick}>
-                  <User className="mr-2 h-4 w-4" /> Editar cliente
-                </DropdownMenuItem>
+                {canEditOpp && (
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
+                  </DropdownMenuItem>
+                )}
+                {canEditClient && (
+                  <DropdownMenuItem onClick={handleEditClientClick}>
+                    <User className="mr-2 h-4 w-4" /> Editar cliente
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => setShowHistory(true)}>
                   <History className="mr-2 h-4 w-4" /> Histórico
                 </DropdownMenuItem>
@@ -434,13 +443,17 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 <DropdownMenuItem onClick={handleCreateTripWallet}>
                   <Wallet className="mr-2 h-4 w-4" /> Gerar Carteira Digital
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setShowDeleteAlert(true)}
-                  className="text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                </DropdownMenuItem>
+                {canDeleteOpp && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setShowDeleteAlert(true)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
