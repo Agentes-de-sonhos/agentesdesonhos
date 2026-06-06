@@ -121,6 +121,10 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const { deleteOpportunity } = useOpportunities();
   const { updateClient } = useClients();
   const { user } = useAuth();
+  const { can } = usePermissions();
+  const canEditOpp = can('opportunities.edit');
+  const canDeleteOpp = can('opportunities.delete');
+  const canEditClient = can('clients.edit');
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
   const { stages } = usePipelineStages();
