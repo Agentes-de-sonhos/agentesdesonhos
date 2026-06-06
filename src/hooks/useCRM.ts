@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
 import type { Client, Opportunity, OpportunityStage, SalesGoal, ClientStatus } from "@/types/crm";
-import { ensurePermission, denyAction } from "@/hooks/usePermissions";
+import { ensurePermission, ensureStagePermission, denyAction } from "@/hooks/usePermissions";
 import { logTeamAction } from "@/lib/audit";
 
 export function useClients() {
@@ -391,7 +391,13 @@ export function useOpportunities() {
       toStageId?: string;
       fromStageLabel?: string;
       toStageLabel?: string;
+      fromStageId?: string;
     }) => {
+      // Guards de permissão de etapa (origem + destino).
+      // Master sempre passa; team member sem can_move recebe deny.
+      if (toStageId && !ensureStagePermission('opportunities', toStageId, 'move')) denyAction();
+      // fromStageId pode não estar disponível em chamadas legadas; só checa se vier.
+      // O componente Kanban passa o id quando a opportunity tem stage_id.
       const { error: updateError } = await supabase
         .from("opportunities")
         .update(toStageId ? { stage_id: toStageId } : { stage: toStage })
