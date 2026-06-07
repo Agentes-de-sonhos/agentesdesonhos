@@ -87,7 +87,7 @@ function SortableColumn({
 }
 
 export function KanbanBoard() {
-  const { opportunities, isLoading, updateStage } = useOpportunities();
+  const { opportunities, isLoading, updateStage, reorderOpportunities } = useOpportunities();
   const { clients } = useClients();
   const { can, canStage, isTeamMember } = usePermissions();
   const canCreateOpp = can('opportunities.create');
@@ -105,6 +105,7 @@ export function KanbanBoard() {
   const [search, setSearch] = useState("");
   const [filterClient, setFilterClient] = useState<string>("all");
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
 
@@ -201,38 +202,86 @@ export function KanbanBoard() {
     e.dataTransfer.dropEffect = "move";
   };
 
-  const handleDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
-    e.preventDefault();
+  const performDrop = async (toStage: PipelineStage, targetCardId: string | null, dropBefore: boolean) => {
     if (!draggedId) return;
-
     const opportunity = opportunities.find((o) => o.id === draggedId);
-    if (opportunity && opportunity.stage_id !== toStage.id) {
-      // Guard de destino
-      if (isTeamMember && !canStage('opportunities', toStage.id, 'move')) {
-        toast.error(DENY_MESSAGE);
-        setDraggedId(null);
-        return;
-      }
-      const fromStage = stages.find(
-        (s) => s.id === opportunity.stage_id || s.legacy_key === opportunity.stage
-      );
-      // Guard de origem
-      if (isTeamMember && fromStage && !canStage('opportunities', fromStage.id, 'move')) {
-        toast.error(DENY_MESSAGE);
-        setDraggedId(null);
-        return;
-      }
-      await updateStage({
-        id: draggedId,
-        fromStage: fromStage?.legacy_key || opportunity.stage,
-        toStage: toStage.legacy_key || toStage.id,
-        toStageId: toStage.id,
-        fromStageId: fromStage?.id,
-        fromStageLabel: fromStage?.name,
-        toStageLabel: toStage.name,
-      });
+    if (!opportunity) return;
+
+    const fromStage = stages.find(
+      (s) => s.id === opportunity.stage_id || s.legacy_key === opportunity.stage
+    );
+    const fromStageId = fromStage?.id;
+    const stageChanged = fromStageId !== toStage.id;
+
+    // Permission guards
+    if (isTeamMember && !canStage('opportunities', toStage.id, 'move')) {
+      toast.error(DENY_MESSAGE);
+      return;
     }
+    if (isTeamMember && stageChanged && fromStageId && !canStage('opportunities', fromStageId, 'move')) {
+      toast.error(DENY_MESSAGE);
+      return;
+    }
+
+    // Build new ordered lists for target (and source) columns
+    const targetList = (opportunitiesByStage.get(toStage.id) || []).map((o) => o.id);
+    let sourceList: string[] | undefined;
+    if (stageChanged && fromStageId) {
+      sourceList = (opportunitiesByStage.get(fromStageId) || []).map((o) => o.id).filter((id) => id !== draggedId);
+    } else {
+      // same column: remove from current position first
+      const idx = targetList.indexOf(draggedId);
+      if (idx >= 0) targetList.splice(idx, 1);
+    }
+
+    let insertIdx = targetList.length;
+    if (targetCardId) {
+      const ti = targetList.indexOf(targetCardId);
+      if (ti >= 0) insertIdx = dropBefore ? ti : ti + 1;
+    }
+    targetList.splice(insertIdx, 0, draggedId);
+
+    await reorderOpportunities({
+      movedId: draggedId,
+      fromStageId,
+      toStageId: toStage.id,
+      toStageLegacyKey: toStage.legacy_key,
+      fromStageLegacyKey: fromStage?.legacy_key || opportunity.stage,
+      fromStageLabel: fromStage?.name,
+      toStageLabel: toStage.name,
+      orderedTargetIds: targetList,
+      orderedSourceIds: sourceList,
+    });
+  };
+
+  const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
+    e.preventDefault();
+    await performDrop(toStage, null, false);
     setDraggedId(null);
+    setDragOver(null);
+  };
+
+  const handleCardDragOver = (e: React.DragEvent, stageId: string, targetId: string) => {
+    if (!draggedId || draggedId === targetId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const before = e.clientY < rect.top + rect.height / 2;
+    setDragOver((prev) =>
+      prev && prev.stageId === stageId && prev.targetId === targetId && prev.before === before
+        ? prev
+        : { stageId, targetId, before }
+    );
+  };
+
+  const handleCardDrop = async (e: React.DragEvent, toStage: PipelineStage, targetCardId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const before = dragOver?.before ?? true;
+    await performDrop(toStage, targetCardId, before);
+    setDraggedId(null);
+    setDragOver(null);
   };
 
   const getTotalValue = (stageId: string) =>
@@ -417,14 +466,28 @@ export function KanbanBoard() {
                               />
 
                               <div className="space-y-2.5 min-h-[100px]">
-                                {stageOpps.map((opportunity) => (
-                                  <OpportunityCard
-                                    key={opportunity.id}
-                                    opportunity={opportunity}
-                                    onDragStart={handleDragStart}
-                                    isOverdue={hasOverdueFollowUp(opportunity)}
-                                  />
-                                ))}
+                                {stageOpps.map((opportunity) => {
+                                  const isIndicator = dragOver?.stageId === stage.id && dragOver?.targetId === opportunity.id;
+                                  return (
+                                    <div
+                                      key={opportunity.id}
+                                      onDragOver={(e) => handleCardDragOver(e, stage.id, opportunity.id)}
+                                      onDrop={(e) => handleCardDrop(e, stage, opportunity.id)}
+                                      className={cn(
+                                        "transition-shadow",
+                                        isIndicator && dragOver?.before && "border-t-2 border-primary rounded-t-sm pt-0.5",
+                                        isIndicator && !dragOver?.before && "border-b-2 border-primary rounded-b-sm pb-0.5",
+                                        draggedId === opportunity.id && "opacity-40"
+                                      )}
+                                    >
+                                      <OpportunityCard
+                                        opportunity={opportunity}
+                                        onDragStart={handleDragStart}
+                                        isOverdue={hasOverdueFollowUp(opportunity)}
+                                      />
+                                    </div>
+                                  );
+                                })}
                                 {stageOpps.length === 0 && (
                                   <div className="flex flex-col items-center justify-center text-center py-10 px-3 text-xs text-muted-foreground/70 border-2 border-dashed rounded-lg border-muted-foreground/15">
                                     <span className="text-lg mb-1">✨</span>
