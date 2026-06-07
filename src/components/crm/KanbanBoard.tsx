@@ -437,7 +437,7 @@ export function KanbanBoard() {
                         {({ dragHandleProps, isDragging }) => (
                           <div
                             onDragOver={handleDragOver}
-                            onDrop={(e) => handleDrop(e, stage)}
+                            onDrop={(e) => handleColumnDrop(e, stage)}
                           >
                             <div
                               className={cn(
