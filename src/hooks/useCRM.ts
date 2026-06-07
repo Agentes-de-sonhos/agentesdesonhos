@@ -471,21 +471,21 @@ export function useOpportunities() {
       if (stageChanged && fromStageId && !ensureStagePermission('opportunities', fromStageId, 'move')) denyAction();
 
       // Update positions for all cards in target column (and ensure moved card is in target stage)
-      const updates: Promise<any>[] = [];
+      const tasks: Promise<any>[] = [];
       orderedTargetIds.forEach((id, idx) => {
         const patch: Record<string, any> = { position: idx };
         if (id === movedId && stageChanged) {
           patch.stage_id = toStageId;
           if (toStageLegacyKey) patch.stage = toStageLegacyKey;
         }
-        updates.push(supabase.from("opportunities").update(patch).eq("id", id));
+        tasks.push(Promise.resolve(supabase.from("opportunities").update(patch).eq("id", id)));
       });
       if (stageChanged && orderedSourceIds) {
         orderedSourceIds.forEach((id, idx) => {
-          updates.push(supabase.from("opportunities").update({ position: idx }).eq("id", id));
+          tasks.push(Promise.resolve(supabase.from("opportunities").update({ position: idx }).eq("id", id)));
         });
       }
-      const results = await Promise.all(updates);
+      const results = await Promise.all(tasks);
       const firstError = results.find((r: any) => r?.error)?.error;
       if (firstError) throw firstError;
 
