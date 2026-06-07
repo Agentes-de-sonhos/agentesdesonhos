@@ -134,12 +134,58 @@ export function useOperations() {
     },
   });
 
+  const reorderOperations = useMutation({
+    mutationFn: async ({
+      movedId,
+      fromStage,
+      toStage,
+      orderedTargetIds,
+      orderedSourceIds,
+    }: {
+      movedId: string;
+      fromStage: OperationStage;
+      toStage: OperationStage;
+      orderedTargetIds: string[];
+      orderedSourceIds?: string[];
+    }) => {
+      if (!ensurePermission('operations.edit')) denyAction();
+      const stageChanged = fromStage !== toStage;
+      const tasks: Promise<any>[] = [];
+      orderedTargetIds.forEach((id, idx) => {
+        const patch: any = { position: idx };
+        if (id === movedId && stageChanged) patch.stage = toStage;
+        tasks.push(Promise.resolve(supabase.from("operations" as any).update(patch).eq("id", id)));
+      });
+      if (stageChanged && orderedSourceIds) {
+        orderedSourceIds.forEach((id, idx) => {
+          tasks.push(Promise.resolve(supabase.from("operations" as any).update({ position: idx }).eq("id", id)));
+        });
+      }
+      const results = await Promise.all(tasks);
+      const firstError = results.find((r: any) => r?.error)?.error;
+      if (firstError) throw firstError;
+      return { movedId, stageChanged, toStage };
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["operations", user?.id] });
+      if (res?.stageChanged) {
+        qc.invalidateQueries({ queryKey: ["operation-timeline"] });
+        logTeamAction({ action: 'operation.stage_move', entity_type: 'operation', entity_id: res.movedId, details: { stage: res.toStage } });
+      }
+    },
+    onError: (e: any) => {
+      if (e?.name === 'PermissionDeniedError') return;
+      toast.error(e.message || "Erro ao reordenar");
+    },
+  });
+
   return {
     operations,
     isLoading,
     createOperation: createOperation.mutateAsync,
     updateOperation: updateOperation.mutateAsync,
     moveStage: moveStage.mutateAsync,
+    reorderOperations: reorderOperations.mutateAsync,
     deleteOperation: deleteOperation.mutateAsync,
   };
 }

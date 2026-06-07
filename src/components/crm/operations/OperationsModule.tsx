@@ -26,7 +26,7 @@ import { format, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function OperationsModule() {
-  const { operations, isLoading, moveStage } = useOperations();
+  const { operations, isLoading, moveStage, reorderOperations } = useOperations();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
   const { can, isTeamMember } = usePermissions();
   const canCreate = can('operations.create');
@@ -36,6 +36,7 @@ export function OperationsModule() {
   const [selected, setSelected] = useState<Operation | null>(null);
   const [selectedTab, setSelectedTab] = useState<OperationCardTab>("overview");
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState<{ stageKey: string; targetId: string | null; before: boolean } | null>(null);
   const [calDate, setCalDate] = useState<Date | undefined>(new Date());
   const [deleteStageTarget, setDeleteStageTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -100,14 +101,66 @@ export function OperationsModule() {
     e.dataTransfer.dropEffect = "move";
   };
 
-  const handleDrop = async (e: React.DragEvent, stage: string) => {
-    e.preventDefault();
+  const performDrop = async (toStageKey: string, targetCardId: string | null, dropBefore: boolean) => {
     if (!draggedId) return;
     const op = operations.find((o) => o.id === draggedId);
-    if (op && op.stage !== stage) {
-      await moveStage({ id: draggedId, stage: stage as any });
+    if (!op) return;
+    const fromStageKey = op.stage as string;
+    const stageChanged = fromStageKey !== toStageKey;
+
+    const targetList = (byStage.get(toStageKey) || []).map((o) => o.id);
+    let sourceList: string[] | undefined;
+    if (stageChanged) {
+      sourceList = (byStage.get(fromStageKey) || []).map((o) => o.id).filter((id) => id !== draggedId);
+    } else {
+      const idx = targetList.indexOf(draggedId);
+      if (idx >= 0) targetList.splice(idx, 1);
     }
+
+    let insertIdx = targetList.length;
+    if (targetCardId) {
+      const ti = targetList.indexOf(targetCardId);
+      if (ti >= 0) insertIdx = dropBefore ? ti : ti + 1;
+    }
+    targetList.splice(insertIdx, 0, draggedId);
+
+    await reorderOperations({
+      movedId: draggedId,
+      fromStage: fromStageKey as any,
+      toStage: toStageKey as any,
+      orderedTargetIds: targetList,
+      orderedSourceIds: sourceList,
+    });
+  };
+
+  const handleColumnDrop = async (e: React.DragEvent, stageKey: string) => {
+    e.preventDefault();
+    await performDrop(stageKey, null, false);
     setDraggedId(null);
+    setDragOver(null);
+  };
+
+  const handleCardDragOver = (e: React.DragEvent, stageKey: string, targetId: string) => {
+    if (!draggedId || draggedId === targetId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const before = e.clientY < rect.top + rect.height / 2;
+    setDragOver((prev) =>
+      prev && prev.stageKey === stageKey && prev.targetId === targetId && prev.before === before
+        ? prev
+        : { stageKey, targetId, before }
+    );
+  };
+
+  const handleCardDrop = async (e: React.DragEvent, stageKey: string, targetId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const before = dragOver?.before ?? true;
+    await performDrop(stageKey, targetId, before);
+    setDraggedId(null);
+    setDragOver(null);
   };
 
   return (
@@ -153,7 +206,7 @@ export function OperationsModule() {
                     <div
                       key={stage.id}
                       onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, stage.key)}
+                      onDrop={(e) => handleColumnDrop(e, stage.key)}
                       className={cn(
                         "w-[290px] flex-shrink-0 rounded-xl border p-3 min-h-[400px]",
                         tokens.bg,
@@ -169,15 +222,28 @@ export function OperationsModule() {
                         onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
                       />
                       <div className="space-y-2.5">
-                        {ops.map((op) => (
-                          <OperationCard
-                            key={op.id}
-                            operation={op}
-                            onClick={() => { setSelectedTab("overview"); setSelected(op); }}
-                            onOpenTab={(t) => { setSelectedTab(t); setSelected(op); }}
-                            onDragStart={handleDragStart}
-                          />
-                        ))}
+                        {ops.map((op) => {
+                          const isIndicator = dragOver?.stageKey === stage.key && dragOver?.targetId === op.id;
+                          return (
+                            <div
+                              key={op.id}
+                              onDragOver={(e) => handleCardDragOver(e, stage.key, op.id)}
+                              onDrop={(e) => handleCardDrop(e, stage.key, op.id)}
+                              className={cn(
+                                isIndicator && dragOver?.before && "border-t-2 border-primary rounded-t-sm pt-0.5",
+                                isIndicator && !dragOver?.before && "border-b-2 border-primary rounded-b-sm pb-0.5",
+                                draggedId === op.id && "opacity-40"
+                              )}
+                            >
+                              <OperationCard
+                                operation={op}
+                                onClick={() => { setSelectedTab("overview"); setSelected(op); }}
+                                onOpenTab={(t) => { setSelectedTab(t); setSelected(op); }}
+                                onDragStart={handleDragStart}
+                              />
+                            </div>
+                          );
+                        })}
                         {ops.length === 0 && (
                           <div className="text-center py-8 text-xs text-muted-foreground/70 border-2 border-dashed rounded-lg border-muted-foreground/15">
                             Nenhuma operação

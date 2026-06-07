@@ -71,6 +71,7 @@ export interface Opportunity {
   stage_id: string | null;
   stage_entered_at: string;
   follow_up_date: string | null;
+  position?: number;
   created_at: string;
   updated_at: string;
   client?: Client;
