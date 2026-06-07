@@ -292,6 +292,7 @@ export function useOpportunities() {
         .from("opportunities")
         .select("*, client:clients(*)")
         .eq("user_id", user.id)
+        .order("position", { ascending: true })
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data.map((o) => ({
@@ -442,12 +443,86 @@ export function useOpportunities() {
     },
   });
 
+  const reorderOpportunitiesMutation = useMutation({
+    mutationFn: async ({
+      movedId,
+      fromStageId,
+      toStageId,
+      toStageLegacyKey,
+      fromStageLegacyKey,
+      fromStageLabel,
+      toStageLabel,
+      orderedTargetIds,
+      orderedSourceIds,
+    }: {
+      movedId: string;
+      fromStageId?: string | null;
+      toStageId: string;
+      toStageLegacyKey?: string | null;
+      fromStageLegacyKey?: string | null;
+      fromStageLabel?: string;
+      toStageLabel?: string;
+      orderedTargetIds: string[];
+      orderedSourceIds?: string[];
+    }) => {
+      const stageChanged = !!fromStageId && fromStageId !== toStageId;
+      // Permission guards: only require move permission on the stages actually involved
+      if (!ensureStagePermission('opportunities', toStageId, 'move')) denyAction();
+      if (stageChanged && fromStageId && !ensureStagePermission('opportunities', fromStageId, 'move')) denyAction();
+
+      // Update positions for all cards in target column (and ensure moved card is in target stage)
+      const updates: Promise<any>[] = [];
+      orderedTargetIds.forEach((id, idx) => {
+        const patch: Record<string, any> = { position: idx };
+        if (id === movedId && stageChanged) {
+          patch.stage_id = toStageId;
+          if (toStageLegacyKey) patch.stage = toStageLegacyKey;
+        }
+        updates.push(supabase.from("opportunities").update(patch).eq("id", id));
+      });
+      if (stageChanged && orderedSourceIds) {
+        orderedSourceIds.forEach((id, idx) => {
+          updates.push(supabase.from("opportunities").update({ position: idx }).eq("id", id));
+        });
+      }
+      const results = await Promise.all(updates);
+      const firstError = results.find((r: any) => r?.error)?.error;
+      if (firstError) throw firstError;
+
+      if (stageChanged) {
+        await supabase.from("opportunity_history").insert({
+          opportunity_id: movedId,
+          from_stage: fromStageLabel || fromStageLegacyKey || '',
+          to_stage: toStageLabel || toStageLegacyKey || '',
+        });
+      }
+      return { movedId, stageChanged, fromStageLabel, toStageLabel };
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      if (res?.stageChanged) {
+        queryClient.invalidateQueries({ queryKey: ["sales-stats"] });
+        logTeamAction({
+          action: 'opportunity.stage_move',
+          entity_type: 'opportunity',
+          entity_id: res.movedId,
+          details: { from: res.fromStageLabel, to: res.toStageLabel },
+        });
+      }
+    },
+    onError: (error: any) => {
+      if (error?.name === 'PermissionDeniedError') return;
+      toast({ title: "Erro ao reordenar", description: error.message, variant: "destructive" });
+    },
+  });
+
   return {
     opportunities,
     isLoading,
     createOpportunity: createOpportunityMutation.mutateAsync,
     updateOpportunity: updateOpportunityMutation.mutateAsync,
     updateStage: updateStageMutation.mutateAsync,
+    reorderOpportunities: reorderOpportunitiesMutation.mutateAsync,
     deleteOpportunity: deleteOpportunityMutation.mutateAsync,
     isCreating: createOpportunityMutation.isPending,
   };
