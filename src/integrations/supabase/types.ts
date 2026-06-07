@@ -6345,6 +6345,7 @@ export type Database = {
           id: string
           notes: string | null
           passengers_count: number
+          position: number
           stage: string
           stage_entered_at: string | null
           stage_id: string | null
@@ -6364,6 +6365,7 @@ export type Database = {
           id?: string
           notes?: string | null
           passengers_count?: number
+          position?: number
           stage?: string
           stage_entered_at?: string | null
           stage_id?: string | null
@@ -6383,6 +6385,7 @@ export type Database = {
           id?: string
           notes?: string | null
           passengers_count?: number
+          position?: number
           stage?: string
           stage_entered_at?: string | null
           stage_id?: string | null
