@@ -31,6 +31,11 @@ export function SecureFileLink(props: Props) {
     if (loading) return;
     setLoading(true);
 
+    // Safari/iOS blocks window.open() called after an await.
+    // Open the window synchronously inside the user gesture, then set its
+    // location once the signed URL resolves.
+    const newWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
+
     try {
       let url: string | null = null;
 
@@ -45,11 +50,19 @@ export function SecureFileLink(props: Props) {
       }
 
       if (url) {
-        window.open(url, "_blank", "noopener,noreferrer");
+        if (newWindow && !newWindow.closed) {
+          newWindow.location.href = url;
+        } else {
+          // Popup was blocked — fall back to same-tab navigation so iOS Safari
+          // still opens the PDF instead of silently failing.
+          window.location.href = url;
+        }
       } else {
+        if (newWindow && !newWindow.closed) newWindow.close();
         toast.error("Não foi possível acessar o arquivo");
       }
     } catch {
+      if (newWindow && !newWindow.closed) newWindow.close();
       toast.error("Erro ao acessar arquivo");
     } finally {
       setLoading(false);
