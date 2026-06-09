@@ -239,8 +239,6 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       if (data.coverage_type) insuranceDetails.push(`Tipo: ${covTypeMap[data.coverage_type] || data.coverage_type}`);
       if (data.coverage) insuranceDetails.push(`Cobertura: ${data.coverage}`);
       if (data.medical_assistance) insuranceDetails.push(`Assistência Médica: ${data.medical_assistance}`);
-      if (data.insured_persons?.length > 0) insuranceDetails.push(`Segurados: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
-      if (data.emergency_phone) insuranceDetails.push(`📞 Emergência: ${data.emergency_phone}`);
       const days2 = (() => { try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
       return { title: data.provider, details: insuranceDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${days2 ? ` (${days2} dias)` : ''}` };
     }
@@ -1078,14 +1076,26 @@ function PublicServiceCard({ service }: { service: TripService }) {
           </div>
         )}
 
-        {/* Insurance - Emergency Contacts (PRIORITY) */}
+        {/* Insurance - Insured Persons (TOP) */}
+        {isInsurance && data.insured_persons?.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👨‍👩‍👧 Segurados</p>
+            {data.insured_persons.map((p: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                {p.name}{p.birth_date ? ` • ${p.birth_date}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Insurance - Assistência 24h da Seguradora */}
         {isInsurance && (data.emergency_phone || data.emergency_whatsapp || data.emergency_email) && (
           <div className="mt-3 p-3 bg-destructive/5 border border-destructive/20 rounded-lg space-y-2">
-            <p className="text-xs font-semibold text-destructive uppercase tracking-wide">🆘 Contatos de Emergência</p>
+            <p className="text-xs font-semibold text-destructive uppercase tracking-wide">🆘 Assistência 24h da Seguradora</p>
             {data.emergency_phone && (
               <div className="flex items-center gap-2">
                 <a href={`tel:${data.emergency_phone}`} className="flex-1">
-                  <Button variant="destructive" size="sm" className="text-xs w-full">📞 Ligar Emergência: {data.emergency_phone}</Button>
+                  <Button variant="destructive" size="sm" className="text-xs w-full">📞 Ligar para Assistência 24h: {data.emergency_phone}</Button>
                 </a>
               </div>
             )}
@@ -1136,24 +1146,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {/* Insurance - Emergency Procedure */}
         {isInsurance && (data.how_to_activate || data.hospital_procedure || data.reimbursement_info) && (
           <div className="mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-1">
-            <p className="text-xs font-semibold text-primary">🆘 O que Fazer em Emergência</p>
+            <p className="text-xs font-semibold text-primary">🆘 Como Acionar sua Assistência</p>
             {data.how_to_activate && <p className="text-xs text-foreground whitespace-pre-line">{data.how_to_activate}</p>}
             {data.required_documents_claim && <p className="text-xs text-muted-foreground mt-1">📄 Documentos: {data.required_documents_claim}</p>}
             {data.hospital_procedure && <p className="text-xs text-muted-foreground">🏥 {data.hospital_procedure}</p>}
             {data.reimbursement_info && <p className="text-xs text-muted-foreground">💰 Reembolso: {data.reimbursement_info}</p>}
-          </div>
-        )}
-
-        {/* Insurance - Insured Persons */}
-        {isInsurance && data.insured_persons?.length > 0 && (
-          <div className="mt-2">
-            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👨‍👩‍👧 Segurados</p>
-            {data.insured_persons.map((p: any, i: number) => (
-              <p key={i} className="text-xs text-muted-foreground">
-                {p.name}{p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}
-                {p.birth_date ? ` • ${p.birth_date}` : ''}
-              </p>
-            ))}
           </div>
         )}
 
@@ -1166,17 +1163,15 @@ function PublicServiceCard({ service }: { service: TripService }) {
         )}
 
         {/* Insurance - Agency Contact */}
-        {isInsurance && (data.agency_contact || data.emergency_contact_agency) && (
+        {isInsurance && data.agency_contact && (
           <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
             <p className="text-xs font-semibold text-primary uppercase tracking-wide">📞 Contato da Agência</p>
-            {data.agency_contact && (
-              <a href={`https://wa.me/${data.agency_contact.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="sm" className="text-xs h-7 w-full">
-                  <MessageSquare className="h-3 w-3 mr-1" /> Falar com a agência
-                </Button>
-              </a>
-            )}
-            {data.emergency_contact_agency && <p className="text-xs text-muted-foreground">🆘 Emergência: {data.emergency_contact_agency}</p>}
+            <p className="text-xs text-muted-foreground">📞 {data.agency_contact}</p>
+            <a href={`https://wa.me/${data.agency_contact.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm" className="text-xs h-7 w-full">
+                <MessageSquare className="h-3 w-3 mr-1" /> Falar com a Agência
+              </Button>
+            </a>
           </div>
         )}
 
