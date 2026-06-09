@@ -1621,7 +1621,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
   const voucherCtx: VoucherAccessContext = {
     slug: tripData.slug,
-    shareToken: tripData.share_token,
+    shareToken: tripData.share_token || token,
     password: usedPassword,
   };
 

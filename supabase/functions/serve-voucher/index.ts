@@ -57,7 +57,12 @@ Deno.serve(async (req) => {
 
     // Verify the file belongs to the trip owner
     const ownerPrefix = trip.user_id + "/";
-    if (!filePath.startsWith(ownerPrefix)) {
+    if (
+      !filePath.startsWith(ownerPrefix) &&
+      !filePath.startsWith("itinerary/") &&
+      !filePath.startsWith("itinerary-docs/") &&
+      !filePath.startsWith("itinerary-periods/")
+    ) {
       return new Response("Acesso não autorizado", { status: 403, headers: corsHeaders });
     }
 

@@ -10,10 +10,24 @@ export function extractVoucherPath(urlOrPath: string): string {
   const marker = "/vouchers/";
   const idx = urlOrPath.indexOf(marker);
   if (idx !== -1) {
-    return decodeURIComponent(urlOrPath.substring(idx + marker.length));
+    return decodeURIComponent(urlOrPath.substring(idx + marker.length).split("?")[0].split("#")[0]);
   }
   // Already a path
   return urlOrPath;
+}
+
+/**
+ * Build a direct voucher proxy URL for public wallet documents.
+ * This avoids async click handlers/window.open, which iOS Safari often blocks.
+ */
+export function buildPublicVoucherProxyUrl(filePath: string, shareToken?: string | null): string | null {
+  if (/^https?:\/\//i.test(filePath) && !filePath.includes("/vouchers/")) return filePath;
+
+  const path = extractVoucherPath(filePath);
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (!path || !shareToken || !supabaseUrl) return null;
+
+  return `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(path)}`;
 }
 
 /**
