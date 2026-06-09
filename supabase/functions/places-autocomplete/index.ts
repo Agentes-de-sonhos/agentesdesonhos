@@ -222,3 +222,58 @@ function matchesType(types: string[], targetType: string): boolean {
   if (targetType === "establishment" || targetType === "(cities)") return true;
   return types.includes(targetType);
 }
+
+/**
+ * Resolve a free-text city name to {lat,lng} for use as `locationbias`.
+ * Order: place_cache (case-insensitive name match with coordinates) →
+ * Google `findplacefromtext` (cities) → null.
+ * Successful Google lookups are persisted in place_cache to avoid repeated calls.
+ */
+async function resolveCityCoords(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  cityName: string,
+  googleKey: string,
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const { data: cached } = await supabaseAdmin
+      .from("place_cache")
+      .select("latitude, longitude")
+      .ilike("name", cityName)
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .limit(1)
+      .maybeSingle();
+    if (cached?.latitude != null && cached?.longitude != null) {
+      return { lat: Number(cached.latitude), lng: Number(cached.longitude) };
+    }
+  } catch (_) {
+    // ignore and fall through
+  }
+
+  try {
+    const u = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(cityName)}&inputtype=textquery&fields=place_id,name,geometry,formatted_address,types&key=${googleKey}&language=pt-BR`;
+    const r = await fetch(u);
+    const j = await r.json();
+    const c = j.candidates?.[0];
+    const loc = c?.geometry?.location;
+    if (!c?.place_id || !loc) return null;
+    // Persist as a city entry in place_cache (best-effort).
+    await supabaseAdmin.from("place_cache").upsert(
+      {
+        place_id: c.place_id,
+        name: c.name || cityName,
+        address: c.formatted_address || "",
+        latitude: loc.lat,
+        longitude: loc.lng,
+        photo_url: null,
+        photo_urls: [],
+        place_type: (c.types || [])[0] || "locality",
+        raw_data: { resolved_from: "context_city_lookup", input: cityName },
+      },
+      { onConflict: "place_id" },
+    );
+    return { lat: loc.lat, lng: loc.lng };
+  } catch (_) {
+    return null;
+  }
+}
