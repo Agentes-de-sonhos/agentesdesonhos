@@ -10,7 +10,7 @@ export function extractVoucherPath(urlOrPath: string): string {
   const marker = "/vouchers/";
   const idx = urlOrPath.indexOf(marker);
   if (idx !== -1) {
-    return decodeURIComponent(urlOrPath.substring(idx + marker.length));
+    return decodeURIComponent(urlOrPath.substring(idx + marker.length).split("?")[0].split("#")[0]);
   }
   // Already a path
   return urlOrPath;
