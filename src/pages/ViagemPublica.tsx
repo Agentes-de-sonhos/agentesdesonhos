@@ -1076,14 +1076,26 @@ function PublicServiceCard({ service }: { service: TripService }) {
           </div>
         )}
 
-        {/* Insurance - Emergency Contacts (PRIORITY) */}
+        {/* Insurance - Insured Persons (TOP) */}
+        {isInsurance && data.insured_persons?.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">👨‍👩‍👧 Segurados</p>
+            {data.insured_persons.map((p: any, i: number) => (
+              <p key={i} className="text-xs text-muted-foreground">
+                {p.name}{p.birth_date ? ` • ${p.birth_date}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Insurance - Assistência 24h da Seguradora */}
         {isInsurance && (data.emergency_phone || data.emergency_whatsapp || data.emergency_email) && (
           <div className="mt-3 p-3 bg-destructive/5 border border-destructive/20 rounded-lg space-y-2">
-            <p className="text-xs font-semibold text-destructive uppercase tracking-wide">🆘 Contatos de Emergência</p>
+            <p className="text-xs font-semibold text-destructive uppercase tracking-wide">🆘 Assistência 24h da Seguradora</p>
             {data.emergency_phone && (
               <div className="flex items-center gap-2">
                 <a href={`tel:${data.emergency_phone}`} className="flex-1">
-                  <Button variant="destructive" size="sm" className="text-xs w-full">📞 Ligar Emergência: {data.emergency_phone}</Button>
+                  <Button variant="destructive" size="sm" className="text-xs w-full">📞 Ligar para Assistência 24h: {data.emergency_phone}</Button>
                 </a>
               </div>
             )}
