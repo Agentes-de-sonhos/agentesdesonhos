@@ -232,13 +232,7 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       const statusMap: Record<string, string> = { ativo: '✅ Ativo', expirado: '❌ Expirado', futuro: '📅 Futuro' };
       const covTypeMap: Record<string, string> = { internacional: 'Internacional', nacional: 'Nacional', schengen: 'Schengen', global: 'Global' };
       const insuranceDetails: string[] = [];
-      if (data.plan_name) insuranceDetails.push(`Plano: ${data.plan_name}`);
-      if (data.policy_number) insuranceDetails.push(`Apólice: ${data.policy_number}`);
       if (data.status) insuranceDetails.push(`Status: ${statusMap[data.status] || data.status}`);
-      if (data.destination_covered) insuranceDetails.push(`Destino: ${data.destination_covered}`);
-      if (data.coverage_type) insuranceDetails.push(`Tipo: ${covTypeMap[data.coverage_type] || data.coverage_type}`);
-      if (data.coverage) insuranceDetails.push(`Cobertura: ${data.coverage}`);
-      if (data.medical_assistance) insuranceDetails.push(`Assistência Médica: ${data.medical_assistance}`);
       const days2 = (() => { try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
       return { title: data.provider, details: insuranceDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${days2 ? ` (${days2} dias)` : ''}` };
     }
