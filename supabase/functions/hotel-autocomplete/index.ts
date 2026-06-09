@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,15 +30,28 @@ serve(async (req) => {
       );
     }
 
-    // Build search input with city context
-    const searchInput = city ? `${input} ${city}` : input;
+    // ⚠️ Never concatenate `city` into the query — it can return a hotel from
+    // the wrong city. Resolve the city to coordinates and use `locationbias`.
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      { auth: { persistSession: false } },
+    );
+    const cityBias = city && city.trim().length >= 2
+      ? await resolveCityCoords(supabaseAdmin, city.trim(), GOOGLE_PLACES_API_KEY)
+      : null;
 
     const params = new URLSearchParams({
-      input: searchInput,
+      input: input.trim(),
       types: "establishment",
       key: GOOGLE_PLACES_API_KEY,
       language: "pt-BR",
     });
+    if (cityBias) {
+      params.set("locationbias", `circle:50000@${cityBias.lat},${cityBias.lng}`);
+      params.set("location", `${cityBias.lat},${cityBias.lng}`);
+      params.set("radius", "50000");
+    }
 
     const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params}`;
     const resp = await fetch(url);
@@ -80,3 +94,49 @@ serve(async (req) => {
     );
   }
 });
+
+async function resolveCityCoords(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  cityName: string,
+  googleKey: string,
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const { data: cached } = await supabaseAdmin
+      .from("place_cache")
+      .select("latitude, longitude")
+      .ilike("name", cityName)
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .limit(1)
+      .maybeSingle();
+    if (cached?.latitude != null && cached?.longitude != null) {
+      return { lat: Number(cached.latitude), lng: Number(cached.longitude) };
+    }
+  } catch (_) {}
+
+  try {
+    const u = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(cityName)}&inputtype=textquery&fields=place_id,name,geometry,formatted_address,types&key=${googleKey}&language=pt-BR`;
+    const r = await fetch(u);
+    const j = await r.json();
+    const c = j.candidates?.[0];
+    const loc = c?.geometry?.location;
+    if (!c?.place_id || !loc) return null;
+    await supabaseAdmin.from("place_cache").upsert(
+      {
+        place_id: c.place_id,
+        name: c.name || cityName,
+        address: c.formatted_address || "",
+        latitude: loc.lat,
+        longitude: loc.lng,
+        photo_url: null,
+        photo_urls: [],
+        place_type: (c.types || [])[0] || "locality",
+        raw_data: { resolved_from: "context_city_lookup", input: cityName },
+      },
+      { onConflict: "place_id" },
+    );
+    return { lat: loc.lat, lng: loc.lng };
+  } catch (_) {
+    return null;
+  }
+}
