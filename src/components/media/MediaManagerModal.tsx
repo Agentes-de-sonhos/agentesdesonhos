@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { useMediaManager, type MediaFile, type MediaFolder } from "@/hooks/useMediaManager";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface MediaManagerModalProps {
   open: boolean;
@@ -68,6 +69,19 @@ export function MediaManagerModal({
   accept,
   multiple = false,
 }: MediaManagerModalProps) {
+  const { isAdmin } = useUserRole();
+
+  if (!isAdmin) {
+    return (
+      <UploadOnlyModal
+        open={open}
+        onOpenChange={onOpenChange}
+        onSelect={onSelect}
+        accept={accept}
+      />
+    );
+  }
+
   const {
     folders,
     files,
