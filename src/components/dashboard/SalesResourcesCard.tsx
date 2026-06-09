@@ -60,17 +60,17 @@ export function SalesResourcesCard() {
           </Button>
         </div>
 
+        <div className="rounded-xl bg-[hsl(var(--section-news))]/5 border border-[hsl(var(--section-news))]/15 px-3 py-2 space-y-0.5 w-full">
+          <p className="text-sm font-semibold text-foreground leading-tight">💼 Mais oportunidades para vender</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Encontre bloqueios aéreos exclusivos e materiais prontos para impulsionar suas vendas.
+          </p>
+        </div>
+
         {!collapsed && (
           <div className="space-y-5">
-            {/* Compact top: info + shortcut buttons side by side */}
-            <div className="flex flex-col md:flex-row md:items-stretch gap-3 w-full">
-              <div className="flex-1 rounded-xl bg-[hsl(var(--section-news))]/5 border border-[hsl(var(--section-news))]/15 px-3 py-2.5 space-y-0.5">
-                <p className="text-sm font-semibold text-foreground leading-tight">💼 Mais oportunidades para vender</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Encontre bloqueios aéreos exclusivos e materiais prontos para impulsionar suas vendas.
-                </p>
-              </div>
-              <div className="flex flex-row gap-2 md:flex-shrink-0">
+            {/* Shortcut buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
                 {ITEMS.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -79,7 +79,7 @@ export function SalesResourcesCard() {
                       onClick={() => navigate(item.url)}
                       aria-label={`Acessar ${item.title}`}
                       className={cn(
-                        "flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 border border-transparent flex-1 md:flex-initial",
+                      "flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 border border-transparent flex-1",
                         "bg-[hsl(var(--section-news))]/15 text-[hsl(var(--section-news))]",
                         "hover:scale-[1.02] hover:shadow-md hover:border-border/50"
                       )}
@@ -89,7 +89,6 @@ export function SalesResourcesCard() {
                     </button>
                   );
                 })}
-              </div>
             </div>
 
             {/* Recent materials preview */}
