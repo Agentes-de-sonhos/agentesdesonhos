@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Download, ExternalLink, Loader2, AlertCircle } from "lucide-react";
-import { getSignedVoucherUrl, getPublicVoucherUrl } from "@/lib/secureVoucher";
+import { buildPublicVoucherProxyUrl, getSignedVoucherUrl } from "@/lib/secureVoucher";
 import { toast } from "sonner";
 
 interface SecureFileLinkProps {
@@ -28,24 +28,24 @@ type Props = SecureFileLinkProps | PublicFileLinkProps;
 const REFRESH_AFTER_MS = 90_000;
 
 export function SecureFileLink(props: Props) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const publicUrl = props.mode === "public" ? buildPublicVoucherProxyUrl(props.filePath, props.shareToken) : null;
+  const [url, setUrl] = useState<string | null>(publicUrl);
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">(publicUrl ? "ready" : "idle");
   const lastFetchedAt = useRef<number>(0);
   const inFlight = useRef<Promise<string | null> | null>(null);
 
   const fetchUrl = useCallback(async (): Promise<string | null> => {
+    if (props.mode === "public") {
+      const next = buildPublicVoucherProxyUrl(props.filePath, props.shareToken);
+      setUrl(next);
+      setStatus(next ? "ready" : "error");
+      return next;
+    }
     if (inFlight.current) return inFlight.current;
     setStatus((s) => (s === "ready" ? s : "loading"));
     const p = (async () => {
       try {
-        const next =
-          props.mode === "public"
-            ? await getPublicVoucherUrl(props.filePath, {
-                slug: props.slug,
-                share_token: props.shareToken,
-                password: props.password,
-              })
-            : await getSignedVoucherUrl(props.filePath);
+        const next = await getSignedVoucherUrl(props.filePath);
         if (next) {
           setUrl(next);
           setStatus("ready");
@@ -70,12 +70,24 @@ export function SecureFileLink(props: Props) {
   // only opens new tabs when the click handler runs synchronously on a real
   // URL (not about:blank followed by an async redirect).
   useEffect(() => {
+    if (props.mode === "public") {
+      setUrl(publicUrl);
+      setStatus(publicUrl ? "ready" : "error");
+      return;
+    }
     void fetchUrl();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.filePath]);
+  }, [props.filePath, publicUrl]);
 
   const handleClick = useCallback(
     async (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (props.mode === "public") {
+        if (!url) {
+          e.preventDefault();
+          toast.error("Não foi possível abrir este documento. Tente novamente.");
+        }
+        return;
+      }
       // If the signed URL is missing or stale, refresh and let the navigation
       // happen on the next tap instead of opening about:blank.
       const stale = Date.now() - lastFetchedAt.current > REFRESH_AFTER_MS;
@@ -91,7 +103,7 @@ export function SecureFileLink(props: Props) {
         window.location.href = next;
       }
     },
-    [url, fetchUrl]
+    [props.mode, url, fetchUrl]
   );
 
   const className =
