@@ -1127,13 +1127,17 @@ function PublicServiceCard({ service }: { service: TripService }) {
         )}
 
         {/* Insurance - Policy details */}
-        {isInsurance && (data.policy_number || data.destination_covered || data.coverage_type) && (
+        {isInsurance && (data.policy_number || data.plan_name || data.destination_covered || data.coverage_type) && (
           <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
             <p className="text-xs font-semibold text-primary uppercase tracking-wide">🛡️ Dados da Apólice</p>
-            {data.policy_number && <p className="text-xs text-muted-foreground">Apólice: <span className="font-mono font-medium text-foreground">{data.policy_number}</span></p>}
-            {data.plan_name && <p className="text-xs text-muted-foreground">Plano: {data.plan_name}</p>}
-            {data.destination_covered && <p className="text-xs text-muted-foreground">Destino coberto: {data.destination_covered}</p>}
-            {data.coverage_type && <p className="text-xs text-muted-foreground">Tipo: {data.coverage_type === 'internacional' ? 'Internacional' : data.coverage_type === 'nacional' ? 'Nacional' : data.coverage_type === 'schengen' ? 'Schengen' : 'Global'}</p>}
+            {data.policy_number ? (
+              <p className="text-xs text-muted-foreground">Número da Apólice: <span className="font-mono font-medium text-foreground">{data.policy_number}</span></p>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">Número da Apólice: <span className="text-foreground/60">não informado</span></p>
+            )}
+            {data.plan_name && <p className="text-xs text-muted-foreground">Plano: <span className="font-medium text-foreground">{data.plan_name}</span></p>}
+            {data.destination_covered && <p className="text-xs text-muted-foreground">Destino Coberto: <span className="font-medium text-foreground">{data.destination_covered}</span></p>}
+            {data.coverage_type && <p className="text-xs text-muted-foreground">Tipo de Cobertura: <span className="font-medium text-foreground">{data.coverage_type === 'internacional' ? 'Internacional' : data.coverage_type === 'nacional' ? 'Nacional' : data.coverage_type === 'schengen' ? 'Schengen' : 'Global'}</span></p>}
           </div>
         )}
 
