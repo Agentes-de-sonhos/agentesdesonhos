@@ -115,8 +115,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    const searchInput = context_city ? `${input} ${context_city}` : input;
+    // ⚠️ Never concatenate `context_city` into the query text — Google may
+    // return a place from the wrong city. Instead, resolve the context city
+    // to coordinates and use `locationbias` to bias (but not force) results.
+    const searchInput = input;
     const googleType = TYPE_FILTERS[place_type || "general"] || "establishment";
+
+    let cityBias: { lat: number; lng: number } | null = null;
+    if (context_city && typeof context_city === "string" && context_city.trim().length >= 2) {
+      cityBias = await resolveCityCoords(supabaseAdmin, context_city.trim(), GOOGLE_PLACES_API_KEY);
+    }
 
     const buildParams = (opts: { brOnly?: boolean } = {}) => {
       const p = new URLSearchParams({
@@ -132,8 +140,15 @@ Deno.serve(async (req) => {
       } else {
         p.set("types", "establishment");
       }
-      p.set("location", "-14.235,-51.9253");
-      p.set("radius", "2000000");
+      if (cityBias) {
+        // 50km circle around the resolved context city.
+        p.set("locationbias", `circle:50000@${cityBias.lat},${cityBias.lng}`);
+        p.set("location", `${cityBias.lat},${cityBias.lng}`);
+        p.set("radius", "50000");
+      } else {
+        p.set("location", "-14.235,-51.9253");
+        p.set("radius", "2000000");
+      }
       p.set("region", "br");
       if (opts.brOnly) p.set("components", "country:br");
       return p;
