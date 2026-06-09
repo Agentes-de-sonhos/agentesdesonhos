@@ -232,13 +232,7 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       const statusMap: Record<string, string> = { ativo: '✅ Ativo', expirado: '❌ Expirado', futuro: '📅 Futuro' };
       const covTypeMap: Record<string, string> = { internacional: 'Internacional', nacional: 'Nacional', schengen: 'Schengen', global: 'Global' };
       const insuranceDetails: string[] = [];
-      if (data.plan_name) insuranceDetails.push(`Plano: ${data.plan_name}`);
-      if (data.policy_number) insuranceDetails.push(`Apólice: ${data.policy_number}`);
       if (data.status) insuranceDetails.push(`Status: ${statusMap[data.status] || data.status}`);
-      if (data.destination_covered) insuranceDetails.push(`Destino: ${data.destination_covered}`);
-      if (data.coverage_type) insuranceDetails.push(`Tipo: ${covTypeMap[data.coverage_type] || data.coverage_type}`);
-      if (data.coverage) insuranceDetails.push(`Cobertura: ${data.coverage}`);
-      if (data.medical_assistance) insuranceDetails.push(`Assistência Médica: ${data.medical_assistance}`);
       const days2 = (() => { try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
       return { title: data.provider, details: insuranceDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${days2 ? ` (${days2} dias)` : ''}` };
     }
@@ -1133,13 +1127,17 @@ function PublicServiceCard({ service }: { service: TripService }) {
         )}
 
         {/* Insurance - Policy details */}
-        {isInsurance && (data.policy_number || data.destination_covered || data.coverage_type) && (
+        {isInsurance && (data.policy_number || data.plan_name || data.destination_covered || data.coverage_type) && (
           <div className="mt-2 p-3 bg-muted/50 rounded-lg space-y-1">
             <p className="text-xs font-semibold text-primary uppercase tracking-wide">🛡️ Dados da Apólice</p>
-            {data.policy_number && <p className="text-xs text-muted-foreground">Apólice: <span className="font-mono font-medium text-foreground">{data.policy_number}</span></p>}
-            {data.plan_name && <p className="text-xs text-muted-foreground">Plano: {data.plan_name}</p>}
-            {data.destination_covered && <p className="text-xs text-muted-foreground">Destino coberto: {data.destination_covered}</p>}
-            {data.coverage_type && <p className="text-xs text-muted-foreground">Tipo: {data.coverage_type === 'internacional' ? 'Internacional' : data.coverage_type === 'nacional' ? 'Nacional' : data.coverage_type === 'schengen' ? 'Schengen' : 'Global'}</p>}
+            {data.policy_number ? (
+              <p className="text-xs text-muted-foreground">Número da Apólice: <span className="font-mono font-medium text-foreground">{data.policy_number}</span></p>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">Número da Apólice: <span className="text-foreground/60">não informado</span></p>
+            )}
+            {data.plan_name && <p className="text-xs text-muted-foreground">Plano: <span className="font-medium text-foreground">{data.plan_name}</span></p>}
+            {data.destination_covered && <p className="text-xs text-muted-foreground">Destino Coberto: <span className="font-medium text-foreground">{data.destination_covered}</span></p>}
+            {data.coverage_type && <p className="text-xs text-muted-foreground">Tipo de Cobertura: <span className="font-medium text-foreground">{data.coverage_type === 'internacional' ? 'Internacional' : data.coverage_type === 'nacional' ? 'Nacional' : data.coverage_type === 'schengen' ? 'Schengen' : 'Global'}</span></p>}
           </div>
         )}
 
