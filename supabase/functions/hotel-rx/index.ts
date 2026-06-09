@@ -22,37 +22,52 @@ serve(async (req) => {
       );
     }
 
-    const finalCountry = country || "Brasil";
+    // Country is preserved as-is; we no longer silently default to "Brasil"
+    // because that caused international hotels with missing country to
+    // collide with Brazilian ones in the cache key.
+    const resolvedCountry = (typeof country === "string" && country.trim()) || null;
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check cache by place_id first (30-day window), then by cache_key
+    const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
+    if (!GOOGLE_PLACES_API_KEY) {
+      console.error("GOOGLE_PLACES_API_KEY not configured");
+      return new Response(
+        JSON.stringify({ error: "Serviço temporariamente indisponível." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Resolve a single canonical place_id BEFORE any cache lookup so the
+    // cache_key is always `pid:<place_id>`. This removes the dual-key
+    // ambiguity (place_id row vs name|city|country row) that previously
+    // could return analysis of a different hotel.
+    let placeId: string | null = inputPlaceId || null;
+    if (!placeId && hotel_name && city) {
+      const searchQuery = `${hotel_name} ${city}${resolvedCountry ? ` ${resolvedCountry}` : ""}`;
+      const findUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name,formatted_address&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR`;
+      const findResp = await fetch(findUrl);
+      const findData = await findResp.json();
+      const candidate = findData.candidates?.[0];
+      if (!candidate?.place_id) {
+        return new Response(
+          JSON.stringify({ error: "Hotel não encontrado no Google Places. Verifique o nome e a cidade." }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      placeId = candidate.place_id;
+    }
+
+    const cacheKey = `pid:${placeId}`;
+
+    // Check cache by canonical cache_key (single key path).
     if (!force_update) {
-      let cached = null;
-
-      if (inputPlaceId) {
-        const { data } = await supabase
-          .from("hotel_rx_cache")
-          .select("result, created_at, updated_at")
-          .eq("place_id", inputPlaceId)
-          .order("updated_at", { ascending: false, nullsFirst: false })
-          .limit(1)
-          .single();
-        cached = data;
-      }
-
-      if (!cached && hotel_name && city) {
-        const cacheKey = `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
-        const { data } = await supabase
-          .from("hotel_rx_cache")
-          .select("result, created_at, updated_at")
-          .eq("cache_key", cacheKey)
-          .order("updated_at", { ascending: false, nullsFirst: false })
-          .limit(1)
-          .single();
-        cached = data;
-      }
+      const { data: cached } = await supabase
+        .from("hotel_rx_cache")
+        .select("result, created_at, updated_at")
+        .eq("cache_key", cacheKey)
+        .maybeSingle();
 
       if (cached) {
         const analysisDate = cached.updated_at || cached.created_at;
@@ -72,33 +87,6 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-    }
-
-    // Step 1: Find Place
-    const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
-    if (!GOOGLE_PLACES_API_KEY) {
-      console.error("GOOGLE_PLACES_API_KEY not configured");
-      return new Response(
-        JSON.stringify({ error: "Serviço temporariamente indisponível." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    let placeId = inputPlaceId;
-
-    if (!placeId) {
-      const searchQuery = `${hotel_name} ${city} ${finalCountry}`;
-      const findUrl = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id,name&key=${GOOGLE_PLACES_API_KEY}`;
-      const findResp = await fetch(findUrl);
-      const findData = await findResp.json();
-
-      if (!findData.candidates || findData.candidates.length === 0) {
-        return new Response(
-          JSON.stringify({ error: "Hotel não encontrado no Google Places. Verifique o nome e a cidade." }),
-          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      placeId = findData.candidates[0].place_id;
     }
 
     // Step 2: Get Place Details
@@ -259,49 +247,20 @@ ${reviewsText || "Nenhum comentário disponível"}`;
     };
 
     const now = new Date().toISOString();
-    const cacheKey = inputPlaceId
-      ? `pid:${inputPlaceId}`
-      : `${hotel_name.toLowerCase().trim()}|${city.toLowerCase().trim()}|${finalCountry.toLowerCase().trim()}`;
-
-    // Upsert: if force_update and place_id exists, update existing row
-    if (force_update && placeId) {
-      const { data: existing } = await supabase
-        .from("hotel_rx_cache")
-        .select("id")
-        .eq("place_id", placeId)
-        .limit(1)
-        .single();
-
-      if (existing) {
-        await supabase.from("hotel_rx_cache").update({
-          result,
-          hotel_name: place.name,
-          city,
-          country: finalCountry,
-          updated_at: now,
-        }).eq("id", existing.id);
-      } else {
-        await supabase.from("hotel_rx_cache").insert({
-          cache_key: cacheKey,
-          place_id: placeId,
-          hotel_name: place.name,
-          city,
-          country: finalCountry,
-          result,
-          updated_at: now,
-        });
-      }
-    } else {
-      await supabase.from("hotel_rx_cache").insert({
+    // Canonical upsert keyed by cache_key (UNIQUE constraint at DB level
+    // guarantees no duplicate rows per place_id).
+    await supabase.from("hotel_rx_cache").upsert(
+      {
         cache_key: cacheKey,
         place_id: placeId,
         hotel_name: place.name,
-        city,
-        country: finalCountry,
+        city: city ?? null,
+        country: resolvedCountry,
         result,
         updated_at: now,
-      });
-    }
+      },
+      { onConflict: "cache_key" },
+    );
 
     return new Response(JSON.stringify({
       ...result,

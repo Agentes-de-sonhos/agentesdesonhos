@@ -9,16 +9,31 @@ interface PlacePrediction {
   is_hotel: boolean;
 }
 
+interface PlaceDetails {
+  place_id: string;
+  name: string;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  photo_url: string | null;
+  photo_urls: string[];
+}
+
 interface UseHotelAutocompleteOptions {
-  onSelect?: (prediction: PlacePrediction) => void;
+  onSelect?: (prediction: PlacePrediction, details?: PlaceDetails) => void;
+  fetchDetailsOnSelect?: boolean;
 }
 
 export function useHotelAutocomplete(options?: UseHotelAutocompleteOptions) {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [selectedDetails, setSelectedDetails] = useState<PlaceDetails | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   const fetchAutocomplete = useCallback(async (input: string, city?: string) => {
     if (input.trim().length < 3) {
@@ -50,24 +65,46 @@ export function useHotelAutocomplete(options?: UseHotelAutocompleteOptions) {
     debounceRef.current = setTimeout(() => fetchAutocomplete(value, city), 300);
   }, [fetchAutocomplete]);
 
-  const handleSelect = useCallback((prediction: PlacePrediction) => {
+  const handleSelect = useCallback(async (prediction: PlacePrediction) => {
     setSelectedPlaceId(prediction.place_id);
     setShowDropdown(false);
     setPredictions([]);
-    options?.onSelect?.(prediction);
-  }, [options]);
+
+    let details: PlaceDetails | undefined;
+    if (optionsRef.current?.fetchDetailsOnSelect !== false) {
+      setIsFetchingDetails(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("places-autocomplete", {
+          body: { fetch_details: true, place_id: prediction.place_id, place_type: "hotel" },
+        });
+        if (!error && data?.place) {
+          details = data.place as PlaceDetails;
+          setSelectedDetails(details);
+        }
+      } catch {
+        // silently fail — caller still gets the prediction
+      } finally {
+        setIsFetchingDetails(false);
+      }
+    }
+
+    optionsRef.current?.onSelect?.(prediction, details);
+  }, []);
 
   const reset = useCallback(() => {
     setPredictions([]);
     setShowDropdown(false);
     setSelectedPlaceId(null);
+    setSelectedDetails(null);
   }, []);
 
   return {
     predictions,
     isSearching,
+    isFetchingDetails,
     showDropdown,
     selectedPlaceId,
+    selectedDetails,
     setShowDropdown,
     handleInputChange,
     handleSelect,

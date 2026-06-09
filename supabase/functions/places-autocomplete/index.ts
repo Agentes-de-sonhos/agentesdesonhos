@@ -115,8 +115,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    const searchInput = context_city ? `${input} ${context_city}` : input;
+    // ⚠️ Never concatenate `context_city` into the query text — Google may
+    // return a place from the wrong city. Instead, resolve the context city
+    // to coordinates and use `locationbias` to bias (but not force) results.
+    const searchInput = input;
     const googleType = TYPE_FILTERS[place_type || "general"] || "establishment";
+
+    let cityBias: { lat: number; lng: number } | null = null;
+    if (context_city && typeof context_city === "string" && context_city.trim().length >= 2) {
+      cityBias = await resolveCityCoords(supabaseAdmin, context_city.trim(), GOOGLE_PLACES_API_KEY);
+    }
 
     const buildParams = (opts: { brOnly?: boolean } = {}) => {
       const p = new URLSearchParams({
@@ -132,8 +140,15 @@ Deno.serve(async (req) => {
       } else {
         p.set("types", "establishment");
       }
-      p.set("location", "-14.235,-51.9253");
-      p.set("radius", "2000000");
+      if (cityBias) {
+        // 50km circle around the resolved context city.
+        p.set("locationbias", `circle:50000@${cityBias.lat},${cityBias.lng}`);
+        p.set("location", `${cityBias.lat},${cityBias.lng}`);
+        p.set("radius", "50000");
+      } else {
+        p.set("location", "-14.235,-51.9253");
+        p.set("radius", "2000000");
+      }
       p.set("region", "br");
       if (opts.brOnly) p.set("components", "country:br");
       return p;
@@ -206,4 +221,59 @@ Deno.serve(async (req) => {
 function matchesType(types: string[], targetType: string): boolean {
   if (targetType === "establishment" || targetType === "(cities)") return true;
   return types.includes(targetType);
+}
+
+/**
+ * Resolve a free-text city name to {lat,lng} for use as `locationbias`.
+ * Order: place_cache (case-insensitive name match with coordinates) →
+ * Google `findplacefromtext` (cities) → null.
+ * Successful Google lookups are persisted in place_cache to avoid repeated calls.
+ */
+async function resolveCityCoords(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  cityName: string,
+  googleKey: string,
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const { data: cached } = await supabaseAdmin
+      .from("place_cache")
+      .select("latitude, longitude")
+      .ilike("name", cityName)
+      .not("latitude", "is", null)
+      .not("longitude", "is", null)
+      .limit(1)
+      .maybeSingle();
+    if (cached?.latitude != null && cached?.longitude != null) {
+      return { lat: Number(cached.latitude), lng: Number(cached.longitude) };
+    }
+  } catch (_) {
+    // ignore and fall through
+  }
+
+  try {
+    const u = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(cityName)}&inputtype=textquery&fields=place_id,name,geometry,formatted_address,types&key=${googleKey}&language=pt-BR`;
+    const r = await fetch(u);
+    const j = await r.json();
+    const c = j.candidates?.[0];
+    const loc = c?.geometry?.location;
+    if (!c?.place_id || !loc) return null;
+    // Persist as a city entry in place_cache (best-effort).
+    await supabaseAdmin.from("place_cache").upsert(
+      {
+        place_id: c.place_id,
+        name: c.name || cityName,
+        address: c.formatted_address || "",
+        latitude: loc.lat,
+        longitude: loc.lng,
+        photo_url: null,
+        photo_urls: [],
+        place_type: (c.types || [])[0] || "locality",
+        raw_data: { resolved_from: "context_city_lookup", input: cityName },
+      },
+      { onConflict: "place_id" },
+    );
+    return { lat: loc.lat, lng: loc.lng };
+  } catch (_) {
+    return null;
+  }
 }
