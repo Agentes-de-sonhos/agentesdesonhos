@@ -21,6 +21,8 @@ export function extractVoucherPath(urlOrPath: string): string {
  * This avoids async click handlers/window.open, which iOS Safari often blocks.
  */
 export function buildPublicVoucherProxyUrl(filePath: string, shareToken?: string | null): string | null {
+  if (/^https?:\/\//i.test(filePath) && !filePath.includes("/vouchers/")) return filePath;
+
   const path = extractVoucherPath(filePath);
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   if (!path || !shareToken || !supabaseUrl) return null;
