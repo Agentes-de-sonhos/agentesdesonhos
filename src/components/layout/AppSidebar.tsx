@@ -228,7 +228,7 @@ const marketingSection: MenuSection = {
     { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store, requiredFeature: "showcase" },
     { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush, requiredFeature: "lamina_customizer" },
     { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus, requiredFeature: "lead_capture" },
-    { key: "conteudo", title: "Conteúdo", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+    { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
   ],
 };
 
