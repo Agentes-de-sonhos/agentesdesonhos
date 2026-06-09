@@ -9,6 +9,7 @@ import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useGamification } from "@/hooks/useGamification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,8 +43,17 @@ const UpcomingAgendaEventsCard = lazy(() =>
 export default function StartDashboard() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { plan } = useSubscription();
   const { registerDailyLogin } = useGamification();
   const { trailsWithProgress, isLoading: academyLoading } = useAcademy();
+
+  // Premium/Fundador users should always use the full dashboard, even if a
+  // legacy link or bookmark points them to /dashboard-start.
+  React.useEffect(() => {
+    if (plan === "premium" || plan === "fundador") {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [plan, navigate]);
 
   React.useEffect(() => {
     registerDailyLogin();
