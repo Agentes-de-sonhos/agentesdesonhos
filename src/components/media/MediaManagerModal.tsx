@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { useMediaManager, type MediaFile, type MediaFolder } from "@/hooks/useMediaManager";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface MediaManagerModalProps {
   open: boolean;
@@ -68,6 +69,19 @@ export function MediaManagerModal({
   accept,
   multiple = false,
 }: MediaManagerModalProps) {
+  const { isAdmin } = useUserRole();
+
+  if (!isAdmin) {
+    return (
+      <UploadOnlyModal
+        open={open}
+        onOpenChange={onOpenChange}
+        onSelect={onSelect}
+        accept={accept}
+      />
+    );
+  }
+
   const {
     folders,
     files,
@@ -526,5 +540,112 @@ export function MediaManagerModal({
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Upload-only modal for non-admin users: no folder navigation, no file listing.
+// Users can only upload an image/file and it is auto-selected on success.
+// ---------------------------------------------------------------------------
+interface UploadOnlyModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelect: (url: string, file?: MediaFile) => void;
+  accept?: string;
+}
+
+function UploadOnlyModal({ open, onOpenChange, onSelect, accept }: UploadOnlyModalProps) {
+  const { uploadFiles } = useMediaManager();
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const acceptInput =
+    accept === "image" ? "image/*" :
+    accept === "pdf" ? ".pdf" :
+    accept === "video" ? "video/*" : undefined;
+
+  const handleUpload = useCallback(async (fileList: FileList | File[]) => {
+    const arr = Array.from(fileList);
+    if (arr.length === 0) return;
+    setUploading(true);
+    try {
+      const uploaded = await uploadFiles(arr);
+      if (uploaded.length > 0) {
+        const first = uploaded[0];
+        onSelect(first.url, first);
+        onOpenChange(false);
+      }
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }, [uploadFiles, onSelect, onOpenChange]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    if (e.dataTransfer.files.length > 0) {
+      handleUpload(e.dataTransfer.files);
+    }
+  }, [handleUpload]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md p-0 gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <Upload className="h-5 w-5 text-primary" />
+            Enviar arquivo
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="p-6">
+          <div
+            className={cn(
+              "flex flex-col items-center justify-center gap-3 p-8 rounded-lg border-2 border-dashed transition-colors cursor-pointer",
+              dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+            )}
+            onClick={() => !uploading && inputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={handleDrop}
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                <p className="text-sm font-medium">Enviando...</p>
+              </>
+            ) : (
+              <>
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                  <Upload className="h-7 w-7 text-primary" />
+                </div>
+                <p className="text-sm font-medium">Clique ou arraste para enviar</p>
+                <p className="text-xs text-muted-foreground">
+                  {accept === "image" ? "JPG, PNG, WebP" :
+                   accept === "pdf" ? "PDF" :
+                   accept === "video" ? "MP4, MOV" :
+                   "Imagens, PDF ou vídeo"}
+                </p>
+              </>
+            )}
+            <input
+              ref={inputRef}
+              type="file"
+              className="hidden"
+              accept={acceptInput}
+              onChange={(e) => e.target.files && handleUpload(e.target.files)}
+            />
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t flex justify-end">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={uploading}>
+            Cancelar
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
