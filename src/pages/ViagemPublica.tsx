@@ -239,8 +239,6 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       if (data.coverage_type) insuranceDetails.push(`Tipo: ${covTypeMap[data.coverage_type] || data.coverage_type}`);
       if (data.coverage) insuranceDetails.push(`Cobertura: ${data.coverage}`);
       if (data.medical_assistance) insuranceDetails.push(`Assistência Médica: ${data.medical_assistance}`);
-      if (data.insured_persons?.length > 0) insuranceDetails.push(`Segurados: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
-      if (data.emergency_phone) insuranceDetails.push(`📞 Emergência: ${data.emergency_phone}`);
       const days2 = (() => { try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
       return { title: data.provider, details: insuranceDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}${days2 ? ` (${days2} dias)` : ''}` };
     }
