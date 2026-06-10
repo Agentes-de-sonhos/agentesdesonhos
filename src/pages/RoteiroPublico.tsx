@@ -268,6 +268,14 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const [openDayIndex, setOpenDayIndex] = useState<number | null>(0);
   const [agentOpen, setAgentOpen] = useState(false);
   const [periodImages, setPeriodImages] = useState<Record<string, string>>({});
+  const [fontScale, setFontScale] = useState<"sm" | "md" | "lg">(() => {
+    if (typeof window === "undefined") return "md";
+    const saved = window.localStorage.getItem("roteiro:fontScale");
+    return saved === "sm" || saved === "lg" ? saved : "md";
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem("roteiro:fontScale", fontScale); } catch {}
+  }, [fontScale]);
 
   useEffect(() => {
     setOgMeta({
