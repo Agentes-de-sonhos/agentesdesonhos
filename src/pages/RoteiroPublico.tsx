@@ -560,7 +560,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               </div>
             )}
             {introText && (
-              <p className="text-[13.5px] sm:text-[15px] text-foreground/75 leading-relaxed">
+              <p className="rt-body-lg text-foreground/85 leading-relaxed whitespace-pre-wrap break-words">
                 <FormattedText>{introText}</FormattedText>
               </p>
             )}
