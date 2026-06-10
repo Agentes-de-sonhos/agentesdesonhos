@@ -548,6 +548,31 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
       <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-10 space-y-7 sm:space-y-9">
 
+        {/* ─── Controle de tamanho de fonte ─── */}
+        <div className="flex items-center justify-end -mb-3">
+          <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/80 backdrop-blur px-1 py-1 shadow-sm">
+            <Type className="h-3.5 w-3.5 text-muted-foreground mx-1.5" />
+            <button
+              type="button"
+              onClick={() => setFontScale("sm")}
+              aria-label="Diminuir fonte"
+              className={`h-7 w-7 rounded-full text-[12px] font-semibold transition ${fontScale === "sm" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+            >A-</button>
+            <button
+              type="button"
+              onClick={() => setFontScale("md")}
+              aria-label="Fonte padrão"
+              className={`h-7 w-7 rounded-full text-[13px] font-semibold transition ${fontScale === "md" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+            >A</button>
+            <button
+              type="button"
+              onClick={() => setFontScale("lg")}
+              aria-label="Aumentar fonte"
+              className={`h-7 w-7 rounded-full text-[14px] font-semibold transition ${fontScale === "lg" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+            >A+</button>
+          </div>
+        </div>
+
         {/* ─── Destination intro: editorial gallery + left-aligned text ─── */}
         {showIntro && (introText || introImages.length > 0) && (
           <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
