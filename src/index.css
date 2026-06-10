@@ -349,3 +349,15 @@ img {
   }
 }
 
+
+/* ─── Roteiro público: escala de fonte para legibilidade ─── */
+.rt-scale-sm { --rt-body: 14px; --rt-body-lg: 14px; --rt-title: 14.5px; }
+.rt-scale-md { --rt-body: 15px; --rt-body-lg: 16px; --rt-title: 16px; }
+.rt-scale-lg { --rt-body: 17px; --rt-body-lg: 18px; --rt-title: 18px; }
+@media (min-width: 640px) {
+  .rt-scale-sm { --rt-body: 15px; --rt-body-lg: 15px; }
+  .rt-scale-md { --rt-body: 16px; --rt-body-lg: 17px; }
+  .rt-scale-lg { --rt-body: 18px; --rt-body-lg: 19px; }
+}
+.rt-body { font-size: var(--rt-body) !important; line-height: 1.6 !important; }
+.rt-body-lg { font-size: var(--rt-body-lg) !important; line-height: 1.6 !important; }
