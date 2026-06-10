@@ -50,6 +50,42 @@ export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
 
     setIsSearching(true);
     try {
+      // Para campos de Destino (cidade), usamos a base própria de cidades
+      // (tabela public.cities). Google Places NÃO é utilizado neste caso.
+      if (optionsRef.current?.placeType === "city") {
+        const { data, error } = await supabase.rpc("search_cities", {
+          q: input.trim(),
+          max_results: 10,
+        });
+        if (!error && Array.isArray(data)) {
+          const preds: PlacePrediction[] = data.map((row: {
+            id: number;
+            name: string;
+            country: string;
+            admin_name: string | null;
+            iso2: string | null;
+            lat: number | null;
+            lng: number | null;
+          }) => {
+            const secondary = [row.admin_name, row.country].filter(Boolean).join(", ");
+            return {
+              place_id: `city:${row.id}`,
+              name: row.name,
+              secondary,
+              description: `${row.name}, ${secondary}`,
+              types: ["locality", "political"],
+              matched_type: true,
+            };
+          });
+          setPredictions(preds);
+          setShowDropdown(preds.length > 0);
+        } else {
+          setPredictions([]);
+          setShowDropdown(false);
+        }
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("places-autocomplete", {
         body: {
           input: input.trim(),
@@ -70,6 +106,12 @@ export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
   }, []);
 
   const fetchDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
+    // Place IDs gerados pela base interna de cidades não possuem detalhes
+    // no Google Places. Retornamos null para manter o fluxo (a seleção
+    // já contém nome/país; coordenadas vêm do row se necessário).
+    if (placeId.startsWith("city:")) {
+      return null;
+    }
     setIsFetchingDetails(true);
     try {
       const { data, error } = await supabase.functions.invoke("places-autocomplete", {
