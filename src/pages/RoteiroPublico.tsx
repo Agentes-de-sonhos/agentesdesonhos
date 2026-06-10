@@ -472,7 +472,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0">
+    <div className={`min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0 rt-scale-${fontScale}`}>
       {/* ─── Slim Premium Header (mirrors Orçamento) ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
