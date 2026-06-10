@@ -614,7 +614,7 @@ export function ItineraryEditor({
                                 )}
                               </div>
                               {activity.description && (
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-muted-foreground whitespace-pre-line break-words">
                                   {activity.description}
                                 </p>
                               )}
