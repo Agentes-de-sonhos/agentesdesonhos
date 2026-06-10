@@ -9,7 +9,7 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
 import {
   MapPin, Calendar, Users, Sun, Sunset, Moon, Clock, DollarSign, Loader2,
-  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles,
+  ChevronDown, FileText, Download, Eye, ExternalLink, Sparkles, Type,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -189,7 +189,7 @@ function CollapsibleDayCard({
                         </h4>
 
                         {activity.description && (
-                          <p className="text-[13px] text-muted-foreground leading-relaxed whitespace-pre-line break-words">
+                          <p className="rt-body text-muted-foreground leading-relaxed whitespace-pre-line break-words">
                             {activity.description}
                           </p>
                         )}
@@ -268,6 +268,14 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const [openDayIndex, setOpenDayIndex] = useState<number | null>(0);
   const [agentOpen, setAgentOpen] = useState(false);
   const [periodImages, setPeriodImages] = useState<Record<string, string>>({});
+  const [fontScale, setFontScale] = useState<"sm" | "md" | "lg">(() => {
+    if (typeof window === "undefined") return "md";
+    const saved = window.localStorage.getItem("roteiro:fontScale");
+    return saved === "sm" || saved === "lg" ? saved : "md";
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem("roteiro:fontScale", fontScale); } catch {}
+  }, [fontScale]);
 
   useEffect(() => {
     setOgMeta({
@@ -464,7 +472,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0">
+    <div className={`min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0 rt-scale-${fontScale}`}>
       {/* ─── Slim Premium Header (mirrors Orçamento) ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
@@ -540,6 +548,31 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
       <main className="max-w-4xl mx-auto px-4 sm:px-8 pt-6 sm:pt-10 pb-10 space-y-7 sm:space-y-9">
 
+        {/* ─── Controle de tamanho de fonte ─── */}
+        <div className="flex items-center justify-end -mb-3">
+          <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/80 backdrop-blur px-1 py-1 shadow-sm">
+            <Type className="h-3.5 w-3.5 text-muted-foreground mx-1.5" />
+            <button
+              type="button"
+              onClick={() => setFontScale("sm")}
+              aria-label="Diminuir fonte"
+              className={`h-7 w-7 rounded-full text-[12px] font-semibold transition ${fontScale === "sm" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+            >A-</button>
+            <button
+              type="button"
+              onClick={() => setFontScale("md")}
+              aria-label="Fonte padrão"
+              className={`h-7 w-7 rounded-full text-[13px] font-semibold transition ${fontScale === "md" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+            >A</button>
+            <button
+              type="button"
+              onClick={() => setFontScale("lg")}
+              aria-label="Aumentar fonte"
+              className={`h-7 w-7 rounded-full text-[14px] font-semibold transition ${fontScale === "lg" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+            >A+</button>
+          </div>
+        </div>
+
         {/* ─── Destination intro: editorial gallery + left-aligned text ─── */}
         {showIntro && (introText || introImages.length > 0) && (
           <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] space-y-4">
@@ -560,7 +593,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               </div>
             )}
             {introText && (
-              <p className="text-[13.5px] sm:text-[15px] text-foreground/75 leading-relaxed">
+              <p className="rt-body-lg text-foreground/85 leading-relaxed whitespace-pre-wrap break-words">
                 <FormattedText>{introText}</FormattedText>
               </p>
             )}
