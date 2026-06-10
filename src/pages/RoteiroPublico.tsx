@@ -189,7 +189,7 @@ function CollapsibleDayCard({
                         </h4>
 
                         {activity.description && (
-                          <p className="text-[13px] text-muted-foreground leading-relaxed whitespace-pre-line break-words">
+                          <p className="rt-body text-muted-foreground leading-relaxed whitespace-pre-line break-words">
                             {activity.description}
                           </p>
                         )}
