@@ -1477,6 +1477,51 @@ export type Database = {
         }
         Relationships: []
       }
+      cities: {
+        Row: {
+          admin_name: string | null
+          capital: string | null
+          country: string
+          created_at: string
+          id: number
+          iso2: string | null
+          iso3: string | null
+          lat: number | null
+          lng: number | null
+          name: string
+          name_ascii: string
+          population: number | null
+        }
+        Insert: {
+          admin_name?: string | null
+          capital?: string | null
+          country: string
+          created_at?: string
+          id: number
+          iso2?: string | null
+          iso3?: string | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          name_ascii: string
+          population?: number | null
+        }
+        Update: {
+          admin_name?: string | null
+          capital?: string | null
+          country?: string
+          created_at?: string
+          id?: number
+          iso2?: string | null
+          iso3?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          name_ascii?: string
+          population?: number | null
+        }
+        Relationships: []
+      }
       client_categories: {
         Row: {
           created_at: string
@@ -10854,6 +10899,7 @@ export type Database = {
         Args: { _user_id: string; _year: number }
         Returns: boolean
       }
+      immutable_unaccent: { Args: { "": string }; Returns: string }
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
@@ -10862,10 +10908,25 @@ export type Database = {
         Args: { _data: Json; _token: string }
         Returns: string
       }
+      search_cities: {
+        Args: { max_results?: number; q: string }
+        Returns: {
+          admin_name: string
+          country: string
+          id: number
+          iso2: string
+          lat: number
+          lng: number
+          name: string
+          population: number
+        }[]
+      }
       seed_default_pipeline_stages: {
         Args: { _user_id: string }
         Returns: undefined
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       submit_sales_landing_lead: {
         Args: { p_lead_name: string; p_lead_phone: string; p_slug: string }
         Returns: Json
