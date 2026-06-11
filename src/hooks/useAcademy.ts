@@ -620,6 +620,7 @@ export function useAcademyAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quiz-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-quiz-questions"] });
       toast({ title: "Pergunta adicionada!" });
     },
   });
@@ -631,6 +632,7 @@ export function useAcademyAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quiz-questions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-quiz-questions"] });
       toast({ title: "Pergunta removida!" });
     },
   });
