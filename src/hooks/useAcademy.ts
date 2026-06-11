@@ -38,7 +38,7 @@ export function useAcademy() {
       const { data, error } = await supabase
         .from("learning_trails")
         .select("*")
-        .order("order_index", { ascending: true });
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as LearningTrail[];
     },
