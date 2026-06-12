@@ -399,6 +399,8 @@ export function FlightWizard({
       return_date: !isOneWay ? (data.return_date || "") : "",
       includes_baggage: !!data.includes_baggage,
       includes_boarding_fee: !!data.includes_boarding_fee,
+      fees_amount: data.includes_boarding_fee ? (Number(data.fees_amount) || 0) : 0,
+      charge_fees_first_installment: !!(data.includes_boarding_fee && data.charge_fees_first_installment && (Number(data.fees_amount) || 0) > 0),
       adult_price: adultPrice,
       child_price: childPrice,
       is_unit_price: true,
