@@ -726,7 +726,8 @@ function CollapsibleServiceCard({
       {showPaymentPerService && (() => {
         const payConfig = extractServicePaymentConfig(service);
         if (!payConfig.is_custom_payment) return null;
-        const display = getServicePaymentDisplay(service.amount, payConfig);
+        const feeInfo = extractFlightFeeInfo(service);
+        const display = getServicePaymentDisplay(service.amount, payConfig, feeInfo);
         if (!display) return null;
         return (
           <div className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-3 flex items-center gap-3">
