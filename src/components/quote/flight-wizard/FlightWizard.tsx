@@ -552,6 +552,29 @@ export function FlightWizard({
                 <p className="text-xs text-muted-foreground">Marque se o valor cobrado já inclui as taxas aeroportuárias.</p>
               </div>
             </label>
+            {data.includes_boarding_fee && (
+              <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Valor total das taxas (R$)</Label>
+                  <Input
+                    type="number" min={0} step="0.01"
+                    value={data.fees_amount ?? ''}
+                    onChange={e => upd({ fees_amount: parseFloat(e.target.value) || 0 })}
+                    onFocus={e => e.target.select()}
+                    placeholder="Ex: 1200.00"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Embarque, RAV ou outras taxas inclusas no valor. Use para destacar a 1ª parcela.</p>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={!!data.charge_fees_first_installment}
+                    onCheckedChange={(c) => upd({ charge_fees_first_installment: !!c })}
+                    disabled={!(Number(data.fees_amount) > 0)}
+                  />
+                  <span className="text-sm">Cobrar taxas integralmente na 1ª parcela</span>
+                </label>
+              </div>
+            )}
           </StepShell>
         );
 
