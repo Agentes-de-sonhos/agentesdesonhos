@@ -43,6 +43,8 @@ export interface WizardFlightDraft {
   return_date?: string;    // yyyy-MM-dd
   includes_baggage?: boolean;
   includes_boarding_fee?: boolean;
+  fees_amount?: number;
+  charge_fees_first_installment?: boolean;
   outbound_legs?: FlightLegDraft[];
   return_legs?: FlightLegDraft[];
   internal_legs?: FlightLegDraft[];
