@@ -412,6 +412,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       departure_date: departureDateStr,
       return_date: returnDateStr,
       includes_baggage: values.includes_baggage, includes_boarding_fee: values.includes_boarding_fee,
+      fees_amount: values.includes_boarding_fee ? (Number(values.fees_amount) || 0) : 0,
+      charge_fees_first_installment: !!(values.includes_boarding_fee && values.charge_fees_first_installment && (Number(values.fees_amount) || 0) > 0),
       adult_price: values.adult_price, child_price: values.child_price,
       is_unit_price: true, is_one_way: isOneWay,
       notes: values.notes || "",
