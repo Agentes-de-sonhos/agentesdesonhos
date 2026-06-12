@@ -24,12 +24,42 @@ const OG_CONTENT: Record<string, { title: string; description: string }> = {
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   const type = url.searchParams.get("type");
-  const targetUrl = url.searchParams.get("url");
+  const targetUrlParam = url.searchParams.get("url");
   const token = url.searchParams.get("token");
   const slug = url.searchParams.get("slug");
 
-  if (!type || !targetUrl) {
+  if (!type || !targetUrlParam) {
     return new Response("Missing required params", { status: 400 });
+  }
+
+  // Guard: never allow og:url / canonical to be a bare app/base URL.
+  // The shared link MUST always be the personalized public quote URL
+  // (with slug + access code, or legacy /orcamento/:token).
+  const code = url.searchParams.get("code");
+  const isPersonalizedQuoteUrl = (u: string): boolean => {
+    try {
+      const parsed = new URL(u);
+      const path = parsed.pathname.replace(/^\/+|\/+$/g, "");
+      if (!path) return false; // base domain
+      // Legacy token route: /orcamento/:token
+      if (/^orcamento\/[^/]+$/.test(path)) return true;
+      // New format: /:slug/:code
+      if (/^[^/]+\/[^/]+$/.test(path)) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  let targetUrl = targetUrlParam;
+  if (type === "quote" && !isPersonalizedQuoteUrl(targetUrl)) {
+    // Rebuild the canonical personalized URL from slug/code or token
+    const base = "https://seuorcamento.tur.br";
+    if (slug && code) {
+      targetUrl = `${base}/${encodeURIComponent(slug)}/${encodeURIComponent(code)}`;
+    } else if (token) {
+      targetUrl = `${base}/orcamento/${encodeURIComponent(token)}`;
+    }
   }
 
   const content = OG_CONTENT[type] || OG_CONTENT.quote;
@@ -116,7 +146,6 @@ Deno.serve(async (req) => {
   // Enrich quote type (supports legacy ?token=... and new ?slug=...&code=...)
   if (type === "quote") {
     try {
-      const code = url.searchParams.get("code");
       let quote: any = null;
 
       if (code) {
@@ -208,6 +237,7 @@ Deno.serve(async (req) => {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${esc(ogTitle)}</title>
+  <link rel="canonical" href="${esc(targetUrl)}" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="${esc(ogTitle)}" />
