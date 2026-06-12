@@ -43,6 +43,8 @@ export interface WizardFlightDraft {
   return_date?: string;    // yyyy-MM-dd
   includes_baggage?: boolean;
   includes_boarding_fee?: boolean;
+  fees_amount?: number;
+  charge_fees_first_installment?: boolean;
   outbound_legs?: FlightLegDraft[];
   return_legs?: FlightLegDraft[];
   internal_legs?: FlightLegDraft[];
@@ -397,6 +399,8 @@ export function FlightWizard({
       return_date: !isOneWay ? (data.return_date || "") : "",
       includes_baggage: !!data.includes_baggage,
       includes_boarding_fee: !!data.includes_boarding_fee,
+      fees_amount: data.includes_boarding_fee ? (Number(data.fees_amount) || 0) : 0,
+      charge_fees_first_installment: !!(data.includes_boarding_fee && data.charge_fees_first_installment && (Number(data.fees_amount) || 0) > 0),
       adult_price: adultPrice,
       child_price: childPrice,
       is_unit_price: true,
@@ -548,6 +552,29 @@ export function FlightWizard({
                 <p className="text-xs text-muted-foreground">Marque se o valor cobrado já inclui as taxas aeroportuárias.</p>
               </div>
             </label>
+            {data.includes_boarding_fee && (
+              <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Valor total das taxas (R$)</Label>
+                  <Input
+                    type="number" min={0} step="0.01"
+                    value={data.fees_amount ?? ''}
+                    onChange={e => upd({ fees_amount: parseFloat(e.target.value) || 0 })}
+                    onFocus={e => e.target.select()}
+                    placeholder="Ex: 1200.00"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Embarque, RAV ou outras taxas inclusas no valor. Use para destacar a 1ª parcela.</p>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={!!data.charge_fees_first_installment}
+                    onCheckedChange={(c) => upd({ charge_fees_first_installment: !!c })}
+                    disabled={!(Number(data.fees_amount) > 0)}
+                  />
+                  <span className="text-sm">Cobrar taxas integralmente na 1ª parcela</span>
+                </label>
+              </div>
+            )}
           </StepShell>
         );
 

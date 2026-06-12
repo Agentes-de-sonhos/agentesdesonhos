@@ -160,6 +160,8 @@ const flightSchema = z.object({
   is_one_way: z.boolean(),
   includes_baggage: z.boolean(),
   includes_boarding_fee: z.boolean(),
+  fees_amount: z.number().min(0).optional(),
+  charge_fees_first_installment: z.boolean().optional(),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
   is_unit_price: z.boolean(),
@@ -341,6 +343,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       origin_city: init?.origin_city || "", destination_city: init?.destination_city || "",
       airline: init?.airline || "",
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
+      fees_amount: (init as any)?.fees_amount ?? 0,
+      charge_fees_first_installment: (init as any)?.charge_fees_first_installment ?? false,
       adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
       is_unit_price: true,
       is_one_way: init?.is_one_way ?? isOneWayInit ?? false,
@@ -408,6 +412,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       departure_date: departureDateStr,
       return_date: returnDateStr,
       includes_baggage: values.includes_baggage, includes_boarding_fee: values.includes_boarding_fee,
+      fees_amount: values.includes_boarding_fee ? (Number(values.fees_amount) || 0) : 0,
+      charge_fees_first_installment: !!(values.includes_boarding_fee && values.charge_fees_first_installment && (Number(values.fees_amount) || 0) > 0),
       adult_price: values.adult_price, child_price: values.child_price,
       is_unit_price: true, is_one_way: isOneWay,
       notes: values.notes || "",
@@ -499,6 +505,38 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             <FormItem className="flex items-center space-x-2 space-y-0"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel className="font-normal">Inclui taxa de embarque</FormLabel></FormItem>
           )} />
         </div>
+
+        {form.watch("includes_boarding_fee") && (
+          <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+            <FormField control={form.control} name="fees_amount" render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Valor total das taxas (R$)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number" min={0} step="0.01"
+                    value={field.value ?? ''}
+                    onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                    onFocus={e => e.target.select()}
+                    placeholder="Ex: 1200.00"
+                  />
+                </FormControl>
+                <p className="text-[11px] text-muted-foreground">Embarque, RAV ou outras taxas inclusas. Usado para destacar a 1ª parcela.</p>
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="charge_fees_first_installment" render={({ field }) => (
+              <FormItem className="flex items-center space-x-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={!(Number(form.watch("fees_amount")) > 0)}
+                  />
+                </FormControl>
+                <FormLabel className="font-normal">Cobrar taxas integralmente na 1ª parcela</FormLabel>
+              </FormItem>
+            )} />
+          </div>
+        )}
 
         {/* BLOCO 4 — Detalhes do Voo (expandível) */}
         <div className="border border-border/60 rounded-lg">
@@ -2536,6 +2574,8 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
             is_one_way: draft.is_one_way,
             includes_baggage: draft.includes_baggage,
             includes_boarding_fee: draft.includes_boarding_fee,
+            fees_amount: (draft as any).fees_amount,
+            charge_fees_first_installment: (draft as any).charge_fees_first_installment,
             adult_price: draft.adult_price || 0,
             child_price: draft.child_price || 0,
             notes: draft.notes || "",

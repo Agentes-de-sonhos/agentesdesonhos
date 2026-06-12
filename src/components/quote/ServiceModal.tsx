@@ -4,6 +4,7 @@ import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
 import type { ServiceType, ServiceData, QuoteService } from "@/types/quote";
 import { SERVICE_TYPE_LABELS, MULTI_OPTION_TYPES } from "@/types/quote";
 import type { ServicePaymentConfig } from "@/lib/servicePayment";
+import { extractFlightFeeInfo } from "@/lib/servicePayment";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -239,6 +240,7 @@ export function ServiceModal(props: Props) {
                   amount={liveAmount || editingService.amount}
                   config={servicePaymentConfigs[editingService.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
                   onChange={(config) => onServicePaymentChange(editingService.id, config)}
+                  feeInfo={extractFlightFeeInfo(editingService)}
                 />
               )
             ) : (

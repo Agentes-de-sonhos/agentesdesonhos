@@ -42,15 +42,66 @@ export const PAYMENT_METHOD_OPTIONS = [
 ];
 
 /**
+ * Informações de taxas (passagem aérea) que afetam APENAS a apresentação do parcelamento.
+ * Nunca altera o valor total do serviço.
+ */
+export interface FlightFeeInfo {
+  fees_amount?: number | null;
+  charge_fees_first_installment?: boolean | null;
+}
+
+/**
+ * Extrai informações de taxas do service_data quando o serviço é uma passagem aérea.
+ * Retorna null para qualquer outro tipo de serviço.
+ */
+export function extractFlightFeeInfo(service: any): FlightFeeInfo | null {
+  if (!service || service.service_type !== 'flight') return null;
+  const sd = service.service_data || {};
+  if (!sd.includes_boarding_fee) return null;
+  const fees = Number(sd.fees_amount) || 0;
+  if (!fees || fees <= 0) return null;
+  if (!sd.charge_fees_first_installment) return null;
+  return {
+    fees_amount: fees,
+    charge_fees_first_installment: true,
+  };
+}
+
+/**
  * Calculate service payment display values.
  * Only called when use_service_payment AND is_custom_payment are both true.
  */
-export function calculateServicePayment(amount: number, config: ServicePaymentConfig) {
+export function calculateServicePayment(
+  amount: number,
+  config: ServicePaymentConfig,
+  feeInfo?: FlightFeeInfo | null,
+) {
   const type = config.payment_type || 'full_payment';
 
   if (type === 'installments') {
     const count = config.installments || 1;
     const installmentValue = amount / count;
+    // Regra especial: cobrar taxas integralmente na 1ª parcela (apenas passagem aérea)
+    const feesAmount = Number(feeInfo?.fees_amount) || 0;
+    if (
+      feeInfo?.charge_fees_first_installment &&
+      feesAmount > 0 &&
+      count > 1 &&
+      amount > feesAmount
+    ) {
+      const installable = amount - feesAmount;
+      const normalInstallment = installable / count;
+      const firstInstallment = normalInstallment + feesAmount;
+      return {
+        type: 'installments' as const,
+        installmentCount: count,
+        installmentValue: normalInstallment,
+        firstInstallmentValue: firstInstallment,
+        feesAmount,
+        total: amount,
+        method: config.payment_method,
+      };
+    }
     return {
       type: 'installments' as const,
       installmentCount: count,
@@ -95,16 +146,24 @@ export function calculateServicePayment(amount: number, config: ServicePaymentCo
 /**
  * Get a human-readable payment display string for a service.
  */
-export function getServicePaymentDisplay(amount: number, config: ServicePaymentConfig): string {
+export function getServicePaymentDisplay(
+  amount: number,
+  config: ServicePaymentConfig,
+  feeInfo?: FlightFeeInfo | null,
+): string {
   const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
   if (!config.is_custom_payment || !config.payment_type) {
     return ''; // fallback to global
   }
 
-  const result = calculateServicePayment(amount, config);
+  const result = calculateServicePayment(amount, config, feeInfo);
 
   if (result.type === 'installments') {
+    if ('firstInstallmentValue' in result && result.firstInstallmentValue) {
+      const remaining = result.installmentCount - 1;
+      return `1ª parcela de ${fmt(result.firstInstallmentValue)} + ${remaining}x de ${fmt(result.installmentValue)}${result.method ? ` no ${result.method}` : ''}`;
+    }
     return `${result.installmentCount}x de ${fmt(result.installmentValue)}${result.method ? ` no ${result.method}` : ''}`;
   }
 

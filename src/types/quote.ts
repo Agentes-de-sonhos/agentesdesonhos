@@ -91,6 +91,10 @@ export interface FlightData {
   adult_price: number;
   child_price: number;
   notes: string;
+  /** Valor total das taxas (embarque/RAV/etc) incluídas no preço — exibição apenas */
+  fees_amount?: number;
+  /** Quando true, cobra integralmente o valor de `fees_amount` na 1ª parcela */
+  charge_fees_first_installment?: boolean;
   /** @deprecated Use outbound_legs instead */
   outbound_detail?: FlightLegDetail;
   /** @deprecated Use return_legs instead */

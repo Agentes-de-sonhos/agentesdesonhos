@@ -3,7 +3,7 @@ import { ptBR } from "date-fns/locale";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
-import { extractServicePaymentConfig, getServicePaymentDisplay } from "@/lib/servicePayment";
+import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { supabase } from "@/integrations/supabase/client";
@@ -369,7 +369,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         if (useServicePayment && showDetailedPrices) {
           const payConfig = extractServicePaymentConfig(service);
           if (payConfig.is_custom_payment) {
-            const display = getServicePaymentDisplay(service.amount, payConfig);
+            const feeInfo = extractFlightFeeInfo(service);
+            const display = getServicePaymentDisplay(service.amount, payConfig, feeInfo);
             if (display) {
               paymentHtml = `
                 <div class="pdf-block pdf-payment" style="margin-top:10px;background:rgba(15,118,110,0.05);border:1px solid rgba(15,118,110,0.20);border-radius:10px;padding:10px 12px;">
