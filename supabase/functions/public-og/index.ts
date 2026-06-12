@@ -113,15 +113,29 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Enrich quote type
-  if (type === "quote" && token) {
+  // Enrich quote type (supports legacy ?token=... and new ?slug=...&code=...)
+  if (type === "quote") {
     try {
-      const { data: quote } = await supabase
-        .from("quotes")
-        .select("destination, user_id")
-        .eq("share_token", token)
-        .eq("status", "published")
-        .maybeSingle();
+      const code = url.searchParams.get("code");
+      let quote: any = null;
+
+      if (code) {
+        const { data } = await supabase
+          .from("quotes")
+          .select("destination, start_date, end_date, client_name, user_id, destination_intro_images")
+          .eq("public_access_code", code)
+          .eq("status", "published")
+          .maybeSingle();
+        quote = data;
+      } else if (token) {
+        const { data } = await supabase
+          .from("quotes")
+          .select("id, destination, start_date, end_date, client_name, user_id, destination_intro_images")
+          .eq("share_token", token)
+          .eq("status", "published")
+          .maybeSingle();
+        quote = data;
+      }
 
       if (quote) {
         const { data: profile } = await supabase
@@ -130,16 +144,61 @@ Deno.serve(async (req) => {
           .eq("user_id", quote.user_id)
           .maybeSingle();
 
-        if (profile?.agency_name) {
-          ogTitle = `Orçamento personalizado | ${profile.agency_name}`;
-          ogDescription = `Confira seu orçamento personalizado para ${quote.destination}, preparado especialmente por ${profile.agency_name}.`;
+        const destination = (quote.destination || "").trim();
+        const agency = (profile?.agency_name || "").trim();
+
+        // Title: prioritize destination + agency
+        if (destination && agency) {
+          ogTitle = `Orçamento de viagem para ${destination} | ${agency}`;
+        } else if (destination) {
+          ogTitle = `Orçamento de viagem para ${destination}`;
+        } else if (agency) {
+          ogTitle = `Orçamento personalizado | ${agency}`;
         }
-        if (profile?.agency_logo_url) {
+
+        // Description: include dates when available
+        const period = formatPeriod(quote.start_date, quote.end_date);
+        if (period && destination) {
+          ogDescription = `Confira os detalhes da sua viagem para ${destination}: ${period}, serviços incluídos e investimento.`;
+        } else if (destination) {
+          ogDescription = `Confira os detalhes da sua viagem para ${destination}: serviços incluídos e investimento.`;
+        } else if (agency) {
+          ogDescription = `Confira seu orçamento personalizado preparado por ${agency}.`;
+        }
+
+        // Image: cover/destination intro > first service image > agency logo > default
+        const intro = Array.isArray(quote.destination_intro_images) ? quote.destination_intro_images : [];
+        const coverImage = intro.find((u: any) => typeof u === "string" && u.startsWith("http"));
+        if (coverImage) {
+          ogImage = coverImage;
+          twitterCard = "summary_large_image";
+        } else if (quote.id) {
+          // Try to find first service image as a secondary fallback (legacy token path)
+          try {
+            const { data: svc } = await supabase
+              .from("quote_services")
+              .select("image_url, image_urls")
+              .eq("quote_id", quote.id)
+              .order("order_index", { ascending: true })
+              .limit(5);
+            const firstImg = (svc || [])
+              .flatMap((s: any) => [s.image_url, ...((s.image_urls as string[]) || [])])
+              .find((u: any) => typeof u === "string" && u.startsWith("http"));
+            if (firstImg) {
+              ogImage = firstImg;
+              twitterCard = "summary_large_image";
+            } else if (profile?.agency_logo_url) {
+              ogImage = profile.agency_logo_url;
+            }
+          } catch {
+            if (profile?.agency_logo_url) ogImage = profile.agency_logo_url;
+          }
+        } else if (profile?.agency_logo_url) {
           ogImage = profile.agency_logo_url;
         }
       }
     } catch {
-      // Fallback
+      // Fallback to generic
     }
   }
 
@@ -186,4 +245,18 @@ function esc(str: string): string {
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function formatPeriod(start?: string | null, end?: string | null): string {
+  const fmt = (iso?: string | null) => {
+    if (!iso) return "";
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+    if (!m) return "";
+    return `${m[3]}/${m[2]}/${m[1]}`;
+  };
+  const s = fmt(start);
+  const e = fmt(end);
+  if (s && e) return `período de ${s} a ${e}`;
+  if (s) return `a partir de ${s}`;
+  return "";
 }
