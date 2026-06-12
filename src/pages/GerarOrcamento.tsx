@@ -2,12 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, CloudOff, Cloud } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
-import {
-  buildOrcamentoLink,
-  buildOrcamentoShareUrl,
-  buildOrcamentoShareUrlByToken,
-  ORCAMENTO_DOMAIN,
-} from "@/lib/orcamento-domain";
+import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -432,14 +427,9 @@ export default function GerarOrcamento() {
     const publicUrl = accessCode && agencyName
       ? buildOrcamentoLink(agencyName, accessCode)
       : `${ORCAMENTO_DOMAIN}/orcamento/${token}`;
-    // Share URL goes through the public-og edge function so WhatsApp/social
-    // crawlers receive dynamic Open Graph meta tags (title/description/cover).
-    const shareUrl = accessCode && agencyName
-      ? buildOrcamentoShareUrl(agencyName, accessCode)
-      : buildOrcamentoShareUrlByToken(token);
 
     clearLocalDraft();
-    await navigator.clipboard.writeText(shareUrl);
+    await navigator.clipboard.writeText(publicUrl);
     toast({
       title: quote.share_token ? "Link copiado" : "Orçamento publicado",
       description: quote.share_token ? "O link foi copiado para a área de transferência." : "O link do orçamento foi copiado para a área de transferência.",
@@ -763,9 +753,6 @@ export default function GerarOrcamento() {
               const publicUrl = accessCode && agencyName
                 ? buildOrcamentoLink(agencyName, accessCode)
                 : `${ORCAMENTO_DOMAIN}/orcamento/${quote.share_token}`;
-              const shareUrl = accessCode && agencyName
-                ? buildOrcamentoShareUrl(agencyName, accessCode)
-                : buildOrcamentoShareUrlByToken(quote.share_token!);
               return (
                 <div className="flex items-center gap-1 rounded-md border bg-muted/40 pl-2 pr-1 py-1 max-w-full">
                   <LinkIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -780,8 +767,8 @@ export default function GerarOrcamento() {
                     variant="ghost"
                     className="h-7 px-2"
                     onClick={async () => {
-                      await navigator.clipboard.writeText(shareUrl);
-                      toast({ title: "Link copiado", description: "URL pública copiada — pronto para compartilhar no WhatsApp com prévia personalizada." });
+                      await navigator.clipboard.writeText(publicUrl);
+                      toast({ title: "Link copiado", description: "URL pública copiada para a área de transferência." });
                     }}
                   >
                     Copiar

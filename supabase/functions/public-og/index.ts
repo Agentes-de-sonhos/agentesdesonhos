@@ -24,42 +24,12 @@ const OG_CONTENT: Record<string, { title: string; description: string }> = {
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   const type = url.searchParams.get("type");
-  const targetUrlParam = url.searchParams.get("url");
+  const targetUrl = url.searchParams.get("url");
   const token = url.searchParams.get("token");
   const slug = url.searchParams.get("slug");
 
-  if (!type || !targetUrlParam) {
+  if (!type || !targetUrl) {
     return new Response("Missing required params", { status: 400 });
-  }
-
-  // Guard: never allow og:url / canonical to be a bare app/base URL.
-  // The shared link MUST always be the personalized public quote URL
-  // (with slug + access code, or legacy /orcamento/:token).
-  const code = url.searchParams.get("code");
-  const isPersonalizedQuoteUrl = (u: string): boolean => {
-    try {
-      const parsed = new URL(u);
-      const path = parsed.pathname.replace(/^\/+|\/+$/g, "");
-      if (!path) return false; // base domain
-      // Legacy token route: /orcamento/:token
-      if (/^orcamento\/[^/]+$/.test(path)) return true;
-      // New format: /:slug/:code
-      if (/^[^/]+\/[^/]+$/.test(path)) return true;
-      return false;
-    } catch {
-      return false;
-    }
-  };
-
-  let targetUrl = targetUrlParam;
-  if (type === "quote" && !isPersonalizedQuoteUrl(targetUrl)) {
-    // Rebuild the canonical personalized URL from slug/code or token
-    const base = "https://seuorcamento.tur.br";
-    if (slug && code) {
-      targetUrl = `${base}/${encodeURIComponent(slug)}/${encodeURIComponent(code)}`;
-    } else if (token) {
-      targetUrl = `${base}/orcamento/${encodeURIComponent(token)}`;
-    }
   }
 
   const content = OG_CONTENT[type] || OG_CONTENT.quote;
@@ -143,28 +113,15 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Enrich quote type (supports legacy ?token=... and new ?slug=...&code=...)
-  if (type === "quote") {
+  // Enrich quote type
+  if (type === "quote" && token) {
     try {
-      let quote: any = null;
-
-      if (code) {
-        const { data } = await supabase
-          .from("quotes")
-          .select("destination, start_date, end_date, client_name, user_id, destination_intro_images")
-          .eq("public_access_code", code)
-          .eq("status", "published")
-          .maybeSingle();
-        quote = data;
-      } else if (token) {
-        const { data } = await supabase
-          .from("quotes")
-          .select("id, destination, start_date, end_date, client_name, user_id, destination_intro_images")
-          .eq("share_token", token)
-          .eq("status", "published")
-          .maybeSingle();
-        quote = data;
-      }
+      const { data: quote } = await supabase
+        .from("quotes")
+        .select("destination, user_id")
+        .eq("share_token", token)
+        .eq("status", "published")
+        .maybeSingle();
 
       if (quote) {
         const { data: profile } = await supabase
@@ -173,61 +130,16 @@ Deno.serve(async (req) => {
           .eq("user_id", quote.user_id)
           .maybeSingle();
 
-        const destination = (quote.destination || "").trim();
-        const agency = (profile?.agency_name || "").trim();
-
-        // Title: prioritize destination + agency
-        if (destination && agency) {
-          ogTitle = `Orçamento de viagem para ${destination} | ${agency}`;
-        } else if (destination) {
-          ogTitle = `Orçamento de viagem para ${destination}`;
-        } else if (agency) {
-          ogTitle = `Orçamento personalizado | ${agency}`;
+        if (profile?.agency_name) {
+          ogTitle = `Orçamento personalizado | ${profile.agency_name}`;
+          ogDescription = `Confira seu orçamento personalizado para ${quote.destination}, preparado especialmente por ${profile.agency_name}.`;
         }
-
-        // Description: include dates when available
-        const period = formatPeriod(quote.start_date, quote.end_date);
-        if (period && destination) {
-          ogDescription = `Confira os detalhes da sua viagem para ${destination}: ${period}, serviços incluídos e investimento.`;
-        } else if (destination) {
-          ogDescription = `Confira os detalhes da sua viagem para ${destination}: serviços incluídos e investimento.`;
-        } else if (agency) {
-          ogDescription = `Confira seu orçamento personalizado preparado por ${agency}.`;
-        }
-
-        // Image: cover/destination intro > first service image > agency logo > default
-        const intro = Array.isArray(quote.destination_intro_images) ? quote.destination_intro_images : [];
-        const coverImage = intro.find((u: any) => typeof u === "string" && u.startsWith("http"));
-        if (coverImage) {
-          ogImage = coverImage;
-          twitterCard = "summary_large_image";
-        } else if (quote.id) {
-          // Try to find first service image as a secondary fallback (legacy token path)
-          try {
-            const { data: svc } = await supabase
-              .from("quote_services")
-              .select("image_url, image_urls")
-              .eq("quote_id", quote.id)
-              .order("order_index", { ascending: true })
-              .limit(5);
-            const firstImg = (svc || [])
-              .flatMap((s: any) => [s.image_url, ...((s.image_urls as string[]) || [])])
-              .find((u: any) => typeof u === "string" && u.startsWith("http"));
-            if (firstImg) {
-              ogImage = firstImg;
-              twitterCard = "summary_large_image";
-            } else if (profile?.agency_logo_url) {
-              ogImage = profile.agency_logo_url;
-            }
-          } catch {
-            if (profile?.agency_logo_url) ogImage = profile.agency_logo_url;
-          }
-        } else if (profile?.agency_logo_url) {
+        if (profile?.agency_logo_url) {
           ogImage = profile.agency_logo_url;
         }
       }
     } catch {
-      // Fallback to generic
+      // Fallback
     }
   }
 
@@ -237,7 +149,6 @@ Deno.serve(async (req) => {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${esc(ogTitle)}</title>
-  <link rel="canonical" href="${esc(targetUrl)}" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="${esc(ogTitle)}" />
@@ -275,18 +186,4 @@ function esc(str: string): string {
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-}
-
-function formatPeriod(start?: string | null, end?: string | null): string {
-  const fmt = (iso?: string | null) => {
-    if (!iso) return "";
-    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
-    if (!m) return "";
-    return `${m[3]}/${m[2]}/${m[1]}`;
-  };
-  const s = fmt(start);
-  const e = fmt(end);
-  if (s && e) return `período de ${s} a ${e}`;
-  if (s) return `a partir de ${s}`;
-  return "";
 }
