@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import type { ServicePaymentConfig, ServicePaymentType, ServiceDiscountType } from "@/lib/servicePayment";
+import type { ServicePaymentConfig, ServicePaymentType, ServiceDiscountType, FlightFeeInfo } from "@/lib/servicePayment";
 import { SERVICE_PAYMENT_TYPE_LABELS, PAYMENT_METHOD_OPTIONS, calculateServicePayment } from "@/lib/servicePayment";
 
 function formatCurrency(value: number) {
@@ -15,9 +15,11 @@ interface ServicePaymentFormProps {
   amount: number;
   config: ServicePaymentConfig;
   onChange: (config: ServicePaymentConfig) => void;
+  /** Quando informado (passagem aérea com taxas), ajusta a prévia para destacar a 1ª parcela. */
+  feeInfo?: FlightFeeInfo | null;
 }
 
-export function ServicePaymentForm({ amount, config, onChange }: ServicePaymentFormProps) {
+export function ServicePaymentForm({ amount, config, onChange, feeInfo }: ServicePaymentFormProps) {
   const update = (partial: Partial<ServicePaymentConfig>) => {
     onChange({ ...config, ...partial });
   };
@@ -41,8 +43,12 @@ export function ServicePaymentForm({ amount, config, onChange }: ServicePaymentF
   // Preview
   const preview = (() => {
     if (!config.payment_type) return null;
-    const result = calculateServicePayment(amount, config);
+    const result = calculateServicePayment(amount, config, feeInfo);
     if (result.type === 'installments') {
+      if ('firstInstallmentValue' in result && result.firstInstallmentValue) {
+        const remaining = result.installmentCount - 1;
+        return `1ª parcela de ${formatCurrency(result.firstInstallmentValue)} + ${remaining}x de ${formatCurrency(result.installmentValue)}`;
+      }
       return `${result.installmentCount}x de ${formatCurrency(result.installmentValue)}`;
     }
     if (result.type === 'installments_with_entry') {
