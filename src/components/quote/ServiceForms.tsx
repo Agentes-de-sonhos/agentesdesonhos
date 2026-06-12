@@ -2574,6 +2574,8 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
             is_one_way: draft.is_one_way,
             includes_baggage: draft.includes_baggage,
             includes_boarding_fee: draft.includes_boarding_fee,
+            fees_amount: (draft as any).fees_amount,
+            charge_fees_first_installment: (draft as any).charge_fees_first_installment,
             adult_price: draft.adult_price || 0,
             child_price: draft.child_price || 0,
             notes: draft.notes || "",
