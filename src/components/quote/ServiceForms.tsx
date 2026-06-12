@@ -160,6 +160,8 @@ const flightSchema = z.object({
   is_one_way: z.boolean(),
   includes_baggage: z.boolean(),
   includes_boarding_fee: z.boolean(),
+  fees_amount: z.number().min(0).optional(),
+  charge_fees_first_installment: z.boolean().optional(),
   adult_price: z.number().min(0),
   child_price: z.number().min(0),
   is_unit_price: z.boolean(),
