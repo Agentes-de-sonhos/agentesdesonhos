@@ -343,6 +343,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       origin_city: init?.origin_city || "", destination_city: init?.destination_city || "",
       airline: init?.airline || "",
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
+      fees_amount: (init as any)?.fees_amount ?? 0,
+      charge_fees_first_installment: (init as any)?.charge_fees_first_installment ?? false,
       adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
       is_unit_price: true,
       is_one_way: init?.is_one_way ?? isOneWayInit ?? false,
