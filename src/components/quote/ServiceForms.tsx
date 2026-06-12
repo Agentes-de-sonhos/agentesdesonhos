@@ -506,6 +506,38 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           )} />
         </div>
 
+        {form.watch("includes_boarding_fee") && (
+          <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+            <FormField control={form.control} name="fees_amount" render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Valor total das taxas (R$)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number" min={0} step="0.01"
+                    value={field.value ?? ''}
+                    onChange={e => field.onChange(parseFloat(e.target.value) || 0)}
+                    onFocus={e => e.target.select()}
+                    placeholder="Ex: 1200.00"
+                  />
+                </FormControl>
+                <p className="text-[11px] text-muted-foreground">Embarque, RAV ou outras taxas inclusas. Usado para destacar a 1ª parcela.</p>
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="charge_fees_first_installment" render={({ field }) => (
+              <FormItem className="flex items-center space-x-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={!!field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={!(Number(form.watch("fees_amount")) > 0)}
+                  />
+                </FormControl>
+                <FormLabel className="font-normal">Cobrar taxas integralmente na 1ª parcela</FormLabel>
+              </FormItem>
+            )} />
+          </div>
+        )}
+
         {/* BLOCO 4 — Detalhes do Voo (expandível) */}
         <div className="border border-border/60 rounded-lg">
           <button
