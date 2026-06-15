@@ -12,6 +12,7 @@ import {
 } from "@/types/subscription";
 import { useUserRole } from "./useUserRole";
 import { useFeatureAccess } from "./useFeatureAccess";
+import { useTeamSession } from "@/contexts/TeamSessionContext";
 
 interface SubscriptionContextType {
   subscription: Subscription | null;
@@ -128,6 +129,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const isPromotor = role === "promotor";
   const isAdmin = role === "admin";
   const { hasFeatureAccess: hasExplicitAccess } = useFeatureAccess();
+  const { member: teamMember } = useTeamSession();
+  const isTeamMember = !!teamMember;
 
   const plan: SubscriptionPlan = subscription?.plan || "start";
   const aiLimit = AI_LIMITS[plan];
@@ -137,12 +140,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const hasFeature = useCallback((feature: Feature): boolean => {
     if (isAdmin) return true;
     if (isPromotor) return true;
+    // Team members inherit the master's agency context — bypass plan gating.
+    if (isTeamMember) return true;
     // Check explicit grants (additive)
     if (hasExplicitAccess(feature)) return true;
     const features = PLAN_FEATURES[plan];
     if (!features) return false;
     return features.includes(feature);
-  }, [plan, isPromotor, isAdmin, hasExplicitAccess]);
+  }, [plan, isPromotor, isAdmin, isTeamMember, hasExplicitAccess]);
 
   const canUseAI = useCallback((): boolean => {
     if (isAdmin || isPromotor) return true;
