@@ -5,6 +5,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function loginCandidates(login: string) {
+  const normalized = login.toLowerCase().trim()
+  const candidates = new Set([normalized])
+
+  if (normalized.endsWith('@agentedesonhos.com.br')) {
+    candidates.add(normalized.replace('@agentedesonhos.com.br', '@agentesdesonhos.com.br'))
+  }
+
+  return Array.from(candidates)
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -21,10 +32,14 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
+    const candidates = loginCandidates(login)
+
     const { data } = await admin
       .from('agency_team_members')
       .select('synthetic_email, status')
-      .eq('login_normalized', login.toLowerCase().trim())
+      .in('login_normalized', candidates)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle()
 
     if (!data?.synthetic_email) {
