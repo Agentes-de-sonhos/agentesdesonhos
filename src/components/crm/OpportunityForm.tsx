@@ -236,8 +236,13 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
                   type="number"
                   min={0}
                   step="0.01"
-                  {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  placeholder="0"
+                  value={field.value === 0 || field.value === undefined ? "" : field.value}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    field.onChange(v === "" ? 0 : parseFloat(v) || 0);
+                  }}
+                  onFocus={(e) => e.target.select()}
                 />
               </FormControl>
               <FormMessage />
