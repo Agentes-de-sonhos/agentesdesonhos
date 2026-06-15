@@ -27,8 +27,9 @@ import {
 } from "@/types/agenda";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Trash2, EyeOff, Loader2, Plus, Star, CalendarPlus } from "lucide-react";
+import { Trash2, EyeOff, Loader2, Plus, Star, CalendarPlus, CheckCircle2, ExternalLink } from "lucide-react";
 import { CreateCustomTypeDialog } from "./CreateCustomTypeDialog";
+import { useNavigate } from "react-router-dom";
 
 interface EventModalProps {
   open: boolean;
@@ -54,6 +55,7 @@ interface EventModalProps {
   onUnhighlight?: (eventId: string) => void;
   highlightedEventIds?: Set<string>;
   onCreateCustomType?: (name: string, color: string) => void;
+  onCompleteFollowup?: (followupId: string) => void;
   isLoading?: boolean;
   isCreatingCustomType?: boolean;
 }
@@ -90,9 +92,11 @@ export function EventModal({
   onUnhighlight,
   highlightedEventIds = new Set(),
   onCreateCustomType,
+  onCompleteFollowup,
   isLoading,
   isCreatingCustomType,
 }: EventModalProps) {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [eventType, setEventType] = useState<string>("compromisso");
@@ -105,6 +109,7 @@ export function EventModal({
 
   const isEditing = !!event;
   const isPresetEvent = event?.isPreset;
+  const isFollowupEvent = event?.event_type === 'followup';
   const isHighlighted = event ? highlightedEventIds.has(event.id) : false;
 
   useEffect(() => {
@@ -262,6 +267,66 @@ export function EventModal({
                 <Button variant="outline" size="sm" className="text-xs px-2.5 h-8" onClick={handleHide}>
                   <EyeOff className="h-3.5 w-3.5 mr-1" />
                   Ocultar
+                </Button>
+              </div>
+            </div>
+          ) : isFollowupEvent ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: event?.color }}
+                />
+                <span className="text-sm text-muted-foreground">
+                  {eventTypeLabels['followup']}
+                </span>
+              </div>
+              <div className="rounded-md border bg-muted/30 p-3">
+                <p className="text-sm font-medium">{event?.title}</p>
+                {event?.description ? (
+                  <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">
+                    {event.description}
+                  </p>
+                ) : (
+                  <p className="mt-2 text-sm text-muted-foreground italic">
+                    Sem anotação para este follow-up.
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 justify-end pt-2 border-t">
+                {event?.opportunity_id && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigate(`/gestao-clientes?tab=oportunidades&opportunity=${event.opportunity_id}`);
+                      onOpenChange(false);
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Ver oportunidade
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Fechar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (!event || !onCompleteFollowup) return;
+                    const followupId = event.id.replace(/^followup_/, "");
+                    onCompleteFollowup(followupId);
+                    onOpenChange(false);
+                  }}
+                  disabled={isLoading || !onCompleteFollowup}
+                >
+                  {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Marcar como concluído
                 </Button>
               </div>
             </div>
