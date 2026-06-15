@@ -159,6 +159,27 @@ export function useAgenda(year?: number) {
     enabled: !!user?.id,
   });
 
+  // Fetch all CRM opportunity follow-ups for current user (current year)
+  const { data: opportunityFollowups = [] } = useQuery({
+    queryKey: ["agenda-followups", user?.id, currentYear],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const startDate = `${currentYear}-01-01`;
+      const endDate = `${currentYear}-12-31`;
+      const { data, error } = await supabase
+        .from("opportunity_followups" as any)
+        .select("id, follow_up_date, note, opportunity_id, opportunity:opportunities(destination, client:clients(name))")
+        .eq("user_id", user.id)
+        .gte("follow_up_date", startDate)
+        .lte("follow_up_date", endDate)
+        .order("follow_up_date", { ascending: true });
+      if (error) throw error;
+      return (data || []) as any[];
+    },
+    enabled: !!user?.id,
+    staleTime: 2 * 60 * 1000,
+  });
+
   // Build complete list of event types for filter (deduplicated)
   const seenTypeIds = new Set<string>();
   const allEventTypes: EventTypeOption[] = [];
@@ -175,6 +196,17 @@ export function useAgenda(year?: number) {
       });
     }
   });
+
+  // Follow-up type (from CRM)
+  if (!seenTypeIds.has('followup')) {
+    seenTypeIds.add('followup');
+    allEventTypes.push({
+      id: 'followup',
+      name: eventTypeLabels['followup'],
+      color: eventTypeColors['followup'],
+      isCustom: false,
+    });
+  }
   
   // Preset event types (skip duplicates like 'trade')
   presetEventTypes.forEach(type => {
@@ -498,6 +530,23 @@ export function useAgenda(year?: number) {
       color: eventTypeColors['viagem'] || '#14b8a6',
       isPreset: false,
     })),
+    // Follow-ups as virtual calendar events
+    ...opportunityFollowups.map((fu: any): CalendarEvent => {
+      const clientName = fu.opportunity?.client?.name || "Cliente";
+      const destination = fu.opportunity?.destination || "";
+      const title = `📞 Follow-up: ${clientName}${destination ? ` — ${destination}` : ""}`;
+      return {
+        id: `followup_${fu.id}`,
+        title,
+        description: fu.note || null,
+        event_type: 'followup',
+        event_date: fu.follow_up_date,
+        event_time: null,
+        color: eventTypeColors['followup'],
+        isPreset: false,
+        opportunity_id: fu.opportunity_id,
+      };
+    }),
   ];
 
   // Filter events by hidden types (but always keep highlighted events)
