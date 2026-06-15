@@ -129,6 +129,10 @@ export function AdminNewsCurationManager() {
   const [search, setSearch] = useState<string>(initial.search);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
+  const [collectDialogOpen, setCollectDialogOpen] = useState(false);
+  const [collectDate, setCollectDate] = useState<string>("");
+  const [collectTime, setCollectTime] = useState<string>("");
+  const [collectSources, setCollectSources] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   useAuth();
