@@ -246,10 +246,11 @@ export function AdminNewsCurationManager() {
   });
 
   const collectMutation = useMutation({
-    mutationFn: async (params?: { since?: string; sources?: string[] }) => {
+    mutationFn: async (params?: { since?: string; sources?: string[]; reset?: boolean }) => {
       const body: Record<string, unknown> = {};
       if (params?.since) body.since = params.since;
       if (params?.sources && params.sources.length > 0) body.sources = params.sources;
+      if (params?.reset) body.reset = true;
       const { data, error } = await supabase.functions.invoke("curate-news", {
         body: Object.keys(body).length > 0 ? body : undefined,
       });
@@ -867,6 +868,11 @@ export function AdminNewsCurationManager() {
               Opcional: defina a partir de quando coletar e quais portais usar. Se deixar em branco,
               o sistema coleta as últimas 24h de todos os portais.
             </p>
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+              <strong>Atenção:</strong> ao coletar manualmente, qualquer validação anterior
+              (aprovada, rejeitada ou pendente) das notícias dos portais selecionados será
+              <strong> apagada</strong> e a IA vai reavaliar tudo do zero.
+            </p>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs">Data (a partir de)</Label>
@@ -905,7 +911,7 @@ export function AdminNewsCurationManager() {
                     const d = new Date(`${collectDate}T${time}:00`);
                     if (!Number.isNaN(d.getTime())) since = d.toISOString();
                   }
-                  collectMutation.mutate({ since, sources: collectSources });
+                  collectMutation.mutate({ since, sources: collectSources, reset: true });
                 }}
                 disabled={collectMutation.isPending}
               >
