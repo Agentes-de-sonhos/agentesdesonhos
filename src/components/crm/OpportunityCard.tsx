@@ -763,6 +763,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         opportunity={opportunity}
         open={showDetails}
         onOpenChange={setShowDetails}
+        onEdit={canEditOpp ? () => setIsEditing(true) : undefined}
       />
 
       <QuickLabelPicker
