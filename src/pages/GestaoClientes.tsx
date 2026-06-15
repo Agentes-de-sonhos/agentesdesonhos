@@ -1,8 +1,8 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { TeamMembersButton } from "@/components/team/TeamMembersButton";
+import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Kanban, Target, Briefcase, LayoutDashboard } from "lucide-react";
+import { Users, Kanban, Target, Briefcase, LayoutDashboard, UserCog } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
 import { SalesGoalsModule } from "@/components/crm/SalesGoalsModule";
@@ -12,7 +12,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PermissionGate } from "@/components/permissions/PermissionGate";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function GestaoClientes() {
   return (
@@ -26,6 +26,7 @@ function GestaoClientesContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const { can, isTeamMember } = usePermissions();
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
 
   const tabPermission: Record<string, string> = {
     dashboard: 'dashboard.view',
@@ -34,7 +35,7 @@ function GestaoClientesContent() {
     operacoes: 'operations.view',
     metas: 'goals.view',
   };
-  
+
   const getCurrentTab = () => {
     if (location.pathname.includes('/dashboard')) return 'dashboard';
     if (location.pathname.includes('/funil')) return 'funil';
@@ -45,6 +46,10 @@ function GestaoClientesContent() {
   };
 
   const handleTabChange = (value: string) => {
+    if (value === 'equipe') {
+      setTeamDialogOpen(true);
+      return;
+    }
     const routes: Record<string, string> = {
       dashboard: '/gestao-clientes/dashboard',
       clientes: '/gestao-clientes/clientes',
@@ -86,14 +91,12 @@ function GestaoClientesContent() {
           subtitle="Gerencie clientes, oportunidades e metas de vendas"
           icon={Users}
           adminTab="crm"
-        >
-          <TeamMembersButton />
-        </PageHeader>
+        />
 
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
+          {/* Mobile: horizontal scroll; Desktop: grid 6 cols */}
           <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
-            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-3xl md:grid-cols-5">
+            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-3xl md:grid-cols-6">
               {can('dashboard.view') && (
                 <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
                   <LayoutDashboard className="h-4 w-4 shrink-0" />
@@ -125,6 +128,13 @@ function GestaoClientesContent() {
                   <span className="hidden md:inline">Meta de Vendas</span>
                 </TabsTrigger>
               )}
+              {!isTeamMember && (
+                <TabsTrigger value="equipe" className="gap-1.5 whitespace-nowrap px-3">
+                  <UserCog className="h-4 w-4 shrink-0" />
+                  <span className="md:hidden">Equipe</span>
+                  <span className="hidden md:inline">Usuários da Equipe</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
           <TabsContent value="dashboard" className="mt-6">
@@ -143,6 +153,8 @@ function GestaoClientesContent() {
             <PermissionGate permission="goals.view"><SalesGoalsModule /></PermissionGate>
           </TabsContent>
         </Tabs>
+
+        <TeamMembersDialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
       </div>
     </DashboardLayout>
   );
