@@ -92,7 +92,7 @@ export default function Financeiro() {
   const hasFinancialAccess = can('financial.access');
   useEffect(() => {
     if (isTeam && !hasFinancialAccess) {
-      navigate('/team-dashboard', { replace: true });
+      navigate('/gestao-clientes/clientes', { replace: true });
     }
   }, [isTeam, hasFinancialAccess, navigate]);
 
