@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export function UpcomingAgendaEventsCard() {
   const navigate = useNavigate();
-  const { getUpcomingEvents, highlightedEventIds, isLoading } = useAgenda();
+  const { getUpcomingEvents, getFollowupEvents, highlightedEventIds, isLoading } = useAgenda();
 
   // Use local date components to avoid UTC shift
   const now = new Date();
@@ -18,24 +18,29 @@ export function UpcomingAgendaEventsCard() {
   const weekStart = startOfWeek(todayLocal, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(todayLocal, { weekStartsOn: 1 });
   
-  // Filter: user-created events (current month) + ALL highlighted events (any date) +
-  // CRM follow-ups only for the CURRENT WEEK
-  const upcomingEvents = getUpcomingEvents(50)
-    .filter((event) => {
-      const isHighlighted = highlightedEventIds.has(event.id);
-      // Highlighted events always show, regardless of month
-      if (isHighlighted) return true;
-      // User-created events: only current month
-      const [y, m, d] = event.event_date.split('-').map(Number);
-      const evDate = new Date(y, m - 1, d);
-      // Follow-ups: only current week
-      if (event.event_type === 'followup') {
-        return isWithinInterval(evDate, { start: weekStart, end: weekEnd });
-      }
-      const isCurrentMonth = isSameMonth(evDate, todayLocal);
-      const isUserEvent = !event.isPreset;
-      return isCurrentMonth && isUserEvent;
-    })
+  // Non-followup events: respect Agenda hidden-type filter (comes from getUpcomingEvents)
+  const baseEvents = getUpcomingEvents(50).filter((event) => {
+    if (event.event_type === 'followup') return false; // handled separately
+    const isHighlighted = highlightedEventIds.has(event.id);
+    if (isHighlighted) return true;
+    const [y, m, d] = event.event_date.split('-').map(Number);
+    const evDate = new Date(y, m - 1, d);
+    const isCurrentMonth = isSameMonth(evDate, todayLocal);
+    const isUserEvent = !event.isPreset;
+    return isCurrentMonth && isUserEvent;
+  });
+
+  // Follow-ups: always include current-week ones regardless of Agenda hidden filter
+  const todayStr = format(todayLocal, "yyyy-MM-dd");
+  const followupEvents = getFollowupEvents().filter((event) => {
+    if (event.event_date < todayStr) return false;
+    const [y, m, d] = event.event_date.split('-').map(Number);
+    const evDate = new Date(y, m - 1, d);
+    return isWithinInterval(evDate, { start: weekStart, end: weekEnd });
+  });
+
+  const upcomingEvents = [...baseEvents, ...followupEvents]
+    .sort((a, b) => a.event_date.localeCompare(b.event_date))
     .slice(0, 6);
 
   if (isLoading) {
@@ -91,7 +96,7 @@ export function UpcomingAgendaEventsCard() {
                 <div
                   key={event.id}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-[hsl(var(--section-events))]/10 transition-colors cursor-pointer"
-                  onClick={() => navigate("/agenda")}
+                  onClick={() => navigate("/agenda", { state: { openEventId: event.id } })}
                 >
                   <div
                     className="w-1 h-10 rounded-full flex-shrink-0"
