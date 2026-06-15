@@ -67,7 +67,7 @@ function GestaoClientesContent() {
   useEffect(() => {
     if (!isTeamMember) return;
     if (visibleTabs.length === 0) {
-      navigate('/team-dashboard', { replace: true });
+      navigate('/financeiro', { replace: true });
       return;
     }
     if (!visibleTabs.includes(currentTab as any)) {
