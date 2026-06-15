@@ -469,7 +469,7 @@ export function useAcademyRanking() {
       if (userIds.length === 0) return [];
 
       const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url, agency_name")
         .in("user_id", userIds);
       if (profilesError) throw profilesError;
