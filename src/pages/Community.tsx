@@ -63,7 +63,7 @@ function CommunityContent() {
       if (!data || data.length === 0) return [];
       const userIds = data.map((m: any) => m.user_id);
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url, agency_name, city, state")
         .in("user_id", userIds);
       return data.map((m: any) => ({

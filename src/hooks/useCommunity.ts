@@ -137,7 +137,7 @@ export function useCommunity(activeSection: string = "feed") {
       
       const userIds = highlightsData.map(h => h.user_id);
       const { data: profilesData } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url")
         .in("user_id", userIds);
       
