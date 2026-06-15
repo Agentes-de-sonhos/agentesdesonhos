@@ -96,7 +96,7 @@ function GestaoClientesContent() {
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
           {/* Mobile: horizontal scroll; Desktop: grid 6 cols */}
           <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
-            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-3xl md:grid-cols-6">
+            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-5xl md:grid-cols-6">
               {can('dashboard.view') && (
                 <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
                   <LayoutDashboard className="h-4 w-4 shrink-0" />
