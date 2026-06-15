@@ -188,23 +188,22 @@ export default function Auth() {
       await new Promise((r) => setTimeout(r, attempt.waitMs));
     }
 
-    // Se não for um e-mail, tenta resolver como login de membro da equipe
+    // Sempre tenta resolver como login de membro da equipe primeiro
+    // (o login pode ser um e-mail real diferente do e-mail sintético da auth)
     let effectiveEmail = data.email;
-    if (!data.email.includes('@')) {
-      try {
-        const { data: resolved } = await supabase.functions.invoke('team-resolve-login', {
-          body: { login: data.email },
-        });
-        if ((resolved as any)?.email) {
-          if ((resolved as any).status === 'blocked') {
-            setIsLoading(false);
-            setError('Usuário bloqueado. Entre em contato com a sua agência.');
-            return;
-          }
-          effectiveEmail = (resolved as any).email as string;
+    try {
+      const { data: resolved } = await supabase.functions.invoke('team-resolve-login', {
+        body: { login: data.email },
+      });
+      if ((resolved as any)?.email) {
+        if ((resolved as any).status === 'blocked') {
+          setIsLoading(false);
+          setError('Usuário bloqueado. Entre em contato com a sua agência.');
+          return;
         }
-      } catch { /* segue com o valor digitado */ }
-    }
+        effectiveEmail = (resolved as any).email as string;
+      }
+    } catch { /* segue com o valor digitado */ }
 
     const { error: signInError } = await signIn(effectiveEmail, data.password);
 
