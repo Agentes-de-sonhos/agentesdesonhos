@@ -4,7 +4,6 @@ import { useTeamSession } from '@/contexts/TeamSessionContext'
 
 /** Rotas (prefixos) permitidas para subusuários da equipe. */
 const TEAM_ALLOWED_PREFIXES = [
-  '/team-dashboard',
   '/gestao-clientes',
   '/financeiro',
   '/auth',
@@ -17,26 +16,30 @@ const TEAM_PUBLIC_PREFIXES = [
 ]
 
 function isAllowedForTeam(path: string) {
-  if (path === '/' || path === '') return true
   if (TEAM_PUBLIC_PREFIXES.some(p => path.startsWith(p))) return true
   return TEAM_ALLOWED_PREFIXES.some(p => path === p || path.startsWith(p + '/') || path === p)
 }
 
 /**
  * Quando o usuário logado é membro da equipe, redireciona qualquer rota
- * fora do escopo permitido para o dashboard reduzido (/team-dashboard).
+ * fora do escopo permitido para o primeiro módulo liberado (clientes ou financeiro).
  */
 export function TeamRouteGuard() {
-  const { member, loading } = useTeamSession()
+  const { member, loading, hasModule } = useTeamSession()
   const location = useLocation()
   const navigate = useNavigate()
 
   useEffect(() => {
     if (loading || !member) return
+    const landing = hasModule('clients')
+      ? '/gestao-clientes/clientes'
+      : hasModule('financial')
+        ? '/financeiro'
+        : '/auth'
     if (!isAllowedForTeam(location.pathname)) {
-      navigate('/team-dashboard', { replace: true })
+      navigate(landing, { replace: true })
     }
-  }, [member, loading, location.pathname, navigate])
+  }, [member, loading, location.pathname, navigate, hasModule])
 
   return null
 }
