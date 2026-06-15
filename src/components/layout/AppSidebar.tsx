@@ -324,6 +324,8 @@ export function AppSidebar() {
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
   const isStartPlan = !isPromotor && plan === "start";
+  // Team members inherit the master's agency context — do not show plan-specific UI.
+  const showStartPlanSection = isStartPlan && !isTeamMember;
 
   // URLs locked specifically for Start plan users (shows lock icon + opens upgrade dialog)
   const startPlanLockedUrls = useMemo(
@@ -397,7 +399,7 @@ export function AppSidebar() {
     const sorted = entries.sort((a, b) => a.orderIdx - b.orderIdx);
 
     // Start plan users get a custom "Plano Start" section pinned to the top
-    if (isStartPlan) {
+    if (showStartPlanSection) {
       return [
         { type: "section" as const, section: planoStartSection, orderIdx: -1 },
         ...sorted,
@@ -405,7 +407,7 @@ export function AppSidebar() {
     }
 
     return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan, isPermittedForTeam]);
+  }, [allSections, standaloneItems, orderMap, isStartPlan, showStartPlanSection, isPermittedForTeam]);
 
   const toggleSection = (title: string) => {
     setUserInteracted(true);
@@ -674,15 +676,17 @@ export function AppSidebar() {
         <div className={cn("flex-1 py-2", collapsed ? "overflow-hidden space-y-[2px]" : "overflow-y-auto space-y-0.5")}>
           {/* Início */}
           <nav className={cn("flex flex-col", collapsed ? "gap-[2px] px-3" : "gap-0.5 px-3")}>
-            {renderSingleItem(meusProjetosItem)}
-            {renderSingleItem(minhaAgendaItem)}
-            {renderSingleItem(meuPerfilItem)}
-            {renderSingleItem(comunidadeItem)}
+            {!isTeamMember && renderSingleItem(meusProjetosItem)}
+            {!isTeamMember && renderSingleItem(minhaAgendaItem)}
+            {!isTeamMember && renderSingleItem(meuPerfilItem)}
+            {!isTeamMember && renderSingleItem(comunidadeItem)}
           </nav>
 
-          <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
-            <Separator className="bg-sidebar-border" />
-          </div>
+          {!isTeamMember && (
+            <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
+              <Separator className="bg-sidebar-border" />
+            </div>
+          )}
 
           {/* Dynamic menu entries ordered by DB */}
           {orderedEntries.map((entry) => {
