@@ -10,9 +10,9 @@ const corsHeaders = {
 // RSS feed sources com peso de prioridade (maior = mais relevante)
 // Brasilturis usa ?withoutcomments=1 para driblar o bloqueio do Yoast SEO no /feed/
 const RSS_SOURCES = [
-  { name: "Panrotas", url: "https://www.panrotas.com.br/feed", priority: 3, maxItems: 30 },
-  { name: "Brasilturis", url: "https://brasilturis.com.br/feed/?withoutcomments=1", priority: 2, maxItems: 25 },
-  { name: "Mercado & Eventos", url: "https://www.mercadoeeventos.com.br/feed/", priority: 1, maxItems: 20 },
+  { name: "Panrotas", url: "https://www.panrotas.com.br/feed", priority: 3, maxItems: 100 },
+  { name: "Brasilturis", url: "https://brasilturis.com.br/feed/?withoutcomments=1", priority: 2, maxItems: 100 },
+  { name: "Mercado & Eventos", url: "https://www.mercadoeeventos.com.br/feed/", priority: 1, maxItems: 100 },
 ];
 
 interface RawNewsItem {
@@ -49,7 +49,7 @@ function extractItems(xml: string): string[] {
   return items;
 }
 
-async function fetchRSS(source: { name: string; url: string; maxItems: number }): Promise<RawNewsItem[]> {
+async function fetchRSS(source: { name: string; url: string; maxItems: number }, sinceTs: number): Promise<RawNewsItem[]> {
   try {
     console.log(`Fetching RSS from ${source.name}: ${source.url}`);
     const response = await fetch(source.url, {
@@ -80,15 +80,14 @@ async function fetchRSS(source: { name: string; url: string; maxItems: number })
     })).filter((n) => n.titulo_original && n.url);
     console.log(`[CURATION] ${source.name}: ${parsed.length} items válidos (com título + url)`);
 
-    // Filtrar apenas notícias das últimas 24h (com base em pubDate)
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    // Filtrar notícias publicadas a partir de sinceTs (padrão: 24h atrás)
     const recent = parsed.filter((n) => {
       if (!n.data_publicacao) return false; // Sem data confiável → descartar
       const ts = new Date(n.data_publicacao).getTime();
       if (Number.isNaN(ts)) return false;
-      return ts >= cutoff;
+      return ts >= sinceTs;
     });
-    console.log(`[CURATION] ${source.name}: ${recent.length} items das últimas 24h`);
+    console.log(`[CURATION] ${source.name}: ${recent.length} items após filtro de data`);
     return recent;
   } catch (error) {
     console.error(`[CURATION] Erro ao buscar ${source.name}:`, error);
@@ -189,6 +188,28 @@ serve(async (req) => {
   }
 
   try {
+    // Parse optional body: { since?: ISO string, sources?: string[] }
+    let bodyParams: { since?: string; sources?: string[] } = {};
+    if (req.method === "POST") {
+      try {
+        const text = await req.text();
+        if (text) bodyParams = JSON.parse(text);
+      } catch (_) {
+        // ignore invalid body, fallback to defaults
+      }
+    }
+    const sinceTs = bodyParams.since
+      ? new Date(bodyParams.since).getTime()
+      : Date.now() - 24 * 60 * 60 * 1000;
+    const finalSinceTs = Number.isFinite(sinceTs)
+      ? sinceTs
+      : Date.now() - 24 * 60 * 60 * 1000;
+
+    const selectedSources = Array.isArray(bodyParams.sources) && bodyParams.sources.length > 0
+      ? RSS_SOURCES.filter((s) => bodyParams.sources!.includes(s.name))
+      : RSS_SOURCES;
+    console.log(`[CURATION] Iniciando coleta - since=${new Date(finalSinceTs).toISOString()} sources=${selectedSources.map((s) => s.name).join(",")}`);
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -215,13 +236,13 @@ serve(async (req) => {
     else console.log(`Cleaned ${deletedBrutas?.length || 0} old raw news`);
 
     // 1. Fetch RSS feeds em paralelo (mais rápido + maior volume)
-    const fetchResults = await Promise.all(RSS_SOURCES.map((s) => fetchRSS(s)));
+    const fetchResults = await Promise.all(selectedSources.map((s) => fetchRSS(s, finalSinceTs)));
     const allNews: RawNewsItem[] = fetchResults.flat();
-    const perSourceCount = RSS_SOURCES.map((s, i) => `${s.name}=${fetchResults[i].length}`).join(", ");
+    const perSourceCount = selectedSources.map((s, i) => `${s.name}=${fetchResults[i].length}`).join(", ");
     console.log(`[CURATION] Fetched ${allNews.length} total items (${perSourceCount})`);
 
     // Alerta se Brasilturis voltou a falhar
-    const brasilturisIdx = RSS_SOURCES.findIndex((s) => s.name === "Brasilturis");
+    const brasilturisIdx = selectedSources.findIndex((s) => s.name === "Brasilturis");
     if (brasilturisIdx !== -1 && fetchResults[brasilturisIdx].length === 0) {
       console.error("[CURATION][ALERTA] Brasilturis não retornou itens — verificar feed");
     }
@@ -257,7 +278,7 @@ serve(async (req) => {
       .select("*")
       .eq("processado", false)
       .order("data_coleta", { ascending: false })
-      .limit(40);
+      .limit(200);
 
     if (!unprocessed || unprocessed.length === 0) {
       return new Response(JSON.stringify({ message: "No new news to process", inserted: insertedRaw?.length || 0, curated: 0 }), {
