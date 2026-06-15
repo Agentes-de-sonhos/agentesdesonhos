@@ -144,6 +144,18 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const [showDetails, setShowDetails] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [showEditClient, setShowEditClient] = useState(false);
+
+  // Auto-open details drawer when URL has ?opportunity=<this id> (e.g. coming from Dashboard follow-up click)
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const target = searchParams.get("opportunity");
+    if (target && target === opportunity.id) {
+      setShowDetails(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("opportunity");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, opportunity.id, setSearchParams]);
   const [linkedDialog, setLinkedDialog] = useState<null | {
     kind: "quote" | "trip";
     existingId: string;
