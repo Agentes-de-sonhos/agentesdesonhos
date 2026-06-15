@@ -43,7 +43,7 @@ export default function TradeConnectHub() {
     queryFn: async () => {
       if (!allProfileIds.length) return [];
       const { data } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url, agency_name, city, state")
         .in("user_id", allProfileIds);
       return data || [];

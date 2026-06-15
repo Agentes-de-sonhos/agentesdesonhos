@@ -298,7 +298,7 @@ export function useGamification() {
       if (!data || data.length === 0) return [];
       const userIds = [...new Set(data.map((q) => q.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name")
         .in("user_id", userIds);
       const profileMap = new Map(profiles?.map((p) => [p.user_id, p.name]) || []);
