@@ -290,9 +290,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     queryFn: async () => {
       if (!itinerary?.userId) return null;
       const { data, error } = await supabase
-        .from("profiles")
-        .select("name, phone, avatar_url, agency_name, agency_logo_url, city, state")
-        .eq("user_id", itinerary.userId)
+        .rpc("get_public_profile", { _user_id: itinerary.userId })
         .maybeSingle();
       if (error || !data) return null;
       return data as AgentProfile;
