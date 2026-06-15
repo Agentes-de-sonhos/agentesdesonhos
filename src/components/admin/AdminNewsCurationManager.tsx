@@ -465,7 +465,7 @@ export function AdminNewsCurationManager() {
             </DropdownMenu>
             <Button
               size="sm"
-              onClick={() => collectMutation.mutate()}
+              onClick={() => setCollectDialogOpen(true)}
               disabled={collectMutation.isPending}
             >
               {collectMutation.isPending ? (
