@@ -377,9 +377,6 @@ export function KanbanBoard() {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-xs text-muted-foreground">
-            Arraste as colunas para reordenar • use as setas ou role para navegar
-          </span>
           <Button
             variant="outline"
             size="icon"
@@ -388,6 +385,14 @@ export function KanbanBoard() {
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Arraste as colunas para reordenar • use as setas ou role para navegar</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Kanban container with drag-to-scroll and edge fades */}
