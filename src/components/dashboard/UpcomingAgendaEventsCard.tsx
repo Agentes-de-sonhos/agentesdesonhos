@@ -1,47 +1,54 @@
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { Calendar, Clock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
-import { format, differenceInCalendarDays, isSameMonth, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
+const PAGE_SIZE = 8;
+
 export function UpcomingAgendaEventsCard() {
   const navigate = useNavigate();
-  const { getUpcomingEvents, getFollowupEvents, highlightedEventIds, isLoading } = useAgenda();
+  const { getUpcomingEvents, getFollowupEvents, isLoading } = useAgenda();
+  const [page, setPage] = useState(0);
 
   // Use local date components to avoid UTC shift
   const now = new Date();
   const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  // Current week (Mon–Sun) for CRM follow-ups
-  const weekStart = startOfWeek(todayLocal, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(todayLocal, { weekStartsOn: 1 });
-  
-  // Non-followup events: respect Agenda hidden-type filter (comes from getUpcomingEvents)
-  const baseEvents = getUpcomingEvents(50).filter((event) => {
-    if (event.event_type === 'followup') return false; // handled separately
-    const isHighlighted = highlightedEventIds.has(event.id);
-    if (isHighlighted) return true;
-    const [y, m, d] = event.event_date.split('-').map(Number);
-    const evDate = new Date(y, m - 1, d);
-    const isCurrentMonth = isSameMonth(evDate, todayLocal);
-    const isUserEvent = !event.isPreset;
-    return isCurrentMonth && isUserEvent;
-  });
-
-  // Follow-ups: always include current-week ones regardless of Agenda hidden filter
   const todayStr = format(todayLocal, "yyyy-MM-dd");
-  const followupEvents = getFollowupEvents().filter((event) => {
-    if (event.event_date < todayStr) return false;
-    const [y, m, d] = event.event_date.split('-').map(Number);
-    const evDate = new Date(y, m - 1, d);
-    return isWithinInterval(evDate, { start: weekStart, end: weekEnd });
-  });
 
-  const upcomingEvents = [...baseEvents, ...followupEvents]
-    .sort((a, b) => a.event_date.localeCompare(b.event_date))
-    .slice(0, 6);
+  // All upcoming events (any type) from today onwards.
+  // - Non-followup events respect the Agenda hidden-type filter (via getUpcomingEvents).
+  // - Follow-ups are always included (independent of Agenda hidden filter) per Dashboard spec.
+  const allUpcoming = useMemo(() => {
+    const baseEvents = getUpcomingEvents(500).filter(
+      (event) => event.event_type !== "followup"
+    );
+    const followupEvents = getFollowupEvents().filter(
+      (event) => event.event_date >= todayStr
+    );
+    const seen = new Set<string>();
+    return [...baseEvents, ...followupEvents]
+      .filter((e) => {
+        if (seen.has(e.id)) return false;
+        seen.add(e.id);
+        return true;
+      })
+      .sort((a, b) => {
+        const dateCmp = a.event_date.localeCompare(b.event_date);
+        if (dateCmp !== 0) return dateCmp;
+        return (a.event_time || "").localeCompare(b.event_time || "");
+      });
+  }, [getUpcomingEvents, getFollowupEvents, todayStr]);
+
+  const total = allUpcoming.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const startIdx = safePage * PAGE_SIZE;
+  const pageEvents = allUpcoming.slice(startIdx, startIdx + PAGE_SIZE);
 
   if (isLoading) {
     return (
@@ -65,10 +72,10 @@ export function UpcomingAgendaEventsCard() {
         </div>
       </CardHeader>
       <CardContent>
-        {upcomingEvents.length === 0 ? (
+        {total === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Nenhum evento programado para este mês</p>
+            <p className="text-sm">Nenhum evento programado</p>
             <Button
               variant="outline"
               size="sm"
@@ -80,7 +87,7 @@ export function UpcomingAgendaEventsCard() {
           </div>
         ) : (
           <div className="space-y-2">
-            {upcomingEvents.map((event) => {
+            {pageEvents.map((event) => {
                // Parse date using local components to avoid UTC timezone shift
                const [y, m, d] = event.event_date.split('-').map(Number);
                const eventDate = new Date(y, m - 1, d);
@@ -130,15 +137,37 @@ export function UpcomingAgendaEventsCard() {
               );
             })}
 
-            <div className="pt-3 border-t">
-              <Button
-                variant="ghost"
-                className="w-full text-[hsl(var(--section-events))] hover:text-[hsl(var(--section-events))] hover:bg-[hsl(var(--section-events))]/5"
-                onClick={() => navigate("/agenda")}
-              >
-                Ver todos
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+            {/* Pagination footer */}
+            <div className="pt-3 mt-1 border-t flex flex-col sm:flex-row items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + PAGE_SIZE, total)}</span> de{" "}
+                <span className="font-medium text-foreground">{total}</span> atividades
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={safePage === 0}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-1">Anterior</span>
+                </Button>
+                <span className="text-xs text-muted-foreground px-2 tabular-nums">
+                  {safePage + 1} / {totalPages}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={safePage >= totalPages - 1}
+                >
+                  <span className="hidden sm:inline mr-1">Próximo</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
