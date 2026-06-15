@@ -36,9 +36,9 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
 
   const filtered = query.length >= 1
     ? clients.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
-    : [];
+    : clients.slice(0, 8);
 
-  const showDropdown = isOpen && query.length >= 1;
+  const showDropdown = isOpen;
 
   useEffect(() => {
     if (value) setQuery(value.name);
