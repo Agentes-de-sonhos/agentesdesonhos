@@ -242,13 +242,19 @@ export function AdminNewsCurationManager() {
   });
 
   const collectMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("curate-news");
+    mutationFn: async (params?: { since?: string; sources?: string[] }) => {
+      const body: Record<string, unknown> = {};
+      if (params?.since) body.since = params.since;
+      if (params?.sources && params.sources.length > 0) body.sources = params.sources;
+      const { data, error } = await supabase.functions.invoke("curate-news", {
+        body: Object.keys(body).length > 0 ? body : undefined,
+      });
       if (error) throw error;
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-noticias-curadas"] });
+      setCollectDialogOpen(false);
       toast({
         title: "Coleta concluída!",
         description: `${data.fetched || 0} notícias coletadas, ${data.curated || 0} curadas pela IA`,
