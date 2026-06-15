@@ -22,7 +22,7 @@ export function useCommunityFeed() {
 
       const userIds = [...new Set(data.map((p: any) => p.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url, agency_name")
         .in("user_id", userIds);
       const { data: members } = await supabase
@@ -118,7 +118,7 @@ export function useCommunityFeed() {
     if (!data || data.length === 0) return [];
     const userIds = [...new Set(data.map((c: any) => c.user_id))];
     const { data: profiles } = await supabase
-      .from("profiles")
+      .from("profiles_public")
       .select("user_id, name, avatar_url")
       .in("user_id", userIds);
     return data.map((c: any) => ({
