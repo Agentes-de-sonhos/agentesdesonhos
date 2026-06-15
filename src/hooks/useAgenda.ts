@@ -580,6 +580,55 @@ export function useAgenda(year?: number) {
       .slice(0, limit);
   };
 
+  // Build follow-up virtual events from the raw list (NOT affected by hidden type filters).
+  // Used by the Dashboard so that hiding follow-ups in the Agenda page does not remove
+  // them from "Minha Agenda" on the home dashboard.
+  const getFollowupEvents = (): CalendarEvent[] => {
+    return opportunityFollowups.map((fu: any): CalendarEvent => {
+      const clientName = fu.opportunity?.client?.name || "Cliente";
+      const destination = fu.opportunity?.destination || "";
+      const title = `📞 Follow-up: ${clientName}${destination ? ` — ${destination}` : ""}`;
+      return {
+        id: `followup_${fu.id}`,
+        title,
+        description: fu.note || null,
+        event_type: 'followup',
+        event_date: fu.follow_up_date,
+        event_time: null,
+        color: eventTypeColors['followup'],
+        isPreset: false,
+        opportunity_id: fu.opportunity_id,
+      };
+    });
+  };
+
+  // Lookup any event by id, bypassing the hidden-type filter (useful when opening
+  // an event from a deep link / dashboard click even if its type is currently hidden).
+  const findEventById = (eventId: string): CalendarEvent | null => {
+    return allEvents.find(e => e.id === eventId) || null;
+  };
+
+  // Mark a follow-up as completed (deletes the row).
+  const completeFollowupMutation = useMutation({
+    mutationFn: async (followupId: string) => {
+      const { error } = await supabase
+        .from("opportunity_followups" as any)
+        .delete()
+        .eq("id", followupId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["agenda-followups"] });
+      queryClient.invalidateQueries({ queryKey: ["all-followups"] });
+      queryClient.invalidateQueries({ queryKey: ["opportunity-followups"] });
+      toast.success("Follow-up concluído!");
+    },
+    onError: (err) => {
+      console.error("Erro ao concluir follow-up:", err);
+      toast.error("Erro ao concluir follow-up");
+    },
+  });
+
   return {
     allEvents: filteredEvents,
     agencyEvents,
@@ -591,6 +640,8 @@ export function useAgenda(year?: number) {
     isLoading: agencyLoading || presetLoading || hiddenLoading || customTypesLoading || filterLoading || highlightedLoading,
     getEventsForDate,
     getUpcomingEvents,
+    getFollowupEvents,
+    findEventById,
     createEvent: createEventMutation.mutate,
     updateEvent: updateEventMutation.mutate,
     deleteEvent: deleteEventMutation.mutate,
@@ -601,6 +652,8 @@ export function useAgenda(year?: number) {
     highlightEvent: (eventId: string, source: string) => highlightEventMutation.mutate({ eventId, source }),
     unhighlightEvent: (eventId: string) => unhighlightEventMutation.mutate(eventId),
     highlightedEventIds,
+    completeFollowup: completeFollowupMutation.mutate,
+    isCompletingFollowup: completeFollowupMutation.isPending,
     isCreating: createEventMutation.isPending,
     isUpdating: updateEventMutation.isPending,
     isDeleting: deleteEventMutation.isPending,
