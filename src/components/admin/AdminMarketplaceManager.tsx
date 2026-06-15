@@ -34,7 +34,7 @@ export function AdminMarketplaceManager() {
       let profiles: any[] = [];
       if (creatorIds.length > 0) {
         const { data: pData } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name")
           .in("user_id", creatorIds);
         profiles = pData || [];

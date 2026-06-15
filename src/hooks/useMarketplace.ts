@@ -31,7 +31,7 @@ export function useMarketplaceCourses() {
       let profiles: any[] = [];
       if (creatorIds.length > 0) {
         const { data: pData } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name, avatar_url")
           .in("user_id", creatorIds);
         profiles = pData || [];
@@ -95,7 +95,7 @@ export function useMarketplaceCourseDetail(courseId: string | undefined) {
       if (error) throw error;
       // Get creator profile
       const { data: profile } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url")
         .eq("user_id", data.creator_id)
         .single();
@@ -194,7 +194,7 @@ export function useMarketplaceCourseDetail(courseId: string | undefined) {
       let profiles: any[] = [];
       if (userIds.length > 0) {
         const { data: pData } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name, avatar_url")
           .in("user_id", userIds);
         profiles = pData || [];
