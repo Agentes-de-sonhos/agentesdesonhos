@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   MapPin,
   Users,
@@ -144,6 +144,18 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const [showDetails, setShowDetails] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [showEditClient, setShowEditClient] = useState(false);
+
+  // Auto-open details drawer when URL has ?opportunity=<this id> (e.g. coming from Dashboard follow-up click)
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const target = searchParams.get("opportunity");
+    if (target && target === opportunity.id) {
+      setShowDetails(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("opportunity");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, opportunity.id, setSearchParams]);
   const [linkedDialog, setLinkedDialog] = useState<null | {
     kind: "quote" | "trip";
     existingId: string;
