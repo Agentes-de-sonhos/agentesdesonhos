@@ -129,6 +129,10 @@ export function AdminNewsCurationManager() {
   const [search, setSearch] = useState<string>(initial.search);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [resetScope, setResetScope] = useState<null | "todas" | "pendente" | "rejeitado" | "aprovado">(null);
+  const [collectDialogOpen, setCollectDialogOpen] = useState(false);
+  const [collectDate, setCollectDate] = useState<string>("");
+  const [collectTime, setCollectTime] = useState<string>("");
+  const [collectSources, setCollectSources] = useState<string[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   useAuth();
@@ -242,13 +246,19 @@ export function AdminNewsCurationManager() {
   });
 
   const collectMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("curate-news");
+    mutationFn: async (params?: { since?: string; sources?: string[] }) => {
+      const body: Record<string, unknown> = {};
+      if (params?.since) body.since = params.since;
+      if (params?.sources && params.sources.length > 0) body.sources = params.sources;
+      const { data, error } = await supabase.functions.invoke("curate-news", {
+        body: Object.keys(body).length > 0 ? body : undefined,
+      });
       if (error) throw error;
       return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["admin-noticias-curadas"] });
+      setCollectDialogOpen(false);
       toast({
         title: "Coleta concluída!",
         description: `${data.fetched || 0} notícias coletadas, ${data.curated || 0} curadas pela IA`,
@@ -455,7 +465,7 @@ export function AdminNewsCurationManager() {
             </DropdownMenu>
             <Button
               size="sm"
-              onClick={() => collectMutation.mutate()}
+              onClick={() => setCollectDialogOpen(true)}
               disabled={collectMutation.isPending}
             >
               {collectMutation.isPending ? (
@@ -846,6 +856,70 @@ export function AdminNewsCurationManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={collectDialogOpen} onOpenChange={setCollectDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Coletar notícias</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-xs text-muted-foreground">
+              Opcional: defina a partir de quando coletar e quais portais usar. Se deixar em branco,
+              o sistema coleta as últimas 24h de todos os portais.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Data (a partir de)</Label>
+                <Input type="date" value={collectDate} onChange={(e) => setCollectDate(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs">Hora</Label>
+                <Input type="time" value={collectTime} onChange={(e) => setCollectTime(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Portais (vazio = todos)</Label>
+              {["Panrotas", "Mercado & Eventos", "Brasilturis"].map((src) => (
+                <label key={src} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={collectSources.includes(src)}
+                    onCheckedChange={(checked) => {
+                      setCollectSources((prev) =>
+                        checked ? [...prev, src] : prev.filter((s) => s !== src)
+                      );
+                    }}
+                  />
+                  {src}
+                </label>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setCollectDialogOpen(false)} disabled={collectMutation.isPending}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  let since: string | undefined;
+                  if (collectDate) {
+                    const time = collectTime || "00:00";
+                    const d = new Date(`${collectDate}T${time}:00`);
+                    if (!Number.isNaN(d.getTime())) since = d.toISOString();
+                  }
+                  collectMutation.mutate({ since, sources: collectSources });
+                }}
+                disabled={collectMutation.isPending}
+              >
+                {collectMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                )}
+                Coletar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
