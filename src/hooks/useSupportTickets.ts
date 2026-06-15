@@ -30,7 +30,7 @@ export function useSupportTickets() {
       if (isAdmin && data.length > 0) {
         const userIds = [...new Set(data.map((t: any) => t.user_id))];
         const { data: profiles } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name, avatar_url")
           .in("user_id", userIds);
 
@@ -132,7 +132,7 @@ export function useTicketMessages(ticketId: string | null) {
       // Fetch sender profiles
       const senderIds = [...new Set(data.map((m: any) => m.sender_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url")
         .in("user_id", senderIds);
       const profileMap = new Map(profiles?.map((p: any) => [p.user_id, p]) || []);

@@ -54,7 +54,7 @@ export function useDirectMessages(activeConversationId?: string) {
       );
 
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url")
         .in("user_id", otherUserIds);
 
@@ -107,7 +107,7 @@ export function useDirectMessages(activeConversationId?: string) {
 
       const userIds = [...new Set(msgs.map((m: any) => m.sender_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url")
         .in("user_id", userIds as string[]);
 

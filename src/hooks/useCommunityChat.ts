@@ -64,7 +64,7 @@ export function useCommunityChat(activeRoomId?: string) {
       // Fetch profiles
       const userIds = [...new Set(msgs.map((m: any) => m.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url")
         .in("user_id", userIds as string[]);
 
