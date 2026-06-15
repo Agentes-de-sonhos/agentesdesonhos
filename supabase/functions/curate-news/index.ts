@@ -188,8 +188,8 @@ serve(async (req) => {
   }
 
   try {
-    // Parse optional body: { since?: ISO string, sources?: string[] }
-    let bodyParams: { since?: string; sources?: string[] } = {};
+    // Parse optional body: { since?: ISO string, sources?: string[], reset?: boolean }
+    let bodyParams: { since?: string; sources?: string[]; reset?: boolean } = {};
     if (req.method === "POST") {
       try {
         const text = await req.text();
@@ -208,7 +208,8 @@ serve(async (req) => {
     const selectedSources = Array.isArray(bodyParams.sources) && bodyParams.sources.length > 0
       ? RSS_SOURCES.filter((s) => bodyParams.sources!.includes(s.name))
       : RSS_SOURCES;
-    console.log(`[CURATION] Iniciando coleta - since=${new Date(finalSinceTs).toISOString()} sources=${selectedSources.map((s) => s.name).join(",")}`);
+    const resetValidation = bodyParams.reset === true;
+    console.log(`[CURATION] Iniciando coleta - since=${new Date(finalSinceTs).toISOString()} sources=${selectedSources.map((s) => s.name).join(",")} reset=${resetValidation}`);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -270,6 +271,36 @@ serve(async (req) => {
 
     if (rawError) {
       console.error("Error inserting raw news:", rawError);
+    }
+
+    // 2.1 Se o usuário pediu reset, apagamos curadorias anteriores das URLs coletadas
+    // (aprovadas, rejeitadas ou pendentes) e marcamos as brutas como não processadas,
+    // para que a IA re-avalie tudo do zero.
+    if (resetValidation && allNews.length > 0) {
+      const urls = Array.from(new Set(allNews.map((n) => n.url).filter(Boolean)));
+      // Chunk para evitar URLs muito longas no PostgREST
+      const chunkSize = 100;
+      let deletedDashCount = 0;
+      let resetRawCount = 0;
+      for (let i = 0; i < urls.length; i += chunkSize) {
+        const slice = urls.slice(i, i + chunkSize);
+        const { data: delDash, error: delDashE } = await supabase
+          .from("noticias_dashboard")
+          .delete()
+          .in("url_original", slice)
+          .select("id");
+        if (delDashE) console.error("[CURATION][RESET] delete dashboard error:", delDashE);
+        else deletedDashCount += delDash?.length || 0;
+
+        const { data: updRaw, error: updRawE } = await supabase
+          .from("noticias_brutas")
+          .update({ processado: false })
+          .in("url", slice)
+          .select("id");
+        if (updRawE) console.error("[CURATION][RESET] reset brutas error:", updRawE);
+        else resetRawCount += updRaw?.length || 0;
+      }
+      console.log(`[CURATION][RESET] Apagadas ${deletedDashCount} curadorias e ${resetRawCount} brutas resetadas para reprocessamento.`);
     }
 
     // 3. Get unprocessed news (limite maior para aumentar volume curado)
