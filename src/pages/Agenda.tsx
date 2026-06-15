@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,6 +50,9 @@ export default function Agenda() {
     highlightEvent,
     unhighlightEvent,
     highlightedEventIds,
+    completeFollowup,
+    isCompletingFollowup,
+    getFollowupEvents,
     isCreating,
     isUpdating,
     isDeleting,
@@ -56,6 +60,29 @@ export default function Agenda() {
   } = agenda;
 
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const openedEventIdRef = useRef<string | null>(null);
+
+  // When arriving from Dashboard with a target event id, open the matching event in the modal.
+  useEffect(() => {
+    const targetId = (location.state as any)?.openEventId as string | undefined;
+    if (!targetId || isLoading) return;
+    if (openedEventIdRef.current === targetId) return;
+    // Search in filtered events first; if it's a hidden follow-up, look in raw follow-up list.
+    let target = allEvents.find((e) => e.id === targetId) || null;
+    if (!target && targetId.startsWith("followup_")) {
+      target = getFollowupEvents().find((e) => e.id === targetId) || null;
+    }
+    if (target) {
+      openedEventIdRef.current = targetId;
+      setSelectedDate(target.event_date);
+      setSelectedEvent(target);
+      setIsModalOpen(true);
+      // Clear navigation state so the modal doesn't re-open on next render.
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, allEvents, isLoading, getFollowupEvents, navigate, location.pathname]);
 
   const handleSyncComplete = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["agency-events"] });
@@ -265,7 +292,8 @@ export default function Agenda() {
         onUnhighlight={unhighlightEvent}
         highlightedEventIds={highlightedEventIds}
         onCreateCustomType={handleCreateCustomType}
-        isLoading={isCreating || isUpdating || isDeleting}
+        onCompleteFollowup={completeFollowup}
+        isLoading={isCreating || isUpdating || isDeleting || isCompletingFollowup}
         isCreatingCustomType={isCreatingCustomType}
       />
     </DashboardLayout>
