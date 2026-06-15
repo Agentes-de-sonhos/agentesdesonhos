@@ -1,9 +1,10 @@
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useClients, useOpportunities } from "@/hooks/useCRM";
+import { useOpportunityFollowups, type FollowupDraft } from "@/hooks/useOpportunityFollowups";
 import type { Opportunity } from "@/types/crm";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 
@@ -35,7 +37,6 @@ const opportunitySchema = z.object({
   children_count: z.number().min(0, "Não pode ser negativo"),
   estimated_value: z.number().min(0),
   notes: z.string().optional(),
-  follow_up_date: z.date().optional(),
 });
 
 type FormData = z.infer<typeof opportunitySchema>;
@@ -49,6 +50,27 @@ interface OpportunityFormProps {
 export function OpportunityForm({ opportunity, onSuccess, onCancel }: OpportunityFormProps) {
   const { clients } = useClients();
   const { createOpportunity, updateOpportunity, isCreating } = useOpportunities();
+  const { followups: existingFollowups, syncFollowups, isSyncing } =
+    useOpportunityFollowups(opportunity?.id);
+
+  const [followupDrafts, setFollowupDrafts] = useState<FollowupDraft[]>([]);
+
+  useEffect(() => {
+    if (opportunity?.id) {
+      if (existingFollowups.length > 0) {
+        setFollowupDrafts(
+          existingFollowups.map((f) => ({
+            id: f.id,
+            follow_up_date: f.follow_up_date,
+            note: f.note || "",
+          }))
+        );
+      } else if (opportunity.follow_up_date) {
+        // Legacy single follow-up date — preload as first draft (no id, will be created)
+        setFollowupDrafts([{ follow_up_date: opportunity.follow_up_date, note: "" }]);
+      }
+    }
+  }, [opportunity?.id, existingFollowups.length]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(opportunitySchema),
@@ -61,12 +83,13 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
       children_count: opportunity?.children_count ?? 0,
       estimated_value: opportunity?.estimated_value || 0,
       notes: opportunity?.notes || "",
-      follow_up_date: opportunity?.follow_up_date ? new Date(opportunity.follow_up_date) : undefined,
     },
   });
 
   const handleSubmit = async (data: FormData) => {
     const totalPassengers = (data.adults_count || 0) + (data.children_count || 0);
+    const validDrafts = followupDrafts.filter((d) => d.follow_up_date);
+    const firstDate = validDrafts[0]?.follow_up_date;
     const payload = {
       client_id: data.client_id,
       destination: data.destination,
@@ -77,15 +100,40 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
       passengers_count: totalPassengers,
       estimated_value: data.estimated_value,
       notes: data.notes,
-      follow_up_date: data.follow_up_date ? format(data.follow_up_date, "yyyy-MM-dd") : undefined,
+      // Keep the legacy single-date column in sync with the earliest follow-up,
+      // so existing card badges and queries keep working.
+      follow_up_date: firstDate,
     };
 
+    let opportunityId = opportunity?.id;
     if (opportunity) {
       await updateOpportunity({ id: opportunity.id, ...payload });
     } else {
-      await createOpportunity(payload);
+      const created: any = await new Promise((resolve, reject) => {
+        createOpportunity(payload, {
+          onSuccess: (res: any) => resolve(res),
+          onError: (err: any) => reject(err),
+        } as any);
+      });
+      opportunityId = created?.id;
+    }
+
+    if (opportunityId) {
+      await syncFollowups({ opportunity_id: opportunityId, drafts: validDrafts });
     }
     onSuccess();
+  };
+
+  const addFollowup = () => {
+    setFollowupDrafts((prev) => [...prev, { follow_up_date: "", note: "" }]);
+  };
+
+  const updateDraft = (index: number, patch: Partial<FollowupDraft>) => {
+    setFollowupDrafts((prev) => prev.map((d, i) => (i === index ? { ...d, ...patch } : d)));
+  };
+
+  const removeDraft = (index: number) => {
+    setFollowupDrafts((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -250,32 +298,79 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="follow_up_date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data de Follow-up</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
+        <div className="space-y-3 rounded-lg border border-border/50 bg-muted/20 p-3">
+          <div className="flex items-center justify-between">
+            <FormLabel className="text-sm">Follow-ups</FormLabel>
+            <Button type="button" variant="outline" size="sm" onClick={addFollowup}>
+              <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar
+            </Button>
+          </div>
+
+          {followupDrafts.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Nenhum follow-up. Clique em "Adicionar" para programar lembretes para este cliente.
+            </p>
+          ) : (
+            followupDrafts.map((draft, index) => {
+              const parsedDate = draft.follow_up_date
+                ? (() => {
+                    const [y, m, d] = draft.follow_up_date.split("-").map(Number);
+                    return new Date(y, (m || 1) - 1, d || 1);
+                  })()
+                : undefined;
+              return (
+                <div key={index} className="space-y-2 rounded-md border bg-background p-3">
+                  <div className="flex items-start gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={cn(
+                            "flex-1 pl-3 text-left font-normal",
+                            !parsedDate && "text-muted-foreground"
+                          )}
+                        >
+                          {parsedDate
+                            ? format(parsedDate, "dd/MM/yyyy", { locale: ptBR })
+                            : "Selecione a data"}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={parsedDate}
+                          onSelect={(d) =>
+                            updateDraft(index, {
+                              follow_up_date: d ? format(d, "yyyy-MM-dd") : "",
+                            })
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <Button
-                      variant="outline"
-                      className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeDraft(index)}
+                      aria-label="Remover follow-up"
                     >
-                      {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
+                  </div>
+                  <Textarea
+                    placeholder="O que será feito neste follow-up?"
+                    value={draft.note}
+                    onChange={(e) => updateDraft(index, { note: e.target.value })}
+                    rows={2}
+                  />
+                </div>
+              );
+            })
           )}
-        />
+        </div>
 
         <FormField
           control={form.control}
@@ -295,7 +390,7 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={isCreating}>
+          <Button type="submit" disabled={isCreating || isSyncing}>
             {opportunity ? "Salvar" : "Criar"}
           </Button>
         </div>

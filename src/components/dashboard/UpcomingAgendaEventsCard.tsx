@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
-import { format, differenceInCalendarDays, isSameMonth, parseISO } from "date-fns";
+import { format, differenceInCalendarDays, isSameMonth, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
@@ -14,8 +14,12 @@ export function UpcomingAgendaEventsCard() {
   // Use local date components to avoid UTC shift
   const now = new Date();
   const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Current week (Mon–Sun) for CRM follow-ups
+  const weekStart = startOfWeek(todayLocal, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(todayLocal, { weekStartsOn: 1 });
   
-  // Filter: user-created events (current month) + ALL highlighted events (any date)
+  // Filter: user-created events (current month) + ALL highlighted events (any date) +
+  // CRM follow-ups only for the CURRENT WEEK
   const upcomingEvents = getUpcomingEvents(50)
     .filter((event) => {
       const isHighlighted = highlightedEventIds.has(event.id);
@@ -24,6 +28,10 @@ export function UpcomingAgendaEventsCard() {
       // User-created events: only current month
       const [y, m, d] = event.event_date.split('-').map(Number);
       const evDate = new Date(y, m - 1, d);
+      // Follow-ups: only current week
+      if (event.event_type === 'followup') {
+        return isWithinInterval(evDate, { start: weekStart, end: weekEnd });
+      }
       const isCurrentMonth = isSameMonth(evDate, todayLocal);
       const isUserEvent = !event.isPreset;
       return isCurrentMonth && isUserEvent;
