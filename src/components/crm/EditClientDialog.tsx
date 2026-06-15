@@ -247,17 +247,19 @@ export function EditClientDialog({ clientId, open, onOpenChange }: Props) {
             <FormField control={form.control} name="notes" render={({ field }) => (
               <FormItem>
                 <FormLabel>Observações Gerais</FormLabel>
-                <FormControl><Textarea placeholder="Anotações sobre o cliente..." {...field} /></FormControl>
+                <FormControl><Textarea placeholder="Anotações sobre o cliente (não visíveis ao cliente)..." {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
-            <FormField control={form.control} name="internal_notes" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Observações Internas</FormLabel>
-                <FormControl><Textarea placeholder="Notas internas (não visíveis ao cliente)..." {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
+            {client?.internal_notes ? (
+              <FormField control={form.control} name="internal_notes" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Observações Internas (legado)</FormLabel>
+                  <FormControl><Textarea placeholder="Notas internas (não visíveis ao cliente)..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            ) : null}
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>Salvar</Button>

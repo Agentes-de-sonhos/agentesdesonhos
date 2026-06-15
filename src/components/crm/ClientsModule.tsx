@@ -471,28 +471,30 @@ export function ClientsModule() {
                     <FormItem>
                       <FormLabel>Observações Gerais</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Anotações sobre o cliente..." {...field} />
+                        <Textarea placeholder="Anotações sobre o cliente (não visíveis ao cliente)..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="internal_notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Observações Internas</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Notas internas (não visíveis ao cliente)..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {editingClient?.internal_notes ? (
+                  <FormField
+                    control={form.control}
+                    name="internal_notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Observações Internas (legado)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Notas internas (não visíveis ao cliente)..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : null}
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancelar
