@@ -37,7 +37,7 @@ export function useHotelRecommendations(hotelId?: string) {
       let profiles: Record<string, { name: string; agency_name: string | null }> = {};
       if (userIds.length > 0) {
         const { data: profileData } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name, agency_name")
           .in("user_id", userIds);
         if (profileData) {
@@ -147,7 +147,7 @@ export function useAdminHotelRecommendations() {
       let profiles: Record<string, { name: string; agency_name: string | null }> = {};
       if (userIds.length > 0) {
         const { data: pData } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name, agency_name")
           .in("user_id", userIds);
         if (pData) pData.forEach((p) => (profiles[p.user_id] = { name: p.name, agency_name: p.agency_name }));

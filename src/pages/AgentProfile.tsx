@@ -26,7 +26,7 @@ export default function AgentProfile() {
     queryFn: async () => {
       if (!userId) return null;
       const { data, error } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url, agency_name, agency_logo_url, city, state, bio, specialties, services, niches, niche, years_in_business, phone, help_offer, partnership_interests")
         .eq("user_id", userId)
         .maybeSingle();
