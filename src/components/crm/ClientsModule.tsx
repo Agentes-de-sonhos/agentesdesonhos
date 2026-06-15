@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -99,6 +100,20 @@ export function ClientsModule() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Auto-open a client profile when URL has ?client=<id> (e.g. from opportunity drawer "Abrir Cliente")
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const target = searchParams.get("client");
+    if (!target || clients.length === 0) return;
+    const match = clients.find((c) => c.id === target);
+    if (match) {
+      setSelectedClient(match);
+      const next = new URLSearchParams(searchParams);
+      next.delete("client");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, clients, setSearchParams]);
 
   const existingPhones = useMemo(() => {
     const map = new Map<string, string>();
