@@ -21,16 +21,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useClients, useOpportunities } from "@/hooks/useCRM";
 import type { Opportunity } from "@/types/crm";
+import { ClientSelector } from "@/components/shared/ClientSelector";
 
 const opportunitySchema = z.object({
   client_id: z.string().min(1, "Selecione um cliente"),
@@ -103,20 +97,21 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
           render={({ field }) => (
             <FormItem>
               <FormLabel>Cliente *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o cliente" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <ClientSelector
+                  value={
+                    field.value
+                      ? {
+                          id: field.value,
+                          name:
+                            clients.find((c) => c.id === field.value)?.name || "",
+                        }
+                      : null
+                  }
+                  onChange={(client) => field.onChange(client?.id || "")}
+                  required
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
