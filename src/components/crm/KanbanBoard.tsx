@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Filter, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DndContext,
   closestCenter,
@@ -377,9 +377,6 @@ export function KanbanBoard() {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-xs text-muted-foreground">
-            Arraste as colunas para reordenar • use as setas ou role para navegar
-          </span>
           <Button
             variant="outline"
             size="icon"
@@ -388,6 +385,14 @@ export function KanbanBoard() {
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Arraste as colunas para reordenar • use as setas ou role para navegar</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Kanban container with drag-to-scroll and edge fades */}
