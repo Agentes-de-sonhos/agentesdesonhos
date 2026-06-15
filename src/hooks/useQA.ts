@@ -71,7 +71,7 @@ export function useQA() {
       // Fetch author profiles
       const userIds = [...new Set((data || []).map((q: any) => q.user_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("user_id, name, avatar_url")
         .in("user_id", userIds);
 
@@ -102,7 +102,7 @@ export function useQA() {
 
         const userIds = [...new Set((data || []).map((a: any) => a.user_id))];
         const { data: profiles } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name, avatar_url")
           .in("user_id", userIds);
 
