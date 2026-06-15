@@ -96,7 +96,13 @@ export function UpcomingAgendaEventsCard() {
                 <div
                   key={event.id}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-[hsl(var(--section-events))]/10 transition-colors cursor-pointer"
-                  onClick={() => navigate("/agenda", { state: { openEventId: event.id } })}
+                  onClick={() => {
+                    if (event.event_type === 'followup' && event.opportunity_id) {
+                      navigate(`/gestao-clientes/funil?opportunity=${event.opportunity_id}`);
+                    } else {
+                      navigate("/agenda", { state: { openEventId: event.id } });
+                    }
+                  }}
                 >
                   <div
                     className="w-1 h-10 rounded-full flex-shrink-0"
