@@ -44,7 +44,7 @@ export function useAdvisorReviews(itemId: string, itemType: AdvisorItemType) {
       let profilesMap: Record<string, { name: string | null; agency_name: string | null; avatar_url: string | null }> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
-          .from("profiles")
+          .from("profiles_public")
           .select("user_id, name, agency_name, avatar_url")
           .in("user_id", userIds);
         if (profiles) {

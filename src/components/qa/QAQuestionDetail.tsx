@@ -47,7 +47,7 @@ export function QAQuestionDetail({ questionId, onBack }: Props) {
       if (error) throw error;
 
       const { data: profile } = await supabase
-        .from("profiles")
+        .from("profiles_public")
         .select("name, avatar_url")
         .eq("user_id", data.user_id)
         .maybeSingle();
