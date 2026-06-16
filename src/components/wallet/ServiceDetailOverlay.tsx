@@ -51,9 +51,9 @@ export function ServiceDetailOverlay({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="bottom"
-          className="h-[92vh] p-0 rounded-t-2xl flex flex-col"
+          className="max-h-[85vh] p-0 rounded-t-2xl flex flex-col"
         >
-          <SheetHeader className="px-4 py-3 border-b text-left">
+          <SheetHeader className="px-4 py-3 border-b text-left shrink-0">
             <SheetTitle className="flex items-center gap-2 text-base">
               <Icon className="h-5 w-5 text-primary" />
               {label}
