@@ -368,6 +368,7 @@ export function useItineraries() {
         document_urls: string[];
         period: "manha" | "tarde" | "noite";
         day_id: string;
+        linked_trip_service_id: string | null;
       }>;
     }) => {
       const { error } = await supabase
