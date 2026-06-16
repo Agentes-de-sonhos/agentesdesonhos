@@ -27,6 +27,8 @@ import { verifyTripAccess } from "@/hooks/useTrips";
 import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
+import type { ItineraryDay } from "@/types/itinerary";
 
 function TripCalendarWithWeather(props: {
   destination: string;
@@ -1364,6 +1366,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [loading, setLoading] = useState(false);
   const [usedPassword, setUsedPassword] = useState(preLoadedPassword || "");
   const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
+  // V2 itinerary days in the shape consumed by <CollapsibleDayCard /> so the
+  // wallet renders the day-by-day with the exact same component as the public
+  // itinerary link (RoteiroPublico). Stays null for legacy/no-itinerary.
+  const [v2Days, setV2Days] = useState<ItineraryDay[] | null>(null);
+  const [v2Destination, setV2Destination] = useState<string | undefined>(undefined);
   const [gateAttempts, setGateAttempts] = useState(0);
   const [gateLocked, setGateLocked] = useState(false);
   const [gateBranding, setGateBranding] = useState<AgentProfile | null>(null);
@@ -1401,12 +1408,20 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               tarde: 'afternoon', afternoon: 'afternoon',
               noite: 'evening', evening: 'evening', night: 'evening',
             };
+            const PT_PERIOD_MAP: Record<string, 'manha' | 'tarde' | 'noite'> = {
+              manha: 'manha', manhã: 'manha', morning: 'manha',
+              tarde: 'tarde', afternoon: 'tarde',
+              noite: 'noite', evening: 'noite', night: 'noite',
+            };
             const mapped: any[] = [];
+            const richDays: ItineraryDay[] = [];
             for (const d of itin.days) {
               const acts = Array.isArray(d.activities) ? d.activities : [];
+              const dayActivities: any[] = [];
               for (const a of acts) {
                 const rawPeriod = String(a.period || '').toLowerCase().trim();
                 const normPeriod = PERIOD_MAP[rawPeriod] || 'morning';
+                const ptPeriod = PT_PERIOD_MAP[rawPeriod] || 'manha';
                 mapped.push({
                   id: a.id,
                   day_date: d.date,
@@ -1421,15 +1436,43 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   photo_urls: a.photo_url ? [a.photo_url] : [],
                   document_urls: Array.isArray(a.document_urls) ? a.document_urls : [],
                 });
+                dayActivities.push({
+                  id: a.id,
+                  period: ptPeriod,
+                  title: a.title,
+                  description: a.description ?? null,
+                  location: a.location ?? null,
+                  estimatedDuration: a.estimated_duration ?? null,
+                  estimatedCost: a.estimated_cost ?? null,
+                  orderIndex: a.order_index ?? 0,
+                  isApproved: true,
+                  photoUrl: a.photo_url ?? null,
+                  documentUrls: Array.isArray(a.document_urls) ? a.document_urls : [],
+                  mapsUrl: a.location
+                    ? (String(a.location).startsWith('http')
+                        ? a.location
+                        : `https://www.google.com/maps/search/${encodeURIComponent(a.location)}`)
+                    : null,
+                });
               }
+              richDays.push({
+                id: d.id,
+                dayNumber: d.day_number ?? (richDays.length + 1),
+                date: d.date,
+                activities: dayActivities,
+              });
             }
             setItineraryActivities(mapped);
+            setV2Days(richDays);
+            setV2Destination(itin.destination ?? undefined);
             return;
           }
         } catch (e) {
           console.error('[CarteiraPublica] Falha ao carregar Roteiro V2:', e);
         }
         setItineraryActivities([]);
+        setV2Days(null);
+        setV2Destination(undefined);
         return;
       }
 
@@ -1441,6 +1484,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         .order("day_date", { ascending: true })
         .order("order_index", { ascending: true });
       if (data) setItineraryActivities(data);
+      setV2Days(null);
+      setV2Destination(undefined);
     };
     fetchItinerary();
   }, [tripData?.id, tripData?.itinerary_mode, tripData?.itinerary_id, tripData?.public_access_code]);
@@ -1875,6 +1920,29 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div ref={itineraryRef} style={{ scrollMarginTop: '110px' }}>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Roteiro dia a dia</h2>
+              {v2Days && v2Days.length > 0 ? (
+                <div className="space-y-3">
+                  {v2Days.map((day) => {
+                    const isDayOpen = openDay === day.date;
+                    return (
+                      <div
+                        key={day.date}
+                        ref={(el) => { dayRefs.current[day.date] = el; }}
+                        style={{ scrollMarginTop: '80px' }}
+                      >
+                        <CollapsibleDayCard
+                          day={day}
+                          periodImages={{}}
+                          isOpen={isDayOpen}
+                          onToggle={() => toggleDay(day.date)}
+                          weather={itineraryWeather?.[day.date]}
+                          destination={v2Destination || tripData?.destination}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
               <div className="space-y-3">
                 {sortedDates.map((dateStr, idx) => {
                   const [y,m,d] = dateStr.split("-").map(Number);
@@ -1995,6 +2063,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   );
                 })}
               </div>
+              )}
             </div>
           );
         })()}
