@@ -100,7 +100,7 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
               if (value) onChange(null);
               setIsOpen(true);
             }}
-            onFocus={() => setIsOpen(true)}
+            onClick={() => setIsOpen(true)}
             className={`pl-9 ${error ? "border-destructive" : ""}`}
           />
           {value && (

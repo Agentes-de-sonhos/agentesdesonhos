@@ -355,7 +355,10 @@ export function KanbanBoard() {
                 </Button>
               </DialogTrigger>
             )}
-            <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+            <DialogContent
+              className="sm:max-w-4xl max-h-[90vh] flex flex-col"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
               <DialogHeader>
                 <DialogTitle>Nova Oportunidade</DialogTitle>
               </DialogHeader>
