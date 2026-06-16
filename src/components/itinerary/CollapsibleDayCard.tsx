@@ -216,6 +216,24 @@ export function CollapsibleDayCard({
                           </a>
                         )}
 
+                        {(() => {
+                          const linkedId = (activity as any).linkedTripServiceId as string | null | undefined;
+                          if (!linkedId || !servicesById) return null;
+                          const svc = servicesById.get(linkedId);
+                          if (!svc) return null;
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => onOpenService?.(svc)}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 hover:bg-primary/15 text-primary text-[11.5px] font-semibold px-2.5 py-1 transition-colors"
+                            >
+                              <span aria-hidden>{SERVICE_ICONS[svc.service_type]}</span>
+                              {SERVICE_CHIP_LABELS[svc.service_type]}
+                              <ArrowRight className="h-3 w-3" />
+                            </button>
+                          );
+                        })()}
+
                         {(activity as any).documentUrls?.length > 0 && (
                           <div className="space-y-1.5 pt-1">
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex items-center gap-1">
