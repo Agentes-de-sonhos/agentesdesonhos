@@ -882,30 +882,48 @@ export default function CriarRoteiro() {
         />
       )}
 
-      {currentItinerary && editPresentationOpen && (
+      {currentItinerary && editTextOpen && (
         <PublishReviewDialog
-          open={editPresentationOpen}
-          onOpenChange={setEditPresentationOpen}
+          open={editTextOpen}
+          onOpenChange={setEditTextOpen}
           itinerary={currentItinerary}
           mode="edit"
+          section="text"
           onConfirm={async (data) => {
             await updateItineraryDetails.mutateAsync({
               itineraryId: currentItinerary.id,
-              updates: {
-                destination_intro_text: data.introText,
-                destination_intro_images: data.images,
-                cover_image_url: data.coverUrl,
-                show_destination_intro: data.showIntro,
-              },
+              updates: { destination_intro_text: data.introText },
             });
             setCurrentItinerary({
               ...currentItinerary,
               destinationIntroText: data.introText || undefined,
+            });
+            toast.success("Descrição atualizada!");
+          }}
+        />
+      )}
+
+      {currentItinerary && editPhotosOpen && (
+        <PublishReviewDialog
+          open={editPhotosOpen}
+          onOpenChange={setEditPhotosOpen}
+          itinerary={currentItinerary}
+          mode="edit"
+          section="photos"
+          onConfirm={async (data) => {
+            await updateItineraryDetails.mutateAsync({
+              itineraryId: currentItinerary.id,
+              updates: {
+                destination_intro_images: data.images,
+                cover_image_url: data.coverUrl,
+              },
+            });
+            setCurrentItinerary({
+              ...currentItinerary,
               destinationIntroImages: data.images,
               coverImageUrl: data.coverUrl || undefined,
-              showDestinationIntro: data.showIntro,
             });
-            toast.success("Apresentação atualizada!");
+            toast.success("Fotos atualizadas!");
           }}
         />
       )}
