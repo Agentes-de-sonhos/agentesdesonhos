@@ -90,7 +90,6 @@ function GestaoClientesContent() {
           title="Clientes"
           subtitle="Gerencie clientes, oportunidades e metas de vendas"
           icon={Users}
-          adminTab="crm"
         />
 
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
