@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 import type { StageColor } from "@/types/crm";
+import { ensureStagePermission, PermissionDeniedError, DENY_MESSAGE } from "@/hooks/usePermissions";
 
 export interface OperationPipelineStage {
   id: string;
@@ -99,6 +100,9 @@ export function useOperationStages() {
 
   const updateStage = useMutation({
     mutationFn: async ({ id, ...patch }: { id: string; name?: string; color?: StageColor }) => {
+      if (!ensureStagePermission('operations', id, 'edit')) {
+        throw new PermissionDeniedError();
+      }
       const { error } = await supabase
         .from("operation_pipeline_stages" as any)
         .update(patch as any)
@@ -109,12 +113,15 @@ export function useOperationStages() {
       invalidate();
       toast.success("Coluna atualizada");
     },
-    onError: (e: any) => toast.error(e.message || "Erro ao atualizar coluna"),
+    onError: (e: any) => toast.error(e instanceof PermissionDeniedError ? DENY_MESSAGE : (e.message || "Erro ao atualizar coluna")),
   });
 
   const duplicateStage = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error("Não autenticado");
+      if (!ensureStagePermission('operations', id, 'edit')) {
+        throw new PermissionDeniedError();
+      }
       const source = stages.find((s) => s.id === id);
       if (!source) throw new Error("Coluna não encontrada");
       const newPos = source.position + 1;
@@ -131,25 +138,35 @@ export function useOperationStages() {
       while (stages.some((s) => s.key === key)) {
         key = `${base}_${n++}`;
       }
-      const { error } = await supabase.from("operation_pipeline_stages" as any).insert({
+      const { data: inserted, error } = await supabase.from("operation_pipeline_stages" as any).insert({
         user_id: agencyOwnerId || user.id,
         key,
         name: `${source.name} (cópia)`,
         color: source.color,
         position: newPos,
         is_protected: false,
-      });
+      }).select("id").single();
       if (error) throw error;
+      if ((inserted as any)?.id) {
+        await supabase.rpc("inherit_stage_permissions" as any, {
+          _pipeline: "operations",
+          _source_stage_id: id,
+          _new_stage_id: (inserted as any).id,
+        });
+      }
     },
     onSuccess: () => {
       invalidate();
       toast.success("Coluna duplicada");
     },
-    onError: (e: any) => toast.error(e.message || "Erro ao duplicar"),
+    onError: (e: any) => toast.error(e instanceof PermissionDeniedError ? DENY_MESSAGE : (e.message || "Erro ao duplicar")),
   });
 
   const deleteStage = useMutation({
     mutationFn: async ({ id, moveToStageKey }: { id: string; moveToStageKey?: string }) => {
+      if (!ensureStagePermission('operations', id, 'edit')) {
+        throw new PermissionDeniedError();
+      }
       const target = stages.find((s) => s.id === id);
       if (!target) throw new Error("Coluna não encontrada");
       if (target.is_protected) throw new Error("Esta coluna não pode ser excluída");
@@ -171,7 +188,7 @@ export function useOperationStages() {
       qc.invalidateQueries({ queryKey: ["operations"] });
       toast.success("Coluna excluída");
     },
-    onError: (e: any) => toast.error(e.message || "Erro ao excluir"),
+    onError: (e: any) => toast.error(e instanceof PermissionDeniedError ? DENY_MESSAGE : (e.message || "Erro ao excluir")),
   });
 
   return {
