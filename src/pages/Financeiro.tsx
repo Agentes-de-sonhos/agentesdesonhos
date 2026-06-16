@@ -153,24 +153,24 @@ export default function Financeiro() {
           <PageHeader
             pageKey="financeiro"
             title="Gestão Financeira"
-            subtitle="Controle simples e inteligente da sua agência"
+            subtitle="Controle simples da sua agência"
             icon={DollarSign}
           />
 
 
           {showPeriodSelector && (
-            <div className="mt-3 flex flex-wrap items-center gap-2 md:mt-0 md:absolute md:top-0 md:right-0">
-              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-foreground" onClick={goToPrevMonth}>
-                <ChevronLeft className="h-4 w-4" />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="icon" className="h-10 w-10" onClick={goToPrevMonth} aria-label="Mês anterior">
+                <ChevronLeft className="h-5 w-5" />
               </Button>
-              <div className="text-center min-w-[120px] md:min-w-[140px]">
-                <span className="text-sm font-semibold">{periodLabel}</span>
+              <div className="text-center min-w-[160px] px-3 py-2 rounded-lg bg-muted/50">
+                <span className="text-base sm:text-lg font-semibold">{periodLabel}</span>
               </div>
-              <Button variant="outline" size="icon" className="h-8 w-8 hover:bg-transparent hover:text-foreground" onClick={goToNextMonth}>
-                <ChevronRight className="h-4 w-4" />
+              <Button variant="outline" size="icon" className="h-10 w-10" onClick={goToNextMonth} aria-label="Próximo mês">
+                <ChevronRight className="h-5 w-5" />
               </Button>
               {!isCurrentMonth && (
-                <Button variant="ghost" size="sm" className="text-xs gap-1 hover:bg-transparent" onClick={goToCurrentMonth}>
+                <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={goToCurrentMonth}>
                   <Calendar className="h-3 w-3" />
                   Hoje
                 </Button>
