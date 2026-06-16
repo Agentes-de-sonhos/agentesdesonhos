@@ -186,7 +186,7 @@ export default function Financeiro() {
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-1 flex-wrap">
-              {ALL_TABS_DEF.map(tab => {
+              {primaryTabs.map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
                 return (
@@ -200,15 +200,42 @@ export default function Financeiro() {
                   </button>
                 );
               })}
-              {canShowTeamMembers && (
-                <button
-                  onClick={() => setTeamDialogOpen(true)}
-                  className={tabClass(false)}
-                >
-                  <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">Usuários da Equipe</span>
-                </button>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={tabClass(isMoreActive)}>
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="hidden sm:inline">Mais</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-[12rem]">
+                  {moreTabs.map(tab => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.key;
+                    return (
+                      <DropdownMenuItem
+                        key={tab.key}
+                        onClick={() => handleTabChange(tab.key)}
+                        className={cn(
+                          "flex items-center gap-2 cursor-pointer",
+                          isActive && "bg-accent text-accent-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{tab.label}</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  {canShowTeamMembers && (
+                    <DropdownMenuItem
+                      onClick={() => setTeamDialogOpen(true)}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <Users className="h-4 w-4" />
+                      <span>Usuários da Equipe</span>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div>
