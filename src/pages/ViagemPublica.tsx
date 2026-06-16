@@ -1366,6 +1366,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [loading, setLoading] = useState(false);
   const [usedPassword, setUsedPassword] = useState(preLoadedPassword || "");
   const [itineraryActivities, setItineraryActivities] = useState<any[]>([]);
+  // V2 itinerary days in the shape consumed by <CollapsibleDayCard /> so the
+  // wallet renders the day-by-day with the exact same component as the public
+  // itinerary link (RoteiroPublico). Stays null for legacy/no-itinerary.
+  const [v2Days, setV2Days] = useState<ItineraryDay[] | null>(null);
+  const [v2Destination, setV2Destination] = useState<string | undefined>(undefined);
   const [gateAttempts, setGateAttempts] = useState(0);
   const [gateLocked, setGateLocked] = useState(false);
   const [gateBranding, setGateBranding] = useState<AgentProfile | null>(null);
