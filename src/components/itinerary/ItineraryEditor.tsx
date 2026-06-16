@@ -72,6 +72,9 @@ import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./Activity
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
 import { ActivityMediaActions } from "./ActivityMediaActions";
+import { useLinkedTripForItinerary } from "@/hooks/useLinkedTripForItinerary";
+import { SERVICE_ICONS, SERVICE_LABELS, getServiceSummary } from "@/lib/tripServiceLabels";
+import { Link2 } from "lucide-react";
 
 const periodIcons = {
   manha: Sun,
@@ -261,6 +264,8 @@ export function ItineraryEditor({
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
     useItineraryPeriodImages(itineraryId);
+  const { data: linkedTrip } = useLinkedTripForItinerary(itineraryId);
+  const tripServices = linkedTrip?.services ?? [];
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
   const { memory, learnFromInstruction, recordApproved, recordRemoved } =
