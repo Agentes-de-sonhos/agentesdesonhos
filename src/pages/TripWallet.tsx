@@ -815,14 +815,20 @@ function TripWalletContent() {
               <span className="text-base font-semibold">Roteiro dia a dia</span>
             </AccordionTrigger>
             <AccordionContent className="px-4 pb-4">
-              <TripItinerary
-                tripId={trip.id}
-                destination={trip.destination}
-                startDate={trip.start_date}
-                endDate={trip.end_date}
-                services={trip.services || []}
-                onRequestAddService={openServicesAccordion}
-              />
+              {trip.itinerary_mode === "v2" ? (
+                <TripItineraryV2 trip={trip} />
+              ) : trip.itinerary_mode === "legacy" ? (
+                <TripItinerary
+                  tripId={trip.id}
+                  destination={trip.destination}
+                  startDate={trip.start_date}
+                  endDate={trip.end_date}
+                  services={trip.services || []}
+                  onRequestAddService={openServicesAccordion}
+                />
+              ) : (
+                <TripItineraryV2 trip={trip} />
+              )}
             </AccordionContent>
           </AccordionItem>
 
