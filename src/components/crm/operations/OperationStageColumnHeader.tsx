@@ -22,6 +22,7 @@ interface Props {
   onChangeColor: (color: StageColor) => void | Promise<void>;
   onDuplicate: () => void | Promise<void>;
   onRequestDelete: () => void;
+  canEdit?: boolean;
 }
 
 const COLOR_KEYS = Object.keys(STAGE_COLOR_PALETTE) as StageColor[];
@@ -33,6 +34,7 @@ export function OperationStageColumnHeader({
   onChangeColor,
   onDuplicate,
   onRequestDelete,
+  canEdit = true,
 }: Props) {
   const tokens = getStageTokens(stage.color);
   const [editing, setEditing] = useState(false);
@@ -107,12 +109,12 @@ export function OperationStageColumnHeader({
           ) : (
             <button
               type="button"
-              onClick={() => setEditing(true)}
+              onClick={() => { if (canEdit) setEditing(true); }}
               className={cn(
                 "font-semibold text-sm text-left truncate rounded px-1 py-0.5 hover:bg-muted/60 transition-colors",
                 tokens.text
               )}
-              title="Clique para editar"
+              title={canEdit ? "Clique para editar" : undefined}
             >
               {stage.name}
             </button>
@@ -124,7 +126,7 @@ export function OperationStageColumnHeader({
           )}
         </div>
 
-        {!editing && (
+        {!editing && canEdit && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

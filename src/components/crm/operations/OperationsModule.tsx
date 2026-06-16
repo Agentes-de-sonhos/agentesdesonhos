@@ -28,7 +28,7 @@ import { ptBR } from "date-fns/locale";
 export function OperationsModule() {
   const { operations, isLoading, moveStage, reorderOperations } = useOperations();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
-  const { can, isTeamMember } = usePermissions();
+  const { can, canStage, isTeamMember } = usePermissions();
   const canCreate = can('operations.create');
   const canEdit = can('operations.edit');
   const [search, setSearch] = useState("");
@@ -202,6 +202,7 @@ export function OperationsModule() {
                 {stages.map((stage) => {
                   const ops = byStage.get(stage.key) || [];
                   const tokens = getStageTokens(stage.color);
+                  const stageCanEdit = canStage('operations', stage.id, 'edit');
                   return (
                     <div
                       key={stage.id}
@@ -220,6 +221,7 @@ export function OperationsModule() {
                         onChangeColor={(color) => updateStage({ id: stage.id, color })}
                         onDuplicate={() => duplicateStage(stage.id)}
                         onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
+                        canEdit={stageCanEdit}
                       />
                       <div className="space-y-2.5">
                         {ops.map((op) => {

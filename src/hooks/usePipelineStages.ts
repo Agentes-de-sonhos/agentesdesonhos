@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 import type { PipelineStage, StageColor } from "@/types/crm";
+import { ensureStagePermission, PermissionDeniedError, DENY_MESSAGE } from "@/hooks/usePermissions";
 
 export function usePipelineStages() {
   const { user } = useAuth();
@@ -64,6 +65,9 @@ export function usePipelineStages() {
 
   const updateStage = useMutation({
     mutationFn: async ({ id, ...patch }: { id: string; name?: string; color?: StageColor }) => {
+      if (!ensureStagePermission('opportunities', id, 'edit')) {
+        throw new PermissionDeniedError();
+      }
       const { error } = await supabase
         .from("pipeline_stages")
         .update(patch)
@@ -74,12 +78,21 @@ export function usePipelineStages() {
       invalidate();
       toast.success("Coluna atualizada");
     },
-    onError: (e: any) => toast.error("Erro ao atualizar coluna", { description: e.message }),
+    onError: (e: any) => {
+      if (e instanceof PermissionDeniedError) {
+        toast.error(DENY_MESSAGE);
+      } else {
+        toast.error("Erro ao atualizar coluna", { description: e.message });
+      }
+    },
   });
 
   const duplicateStage = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error("Not authenticated");
+      if (!ensureStagePermission('opportunities', id, 'edit')) {
+        throw new PermissionDeniedError();
+      }
       const source = stages.find((s) => s.id === id);
       if (!source) throw new Error("Coluna não encontrada");
       const newPos = source.position + 1;
@@ -91,24 +104,41 @@ export function usePipelineStages() {
           .update({ position: s.position + 1 })
           .eq("id", s.id);
       }
-      const { error } = await supabase.from("pipeline_stages").insert({
+      const { data: inserted, error } = await supabase.from("pipeline_stages").insert({
         user_id: agencyOwnerId || user.id,
         name: `${source.name} (cópia)`,
         position: newPos,
         color: source.color,
         is_default: false,
-      });
+      }).select("id").single();
       if (error) throw error;
+      // Inherit per-team-member stage permissions from the source stage
+      if (inserted?.id) {
+        await supabase.rpc("inherit_stage_permissions" as any, {
+          _pipeline: "opportunities",
+          _source_stage_id: id,
+          _new_stage_id: inserted.id,
+        });
+      }
     },
     onSuccess: () => {
       invalidate();
       toast.success("Coluna duplicada");
     },
-    onError: (e: any) => toast.error("Erro ao duplicar", { description: e.message }),
+    onError: (e: any) => {
+      if (e instanceof PermissionDeniedError) {
+        toast.error(DENY_MESSAGE);
+      } else {
+        toast.error("Erro ao duplicar", { description: e.message });
+      }
+    },
   });
 
   const deleteStage = useMutation({
     mutationFn: async ({ id, moveToStageId }: { id: string; moveToStageId?: string }) => {
+      if (!ensureStagePermission('opportunities', id, 'edit')) {
+        throw new PermissionDeniedError();
+      }
       if (moveToStageId) {
         const { error: moveErr } = await supabase
           .from("opportunities")
@@ -124,7 +154,13 @@ export function usePipelineStages() {
       qc.invalidateQueries({ queryKey: ["opportunities"] });
       toast.success("Coluna excluída");
     },
-    onError: (e: any) => toast.error("Erro ao excluir", { description: e.message }),
+    onError: (e: any) => {
+      if (e instanceof PermissionDeniedError) {
+        toast.error(DENY_MESSAGE);
+      } else {
+        toast.error("Erro ao excluir", { description: e.message });
+      }
+    },
   });
 
   const reorderStages = useMutation({
