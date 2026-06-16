@@ -29,7 +29,6 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
   const { user } = useAuth();
   const { toast } = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
 
   const { data: itineraries = [], isLoading } = useQuery({
     queryKey: ["my-itineraries-for-attach", user?.id],
