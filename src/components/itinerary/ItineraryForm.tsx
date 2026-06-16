@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -70,9 +70,15 @@ const formSchema = z.object({
 interface ItineraryFormProps {
   onSubmit: (data: ItineraryFormData) => void;
   isLoading?: boolean;
+  initialValues?: {
+    destination?: string;
+    startDate?: Date;
+    endDate?: Date;
+    client?: { id: string; name: string } | null;
+  };
 }
 
-export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
+export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryFormProps) {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<TravelInterest[]>([]);
@@ -106,6 +112,24 @@ export function ItineraryForm({ onSubmit, isLoading }: ItineraryFormProps) {
       mobilityLimitations: "",
     },
   });
+
+  // Pré-preenche a partir de uma carteira ao clicar em "Criar novo".
+  useEffect(() => {
+    if (!initialValues) return;
+    if (initialValues.destination) form.setValue("destination", initialValues.destination);
+    if (initialValues.startDate && initialValues.endDate) {
+      form.setValue("startDate", initialValues.startDate);
+      form.setValue("endDate", initialValues.endDate);
+      setDateRange({ from: initialValues.startDate, to: initialValues.endDate });
+    } else if (initialValues.startDate) {
+      form.setValue("startDate", initialValues.startDate);
+      setDateRange({ from: initialValues.startDate, to: undefined });
+    }
+    if (initialValues.client) {
+      setSelectedClient(initialValues.client);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleInterest = (interest: TravelInterest) => {
     setSelectedInterests((prev) => {
