@@ -22,7 +22,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useTravelers, useTravelerDocuments, type Traveler } from "@/hooks/useTravelers";
+import { useTravelers, useTravelerDocuments, getTravelerDocumentSignedUrl, type Traveler } from "@/hooks/useTravelers";
+import { useToast } from "@/hooks/use-toast";
 
 interface TravelersSectionProps {
   clientId: string;
@@ -321,6 +322,32 @@ function TravelerDocumentsSection({ travelerId, travelerName }: { travelerId: st
   const { documents, isLoading, uploadDocument, deleteDocument, isUploading } = useTravelerDocuments(travelerId);
   const [tipoDoc, setTipoDoc] = useState("outros");
   const fileInputId = `file-${travelerId}`;
+  const { toast } = useToast();
+
+  const handleView = async (path: string) => {
+    try {
+      const url = await getTravelerDocumentSignedUrl(path);
+      window.open(url, "_blank");
+    } catch (e: any) {
+      toast({ title: "Erro ao abrir documento", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const handleDownload = async (path: string, filename: string) => {
+    try {
+      const url = await getTravelerDocumentSignedUrl(path);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e: any) {
+      toast({ title: "Erro ao baixar documento", description: e.message, variant: "destructive" });
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -380,15 +407,16 @@ function TravelerDocumentsSection({ travelerId, travelerName }: { travelerId: st
               <div className="flex items-center gap-1 shrink-0">
                 <Button
                   variant="ghost" size="icon" className="h-7 w-7"
-                  onClick={() => window.open(doc.arquivo_url, "_blank")}
+                  onClick={() => handleView(doc.arquivo_url)}
                 >
                   <Eye className="h-3.5 w-3.5" />
                 </Button>
-                <a href={doc.arquivo_url} download={doc.nome_arquivo}>
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <Download className="h-3.5 w-3.5" />
-                  </Button>
-                </a>
+                <Button
+                  variant="ghost" size="icon" className="h-7 w-7"
+                  onClick={() => handleDownload(doc.arquivo_url, doc.nome_arquivo)}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive">
