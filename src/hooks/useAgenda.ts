@@ -161,24 +161,26 @@ export function useAgenda(year?: number) {
     enabled: !!user?.id,
   });
 
-  // Fetch all CRM opportunity follow-ups for current user (current year)
+  // Fetch CRM opportunity follow-ups for the current user (personal Agenda).
+  // The Agenda is individual: each user only sees follow-ups they created (created_by = auth.uid()).
+  // The shared opportunity history is handled separately by useOpportunityFollowups.
   const { data: opportunityFollowups = [] } = useQuery({
-    queryKey: ["agenda-followups", agencyOwnerId, user?.id, currentYear],
+    queryKey: ["agenda-followups", user?.id, currentYear],
     queryFn: async () => {
-      if (!user?.id || !agencyOwnerId) return [];
+      if (!user?.id) return [];
       const startDate = `${currentYear}-01-01`;
       const endDate = `${currentYear}-12-31`;
       const { data, error } = await supabase
         .from("opportunity_followups" as any)
-        .select("id, follow_up_date, note, opportunity_id, opportunity:opportunities(destination, client:clients(name))")
-        .eq("user_id", agencyOwnerId)
+        .select("id, follow_up_date, note, opportunity_id, created_by, opportunity:opportunities(destination, client:clients(name))")
+        .eq("created_by", user.id)
         .gte("follow_up_date", startDate)
         .lte("follow_up_date", endDate)
         .order("follow_up_date", { ascending: true });
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!user?.id && !!agencyOwnerId,
+    enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
   });
 
