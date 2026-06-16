@@ -1454,6 +1454,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                         ? a.location
                         : `https://www.google.com/maps/search/${encodeURIComponent(a.location)}`)
                     : null,
+                  linkedTripServiceId: a.linked_trip_service_id ?? null,
                 });
               }
               richDays.push({
