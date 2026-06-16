@@ -45,8 +45,6 @@ export function StageColumnHeader({
   stage,
   count,
   overdueCount,
-  totalLabel,
-  avgTimeLabel,
   dragHandleProps,
   onRename,
   onChangeColor,
