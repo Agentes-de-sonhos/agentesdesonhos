@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Plus, Sun, Sunset, Moon, ChevronDown, Loader2, Camera, X, Sparkles, RefreshCw, Plane, Hotel, Bus, AlertTriangle, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatItineraryDayHeader } from "@/lib/dateParsing";
 import { useItineraryActivities, type ItineraryActivity, type CreateActivityData } from "@/hooks/useItineraryActivities";
 import { ItineraryActivityForm } from "./ItineraryActivityForm";
 import { ItineraryActivityCard } from "./ItineraryActivityCard";
@@ -435,8 +436,8 @@ export function TripItinerary({ tripId, destination, startDate, endDate, service
               >
                 <div className="flex items-baseline gap-2">
                   <span className="text-base font-bold text-primary">Dia {day.dayNumber}</span>
-                  <span className="text-xs text-muted-foreground capitalize">
-                    {format(day.date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                  <span className="text-xs text-muted-foreground">
+                    {formatItineraryDayHeader(day.date)}
                   </span>
                   {activityCount > 0 && (
                     <span className="ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">

@@ -67,7 +67,7 @@ import { Label } from "@/components/ui/label";
 import { ItineraryDay, Activity } from "@/types/itinerary";
 import { cn } from "@/lib/utils";
 import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
-import { parseLocalDate } from "@/lib/dateParsing";
+import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
@@ -423,9 +423,7 @@ export function ItineraryEditor({
                     Dia {day.dayNumber}
                   </CardTitle>
                   <CardDescription>
-                    {format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", {
-                      locale: ptBR,
-                    })}
+                    {formatItineraryDayHeader(parseLocalDate(day.date))}
                   </CardDescription>
                 </div>
                 <Dialog

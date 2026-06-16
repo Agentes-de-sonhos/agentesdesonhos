@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { formatItineraryDayHeader } from "@/lib/dateParsing";
 import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -1966,8 +1967,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           </div>
                           <div className="text-left">
                             <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
-                            <p className="text-xs text-muted-foreground capitalize">
-                              {format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                            <p className="text-xs text-muted-foreground">
+                              {formatItineraryDayHeader(dayDate)}
                             </p>
                           </div>
                         </div>

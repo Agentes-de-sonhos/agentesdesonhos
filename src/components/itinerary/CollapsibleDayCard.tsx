@@ -4,7 +4,7 @@ import {
   Calendar, ChevronDown, MapPin, Clock, DollarSign, Sun, Sunset, Moon,
   FileText, Download, Eye, ExternalLink,
 } from "lucide-react";
-import { parseLocalDate } from "@/lib/dateParsing";
+import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import type { ItineraryDay } from "@/types/itinerary";
 import { weatherIconFor } from "@/components/trip/TripCalendar";
 import type { DayWeather } from "@/hooks/useTripWeather";
@@ -79,7 +79,7 @@ export function CollapsibleDayCard({
   weather?: DayWeather;
   destination?: string;
 }) {
-  const dateFormatted = format(parseLocalDate(day.date), "EEEE, dd 'de' MMMM", { locale: ptBR });
+  const dateFormatted = formatItineraryDayHeader(parseLocalDate(day.date));
   const WxIcon = weather ? weatherIconFor(weather.code) : null;
   const totalActivities = day.activities.length;
 
@@ -106,7 +106,7 @@ export function CollapsibleDayCard({
             <span className="text-[13px] font-bold tracking-tight text-primary uppercase">
               Dia {day.dayNumber}
             </span>
-            <span className="text-xs text-muted-foreground font-medium capitalize truncate">
+            <span className="text-xs text-muted-foreground font-medium truncate">
               {dateFormatted}
               {!isOpen && totalActivities > 0 && (
                 <span className="text-muted-foreground/60"> · {totalActivities} {totalActivities === 1 ? "atividade" : "atividades"}</span>
