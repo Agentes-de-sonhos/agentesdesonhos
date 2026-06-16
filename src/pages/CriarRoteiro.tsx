@@ -30,6 +30,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ExternalLink, Copy } from "lucide-react";
 import {
@@ -794,16 +795,45 @@ export default function CriarRoteiro() {
                         <Sparkles className="h-3.5 w-3.5 text-primary" />
                         Apresentação do destino
                       </span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 px-2"
-                        onClick={() => setEditTextOpen(true)}
-                      >
-                        <Pencil className="h-3.5 w-3.5 mr-1" />
-                        Editar descrição
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2"
+                          onClick={() => setEditTextOpen(true)}
+                        >
+                          <Pencil className="h-3.5 w-3.5 mr-1" />
+                          Editar descrição
+                        </Button>
+                        <div className="flex items-center gap-1.5 pl-2 border-l">
+                          <Switch
+                            id="show-intro-inline"
+                            checked={currentItinerary.showDestinationIntro !== false}
+                            onCheckedChange={async (checked) => {
+                              const prev = currentItinerary;
+                              setCurrentItinerary({ ...prev, showDestinationIntro: checked });
+                              try {
+                                await updateItineraryDetails.mutateAsync({
+                                  itineraryId: prev.id,
+                                  updates: { show_destination_intro: checked },
+                                });
+                              } catch (err) {
+                                setCurrentItinerary(prev);
+                                toast.error("Não foi possível atualizar a visibilidade.");
+                              }
+                            }}
+                          />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              <p className="max-w-[200px]">Mostra o texto e a galeria de fotos no topo do roteiro público.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
                     </div>
                     {currentItinerary.destinationIntroText ? (
                       <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line line-clamp-6">
@@ -814,33 +844,6 @@ export default function CriarRoteiro() {
                         Nenhum texto gerado ainda. Clique em "Editar descrição" para criar a apresentação do destino.
                       </p>
                     )}
-                    <div className="mt-4 flex items-center justify-between rounded-lg border p-3">
-                      <div className="pr-3">
-                        <Label htmlFor="show-intro-inline" className="text-sm font-semibold">
-                          Exibir apresentação do destino
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Mostra o texto e a galeria de fotos no topo do roteiro público.
-                        </p>
-                      </div>
-                      <Switch
-                        id="show-intro-inline"
-                        checked={currentItinerary.showDestinationIntro !== false}
-                        onCheckedChange={async (checked) => {
-                          const prev = currentItinerary;
-                          setCurrentItinerary({ ...prev, showDestinationIntro: checked });
-                          try {
-                            await updateItineraryDetails.mutateAsync({
-                              itineraryId: prev.id,
-                              updates: { show_destination_intro: checked },
-                            });
-                          } catch (err) {
-                            setCurrentItinerary(prev);
-                            toast.error("Não foi possível atualizar a visibilidade.");
-                          }
-                        }}
-                      />
-                    </div>
                   </div>
                 </div>
               </CardContent>
