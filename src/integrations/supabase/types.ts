@@ -4333,6 +4333,7 @@ export type Database = {
           estimated_duration: string | null
           id: string
           is_approved: boolean
+          linked_trip_service_id: string | null
           location: string | null
           order_index: number
           period: string
@@ -4349,6 +4350,7 @@ export type Database = {
           estimated_duration?: string | null
           id?: string
           is_approved?: boolean
+          linked_trip_service_id?: string | null
           location?: string | null
           order_index?: number
           period: string
@@ -4365,6 +4367,7 @@ export type Database = {
           estimated_duration?: string | null
           id?: string
           is_approved?: boolean
+          linked_trip_service_id?: string | null
           location?: string | null
           order_index?: number
           period?: string
@@ -4378,6 +4381,13 @@ export type Database = {
             columns: ["day_id"]
             isOneToOne: false
             referencedRelation: "itinerary_days"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itinerary_activities_linked_trip_service_id_fkey"
+            columns: ["linked_trip_service_id"]
+            isOneToOne: false
+            referencedRelation: "trip_services"
             referencedColumns: ["id"]
           },
         ]
