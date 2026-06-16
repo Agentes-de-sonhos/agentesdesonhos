@@ -11024,6 +11024,14 @@ export type Database = {
         Returns: boolean
       }
       immutable_unaccent: { Args: { "": string }; Returns: string }
+      inherit_stage_permissions: {
+        Args: {
+          _new_stage_id: string
+          _pipeline: Database["public"]["Enums"]["team_pipeline_type"]
+          _source_stage_id: string
+        }
+        Returns: undefined
+      }
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
