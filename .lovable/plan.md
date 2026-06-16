@@ -1,196 +1,118 @@
+## Roteiro V2 na Carteira Digital — Plano Revisado (UX Simplificada)
 
-# Roteiro V2 na Carteira Digital — Plano Técnico Final (Revisado)
-
-Resposta direta aos 10 pontos levantados, seguida de migrations, arquivos, ordem de execução e testes. Nada será executado até aprovação.
-
----
-
-## 1. Estado "sem roteiro" — concordo com `none` explícito
-
-Recomendo `itinerary_mode IN ('none','legacy','v2')` com default `'none'` para carteiras novas.
-
-Motivos:
-- Inferir por `itinerary_id IS NULL` + "ausência de atividades legadas" exige um COUNT em `trip_itinerary_activities` a cada render → custo e ambiguidade.
-- Estado explícito permite distinguir "usuário ainda não decidiu" de "usuário desvinculou de propósito".
-- Facilita métricas (% de carteiras com roteiro, qual modo).
-- Migração das carteiras existentes: backfill determinístico — se existir 1+ linha em `trip_itinerary_activities` para o `trip_id` → `'legacy'`; caso contrário → `'none'`.
-
-Risco: nenhum relevante. Campo aditivo.
-
-## 2. Regra de renderização — concordo, com guarda extra
-
-```
-if mode = 'v2' AND itinerary_id IS NOT NULL  → Roteiro V2
-else if mode = 'legacy'                       → roteiro legado
-                                                (mesmo vazio é OK, é estado conhecido)
-else (mode = 'none' OR v2 sem itinerary_id)   → EmptyState com CTAs
-                                                 [Criar do zero] [Importar existente]
-```
-
-Guarda extra: se `mode = 'v2'` mas `itinerary_id IS NULL` (estado inconsistente, ex.: itinerário deletado e FK SET NULL disparou), tratar como `'none'` no frontend e oferecer reatribuição. Não cair em legacy nesse caso.
-
-## 3. Desvincular — concordo
-
-Regra ao desvincular:
-1. `UPDATE trips SET itinerary_id = NULL, itinerary_mode = CASE WHEN EXISTS(SELECT 1 FROM trip_itinerary_activities WHERE trip_id = $1) THEN 'legacy' ELSE 'none' END`.
-2. Nunca deletar o `itineraries` de origem (`source_itinerary_id`).
-3. A cópia local **não** é deletada automaticamente — fica órfã (acessível via Criar Roteiros do agente). Opção futura: flag `archived_at` para "arquivar" sem perder. Por ora, apenas desvincular.
-4. Oferecer no diálogo de desvinculação um checkbox secundário "Excluir também a cópia editada" (default OFF) — ação destrutiva e opt-in.
-
-## 4. Leitura pública — concordo, RPC dedicada
-
-Sim, criar `get_public_trip_itinerary_v2(p_trip_id uuid, p_access_code text)` em `SECURITY DEFINER`.
-
-Funcionamento:
-- Valida `trips.access_code = p_access_code` e que a carteira está publicada.
-- Lê `trips.itinerary_id`, retorna JSON aninhado com: itinerary (campos públicos apenas), days, activities (ordenadas), period_images, documentos vinculados, maps_url, notes.
-- Não expõe `user_id`, `agency_id`, `created_at` interno, analytics, slugs privados.
-- Não requer policy pública em `itineraries` — mantém RLS estrita.
-
-Hoje **não** existe RPC equivalente. Há `get_public_profile` e funções similares, mas nada para itinerário. Padrão alinhado com o que já fazemos para vouchers/cards.
-
-## 5. Clone — concordo, transacional + reset de campos públicos
-
-RPC: `clone_itinerary_for_trip(p_source_itinerary_id uuid, p_trip_id uuid) RETURNS uuid` (`SECURITY DEFINER`, `SET search_path = public`).
-
-Fluxo dentro de bloco transacional implícito (função plpgsql):
-1. Valida `auth.uid()` é dono de `p_source_itinerary_id` **ou** o itinerário é template/compartilhado permitido.
-2. Valida `auth.uid()` é dono do `trips.user_id`.
-3. INSERT em `itineraries` copiando campos de conteúdo; **resetando**: `public_slug = NULL`, `access_code = <novo>`, `published = false`, `views_count = 0`, `source_itinerary_id = p_source_itinerary_id`, `created_at = now()`, `updated_at = now()`, `user_id = auth.uid()`.
-4. Loop em `itinerary_days` do source → INSERT em novos days, mantendo mapa `old_day_id → new_day_id` em tabela temporária ou CTE.
-5. INSERT em `itinerary_activities` com `day_id` remapeado, preservando `order_index`, `start_time`, `notes`, `photo_urls[]`, `location`, `description`, `estimated_duration`, `estimated_cost`.
-6. INSERT em `itinerary_period_images` com `itinerary_id` remapeado (não copiar `trip_id` — não aplicável).
-7. UPDATE `trips SET itinerary_id = new_id, itinerary_mode = 'v2' WHERE id = p_trip_id`.
-8. Retorna `new_id`. Qualquer EXCEPTION → ROLLBACK automático (função plpgsql).
-
-Campos NÃO copiados (resetados): `public_slug`, `access_code`, `published`, `views_count`, analytics, `pdf_url` cacheado, `og_image_url` cacheado.
-
-## 6. Campo de rastreio — recomendo manter mínimo agora
-
-Sugiro **apenas** `source_itinerary_id uuid NULL`. Não adicionar `context` ou `created_from_trip_id` agora:
-- `context` é derivável: `source_itinerary_id IS NOT NULL` → cópia; senão → standalone.
-- `created_from_trip_id` é redundante com a relação inversa (`trips.itinerary_id`).
-- YAGNI: adicionar depois é trivial e aditivo, sem migração quebrável.
-
-Se quiser uma única adição leve: `origin_kind text CHECK IN ('standalone','wallet_clone','wallet_native') DEFAULT 'standalone'` — preenchido pela RPC de clone (`wallet_clone`) e por um endpoint de criação nativa em wallet (`wallet_native`). Recomendo **deixar para Fase 2** se necessidade analítica surgir.
-
-## 7. Reuso real dos componentes — refatoração leve necessária
-
-Auditei `CriarRoteiro.tsx`, `useItineraries`, `useItineraryActivities`. Status:
-
-- `ItineraryEditor` / `ItineraryForm` hoje assumem rota `/criar-roteiro` e navegação própria (toasts de "Roteiro salvo", redirect, etc.). **Precisa de props de mode**: `mode: 'standalone' | 'embed'`, `onSaved?: (itineraryId) => void`, `hideHeader?: boolean`, `hidePublishControls?: boolean`.
-- `AIGeneratingOverlay`, `PublishReviewDialog`, `downloadPDF` — já são puros, reutilizáveis sem mudança.
-- Hooks (`useItineraries`, `useItineraryActivities`, `useItineraryPeriodImages`) — já são reutilizáveis, parametrizados por `itineraryId`.
-- Renderer público (`RoteiroPublicoV2.tsx`) — extrair um `<ItineraryReadOnlyView itineraryId={...} />` puro que possa ser embedado dentro de `CarteiraPublica.tsx`.
-
-Conclusão: refatoração de superfície (props), não estrutural. Estimo 1 PR pequeno antes da Fase 3.
-
-## 8. ImportItineraryModal — concordo
-
-- `ImportItineraryModal` **legado** permanece intocado, só será chamado quando `itinerary_mode = 'legacy'` (manutenção de carteiras antigas).
-- Novo `AttachItineraryDialog` (V2) com 3 ações: **Criar do zero** (cria `itinerary` vazio + atribui), **Importar existente** (chama `clone_itinerary_for_trip`), **Desvincular**.
-- V2 **nunca** escreve em `trip_itinerary_activities`. V2 e legacy permanecem silos isolados.
-- Em uma carteira `legacy` existente, oferecer botão "Migrar para Roteiro V2" (Fase futura, não escopo deste plano).
+Confirmo que a mudança simplifica significativamente a implementação. Abaixo as respostas às 5 perguntas e o plano ajustado.
 
 ---
 
-## Migrations necessárias
+### Respostas
 
-**Migration única, aditiva:**
+**1. Simplifica a implementação?**
+Sim, e bastante. Elimina toda a complexidade de "embed mode" no `ItineraryEditor` (props condicionais, header/publish controls escondidos, autosave compartilhado, conflitos de contexto entre Trip e Itinerary). Reduz risco de regressão no editor standalone existente.
 
-```sql
--- trips
-ALTER TABLE public.trips
-  ADD COLUMN itinerary_id uuid NULL REFERENCES public.itineraries(id) ON DELETE SET NULL,
-  ADD COLUMN itinerary_mode text NOT NULL DEFAULT 'none'
-    CHECK (itinerary_mode IN ('none','legacy','v2'));
+**2. As migrations e RPCs já entregues continuam válidas?**
+Sim, 100%. Continuam necessárias e não mudam:
+- `trips.itinerary_id` + `trips.itinerary_mode` (`none`/`legacy`/`v2`) — base do vínculo.
+- `itineraries.source_itinerary_id` — rastreio de clonagem.
+- RPC `clone_itinerary_for_trip` — usada ao criar/importar roteiro a partir da Carteira.
+- RPC `get_public_trip_itinerary_v2` — usada na Carteira Pública para renderizar o roteiro V2 sem expor RLS de `itineraries`.
 
--- backfill determinístico
-UPDATE public.trips t
-SET itinerary_mode = 'legacy'
-WHERE EXISTS (SELECT 1 FROM public.trip_itinerary_activities a WHERE a.trip_id = t.id);
+Nada do que foi entregue no banco vira código morto.
 
--- itineraries
-ALTER TABLE public.itineraries
-  ADD COLUMN source_itinerary_id uuid NULL REFERENCES public.itineraries(id) ON DELETE SET NULL;
+**3. `TripItineraryV2` vira apenas visualizador/resumo?**
+Sim. Passa a ser um **card resumo** com:
+- Cabeçalho: título do roteiro, destino, período, nº de dias, status (rascunho/publicado).
+- Miniatura (capa ou primeira imagem de período, se existir).
+- Ações: **Abrir roteiro** (navega para `/criar-roteiros/:id`), **Trocar roteiro**, **Desvincular**.
+- Sem edição inline, sem lista de atividades editável, sem publish controls.
 
-CREATE INDEX idx_trips_itinerary_id ON public.trips(itinerary_id) WHERE itinerary_id IS NOT NULL;
-CREATE INDEX idx_itineraries_source ON public.itineraries(source_itinerary_id) WHERE source_itinerary_id IS NOT NULL;
-```
+Opcionalmente, uma prévia read-only colapsada dos dias (apenas leitura, sem ações) — mas pode ficar fora do MVP.
 
-**Migration RPCs (separada, após validação):**
-- `clone_itinerary_for_trip(uuid, uuid) RETURNS uuid` — SECURITY DEFINER.
-- `get_public_trip_itinerary_v2(uuid, text) RETURNS jsonb` — SECURITY DEFINER.
+**4. `ItineraryEditor` em modo embed ainda é necessário?**
+**Não.** O `ItineraryEditor` continua exatamente como está hoje, sem novos props (`mode`, `hideHeader`, `hidePublishControls`, `onSaved` específico de embed). Toda edição acontece na rota standalone existente. Isso elimina a Fase 1 inteira de refactor do editor.
 
-Nenhuma alteração em `trip_itinerary_activities`, `trip_itinerary_period_images`, `itinerary_days`, `itinerary_activities`. Nenhuma policy existente é alterada.
+**5. Quais fases mudam?**
 
-## Arquivos afetados
-
-**Novos:**
-- `src/components/wallet/TripItineraryV2.tsx` — wrapper embed.
-- `src/components/wallet/AttachItineraryDialog.tsx` — diálogo criar/importar/desvincular.
-- `src/components/itinerary/ItineraryReadOnlyView.tsx` — renderer público extraído.
-- `src/lib/roteiro-domain.ts` — adicionar `cloneItineraryForTrip(sourceId, tripId)`, `attachItineraryToTrip`, `detachItineraryFromTrip`.
-
-**Refatorados (props/mode, sem mudar lógica):**
-- `src/components/itinerary/ItineraryEditor.tsx` — props `mode`, `onSaved`, `hideHeader`.
-- `src/pages/RoteiroPublicoV2.tsx` — passa a usar `ItineraryReadOnlyView`.
-
-**Integração:**
-- `src/components/wallet/TripWallet.tsx` (ou equivalente) — branch por `itinerary_mode`.
-- `src/pages/CarteiraPublica.tsx` — branch V2 via `get_public_trip_itinerary_v2`.
-- `src/types/trip.ts` — tipos `itinerary_mode`, `itinerary_id`.
-
-**Não tocar:** `ImportItineraryModal.tsx` (legado), `TripItinerary.tsx` (legado), Criar Roteiros, CRM, follow-ups, financeiro.
-
-## Ordem final de execução
-
-- **Fase 0** — Auditoria final (componentes, hooks, policies). Confirmar nomes exatos de colunas em `itineraries`.
-- **Fase 1** — Refatoração de props no `ItineraryEditor` + extração `ItineraryReadOnlyView`. Zero mudança de comportamento (testar Criar Roteiros antes/depois).
-- **Fase 2** — Migration aditiva (campos + backfill + índices).
-- **Fase 3** — RPC `clone_itinerary_for_trip` + testes manuais via SQL.
-- **Fase 4** — `AttachItineraryDialog` + `TripItineraryV2` + integração em `TripWallet` com 3 estados (`none`/`legacy`/`v2`).
-- **Fase 5** — RPC `get_public_trip_itinerary_v2` + integração em `CarteiraPublica`.
-- **Fase 6** — QA contra os 12 critérios de aceite (abaixo).
-
-## Critérios de aceite
-
-1. **Carteira nova sem roteiro** → `mode='none'`, exibe EmptyState com [Criar] [Importar]. Nenhum render de roteiro vazio.
-2. **Carteira nova criando roteiro do zero** → cria `itinerary` vazio, `mode='v2'`, abre editor embed.
-3. **Carteira nova importando existente** → `clone_itinerary_for_trip` executa transacional, copia dias/atividades/imagens, reseta campos públicos, atribui à carteira.
-4. **Edição da cópia não altera o original** → editar a cópia não dispara qualquer UPDATE no `source_itinerary_id`. Verificado via SELECT antes/depois.
-5. **Desvincular roteiro** → `itinerary_id = NULL`, `mode` volta a `legacy` se houver dados legados ou `none` caso contrário. Cópia preservada (não deletada).
-6. **Carteira pública V2** → RPC retorna estrutura completa; nenhum campo interno exposto; funciona sem login.
-7. **Carteira pública sem roteiro** → seção "Roteiro" oculta ou mostra mensagem neutra.
-8. **Carteira antiga com legado** → renderiza `TripItinerary` legado inalterado.
-9. **Carteira antiga sem roteiro** → após backfill, `mode='none'`, EmptyState aparece.
-10. **Segurança/RLS** → tentar acessar `itineraries` de outro user via REST direto retorna 0 linhas; RPC pública só responde com `access_code` válido.
-11. **Sem perda de dados** → nenhuma linha em `trip_itinerary_activities`, `trip_itinerary_period_images`, `itineraries`, `itinerary_days`, `itinerary_activities` é deletada ou alterada pela migração.
-12. **Sem alterações destrutivas** → migration roda em ambiente de teste e produção sem erros; rollback é apenas `DROP COLUMN` (aditivo puro).
-
-## Testes a executar
-
-- **SQL:** rodar migration, verificar backfill (`SELECT itinerary_mode, count(*) FROM trips GROUP BY 1`).
-- **RPC clone:** chamar via SQL com user real, conferir contagem de days/activities/images = source.
-- **RPC pública:** chamar com access_code válido/inválido; conferir ausência de campos sensíveis.
-- **UI:** matriz 3x2 — (none/legacy/v2) × (logado/público).
-- **Regressão Criar Roteiros:** criar, editar, publicar, gerar PDF — comportamento idêntico ao atual.
-- **Regressão Carteira legada:** abrir 3 carteiras antigas com roteiro legado; conferir que nada mudou visualmente.
-
-## Riscos técnicos
-
-- **R1 — Refator do ItineraryEditor** pode introduzir regressão em Criar Roteiros. Mitigação: Fase 1 isolada, QA antes de Fase 2.
-- **R2 — RPC clone com itinerários muito grandes** (50+ dias, 200+ atividades) pode ter latência. Mitigação: medir; se >2s, paginar ou rodar em Edge Function.
-- **R3 — FK `ON DELETE SET NULL` em `trips.itinerary_id`** é segura, mas deletar um `itinerary` deixa a carteira em estado inconsistente (`mode='v2'` + `itinerary_id NULL`). Mitigação: guarda na regra de render (item 2) trata como `none`.
-- **R4 — Backfill** assume que toda linha em `trip_itinerary_activities` representa roteiro legítimo. Se houver lixo, marcará como legacy. Mitigação: rodar `SELECT` preview antes do `UPDATE`.
-
-## Arquitetura alternativa avaliada (e descartada)
-
-- **Unificar tudo no modelo V2 já agora** (deprecar `trip_itinerary_activities`): muito invasivo, quebra carteiras públicas existentes, sai do escopo de "não destrutivo".
-- **Reference em vez de copy** (carteira aponta para itinerário original): edição na carteira alteraria o original → quebra o requisito do usuário.
-
-**Confirmo arquitetura proposta como a mais segura e aderente aos requisitos.**
+| Fase original | Status revisado |
+|---|---|
+| **Fase 1 — Refact `ItineraryEditor` (embed mode)** | ❌ Removida. Editor permanece intocado. |
+| **Fase 2 — Extrair `ItineraryReadOnlyView`** | ⚠️ Mantida, mas usada **apenas na Carteira Pública** (`RoteiroPublicoV2` / `CarteiraPublica`), não no app autenticado. |
+| **Fase 3 — Migrations (trips + itineraries)** | ✅ Já entregue. |
+| **Fase 4 — RPCs (clone + public read)** | ✅ Já entregue. |
+| **Fase 5 — Integração** | 🔄 Reescrita: novo `TripItineraryV2` (card resumo) + `AttachItineraryDialog` (Criar / Importar / Trocar / Desvincular). Sem editor embutido. |
+| **Fase 6 — QA** | 🔄 Critérios ajustados (ver abaixo). |
 
 ---
 
-Aguardando aprovação para implementação. Nenhuma migration ou código será executado antes do "ok".
+### Plano Final Revisado
+
+**Fase A — Componentes novos (autenticado)**
+- `TripItineraryV2.tsx` (card resumo, read-only no contexto da Carteira)
+  - Props: `trip`, `onChanged`
+  - Fetch leve: `itineraries` (título, destino, período, status, capa) + `count` de dias
+  - Estados: `none` → EmptyState com CTA "Criar roteiro" / "Importar roteiro"; `v2` com `itinerary_id` válido → card resumo; `legacy` → mantém componente legado atual; estado inconsistente → trata como `none`
+- `AttachItineraryDialog.tsx`
+  - Abas: **Criar novo**, **Importar de modelo/outro roteiro** (usa `clone_itinerary_for_trip`), **Trocar**, **Desvincular**
+  - Após criar/importar: `UPDATE trips SET itinerary_id=?, itinerary_mode='v2'` e redireciona para `/criar-roteiros/:id` (opcional, com toggle "abrir agora")
+
+**Fase B — Navegação**
+- Botão "Abrir roteiro" → `navigate('/criar-roteiros/' + itinerary_id)`
+- No editor standalone, adicionar **breadcrumb/back contextual** quando vier da Carteira: query param `?from=trip:<trip_id>` → botão "Voltar para Carteira" no header do editor
+- Sem alteração do comportamento padrão do editor quando aberto direto
+
+**Fase C — Carteira Pública**
+- `ItineraryReadOnlyView` (extraído da `RoteiroPublicoV2` atual) renderizado dentro de `CarteiraPublica` quando `itinerary_mode='v2'`
+- Usa `get_public_trip_itinerary_v2` (já criada)
+- Sem editor, sem ações, somente leitura
+
+**Fase D — QA**
+Critérios de aceitação ajustados:
+1. Trip nova → `itinerary_mode='none'` → mostra EmptyState
+2. "Criar roteiro" na Carteira → cria itinerary, vincula, navega para editor standalone
+3. "Importar" → clona via RPC, vincula, navega para editor
+4. "Abrir roteiro" → abre editor standalone, botão voltar funciona
+5. "Trocar" → permite escolher outro roteiro, atualiza vínculo
+6. "Desvincular" → `itinerary_id=NULL`, `itinerary_mode='none'`, cópia preservada
+7. Carteira pública com V2 → renderiza via RPC pública
+8. Carteira pública sem roteiro → não mostra seção
+9. Trips legacy continuam usando componente antigo, sem regressão
+10. Editor standalone funciona idêntico ao atual quando aberto fora da Carteira
+11. Nenhuma alteração em `trip_itinerary_activities` ou fluxo legado
+12. Sem novos props no `ItineraryEditor`
+
+---
+
+### Arquivos afetados (revisado)
+
+**Novos**
+- `src/components/wallet/TripItineraryV2.tsx`
+- `src/components/wallet/AttachItineraryDialog.tsx`
+- `src/components/itinerary/ItineraryReadOnlyView.tsx` (extração da view pública)
+
+**Editados (mínimo)**
+- `src/components/wallet/TripWallet.tsx` — roteamento entre `none`/`legacy`/`v2`
+- `src/pages/CarteiraPublica.tsx` — renderiza `ItineraryReadOnlyView` em modo V2
+- `src/pages/RoteiroPublicoV2.tsx` — passa a consumir `ItineraryReadOnlyView` (refactor sem mudança visual)
+- `src/pages/CriarConteudo.tsx` ou rota equivalente do editor — ler `?from=trip:` e exibir botão voltar
+
+**Intocados**
+- `ItineraryEditor` e todos os subcomponentes de edição
+- Hooks de autosave, publish, AI generation
+- Todo o fluxo legado (`trip_itinerary_activities`, `ImportItineraryModal` legado)
+
+---
+
+### Ganhos
+
+- Menos código novo (~40% menor que o plano anterior)
+- Zero risco no editor standalone
+- UX mais clara: um lugar para editar, um lugar para vincular
+- Mobile-friendly: card resumo cabe melhor que editor completo dentro da Carteira
+
+### Riscos restantes
+
+- Navegação entre Carteira ↔ Editor precisa preservar contexto (resolvido via query param)
+- Usuário pode editar o roteiro e esquecer que está vinculado a uma Trip — mitigar com badge "Vinculado a viagem de [cliente]" no header do editor quando aplicável
+
+---
+
+Confirma esta versão simplificada para eu seguir para implementação (Fase A)?
