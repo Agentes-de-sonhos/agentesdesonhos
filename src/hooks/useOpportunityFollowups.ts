@@ -76,11 +76,14 @@ export function useOpportunityFollowups(opportunityId?: string) {
 
       const existing = await supabase
         .from("opportunity_followups" as any)
-        .select("id")
+        .select("id, follow_up_date, note")
         .eq("opportunity_id", opportunity_id);
       if (existing.error) throw existing.error;
 
-      const existingIds = new Set((existing.data || []).map((r: any) => r.id));
+      const existingById = new Map(
+        (existing.data || []).map((r: any) => [r.id as string, r])
+      );
+      const existingIds = new Set(existingById.keys());
       const keepIds = new Set(
         drafts.filter((d) => d.id && d.follow_up_date).map((d) => d.id as string)
       );
@@ -99,6 +102,16 @@ export function useOpportunityFollowups(opportunityId?: string) {
       for (const draft of drafts) {
         if (!draft.follow_up_date) continue;
         if (draft.id) {
+          // Skip update when nothing actually changed — avoids touching the row
+          // and any triggers when the master simply re-saves the opportunity.
+          const prev = existingById.get(draft.id);
+          if (
+            prev &&
+            prev.follow_up_date === draft.follow_up_date &&
+            (prev.note || null) === (draft.note || null)
+          ) {
+            continue;
+          }
           const { error } = await supabase
             .from("opportunity_followups" as any)
             .update({
