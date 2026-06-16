@@ -117,6 +117,14 @@ export function UpcomingAgendaEventsCard() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{event.title}</p>
+                    {event.event_type === 'followup' && event.description && (
+                      <p
+                        className="text-xs text-foreground/80 mt-0.5 line-clamp-2"
+                        title={event.description}
+                      >
+                        {event.description}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {format(eventDate, "EEEE, d 'de' MMM", { locale: ptBR })}
