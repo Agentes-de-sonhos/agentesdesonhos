@@ -1920,6 +1920,29 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div ref={itineraryRef} style={{ scrollMarginTop: '110px' }}>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Roteiro dia a dia</h2>
+              {v2Days && v2Days.length > 0 ? (
+                <div className="space-y-3">
+                  {v2Days.map((day) => {
+                    const isDayOpen = openDay === day.date;
+                    return (
+                      <div
+                        key={day.date}
+                        ref={(el) => { dayRefs.current[day.date] = el; }}
+                        style={{ scrollMarginTop: '80px' }}
+                      >
+                        <CollapsibleDayCard
+                          day={day}
+                          periodImages={{}}
+                          isOpen={isDayOpen}
+                          onToggle={() => toggleDay(day.date)}
+                          weather={itineraryWeather?.[day.date]}
+                          destination={v2Destination || tripData?.destination}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
               <div className="space-y-3">
                 {sortedDates.map((dateStr, idx) => {
                   const [y,m,d] = dateStr.split("-").map(Number);
@@ -2040,6 +2063,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   );
                 })}
               </div>
+              )}
             </div>
           );
         })()}
