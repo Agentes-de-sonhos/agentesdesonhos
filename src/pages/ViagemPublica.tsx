@@ -6,7 +6,7 @@ import { ptBR } from "date-fns/locale";
 import {
   Wallet, MapPin, Calendar, FileText, Loader2, Lock, Plane, Hotel, Car, Bus,
   Ticket, Shield, Ship, TrainFront, Download, ExternalLink, MessageSquare,
-  ChevronDown, Sun, Sunset, Moon, CalendarDays, User, Briefcase
+  ChevronDown, Sun, Sunset, Moon, CalendarDays, User, Briefcase, Save
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
