@@ -231,13 +231,6 @@ serve(async (req) => {
       );
     }
 
-    // Best-effort consumption of monthly AI quota (mirror of other AI funcs).
-    try {
-      await supabase.rpc("increment_ai_usage", { _user_id: userId });
-    } catch {
-      /* no-op */
-    }
-
     return new Response(JSON.stringify({ ...parsed, truncated }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
