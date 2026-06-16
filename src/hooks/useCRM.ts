@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
 import type { Client, Opportunity, OpportunityStage, SalesGoal, ClientStatus } from "@/types/crm";
@@ -9,23 +10,24 @@ import { logTeamAction } from "@/lib/audit";
 
 export function useClients() {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ["clients", user?.id],
+    queryKey: ["clients", agencyOwnerId, user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !agencyOwnerId) return [];
       const { data, error } = await supabase
         .from("clients")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .order("name", { ascending: true })
         .limit(500);
       if (error) throw error;
       return data as Client[];
     },
-    enabled: !!user,
+    enabled: !!user && !!agencyOwnerId,
     staleTime: 2 * 60 * 1000,
   });
 
@@ -49,7 +51,7 @@ export function useClients() {
         .from("clients")
         .insert({
           ...data,
-          user_id: user.id,
+          user_id: agencyOwnerId || user.id,
           status: data.status || "lead",
         })
         .select()
