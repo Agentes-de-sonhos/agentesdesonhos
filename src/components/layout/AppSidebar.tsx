@@ -203,13 +203,11 @@ const financeiroSection: MenuSection = {
   textColor: "text-emerald-700",
   borderColor: "border-emerald-600",
   items: [
+    { key: "dashboard_fin", title: "Visão Geral", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "faturas", title: "Faturas", url: "/financeiro?tab=faturas", icon: FileText, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "vendedores", title: "Vendedores", url: "/financeiro?tab=vendedores", icon: Users, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "dashboard_fin", title: "Visão Geral", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
   ],
 };
 
