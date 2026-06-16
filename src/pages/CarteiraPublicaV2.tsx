@@ -552,8 +552,17 @@ export default function CarteiraPublicaV2() {
         preLoadedTrip={tripData.trip} 
         preLoadedAgent={tripData.agentProfile}
         preLoadedPassword={usedPassword}
+        onInstallPrompt={triggerInstall}
       />
-      <InstallWalletButton agencyName={branding?.agency_name || branding?.name || undefined} />
+      {!isMobile && (
+        <InstallWalletButton agencyName={branding?.agency_name || branding?.name || undefined} />
+      )}
+      <InstallWalletDialog
+        open={showInstructions}
+        onOpenChange={setShowInstructions}
+        platform={platform}
+        agencyName={branding?.agency_name || branding?.name || undefined}
+      />
     </Suspense>
   );
 }
