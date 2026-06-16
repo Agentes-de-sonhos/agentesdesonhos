@@ -4,6 +4,7 @@ import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
   ShoppingBag, ArrowUpCircle, Receipt, Users,
   ChevronLeft, ChevronRight, Calendar, FileText, Truck,
+  MoreHorizontal,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
