@@ -428,8 +428,6 @@ export function KanbanBoard() {
                     .filter(s => canStage('opportunities', s.id, 'view'))
                     .map((stage, index) => {
                     const stageOpps = getOpportunitiesForStage(stage.id);
-                    const total = getTotalValue(stage.id);
-                    const avgTime = getAverageTimeInStage(stage.id);
                     const overdueCount = stageOpps.filter(hasOverdueFollowUp).length;
                     const tokens = getStageTokens(stage.color);
                     const isFirstStage = index === 0;
@@ -460,8 +458,6 @@ export function KanbanBoard() {
                                 stage={stage}
                                 count={stageOpps.length}
                                 overdueCount={overdueCount}
-                                totalLabel={total > 0 ? formatCurrency(total) : null}
-                                avgTimeLabel={avgTime}
                                 dragHandleProps={dragHandleProps}
                                 isDragging={isDragging}
                                 onRename={(name) => updateStageColumn({ id: stage.id, name })}
