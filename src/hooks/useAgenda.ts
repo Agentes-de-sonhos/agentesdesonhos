@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 import { 
   AgencyEvent, 
@@ -24,6 +25,7 @@ export interface EventTypeOption {
 
 export function useAgenda(year?: number) {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const queryClient = useQueryClient();
   const currentYear = year || new Date().getFullYear();
 
@@ -161,22 +163,22 @@ export function useAgenda(year?: number) {
 
   // Fetch all CRM opportunity follow-ups for current user (current year)
   const { data: opportunityFollowups = [] } = useQuery({
-    queryKey: ["agenda-followups", user?.id, currentYear],
+    queryKey: ["agenda-followups", agencyOwnerId, user?.id, currentYear],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id || !agencyOwnerId) return [];
       const startDate = `${currentYear}-01-01`;
       const endDate = `${currentYear}-12-31`;
       const { data, error } = await supabase
         .from("opportunity_followups" as any)
         .select("id, follow_up_date, note, opportunity_id, opportunity:opportunities(destination, client:clients(name))")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .gte("follow_up_date", startDate)
         .lte("follow_up_date", endDate)
         .order("follow_up_date", { ascending: true });
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !!agencyOwnerId,
     staleTime: 2 * 60 * 1000,
   });
 
