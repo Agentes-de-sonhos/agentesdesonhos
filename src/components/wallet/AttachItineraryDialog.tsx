@@ -91,8 +91,8 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
           start_date: trip.start_date,
           end_date: trip.end_date,
           travelers_count: 1,
-          trip_type: "lazer",
-          budget_level: "medio",
+          trip_type: "casal",
+          budget_level: "conforto",
           status: "draft",
         } as any)
         .select("id")
