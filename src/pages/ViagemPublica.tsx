@@ -1396,14 +1396,21 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           const result = data as any;
           const itin = result?.itinerary;
           if (itin && Array.isArray(itin.days)) {
+            const PERIOD_MAP: Record<string, 'morning' | 'afternoon' | 'evening'> = {
+              manha: 'morning', manhã: 'morning', morning: 'morning',
+              tarde: 'afternoon', afternoon: 'afternoon',
+              noite: 'evening', evening: 'evening', night: 'evening',
+            };
             const mapped: any[] = [];
             for (const d of itin.days) {
               const acts = Array.isArray(d.activities) ? d.activities : [];
               for (const a of acts) {
+                const rawPeriod = String(a.period || '').toLowerCase().trim();
+                const normPeriod = PERIOD_MAP[rawPeriod] || 'morning';
                 mapped.push({
                   id: a.id,
                   day_date: d.date,
-                  period: a.period,
+                  period: normPeriod,
                   order_index: a.order_index,
                   title: a.title,
                   description: a.description,
