@@ -1,10 +1,19 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, Sparkles, MapPin, X, Upload } from "lucide-react";
+import { Loader2, Sparkles, MapPin, X, Upload, Pencil, Images, Star, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
@@ -220,88 +229,33 @@ export function DestinationIntroEditor({
   }
 
   if (embedded) {
-    return (
-      <div className="space-y-4">
-        <p className="text-xs text-muted-foreground">
-          A apresentação do destino aparece automaticamente no orçamento quando há texto ou imagens. Se nenhum conteúdo for adicionado, a seção fica oculta para o cliente.
-        </p>
-        {images.length > 0 ? (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {images.map((url, i) => (
-                  <div key={i} className="relative shrink-0 group">
-                    <img
-                      src={url}
-                      alt={`${destination} ${i + 1}`}
-                      className="h-20 w-28 rounded-lg object-cover border border-border/40"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(i)}
-                      className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : isFetchingPhotos ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Buscando fotos do destino...
-              </div>
-            ) : null}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => e.target.files && handleUploadImages(e.target.files)}
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="gap-2"
-              >
-                {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                Adicionar imagem
-              </Button>
-              <InternetPhotosPicker
-                query={destination}
-                destination={destination}
-                existingUrls={images}
-                onPick={handleAddGooglePhotos}
-                triggerLabel="Buscar fotos da internet"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleGenerate}
-                disabled={isGenerating || isFetchingPhotos}
-                className="gap-2"
-              >
-                {isGenerating || isFetchingPhotos ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
-                )}
-                {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
-              </Button>
-            </div>
-
-            <Textarea
-              value={text}
-              onChange={(e) => handleTextChange(e.target.value)}
-              placeholder="Descrição curta e envolvente do destino..."
-              rows={3}
-              className="resize-none text-sm"
-            />
-      </div>
-    );
+    return <EmbeddedDestinationIntro
+      destination={destination}
+      enabled={enabled}
+      onToggle={handleToggle}
+      text={text}
+      onTextChange={handleTextChange}
+      images={images}
+      onRemoveImage={handleRemoveImage}
+      onAddGooglePhotos={handleAddGooglePhotos}
+      onUploadImages={handleUploadImages}
+      onSetCover={async (index) => {
+        if (index === 0) return;
+        const reordered = [images[index], ...images.filter((_, i) => i !== index)];
+        setImages(reordered);
+        await saveToDb({ destination_intro_images: reordered });
+      }}
+      onAddByUrl={async (url) => {
+        if (!url || images.includes(url)) return;
+        const updated = [...images, url];
+        setImages(updated);
+        await saveToDb({ destination_intro_images: updated });
+      }}
+      onGenerate={handleGenerate}
+      isGenerating={isGenerating}
+      isFetchingPhotos={isFetchingPhotos}
+      isUploading={isUploading}
+    />;
   }
 
   return (
@@ -400,5 +354,258 @@ export function DestinationIntroEditor({
         </Button>
       </CardContent>
     </Card>
+  );
+}
+
+interface EmbeddedProps {
+  destination: string;
+  enabled: boolean;
+  onToggle: (checked: boolean) => void;
+  text: string;
+  onTextChange: (value: string) => void;
+  images: string[];
+  onRemoveImage: (index: number) => void;
+  onAddGooglePhotos: (urls: string[]) => void;
+  onUploadImages: (files: FileList) => void;
+  onSetCover: (index: number) => void;
+  onAddByUrl: (url: string) => void;
+  onGenerate: () => void;
+  isGenerating: boolean;
+  isFetchingPhotos: boolean;
+  isUploading: boolean;
+}
+
+function EmbeddedDestinationIntro(props: EmbeddedProps) {
+  const {
+    destination, enabled, onToggle, text, onTextChange, images,
+    onRemoveImage, onAddGooglePhotos, onUploadImages, onSetCover, onAddByUrl,
+    onGenerate, isGenerating, isFetchingPhotos, isUploading,
+  } = props;
+
+  const [textOpen, setTextOpen] = useState(false);
+  const [photosOpen, setPhotosOpen] = useState(false);
+  const [draftText, setDraftText] = useState(text);
+  const [urlInput, setUrlInput] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (textOpen) setDraftText(text);
+  }, [textOpen, text]);
+
+  const handleSaveText = () => {
+    onTextChange(draftText);
+    setTextOpen(false);
+  };
+
+  const handleAddByUrl = () => {
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+    onAddByUrl(trimmed);
+    setUrlInput("");
+  };
+
+  const charCount = draftText.length;
+
+  return (
+    <div className="space-y-4">
+      {/* Inline switch */}
+      <div className="flex items-center justify-between rounded-lg border bg-card px-4 py-3">
+        <div className="flex items-start gap-3">
+          <MapPin className="h-4 w-4 text-primary mt-0.5" />
+          <div>
+            <Label htmlFor="show-destination-inline" className="text-sm font-medium cursor-pointer">
+              Exibir apresentação do destino
+            </Label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Mostre uma descrição e imagens do destino antes dos serviços.
+            </p>
+          </div>
+        </div>
+        <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" onClick={() => setTextOpen(true)} className="gap-2">
+          <Pencil className="h-3.5 w-3.5" />
+          Editar descrição
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setPhotosOpen(true)} className="gap-2">
+          <Images className="h-3.5 w-3.5" />
+          Capa e fotos
+          {images.length > 0 && (
+            <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">
+              {images.length}
+            </span>
+          )}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onGenerate}
+          disabled={isGenerating || isFetchingPhotos}
+          className="gap-2"
+        >
+          {isGenerating || isFetchingPhotos ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
+        </Button>
+      </div>
+
+      {/* Preview summary */}
+      <div className="rounded-lg border border-dashed bg-muted/20 p-3 space-y-2">
+        {text ? (
+          <p className="text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">{text}</p>
+        ) : (
+          <p className="text-xs italic text-muted-foreground">Nenhuma descrição adicionada.</p>
+        )}
+        {images.length > 0 ? (
+          <div className="flex gap-1.5 overflow-x-auto">
+            {images.slice(0, 6).map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={`${destination} ${i + 1}`}
+                className="h-12 w-16 rounded object-cover border border-border/40 shrink-0"
+              />
+            ))}
+            {images.length > 6 && (
+              <div className="h-12 w-16 rounded border border-border/40 bg-muted flex items-center justify-center text-[10px] text-muted-foreground shrink-0">
+                +{images.length - 6}
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs italic text-muted-foreground">Nenhuma imagem adicionada.</p>
+        )}
+      </div>
+
+      {/* Text-only modal */}
+      <Dialog open={textOpen} onOpenChange={setTextOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Editar descrição do destino</DialogTitle>
+            <DialogDescription>
+              Texto exibido na apresentação do destino do orçamento.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={draftText}
+            onChange={(e) => setDraftText(e.target.value)}
+            placeholder="Descrição curta e envolvente do destino..."
+            rows={8}
+            className="resize-none text-sm"
+          />
+          <div className="text-xs text-muted-foreground text-right">{charCount} caracteres</div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setTextOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSaveText}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Photos-only modal */}
+      <Dialog open={photosOpen} onOpenChange={setPhotosOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Capa e fotos do destino</DialogTitle>
+            <DialogDescription>
+              A primeira imagem é usada como capa. Reordene definindo outra como capa.
+            </DialogDescription>
+          </DialogHeader>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => e.target.files && onUploadImages(e.target.files)}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="gap-2"
+            >
+              {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+              Adicionar imagem
+            </Button>
+            <InternetPhotosPicker
+              query={destination}
+              destination={destination}
+              existingUrls={images}
+              onPick={onAddGooglePhotos}
+              triggerLabel="Buscar fotos da internet"
+            />
+          </div>
+
+          <div className="flex gap-2 items-center">
+            <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+            <Input
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="Cole uma URL de imagem..."
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddByUrl(); } }}
+            />
+            <Button size="sm" variant="secondary" onClick={handleAddByUrl} disabled={!urlInput.trim()}>
+              Adicionar
+            </Button>
+          </div>
+
+          {images.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {images.map((url, i) => (
+                <div key={i} className="relative group rounded-lg overflow-hidden border border-border/40">
+                  <img src={url} alt={`${destination} ${i + 1}`} className="h-28 w-full object-cover" />
+                  {i === 0 && (
+                    <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                      <Star className="h-2.5 w-2.5 fill-current" /> Capa
+                    </span>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-1.5 flex items-center justify-between gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {i !== 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => onSetCover(i)}
+                        className="text-[10px] text-white bg-white/10 hover:bg-white/20 rounded px-1.5 py-0.5"
+                      >
+                        Definir como capa
+                      </button>
+                    ) : <span />}
+                    <button
+                      type="button"
+                      onClick={() => onRemoveImage(i)}
+                      className="h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                      aria-label="Remover imagem"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : isFetchingPhotos ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Buscando fotos do destino...
+            </div>
+          ) : (
+            <p className="text-xs italic text-muted-foreground text-center py-6">
+              Nenhuma imagem adicionada ainda.
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button onClick={() => setPhotosOpen(false)}>Concluir</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
