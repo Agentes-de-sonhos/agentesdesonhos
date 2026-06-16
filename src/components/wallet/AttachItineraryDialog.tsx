@@ -79,34 +79,20 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
     }
   };
 
-  const handleCreateNew = async () => {
-    if (!user) return;
-    setCreating(true);
-    try {
-      const { data, error } = await supabase
-        .from("itineraries")
-        .insert({
-          user_id: user.id,
-          destination: trip.destination,
-          start_date: trip.start_date,
-          end_date: trip.end_date,
-          travelers_count: 1,
-          trip_type: "casal",
-          budget_level: "conforto",
-          status: "draft",
-        } as any)
-        .select("id")
-        .single();
-      if (error) throw error;
-      await attachItineraryToTrip(trip.id, data.id);
-      onAttached?.();
-      onOpenChange(false);
-      navigate(`/ferramentas-ia/criar-roteiro/${data.id}?fromTrip=${trip.id}`);
-    } catch (err: any) {
-      toast({ title: "Erro ao criar roteiro", description: err.message, variant: "destructive" });
-    } finally {
-      setCreating(false);
-    }
+  const handleCreateNew = () => {
+    // Apenas navega para o formulário de Novo Roteiro com os dados da carteira
+    // pré-preenchidos. O roteiro só é criado quando o usuário confirmar.
+    const params = new URLSearchParams({
+      fromTrip: trip.id,
+      destination: trip.destination ?? "",
+      start: trip.start_date ?? "",
+      end: trip.end_date ?? "",
+    });
+    const clientId = (trip as any).client_id as string | null | undefined;
+    if (clientId) params.set("clientId", clientId);
+    if (trip.client_name) params.set("clientName", trip.client_name);
+    onOpenChange(false);
+    navigate(`/ferramentas-ia/criar-roteiro?${params.toString()}`);
   };
 
   return (
