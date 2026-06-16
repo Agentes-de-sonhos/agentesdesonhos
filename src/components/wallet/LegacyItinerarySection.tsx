@@ -25,12 +25,18 @@ export function LegacyItinerarySection({ trip, onRequestAddService }: Props) {
   const [upgrading, setUpgrading] = useState(false);
 
   const { data: legacyCount, isLoading } = useQuery({
-    queryKey: ["trip-legacy-activity-count", trip.id],
+    queryKey: ["trip-legacy-activity-count", trip.id, trip.start_date, trip.end_date],
     queryFn: async () => {
+      // Conta apenas atividades dentro do intervalo atual da viagem.
+      // Atividades "órfãs" (datas fora do start_date/end_date atuais) são
+      // ignoradas — a carteira parece vazia visualmente e o usuário deve
+      // poder migrar para a nova versão.
       const { count, error } = await supabase
         .from("trip_itinerary_activities")
         .select("id", { count: "exact", head: true })
-        .eq("trip_id", trip.id);
+        .eq("trip_id", trip.id)
+        .gte("day_date", trip.start_date)
+        .lte("day_date", trip.end_date);
       if (error) throw error;
       return count ?? 0;
     },
