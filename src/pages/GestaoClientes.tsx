@@ -100,7 +100,7 @@ function GestaoClientesContent() {
               {can('dashboard.view') && (
                 <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
                   <LayoutDashboard className="h-4 w-4 shrink-0" />
-                  Dashboard
+                  Visão Geral
                 </TabsTrigger>
               )}
               {can('clients.view') && (
