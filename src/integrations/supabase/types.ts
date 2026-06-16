@@ -10838,6 +10838,10 @@ export type Database = {
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
+      clone_itinerary_for_trip: {
+        Args: { p_source_itinerary_id: string; p_trip_id: string }
+        Returns: string
+      }
       current_agency_id: { Args: never; Returns: string }
       ensure_client_and_opportunity_for_lead: {
         Args: {
@@ -10985,6 +10989,10 @@ export type Database = {
       }
       get_public_sales_landing: { Args: { p_slug: string }; Returns: Json }
       get_public_tour_guide: { Args: { _id: string }; Returns: Json }
+      get_public_trip_itinerary_v2: {
+        Args: { p_access_code: string; p_trip_id: string }
+        Returns: Json
+      }
       get_published_supplier_by_slug: {
         Args: { p_slug: string }
         Returns: Json
