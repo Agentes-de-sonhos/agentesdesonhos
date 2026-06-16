@@ -29,7 +29,6 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
   const { user } = useAuth();
   const { toast } = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
 
   const { data: itineraries = [], isLoading } = useQuery({
     queryKey: ["my-itineraries-for-attach", user?.id],
@@ -79,34 +78,20 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
     }
   };
 
-  const handleCreateNew = async () => {
-    if (!user) return;
-    setCreating(true);
-    try {
-      const { data, error } = await supabase
-        .from("itineraries")
-        .insert({
-          user_id: user.id,
-          destination: trip.destination,
-          start_date: trip.start_date,
-          end_date: trip.end_date,
-          travelers_count: 1,
-          trip_type: "casal",
-          budget_level: "conforto",
-          status: "draft",
-        } as any)
-        .select("id")
-        .single();
-      if (error) throw error;
-      await attachItineraryToTrip(trip.id, data.id);
-      onAttached?.();
-      onOpenChange(false);
-      navigate(`/ferramentas-ia/criar-roteiro/${data.id}?fromTrip=${trip.id}`);
-    } catch (err: any) {
-      toast({ title: "Erro ao criar roteiro", description: err.message, variant: "destructive" });
-    } finally {
-      setCreating(false);
-    }
+  const handleCreateNew = () => {
+    // Apenas navega para o formulário de Novo Roteiro com os dados da carteira
+    // pré-preenchidos. O roteiro só é criado quando o usuário confirmar.
+    const params = new URLSearchParams({
+      fromTrip: trip.id,
+      destination: trip.destination ?? "",
+      start: trip.start_date ?? "",
+      end: trip.end_date ?? "",
+    });
+    const clientId = (trip as any).client_id as string | null | undefined;
+    if (clientId) params.set("clientId", clientId);
+    if (trip.client_name) params.set("clientName", trip.client_name);
+    onOpenChange(false);
+    navigate(`/ferramentas-ia/criar-roteiro?${params.toString()}`);
   };
 
   return (
@@ -128,18 +113,24 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
 
           <TabsContent value="new" className="space-y-3 py-2">
             <div className="rounded-md border bg-muted/30 p-3 text-sm space-y-1">
-              <p className="font-medium">Será criado um roteiro vazio com os dados da viagem:</p>
+              <p className="font-medium">Você será levado ao formulário de Novo Roteiro com estes dados já preenchidos:</p>
               <p className="text-muted-foreground">Destino: <span className="font-medium text-foreground">{trip.destination}</span></p>
               <p className="text-muted-foreground">
                 Período: <span className="font-medium text-foreground">
                   {format(parseLocalDate(trip.start_date), "dd/MM/yyyy")} — {format(parseLocalDate(trip.end_date), "dd/MM/yyyy")}
                 </span>
               </p>
+              {trip.client_name && (
+                <p className="text-muted-foreground">Cliente: <span className="font-medium text-foreground">{trip.client_name}</span></p>
+              )}
             </div>
-            <Button onClick={handleCreateNew} disabled={creating} className="w-full">
-              {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}
-              Criar e abrir editor
+            <Button onClick={handleCreateNew} className="w-full">
+              <Plus className="h-4 w-4 mr-1.5" />
+              Ir para Novo Roteiro
             </Button>
+            <p className="text-xs text-muted-foreground">
+              O roteiro será vinculado automaticamente a esta carteira ao ser criado.
+            </p>
           </TabsContent>
 
           <TabsContent value="existing" className="py-2">
