@@ -4,7 +4,7 @@ import {
   Calendar, ChevronDown, MapPin, Clock, DollarSign, Sun, Sunset, Moon,
   FileText, Download, Eye, ExternalLink,
 } from "lucide-react";
-import { parseLocalDate } from "@/lib/dateParsing";
+import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import type { ItineraryDay } from "@/types/itinerary";
 import { weatherIconFor } from "@/components/trip/TripCalendar";
 import type { DayWeather } from "@/hooks/useTripWeather";
