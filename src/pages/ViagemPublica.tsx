@@ -27,6 +27,8 @@ import { verifyTripAccess } from "@/hooks/useTrips";
 import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
+import type { ItineraryDay } from "@/types/itinerary";
 
 function TripCalendarWithWeather(props: {
   destination: string;
