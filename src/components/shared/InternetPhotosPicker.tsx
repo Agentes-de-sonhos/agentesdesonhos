@@ -33,6 +33,12 @@ interface Props {
   triggerLabel?: string;
   /** How many photos to request per search (max 18). */
   limit?: number;
+  /** When true, opens the picker dialog automatically on mount and runs the initial search. */
+  autoOpen?: boolean;
+  /** When true, hides the trigger button (useful when autoOpen is controlling the flow). */
+  hideTrigger?: boolean;
+  /** Called when the dialog closes (after pick or cancel). */
+  onClose?: () => void;
 }
 
 /**
@@ -49,6 +55,9 @@ export function InternetPhotosPicker({
   onPick,
   triggerLabel = "Buscar fotos da internet",
   limit = 18,
+  autoOpen = false,
+  hideTrigger = false,
+  onClose,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,6 +65,11 @@ export function InternetPhotosPicker({
   const [search, setSearch] = useState("");
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const cache = useRef<Map<string, PhotoCandidate[]>>(new Map());
+
+  useEffect(() => {
+    if (autoOpen) setOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpen]);
 
   useEffect(() => {
     if (!open) return;
@@ -105,22 +119,25 @@ export function InternetPhotosPicker({
     toast.success(`${picked.size} foto(s) adicionada(s)`);
     setOpen(false);
     setPicked(new Set());
+    onClose?.();
   };
 
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="gap-2"
-        onClick={() => setOpen(true)}
-      >
-        <Globe2 className="h-3.5 w-3.5" />
-        {triggerLabel}
-      </Button>
+      {!hideTrigger && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={() => setOpen(true)}
+        >
+          <Globe2 className="h-3.5 w-3.5" />
+          {triggerLabel}
+        </Button>
+      )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) onClose?.(); }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Selecionar fotos da internet</DialogTitle>
