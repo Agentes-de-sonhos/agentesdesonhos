@@ -129,20 +129,19 @@ export function useOpportunityFollowups(opportunityId?: string) {
  */
 export function useAllFollowups() {
   const { user } = useAuth();
-  const { agencyOwnerId } = useAgencyOwnerId();
   return useQuery({
-    queryKey: ["all-followups", agencyOwnerId, user?.id],
+    queryKey: ["all-followups", user?.id],
     queryFn: async () => {
-      if (!user?.id || !agencyOwnerId) return [];
+      if (!user?.id) return [];
       const { data, error } = await supabase
         .from("opportunity_followups" as any)
         .select("*, opportunity:opportunities(id, destination, client:clients(name))")
-        .eq("user_id", agencyOwnerId)
+        .eq("created_by", user.id)
         .order("follow_up_date", { ascending: true });
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!user?.id && !!agencyOwnerId,
+    enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
   });
 }
