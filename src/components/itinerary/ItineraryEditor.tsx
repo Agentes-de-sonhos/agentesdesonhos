@@ -71,7 +71,11 @@ import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
-import { ActivityMediaActions } from "./ActivityMediaActions";
+import {
+  ActivityPhotoEditor,
+  ActivityDocumentsButton,
+  ActivityDocumentsList,
+} from "./ActivityMediaActions";
 import { useLinkedTripForItinerary } from "@/hooks/useLinkedTripForItinerary";
 import { SERVICE_ICONS, SERVICE_LABELS, getServiceSummary } from "@/lib/tripServiceLabels";
 import { Link2 } from "lucide-react";
