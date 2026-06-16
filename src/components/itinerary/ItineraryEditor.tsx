@@ -764,6 +764,39 @@ export function ItineraryEditor({
                                           }
                                         />
                                       </div>
+                                      {tripServices.length > 0 && (
+                                        <div className="space-y-2">
+                                          <Label className="flex items-center gap-1.5">
+                                            <Link2 className="h-3.5 w-3.5" />
+                                            Vincular a serviço da viagem
+                                          </Label>
+                                          <Select
+                                            value={editingActivity.linkedTripServiceId ?? "none"}
+                                            onValueChange={(v) =>
+                                              setEditingActivity({
+                                                ...editingActivity,
+                                                linkedTripServiceId: v === "none" ? null : v,
+                                              })
+                                            }
+                                          >
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Nenhum" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="none">Nenhum</SelectItem>
+                                              {tripServices.map((svc) => (
+                                                <SelectItem key={svc.id} value={svc.id}>
+                                                  {SERVICE_ICONS[svc.service_type]}{" "}
+                                                  {SERVICE_LABELS[svc.service_type]} — {getServiceSummary(svc)}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <p className="text-[11px] text-muted-foreground">
+                                            Cria um botão "Ver serviço" nesta atividade dentro da Carteira Digital.
+                                          </p>
+                                        </div>
+                                      )}
                                     </div>
                                   )}
                                   <DialogFooter>
