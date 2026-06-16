@@ -415,12 +415,6 @@ export function ItineraryEditor({
             Aprove, edite ou remova atividades
           </p>
         </div>
-        {!allApproved && (
-          <Button onClick={onApproveAll} variant="outline">
-            <Check className="mr-2 h-4 w-4" />
-            Aprovar Todas
-          </Button>
-        )}
       </div>
 
       <div className="space-y-6">
