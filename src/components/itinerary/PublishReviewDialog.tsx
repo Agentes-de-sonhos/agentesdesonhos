@@ -29,6 +29,8 @@ interface PublishReviewDialogProps {
     showIntro: boolean;
   }) => Promise<void>;
   mode?: "publish" | "edit";
+  /** Restrict which section is editable. Defaults to all. */
+  section?: "all" | "text" | "photos";
 }
 
 export function PublishReviewDialog({
@@ -37,6 +39,7 @@ export function PublishReviewDialog({
   itinerary,
   onConfirm,
   mode = "publish",
+  section = "all",
 }: PublishReviewDialogProps) {
   const [introText, setIntroText] = useState(itinerary.destinationIntroText || "");
   const [images, setImages] = useState<string[]>(itinerary.destinationIntroImages || []);
@@ -114,16 +117,27 @@ export function PublishReviewDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode === "publish" ? "Revisar antes de publicar" : "Apresentação do destino"}
+            {mode === "publish"
+              ? "Revisar antes de publicar"
+              : section === "text"
+                ? "Editar descrição do destino"
+                : section === "photos"
+                  ? "Capa e fotos do destino"
+                  : "Apresentação do destino"}
           </DialogTitle>
           <DialogDescription>
             {mode === "publish"
               ? "Revise a apresentação do destino, capa e galeria. O cliente verá esse material no link público."
-              : "Edite o texto gerado pela IA, gerencie a galeria de fotos e escolha a capa do destino."}
+              : section === "text"
+                ? "Ajuste apenas o texto de apresentação exibido no topo do roteiro."
+                : section === "photos"
+                  ? "Gerencie a galeria de fotos do destino e escolha a imagem de capa."
+                  : "Edite o texto gerado pela IA, gerencie a galeria de fotos e escolha a capa do destino."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-2">
+          {section === "all" && (
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <Label htmlFor="show-intro" className="font-semibold">
@@ -135,7 +149,9 @@ export function PublishReviewDialog({
             </div>
             <Switch id="show-intro" checked={showIntro} onCheckedChange={setShowIntro} />
           </div>
+          )}
 
+          {(section === "all" || section === "text") && (
           <div className="space-y-2">
             <Label className="font-semibold">Descrição do destino</Label>
             <Textarea
@@ -147,7 +163,9 @@ export function PublishReviewDialog({
             />
             <p className="text-xs text-muted-foreground">{introText.length} caracteres</p>
           </div>
+          )}
 
+          {(section === "all" || section === "photos") && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="font-semibold flex items-center gap-2">
@@ -246,6 +264,7 @@ export function PublishReviewDialog({
               </Button>
             </div>
           </div>
+          )}
         </div>
 
         <DialogFooter>

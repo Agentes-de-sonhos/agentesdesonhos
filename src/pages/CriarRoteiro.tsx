@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { ExternalLink, Copy } from "lucide-react";
 import {
   AlertDialog,
@@ -69,7 +71,8 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [publishReviewOpen, setPublishReviewOpen] = useState(false);
   const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
-  const [editPresentationOpen, setEditPresentationOpen] = useState(false);
+  const [editTextOpen, setEditTextOpen] = useState(false);
+  const [editPhotosOpen, setEditPhotosOpen] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
@@ -777,7 +780,7 @@ export default function CriarRoteiro() {
                       size="sm"
                       variant="outline"
                       className="w-full mt-2"
-                      onClick={() => setEditPresentationOpen(true)}
+                      onClick={() => setEditPhotosOpen(true)}
                     >
                       <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
                       Capa e fotos
@@ -796,10 +799,10 @@ export default function CriarRoteiro() {
                         size="sm"
                         variant="ghost"
                         className="h-7 px-2"
-                        onClick={() => setEditPresentationOpen(true)}
+                        onClick={() => setEditTextOpen(true)}
                       >
                         <Pencil className="h-3.5 w-3.5 mr-1" />
-                        Editar
+                        Editar descrição
                       </Button>
                     </div>
                     {currentItinerary.destinationIntroText ? (
@@ -808,9 +811,36 @@ export default function CriarRoteiro() {
                       </p>
                     ) : (
                       <p className="text-sm text-muted-foreground italic">
-                        Nenhum texto gerado ainda. Clique em "Editar" para criar a apresentação do destino.
+                        Nenhum texto gerado ainda. Clique em "Editar descrição" para criar a apresentação do destino.
                       </p>
                     )}
+                    <div className="mt-4 flex items-center justify-between rounded-lg border p-3">
+                      <div className="pr-3">
+                        <Label htmlFor="show-intro-inline" className="text-sm font-semibold">
+                          Exibir apresentação do destino
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Mostra o texto e a galeria de fotos no topo do roteiro público.
+                        </p>
+                      </div>
+                      <Switch
+                        id="show-intro-inline"
+                        checked={currentItinerary.showDestinationIntro !== false}
+                        onCheckedChange={async (checked) => {
+                          const prev = currentItinerary;
+                          setCurrentItinerary({ ...prev, showDestinationIntro: checked });
+                          try {
+                            await updateItineraryDetails.mutateAsync({
+                              itineraryId: prev.id,
+                              updates: { show_destination_intro: checked },
+                            });
+                          } catch (err) {
+                            setCurrentItinerary(prev);
+                            toast.error("Não foi possível atualizar a visibilidade.");
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -851,30 +881,48 @@ export default function CriarRoteiro() {
         />
       )}
 
-      {currentItinerary && editPresentationOpen && (
+      {currentItinerary && editTextOpen && (
         <PublishReviewDialog
-          open={editPresentationOpen}
-          onOpenChange={setEditPresentationOpen}
+          open={editTextOpen}
+          onOpenChange={setEditTextOpen}
           itinerary={currentItinerary}
           mode="edit"
+          section="text"
           onConfirm={async (data) => {
             await updateItineraryDetails.mutateAsync({
               itineraryId: currentItinerary.id,
-              updates: {
-                destination_intro_text: data.introText,
-                destination_intro_images: data.images,
-                cover_image_url: data.coverUrl,
-                show_destination_intro: data.showIntro,
-              },
+              updates: { destination_intro_text: data.introText },
             });
             setCurrentItinerary({
               ...currentItinerary,
               destinationIntroText: data.introText || undefined,
+            });
+            toast.success("Descrição atualizada!");
+          }}
+        />
+      )}
+
+      {currentItinerary && editPhotosOpen && (
+        <PublishReviewDialog
+          open={editPhotosOpen}
+          onOpenChange={setEditPhotosOpen}
+          itinerary={currentItinerary}
+          mode="edit"
+          section="photos"
+          onConfirm={async (data) => {
+            await updateItineraryDetails.mutateAsync({
+              itineraryId: currentItinerary.id,
+              updates: {
+                destination_intro_images: data.images,
+                cover_image_url: data.coverUrl,
+              },
+            });
+            setCurrentItinerary({
+              ...currentItinerary,
               destinationIntroImages: data.images,
               coverImageUrl: data.coverUrl || undefined,
-              showDestinationIntro: data.showIntro,
             });
-            toast.success("Apresentação atualizada!");
+            toast.success("Fotos atualizadas!");
           }}
         />
       )}
