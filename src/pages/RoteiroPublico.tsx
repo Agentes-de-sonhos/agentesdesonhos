@@ -20,9 +20,7 @@ import { LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
-
-const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon };
-const periodLabels = { manha: "Manhã", tarde: "Tarde", noite: "Noite" };
+import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 
 const tripTypeLabels: Record<string, string> = {
   familia: "Viagem em Família", casal: "Viagem de Casal",
