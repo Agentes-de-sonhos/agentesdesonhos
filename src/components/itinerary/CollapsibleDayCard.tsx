@@ -2,13 +2,15 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Calendar, ChevronDown, MapPin, Clock, DollarSign, Sun, Sunset, Moon,
-  FileText, Download, Eye, ExternalLink,
+  FileText, Download, Eye, ExternalLink, ArrowRight,
 } from "lucide-react";
 import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import type { ItineraryDay } from "@/types/itinerary";
 import { weatherIconFor } from "@/components/trip/TripCalendar";
 import type { DayWeather } from "@/hooks/useTripWeather";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
+import type { TripService } from "@/types/trip";
+import { SERVICE_CHIP_LABELS, SERVICE_ICONS } from "@/lib/tripServiceLabels";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon } as const;
 const periodLabels = { manha: "Manhã", tarde: "Tarde", noite: "Noite" } as const;
@@ -71,6 +73,7 @@ export function ActivityImage({
  */
 export function CollapsibleDayCard({
   day, periodImages, isOpen, onToggle, weather, destination,
+  servicesById, onOpenService,
 }: {
   day: ItineraryDay;
   periodImages: Record<string, string>;
@@ -78,6 +81,13 @@ export function CollapsibleDayCard({
   onToggle: () => void;
   weather?: DayWeather;
   destination?: string;
+  /**
+   * Optional map of `trip_services.id → TripService`. When provided, activities
+   * whose `linkedTripServiceId` resolves to one of these services render a
+   * clickable "Ver serviço" chip. Only used inside the Carteira Digital.
+   */
+  servicesById?: Map<string, TripService>;
+  onOpenService?: (service: TripService) => void;
 }) {
   const dateFormatted = formatItineraryDayHeader(parseLocalDate(day.date));
   const WxIcon = weather ? weatherIconFor(weather.code) : null;
@@ -205,6 +215,24 @@ export function CollapsibleDayCard({
                             <ExternalLink className="h-2.5 w-2.5" />
                           </a>
                         )}
+
+                        {(() => {
+                          const linkedId = (activity as any).linkedTripServiceId as string | null | undefined;
+                          if (!linkedId || !servicesById) return null;
+                          const svc = servicesById.get(linkedId);
+                          if (!svc) return null;
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => onOpenService?.(svc)}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 hover:bg-primary/15 text-primary text-[11.5px] font-semibold px-2.5 py-1 transition-colors"
+                            >
+                              <span aria-hidden>{SERVICE_ICONS[svc.service_type]}</span>
+                              {SERVICE_CHIP_LABELS[svc.service_type]}
+                              <ArrowRight className="h-3 w-3" />
+                            </button>
+                          );
+                        })()}
 
                         {(activity as any).documentUrls?.length > 0 && (
                           <div className="space-y-1.5 pt-1">

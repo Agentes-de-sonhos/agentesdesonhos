@@ -416,7 +416,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isOther = service.service_type === 'other';
 
   return (
-    <Card className="border-border/40 shadow-sm hover:shadow transition-shadow">
+    <Card
+      id={`service-${service.id}`}
+      className="border-border/40 shadow-sm hover:shadow transition-shadow scroll-mt-28"
+    >
       <CardContent className="p-4">
         {/* Service images (gallery) */}
         {(() => {
@@ -1454,6 +1457,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                         ? a.location
                         : `https://www.google.com/maps/search/${encodeURIComponent(a.location)}`)
                     : null,
+                  linkedTripServiceId: a.linked_trip_service_id ?? null,
                 });
               }
               richDays.push({
@@ -1725,6 +1729,30 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     setOpenDay(prev => prev === key ? null : key);
   }, []);
 
+  // Index trip services by id so the V2 day-by-day can render a "Ver serviço"
+  // chip on activities linked via linked_trip_service_id.
+  const servicesById = useMemo(() => {
+    const map = new Map<string, TripService>();
+    services.forEach((s) => map.set(s.id, s));
+    return map;
+  }, [services]);
+
+  // Open the wallet section that contains the given service and scroll to it.
+  const handleOpenService = useCallback((service: TripService) => {
+    setOpenSection(`service-${service.service_type}`);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const el = document.getElementById(`service-${service.id}`);
+        if (el) {
+          scrollToElement(el);
+        } else {
+          const section = sectionRefs.current[service.service_type];
+          scrollToElement(section);
+        }
+      }, 250);
+    });
+  }, [scrollToElement]);
+
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
   const { weatherByDate: itineraryWeather } = useTripWeather(
     tripData.destination,
@@ -1938,6 +1966,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           onToggle={() => toggleDay(day.date)}
                           weather={itineraryWeather?.[day.date]}
                           destination={v2Destination || tripData?.destination}
+                          servicesById={servicesById}
+                          onOpenService={handleOpenService}
                         />
                       </div>
                     );

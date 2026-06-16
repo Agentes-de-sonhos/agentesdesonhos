@@ -72,6 +72,9 @@ import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./Activity
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
 import { ActivityMediaActions } from "./ActivityMediaActions";
+import { useLinkedTripForItinerary } from "@/hooks/useLinkedTripForItinerary";
+import { SERVICE_ICONS, SERVICE_LABELS, getServiceSummary } from "@/lib/tripServiceLabels";
+import { Link2 } from "lucide-react";
 
 const periodIcons = {
   manha: Sun,
@@ -261,6 +264,8 @@ export function ItineraryEditor({
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
     useItineraryPeriodImages(itineraryId);
+  const { data: linkedTrip } = useLinkedTripForItinerary(itineraryId);
+  const tripServices = linkedTrip?.services ?? [];
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
   const { memory, learnFromInstruction, recordApproved, recordRemoved } =
@@ -299,6 +304,7 @@ export function ItineraryEditor({
         location: editingActivity.location,
         estimatedDuration: editingActivity.estimatedDuration,
         estimatedCost: editingActivity.estimatedCost,
+        linkedTripServiceId: editingActivity.linkedTripServiceId ?? null,
       });
       setEditingActivity(null);
     }
@@ -758,6 +764,39 @@ export function ItineraryEditor({
                                           }
                                         />
                                       </div>
+                                      {tripServices.length > 0 && (
+                                        <div className="space-y-2">
+                                          <Label className="flex items-center gap-1.5">
+                                            <Link2 className="h-3.5 w-3.5" />
+                                            Vincular a serviço da viagem
+                                          </Label>
+                                          <Select
+                                            value={editingActivity.linkedTripServiceId ?? "none"}
+                                            onValueChange={(v) =>
+                                              setEditingActivity({
+                                                ...editingActivity,
+                                                linkedTripServiceId: v === "none" ? null : v,
+                                              })
+                                            }
+                                          >
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Nenhum" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="none">Nenhum</SelectItem>
+                                              {tripServices.map((svc) => (
+                                                <SelectItem key={svc.id} value={svc.id}>
+                                                  {SERVICE_ICONS[svc.service_type]}{" "}
+                                                  {SERVICE_LABELS[svc.service_type]} — {getServiceSummary(svc)}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <p className="text-[11px] text-muted-foreground">
+                                            Cria um botão "Ver serviço" nesta atividade dentro da Carteira Digital.
+                                          </p>
+                                        </div>
+                                      )}
                                     </div>
                                   )}
                                   <DialogFooter>

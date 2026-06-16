@@ -212,6 +212,7 @@ export default function CriarRoteiro() {
     if (updates.isApproved !== undefined) dbUpdates.is_approved = updates.isApproved;
     if (updates.photo_url !== undefined) dbUpdates.photo_url = updates.photo_url;
     if (updates.document_urls !== undefined) dbUpdates.document_urls = updates.document_urls;
+    if (updates.linkedTripServiceId !== undefined) dbUpdates.linked_trip_service_id = updates.linkedTripServiceId;
 
     updateActivity.mutate(
       { activityId, updates: dbUpdates },
