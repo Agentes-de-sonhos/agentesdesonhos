@@ -222,13 +222,14 @@ export function ActivityAIActions({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-primary hover:text-primary"
-            title="Refinar com IA"
+            className="h-9 w-9 text-primary hover:text-primary hover:bg-primary/15"
+            title="Refinar atividade com IA"
+            aria-label="Refinar atividade com IA"
           >
             {loading === "refine" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-[18px] w-[18px] animate-spin" />
             ) : (
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-[18px] w-[18px]" />
             )}
           </Button>
         </PopoverTrigger>
@@ -296,17 +297,18 @@ export function ActivityAIActions({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-primary hover:text-primary"
-            title="Sugerir outra opção"
+            className="h-9 w-9 text-primary hover:text-primary hover:bg-primary/15"
+            title="Gerar nova sugestão"
+            aria-label="Gerar nova sugestão"
             onClick={(e) => {
               e.preventDefault();
               handleSuggest();
             }}
           >
             {loading === "suggest" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-[18px] w-[18px] animate-spin" />
             ) : (
-              <Shuffle className="h-4 w-4" />
+              <Shuffle className="h-[18px] w-[18px]" />
             )}
           </Button>
         </PopoverTrigger>

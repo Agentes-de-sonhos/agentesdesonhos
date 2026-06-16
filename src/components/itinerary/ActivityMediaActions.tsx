@@ -8,10 +8,23 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ImagePlus, Globe2, Paperclip, X, Check, FileText, Download, Search } from "lucide-react";
+import {
+  Loader2,
+  Upload,
+  Globe2,
+  Paperclip,
+  X,
+  Check,
+  FileText,
+  Download,
+  Search,
+  ImageIcon,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 
 interface Props {
   itineraryId?: string;
@@ -38,38 +51,85 @@ function isImageUrl(url: string) {
 
 const MAX_DOC_SIZE = 10 * 1024 * 1024; // 10MB
 
-export function ActivityMediaActions({
+/* ───────────────────── Shared upload helpers ───────────────────── */
+
+async function uploadPhotoFile(
+  file: File,
+  itineraryId?: string,
+  activityId?: string,
+) {
+  if (!file || !itineraryId || !activityId) return null;
+  if (!file.type.startsWith("image/")) {
+    toast.error("Selecione uma imagem JPG, PNG ou WEBP");
+    return null;
+  }
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `itinerary-activities/${itineraryId}/${activityId}/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage
+    .from("media-files")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (error) throw error;
+  const { data } = supabase.storage.from("media-files").getPublicUrl(path);
+  return data?.publicUrl ?? null;
+}
+
+/* ───────────────────── Photo editor (with overlay) ───────────────────── */
+
+interface PhotoEditorProps {
+  itineraryId?: string;
+  activityId?: string;
+  activityTitle: string;
+  activityLocation?: string | null;
+  destination?: string;
+  photoUrl?: string | null;
+  onChange: (updates: { photo_url?: string | null }) => void;
+  /** If true and there is no photo, auto-fetch a suggestion in the background. */
+  autoFetch?: boolean;
+}
+
+/**
+ * Renders the activity thumbnail with overlaid action icons:
+ *  - Excluir foto (X)
+ *  - Buscar foto na internet (Globe2)
+ *  - Trocar / Enviar foto (Upload)
+ *
+ * On desktop the icons appear on hover; on touch devices they are always visible.
+ */
+export function ActivityPhotoEditor({
   itineraryId,
   activityId,
   activityTitle,
   activityLocation,
   destination,
   photoUrl,
-  documentUrls = [],
   onChange,
-}: Props) {
+  autoFetch = true,
+}: PhotoEditorProps) {
   const photoInputRef = useRef<HTMLInputElement | null>(null);
-  const docInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  // Auto-fetch a suggestion when no photo is set yet
+  const { data: suggestion, loading: suggestionLoading } = useActivityPhoto({
+    query: autoFetch && !photoUrl ? activityTitle : "",
+    location: activityLocation,
+    destination,
+  });
+
+  useEffect(() => {
+    if (!photoUrl && autoFetch && suggestion?.photo_url && activityId) {
+      onChange({ photo_url: suggestion.photo_url });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestion?.photo_url]);
 
   const handleUploadPhoto = async (file?: File) => {
     if (!file || !itineraryId || !activityId) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Selecione uma imagem JPG, PNG ou WEBP");
-      return;
-    }
     setUploadingPhoto(true);
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `itinerary-activities/${itineraryId}/${activityId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("media-files")
-        .upload(path, file, { upsert: true, contentType: file.type });
-      if (error) throw error;
-      const { data } = supabase.storage.from("media-files").getPublicUrl(path);
-      if (data?.publicUrl) {
-        onChange({ photo_url: data.publicUrl });
+      const url = await uploadPhotoFile(file, itineraryId, activityId);
+      if (url) {
+        onChange({ photo_url: url });
         toast.success("Foto adicionada");
       }
     } catch (e: any) {
@@ -78,6 +138,128 @@ export function ActivityMediaActions({
       setUploadingPhoto(false);
     }
   };
+
+  const handleRemovePhoto = () => {
+    onChange({ photo_url: null });
+    toast.success("Foto removida");
+  };
+
+  const hasPhoto = !!photoUrl;
+
+  return (
+    <div className="shrink-0">
+      <input
+        ref={photoInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) handleUploadPhoto(f);
+          if (photoInputRef.current) photoInputRef.current.value = "";
+        }}
+      />
+      <div
+        className={cn(
+          "group relative overflow-hidden rounded-md border bg-muted/50",
+          "h-16 w-16 sm:h-20 sm:w-20",
+        )}
+      >
+        {hasPhoto ? (
+          <img
+            src={photoUrl!}
+            alt={activityTitle}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
+        ) : suggestionLoading ? (
+          <div className="h-full w-full animate-pulse bg-muted" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+            <ImageIcon className="h-5 w-5 opacity-40" />
+          </div>
+        )}
+
+        {/* Overlay actions */}
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 flex items-end justify-center gap-1 p-1",
+            "bg-gradient-to-t from-black/55 via-black/10 to-transparent",
+            // Always visible on touch; hover-only on desktop
+            "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity",
+          )}
+        >
+          {hasPhoto && (
+            <button
+              type="button"
+              title="Excluir foto"
+              aria-label="Excluir foto"
+              onClick={handleRemovePhoto}
+              disabled={!activityId}
+              className="pointer-events-auto h-6 w-6 inline-flex items-center justify-center rounded-md bg-background/90 text-destructive shadow-sm hover:bg-background"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          )}
+          <button
+            type="button"
+            title="Buscar foto na internet"
+            aria-label="Buscar foto na internet"
+            onClick={() => setPickerOpen(true)}
+            disabled={!activityId}
+            className="pointer-events-auto h-6 w-6 inline-flex items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm hover:bg-background"
+          >
+            <Globe2 className="h-3 w-3" />
+          </button>
+          <button
+            type="button"
+            title={hasPhoto ? "Trocar foto" : "Enviar foto"}
+            aria-label={hasPhoto ? "Trocar foto" : "Enviar foto"}
+            onClick={() => photoInputRef.current?.click()}
+            disabled={uploadingPhoto || !activityId}
+            className="pointer-events-auto h-6 w-6 inline-flex items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm hover:bg-background"
+          >
+            {uploadingPhoto ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Upload className="h-3 w-3" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <InternetPhotoPickerDialog
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        query={activityTitle}
+        location={activityLocation}
+        destination={destination}
+        onPick={(url) => onChange({ photo_url: url })}
+      />
+    </div>
+  );
+}
+
+/* ───────────────────── Documents (button + list) ───────────────────── */
+
+interface DocumentsButtonProps {
+  itineraryId?: string;
+  activityId?: string;
+  documentUrls: string[];
+  onChange: (updates: { document_urls?: string[] }) => void;
+  className?: string;
+}
+
+export function ActivityDocumentsButton({
+  itineraryId,
+  activityId,
+  documentUrls,
+  onChange,
+  className,
+}: DocumentsButtonProps) {
+  const docInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
 
   const handleUploadDocument = async (file?: File) => {
     if (!file || !itineraryId || !activityId) return;
@@ -116,25 +298,8 @@ export function ActivityMediaActions({
     }
   };
 
-  const handleRemoveDocument = (url: string) => {
-    onChange({ document_urls: documentUrls.filter((u) => u !== url) });
-  };
-
-  const handleRemovePhoto = () => onChange({ photo_url: null });
-
   return (
-    <div className="mt-2 space-y-2">
-      <input
-        ref={photoInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) handleUploadPhoto(f);
-          if (photoInputRef.current) photoInputRef.current.value = "";
-        }}
-      />
+    <>
       <input
         ref={docInputRef}
         type="file"
@@ -146,66 +311,40 @@ export function ActivityMediaActions({
           if (docInputRef.current) docInputRef.current.value = "";
         }}
       />
-
-      {/* Photo preview (if set) */}
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-1.5">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-7 text-xs gap-1.5"
-          onClick={() => photoInputRef.current?.click()}
-          disabled={uploadingPhoto || !activityId}
-        >
-          {uploadingPhoto ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            <ImagePlus className="h-3 w-3" />
-          )}
-          {photoUrl ? "Trocar foto" : "Adicionar foto"}
-        </Button>
-        <InternetPhotoPickerButton
-          query={activityTitle}
-          location={activityLocation}
-          destination={destination}
-          onPick={(url) => onChange({ photo_url: url })}
-        />
-        {photoUrl && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs gap-1.5"
-            onClick={handleRemovePhoto}
-          >
-            <X className="h-3 w-3" />
-            Remover foto
-          </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className={cn("h-8 w-8", className)}
+        onClick={() => docInputRef.current?.click()}
+        disabled={uploadingDoc || !activityId}
+        title="Anexar documento"
+        aria-label="Anexar documento"
+      >
+        {uploadingDoc ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Paperclip className="h-4 w-4" />
         )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-7 text-xs gap-1.5"
-          onClick={() => docInputRef.current?.click()}
-          disabled={uploadingDoc || !activityId}
-        >
-          {uploadingDoc ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            <Paperclip className="h-3 w-3" />
-          )}
-          Anexar documento
-        </Button>
-      </div>
+      </Button>
+    </>
+  );
+}
 
-      {/* Document list */}
-      {documentUrls.length > 0 && (
-        <div className="space-y-1">
-          {documentUrls.map((url) => {
+interface DocumentsListProps {
+  documentUrls: string[];
+  onChange: (updates: { document_urls?: string[] }) => void;
+}
+
+export function ActivityDocumentsList({ documentUrls, onChange }: DocumentsListProps) {
+  if (!documentUrls.length) return null;
+  const handleRemoveDocument = (url: string) => {
+    onChange({ document_urls: documentUrls.filter((u) => u !== url) });
+  };
+  return (
+    <div className="mt-2 space-y-1">
+      {documentUrls.map((url) => {
             const name = fileNameOf(url);
-            const img = isImageUrl(url);
             return (
               <div
                 key={url}
@@ -232,11 +371,14 @@ export function ActivityMediaActions({
                 </button>
               </div>
             );
-          })}
-        </div>
-      )}
+      })}
     </div>
   );
+}
+
+/* Legacy wrapper kept for backward-compatibility (renders nothing). */
+export function ActivityMediaActions(_props: Props) {
+  return null;
 }
 
 /* ───────────────── Internet photo picker ───────────────── */
@@ -247,18 +389,21 @@ interface PhotoCandidate {
   source: string;
 }
 
-function InternetPhotoPickerButton({
+function InternetPhotoPickerDialog({
+  open,
+  onOpenChange,
   query,
   location,
   destination,
   onPick,
 }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
   query: string;
   location?: string | null;
   destination?: string;
   onPick: (url: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [photos, setPhotos] = useState<PhotoCandidate[]>([]);
   const [search, setSearch] = useState("");
@@ -303,25 +448,13 @@ function InternetPhotoPickerButton({
     if (picked) {
       onPick(picked);
       toast.success("Foto aplicada");
-      setOpen(false);
+      onOpenChange(false);
       setPicked(null);
     }
   };
 
   return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-7 text-xs gap-1.5"
-        onClick={() => setOpen(true)}
-      >
-        <Globe2 className="h-3 w-3" />
-        Buscar fotos da internet
-      </Button>
-
-      <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Selecionar foto da internet</DialogTitle>
@@ -395,7 +528,7 @@ function InternetPhotoPickerButton({
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
             <Button size="sm" disabled={!picked} onClick={handleConfirm}>
@@ -404,6 +537,5 @@ function InternetPhotoPickerButton({
           </div>
         </DialogContent>
       </Dialog>
-    </>
   );
 }
