@@ -13,6 +13,7 @@ export interface OpportunityFollowup {
   note: string | null;
   created_at: string;
   updated_at: string;
+  author_name?: string | null;
 }
 
 export interface FollowupDraft {
@@ -39,7 +40,22 @@ export function useOpportunityFollowups(opportunityId?: string) {
         .eq("opportunity_id", opportunityId)
         .order("follow_up_date", { ascending: true });
       if (error) throw error;
-      return (data || []) as unknown as OpportunityFollowup[];
+      const rows = (data || []) as unknown as OpportunityFollowup[];
+      const authorIds = Array.from(
+        new Set(rows.map((r) => r.created_by).filter(Boolean) as string[])
+      );
+      if (authorIds.length === 0) return rows;
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", authorIds);
+      const nameById = new Map(
+        (profiles || []).map((p: any) => [p.id, p.full_name as string | null])
+      );
+      return rows.map((r) => ({
+        ...r,
+        author_name: r.created_by ? nameById.get(r.created_by) ?? null : null,
+      }));
     },
     enabled: !!opportunityId,
   });
@@ -129,20 +145,19 @@ export function useOpportunityFollowups(opportunityId?: string) {
  */
 export function useAllFollowups() {
   const { user } = useAuth();
-  const { agencyOwnerId } = useAgencyOwnerId();
   return useQuery({
-    queryKey: ["all-followups", agencyOwnerId, user?.id],
+    queryKey: ["all-followups", user?.id],
     queryFn: async () => {
-      if (!user?.id || !agencyOwnerId) return [];
+      if (!user?.id) return [];
       const { data, error } = await supabase
         .from("opportunity_followups" as any)
         .select("*, opportunity:opportunities(id, destination, client:clients(name))")
-        .eq("user_id", agencyOwnerId)
+        .eq("created_by", user.id)
         .order("follow_up_date", { ascending: true });
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!user?.id && !!agencyOwnerId,
+    enabled: !!user?.id,
     staleTime: 2 * 60 * 1000,
   });
 }

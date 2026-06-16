@@ -382,6 +382,7 @@ export function OpportunityDetailsDrawer({
               <div className="relative pl-5 border-l-2 border-border space-y-3">
                 {sortedFollowups.map((fu) => {
                   const d = parseDateOnly(fu.follow_up_date);
+                  const createdAt = fu.created_at ? new Date(fu.created_at) : null;
                   return (
                     <div key={fu.id} className="relative">
                       <span className="absolute -left-[27px] top-2 h-3 w-3 rounded-full bg-sky-500 border-2 border-background" />
@@ -392,6 +393,18 @@ export function OpportunityDetailsDrawer({
                             ? format(d, "dd/MM/yyyy", { locale: ptBR })
                             : fu.follow_up_date}
                         </div>
+                        {(fu.author_name || createdAt) && (
+                          <div className="text-[11px] text-muted-foreground mt-1">
+                            {fu.author_name && (
+                              <span className="font-medium text-foreground/80">
+                                {fu.author_name}
+                              </span>
+                            )}
+                            {fu.author_name && createdAt && " · "}
+                            {createdAt &&
+                              `Criado em ${format(createdAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`}
+                          </div>
+                        )}
                         {fu.note ? (
                           <p className="text-sm text-foreground/90 whitespace-pre-wrap mt-1.5">
                             {fu.note}
