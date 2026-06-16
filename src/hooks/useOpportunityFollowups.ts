@@ -45,10 +45,18 @@ export function useOpportunityFollowups(opportunityId?: string) {
         new Set(rows.map((r) => r.created_by).filter(Boolean) as string[])
       );
       if (authorIds.length === 0) return rows;
-      // Resolve author names from multiple sources:
-      // 1) profiles.name (keyed by user_id) — for master/owners
-      // 2) agency_team_members.full_name (keyed by auth_user_id) — for collaborators
-      const [profilesRes, teamRes] = await Promise.all([
+      // Resolve author names from multiple sources. We must work for both
+      // master and collaborator viewers, even though `profiles` RLS only
+      // allows each user to read their own row. We use:
+      //   1) get_public_profiles RPC (SECURITY DEFINER) — safe cross-user
+      //      lookup of profile names (handles the master in a collaborator's
+      //      session, and other masters/users in general).
+      //   2) agency_team_members.full_name (keyed by auth_user_id) — for
+      //      collaborators that may not have a profile row.
+      //   3) profiles.name direct read — kept as a fast path for the
+      //      currently-logged-in user (always readable by RLS).
+      const [publicProfilesRes, profilesRes, teamRes] = await Promise.all([
+        supabase.rpc("get_public_profiles" as any, { _user_ids: authorIds }),
         supabase
           .from("profiles")
           .select("user_id, name")
@@ -59,7 +67,12 @@ export function useOpportunityFollowups(opportunityId?: string) {
           .in("auth_user_id", authorIds),
       ]);
       const nameById = new Map<string, string | null>();
+      for (const p of (publicProfilesRes.data || []) as any[]) {
+        const n = (p.name as string | null)?.trim();
+        if (p.user_id && n) nameById.set(p.user_id, n);
+      }
       for (const p of (profilesRes.data || []) as any[]) {
+        if (nameById.get(p.user_id)) continue;
         const n = (p.name as string | null)?.trim();
         if (p.user_id && n) nameById.set(p.user_id, n);
       }
