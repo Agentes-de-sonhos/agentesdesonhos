@@ -34,7 +34,7 @@ export function useLinkedTripForItinerary(itineraryId: string | undefined) {
 
       return {
         trip,
-        services: (services ?? []) as TripService[],
+        services: (services ?? []) as unknown as TripService[],
       };
     },
     enabled: !!itineraryId,
