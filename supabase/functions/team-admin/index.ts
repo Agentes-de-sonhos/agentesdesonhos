@@ -77,13 +77,23 @@ Deno.serve(async (req) => {
 
       const password_hash = await bcrypt.hash(password, 10)
       const { data: created, error } = await admin.from('agency_team_members').insert({
-        agency_id: ownerId, full_name, login: login.trim(), password_hash,
+        agency_id: ownerId, full_name, login: login.trim(),
         role_title: role_title ?? null, status: 'active',
         auth_user_id: authUserId, synthetic_email: email,
       }).select('id').single()
       if (error) {
         await admin.auth.admin.deleteUser(authUserId).catch(() => {})
         return json({ error: error.message }, 400)
+      }
+
+      // Guarda o hash da senha em tabela isolada (sem acesso PostgREST)
+      const { error: secretErr } = await admin.from('agency_team_member_secrets').insert({
+        member_id: created.id, password_hash,
+      })
+      if (secretErr) {
+        await admin.from('agency_team_members').delete().eq('id', created.id)
+        await admin.auth.admin.deleteUser(authUserId).catch(() => {})
+        return json({ error: secretErr.message }, 400)
       }
 
       // Permissões iniciais
@@ -121,8 +131,15 @@ Deno.serve(async (req) => {
       const patch: any = { updated_at: new Date().toISOString() }
       if (full_name !== undefined) patch.full_name = full_name
       if (role_title !== undefined) patch.role_title = role_title
-      if (password && password.length >= 6) patch.password_hash = await bcrypt.hash(password, 10)
       await admin.from('agency_team_members').update(patch).eq('id', id)
+
+      // Atualiza hash da senha na tabela isolada (se solicitado)
+      if (password && password.length >= 6) {
+        const newHash = await bcrypt.hash(password, 10)
+        await admin.from('agency_team_member_secrets').upsert({
+          member_id: id, password_hash: newHash, updated_at: new Date().toISOString(),
+        }, { onConflict: 'member_id' })
+      }
 
       // Reflete senha no Supabase Auth
       if (password && password.length >= 6 && member.auth_user_id) {

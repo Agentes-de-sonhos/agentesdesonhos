@@ -523,6 +523,32 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_team_member_secrets: {
+        Row: {
+          member_id: string
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          member_id: string
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          member_id?: string
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_team_member_secrets_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: true
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_team_members: {
         Row: {
           agency_id: string
@@ -533,7 +559,7 @@ export type Database = {
           last_login_at: string | null
           login: string
           login_normalized: string | null
-          password_hash: string
+          password_hash: string | null
           role_title: string | null
           status: Database["public"]["Enums"]["team_member_status"]
           synthetic_email: string | null
@@ -548,7 +574,7 @@ export type Database = {
           last_login_at?: string | null
           login: string
           login_normalized?: string | null
-          password_hash: string
+          password_hash?: string | null
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
           synthetic_email?: string | null
@@ -563,7 +589,7 @@ export type Database = {
           last_login_at?: string | null
           login?: string
           login_normalized?: string | null
-          password_hash?: string
+          password_hash?: string | null
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
           synthetic_email?: string | null

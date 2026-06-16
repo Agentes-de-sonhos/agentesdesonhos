@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
 
     const { data: member } = await admin
       .from('agency_team_members')
-      .select('id, agency_id, password_hash, status, full_name, login, role_title')
+      .select('id, agency_id, status, full_name, login, role_title')
       .eq('login_normalized', login.toLowerCase().trim())
       .maybeSingle()
 
@@ -39,7 +39,17 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Usuário bloqueado. Entre em contato com a sua agência.' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    const ok = await bcrypt.compare(password, member.password_hash)
+    const { data: secret } = await admin
+      .from('agency_team_member_secrets')
+      .select('password_hash')
+      .eq('member_id', member.id)
+      .maybeSingle()
+
+    if (!secret?.password_hash) {
+      return new Response(JSON.stringify({ error: 'Credenciais inválidas' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    const ok = await bcrypt.compare(password, secret.password_hash)
     if (!ok) {
       return new Response(JSON.stringify({ error: 'Credenciais inválidas' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
