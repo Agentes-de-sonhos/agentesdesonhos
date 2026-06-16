@@ -416,7 +416,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const isOther = service.service_type === 'other';
 
   return (
-    <Card className="border-border/40 shadow-sm hover:shadow transition-shadow">
+    <Card
+      id={`service-${service.id}`}
+      className="border-border/40 shadow-sm hover:shadow transition-shadow scroll-mt-28"
+    >
       <CardContent className="p-4">
         {/* Service images (gallery) */}
         {(() => {
