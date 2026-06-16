@@ -408,52 +408,55 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
   const charCount = draftText.length;
 
   return (
+    <TooltipProvider>
     <div className="space-y-4">
-      {/* Inline switch */}
-      <div className="flex items-center justify-between rounded-lg border bg-card px-4 py-3">
-        <div className="flex items-start gap-3">
-          <MapPin className="h-4 w-4 text-primary mt-0.5" />
-          <div>
-            <Label htmlFor="show-destination-inline" className="text-sm font-medium cursor-pointer">
-              Exibir apresentação do destino
-            </Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Mostre uma descrição e imagens do destino antes dos serviços.
-            </p>
-          </div>
+      {/* Action buttons + compact toggle */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => setTextOpen(true)} className="gap-2">
+            <Pencil className="h-3.5 w-3.5" />
+            Editar descrição
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setPhotosOpen(true)} className="gap-2">
+            <Images className="h-3.5 w-3.5" />
+            Capa e fotos
+            {images.length > 0 && (
+              <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">
+                {images.length}
+              </span>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onGenerate}
+            disabled={isGenerating || isFetchingPhotos}
+            className="gap-2"
+          >
+            {isGenerating || isFetchingPhotos ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
+          </Button>
         </div>
-        <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
-      </div>
 
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" onClick={() => setTextOpen(true)} className="gap-2">
-          <Pencil className="h-3.5 w-3.5" />
-          Editar descrição
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => setPhotosOpen(true)} className="gap-2">
-          <Images className="h-3.5 w-3.5" />
-          Capa e fotos
-          {images.length > 0 && (
-            <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">
-              {images.length}
-            </span>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onGenerate}
-          disabled={isGenerating || isFetchingPhotos}
-          className="gap-2"
-        >
-          {isGenerating || isFetchingPhotos ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Sparkles className="h-3.5 w-3.5" />
-          )}
-          {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {enabled ? "Exibindo" : "Oculto"}
+              </span>
+              <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="end">
+            <p className="max-w-[260px]">
+              Mostra o texto e a galeria de fotos no topo do roteiro público.
+            </p>
+          </TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Preview summary */}
