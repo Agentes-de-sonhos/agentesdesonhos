@@ -2139,6 +2139,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           </p>
         </div>
       </div>
+      <ServiceDetailOverlay
+        service={activeService}
+        open={activeService !== null}
+        onOpenChange={(open) => { if (!open) setActiveService(null); }}
+      >
+        {activeService && <PublicServiceCard service={activeService} />}
+      </ServiceDetailOverlay>
     </div>
     </VoucherAccessCtx.Provider>
   );
