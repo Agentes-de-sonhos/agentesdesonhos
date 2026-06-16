@@ -522,7 +522,11 @@ export default function CriarRoteiro() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ItineraryForm onSubmit={handleCreateItinerary} isLoading={isGenerating} />
+                  <ItineraryForm
+                    onSubmit={handleCreateItinerary}
+                    isLoading={isGenerating}
+                    initialValues={initialFormValues}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
