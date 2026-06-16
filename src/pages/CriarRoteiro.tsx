@@ -624,18 +624,24 @@ export default function CriarRoteiro() {
                 {fromTripId ? "Voltar para Carteira" : "Voltar"}
               </Button>
               <div className="flex gap-2">
+                {currentItinerary && !areAllActivitiesApproved(currentItinerary) && (
+                  <Button variant="outline" onClick={() => setApproveAllConfirmOpen(true)}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Aprovar todas as atividades
+                  </Button>
+                )}
+                {!generatedLinkUrl && (
+                  <Button onClick={() => handleActionClick("link")}>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Publicar
+                  </Button>
+                )}
                 <Button variant="outline" onClick={() => handleActionClick("pdf")}>
                   <FileText className="mr-2 h-4 w-4" />
                   Gerar PDF
                 </Button>
-                {!generatedLinkUrl && (
-                  <Button onClick={() => handleActionClick("link")}>
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Gerar Link
-                  </Button>
-                )}
                 {currentItinerary && (
-                <Button variant="outline" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
+                  <Button variant="outline" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
                     <Star className="mr-2 h-4 w-4" />
                     Salvar como modelo
                   </Button>
