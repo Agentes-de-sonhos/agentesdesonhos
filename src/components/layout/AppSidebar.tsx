@@ -184,7 +184,7 @@ const clientesSection: MenuSection = {
   textColor: "text-cyan-700",
   borderColor: "border-cyan-600",
   items: [
-    { key: "dashboard_clientes", title: "Dashboard", url: "/gestao-clientes/dashboard", icon: LayoutDashboard, requiredFeature: "crm_basic", requiredPermission: "dashboard.view" },
+    { key: "dashboard_clientes", title: "Visão Geral", url: "/gestao-clientes/dashboard", icon: LayoutDashboard, requiredFeature: "crm_basic", requiredPermission: "dashboard.view" },
     { key: "gestao_clientes", title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", requiredPermission: "clients.view" },
     { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic", requiredPermission: "opportunities.view" },
     { key: "operacoes", title: "Operações", url: "/gestao-clientes/operacoes", icon: CalendarDays, requiredFeature: "crm_basic", requiredPermission: "operations.view" },
@@ -209,7 +209,7 @@ const financeiroSection: MenuSection = {
     { key: "faturas", title: "Faturas", url: "/financeiro?tab=faturas", icon: FileText, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "vendedores", title: "Vendedores", url: "/financeiro?tab=vendedores", icon: Users, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "dashboard_fin", title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "dashboard_fin", title: "Visão Geral", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
   ],
 };
 
