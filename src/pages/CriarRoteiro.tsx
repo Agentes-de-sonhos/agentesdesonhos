@@ -781,7 +781,7 @@ export default function CriarRoteiro() {
                       size="sm"
                       variant="outline"
                       className="w-full mt-2"
-                      onClick={() => setEditPresentationOpen(true)}
+                      onClick={() => setEditPhotosOpen(true)}
                     >
                       <ImageIcon className="h-3.5 w-3.5 mr-1.5" />
                       Capa e fotos
@@ -800,10 +800,10 @@ export default function CriarRoteiro() {
                         size="sm"
                         variant="ghost"
                         className="h-7 px-2"
-                        onClick={() => setEditPresentationOpen(true)}
+                        onClick={() => setEditTextOpen(true)}
                       >
                         <Pencil className="h-3.5 w-3.5 mr-1" />
-                        Editar
+                        Editar descrição
                       </Button>
                     </div>
                     {currentItinerary.destinationIntroText ? (
@@ -812,9 +812,36 @@ export default function CriarRoteiro() {
                       </p>
                     ) : (
                       <p className="text-sm text-muted-foreground italic">
-                        Nenhum texto gerado ainda. Clique em "Editar" para criar a apresentação do destino.
+                        Nenhum texto gerado ainda. Clique em "Editar descrição" para criar a apresentação do destino.
                       </p>
                     )}
+                    <div className="mt-4 flex items-center justify-between rounded-lg border p-3">
+                      <div className="pr-3">
+                        <Label htmlFor="show-intro-inline" className="text-sm font-semibold">
+                          Exibir apresentação do destino
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Mostra o texto e a galeria de fotos no topo do roteiro público.
+                        </p>
+                      </div>
+                      <Switch
+                        id="show-intro-inline"
+                        checked={currentItinerary.showDestinationIntro !== false}
+                        onCheckedChange={async (checked) => {
+                          const prev = currentItinerary;
+                          setCurrentItinerary({ ...prev, showDestinationIntro: checked });
+                          try {
+                            await updateItineraryDetails.mutateAsync({
+                              itineraryId: prev.id,
+                              updates: { show_destination_intro: checked },
+                            });
+                          } catch (err) {
+                            setCurrentItinerary(prev);
+                            toast.error("Não foi possível atualizar a visibilidade.");
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>
