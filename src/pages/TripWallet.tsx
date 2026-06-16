@@ -12,6 +12,7 @@ import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye,
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TripItinerary } from "@/components/trip/itinerary/TripItinerary";
+import { TripItineraryV2 } from "@/components/wallet/TripItineraryV2";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
