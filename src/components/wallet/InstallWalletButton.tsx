@@ -24,7 +24,7 @@ export function InstallWalletButton({ agencyName }: { agencyName?: string }) {
         Salvar na tela inicial
       </button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Salvar na tela inicial</DialogTitle>
@@ -80,7 +80,7 @@ export function InstallWalletButton({ agencyName }: { agencyName?: string }) {
             </ol>
           )}
 
-          <Button onClick={() => setOpen(false)} className="w-full mt-2">Entendi</Button>
+          <Button onClick={() => setShowInstructions(false)} className="w-full mt-2">Entendi</Button>
         </DialogContent>
       </Dialog>
     </>
