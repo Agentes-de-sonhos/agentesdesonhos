@@ -1408,12 +1408,20 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               tarde: 'afternoon', afternoon: 'afternoon',
               noite: 'evening', evening: 'evening', night: 'evening',
             };
+            const PT_PERIOD_MAP: Record<string, 'manha' | 'tarde' | 'noite'> = {
+              manha: 'manha', manhã: 'manha', morning: 'manha',
+              tarde: 'tarde', afternoon: 'tarde',
+              noite: 'noite', evening: 'noite', night: 'noite',
+            };
             const mapped: any[] = [];
+            const richDays: ItineraryDay[] = [];
             for (const d of itin.days) {
               const acts = Array.isArray(d.activities) ? d.activities : [];
+              const dayActivities: any[] = [];
               for (const a of acts) {
                 const rawPeriod = String(a.period || '').toLowerCase().trim();
                 const normPeriod = PERIOD_MAP[rawPeriod] || 'morning';
+                const ptPeriod = PT_PERIOD_MAP[rawPeriod] || 'manha';
                 mapped.push({
                   id: a.id,
                   day_date: d.date,
@@ -1428,15 +1436,43 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   photo_urls: a.photo_url ? [a.photo_url] : [],
                   document_urls: Array.isArray(a.document_urls) ? a.document_urls : [],
                 });
+                dayActivities.push({
+                  id: a.id,
+                  period: ptPeriod,
+                  title: a.title,
+                  description: a.description ?? null,
+                  location: a.location ?? null,
+                  estimatedDuration: a.estimated_duration ?? null,
+                  estimatedCost: a.estimated_cost ?? null,
+                  orderIndex: a.order_index ?? 0,
+                  isApproved: true,
+                  photoUrl: a.photo_url ?? null,
+                  documentUrls: Array.isArray(a.document_urls) ? a.document_urls : [],
+                  mapsUrl: a.location
+                    ? (String(a.location).startsWith('http')
+                        ? a.location
+                        : `https://www.google.com/maps/search/${encodeURIComponent(a.location)}`)
+                    : null,
+                });
               }
+              richDays.push({
+                id: d.id,
+                dayNumber: d.day_number ?? (richDays.length + 1),
+                date: d.date,
+                activities: dayActivities,
+              });
             }
             setItineraryActivities(mapped);
+            setV2Days(richDays);
+            setV2Destination(itin.destination ?? undefined);
             return;
           }
         } catch (e) {
           console.error('[CarteiraPublica] Falha ao carregar Roteiro V2:', e);
         }
         setItineraryActivities([]);
+        setV2Days(null);
+        setV2Destination(undefined);
         return;
       }
 
@@ -1448,6 +1484,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         .order("day_date", { ascending: true })
         .order("order_index", { ascending: true });
       if (data) setItineraryActivities(data);
+      setV2Days(null);
+      setV2Destination(undefined);
     };
     fetchItinerary();
   }, [tripData?.id, tripData?.itinerary_mode, tripData?.itinerary_id, tripData?.public_access_code]);
