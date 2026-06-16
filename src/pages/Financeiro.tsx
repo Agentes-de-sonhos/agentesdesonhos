@@ -33,7 +33,7 @@ const MONTH_NAMES = [
 ];
 
 const ALL_TABS_DEF = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
   { key: "vendas", label: "Vendas", icon: ShoppingBag },
   { key: "entradas", label: "Entradas", icon: ArrowUpCircle },
   { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
