@@ -45,13 +45,33 @@ export function useOpportunityFollowups(opportunityId?: string) {
         new Set(rows.map((r) => r.created_by).filter(Boolean) as string[])
       );
       if (authorIds.length === 0) return rows;
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", authorIds);
-      const nameById = new Map(
-        (profiles || []).map((p: any) => [p.id, p.full_name as string | null])
-      );
+      // Resolve author names from multiple sources:
+      // 1) profiles.name (keyed by user_id) — for master/owners
+      // 2) agency_team_members.full_name (keyed by auth_user_id) — for collaborators
+      const [profilesRes, teamRes] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("user_id, name")
+          .in("user_id", authorIds),
+        supabase
+          .from("agency_team_members" as any)
+          .select("auth_user_id, full_name, login")
+          .in("auth_user_id", authorIds),
+      ]);
+      const nameById = new Map<string, string | null>();
+      for (const p of (profilesRes.data || []) as any[]) {
+        const n = (p.name as string | null)?.trim();
+        if (p.user_id && n) nameById.set(p.user_id, n);
+      }
+      for (const t of (teamRes.data || []) as any[]) {
+        if (!t.auth_user_id) continue;
+        if (nameById.get(t.auth_user_id)) continue;
+        const n =
+          (t.full_name as string | null)?.trim() ||
+          (t.login as string | null)?.trim() ||
+          null;
+        if (n) nameById.set(t.auth_user_id, n);
+      }
       return rows.map((r) => ({
         ...r,
         author_name: r.created_by ? nameById.get(r.created_by) ?? null : null,
