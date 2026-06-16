@@ -102,20 +102,37 @@ const SERVICE_ICONS: Record<TripServiceType, any> = {
   attraction: Ticket, insurance: Shield, cruise: Ship, train: TrainFront, other: FileText,
 };
 
-// Central pastel color system per service category — scalable for new types
-const SERVICE_COLORS: Record<TripServiceType | 'itinerary', {
-  bg: string; icon: string; badge: string; border: string; hoverBg: string; activeBorder: string; activeGlow: string;
-}> = {
-  flight:     { bg: 'bg-[#D6EAF8]', icon: 'text-[#2E86C1]', badge: 'bg-[#D6EAF8] text-[#2E86C1]', border: 'border-[#D6EAF8]', hoverBg: 'hover:bg-[#D6EAF8]/20', activeBorder: 'border-[#2E86C1]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(46,134,193,0.12)]' },
-  train:      { bg: 'bg-[#DCEAF7]', icon: 'text-[#5D6D7E]', badge: 'bg-[#DCEAF7] text-[#5D6D7E]', border: 'border-[#DCEAF7]', hoverBg: 'hover:bg-[#DCEAF7]/20', activeBorder: 'border-[#5D6D7E]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(93,109,126,0.12)]' },
-  hotel:      { bg: 'bg-[#E8DAEF]', icon: 'text-[#8E44AD]', badge: 'bg-[#E8DAEF] text-[#8E44AD]', border: 'border-[#E8DAEF]', hoverBg: 'hover:bg-[#E8DAEF]/20', activeBorder: 'border-[#8E44AD]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(142,68,173,0.12)]' },
-  attraction: { bg: 'bg-[#FDEBD0]', icon: 'text-[#CA6F1E]', badge: 'bg-[#FDEBD0] text-[#CA6F1E]', border: 'border-[#FDEBD0]', hoverBg: 'hover:bg-[#FDEBD0]/20', activeBorder: 'border-[#CA6F1E]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(202,111,30,0.12)]' },
-  car_rental: { bg: 'bg-[#D5F5E3]', icon: 'text-[#239B56]', badge: 'bg-[#D5F5E3] text-[#239B56]', border: 'border-[#D5F5E3]', hoverBg: 'hover:bg-[#D5F5E3]/20', activeBorder: 'border-[#239B56]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(35,155,86,0.12)]' },
-  insurance:  { bg: 'bg-[#D4E6F1]', icon: 'text-[#2874A6]', badge: 'bg-[#D4E6F1] text-[#2874A6]', border: 'border-[#D4E6F1]', hoverBg: 'hover:bg-[#D4E6F1]/20', activeBorder: 'border-[#2874A6]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(40,116,166,0.12)]' },
-  transfer:   { bg: 'bg-[#D1F2EB]', icon: 'text-[#17A589]', badge: 'bg-[#D1F2EB] text-[#17A589]', border: 'border-[#D1F2EB]', hoverBg: 'hover:bg-[#D1F2EB]/20', activeBorder: 'border-[#17A589]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(23,165,137,0.12)]' },
-  cruise:     { bg: 'bg-[#AED6F1]', icon: 'text-[#1F618D]', badge: 'bg-[#AED6F1] text-[#1F618D]', border: 'border-[#AED6F1]', hoverBg: 'hover:bg-[#AED6F1]/20', activeBorder: 'border-[#1F618D]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(31,97,141,0.12)]' },
-  other:      { bg: 'bg-[#ECECEC]', icon: 'text-[#6B7280]', badge: 'bg-[#ECECEC] text-[#6B7280]', border: 'border-[#ECECEC]', hoverBg: 'hover:bg-[#ECECEC]/20', activeBorder: 'border-[#6B7280]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(107,114,128,0.12)]' },
-  itinerary:  { bg: 'bg-[#FCF3CF]', icon: 'text-[#B7950B]', badge: 'bg-[#FCF3CF] text-[#B7950B]', border: 'border-[#FCF3CF]', hoverBg: 'hover:bg-[#FCF3CF]/20', activeBorder: 'border-[#B7950B]/40', activeGlow: 'shadow-[0_0_0_2px_rgba(183,149,11,0.12)]' },
+/**
+ * Unified wallet brand palette.
+ *
+ * All service categories (flight, hotel, insurance, itinerary, etc) share the
+ * SAME visual identity driven by the CSS variables --wallet-brand and
+ * --wallet-brand-soft (defined in index.css). This makes the public Digital
+ * Wallet feel like a single product with one brand color instead of a
+ * patchwork of pastels — and lets each agency override the brand color
+ * globally by setting those two CSS vars on the wallet root.
+ */
+const BRAND_COLORS = {
+  bg: 'bg-[hsl(var(--wallet-brand-soft))]',
+  icon: 'text-[hsl(var(--wallet-brand))]',
+  badge: 'bg-[hsl(var(--wallet-brand-soft))] text-[hsl(var(--wallet-brand))]',
+  border: 'border-[hsl(var(--wallet-brand-soft))]',
+  hoverBg: 'hover:bg-[hsl(var(--wallet-brand-soft)/0.4)]',
+  activeBorder: 'border-[hsl(var(--wallet-brand)/0.4)]',
+  activeGlow: 'shadow-[0_0_0_2px_hsl(var(--wallet-brand)/0.12)]',
+} as const;
+
+const SERVICE_COLORS: Record<TripServiceType | 'itinerary', typeof BRAND_COLORS> = {
+  flight: BRAND_COLORS,
+  train: BRAND_COLORS,
+  hotel: BRAND_COLORS,
+  attraction: BRAND_COLORS,
+  car_rental: BRAND_COLORS,
+  insurance: BRAND_COLORS,
+  transfer: BRAND_COLORS,
+  cruise: BRAND_COLORS,
+  other: BRAND_COLORS,
+  itinerary: BRAND_COLORS,
 };
 
 const SERVICE_LABELS: Record<TripServiceType, string> = {
