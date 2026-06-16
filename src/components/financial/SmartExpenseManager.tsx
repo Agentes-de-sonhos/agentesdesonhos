@@ -302,6 +302,9 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
           </TableBody>
         </Table>
       </div>
+      </>)}
+
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Despesas" onExport={handleExportExpenses} />
 
       <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
         <DialogContent>
