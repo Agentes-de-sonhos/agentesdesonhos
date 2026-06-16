@@ -3,14 +3,17 @@ import { useCommissionsReceivable, CommissionReceivable } from "@/hooks/useCommi
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
-import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { exportFinancialData, prepareCommissionsExport } from "@/utils/financialExport";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle, FileText, AlertTriangle, Clock, DollarSign, Filter, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
+import { Loader2, CheckCircle, FileText, AlertTriangle, Clock, DollarSign, Filter, ChevronDown, ChevronUp, MessageSquare, MoreHorizontal, Download } from "lucide-react";
 import { PRODUCT_TYPES } from "@/types/financial";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -233,8 +236,21 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
           {showFilters ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </Button>
         <div className="flex items-center gap-2">
-          <ExportButton onClick={() => setShowExport(true)} />
           <span className="text-sm text-muted-foreground">{filtered.length} comissão(ões)</span>
+          {allCommissions.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Mais ações">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowExport(true)}>
+                  <Download className="h-4 w-4 mr-2" /> Exportar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
 
