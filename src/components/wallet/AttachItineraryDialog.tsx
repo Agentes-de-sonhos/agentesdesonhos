@@ -114,18 +114,24 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
 
           <TabsContent value="new" className="space-y-3 py-2">
             <div className="rounded-md border bg-muted/30 p-3 text-sm space-y-1">
-              <p className="font-medium">Será criado um roteiro vazio com os dados da viagem:</p>
+              <p className="font-medium">Você será levado ao formulário de Novo Roteiro com estes dados já preenchidos:</p>
               <p className="text-muted-foreground">Destino: <span className="font-medium text-foreground">{trip.destination}</span></p>
               <p className="text-muted-foreground">
                 Período: <span className="font-medium text-foreground">
                   {format(parseLocalDate(trip.start_date), "dd/MM/yyyy")} — {format(parseLocalDate(trip.end_date), "dd/MM/yyyy")}
                 </span>
               </p>
+              {trip.client_name && (
+                <p className="text-muted-foreground">Cliente: <span className="font-medium text-foreground">{trip.client_name}</span></p>
+              )}
             </div>
-            <Button onClick={handleCreateNew} disabled={creating} className="w-full">
-              {creating ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}
-              Criar e abrir editor
+            <Button onClick={handleCreateNew} className="w-full">
+              <Plus className="h-4 w-4 mr-1.5" />
+              Ir para Novo Roteiro
             </Button>
+            <p className="text-xs text-muted-foreground">
+              O roteiro será vinculado automaticamente a esta carteira ao ser criado.
+            </p>
           </TabsContent>
 
           <TabsContent value="existing" className="py-2">
