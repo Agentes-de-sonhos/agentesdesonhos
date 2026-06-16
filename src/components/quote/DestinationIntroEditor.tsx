@@ -611,5 +611,6 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
         </DialogContent>
       </Dialog>
     </div>
+    </TooltipProvider>
   );
 }
