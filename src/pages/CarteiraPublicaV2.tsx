@@ -287,6 +287,8 @@ export default function CarteiraPublicaV2() {
   const [usedPassword, setUsedPassword] = useState("");
   const [branding, setBranding] = useState<AgentProfile | null>(null);
   const [attemptsUsed, setAttemptsUsed] = useState(0);
+  const isMobile = useIsMobile();
+  const { triggerInstall, showInstructions, setShowInstructions, platform } = useInstallPrompt();
 
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
   const MAX_ATTEMPTS = 5;
