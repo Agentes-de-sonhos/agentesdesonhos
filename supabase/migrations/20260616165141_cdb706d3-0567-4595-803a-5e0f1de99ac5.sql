@@ -1,0 +1,2 @@
+ALTER TABLE public.sale_products DROP CONSTRAINT IF EXISTS sale_products_payment_rule_check;
+ALTER TABLE public.sale_products ADD CONSTRAINT sale_products_payment_rule_check CHECK (payment_rule IN ('after_sale','after_travel','after_invoice_issued','after_invoice_sent','manual'));
