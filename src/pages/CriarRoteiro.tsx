@@ -78,6 +78,7 @@ export default function CriarRoteiro() {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
   const [approvalPromptOpen, setApprovalPromptOpen] = useState(false);
+  const [approveAllConfirmOpen, setApproveAllConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<"pdf" | "link" | null>(null);
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
@@ -623,18 +624,24 @@ export default function CriarRoteiro() {
                 {fromTripId ? "Voltar para Carteira" : "Voltar"}
               </Button>
               <div className="flex gap-2">
+                {currentItinerary && !areAllActivitiesApproved(currentItinerary) && (
+                  <Button variant="outline" onClick={() => setApproveAllConfirmOpen(true)}>
+                    <Check className="mr-2 h-4 w-4" />
+                    Aprovar todas as atividades
+                  </Button>
+                )}
+                {!generatedLinkUrl && (
+                  <Button onClick={() => handleActionClick("link")}>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Publicar
+                  </Button>
+                )}
                 <Button variant="outline" onClick={() => handleActionClick("pdf")}>
                   <FileText className="mr-2 h-4 w-4" />
                   Gerar PDF
                 </Button>
-                {!generatedLinkUrl && (
-                  <Button onClick={() => handleActionClick("link")}>
-                    <Link2 className="mr-2 h-4 w-4" />
-                    Gerar Link
-                  </Button>
-                )}
                 {currentItinerary && (
-                <Button variant="outline" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
+                  <Button variant="outline" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
                     <Star className="mr-2 h-4 w-4" />
                     Salvar como modelo
                   </Button>
@@ -951,6 +958,29 @@ export default function CriarRoteiro() {
               ) : (
                 "Sim, aprovar e continuar"
               )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={approveAllConfirmOpen} onOpenChange={setApproveAllConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja aprovar todas as atividades deste roteiro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação marcará todas as atividades pendentes como aprovadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                setApproveAllConfirmOpen(false);
+                handleApproveAll();
+              }}
+            >
+              Confirmar aprovação
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
