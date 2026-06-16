@@ -138,7 +138,12 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="flex flex-col flex-1 min-h-0"
+      >
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 -mr-1">
+
         <FormField
           control={form.control}
           name="client_id"
@@ -386,7 +391,9 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
           )}
         />
 
-        <div className="flex justify-end gap-2">
+        </div>
+
+        <div className="flex justify-end gap-2 pt-3 mt-2 border-t bg-background">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
@@ -398,3 +405,4 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
     </Form>
   );
 }
+
