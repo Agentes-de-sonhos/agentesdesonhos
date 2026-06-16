@@ -49,6 +49,7 @@ export function PublishReviewDialog({
   const [showIntro, setShowIntro] = useState(itinerary.showDestinationIntro !== false);
   const [newUrl, setNewUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [autoSearchTriggered, setAutoSearchTriggered] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -56,6 +57,7 @@ export function PublishReviewDialog({
       setImages(itinerary.destinationIntroImages || []);
       setCoverUrl(itinerary.coverImageUrl || itinerary.destinationIntroImages?.[0] || null);
       setShowIntro(itinerary.showDestinationIntro !== false);
+      setAutoSearchTriggered(false);
     }
   }, [open, itinerary]);
 
@@ -178,6 +180,8 @@ export function PublishReviewDialog({
                 existingUrls={images}
                 onPick={handlePickedPhotos}
                 triggerLabel="Buscar fotos da internet"
+                autoOpen={section === "photos" && !autoSearchTriggered}
+                onClose={() => setAutoSearchTriggered(true)}
               />
             </div>
 
