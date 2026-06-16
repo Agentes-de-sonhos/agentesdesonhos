@@ -71,7 +71,6 @@ export default function CriarRoteiro() {
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
   const [publishReviewOpen, setPublishReviewOpen] = useState(false);
   const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
-  const [editPresentationOpen, setEditPresentationOpen] = useState(false);
   const [editTextOpen, setEditTextOpen] = useState(false);
   const [editPhotosOpen, setEditPhotosOpen] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
