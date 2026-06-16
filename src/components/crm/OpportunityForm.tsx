@@ -144,47 +144,47 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
       >
         <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 -mr-1">
 
-        <FormField
-          control={form.control}
-          name="client_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cliente *</FormLabel>
-              <FormControl>
-                <ClientSelector
-                  value={
-                    field.value
-                      ? {
-                          id: field.value,
-                          name:
-                            clients.find((c) => c.id === field.value)?.name || "",
-                        }
-                      : null
-                  }
-                  onChange={(client) => field.onChange(client?.id || "")}
-                  required
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="client_id"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Cliente *</FormLabel>
+                <FormControl>
+                  <ClientSelector
+                    value={
+                      field.value
+                        ? {
+                            id: field.value,
+                            name:
+                              clients.find((c) => c.id === field.value)?.name || "",
+                          }
+                        : null
+                    }
+                    onChange={(client) => field.onChange(client?.id || "")}
+                    required
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="destination"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Destino *</FormLabel>
-              <FormControl>
-                <Input placeholder="Paris, França" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="destination"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Destino *</FormLabel>
+                <FormControl>
+                  <Input placeholder="Paris, França" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="start_date"
@@ -237,9 +237,6 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
               </FormItem>
             )}
           />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="adults_count"
@@ -276,32 +273,31 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="estimated_value"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Valor Estimado (R$)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    placeholder="0"
+                    value={field.value === 0 || field.value === undefined ? "" : field.value}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      field.onChange(v === "" ? 0 : parseFloat(v) || 0);
+                    }}
+                    onFocus={(e) => e.target.select()}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
-
-        <FormField
-          control={form.control}
-          name="estimated_value"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Valor Estimado (R$)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  placeholder="0"
-                  value={field.value === 0 || field.value === undefined ? "" : field.value}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    field.onChange(v === "" ? 0 : parseFloat(v) || 0);
-                  }}
-                  onFocus={(e) => e.target.select()}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="space-y-3 rounded-lg border border-border/50 bg-muted/20 p-3">
           <div className="flex items-center justify-between">
