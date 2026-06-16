@@ -6484,6 +6484,7 @@ export type Database = {
       opportunity_followups: {
         Row: {
           created_at: string
+          created_by: string | null
           follow_up_date: string
           id: string
           note: string | null
@@ -6493,6 +6494,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           follow_up_date: string
           id?: string
           note?: string | null
@@ -6502,6 +6504,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           follow_up_date?: string
           id?: string
           note?: string | null
