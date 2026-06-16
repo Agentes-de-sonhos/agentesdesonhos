@@ -1747,7 +1747,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           scrollToElement(el);
         } else {
           const section = sectionRefs.current[`service-${service.service_type}`];
-          scrollToElement(section ?? undefined as any);
+          scrollToElement(section);
         }
       }, 250);
     });
