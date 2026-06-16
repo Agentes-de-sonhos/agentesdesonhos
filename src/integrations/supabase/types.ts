@@ -4252,6 +4252,7 @@ export type Database = {
           share_expires_at: string | null
           share_token: string | null
           show_destination_intro: boolean
+          source_itinerary_id: string | null
           start_date: string
           status: string
           travelers_count: number
@@ -4274,6 +4275,7 @@ export type Database = {
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
+          source_itinerary_id?: string | null
           start_date: string
           status?: string
           travelers_count?: number
@@ -4296,6 +4298,7 @@ export type Database = {
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
+          source_itinerary_id?: string | null
           start_date?: string
           status?: string
           travelers_count?: number
@@ -4309,6 +4312,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itineraries_source_itinerary_id_fkey"
+            columns: ["source_itinerary_id"]
+            isOneToOne: false
+            referencedRelation: "itineraries"
             referencedColumns: ["id"]
           },
         ]
@@ -10204,6 +10214,8 @@ export type Database = {
           failed_password_attempts: number
           id: string
           is_locked: boolean
+          itinerary_id: string | null
+          itinerary_mode: string
           opportunity_id: string | null
           public_access_code: string | null
           share_expires_at: string | null
@@ -10226,6 +10238,8 @@ export type Database = {
           failed_password_attempts?: number
           id?: string
           is_locked?: boolean
+          itinerary_id?: string | null
+          itinerary_mode?: string
           opportunity_id?: string | null
           public_access_code?: string | null
           share_expires_at?: string | null
@@ -10248,6 +10262,8 @@ export type Database = {
           failed_password_attempts?: number
           id?: string
           is_locked?: boolean
+          itinerary_id?: string | null
+          itinerary_mode?: string
           opportunity_id?: string | null
           public_access_code?: string | null
           share_expires_at?: string | null
@@ -10266,6 +10282,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_itinerary_id_fkey"
+            columns: ["itinerary_id"]
+            isOneToOne: false
+            referencedRelation: "itineraries"
             referencedColumns: ["id"]
           },
           {
