@@ -13,6 +13,9 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { BrandText } from "@/components/ui/brand-text";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { InstallWalletButton } from "@/components/wallet/InstallWalletButton";
+import { InstallWalletDialog } from "@/components/wallet/InstallWalletDialog";
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
