@@ -78,6 +78,7 @@ export default function CriarRoteiro() {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
   const [approvalPromptOpen, setApprovalPromptOpen] = useState(false);
+  const [approveAllConfirmOpen, setApproveAllConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<"pdf" | "link" | null>(null);
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
