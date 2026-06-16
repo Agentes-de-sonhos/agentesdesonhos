@@ -436,6 +436,7 @@ export function KanbanBoard() {
                     const isProtected =
                       isFirstStage || isLastStage || isSecondToLastStage || isQuoteSentStage;
                     const stageCanMove = canStage('opportunities', stage.id, 'move');
+                    const stageCanEdit = canStage('opportunities', stage.id, 'edit');
 
                     return (
                       <SortableColumn key={stage.id} stage={stage}>
@@ -468,6 +469,7 @@ export function KanbanBoard() {
                                 onRequestDelete={() => setDeleteTarget(stage)}
                                 onQuickAdd={isFirstStage ? () => setQuickAddOpen(true) : undefined}
                                 isProtected={isProtected}
+                                canEdit={stageCanEdit}
                               />
 
                               <div className="space-y-2.5 min-h-[100px]">
