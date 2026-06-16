@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 import type { StageColor } from "@/types/crm";
 
@@ -19,26 +20,27 @@ export interface OperationPipelineStage {
 
 export function useOperationStages() {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const qc = useQueryClient();
 
   const { data: stages = [], isLoading } = useQuery({
-    queryKey: ["operation-pipeline-stages", user?.id],
-    enabled: !!user,
+    queryKey: ["operation-pipeline-stages", agencyOwnerId, user?.id],
+    enabled: !!user && !!agencyOwnerId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !agencyOwnerId) return [];
       const { data: existing } = await supabase
         .from("operation_pipeline_stages" as any)
         .select("id")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .limit(1);
       if (!existing || (existing as any[]).length === 0) {
-        await supabase.rpc("ensure_default_operation_stages" as any, { _user_id: user.id });
+        await supabase.rpc("ensure_default_operation_stages" as any, { _user_id: agencyOwnerId });
       }
       const { data, error } = await supabase
         .from("operation_pipeline_stages" as any)
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .order("position", { ascending: true });
       if (error) throw error;
       return (data || []) as unknown as OperationPipelineStage[];
@@ -79,7 +81,7 @@ export function useOperationStages() {
           .eq("id", s.id);
       }
       const { error } = await supabase.from("operation_pipeline_stages" as any).insert({
-        user_id: user.id,
+        user_id: agencyOwnerId || user.id,
         key,
         name: input.name.trim(),
         color: input.color || "slate",
@@ -130,7 +132,7 @@ export function useOperationStages() {
         key = `${base}_${n++}`;
       }
       const { error } = await supabase.from("operation_pipeline_stages" as any).insert({
-        user_id: user.id,
+        user_id: agencyOwnerId || user.id,
         key,
         name: `${source.name} (cópia)`,
         color: source.color,

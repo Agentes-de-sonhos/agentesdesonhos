@@ -1,35 +1,37 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 import type { PipelineStage, StageColor } from "@/types/crm";
 
 export function usePipelineStages() {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const qc = useQueryClient();
 
   const { data: stages = [], isLoading } = useQuery({
-    queryKey: ["pipeline-stages", user?.id],
+    queryKey: ["pipeline-stages", agencyOwnerId, user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !agencyOwnerId) return [];
       // Ensure defaults exist (idempotent)
       const { data: existing } = await supabase
         .from("pipeline_stages")
         .select("id")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .limit(1);
       if (!existing || existing.length === 0) {
-        await supabase.rpc("seed_default_pipeline_stages", { _user_id: user.id });
+        await supabase.rpc("seed_default_pipeline_stages", { _user_id: agencyOwnerId });
       }
       const { data, error } = await supabase
         .from("pipeline_stages")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .order("position", { ascending: true });
       if (error) throw error;
       return (data || []) as PipelineStage[];
     },
-    enabled: !!user,
+    enabled: !!user && !!agencyOwnerId,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -42,7 +44,7 @@ export function usePipelineStages() {
       const { data, error } = await supabase
         .from("pipeline_stages")
         .insert({
-          user_id: user.id,
+          user_id: agencyOwnerId || user.id,
           name: input.name.trim(),
           position: maxPos + 1,
           color: input.color || "slate",
@@ -90,7 +92,7 @@ export function usePipelineStages() {
           .eq("id", s.id);
       }
       const { error } = await supabase.from("pipeline_stages").insert({
-        user_id: user.id,
+        user_id: agencyOwnerId || user.id,
         name: `${source.name} (cópia)`,
         position: newPos,
         color: source.color,

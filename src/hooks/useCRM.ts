@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
 import type { Client, Opportunity, OpportunityStage, SalesGoal, ClientStatus } from "@/types/crm";
@@ -9,23 +10,24 @@ import { logTeamAction } from "@/lib/audit";
 
 export function useClients() {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: clients = [], isLoading } = useQuery({
-    queryKey: ["clients", user?.id],
+    queryKey: ["clients", agencyOwnerId, user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !agencyOwnerId) return [];
       const { data, error } = await supabase
         .from("clients")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .order("name", { ascending: true })
         .limit(500);
       if (error) throw error;
       return data as Client[];
     },
-    enabled: !!user,
+    enabled: !!user && !!agencyOwnerId,
     staleTime: 2 * 60 * 1000,
   });
 
@@ -49,7 +51,7 @@ export function useClients() {
         .from("clients")
         .insert({
           ...data,
-          user_id: user.id,
+          user_id: agencyOwnerId || user.id,
           status: data.status || "lead",
         })
         .select()
@@ -281,17 +283,18 @@ export function useClientDetails(clientId: string) {
 
 export function useOpportunities() {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: opportunities = [], isLoading } = useQuery({
-    queryKey: ["opportunities", user?.id],
+    queryKey: ["opportunities", agencyOwnerId, user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !agencyOwnerId) return [];
       const { data, error } = await supabase
         .from("opportunities")
         .select("*, client:clients(*)")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .order("position", { ascending: true })
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -301,7 +304,7 @@ export function useOpportunities() {
         client: o.client as Client,
       })) as Opportunity[];
     },
-    enabled: !!user,
+    enabled: !!user && !!agencyOwnerId,
   });
 
   const createOpportunityMutation = useMutation({
@@ -319,11 +322,11 @@ export function useOpportunities() {
     }) => {
       if (!ensurePermission('opportunities.create')) denyAction();
       if (!user) throw new Error("Not authenticated");
-      // Resolve first stage (lowest position) for this user
+      // Resolve first stage (lowest position) for this agency (stages live under the master user_id)
       const { data: firstStage } = await supabase
         .from("pipeline_stages")
         .select("id, legacy_key")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId || user.id)
         .order("position", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -331,7 +334,7 @@ export function useOpportunities() {
         .from("opportunities")
         .insert({
           ...data,
-          user_id: user.id,
+          user_id: agencyOwnerId || user.id,
           stage: firstStage?.legacy_key || "new_contact",
           stage_id: firstStage?.id || null,
         })
@@ -530,24 +533,25 @@ export function useOpportunities() {
 
 export function useSalesGoals(month: number, year: number) {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: goal, isLoading } = useQuery({
-    queryKey: ["sales-goal", user?.id, month, year],
+    queryKey: ["sales-goal", agencyOwnerId, user?.id, month, year],
     queryFn: async () => {
-      if (!user) return null;
+      if (!user || !agencyOwnerId) return null;
       const { data, error } = await supabase
         .from("sales_goals")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .eq("month", month)
         .eq("year", year)
         .maybeSingle();
       if (error) throw error;
       return data as SalesGoal | null;
     },
-    enabled: !!user,
+    enabled: !!user && !!agencyOwnerId,
   });
 
   const setGoalMutation = useMutation({
@@ -556,7 +560,7 @@ export function useSalesGoals(month: number, year: number) {
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase.from("sales_goals").upsert(
         {
-          user_id: user.id,
+          user_id: agencyOwnerId || user.id,
           month,
           year,
           target_amount: targetAmount,
