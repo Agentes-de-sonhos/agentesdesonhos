@@ -1,12 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 
 export interface OpportunityFollowup {
   id: string;
   opportunity_id: string;
   user_id: string;
+  created_by: string | null;
   follow_up_date: string; // YYYY-MM-DD
   note: string | null;
   created_at: string;
@@ -24,10 +26,11 @@ export interface FollowupDraft {
  */
 export function useOpportunityFollowups(opportunityId?: string) {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const queryClient = useQueryClient();
 
   const { data: followups = [], isLoading } = useQuery({
-    queryKey: ["opportunity-followups", opportunityId],
+    queryKey: ["opportunity-followups", opportunityId, agencyOwnerId, user?.id],
     queryFn: async () => {
       if (!opportunityId) return [];
       const { data, error } = await supabase
@@ -93,7 +96,8 @@ export function useOpportunityFollowups(opportunityId?: string) {
             .from("opportunity_followups" as any)
             .insert({
               opportunity_id,
-              user_id: user.id,
+              // user_id and created_by are normalized by the DB trigger
+              user_id: agencyOwnerId || user.id,
               follow_up_date: draft.follow_up_date,
               note: draft.note || null,
             });
@@ -104,6 +108,7 @@ export function useOpportunityFollowups(opportunityId?: string) {
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ["opportunity-followups", vars.opportunity_id] });
       queryClient.invalidateQueries({ queryKey: ["all-followups"] });
+      queryClient.invalidateQueries({ queryKey: ["agenda-followups"] });
     },
     onError: (err: any) => {
       console.error("Erro ao salvar follow-ups:", err);
@@ -124,19 +129,20 @@ export function useOpportunityFollowups(opportunityId?: string) {
  */
 export function useAllFollowups() {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   return useQuery({
-    queryKey: ["all-followups", user?.id],
+    queryKey: ["all-followups", agencyOwnerId, user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id || !agencyOwnerId) return [];
       const { data, error } = await supabase
         .from("opportunity_followups" as any)
         .select("*, opportunity:opportunities(id, destination, client:clients(name))")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .order("follow_up_date", { ascending: true });
       if (error) throw error;
       return (data || []) as any[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !!agencyOwnerId,
     staleTime: 2 * 60 * 1000,
   });
 }
