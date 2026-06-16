@@ -1766,13 +1766,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
         <div className="container max-w-5xl mx-auto px-4 py-3 sm:py-3 relative flex items-center justify-start">
-          <div className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-4">
+          <div className="absolute top-1/2 -translate-y-1/2 right-5 sm:right-4">
             {isMobile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm active:scale-95 transition-transform"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-slate-600 shadow-sm active:scale-95 transition-transform"
                     aria-label="Ações da carteira"
                   >
                     <Download className="h-4 w-4" />
