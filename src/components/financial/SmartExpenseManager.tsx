@@ -1,10 +1,13 @@
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
-import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { exportFinancialData, prepareExpensesExport } from "@/utils/financialExport";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, Tag, Loader2, Repeat, Pencil, Filter } from "lucide-react";
+import { Plus, Trash2, Tag, Loader2, Repeat, Pencil, Filter, MoreHorizontal, Download, ArrowDownCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -190,17 +193,29 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
 
   return (
     <div className="space-y-4">
+      {expenseEntries.length === 0 ? (
+        <div className="border border-dashed rounded-lg p-10 text-center space-y-3">
+          <ArrowDownCircle className="h-8 w-8 mx-auto text-muted-foreground/60" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Você ainda não possui despesas cadastradas.</p>
+            <p className="text-xs text-muted-foreground">
+              Registre despesas para acompanhar os custos da sua agência.
+            </p>
+          </div>
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} size="sm">
+            <Plus className="h-4 w-4 mr-2" /> Nova Despesa
+          </Button>
+        </div>
+      ) : (<>
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Total do Mês</CardTitle></CardHeader><CardContent><div className="text-xl font-bold text-destructive">{formatCurrency(totalMonth)}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Despesas Fixas</CardTitle></CardHeader><CardContent><div className="text-xl font-bold">{formatCurrency(fixedTotal)}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Despesas Variáveis</CardTitle></CardHeader><CardContent><div className="text-xl font-bold">{formatCurrency(variableTotal)}</div></CardContent></Card>
       </div>
 
-      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Despesas" onExport={handleExportExpenses} />
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-semibold">Despesas</h3>
         <div className="flex items-center gap-2">
-          <ExportButton onClick={() => setShowExport(true)} />
           {sellerNames.length > 0 && (
             <Select value={sellerFilter} onValueChange={setSellerFilter}>
               <SelectTrigger className="w-[180px] h-9">
@@ -219,6 +234,18 @@ export function SmartExpenseManager({ viewMonth, viewYear }: SmartExpenseManager
           <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-2" /> Nova Despesa
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Mais ações">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowExport(true)}>
+                <Download className="h-4 w-4 mr-2" /> Exportar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
