@@ -98,6 +98,7 @@ export function useItineraries() {
             isApproved: a.is_approved,
             photoUrl: (a as any).photo_url ?? null,
             documentUrls: (a as any).document_urls ?? [],
+            linkedTripServiceId: (a as any).linked_trip_service_id ?? null,
           })),
         };
       })
