@@ -203,36 +203,38 @@ export function CollapsibleDayCard({
                           )}
                         </div>
 
-                        {(activity as any).mapsUrl && (
-                          <a
-                            href={(activity as any).mapsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
-                          >
-                            <MapPin className="h-3 w-3" />
-                            Ver no mapa
-                            <ExternalLink className="h-2.5 w-2.5" />
-                          </a>
-                        )}
-
-                        {(() => {
-                          const linkedId = (activity as any).linkedTripServiceId as string | null | undefined;
-                          if (!linkedId || !servicesById) return null;
-                          const svc = servicesById.get(linkedId);
-                          if (!svc) return null;
-                          return (
-                            <button
-                              type="button"
-                              onClick={() => onOpenService?.(svc)}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 hover:bg-primary/15 text-primary text-[11.5px] font-semibold px-2.5 py-1 transition-colors"
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-0.5">
+                          {(activity as any).mapsUrl && (
+                            <a
+                              href={(activity as any).mapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
                             >
-                              <span aria-hidden>{SERVICE_ICONS[svc.service_type]}</span>
-                              {SERVICE_CHIP_LABELS[svc.service_type]}
-                              <ArrowRight className="h-3 w-3" />
-                            </button>
-                          );
-                        })()}
+                              <MapPin className="h-3 w-3" />
+                              Ver no mapa
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          )}
+
+                          {(() => {
+                            const linkedId = (activity as any).linkedTripServiceId as string | null | undefined;
+                            if (!linkedId || !servicesById) return null;
+                            const svc = servicesById.get(linkedId);
+                            if (!svc) return null;
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => onOpenService?.(svc)}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 hover:bg-primary/15 text-primary text-[11.5px] font-semibold px-2.5 py-1 transition-colors"
+                              >
+                                <span aria-hidden>{SERVICE_ICONS[svc.service_type]}</span>
+                                {SERVICE_CHIP_LABELS[svc.service_type]}
+                                <ArrowRight className="h-3 w-3" />
+                              </button>
+                            );
+                          })()}
+                        </div>
 
                         {(activity as any).documentUrls?.length > 0 && (
                           <div className="space-y-1.5 pt-1">
