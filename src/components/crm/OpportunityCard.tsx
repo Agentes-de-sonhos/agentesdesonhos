@@ -536,7 +536,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
       </Card>
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Editar Oportunidade</DialogTitle>
           </DialogHeader>
