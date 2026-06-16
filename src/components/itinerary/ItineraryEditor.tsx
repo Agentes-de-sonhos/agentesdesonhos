@@ -589,28 +589,19 @@ export function ItineraryEditor({
                             {onMoveActivity && activity.id && (
                               <DragHandleButton {...handle} />
                             )}
-                            {activity.photoUrl ? (
-                              <div className="shrink-0 overflow-hidden rounded-md border bg-muted/50 h-16 w-16 sm:h-20 sm:w-20">
-                                <img
-                                  src={activity.photoUrl}
-                                  alt={activity.title}
-                                  loading="lazy"
-                                  decoding="async"
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <ActivityPhotoThumb
-                                title={activity.title}
-                                location={activity.location}
-                                destination={ctx.destination}
-                                onResolved={(url) => {
-                                  if (!activity.photoUrl && activity.id) {
-                                    onUpdateActivity(activity.id, { photoUrl: url } as Partial<Activity>);
-                                  }
-                                }}
-                              />
-                            )}
+                            <ActivityPhotoEditor
+                              itineraryId={itineraryId}
+                              activityId={activity.id}
+                              activityTitle={activity.title}
+                              activityLocation={activity.location}
+                              destination={ctx.destination}
+                              photoUrl={activity.photoUrl ?? null}
+                              onChange={(updates) =>
+                                onUpdateActivity(activity.id!, {
+                                  photoUrl: updates.photo_url ?? null,
+                                } as Partial<Activity>)
+                              }
+                            />
                             <div className="space-y-1 flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <h4 className="font-medium">{activity.title}</h4>
@@ -646,20 +637,16 @@ export function ItineraryEditor({
                                   </span>
                                 )}
                               </div>
-                              <ActivityMediaActions
-                                itineraryId={itineraryId}
-                                activityId={activity.id}
-                                activityTitle={activity.title}
-                                activityLocation={activity.location}
-                                destination={ctx.destination}
-                                photoUrl={activity.photoUrl ?? null}
+                              <ActivityDocumentsList
                                 documentUrls={activity.documentUrls ?? []}
                                 onChange={(updates) =>
-                                  onUpdateActivity(activity.id!, updates as Partial<Activity>)
+                                  onUpdateActivity(activity.id!, {
+                                    documentUrls: updates.document_urls,
+                                  } as Partial<Activity>)
                                 }
                               />
                             </div>
-                            <div className="flex gap-1">
+                            <div className="flex items-start gap-1">
                               {!activity.isApproved && (
                                 <Button
                                   variant="ghost"
@@ -677,15 +664,28 @@ export function ItineraryEditor({
                                   <Check className="h-4 w-4 text-green-600" />
                                 </Button>
                               )}
-                              <ActivityAIActions
-                                activity={activity}
-                                day={day}
-                                context={ctx}
-                                memory={memory}
-                                onApplyUpdate={(updates) =>
-                                  onUpdateActivity(activity.id!, updates)
+                              {/* AI actions: visually highlighted and grouped */}
+                              <div className="flex items-center rounded-lg bg-primary/10 ring-1 ring-primary/20 px-0.5 py-0.5">
+                                <ActivityAIActions
+                                  activity={activity}
+                                  day={day}
+                                  context={ctx}
+                                  memory={memory}
+                                  onApplyUpdate={(updates) =>
+                                    onUpdateActivity(activity.id!, updates)
+                                  }
+                                  onLearnInstruction={learnFromInstruction}
+                                />
+                              </div>
+                              <ActivityDocumentsButton
+                                itineraryId={itineraryId}
+                                activityId={activity.id}
+                                documentUrls={activity.documentUrls ?? []}
+                                onChange={(updates) =>
+                                  onUpdateActivity(activity.id!, {
+                                    documentUrls: updates.document_urls,
+                                  } as Partial<Activity>)
                                 }
-                                onLearnInstruction={learnFromInstruction}
                               />
                               <Dialog>
                                 <DialogTrigger asChild>
@@ -694,6 +694,8 @@ export function ItineraryEditor({
                                     size="icon"
                                     className="h-8 w-8"
                                     onClick={() => setEditingActivity(activity)}
+                                    title="Editar atividade"
+                                    aria-label="Editar atividade"
                                   >
                                     <Pencil className="h-4 w-4" />
                                   </Button>
