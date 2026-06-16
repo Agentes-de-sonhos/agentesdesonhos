@@ -209,7 +209,7 @@ const financeiroSection: MenuSection = {
     { key: "faturas", title: "Faturas", url: "/financeiro?tab=faturas", icon: FileText, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial", requiredPermission: "financial.access" },
     { key: "vendedores", title: "Vendedores", url: "/financeiro?tab=vendedores", icon: Users, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "dashboard_fin", title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
+    { key: "dashboard_fin", title: "Visão Geral", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
   ],
 };
 
