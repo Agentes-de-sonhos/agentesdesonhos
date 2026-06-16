@@ -21,7 +21,7 @@ import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { attachItineraryToTrip } from "@/lib/roteiro-domain";
-import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Info } from "lucide-react";
+import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
 import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
