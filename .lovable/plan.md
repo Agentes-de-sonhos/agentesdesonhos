@@ -1,118 +1,126 @@
-## Roteiro V2 na Carteira Digital — Plano Revisado (UX Simplificada)
+# Análise: vincular atividades do roteiro a serviços da Carteira
 
-Confirmo que a mudança simplifica significativamente a implementação. Abaixo as respostas às 5 perguntas e o plano ajustado.
-
----
-
-### Respostas
-
-**1. Simplifica a implementação?**
-Sim, e bastante. Elimina toda a complexidade de "embed mode" no `ItineraryEditor` (props condicionais, header/publish controls escondidos, autosave compartilhado, conflitos de contexto entre Trip e Itinerary). Reduz risco de regressão no editor standalone existente.
-
-**2. As migrations e RPCs já entregues continuam válidas?**
-Sim, 100%. Continuam necessárias e não mudam:
-- `trips.itinerary_id` + `trips.itinerary_mode` (`none`/`legacy`/`v2`) — base do vínculo.
-- `itineraries.source_itinerary_id` — rastreio de clonagem.
-- RPC `clone_itinerary_for_trip` — usada ao criar/importar roteiro a partir da Carteira.
-- RPC `get_public_trip_itinerary_v2` — usada na Carteira Pública para renderizar o roteiro V2 sem expor RLS de `itineraries`.
-
-Nada do que foi entregue no banco vira código morto.
-
-**3. `TripItineraryV2` vira apenas visualizador/resumo?**
-Sim. Passa a ser um **card resumo** com:
-- Cabeçalho: título do roteiro, destino, período, nº de dias, status (rascunho/publicado).
-- Miniatura (capa ou primeira imagem de período, se existir).
-- Ações: **Abrir roteiro** (navega para `/criar-roteiros/:id`), **Trocar roteiro**, **Desvincular**.
-- Sem edição inline, sem lista de atividades editável, sem publish controls.
-
-Opcionalmente, uma prévia read-only colapsada dos dias (apenas leitura, sem ações) — mas pode ficar fora do MVP.
-
-**4. `ItineraryEditor` em modo embed ainda é necessário?**
-**Não.** O `ItineraryEditor` continua exatamente como está hoje, sem novos props (`mode`, `hideHeader`, `hidePublishControls`, `onSaved` específico de embed). Toda edição acontece na rota standalone existente. Isso elimina a Fase 1 inteira de refactor do editor.
-
-**5. Quais fases mudam?**
-
-| Fase original | Status revisado |
-|---|---|
-| **Fase 1 — Refact `ItineraryEditor` (embed mode)** | ❌ Removida. Editor permanece intocado. |
-| **Fase 2 — Extrair `ItineraryReadOnlyView`** | ⚠️ Mantida, mas usada **apenas na Carteira Pública** (`RoteiroPublicoV2` / `CarteiraPublica`), não no app autenticado. |
-| **Fase 3 — Migrations (trips + itineraries)** | ✅ Já entregue. |
-| **Fase 4 — RPCs (clone + public read)** | ✅ Já entregue. |
-| **Fase 5 — Integração** | 🔄 Reescrita: novo `TripItineraryV2` (card resumo) + `AttachItineraryDialog` (Criar / Importar / Trocar / Desvincular). Sem editor embutido. |
-| **Fase 6 — QA** | 🔄 Critérios ajustados (ver abaixo). |
+Esta é uma análise de produto e arquitetura. **Nada será implementado agora** — o objetivo é decidir o caminho antes de codar.
 
 ---
 
-### Plano Final Revisado
+## 1. Faz sentido em UX?
 
-**Fase A — Componentes novos (autenticado)**
-- `TripItineraryV2.tsx` (card resumo, read-only no contexto da Carteira)
-  - Props: `trip`, `onChanged`
-  - Fetch leve: `itineraries` (título, destino, período, status, capa) + `count` de dias
-  - Estados: `none` → EmptyState com CTA "Criar roteiro" / "Importar roteiro"; `v2` com `itinerary_id` válido → card resumo; `legacy` → mantém componente legado atual; estado inconsistente → trata como `none`
-- `AttachItineraryDialog.tsx`
-  - Abas: **Criar novo**, **Importar de modelo/outro roteiro** (usa `clone_itinerary_for_trip`), **Trocar**, **Desvincular**
-  - Após criar/importar: `UPDATE trips SET itinerary_id=?, itinerary_mode='v2'` e redireciona para `/criar-roteiros/:id` (opcional, com toggle "abrir agora")
+Sim, e resolve uma fricção real:
 
-**Fase B — Navegação**
-- Botão "Abrir roteiro" → `navigate('/criar-roteiros/' + itinerary_id)`
-- No editor standalone, adicionar **breadcrumb/back contextual** quando vier da Carteira: query param `?from=trip:<trip_id>` → botão "Voltar para Carteira" no header do editor
-- Sem alteração do comportamento padrão do editor quando aberto direto
+- Hoje o passageiro precisa "trocar de aba mental" entre Roteiro (o que vou fazer) e Serviços (meus comprovantes).
+- O roteiro é a linha do tempo natural da viagem — é o lugar onde o passageiro já está no momento em que precisa do voucher/dado.
+- Linkar uma atividade a um serviço transforma o roteiro em um índice navegável da Carteira inteira.
 
-**Fase C — Carteira Pública**
-- `ItineraryReadOnlyView` (extraído da `RoteiroPublicoV2` atual) renderizado dentro de `CarteiraPublica` quando `itinerary_mode='v2'`
-- Usa `get_public_trip_itinerary_v2` (já criada)
-- Sem editor, sem ações, somente leitura
+**Riscos de UX a evitar:**
+- Duplicar informação visual (atividade + card de serviço inteiro embutido = poluído).
+- Confundir vínculo com "fonte da verdade" (atividade é narrativa; serviço é o dado oficial).
+- Quebrar o roteiro para clientes que não usam serviços na Carteira.
 
-**Fase D — QA**
-Critérios de aceitação ajustados:
-1. Trip nova → `itinerary_mode='none'` → mostra EmptyState
-2. "Criar roteiro" na Carteira → cria itinerary, vincula, navega para editor standalone
-3. "Importar" → clona via RPC, vincula, navega para editor
-4. "Abrir roteiro" → abre editor standalone, botão voltar funciona
-5. "Trocar" → permite escolher outro roteiro, atualiza vínculo
-6. "Desvincular" → `itinerary_id=NULL`, `itinerary_mode='none'`, cópia preservada
-7. Carteira pública com V2 → renderiza via RPC pública
-8. Carteira pública sem roteiro → não mostra seção
-9. Trips legacy continuam usando componente antigo, sem regressão
-10. Editor standalone funciona idêntico ao atual quando aberto fora da Carteira
-11. Nenhuma alteração em `trip_itinerary_activities` ou fluxo legado
-12. Sem novos props no `ItineraryEditor`
+**Padrão recomendado:** atividade mantém título/descrição/foto curtos; ganha um **chip discreto** ("Ver passagem", "Ver hospedagem", "Ver ingresso") com ícone do tipo de serviço. Clique abre o serviço em modal/sheet (mesmo componente já usado na Carteira) sem tirar o passageiro do roteiro.
 
 ---
 
-### Arquivos afetados (revisado)
+## 2. Como vincular tecnicamente
 
-**Novos**
-- `src/components/wallet/TripItineraryV2.tsx`
-- `src/components/wallet/AttachItineraryDialog.tsx`
-- `src/components/itinerary/ItineraryReadOnlyView.tsx` (extração da view pública)
+Os dois lados já existem no banco e são compatíveis:
 
-**Editados (mínimo)**
-- `src/components/wallet/TripWallet.tsx` — roteamento entre `none`/`legacy`/`v2`
-- `src/pages/CarteiraPublica.tsx` — renderiza `ItineraryReadOnlyView` em modo V2
-- `src/pages/RoteiroPublicoV2.tsx` — passa a consumir `ItineraryReadOnlyView` (refactor sem mudança visual)
-- `src/pages/CriarConteudo.tsx` ou rota equivalente do editor — ler `?from=trip:` e exibir botão voltar
+- `itinerary_activities` (roteiro V2, por `itinerary_days.itinerary_id`)
+- `trip_services` (Carteira, por `trip_id`), com `service_type` enum: `flight | hotel | car_rental | transfer | attraction | insurance | cruise | train | other`
+- `trips.itinerary_id` já costura roteiro ↔ viagem
 
-**Intocados**
-- `ItineraryEditor` e todos os subcomponentes de edição
-- Hooks de autosave, publish, AI generation
-- Todo o fluxo legado (`trip_itinerary_activities`, `ImportItineraryModal` legado)
+A relação atividade ↔ serviço é **N:1 opcional** (várias atividades podem apontar para o mesmo serviço; ex.: "check-in" e "check-out" → mesma hospedagem).
 
----
+**Proposta de campo:** adicionar `linked_trip_service_id uuid null references trip_services(id) on delete set null` em `itinerary_activities`.
 
-### Ganhos
+- `on delete set null` garante que apagar um serviço não quebra o roteiro (o chip simplesmente some).
+- Nullable e sem default → zero impacto em roteiros existentes.
+- Não precisa de tabela de junção: cada atividade tem **no máximo um** serviço vinculado (regra de produto simples e suficiente).
 
-- Menos código novo (~40% menor que o plano anterior)
-- Zero risco no editor standalone
-- UX mais clara: um lugar para editar, um lugar para vincular
-- Mobile-friendly: card resumo cabe melhor que editor completo dentro da Carteira
-
-### Riscos restantes
-
-- Navegação entre Carteira ↔ Editor precisa preservar contexto (resolvido via query param)
-- Usuário pode editar o roteiro e esquecer que está vinculado a uma Trip — mitigar com badge "Vinculado a viagem de [cliente]" no header do editor quando aplicável
+**Por que não usar `service_type` na atividade?** Já está implícito em `trip_services.service_type`. Manter um único id evita inconsistência (tipo errado vs. serviço apontado).
 
 ---
 
-Confirma esta versão simplificada para eu seguir para implementação (Fase A)?
+## 3. Como funciona para tipos diferentes
+
+O chip é polimórfico baseado em `trip_services.service_type`:
+
+| Tipo serviço | Label do chip | Ícone | Abre |
+|---|---|---|---|
+| flight | Ver passagem | Plane | tela de detalhes do voo (já existe na Carteira) |
+| hotel | Ver hospedagem | Hotel/Bed | detalhes da hospedagem |
+| attraction | Ver ingresso | Ticket | detalhes do ingresso |
+| transfer | Ver transfer | Car | detalhes do transfer |
+| insurance | Ver seguro | Shield | detalhes do seguro |
+| cruise | Ver cruzeiro | Ship | detalhes do cruzeiro |
+| car_rental | Ver locação | Car | detalhes da locação |
+| train / other | Ver detalhes | genérico | detalhes do serviço |
+
+Reaproveitamos os componentes de detalhe que a Carteira já renderiza — nada novo na camada de apresentação por tipo.
+
+---
+
+## 4. Menor MVP para validar
+
+**Escopo mínimo (1 migration + 1 selector + 1 chip):**
+
+1. Migration: coluna `linked_trip_service_id` em `itinerary_activities`.
+2. **Editor (modo agente):** dentro da edição da atividade no roteiro V2, um único combobox "Vincular a serviço da viagem" listando os `trip_services` da viagem atual (quando o roteiro está vinculado a uma `trip` via `trips.itinerary_id`). Mostra "tipo · resumo" (ex.: "Voo · GRU → MCO 12/jul"). Botão "Remover vínculo".
+3. **Público (Carteira e Roteiro público):** se a atividade tem `linked_trip_service_id` e o serviço existe, renderiza chip clicável abaixo do título. Clique abre o **mesmo modal de detalhes do serviço** já usado na Carteira (sheet no mobile).
+4. **Sem auto-vínculo, sem sugestão por IA, sem múltiplos serviços por atividade** — fica para v2.
+
+**Critério de validação:** medir cliques no chip via `trip_edit_history` ou um event log simples; se houver uso real, evoluir.
+
+---
+
+## 5. Impacto no que já existe
+
+**Não-disruptivo, se respeitar 3 regras:**
+
+- Coluna nullable, sem default → roteiros antigos seguem iguais.
+- Renderização do chip **só** quando `linked_trip_service_id` resolve para um `trip_services` existente E o roteiro está exposto dentro de uma `trip` (Carteira). No **Roteiro Público standalone** (sem trip), simplesmente não mostra o chip — o link só faz sentido dentro da Carteira.
+- O selector no editor só aparece quando o roteiro está vinculado a uma `trip` (`trips.itinerary_id = itinerary.id`). Em roteiro avulso (sem viagem), o campo nem aparece.
+
+RLS: `itinerary_activities` já é protegida via `itinerary_days → itineraries`. Adicionar a coluna não muda nada nas policies. Leitura pública da Carteira já resolve `trip_services` via share_token; o chip usa o mesmo caminho.
+
+---
+
+## 6. Detalhes técnicos (para revisão posterior)
+
+```text
+itinerary_activities
+  + linked_trip_service_id uuid null
+    references trip_services(id) on delete set null
+  + index (linked_trip_service_id)
+```
+
+```text
+Editor:
+  ItineraryActivityEditor
+    └─ <LinkedServiceCombobox tripId={trip.id} value={...} onChange={...} />
+        - query: trip_services where trip_id = tripId order by order_index
+        - render: ícone do tipo + label resumida + preview do dado
+
+Público (Carteira):
+  CollapsibleDayCard / ItineraryActivityCard
+    └─ if linked_trip_service_id && resolvedService
+         <LinkedServiceChip service={resolvedService} onOpen={openServiceSheet} />
+```
+
+Resolução de dados na Carteira: já carregamos `trip.services` no `TripWallet`. Basta passar um `Map<id, TripService>` para o componente do roteiro e o chip resolve em O(1) sem novas queries.
+
+---
+
+## 7. O que **não** entra no MVP (registrar como follow-ups)
+
+- Sugestão automática (IA cruzando título da atividade com serviços).
+- Vincular 1 atividade a múltiplos serviços (ex.: voo + transfer).
+- Substituir o conteúdo da atividade pelos dados do serviço (manter narrativa separada).
+- Vínculo no sentido inverso (do serviço apontar atividade) — não há demanda.
+- Roteiro público standalone exibindo serviços (não tem `trip` para resolver).
+
+---
+
+## Recomendação
+
+Seguir com o MVP da seção 4. É barato (1 coluna + 1 combobox + 1 chip), reaproveita componentes existentes, é totalmente opcional por atividade e não afeta nenhum fluxo atual. Validar uso real antes de investir em sugestão automática ou vínculo múltiplo.
