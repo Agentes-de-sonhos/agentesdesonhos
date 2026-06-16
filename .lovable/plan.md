@@ -1,194 +1,174 @@
-# Fase 2 — Permissões Reais e Controle de Acesso
+## 📋 Opção A — Mover `password_hash` para tabela `agency_team_member_secrets`
 
-## Princípio fundamental
-
-O sistema tem dois tipos de usuário autenticado:
-- **Master (dono da agência)**: sem linha em `agency_team_members` → acesso total irrestrito.
-- **Team member**: tem linha em `agency_team_members` + linhas em `agency_team_permissions` / `agency_team_stage_permissions` → acesso filtrado.
-
-Toda checagem deve ser: *"se não for team member → permitido; se for team member → consultar permissão"*.
+**Status:** apenas levantamento. Nenhuma execução proposta neste turno.
 
 ---
 
-## Etapa 1 — Camada central `usePermissions`
+### 1. Uso atual de `agency_team_members.password_hash`
 
-Novo arquivo: `src/hooks/usePermissions.ts`
+**Frontend (`src/`)** — nenhum acesso direto. `useTeamMembers.ts` usa apenas RPCs (`team_list_members`, `team_get_member_detail`, `team_member_quota`) e a Edge Function `team-admin`. Nenhum `select('*')` ou `select('password_hash')` foi encontrado.
 
-```ts
-const { can, canStage, isTeamMember, isMaster } = usePermissions();
-can('clients.edit')               // boolean
-canStage('opportunities', stageId, 'move')
+**Edge Functions:**
+| Função | Toca `password_hash`? | Como |
+|---|---|---|
+| `team-login` | **SIM (READ)** | `select('id, agency_id, password_hash, status, full_name, login, role_title')` + `bcrypt.compare(password, member.password_hash)` |
+| `team-admin` | **SIM (WRITE)** | create: `bcrypt.hash` → `insert({ password_hash })`. update: se vem nova senha, `update({ password_hash })` |
+| `team-resolve-login` | NÃO | Lê só `synthetic_email, status` |
+| `team-session` | NÃO | Lê metadados do membro |
+| `team-audit` | NÃO | Lê só `id, agency_id` |
+
+**Conclusão:** só **2 funções** dependem do hash. Frontend é zero-touch.
+
+---
+
+### 2. RLS atual do problema
+
+```
+POLICY "Owner manages own team members"
+ON agency_team_members
+TO authenticated
+USING  (auth.uid() = agency_id)
+WITH CHECK (auth.uid() = agency_id)
+```
+→ Dono lê `*` (inclui `password_hash`) via PostgREST. É exatamente o que o scanner aponta.
+
+---
+
+### 3. Migration proposta (não executar agora)
+
+```sql
+-- 1. Nova tabela isolada (sem acesso PostgREST)
+CREATE TABLE public.agency_team_member_secrets (
+  member_id uuid PRIMARY KEY
+    REFERENCES public.agency_team_members(id) ON DELETE CASCADE,
+  password_hash text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- 2. NUNCA exposta ao PostgREST: revogar tudo de anon/authenticated
+REVOKE ALL ON public.agency_team_member_secrets FROM anon, authenticated, PUBLIC;
+GRANT  ALL ON public.agency_team_member_secrets TO service_role;
+
+-- 3. RLS ligada SEM policies → ninguém com JWT lê/escreve
+ALTER TABLE public.agency_team_member_secrets ENABLE ROW LEVEL SECURITY;
+-- (sem CREATE POLICY: deny-all para anon/authenticated; service_role bypassa RLS)
+
+-- 4. Migrar hashes existentes
+INSERT INTO public.agency_team_member_secrets (member_id, password_hash)
+SELECT id, password_hash
+FROM public.agency_team_members
+WHERE password_hash IS NOT NULL
+ON CONFLICT (member_id) DO NOTHING;
+
+-- 5. Neutralizar coluna antiga sem dropar (segurança em camadas + rollback)
+ALTER TABLE public.agency_team_members
+  ALTER COLUMN password_hash DROP NOT NULL;
+
+UPDATE public.agency_team_members SET password_hash = NULL;
+
+-- (Opcional, fase 2 — após validação em produção)
+-- ALTER TABLE public.agency_team_members DROP COLUMN password_hash;
+
+-- 6. Revogar SELECT explícito da coluna antiga enquanto existir
+REVOKE SELECT (password_hash) ON public.agency_team_members FROM anon, authenticated;
 ```
 
-Implementação encapsula `useTeamSession` e aplica a regra master-bypass. Hook único para todo o app.
-
-Também expõe `useCan(key)` (atalho) e `<PermissionGate permission="…" fallback={…}>`.
+**Por que não dropar a coluna agora:** mantém rollback de 1 comando caso `team-login` falhe em produção. Drop fica para uma migration de cleanup posterior.
 
 ---
 
-## Etapa 2 — CRM (aplicação por módulo)
+### 4. Mudanças no código (apenas 2 arquivos)
 
-### 2.1 Roteamento `/gestao-clientes/*` (`src/pages/GestaoClientes.tsx`)
-
-Adicionar guard por tab usando `can('dashboard.view')`, `can('clients.view')`, `can('opportunities.view')`, `can('operations.view')`, `can('goals.view')`. Se a tab atual estiver bloqueada, redireciona para a primeira tab permitida. Se nenhuma permitida → `/team-dashboard`.
-
-### 2.2 Clientes — `ClientsModule.tsx` + `useCRM.ts`
-
-| Permissão | Aplicação |
-|-----------|-----------|
-| `clients.view` | Guard no topo do componente: sem permissão → mensagem "Sem acesso" + não monta lista. Desabilita query `useClients()` via `enabled`. |
-| `clients.create` | Esconde botão "Novo Cliente" e "Importar". Bloqueia `createClientMutation` (throw com mensagem padrão). |
-| `clients.edit` | Esconde botão Edit. Bloqueia `updateClientMutation`. |
-| `clients.delete` | Esconde ícone Delete. Bloqueia `deleteClientMutation`. |
-
-### 2.3 Oportunidades / Kanban — `KanbanBoard.tsx` + `useCRM.ts`
-
-| Permissão | Aplicação |
-|-----------|-----------|
-| `opportunities.view` | Guard de tela. |
-| `opportunities.create` | Esconde "Nova Oportunidade"; bloqueia mutation. |
-| `opportunities.edit` | Esconde edit em `OpportunityCard`/`OpportunityDetailsDrawer`; bloqueia `updateOpportunityMutation`. |
-| `opportunities.delete` | Esconde delete; bloqueia mutation. |
-| `opportunities.generate_quote` / `generate_wallet` | Esconde itens de menu de geração; bloqueia chamadas. |
-
-### 2.4 Operações — `OperationsModule.tsx` + `useOperations.ts`
-
-`operations.view / create / edit / delete` aplicados nos mesmos pontos (botão "Nova Operação", edit, delete, mutations).
-
-### 2.5 Metas — `SalesGoalsModule.tsx`
-
-`goals.view` (guard de tela) e `goals.edit` (esconde edição + bloqueia mutations).
-
----
-
-## Etapa 3 — Permissões por etapa do funil (Kanban)
-
-No `KanbanBoard.tsx`:
-
-- **Filtragem de colunas**: `stages.filter(s => canStage('opportunities', s.id, 'view'))` antes de renderizar `SortableColumn`.
-- **Bloqueio de edição de cards**: dentro de cada coluna, `canStage(..., stage.id, 'edit')` controla botões edit/delete por card.
-- **Bloqueio de drag**: em `handleDragStart` (HTML5), checar `canStage(fromStage, 'move')` no card de origem **E** `canStage(toStage, 'move')` em `handleDrop` no destino. Se faltar qualquer um → toast padrão e abort.
-- **Drop zones invalidadas**: visualmente sinalizar (opacity reduzida) colunas sem `can_move` do destino.
-
-Mesma lógica em `OperationsModule` para `pipeline_type='operations'`.
-
----
-
-## Etapa 4 — Gestão Financeira
-
-`Financeiro.tsx`:
-
-- Guard no topo: se team member e `!can('financial.access')` → tela "Sem acesso" + não monta nada (desabilita todas as queries).
-- `TeamRouteGuard` já bloqueia rota externa; reforçar bloqueio aqui evita acesso de query mesmo se tab renderizada.
-
-Todas as sub-tabs (Dashboard, Entradas, Despesas, Vendas, Faturas, Comissões, Fornecedores, Vendedores) ficam sob o mesmo gate único (granularidade financeira fica para Fase 3, conforme schema atual só expõe `financial.access`).
-
----
-
-## Etapa 5 — Proteção server-side de ações
-
-Não confiar só em UI. Cada mutation crítica nos hooks (`useCRM`, `useOperations`, `useFinancial`) ganha **guard no início**:
-
+**`supabase/functions/team-login/index.ts`** (linhas 30–42)
 ```ts
-mutationFn: async (input) => {
-  if (!ensurePermission('clients.create')) throw new PermissionDeniedError();
-  // ... insert
-}
+// ANTES
+.from('agency_team_members')
+.select('id, agency_id, password_hash, status, full_name, login, role_title')
+...
+const ok = await bcrypt.compare(password, member.password_hash)
+
+// DEPOIS
+.from('agency_team_members')
+.select('id, agency_id, status, full_name, login, role_title')
+...
+const { data: secret } = await admin
+  .from('agency_team_member_secrets')
+  .select('password_hash')
+  .eq('member_id', member.id)
+  .maybeSingle()
+if (!secret?.password_hash) return 401
+const ok = await bcrypt.compare(password, secret.password_hash)
 ```
 
-Onde `ensurePermission` é função sincrona pura que lê o snapshot atual do `TeamSessionContext` (via store leve em módulo ou via parâmetro). 
+**`supabase/functions/team-admin/index.ts`**
+- Create (linhas 78–80): após `insert` em `agency_team_members`, fazer `insert` em `agency_team_member_secrets` com `member_id = created.id, password_hash`. Remover `password_hash` do payload do insert principal.
+- Update (linhas 124–125): substituir `patch.password_hash = ...` por `upsert` em `agency_team_member_secrets`.
+- Delete: nada a fazer (cascade já remove o secret).
 
-> Nota: a defesa real fica na RLS do banco (a ser endurecida na Fase 3). Esta etapa garante que a UI não dispare a chamada — proteção UX e contra acidentes; não substitui RLS.
+Frontend, RPCs (`team_list_members`, `team_get_member_detail`, `team_member_quota`) e demais Edge Functions: **zero alteração**.
 
 ---
 
-## Etapa 6 — UX de erro padronizada
+### 5. Impacto esperado por fluxo
 
-Helper `denyAction(label?: string)`:
-```ts
-toast.error('Você não possui permissão para executar esta ação.')
-throw new PermissionDeniedError()
+| Fluxo | Impacto | Risco |
+|---|---|---|
+| Login de membro (`team-login`) | Lê hash de outra tabela | Médio — testar em preview antes de prod |
+| Listar membros (`team_list_members`) | Nenhum | Nenhum |
+| Detalhe de membro | Nenhum | Nenhum |
+| Criar membro (`team-admin` create) | 2 inserts (transação lógica) | Baixo |
+| Editar membro sem trocar senha | Nenhum | Nenhum |
+| Trocar senha (`team-admin` update) | Upsert em secrets | Baixo |
+| Excluir membro | Cascade automática | Nenhum |
+| Auditoria, sessão, resolve-login | Nenhum | Nenhum |
+
+---
+
+### 6. Rollback exato
+
+Se algo quebrar em produção, rodar imediatamente:
+
+```sql
+-- Restaurar hashes na coluna antiga
+UPDATE public.agency_team_members m
+SET    password_hash = s.password_hash
+FROM   public.agency_team_member_secrets s
+WHERE  s.member_id = m.id;
+
+ALTER TABLE public.agency_team_members
+  ALTER COLUMN password_hash SET NOT NULL;
+
+GRANT SELECT (password_hash) ON public.agency_team_members TO authenticated;
+
+-- (Opcional) reverter código das 2 edge functions via revert do commit
+-- A tabela agency_team_member_secrets pode permanecer — não atrapalha.
 ```
 
-`PermissionDeniedError` é capturada globalmente em `App.tsx` (ou wrappers de mutation) para não vazar stack/erro técnico.
+---
+
+### 7. Checklist de teste (pré-deploy em preview)
+
+1. **Login de membro existente** com senha conhecida → sucesso.
+2. **Login com senha errada** → 401.
+3. **Login de membro bloqueado** → 403.
+4. **Criar novo membro** via UI → registro aparece em `agency_team_members` + em `agency_team_member_secrets` (psql).
+5. **Login com o novo membro** → sucesso.
+6. **Trocar senha de membro** → login só funciona com a nova.
+7. **Editar membro sem trocar senha** → senha antiga continua válida.
+8. **Excluir membro** → linha some das duas tabelas (cascade).
+9. **DevTools Network**: confirmar que respostas de `/rest/v1/agency_team_members` **não** trazem `password_hash` (nem como `null`).
+10. **Tentativa direta** (auth como dono): `supabase.from('agency_team_member_secrets').select('*')` → erro de permissão.
+11. **Security scan** após deploy → finding `agency_team_members_password_hash_exposed` desaparece dos ERRORs.
 
 ---
 
-## Etapa 7 — Navegação (`AppSidebar.tsx`)
+### 8. Notas importantes
 
-Adicionar campo opcional `requiredPermission?: string` no `MenuItem`. No render dos menu items, ao lado da checagem `useFeatureAccess`, aplicar `usePermissions().can(item.requiredPermission)` quando o item tiver a propriedade. Mapping:
-
-- `dashboard_clientes` → `dashboard.view`
-- `gestao_clientes` → `clients.view`
-- `oportunidades` → `opportunities.view`
-- `operacoes` → `operations.view`
-- `meta_vendas` → `goals.view`
-- Todos `*_fin` → `financial.access`
-
-Seções inteiras viram vazias se nada visível → ocultar header da seção também.
+- Mantém compatibilidade com `auth.users` (campo `auth_user_id` continua sendo atualizado por `team-admin` quando senha muda — não impactado).
+- Triggers existentes (`trg_enforce_team_member_limit`, `trg_sync_agency_membership`, `update_updated_at_column`) não dependem de `password_hash` → seguem funcionando.
+- A nova tabela herda automaticamente as garantias de service_role das Edge Functions. **Sem RPC nova necessária.**
+- Esforço total: **1 migration + 2 arquivos de edge function** editados.
 
 ---
 
-## Etapa 8 — Auditoria
-
-Edge Function nova: `supabase/functions/team-audit/index.ts` — recebe `{ action, entity_type, entity_id, details }`, valida sessão, insere em `agency_team_audit_log` com `team_member_id` derivado de `auth.uid()`. Service role no servidor (RLS write fica negada para `authenticated`).
-
-Helper client-side `logTeamAction(action, payload)` chamado **após sucesso** de mutations críticas:
-- `client.create`, `client.update`, `client.delete`
-- `opportunity.create`, `opportunity.update`, `opportunity.delete`, `opportunity.stage_move`
-- `sale.create`, `sale.update`, `sale.delete`
-- `expense.create`, `expense.update`, `expense.delete`
-- `income.create`, `income.update`, `income.delete`
-
-Chamada fire-and-forget (não bloqueia UX, falha silenciosa apenas com `console.warn`).
-
-Migração SQL: garantir índice `(agency_id, created_at DESC)` em `agency_team_audit_log` se não existir; criar RPC `team_audit_log_list(limit, offset)` retornando últimos eventos da agência (master only via RLS já existente).
-
----
-
-## Etapa 9 — Arquivos alterados (estimativa)
-
-**Novos:**
-- `src/hooks/usePermissions.ts`
-- `src/components/permissions/PermissionGate.tsx`
-- `src/lib/audit.ts`
-- `supabase/functions/team-audit/index.ts`
-- `supabase/migrations/<ts>_phase2_audit.sql`
-
-**Editados:**
-- `src/pages/GestaoClientes.tsx` (tab guard)
-- `src/pages/Financeiro.tsx` (financial.access guard)
-- `src/components/crm/ClientsModule.tsx`
-- `src/components/crm/KanbanBoard.tsx`
-- `src/components/crm/operations/OperationsModule.tsx`
-- `src/components/crm/SalesGoalsModule.tsx`
-- `src/components/crm/DashboardModule.tsx`
-- `src/hooks/useCRM.ts` (mutation guards + audit calls)
-- `src/hooks/useOperations.ts` (idem)
-- `src/hooks/useFinancial.ts` (audit calls em vendas/despesas/entradas)
-- `src/components/layout/AppSidebar.tsx` (filtragem por permissão)
-- `src/contexts/TeamSessionContext.tsx` (expor snapshot global p/ guards de mutation)
-
----
-
-## Fora do escopo (Fase 3)
-
-- RLS endurecida com checagem de permissão no DB (hoje team member tem mesmos direitos SQL do master via `is_agency_member()` — Fase 3 deve filtrar por `agency_team_permissions`).
-- Granularidade fina no Financeiro (`finance.sales.create`, etc.).
-- Rate-limit no `team-login`.
-- Password policy reforçada.
-- Tela admin para visualizar log de auditoria.
-- Bulk operations (importar contatos) ganharem checagem de permissão.
-
----
-
-## Critério de aceite
-
-- [ ] Team member sem `clients.view` não vê o card "Clientes" no `/team-dashboard` nem o menu, e `/gestao-clientes/clientes` redireciona.
-- [ ] Team member com `clients.view` mas sem `clients.create` vê a lista, mas sem botão "Novo Cliente". Tentativa via console → toast de negação.
-- [ ] Kanban com stage `can_view=false` não exibe a coluna.
-- [ ] Kanban com stage `can_move=false` no destino impede o drop.
-- [ ] Team member sem `financial.access` redirecionado ao tentar `/financeiro`.
-- [ ] Master continua vendo tudo normalmente.
-- [ ] Linha aparece em `agency_team_audit_log` após criação de cliente / movimento de card / criação de venda por team member.
-- [ ] Mensagem "Você não possui permissão para executar esta ação." padronizada em toda negação.
+**Aguardando sua aprovação para executar.** Nada será alterado até a confirmação explícita.
