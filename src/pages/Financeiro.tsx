@@ -138,8 +138,8 @@ export default function Financeiro() {
         : "text-muted-foreground hover:bg-muted hover:text-foreground"
     );
 
-  const PRIMARY_TAB_KEYS = ["dashboard", "vendas", "entradas", "despesas"];
-  const MORE_TAB_KEYS = ["vendedores", "comissoes", "faturas", "fornecedores"];
+  const PRIMARY_TAB_KEYS = ["dashboard", "vendas", "entradas", "despesas", "comissoes"];
+  const MORE_TAB_KEYS = ["vendedores", "faturas", "fornecedores"];
 
   const primaryTabs = ALL_TABS_DEF.filter(tab => PRIMARY_TAB_KEYS.includes(tab.key));
   const moreTabs = MORE_TAB_KEYS.map(key => ALL_TABS_DEF.find(tab => tab.key === key)!).filter(Boolean);
