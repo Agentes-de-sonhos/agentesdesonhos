@@ -13,6 +13,9 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { BrandText } from "@/components/ui/brand-text";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { InstallWalletButton } from "@/components/wallet/InstallWalletButton";
+import { InstallWalletDialog } from "@/components/wallet/InstallWalletDialog";
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
@@ -284,6 +287,8 @@ export default function CarteiraPublicaV2() {
   const [usedPassword, setUsedPassword] = useState("");
   const [branding, setBranding] = useState<AgentProfile | null>(null);
   const [attemptsUsed, setAttemptsUsed] = useState(0);
+  const isMobile = useIsMobile();
+  const { triggerInstall, showInstructions, setShowInstructions, platform } = useInstallPrompt();
 
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
   const MAX_ATTEMPTS = 5;
@@ -547,8 +552,17 @@ export default function CarteiraPublicaV2() {
         preLoadedTrip={tripData.trip} 
         preLoadedAgent={tripData.agentProfile}
         preLoadedPassword={usedPassword}
+        onInstallPrompt={triggerInstall}
       />
-      <InstallWalletButton agencyName={branding?.agency_name || branding?.name || undefined} />
+      {!isMobile && (
+        <InstallWalletButton agencyName={branding?.agency_name || branding?.name || undefined} />
+      )}
+      <InstallWalletDialog
+        open={showInstructions}
+        onOpenChange={setShowInstructions}
+        platform={platform}
+        agencyName={branding?.agency_name || branding?.name || undefined}
+      />
     </Suspense>
   );
 }
