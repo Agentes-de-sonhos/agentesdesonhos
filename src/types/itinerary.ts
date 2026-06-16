@@ -209,6 +209,12 @@ export interface Activity {
   photoUrl?: string | null;
   /** Voucher / document URLs attached to this activity. */
   documentUrls?: string[];
+  /**
+   * Optional link to a `trip_services` row when this V2 itinerary is bound
+   * to a Carteira Digital trip. Lets the public day-by-day render a
+   * "Ver serviço" chip that jumps to the matching wallet service card.
+   */
+  linkedTripServiceId?: string | null;
 }
 
 export interface ItineraryDay {
