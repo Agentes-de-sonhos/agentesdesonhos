@@ -1,10 +1,19 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, Sparkles, MapPin, X, Upload } from "lucide-react";
+import { Loader2, Sparkles, MapPin, X, Upload, Pencil, Images, Star, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
