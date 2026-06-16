@@ -355,7 +355,7 @@ export function KanbanBoard() {
                 </Button>
               </DialogTrigger>
             )}
-            <DialogContent>
+            <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>Nova Oportunidade</DialogTitle>
               </DialogHeader>
