@@ -122,12 +122,11 @@ export function useTravelerDocuments(travelerId: string) {
       const path = `${user.id}/${travelerId}/${Date.now()}.${ext}`;
       const { error: uploadErr } = await supabase.storage.from("traveler-documents").upload(path, file);
       if (uploadErr) throw uploadErr;
-      const { data: urlData } = supabase.storage.from("traveler-documents").getPublicUrl(path);
       const { error } = await supabase.from("traveler_documents").insert({
         traveler_id: travelerId,
         user_id: user.id,
         tipo_documento: tipoDocumento,
-        arquivo_url: urlData.publicUrl,
+        arquivo_url: path,
         nome_arquivo: file.name,
       });
       if (error) throw error;
@@ -158,4 +157,14 @@ export function useTravelerDocuments(travelerId: string) {
     deleteDocument: deleteDocument.mutateAsync,
     isUploading: uploadDocument.isPending,
   };
+}
+
+export async function getTravelerDocumentSignedUrl(path: string): Promise<string> {
+  // Backward-compatible: if a legacy full URL is stored, return it as-is.
+  if (/^https?:\/\//i.test(path)) return path;
+  const { data, error } = await supabase.storage
+    .from("traveler-documents")
+    .createSignedUrl(path, 300);
+  if (error || !data?.signedUrl) throw error ?? new Error("Falha ao gerar URL");
+  return data.signedUrl;
 }
