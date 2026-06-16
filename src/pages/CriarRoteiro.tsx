@@ -160,6 +160,15 @@ export default function CriarRoteiro() {
       // Only increment usage AFTER successful creation
       await incrementUsage();
 
+      // Se veio de uma Carteira Digital, vincular o roteiro recém-criado
+      if (fromTripId) {
+        try {
+          await attachItineraryToTrip(fromTripId, itinerary.id);
+        } catch (attachErr) {
+          console.error("Erro ao vincular roteiro à carteira:", attachErr);
+        }
+      }
+
       toast.success("Roteiro gerado com sucesso!");
     } catch (error) {
       console.error("Error creating itinerary:", error);
