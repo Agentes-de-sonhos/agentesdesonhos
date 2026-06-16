@@ -458,8 +458,6 @@ export function KanbanBoard() {
                                 stage={stage}
                                 count={stageOpps.length}
                                 overdueCount={overdueCount}
-                                totalLabel={total > 0 ? formatCurrency(total) : null}
-                                avgTimeLabel={avgTime}
                                 dragHandleProps={dragHandleProps}
                                 isDragging={isDragging}
                                 onRename={(name) => updateStageColumn({ id: stage.id, name })}

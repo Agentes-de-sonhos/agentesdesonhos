@@ -28,8 +28,6 @@ interface Props {
   stage: PipelineStage;
   count: number;
   overdueCount: number;
-  totalLabel?: string | null;
-  avgTimeLabel?: string | null;
   dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
   isDragging?: boolean;
   onRename: (name: string) => void | Promise<void>;
@@ -259,12 +257,6 @@ export function StageColumnHeader({
         )}
       </div>
 
-      <div className="flex items-center gap-3 mb-3 text-xs font-medium">
-        {totalLabel && <span className={cn(tokens.text)}>{totalLabel}</span>}
-        {avgTimeLabel && (
-          <span className="text-muted-foreground">⏱ {avgTimeLabel}</span>
-        )}
-      </div>
     </div>
   );
 }
