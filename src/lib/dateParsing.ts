@@ -39,3 +39,42 @@ export function parseLocalDateSafe(
     return null;
   }
 }
+
+/**
+ * Capitalize only the first letter of a string, preserving the rest
+ * (so "segunda-feira" → "Segunda-feira", not "Segunda-Feira").
+ */
+function capitalizeFirst(str: string): string {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Standard Portuguese day header used in itineraries / day-by-day views.
+ * Example: "Segunda-feira, 13 de Julho".
+ *
+ * Built manually (instead of `format(... "EEEE, dd 'de' MMMM")` + CSS
+ * `capitalize`) so that compound weekdays keep natural casing:
+ *   - "Segunda-feira" (correct) vs "Segunda-Feira" (wrong)
+ *   - "de" stays lowercase
+ *   - Month is capitalized (e.g. "Julho")
+ */
+export function formatItineraryDayHeader(date: Date): string {
+  const weekdays = [
+    "Domingo",
+    "Segunda-feira",
+    "Terça-feira",
+    "Quarta-feira",
+    "Quinta-feira",
+    "Sexta-feira",
+    "Sábado",
+  ];
+  const months = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+  ];
+  const weekday = weekdays[date.getDay()];
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = months[date.getMonth()];
+  return `${weekday}, ${day} de ${month}`;
+}
