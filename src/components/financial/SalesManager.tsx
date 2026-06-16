@@ -3,9 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users, ShoppingBag } from "lucide-react";
+import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users, ShoppingBag, MoreHorizontal } from "lucide-react";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
-import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
@@ -306,15 +309,28 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Vendas</h3>
-        <div className="flex items-center gap-2">
-          <ExportButton onClick={() => setShowExport(true)} />
-          <Button onClick={() => setIsWizardOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" /> Nova Venda
-          </Button>
+      {allSales.length > 0 && (
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Vendas</h3>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setIsWizardOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" /> Nova Venda
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Mais ações">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowExport(true)}>
+                  <Download className="h-4 w-4 mr-2" /> Exportar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-      </div>
+      )}
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Vendas" onExport={handleExportSales} />
 
       <NewSaleWizard
@@ -323,7 +339,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
         onCreated={(id) => setExpandedSales((prev) => new Set(prev).add(id))}
       />
 
-      {availableOpportunities.length > 0 && (
+      {allSales.length > 0 && availableOpportunities.length > 0 && (
         <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
           <p className="text-sm text-muted-foreground mb-2">
             <Download className="h-4 w-4 inline mr-1" />
@@ -337,9 +353,15 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
           <div className="border border-dashed rounded-lg p-10 text-center space-y-3">
             <ShoppingBag className="h-8 w-8 mx-auto text-muted-foreground/60" />
             <div className="space-y-1">
-              <p className="text-sm font-medium">Você ainda não possui vendas cadastradas.</p>
+              <p className="text-sm font-medium">
+                {allSales.length === 0
+                  ? "Você ainda não possui vendas cadastradas."
+                  : "Nenhuma venda neste mês."}
+              </p>
               <p className="text-xs text-muted-foreground">
-                Comece registrando uma venda para acompanhar comissões, recebimentos e notas fiscais.
+                {allSales.length === 0
+                  ? "Comece registrando uma venda para acompanhar comissões, recebimentos e notas fiscais."
+                  : "Navegue para outro mês ou registre uma nova venda."}
               </p>
             </div>
             <Button onClick={() => setIsWizardOpen(true)} size="sm">

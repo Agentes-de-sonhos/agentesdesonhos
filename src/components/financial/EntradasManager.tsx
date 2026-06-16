@@ -2,10 +2,13 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
-import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { exportFinancialData, prepareEntradasExport } from "@/utils/financialExport";
 import { ptBR } from "date-fns/locale";
-import { Plus, Trash2, CheckCircle2, Clock, AlertTriangle, Loader2, Pencil } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, Clock, AlertTriangle, Loader2, Pencil, MoreHorizontal, Download, ArrowUpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -189,13 +192,26 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
 
   return (
     <div className="space-y-4">
+      {allIncomeEntries.length === 0 ? (
+        <div className="border border-dashed rounded-lg p-10 text-center space-y-3">
+          <ArrowUpCircle className="h-8 w-8 mx-auto text-muted-foreground/60" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Você ainda não possui entradas cadastradas.</p>
+            <p className="text-xs text-muted-foreground">
+              Registre entradas para acompanhar os valores recebidos pela agência.
+            </p>
+          </div>
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} size="sm">
+            <Plus className="h-4 w-4 mr-2" /> Nova Entrada
+          </Button>
+        </div>
+      ) : (<>
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" />Já no bolso</CardTitle></CardHeader><CardContent><div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceived)}</div><p className="text-xs text-muted-foreground">este mês</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Clock className="h-4 w-4 text-amber-500" />A caminho</CardTitle></CardHeader><CardContent><div className="text-xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(totalPending)}</div><p className="text-xs text-muted-foreground">{pending.length} pendente{pending.length !== 1 ? "s" : ""}</p></CardContent></Card>
         <Card className={cn(totalOverdue > 0 && "ring-1 ring-destructive/30")}><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-destructive" />Atrasadas</CardTitle></CardHeader><CardContent><div className={cn("text-xl font-bold", totalOverdue > 0 ? "text-destructive" : "text-muted-foreground")}>{formatCurrency(totalOverdue)}</div><p className="text-xs text-muted-foreground">{overdue.length} entrada{overdue.length !== 1 ? "s" : ""}</p></CardContent></Card>
       </div>
 
-      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Entradas" onExport={handleExportEntradas} />
       <Tabs defaultValue="todas" className="space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
@@ -210,16 +226,30 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
             </TabsList>
           </div>
           <div className="flex items-center gap-2">
-            <ExportButton onClick={() => setShowExport(true)} />
             <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
               <Plus className="h-4 w-4 mr-2" /> Nova Entrada
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Mais ações">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowExport(true)}>
+                  <Download className="h-4 w-4 mr-2" /> Exportar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <TabsContent value="todas">{renderEntryList(incomeEntries, true)}</TabsContent>
         <TabsContent value="pendentes">{renderEntryList(pending, true)}</TabsContent>
         <TabsContent value="recebidas">{renderEntryList(received)}</TabsContent>
       </Tabs>
+      </>)}
+
+      <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Entradas" onExport={handleExportEntradas} />
 
       <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
         <DialogContent>
