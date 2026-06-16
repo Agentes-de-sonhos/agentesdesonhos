@@ -1385,6 +1385,48 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   useEffect(() => {
     if (!tripData?.id) return;
     const fetchItinerary = async () => {
+      // V2: roteiro vinculado → busca via RPC pública e mapeia para o mesmo shape
+      if (tripData.itinerary_mode === 'v2' && tripData.itinerary_id && tripData.public_access_code) {
+        try {
+          const { data, error } = await supabase.rpc('get_public_trip_itinerary_v2' as any, {
+            p_trip_id: tripData.id,
+            p_access_code: tripData.public_access_code,
+          });
+          if (error) throw error;
+          const result = data as any;
+          const itin = result?.itinerary;
+          if (itin && Array.isArray(itin.days)) {
+            const mapped: any[] = [];
+            for (const d of itin.days) {
+              const acts = Array.isArray(d.activities) ? d.activities : [];
+              for (const a of acts) {
+                mapped.push({
+                  id: a.id,
+                  day_date: d.date,
+                  period: a.period,
+                  order_index: a.order_index,
+                  title: a.title,
+                  description: a.description,
+                  location: a.location,
+                  start_time: null,
+                  notes: null,
+                  maps_url: a.location || null,
+                  photo_urls: a.photo_url ? [a.photo_url] : [],
+                  document_urls: Array.isArray(a.document_urls) ? a.document_urls : [],
+                });
+              }
+            }
+            setItineraryActivities(mapped);
+            return;
+          }
+        } catch (e) {
+          console.error('[CarteiraPublica] Falha ao carregar Roteiro V2:', e);
+        }
+        setItineraryActivities([]);
+        return;
+      }
+
+      // Legacy: trip_itinerary_activities
       const { data } = await supabase
         .from("trip_itinerary_activities")
         .select("*")
@@ -1394,7 +1436,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       if (data) setItineraryActivities(data);
     };
     fetchItinerary();
-  }, [tripData?.id]);
+  }, [tripData?.id, tripData?.itinerary_mode, tripData?.itinerary_id, tripData?.public_access_code]);
 
   // Robust scroll to a target element: waits for layout/animations to settle
   // and compensates for the sticky header so the section title is fully visible.

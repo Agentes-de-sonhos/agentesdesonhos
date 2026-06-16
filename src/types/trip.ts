@@ -23,6 +23,7 @@ export interface Trip {
   failed_password_attempts?: number | null;
   itinerary_id?: string | null;
   itinerary_mode?: 'none' | 'legacy' | 'v2' | null;
+  public_access_code?: string | null;
 }
 
 export interface TripService {
