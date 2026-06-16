@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Wallet, AlertTriangle, PiggyBank,
   DollarSign, ArrowDownCircle, ArrowUpCircle,
