@@ -1726,6 +1726,30 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     setOpenDay(prev => prev === key ? null : key);
   }, []);
 
+  // Index trip services by id so the V2 day-by-day can render a "Ver serviço"
+  // chip on activities linked via linked_trip_service_id.
+  const servicesById = useMemo(() => {
+    const map = new Map<string, TripService>();
+    services.forEach((s) => map.set(s.id, s));
+    return map;
+  }, [services]);
+
+  // Open the wallet section that contains the given service and scroll to it.
+  const handleOpenService = useCallback((service: TripService) => {
+    setOpenSection(`service-${service.service_type}`);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const el = document.getElementById(`service-${service.id}`);
+        if (el) {
+          scrollToElement(el);
+        } else {
+          const section = sectionRefs.current[`service-${service.service_type}`];
+          scrollToElement(section ?? undefined as any);
+        }
+      }, 250);
+    });
+  }, [scrollToElement]);
+
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
   const { weatherByDate: itineraryWeather } = useTripWeather(
     tripData.destination,
