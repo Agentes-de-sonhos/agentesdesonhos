@@ -304,6 +304,7 @@ export function ItineraryEditor({
         location: editingActivity.location,
         estimatedDuration: editingActivity.estimatedDuration,
         estimatedCost: editingActivity.estimatedCost,
+        linkedTripServiceId: editingActivity.linkedTripServiceId ?? null,
       });
       setEditingActivity(null);
     }
