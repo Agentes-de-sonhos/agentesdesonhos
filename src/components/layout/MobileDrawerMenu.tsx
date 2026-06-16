@@ -111,13 +111,11 @@ const financeiroSection: MenuSection = {
   hoverColor: "hover:bg-emerald-600 hover:text-white", headerBg: "bg-emerald-600 text-white", headerHoverBg: "hover:bg-emerald-700",
   bgColor: "bg-emerald-50", textColor: "text-emerald-700", borderColor: "border-emerald-600",
   items: [
+    { key: "dashboard_fin", title: "Visão Geral", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
     { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
     { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
     { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
-    { key: "faturas", title: "Faturas", url: "/financeiro?tab=faturas", icon: FileText, requiredFeature: "financial" },
     { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial" },
-    { key: "vendedores", title: "Vendedores", url: "/financeiro?tab=vendedores", icon: Users, requiredFeature: "financial" },
-    { key: "dashboard_fin", title: "Dashboard", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
   ],
 };
 
