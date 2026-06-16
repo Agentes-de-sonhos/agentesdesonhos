@@ -1963,6 +1963,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           onToggle={() => toggleDay(day.date)}
                           weather={itineraryWeather?.[day.date]}
                           destination={v2Destination || tripData?.destination}
+                          servicesById={servicesById}
+                          onOpenService={handleOpenService}
                         />
                       </div>
                     );
