@@ -1767,9 +1767,38 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
         <div className="container max-w-5xl mx-auto px-4 py-3 sm:py-3 relative flex items-center justify-start">
           <div className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-4">
-            <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
-              <FileText className="mr-2 h-4 w-4" /> Baixar PDF
-            </Button>
+            {isMobile ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm active:scale-95 transition-transform"
+                    aria-label="Ações da carteira"
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={6} className="min-w-[10rem]">
+                  <DropdownMenuItem
+                    onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}
+                    className="cursor-pointer"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Baixar PDF
+                  </DropdownMenuItem>
+                  {onInstallPrompt && (
+                    <DropdownMenuItem onClick={onInstallPrompt} className="cursor-pointer">
+                      <Save className="mr-2 h-4 w-4" />
+                      Salvar na tela inicial
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
+                <FileText className="mr-2 h-4 w-4" /> Baixar PDF
+              </Button>
+            )}
           </div>
           {agentProfile?.agency_logo_url ? (
             <img
