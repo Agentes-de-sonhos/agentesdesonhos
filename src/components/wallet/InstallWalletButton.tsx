@@ -1,64 +1,15 @@
-import { useEffect, useState } from "react";
 import { Download, Share2, Plus, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-
-type BIPEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
-
-function detectPlatform(): "ios" | "android" | "desktop" {
-  if (typeof navigator === "undefined") return "desktop";
-  const ua = navigator.userAgent.toLowerCase();
-  if (/iphone|ipad|ipod/.test(ua)) return "ios";
-  if (/android/.test(ua)) return "android";
-  return "desktop";
-}
-
-function isStandalone(): boolean {
-  if (typeof window === "undefined") return false;
-  return (
-    window.matchMedia?.("(display-mode: standalone)").matches ||
-    (window.navigator as unknown as { standalone?: boolean }).standalone === true
-  );
-}
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
 export function InstallWalletButton({ agencyName }: { agencyName?: string }) {
-  const [deferred, setDeferred] = useState<BIPEvent | null>(null);
-  const [open, setOpen] = useState(false);
-  const [hidden, setHidden] = useState<boolean>(() => isStandalone());
-  const platform = detectPlatform();
+  const { triggerInstall, showInstructions, setShowInstructions, platform, isStandalone } = useInstallPrompt();
 
-  useEffect(() => {
-    const onPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferred(e as BIPEvent);
-    };
-    const onInstalled = () => setHidden(true);
-    window.addEventListener("beforeinstallprompt", onPrompt);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onPrompt);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
-  }, []);
-
-  if (hidden) return null;
+  if (isStandalone) return null;
 
   const handleClick = async () => {
-    if (deferred) {
-      try {
-        await deferred.prompt();
-        const choice = await deferred.userChoice;
-        if (choice.outcome === "accepted") setHidden(true);
-        setDeferred(null);
-        return;
-      } catch {
-        // fallback to instructions
-      }
-    }
-    setOpen(true);
+    await triggerInstall();
   };
 
   return (
