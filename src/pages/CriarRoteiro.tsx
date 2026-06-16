@@ -963,6 +963,29 @@ export default function CriarRoteiro() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={approveAllConfirmOpen} onOpenChange={setApproveAllConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja aprovar todas as atividades deste roteiro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação marcará todas as atividades pendentes como aprovadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                setApproveAllConfirmOpen(false);
+                handleApproveAll();
+              }}
+            >
+              Confirmar aprovação
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {(currentItinerary || templateTargetItinerary) && (
         <SaveAsTemplateDialog
           open={!!templateTargetItinerary}
