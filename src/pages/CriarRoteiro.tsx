@@ -801,58 +801,109 @@ export default function CriarRoteiro() {
 
                   {/* Intro text */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2 mb-1.5">
                       <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <Sparkles className="h-3.5 w-3.5 text-primary" />
                         Apresentação do destino
                       </span>
-                      <div className="flex items-center gap-2">
+                      {!isEditingIntro && (
                         <Button
                           type="button"
-                          size="sm"
+                          size="icon"
                           variant="ghost"
-                          className="h-7 px-2"
-                          onClick={() => setEditTextOpen(true)}
+                          className="h-7 w-7"
+                          onClick={() => {
+                            setEditIntroText(currentItinerary.destinationIntroText || "");
+                            setIsEditingIntro(true);
+                          }}
+                          title="Editar descrição"
                         >
-                          <Pencil className="h-3.5 w-3.5 mr-1" />
-                          Editar descrição
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
-                        <div className="flex items-center gap-1.5 pl-2 border-l">
-                          <Switch
-                            id="show-intro-inline"
-                            checked={currentItinerary.showDestinationIntro !== false}
-                            onCheckedChange={async (checked) => {
-                              const prev = currentItinerary;
-                              setCurrentItinerary({ ...prev, showDestinationIntro: checked });
-                              try {
-                                await updateItineraryDetails.mutateAsync({
-                                  itineraryId: prev.id,
-                                  updates: { show_destination_intro: checked },
-                                });
-                              } catch (err) {
-                                setCurrentItinerary(prev);
-                                toast.error("Não foi possível atualizar a visibilidade.");
-                              }
-                            }}
-                          />
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              <p className="max-w-[200px]">Mostra o texto e a galeria de fotos no topo do roteiro público.</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
+                      )}
+                      <div className="ml-auto">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex">
+                              <Switch
+                                id="show-intro-inline"
+                                checked={currentItinerary.showDestinationIntro !== false}
+                                onCheckedChange={async (checked) => {
+                                  const prev = currentItinerary;
+                                  setCurrentItinerary({ ...prev, showDestinationIntro: checked });
+                                  try {
+                                    await updateItineraryDetails.mutateAsync({
+                                      itineraryId: prev.id,
+                                      updates: { show_destination_intro: checked },
+                                    });
+                                  } catch (err) {
+                                    setCurrentItinerary(prev);
+                                    toast.error("Não foi possível atualizar a visibilidade.");
+                                  }
+                                }}
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p className="max-w-[220px]">Mostra o texto e a galeria de fotos no topo do roteiro público.</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </div>
-                    {currentItinerary.destinationIntroText ? (
+                    {isEditingIntro ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          value={editIntroText}
+                          onChange={(e) => setEditIntroText(e.target.value)}
+                          rows={6}
+                          autoFocus
+                          placeholder="Apresentação do destino..."
+                          className="resize-none text-sm"
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setIsEditingIntro(false);
+                          }}
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            disabled={savingIntro}
+                            onClick={async () => {
+                              setSavingIntro(true);
+                              try {
+                                const value = editIntroText.trim() || null;
+                                await updateItineraryDetails.mutateAsync({
+                                  itineraryId: currentItinerary.id,
+                                  updates: { destination_intro_text: value },
+                                });
+                                setCurrentItinerary({
+                                  ...currentItinerary,
+                                  destinationIntroText: value || undefined,
+                                });
+                                setIsEditingIntro(false);
+                                toast.success("Descrição atualizada!");
+                              } catch {
+                                toast.error("Não foi possível salvar.");
+                              } finally {
+                                setSavingIntro(false);
+                              }
+                            }}
+                          >
+                            {savingIntro ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Check className="h-3.5 w-3.5 mr-1" />}
+                            Salvar
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setIsEditingIntro(false)} disabled={savingIntro}>
+                            Cancelar
+                          </Button>
+                          <span className="ml-auto text-xs text-muted-foreground">{editIntroText.length} caracteres</span>
+                        </div>
+                      </div>
+                    ) : currentItinerary.destinationIntroText ? (
                       <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line line-clamp-6">
                         {currentItinerary.destinationIntroText}
                       </p>
                     ) : (
                       <p className="text-sm text-muted-foreground italic">
-                        Nenhum texto gerado ainda. Clique em "Editar descrição" para criar a apresentação do destino.
+                        Nenhum texto gerado ainda. Clique no lápis para criar a apresentação do destino.
                       </p>
                     )}
                   </div>
