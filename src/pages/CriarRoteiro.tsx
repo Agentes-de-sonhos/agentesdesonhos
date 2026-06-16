@@ -28,6 +28,7 @@ import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWiz
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -74,6 +75,9 @@ export default function CriarRoteiro() {
   const [pendingPublishId, setPendingPublishId] = useState<string | null>(null);
   const [editTextOpen, setEditTextOpen] = useState(false);
   const [editPhotosOpen, setEditPhotosOpen] = useState(false);
+  const [isEditingIntro, setIsEditingIntro] = useState(false);
+  const [editIntroText, setEditIntroText] = useState("");
+  const [savingIntro, setSavingIntro] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
