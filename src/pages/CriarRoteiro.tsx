@@ -20,6 +20,8 @@ import { parseLocalDate } from "@/lib/dateParsing";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { attachItineraryToTrip } from "@/lib/roteiro-domain";
+import { parseLocalDate } from "@/lib/dateParsing";
 import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
@@ -44,6 +46,22 @@ export default function CriarRoteiro() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const fromTripId = searchParams.get("fromTrip");
+  const prefillDestination = searchParams.get("destination") || undefined;
+  const prefillStart = searchParams.get("start") || undefined;
+  const prefillEnd = searchParams.get("end") || undefined;
+  const prefillClientId = searchParams.get("clientId") || undefined;
+  const prefillClientName = searchParams.get("clientName") || undefined;
+
+  const initialFormValues = (prefillDestination || prefillStart || prefillEnd || prefillClientId)
+    ? {
+        destination: prefillDestination,
+        startDate: prefillStart ? parseLocalDate(prefillStart) : undefined,
+        endDate: prefillEnd ? parseLocalDate(prefillEnd) : undefined,
+        client: prefillClientId && prefillClientName
+          ? { id: prefillClientId, name: prefillClientName }
+          : null,
+      }
+    : undefined;
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"create" | "list" | "templates">("create");
   const [isGenerating, setIsGenerating] = useState(false);
