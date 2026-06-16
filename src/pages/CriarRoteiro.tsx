@@ -3,7 +3,7 @@ import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildRoteiroLink } from "@/lib/roteiro-domain";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchAgentProfile, type AgentProfile } from "@/hooks/useAgentProfile";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
@@ -42,6 +42,8 @@ import {
 export default function CriarRoteiro() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const fromTripId = searchParams.get("fromTrip");
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"create" | "list" | "templates">("create");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -545,9 +547,18 @@ export default function CriarRoteiro() {
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Button variant="outline" onClick={handleBack}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (fromTripId) {
+                    navigate(`/ferramentas-ia/trip-wallet/${fromTripId}`);
+                  } else {
+                    handleBack();
+                  }
+                }}
+              >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar
+                {fromTripId ? "Voltar para Carteira" : "Voltar"}
               </Button>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => handleActionClick("pdf")}>

@@ -21,6 +21,8 @@ export interface Trip {
   services?: TripService[];
   is_locked?: boolean | null;
   failed_password_attempts?: number | null;
+  itinerary_id?: string | null;
+  itinerary_mode?: 'none' | 'legacy' | 'v2' | null;
 }
 
 export interface TripService {
