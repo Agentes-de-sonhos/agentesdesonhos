@@ -391,7 +391,9 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
           )}
         />
 
-        <div className="flex justify-end gap-2">
+        </div>
+
+        <div className="flex justify-end gap-2 pt-3 mt-2 border-t bg-background">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
@@ -403,3 +405,4 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
     </Form>
   );
 }
+
