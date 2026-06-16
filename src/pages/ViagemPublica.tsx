@@ -1738,21 +1738,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     return map;
   }, [services]);
 
-  // Open the wallet section that contains the given service and scroll to it.
+  // Service tapped from an itinerary activity chip — open in a dedicated
+  // overlay (Sheet on mobile / Dialog on desktop) to preserve the itinerary
+  // context. The wallet section accordion is left untouched on purpose.
+  const [activeService, setActiveService] = useState<TripService | null>(null);
   const handleOpenService = useCallback((service: TripService) => {
-    setOpenSection(`service-${service.service_type}`);
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        const el = document.getElementById(`service-${service.id}`);
-        if (el) {
-          scrollToElement(el);
-        } else {
-          const section = sectionRefs.current[service.service_type];
-          scrollToElement(section);
-        }
-      }, 250);
-    });
-  }, [scrollToElement]);
+    setActiveService(service);
+  }, []);
 
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
   const { weatherByDate: itineraryWeather } = useTripWeather(
