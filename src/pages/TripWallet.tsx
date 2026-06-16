@@ -11,8 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TripItinerary } from "@/components/trip/itinerary/TripItinerary";
 import { TripItineraryV2 } from "@/components/wallet/TripItineraryV2";
+import { LegacyItinerarySection } from "@/components/wallet/LegacyItinerarySection";
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
@@ -818,14 +818,7 @@ function TripWalletContent() {
               {trip.itinerary_mode === "v2" ? (
                 <TripItineraryV2 trip={trip} />
               ) : trip.itinerary_mode === "legacy" ? (
-                <TripItinerary
-                  tripId={trip.id}
-                  destination={trip.destination}
-                  startDate={trip.start_date}
-                  endDate={trip.end_date}
-                  services={trip.services || []}
-                  onRequestAddService={openServicesAccordion}
-                />
+                <LegacyItinerarySection trip={trip} onRequestAddService={openServicesAccordion} />
               ) : (
                 <TripItineraryV2 trip={trip} />
               )}
