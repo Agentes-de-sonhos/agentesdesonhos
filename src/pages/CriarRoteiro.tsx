@@ -24,6 +24,7 @@ import { attachItineraryToTrip } from "@/lib/roteiro-domain";
 import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
+import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -77,6 +78,7 @@ export default function CriarRoteiro() {
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
   const [templateTargetItinerary, setTemplateTargetItinerary] = useState<Itinerary | null>(null);
+  const [importWizardOpen, setImportWizardOpen] = useState(false);
 
   const {
     itineraries,
@@ -532,6 +534,29 @@ export default function CriarRoteiro() {
                   />
                 </CardContent>
               </Card>
+
+              <Card className="max-w-lg border-dashed">
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 font-medium text-sm">
+                      <FileText className="h-4 w-4 text-primary" />
+                      Já tem um roteiro pronto?
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Importe PDFs, DOCs ou texto colado e a IA monta o roteiro para você.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setImportWizardOpen(true)}
+                    className="shrink-0"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                    Importar roteiro
+                  </Button>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="list" className="mt-6">
@@ -887,6 +912,11 @@ export default function CriarRoteiro() {
           itinerary={templateTargetItinerary || currentItinerary!}
         />
       )}
+
+      <ImportItineraryWizard
+        open={importWizardOpen}
+        onOpenChange={setImportWizardOpen}
+      />
     </DashboardLayout>
   );
 }
