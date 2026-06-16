@@ -164,8 +164,10 @@ export default function CriarRoteiro() {
       if (fromTripId) {
         try {
           await attachItineraryToTrip(fromTripId, itinerary.id);
+          toast.success("Roteiro vinculado à Carteira Digital com sucesso!");
         } catch (attachErr) {
           console.error("Erro ao vincular roteiro à carteira:", attachErr);
+          toast.error("Erro ao vincular roteiro à Carteira Digital.");
         }
       }
 
