@@ -9,6 +9,12 @@ import {
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsTeamMember } from "@/contexts/TeamSessionContext";
 import { Button } from "@/components/ui/button";
