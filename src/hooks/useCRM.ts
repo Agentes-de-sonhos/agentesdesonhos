@@ -283,17 +283,18 @@ export function useClientDetails(clientId: string) {
 
 export function useOpportunities() {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: opportunities = [], isLoading } = useQuery({
-    queryKey: ["opportunities", user?.id],
+    queryKey: ["opportunities", agencyOwnerId, user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !agencyOwnerId) return [];
       const { data, error } = await supabase
         .from("opportunities")
         .select("*, client:clients(*)")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId)
         .order("position", { ascending: true })
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -303,7 +304,7 @@ export function useOpportunities() {
         client: o.client as Client,
       })) as Opportunity[];
     },
-    enabled: !!user,
+    enabled: !!user && !!agencyOwnerId,
   });
 
   const createOpportunityMutation = useMutation({
@@ -321,11 +322,11 @@ export function useOpportunities() {
     }) => {
       if (!ensurePermission('opportunities.create')) denyAction();
       if (!user) throw new Error("Not authenticated");
-      // Resolve first stage (lowest position) for this user
+      // Resolve first stage (lowest position) for this agency (stages live under the master user_id)
       const { data: firstStage } = await supabase
         .from("pipeline_stages")
         .select("id, legacy_key")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId || user.id)
         .order("position", { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -333,7 +334,7 @@ export function useOpportunities() {
         .from("opportunities")
         .insert({
           ...data,
-          user_id: user.id,
+          user_id: agencyOwnerId || user.id,
           stage: firstStage?.legacy_key || "new_contact",
           stage_id: firstStage?.id || null,
         })
