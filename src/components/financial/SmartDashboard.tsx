@@ -1,28 +1,20 @@
 import { useState, useMemo } from "react";
 import {
-  Target, TrendingUp, Wallet, AlertTriangle, CheckCircle2,
-  Zap, Calendar, Settings2, Loader2, Rocket,
-  DollarSign, ArrowDownCircle, ArrowUpCircle, PiggyBank,
-  ShoppingBag, BarChart3, Clock, ExternalLink,
+  Wallet, AlertTriangle, PiggyBank,
+  DollarSign, ArrowDownCircle, ArrowUpCircle,
+  ShoppingBag, Clock, ExternalLink, MoreHorizontal, Download,
 } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
-import { ExportButton, ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
+import { ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import { exportFinancialData, prepareDashboardExport } from "@/utils/financialExport";
-import { projectExpensesInRange, projectExpensesForMonth } from "@/utils/expenseRecurrence";
+import { projectExpensesInRange } from "@/utils/expenseRecurrence";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-} from "recharts";
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useFinancial } from "@/hooks/useFinancial";
-import { useFinancialGoals } from "@/hooks/useFinancialGoals";
 import { cn } from "@/lib/utils";
 
 const MONTH_NAMES = [
@@ -30,15 +22,12 @@ const MONTH_NAMES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-const SHORT_MONTHS = ["", "Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-
 interface SmartDashboardProps {
   viewMonth: number;
   viewYear: number;
 }
 
 export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
-  const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const { sales, saleProducts, expenseEntries, incomeEntries } = useFinancial();
 
@@ -57,13 +46,6 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   };
 
   const now = new Date();
-
-  const isCurrentMonth = viewMonth === now.getMonth() + 1 && viewYear === now.getFullYear();
-
-
-  const { goal, upsertGoal, isLoading: goalLoading } = useFinancialGoals(viewMonth, viewYear);
-  const [showGoalDialog, setShowGoalDialog] = useState(false);
-  const [goalForm, setGoalForm] = useState({ profit_goal: 0, commission_margin: 10 });
   const { showExport, setShowExport, agencyName } = useFinancialExport("Dashboard");
 
   const handleExportDashboard = async (p: { start: Date; end: Date }, fmt: ExportFormat) => {
@@ -81,7 +63,6 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   const periodEnd = viewMonth === 12
     ? `${viewYear + 1}-01-01`
     : `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-01`;
-  const periodLabel = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
 
   // Helpers
   const calcProductCommission = (p: any) => {
@@ -127,18 +108,6 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   // Profit
   const currentProfit = totalCommission - totalExpenses;
 
-  // Projection (only for current month)
-  const daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
-  const currentDay = isCurrentMonth ? now.getDate() : daysInMonth;
-  const daysRemaining = isCurrentMonth ? daysInMonth - currentDay : 0;
-  const dailyAvg = currentDay > 0 ? totalCommission / currentDay : 0;
-  const projectedCommission = isCurrentMonth ? dailyAvg * daysInMonth : totalCommission;
-  const projectedProfit = isCurrentMonth ? projectedCommission - totalExpenses : currentProfit;
-
-  // Goal
-  const profitGoal = goal?.profit_goal || 0;
-  const goalProgress = profitGoal > 0 ? Math.min(100, (currentProfit / profitGoal) * 100) : 0;
-
   // Operational
   const ticketMedio = periodSales.length > 0 ? totalSold / periodSales.length : 0;
   const marginAvg = totalSold > 0 ? (totalCommission / totalSold) * 100 : 0;
@@ -150,61 +119,31 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
       (e as any).expected_date <= new Date(now.getTime() + 7 * 86400000).toISOString().split("T")[0]
   );
 
-  // Chart data: 3 months centered on selected month
-  const chartData = useMemo(() => {
-    const months: { month: string; receitas: number; despesas: number }[] = [];
-    for (let i = 2; i >= 0; i--) {
-      const d = new Date(viewYear, viewMonth - 1 - i, 1);
-      const m = d.getMonth() + 1;
-      const y = d.getFullYear();
-      const ms = `${y}-${String(m).padStart(2, "0")}`;
-      const mSales = sales.filter(s => s.sale_date.startsWith(ms));
-      const mSaleIds = new Set(mSales.map(s => s.id));
-      const mProducts = saleProducts.filter(p => mSaleIds.has(p.sale_id));
-      const mCommission = mProducts.reduce((s, p) => s + calcProductCommission(p), 0);
-      const mExpenses = projectExpensesForMonth(expenseEntries, y, m)
-        .reduce((s, e) => s + Number(e.amount), 0);
-      months.push({ month: `${SHORT_MONTHS[m]}/${String(y).slice(2)}`, receitas: Math.round(mCommission), despesas: Math.round(mExpenses) });
-    }
-    return months;
-  }, [sales, saleProducts, expenseEntries, viewMonth, viewYear]);
-
-  const openGoalDialog = () => {
-    setGoalForm({ profit_goal: goal?.profit_goal || 0, commission_margin: goal?.commission_margin || 10 });
-    setShowGoalDialog(true);
-  };
-
-  const handleSaveGoal = async () => {
-    await upsertGoal.mutateAsync(goalForm);
-    setShowGoalDialog(false);
-  };
-
   const goToTab = (tab: string) => setSearchParams({ tab }, { replace: true });
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="text-left">
-          <h2 className="text-xl sm:text-2xl font-bold text-left">{periodLabel}</h2>
-          {isCurrentMonth && (
-            <p className="text-xs text-muted-foreground">
-              <Calendar className="inline h-3 w-3 mr-1" />
-              Dia {currentDay} de {daysInMonth} — {daysRemaining} restante{daysRemaining !== 1 ? "s" : ""}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <ExportButton onClick={() => setShowExport(true)} />
-          <Button variant="outline" size="sm" onClick={openGoalDialog}>
-            <Settings2 className="h-4 w-4 mr-1" /> Meta
-          </Button>
-        </div>
+      {/* Actions */}
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Mais ações">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[10rem]">
+            <DropdownMenuItem onClick={() => setShowExport(true)} className="cursor-pointer">
+              <Download className="h-4 w-4 mr-2" /> Exportar dados
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Dashboard" onExport={handleExportDashboard} />
 
-      {/* ===== LINHA 1: RESUMO EXECUTIVO ===== */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* ===== RESUMO DO MÊS ===== */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground mb-3">Resumo do mês</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Recebido</CardTitle>
@@ -212,7 +151,7 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{fmt(incomeReceived)}</div>
-            <p className="text-xs text-muted-foreground">já entrou no caixa</p>
+            <p className="text-xs text-muted-foreground">Já entrou no caixa</p>
           </CardContent>
         </Card>
 
@@ -223,7 +162,7 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{fmt(incomePending)}</div>
-            <p className="text-xs text-muted-foreground">previsto no período</p>
+            <p className="text-xs text-muted-foreground">Previsto para este mês</p>
           </CardContent>
         </Card>
 
@@ -235,164 +174,81 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
           <CardContent>
             <div className={cn("text-2xl font-bold", overdueTotal > 0 ? "text-destructive" : "text-muted-foreground")}>{fmt(overdueTotal)}</div>
             <p className="text-xs text-muted-foreground">
-              {overdueTotal > 0 ? `${overdueEntries.length} entrada${overdueEntries.length > 1 ? "s" : ""} vencida${overdueEntries.length > 1 ? "s" : ""}` : "nenhum atraso 🎉"}
+              {overdueTotal > 0 ? `${overdueEntries.length} pagamento${overdueEntries.length > 1 ? "s" : ""} vencido${overdueEntries.length > 1 ? "s" : ""}` : "Pagamentos vencidos"}
             </p>
           </CardContent>
         </Card>
 
         <Card className={cn("ring-2", currentProfit >= 0 ? "ring-emerald-500/20" : "ring-destructive/20")}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Lucro Atual</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Lucro até agora</CardTitle>
             <div className={cn("p-2 rounded-lg", currentProfit >= 0 ? "bg-emerald-500/10" : "bg-destructive/10")}>
               <PiggyBank className={cn("h-4 w-4", currentProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")} />
             </div>
           </CardHeader>
           <CardContent>
             <div className={cn("text-2xl font-bold", currentProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>{fmt(currentProfit)}</div>
-            <p className="text-xs text-muted-foreground">comissões − despesas</p>
+            <p className="text-xs text-muted-foreground">Comissões − despesas</p>
           </CardContent>
         </Card>
+        </div>
       </div>
 
-      {/* ===== LINHA 2: INTELIGÊNCIA ===== */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Projeção (only current month) */}
-        {isCurrentMonth && (
-          <Card className="border-dashed">
+      {/* ===== VENDAS DO MÊS ===== */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground mb-3">Vendas do mês</h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-primary" /> Projeção do Mês
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <ShoppingBag className="h-3.5 w-3.5" /> Vendas
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Média diária</span>
-                <span className="font-semibold">{fmt(dailyAvg)}</span>
-              </div>
-              <div className={cn("rounded-lg p-3 text-center", projectedProfit >= 0 ? "bg-emerald-500/5" : "bg-destructive/5")}>
-                <p className="text-xs text-muted-foreground">Lucro projetado no mês</p>
-                <p className={cn("text-xl font-bold", projectedProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>
-                  {fmt(projectedProfit)}
-                </p>
-              </div>
-              {currentDay > 1 && (
-                <p className="text-xs text-muted-foreground text-center italic">
-                  {projectedProfit >= 0
-                    ? `Se continuar nesse ritmo, você fecha o mês com ${fmt(projectedProfit)} de lucro.`
-                    : `No ritmo atual, o mês pode fechar com prejuízo de ${fmt(Math.abs(projectedProfit))}.`}
-                </p>
-              )}
+            <CardContent>
+              <div className="text-xl font-bold">{periodSales.length}</div>
+              <p className="text-xs text-muted-foreground">no período</p>
             </CardContent>
           </Card>
-        )}
 
-        {/* Meta */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Rocket className="h-4 w-4 text-primary" /> Meta de Lucro
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {profitGoal > 0 ? (
-              <>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Meta</span>
-                  <span className="font-semibold">{fmt(profitGoal)}</span>
-                </div>
-                <Progress value={goalProgress} className="h-3" />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{goalProgress.toFixed(0)}%</span>
-                  {goalProgress >= 100 ? (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" /> Meta atingida!
-                    </span>
-                  ) : (
-                    <span>Faltam {fmt(profitGoal - currentProfit)}</span>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-2">
-                <p className="text-sm text-muted-foreground mb-2">Defina uma meta mensal</p>
-                <Button variant="outline" size="sm" onClick={openGoalDialog}>
-                  <Target className="h-4 w-4 mr-2" /> Definir Meta
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <DollarSign className="h-3.5 w-3.5" /> Total vendido
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold">{fmt(totalSold)}</div>
+              <p className="text-xs text-muted-foreground">valor bruto</p>
+            </CardContent>
+          </Card>
 
-        {/* Insights */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" /> Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {totalCommission >= totalExpenses && totalExpenses > 0 && (
-              <div className="flex items-start gap-2 text-xs rounded-md border border-emerald-500/20 bg-emerald-500/5 p-2 text-emerald-700 dark:text-emerald-400">
-                <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                <span>Suas comissões já cobrem os custos!</span>
-              </div>
-            )}
-            {overdueTotal > 0 && (
-              <div className="flex items-start gap-2 text-xs rounded-md border border-destructive/20 bg-destructive/5 p-2 text-destructive">
-                <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                <span>Você tem {fmt(overdueTotal)} em comissões atrasadas</span>
-              </div>
-            )}
-            {profitGoal > 0 && currentProfit < profitGoal && (
-              <div className="flex items-start gap-2 text-xs rounded-md border border-blue-500/20 bg-blue-500/5 p-2 text-blue-700 dark:text-blue-400">
-                <Target className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                <span>Faltam {fmt(profitGoal - currentProfit)} para sua meta</span>
-              </div>
-            )}
-            {totalCommission < totalExpenses && totalExpenses > 0 && (
-              <div className="flex items-start gap-2 text-xs rounded-md border border-amber-500/20 bg-amber-500/5 p-2 text-amber-700 dark:text-amber-400">
-                <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                <span>Despesas superando receitas — faltam {fmt(totalExpenses - totalCommission)}</span>
-              </div>
-            )}
-            {periodSales.length === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-1">Sem dados suficientes para gerar insights.</p>
-            )}
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <ArrowUpCircle className="h-3.5 w-3.5" /> Ticket médio
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold">{fmt(ticketMedio)}</div>
+              <p className="text-xs text-muted-foreground">por venda</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <ArrowDownCircle className="h-3.5 w-3.5" /> Comissão média
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold">{totalSold > 0 ? `${marginAvg.toFixed(1)}%` : "—"}</div>
+              <p className="text-xs text-muted-foreground">média do período</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* ===== LINHA 3: GRÁFICO ===== */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-primary" /> Receitas vs Despesas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {chartData.some(d => d.receitas > 0 || d.despesas > 0) ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={chartData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" className="text-xs" tick={{ fontSize: 12 }} />
-                <YAxis className="text-xs" tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip
-                  formatter={(value: number) => fmt(value)}
-                  labelStyle={{ fontWeight: 600 }}
-                  contentStyle={{ borderRadius: 8, fontSize: 13 }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="receitas" name="Comissões" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="despesas" name="Despesas" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">Sem dados para exibir o gráfico.</p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* ===== LINHA 4: ALERTAS ===== */}
+      {/* ===== PENDÊNCIAS ===== */}
       {(salesWithoutProducts.length > 0 || overdueEntries.length > 0 || upcomingIncome.length > 0) && (
         <Card>
           <CardHeader className="pb-2">
@@ -434,98 +290,6 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
           </CardContent>
         </Card>
       )}
-
-      {/* ===== LINHA 5: RESUMO OPERACIONAL ===== */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <ShoppingBag className="h-3.5 w-3.5" /> Vendas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{periodSales.length}</div>
-            <p className="text-xs text-muted-foreground">no período</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <DollarSign className="h-3.5 w-3.5" /> Total Vendido
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{fmt(totalSold)}</div>
-            <p className="text-xs text-muted-foreground">valor bruto</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <ArrowUpCircle className="h-3.5 w-3.5" /> Ticket Médio
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{fmt(ticketMedio)}</div>
-            <p className="text-xs text-muted-foreground">por venda</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-              <ArrowDownCircle className="h-3.5 w-3.5" /> Margem Comissão
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{marginAvg.toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">média no período</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Goal Dialog */}
-      <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Meta de {MONTH_NAMES[viewMonth]} {viewYear}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Meta de Lucro Mensal (R$)</Label>
-              <Input
-                type="number"
-                value={goalForm.profit_goal}
-                onChange={(e) => setGoalForm({ ...goalForm, profit_goal: Number(e.target.value) })}
-                placeholder="Ex: 5000"
-              />
-              <p className="text-xs text-muted-foreground">Quanto você quer lucrar neste mês?</p>
-            </div>
-            <div className="space-y-2">
-              <Label>Margem Média de Comissão (%)</Label>
-              <Input
-                type="number"
-                value={goalForm.commission_margin}
-                onChange={(e) => setGoalForm({ ...goalForm, commission_margin: Number(e.target.value) })}
-                placeholder="Ex: 10"
-                min={0} max={100}
-              />
-              <p className="text-xs text-muted-foreground">
-                Percentual médio de comissão sobre vendas.
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancelar</Button>
-            <Button onClick={handleSaveGoal} disabled={upsertGoal.isPending}>
-              {upsertGoal.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Salvar Meta
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
