@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft } from "lucide-react";
 import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsConverterDialog";
 import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
+import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
 
 // Simple destination -> currency inference (best-effort)
 const COUNTRY_CURRENCY: Record<string, { code: string; symbol: string; name: string }> = {
