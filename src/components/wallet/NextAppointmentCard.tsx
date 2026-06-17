@@ -219,11 +219,20 @@ export function NextAppointmentCard({
       className="rounded-2xl border bg-card shadow-sm overflow-hidden"
       style={{ borderColor: "hsl(var(--wallet-brand) / 0.18)" }}
     >
-      <div className="px-4 py-3 flex items-center gap-2 border-b" style={{ borderColor: "hsl(var(--wallet-brand) / 0.12)" }}>
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "hsl(var(--wallet-brand-soft))" }}>
+      <div
+        className="px-4 py-3 flex items-center gap-2.5 border-b"
+        style={{
+          background: "hsl(var(--wallet-brand) / 0.08)",
+          borderColor: "hsl(var(--wallet-brand) / 0.15)",
+        }}
+      >
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "hsl(var(--wallet-brand) / 0.15)" }}>
           <CalendarClock className="h-4 w-4" style={{ color: "hsl(var(--wallet-brand))" }} />
         </div>
-        <h3 className="text-[13px] font-semibold uppercase tracking-wider text-foreground/70">
+        <h3
+          className="text-[13px] font-bold uppercase tracking-wider"
+          style={{ color: "hsl(var(--wallet-brand))" }}
+        >
           Próximo serviço contratado
         </h3>
       </div>
