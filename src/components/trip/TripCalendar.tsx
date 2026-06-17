@@ -219,11 +219,11 @@ export function TripCalendar({
       </div>
 
       {/* Weekday header */}
-      <div className="grid grid-cols-7 px-2 pt-2">
+      <div className={cn("grid grid-cols-7", compact ? "px-1.5 pt-1.5" : "px-2 pt-2")}>
         {WEEKDAYS.map((d, i) => (
           <div
             key={i}
-            className="text-[10px] font-semibold text-muted-foreground text-center py-1"
+            className={cn("font-semibold text-muted-foreground text-center py-1", compact ? "text-[9px]" : "text-[10px]")}
           >
             {d}
           </div>
