@@ -175,10 +175,10 @@ function CruiseFactGrid({ data }: { data: any }) {
               <Icon className="h-[18px] w-[18px] text-primary shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
-                <p className={cn('text-[14px] font-semibold leading-snug truncate', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
+                <p className={cn('text-[14px] font-semibold leading-snug break-words', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
                   {f.value}
                 </p>
-                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 truncate">{f.sub}</p>}
+                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 break-words">{f.sub}</p>}
               </div>
             </div>
           );
@@ -926,7 +926,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
-                <p className="text-[13px] font-semibold text-foreground truncate">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
+                <p className="text-[13px] font-semibold text-foreground break-words">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               </a>
             )}
           </div>
@@ -2473,8 +2473,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{agentProfile.name}</p>
-                    {agentProfile.agency_name && <BrandText as="p" className="text-xs text-gray-500 truncate">{agentProfile.agency_name}</BrandText>}
+                    <p className="text-sm font-semibold text-gray-900 break-words">{agentProfile.name}</p>
+                    {agentProfile.agency_name && <BrandText as="p" className="text-xs text-gray-500 break-words">{agentProfile.agency_name}</BrandText>}
                   </div>
                   {whatsappUrl && (
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"

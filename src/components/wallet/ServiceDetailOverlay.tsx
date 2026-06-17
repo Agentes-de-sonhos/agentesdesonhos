@@ -64,7 +64,7 @@ export function ServiceDetailOverlay({
         <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80">
           Serviço
         </span>
-        <span className="block text-[15px] font-semibold tracking-tight text-foreground truncate">
+        <span className="block text-[15px] font-semibold tracking-tight text-foreground break-words">
           {label}
         </span>
       </div>
