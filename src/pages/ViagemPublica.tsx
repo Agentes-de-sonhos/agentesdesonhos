@@ -2195,7 +2195,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Navegação rápida</h2>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3">
                 {availableTabs.map((type) => {
                   const Icon = SERVICE_ICONS[type];
                   const colors = SERVICE_COLORS[type];
@@ -2243,35 +2243,38 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           ) : null;
 
           return (
-            <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
-              <div className="space-y-4 min-w-0">
-                {navGrid}
+            <div className="space-y-5">
+              {navGrid}
+              <div className="hidden md:flex items-center gap-3 my-1">
+                <div className="h-px flex-1 bg-border/60" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Ferramentas e apoio ao passageiro
+                </span>
+                <div className="h-px flex-1 bg-border/60" />
               </div>
-              <div className="md:w-[320px] md:justify-self-end w-full space-y-4">
-                <TripLocalClockBar
-                  destination={tripData.destination}
-                  startDate={startDate}
-                  endDate={endDate}
-                />
-                <TripCalendarWithWeather
-                  destination={tripData.destination}
-                  startDate={startDate}
-                  endDate={endDate}
-                  itineraryDates={itineraryDates}
-                  onDayClick={handleCalendarDayClick}
-                />
-                <TripConvertersWrapper
-                  destination={tripData.destination}
-                  startDate={startDate}
-                  endDate={endDate}
-                />
-              </div>
+              <TripLocalClockBar
+                destination={tripData.destination}
+                startDate={startDate}
+                endDate={endDate}
+              />
+              <TripCalendarWithWeather
+                destination={tripData.destination}
+                startDate={startDate}
+                endDate={endDate}
+                itineraryDates={itineraryDates}
+                onDayClick={handleCalendarDayClick}
+              />
               {services.length > 0 && (
                 <NextAppointmentCard
                   services={services}
                   onOpenService={handleOpenService}
                 />
               )}
+              <TripConvertersWrapper
+                destination={tripData.destination}
+                startDate={startDate}
+                endDate={endDate}
+              />
             </div>
           );
         })()}
