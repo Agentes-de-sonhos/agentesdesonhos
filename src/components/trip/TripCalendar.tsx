@@ -43,6 +43,7 @@ interface TripCalendarProps {
   timezone?: string;
   /** Human-readable destination label, used as clock subtitle */
   destinationLabel?: string;
+  compact?: boolean;
 }
 
 const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
@@ -52,12 +53,14 @@ export function LocalClock({
   destinationLabel,
   weatherByDate,
   standalone = false,
+  compact = false,
 }: {
   timezone: string;
   destinationLabel?: string;
   weatherByDate?: Record<string, DayWeather>;
   /** When true, renders with its own rounded card; otherwise as a header strip. */
   standalone?: boolean;
+  compact?: boolean;
 }) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -104,9 +107,10 @@ export function LocalClock({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1.5 px-4 py-2.5 bg-gradient-to-r from-primary/10 to-primary/5",
+        "flex flex-col gap-1.5 bg-gradient-to-r from-primary/10 to-primary/5",
+        compact ? "px-3 py-2" : "px-4 py-2.5",
         standalone
-          ? "rounded-2xl border border-primary/15 shadow-sm"
+          ? cn("border border-primary/15 shadow-sm", compact ? "rounded-xl" : "rounded-2xl")
           : "border-b border-primary/10"
       )}
     >
@@ -160,6 +164,7 @@ export function TripCalendar({
   weatherByDate,
   timezone,
   destinationLabel,
+  compact = false,
 }: TripCalendarProps) {
   const [cursor, setCursor] = useState<Date>(startOfMonth(startDate));
 
@@ -174,24 +179,30 @@ export function TripCalendar({
   const today = new Date();
 
   return (
-    <div className="rounded-2xl border border-primary/15 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden">
+    <div className={cn(
+      "border border-primary/15 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden",
+      compact ? "rounded-xl" : "rounded-2xl"
+    )}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10">
+      <div className={cn(
+        "flex items-center justify-between bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10",
+        compact ? "px-3 py-2" : "px-4 py-3"
+      )}>
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full hover:bg-primary/10"
+          className={cn("rounded-full hover:bg-primary/10", compact ? "h-7 w-7" : "h-8 w-8")}
           onClick={() => setCursor((c) => subMonths(c, 1))}
           aria-label="Mês anterior"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
         </Button>
         <div className="flex flex-col items-center">
-          <span className="text-xs uppercase tracking-[0.2em] text-primary/70 font-semibold">
+          <span className={cn("uppercase tracking-[0.2em] text-primary/70 font-semibold", compact ? "text-[10px]" : "text-xs")}>
             Calendário da viagem
           </span>
-          <span className="text-sm font-bold text-foreground capitalize">
+          <span className={cn("font-bold text-foreground capitalize", compact ? "text-[13px]" : "text-sm")}>
             {format(cursor, "MMMM 'de' yyyy", { locale: ptBR })}
           </span>
         </div>
@@ -199,20 +210,20 @@ export function TripCalendar({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full hover:bg-primary/10"
+          className={cn("rounded-full hover:bg-primary/10", compact ? "h-7 w-7" : "h-8 w-8")}
           onClick={() => setCursor((c) => addMonths(c, 1))}
           aria-label="Próximo mês"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
         </Button>
       </div>
 
       {/* Weekday header */}
-      <div className="grid grid-cols-7 px-2 pt-2">
+      <div className={cn("grid grid-cols-7", compact ? "px-1.5 pt-1.5" : "px-2 pt-2")}>
         {WEEKDAYS.map((d, i) => (
           <div
             key={i}
-            className="text-[10px] font-semibold text-muted-foreground text-center py-1"
+            className={cn("font-semibold text-muted-foreground text-center py-1", compact ? "text-[9px]" : "text-[10px]")}
           >
             {d}
           </div>
@@ -220,7 +231,7 @@ export function TripCalendar({
       </div>
 
       {/* Days grid */}
-      <div className="grid grid-cols-7 gap-1 px-2 pb-3">
+      <div className={cn("grid grid-cols-7", compact ? "gap-0.5 px-1.5 pb-2" : "gap-1 px-2 pb-3")}>
         {days.map((day, i) => {
           const dateStr = format(day, "yyyy-MM-dd");
           const inMonth = isSameMonth(day, cursor);
@@ -240,7 +251,8 @@ export function TripCalendar({
               disabled={!clickable}
               onClick={() => clickable && onDayClick?.(dateStr)}
               className={cn(
-                "relative aspect-square flex items-center justify-center text-xs rounded-lg transition-all duration-150",
+                "relative aspect-square flex items-center justify-center transition-all duration-150",
+                compact ? "text-[11px] rounded-md" : "text-xs rounded-lg",
                 !inMonth && "text-muted-foreground/40",
                 inMonth && !inTrip && "text-foreground/70",
                 inTrip && !isStart && !isEnd && "bg-primary/15 text-primary font-semibold",
@@ -285,7 +297,7 @@ export function TripCalendar({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 px-4 py-2 text-[10px] text-muted-foreground border-t border-border/40 bg-muted/30">
+      <div className={cn("flex items-center justify-center text-[10px] text-muted-foreground border-t border-border/40 bg-muted/30", compact ? "gap-3 px-3 py-1.5" : "gap-4 px-4 py-2")}>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-primary" /> Início/Fim
         </span>
