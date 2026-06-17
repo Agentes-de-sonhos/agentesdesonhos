@@ -596,6 +596,16 @@ export default function Perfil() {
 
         {/* Community profile - full width below */}
         <CommunityProfileCard />
+
+        {/* Identidade Visual da Agência */}
+        <AgencyBrandColorCard
+          initialColor={profile?.agency_primary_color ?? null}
+          agencyLogoUrl={profile?.agency_logo_url ?? null}
+          onSaved={(color) => {
+            setProfile((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
+            setFormData((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
+          }}
+        />
       </div>
     </DashboardLayout>
   );
