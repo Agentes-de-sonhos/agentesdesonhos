@@ -50,17 +50,19 @@ function TripCoverHero({
   startDate,
   endDate,
   days,
+  coverUrl,
 }: {
   title: string;
   destination: string;
   startDate: Date;
   endDate: Date;
   days: number;
+  coverUrl?: string | null;
 }) {
-  const { data } = useActivityPhoto({ query: destination, destination });
-  const photo = data?.photo_url || null;
+  const { data } = useActivityPhoto({ query: destination, destination, enabled: !coverUrl });
+  const photo = coverUrl || data?.photo_url || null;
   return (
-    <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9] -mx-4 sm:mx-0">
+    <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9]">
       {photo ? (
         <img
           src={photo}
