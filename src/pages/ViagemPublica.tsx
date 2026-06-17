@@ -105,6 +105,21 @@ function TripCoverHero({
 
 // ===== Cruise visual helpers (premium UI inspired by reference design) =====
 
+function BoardingFact({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  const isMuted = /^a confirmar$/i.test(value);
+  return (
+    <div className="flex items-start gap-2.5 min-w-0">
+      <Icon className="h-[18px] w-[18px] text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+      <div className="min-w-0">
+        <p className="text-[12px] font-semibold text-foreground leading-tight">{label}</p>
+        <p className={cn('text-[12.5px] leading-snug mt-0.5', isMuted ? 'text-muted-foreground/80 italic' : 'text-muted-foreground')}>
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function CruiseFactGrid({ data }: { data: any }) {
   const mealLabel = (() => {
     if (!data.meal_plan) return null;
