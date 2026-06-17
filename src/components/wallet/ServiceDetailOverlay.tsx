@@ -77,7 +77,7 @@ export function ServiceDetailOverlay({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[85vh] p-0 flex flex-col" style={style}>
         <DialogHeader className="px-6 py-4 border-b text-left">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Icon className="h-5 w-5 text-primary" />
