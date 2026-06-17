@@ -43,6 +43,7 @@ interface TripCalendarProps {
   timezone?: string;
   /** Human-readable destination label, used as clock subtitle */
   destinationLabel?: string;
+  compact?: boolean;
 }
 
 const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
