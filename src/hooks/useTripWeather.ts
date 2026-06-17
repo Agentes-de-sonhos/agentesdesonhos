@@ -111,10 +111,24 @@ export function useTripWeather(
           return;
         }
 
-        const wxRes = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${startStr}&end_date=${endStr}`
-        );
-        const wx = await wxRes.json();
+        const fetchForecast = async (s: string, e: string) => {
+          const r = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${s}&end_date=${e}`
+          );
+          return r.json();
+        };
+        let wx = await fetchForecast(startStr, endStr);
+        // If Open-Meteo rejects the range (e.g. end_date past the allowed
+        // horizon), retry with a tighter window so we still get the days that
+        // ARE within range instead of returning nothing.
+        if (wx?.error) {
+          const safeEnd = new Date(today.getTime() + 14 * 86400000);
+          const safeStart = new Date(Math.min(start.getTime(), safeEnd.getTime()));
+          wx = await fetchForecast(
+            format(safeStart, "yyyy-MM-dd"),
+            format(safeEnd, "yyyy-MM-dd")
+          );
+        }
         const out: Record<string, DayWeather> = {};
         const dates: string[] = wx?.daily?.time ?? [];
         const codes: number[] = wx?.daily?.weather_code ?? [];
