@@ -496,6 +496,14 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const voucherAccess = useContext(VoucherAccessCtx);
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
   const isCruise = service.service_type === 'cruise';
+  const cruiseStatusLabel = (() => {
+    if (!isCruise) return null;
+    const s = (data.reservation_status || '').toString().toLowerCase();
+    if (s.includes('confirm') && !s.includes('a confirm') && !s.includes('pre')) return { label: 'Confirmado', tone: 'emerald' as const };
+    if (s.includes('pre') || s.includes('pré')) return { label: 'Pré-reserva', tone: 'amber' as const };
+    if (s.includes('opc') || s.includes('pend')) return { label: 'Opcional', tone: 'slate' as const };
+    return { label: 'A confirmar', tone: 'amber' as const };
+  })();
   const isFlight = service.service_type === 'flight';
   const isCarRental = service.service_type === 'car_rental';
   const isHotel = service.service_type === 'hotel';
