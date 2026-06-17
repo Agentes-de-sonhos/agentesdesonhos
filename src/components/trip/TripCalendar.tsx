@@ -106,9 +106,10 @@ export function LocalClock({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1.5 px-4 py-2.5 bg-gradient-to-r from-primary/10 to-primary/5",
+        "flex flex-col gap-1.5 bg-gradient-to-r from-primary/10 to-primary/5",
+        compact ? "px-3 py-2" : "px-4 py-2.5",
         standalone
-          ? "rounded-2xl border border-primary/15 shadow-sm"
+          ? cn("border border-primary/15 shadow-sm", compact ? "rounded-xl" : "rounded-2xl")
           : "border-b border-primary/10"
       )}
     >
