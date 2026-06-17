@@ -1812,7 +1812,21 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   // Exclusive accordion for itinerary days
   const [openDay, setOpenDay] = useState<string | null>(null);
   const toggleDay = useCallback((key: string) => {
-    setOpenDay(prev => prev === key ? null : key);
+    setOpenDay(prev => {
+      const next = prev === key ? null : key;
+      if (next) {
+        // After the accordion finishes its open/close transition, snap the
+        // opened day card to the top of the overlay scroll container so the
+        // user immediately sees its content (mobile-first UX).
+        setTimeout(() => {
+          const el = dayRefs.current[key];
+          if (el && typeof el.scrollIntoView === "function") {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 60);
+      }
+      return next;
+    });
   }, []);
 
   // Index trip services by id so the V2 day-by-day can render a "Ver serviço"
