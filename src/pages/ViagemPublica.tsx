@@ -1919,12 +1919,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         {(() => {
           const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
           const handleCalendarDayClick = (dateStr: string) => {
-            setOpenSection('itinerary');
             setOpenDay(dateStr);
-            setTimeout(() => {
-              const el = dayRefs.current[dateStr] || itineraryRef.current;
-              scrollToElement(el);
-            }, 120);
+            setItineraryOpen(true);
           };
           const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
             <div>
@@ -1937,13 +1933,10 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   return (
                     <button
                       key={type}
-                      onClick={() => {
-                        setOpenSection(`service-${type}`);
-                        setTimeout(() => scrollToElement(sectionRefs.current[type]), 80);
-                      }}
+                      onClick={() => setActiveGroupType(type)}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
-                        isActive ? cn(colors.activeBorder, colors.activeGlow, "shadow-md") : cn(colors.border, "hover:shadow-md"),
+                        cn(colors.border, "hover:shadow-md"),
                         colors.hoverBg
                       )}
                     >
@@ -1957,16 +1950,12 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 })}
                 {itineraryActivities.length > 0 && (() => {
                   const itColors = SERVICE_COLORS.itinerary;
-                  const isActive = openSection === 'itinerary';
                   return (
                     <button
-                      onClick={() => {
-                        setOpenSection('itinerary');
-                        setTimeout(() => scrollToElement(itineraryRef.current), 80);
-                      }}
+                      onClick={() => setItineraryOpen(true)}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
-                        isActive ? cn(itColors.activeBorder, itColors.activeGlow, "shadow-md") : cn(itColors.border, "hover:shadow-md"),
+                        cn(itColors.border, "hover:shadow-md"),
                         itColors.hoverBg
                       )}
                     >
