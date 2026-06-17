@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft } from "lucide-react";
+import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft, ListChecks } from "lucide-react";
 import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsConverterDialog";
 import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
@@ -253,14 +253,15 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   );
 }
 
-export function TripConverters({ destination }: { destination: string }) {
+export function TripConverters({ destination, tripId, services }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }> }) {
   const [openCur, setOpenCur] = useState(false);
   const [openMeasure, setOpenMeasure] = useState(false);
   const [openTip, setOpenTip] = useState(false);
+  const [openChecklist, setOpenChecklist] = useState(false);
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-2">
+      <div className={"grid gap-2 " + (tripId ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
         <Button
           type="button"
           variant="outline"
@@ -291,10 +292,25 @@ export function TripConverters({ destination }: { destination: string }) {
           <Receipt className="h-4 w-4 text-primary" />
           <span className="text-[11px] font-medium leading-tight text-center">Gorjetas</span>
         </Button>
+        {tripId && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-auto py-2.5 flex-col gap-1"
+            onClick={() => setOpenChecklist(true)}
+          >
+            <ListChecks className="h-4 w-4 text-primary" />
+            <span className="text-[11px] font-medium leading-tight text-center">Checklist</span>
+          </Button>
+        )}
       </div>
       <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} />
       <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />
       <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />
+      {tripId && (
+        <TripChecklistDialog open={openChecklist} onOpenChange={setOpenChecklist} tripId={tripId} services={services || []} />
+      )}
     </>
   );
 }
