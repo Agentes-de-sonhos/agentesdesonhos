@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Coins, Ruler, Receipt, ArrowRightLeft } from "lucide-react";
+import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft } from "lucide-react";
 import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsConverterDialog";
 import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 
