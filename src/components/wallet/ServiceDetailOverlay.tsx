@@ -55,21 +55,39 @@ export function ServiceDetailOverlay({
   const label =
     title ?? (service ? SERVICE_LABELS[service.service_type] ?? "Serviço" : "Serviço");
 
+  const Header = (
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/15 shrink-0">
+        <Icon className="h-[18px] w-[18px] text-primary" />
+      </div>
+      <div className="min-w-0">
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80">
+          Serviço
+        </span>
+        <span className="block text-[15px] font-semibold tracking-tight text-foreground truncate">
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="bottom"
-          className="max-h-[85vh] p-0 rounded-t-2xl flex flex-col"
+          className="max-h-[90vh] p-0 rounded-t-3xl flex flex-col bg-background border-t border-border/50"
           style={style}
         >
-          <SheetHeader className="px-4 py-3 border-b text-left shrink-0">
-            <SheetTitle className="flex items-center gap-2 text-base">
-              <Icon className="h-5 w-5 text-primary" />
-              {label}
+          <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted-foreground/25 shrink-0" />
+          <SheetHeader className="px-5 pt-3 pb-4 border-b border-border/50 text-left shrink-0">
+            <SheetTitle asChild>
+              {Header}
             </SheetTitle>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto p-4">{children}</div>
+          <div className="flex-1 overflow-y-auto px-4 py-5 bg-gradient-to-b from-muted/20 to-background">
+            {children}
+          </div>
         </SheetContent>
       </Sheet>
     );
@@ -77,14 +95,15 @@ export function ServiceDetailOverlay({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 flex flex-col" style={style}>
-        <DialogHeader className="px-6 py-4 border-b text-left">
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <Icon className="h-5 w-5 text-primary" />
-            {label}
+      <DialogContent className="max-w-2xl max-h-[88vh] p-0 flex flex-col rounded-2xl overflow-hidden border-border/40" style={style}>
+        <DialogHeader className="px-7 py-5 border-b border-border/50 text-left bg-card">
+          <DialogTitle asChild>
+            {Header}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+        <div className="flex-1 overflow-y-auto px-6 py-6 bg-gradient-to-b from-muted/20 to-background">
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );
