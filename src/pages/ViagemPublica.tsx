@@ -2220,11 +2220,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           );
         })()}
 
-        <div className="mt-6 pb-4 text-center">
-          <p className="text-xs text-muted-foreground/60">
-            Desenvolvido por <span className="font-medium text-muted-foreground/80">Nobre Digital</span>
-          </p>
-        </div>
       </div>
       <ServiceDetailOverlay
         service={activeService}
