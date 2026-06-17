@@ -329,11 +329,11 @@ function TripLocalClockBar(props: {
   );
 }
 
-function TripConvertersWrapper(props: { destination: string; startDate: Date; endDate: Date; }) {
+function TripConvertersWrapper(props: { destination: string; startDate: Date; endDate: Date; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }> }) {
   const { timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   if (!timezone) return null;
-  if (!isInternationalDestination(props.destination, timezone)) return null;
-  return <TripConverters destination={props.destination} />;
+  // Always render so the Checklist tool is available even for domestic trips.
+  return <TripConverters destination={props.destination} tripId={props.tripId} services={props.services} />;
 }
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
