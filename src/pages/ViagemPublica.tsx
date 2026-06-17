@@ -2245,12 +2245,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
               <div className="space-y-4 min-w-0">
-                {services.length > 0 && (
-                  <NextAppointmentCard
-                    services={services}
-                    onOpenService={handleOpenService}
-                  />
-                )}
                 {navGrid}
               </div>
               <div className="md:w-[320px] md:justify-self-end w-full space-y-4">
@@ -2272,6 +2266,12 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   endDate={endDate}
                 />
               </div>
+              {services.length > 0 && (
+                <NextAppointmentCard
+                  services={services}
+                  onOpenService={handleOpenService}
+                />
+              )}
             </div>
           );
         })()}
