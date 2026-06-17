@@ -110,8 +110,19 @@ export function useTrips() {
 
       if (Object.keys(updateData).length === 0) return;
 
-      const { error } = await supabase.from("trips").update(updateData).eq("id", id);
-      if (error) throw error;
+      const { data: updatedRows, error } = await supabase
+        .from("trips")
+        .update(updateData)
+        .eq("id", id)
+        .select("id");
+      if (error) {
+        console.error("[useTrips.update] error:", error, "payload:", updateData);
+        throw error;
+      }
+      if (!updatedRows || updatedRows.length === 0) {
+        console.error("[useTrips.update] no rows updated. id:", id, "payload:", updateData);
+        throw new Error("Não foi possível atualizar (verifique permissões ou se a carteira ainda existe).");
+      }
 
       // Log history
       if (historyEntries.length > 0) {
