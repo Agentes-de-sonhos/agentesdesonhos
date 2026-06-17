@@ -246,12 +246,14 @@ function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
                 {!isLast && <span className="absolute left-[-31px] top-14 bottom-[-16px] w-px border-l border-dashed border-border" />}
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="min-w-0">
-                    <p className="text-[15px] font-semibold text-foreground leading-tight">{stop.port || 'A confirmar'}</p>
+                    <p className="text-[15.5px] font-semibold text-foreground leading-tight break-words">
+                      {stop.port && !/^a\s*confirmar$/i.test(stop.port) ? stop.port : (isNav ? 'Dia no mar' : 'Porto a confirmar')}
+                    </p>
                     {stop.subtitle && (
-                      <p className="text-[12.5px] text-primary/80 font-medium mt-0.5">{stop.subtitle}</p>
+                      <p className="text-[13px] text-primary/80 font-medium mt-1 leading-snug">{stop.subtitle}</p>
                     )}
                     {stop.description && (
-                      <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">{stop.description}</p>
+                      <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">{stop.description}</p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -259,12 +261,12 @@ function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
                       {role}
                     </span>
                     {(stop.arrival_time || stop.departure_time) ? (
-                      <div className="text-[11.5px] text-muted-foreground text-right">
+                      <div className="text-[12px] text-muted-foreground text-right leading-snug">
                         {stop.arrival_time && <div>Chegada <span className="text-foreground font-medium">{stop.arrival_time}</span></div>}
                         {stop.departure_time && <div>Saída <span className="text-foreground font-medium">{stop.departure_time}</span></div>}
                       </div>
                     ) : isNav ? null : (
-                      <span className="text-[11px] text-muted-foreground/80 italic">A confirmar</span>
+                      <span className="text-[11.5px] text-muted-foreground/80 italic">Horários a confirmar</span>
                     )}
                   </div>
                 </div>
