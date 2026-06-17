@@ -39,6 +39,7 @@ import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
+import { getWalletBrandStyle } from "@/lib/agencyColor";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the
@@ -1862,7 +1863,10 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100"
+      style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
+    >
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
         <div className="container max-w-5xl mx-auto px-4 py-3 sm:py-3 relative flex items-center justify-start">

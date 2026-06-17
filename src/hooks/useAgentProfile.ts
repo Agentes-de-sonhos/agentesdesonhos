@@ -6,6 +6,7 @@ export interface AgentProfile {
   agency_logo_url: string | null;
   city: string | null;
   state: string | null;
+  agency_primary_color: string | null;
 }
 
 export async function fetchAgentProfile(userId: string, supabase: any): Promise<AgentProfile | null> {
