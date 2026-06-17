@@ -1815,15 +1815,17 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     setOpenDay(prev => {
       const next = prev === key ? null : key;
       if (next) {
-        // After the accordion finishes its open/close transition, snap the
-        // opened day card to the top of the overlay scroll container so the
-        // user immediately sees its content (mobile-first UX).
+        // When swapping from one open day to another, the Collapsible transition
+        // (close previous + open next) takes ~300 ms. Wait longer so the layout
+        // has fully settled before scrolling, ensuring the new day card snaps to
+        // the correct top position.
+        const delay = prev !== null && prev !== key ? 350 : 60;
         setTimeout(() => {
           const el = dayRefs.current[key];
           if (el && typeof el.scrollIntoView === "function") {
             el.scrollIntoView({ behavior: "smooth", block: "start" });
           }
-        }, 60);
+        }, delay);
       }
       return next;
     });
