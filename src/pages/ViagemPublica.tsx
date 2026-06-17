@@ -2050,7 +2050,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       <div
                         key={day.date}
                         ref={(el) => { dayRefs.current[day.date] = el; }}
-                        style={{ scrollMarginTop: '80px' }}
                       >
                         <CollapsibleDayCard
                           day={day}
@@ -2076,7 +2075,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   const isDayOpen = openDay === dateStr;
 
                   return (
-                    <div key={dateStr} ref={(el) => { dayRefs.current[dateStr] = el; }} style={{ scrollMarginTop: '80px' }} className={cn(
+                    <div key={dateStr} ref={(el) => { dayRefs.current[dateStr] = el; }} className={cn(
                       "rounded-xl overflow-hidden border shadow-sm bg-card transition-all duration-200",
                       isDayOpen ? cn(SERVICE_COLORS.itinerary.activeBorder, SERVICE_COLORS.itinerary.activeGlow, "shadow-md") : cn(SERVICE_COLORS.itinerary.border, "hover:shadow-md")
                     )}>
