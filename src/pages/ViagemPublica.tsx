@@ -38,6 +38,7 @@ import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
+import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the
@@ -59,8 +60,8 @@ function TripCoverHero({
   days: number;
   coverUrl?: string | null;
 }) {
-  const { data } = useActivityPhoto({ query: destination, destination, enabled: !coverUrl });
-  const photo = coverUrl || data?.photo_url || null;
+  const { photoUrl } = useDestinationCoverPhoto({ destination, enabled: !coverUrl });
+  const photo = coverUrl || photoUrl || null;
   return (
     <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9]">
       {photo ? (
