@@ -40,6 +40,7 @@ import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
+import { NextActivityCard } from "@/components/wallet/NextActivityCard";
 import { MyBudgetCard } from "@/components/wallet/MyBudgetCard";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
@@ -2268,6 +2269,17 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 <NextAppointmentCard
                   services={services}
                   onOpenService={handleOpenService}
+                />
+              )}
+              {itineraryActivities.length > 0 && (
+                <NextActivityCard
+                  activities={itineraryActivities as any}
+                  onOpenItinerary={() => {
+                    setItineraryOpen(true);
+                    setTimeout(() => {
+                      itineraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 100);
+                  }}
                 />
               )}
               <TripConvertersWrapper
