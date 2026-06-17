@@ -1831,6 +1831,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     setActiveService(service);
   }, []);
 
+  // Quick-Nav now opens services & itinerary inside overlays instead of
+  // scrolling to long inline sections.
+  const [activeGroupType, setActiveGroupType] = useState<TripServiceType | null>(null);
+  const [itineraryOpen, setItineraryOpen] = useState(false);
+
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
   const { weatherByDate: itineraryWeather } = useTripWeather(
     tripData.destination,
