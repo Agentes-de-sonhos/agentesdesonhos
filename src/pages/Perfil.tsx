@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { CommunityProfileCard } from "@/components/profile/CommunityProfileCard";
+import { AgencyBrandColorCard } from "@/components/profile/AgencyBrandColorCard";
 
 const brazilianStates = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -54,6 +55,7 @@ interface ProfileData {
   state: string | null;
   zip_code: string | null;
   has_password: boolean;
+  agency_primary_color: string | null;
 }
 
 export default function Perfil() {
@@ -102,6 +104,7 @@ export default function Perfil() {
           state: (data as any).state || null,
           zip_code: (data as any).zip_code || null,
           has_password: (data as any).has_password || false,
+          agency_primary_color: (data as any).agency_primary_color || null,
         };
         setProfile(profileData);
         setFormData(profileData);
