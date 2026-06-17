@@ -1,13 +1,23 @@
 /**
- * Agency primary color helpers.
+ * Agency Theme helpers.
  *
- * The Public Digital Wallet (and, progressively, other public links) reads
- * its brand identity from two CSS variables: `--wallet-brand` and
- * `--wallet-brand-soft`. Both are HSL triplets ("H S% L%").
+ * The Public Digital Wallet (and, progressively, other public links) is
+ * driven by a single "Agency Theme". When the agency defines a primary
+ * color in `profiles.agency_primary_color` (HEX), this module produces an
+ * inline-style object that overrides the relevant shadcn / Tailwind HSL
+ * tokens on the page root:
  *
- * Each agency may define `profiles.agency_primary_color` as a HEX string
- * (e.g. "#E53935"). This module converts that HEX into the inline-style
- * object that public pages spread onto their root element.
+ *   --wallet-brand        — raw brand color (used by custom wallet UI)
+ *   --wallet-brand-soft   — light tint companion (backgrounds, badges)
+ *   --primary             — shadcn primary (Buttons, Calendar selection,
+ *                           focus accents, etc.)
+ *   --primary-foreground  — readable text on top of primary
+ *   --ring                — focus ring color
+ *   --sidebar-primary     — sidebar accents (safety net for nested UI)
+ *
+ * Overriding `--primary` is what makes every shadcn component inside the
+ * wallet (Buttons, Inputs, Calendar, etc.) inherit the agency identity
+ * without any component-level changes.
  */
 
 export function normalizeHex(input: string | null | undefined): string | null {
@@ -90,9 +100,29 @@ export function hexToSoftHslTriplet(hex: string): string | null {
   return `${Math.round(h)} ${Math.round(softS)}% 94%`;
 }
 
+/** Perceived luminance (0-1) of an sRGB color. */
+function relativeLuminance(hex: string): number | null {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return null;
+  const toLin = (c: number) => {
+    const x = c / 255;
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * toLin(rgb.r) + 0.7152 * toLin(rgb.g) + 0.0722 * toLin(rgb.b);
+}
+
+/** Returns the HSL triplet for the text color that reads best on top of `hex`. */
+function readableForegroundHsl(hex: string): string {
+  const lum = relativeLuminance(hex);
+  // Light brand → near-black text; dark brand → white text. Threshold tuned
+  // so brand colors like vivid yellow/lime get dark text.
+  if (lum !== null && lum > 0.6) return "222 47% 11%";
+  return "0 0% 100%";
+}
+
 /**
- * Returns inline style props to override the wallet brand color.
- * Spread onto the wallet root element:
+ * Returns inline style props that activate the Agency Theme.
+ * Spread onto the public page root element:
  *
  *   <div style={getWalletBrandStyle(profile.agency_primary_color)}>...</div>
  *
@@ -107,8 +137,16 @@ export function getWalletBrandStyle(
   const brand = hexToHslTriplet(normalized);
   const soft = hexToSoftHslTriplet(normalized);
   if (!brand || !soft) return {};
+  const fg = readableForegroundHsl(normalized);
   return {
     ["--wallet-brand" as any]: brand,
     ["--wallet-brand-soft" as any]: soft,
+    // Drive shadcn tokens so every Button / Input focus / Calendar / etc.
+    // inside the wallet auto-themes with the agency color.
+    ["--primary" as any]: brand,
+    ["--primary-foreground" as any]: fg,
+    ["--ring" as any]: brand,
+    ["--sidebar-primary" as any]: brand,
+    ["--sidebar-primary-foreground" as any]: fg,
   } as React.CSSProperties;
 }
