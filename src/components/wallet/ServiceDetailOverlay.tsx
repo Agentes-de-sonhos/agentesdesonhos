@@ -93,7 +93,6 @@ export function ServiceDetailOverlay({
 
   const Header = (
     <div className="flex items-center gap-3">
-      {FontScaler}
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/15 shrink-0">
         <Icon className="h-[18px] w-[18px] text-primary" />
       </div>
@@ -105,6 +104,8 @@ export function ServiceDetailOverlay({
           {label}
         </span>
       </div>
+      <div className="ml-auto" />
+      {FontScaler}
     </div>
   );
 
