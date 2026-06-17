@@ -143,15 +143,12 @@ function CruiseFactGrid({ data }: { data: any }) {
   const facts: { icon: any; label: string; value: string; sub?: string; full?: boolean }[] = [];
   if (data.cruise_company) facts.push({ icon: Ship, label: 'Companhia', value: data.cruise_company });
   if (data.route) facts.push({ icon: Route, label: 'Roteiro', value: data.route, sub: data.reservation_status_label });
-  if (data.embarkation_port) facts.push({ icon: Anchor, label: 'Embarque', value: data.embarkation_port, sub: data.embarkation_port_status });
-  if (data.disembarkation_port) facts.push({ icon: MapPin, label: 'Desembarque', value: data.disembarkation_port, sub: data.disembarkation_port_status });
+  if (data.embarkation_port) facts.push({ icon: Anchor, label: 'Embarque', value: data.embarkation_port, sub: data.embarkation_port_status, full: true });
+  if (data.disembarkation_port) facts.push({ icon: MapPin, label: 'Desembarque', value: data.disembarkation_port, sub: data.disembarkation_port_status, full: true });
   if (data.duration_label || data.nights) facts.push({ icon: Clock, label: 'Duração', value: data.duration_label || `${data.nights} noites` });
   if (data.booking_number) facts.push({ icon: Ticket, label: 'Reserva', value: data.booking_number });
-  else facts.push({ icon: Ticket, label: 'Reserva', value: 'A confirmar' });
   if (cabin) facts.push({ icon: BedDouble, label: 'Cabine', value: cabin });
-  else facts.push({ icon: BedDouble, label: 'Cabine', value: 'A confirmar' });
   if (data.deck) facts.push({ icon: Layers, label: 'Deck', value: data.deck });
-  else facts.push({ icon: Layers, label: 'Deck', value: 'A confirmar' });
   if (occupancyText) facts.push({ icon: Users, label: 'Ocupação', value: occupancyText });
   if (mealLabel) facts.push({ icon: UtensilsCrossed, label: 'Alimentação', value: mealLabel });
   if (passengers) facts.push({ icon: Users, label: 'Passageiros', value: passengers, full: true });
@@ -160,7 +157,7 @@ function CruiseFactGrid({ data }: { data: any }) {
 
   return (
     <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm divide-y divide-border/50 overflow-hidden">
-      <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-border/50">
+      <div className="grid grid-cols-2 sm:grid-cols-3">
         {facts.map((f, i) => {
           const Icon = f.icon;
           const isMuted = /^a confirmar$/i.test(f.value);
@@ -168,17 +165,23 @@ function CruiseFactGrid({ data }: { data: any }) {
             <div
               key={i}
               className={cn(
-                'flex items-start gap-3 p-3.5 sm:p-4 min-w-0',
-                f.full && 'col-span-2 sm:col-span-3 border-t border-border/50'
+                'flex items-start gap-3 p-4 min-w-0 border-b border-border/50',
+                // alternating right border for 2-col mobile / 3-col desktop
+                'border-r border-border/50 last:border-b-0',
+                f.full && 'col-span-2 sm:col-span-3'
               )}
             >
-              <Icon className="h-[18px] w-[18px] text-primary shrink-0 mt-0.5" />
+              <Icon className="h-[16px] w-[16px] text-primary/80 shrink-0 mt-[3px]" />
               <div className="min-w-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
-                <p className={cn('text-[14px] font-semibold leading-snug truncate', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
+                <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
+                <p className={cn(
+                  'text-[14.5px] font-semibold leading-snug mt-1 break-words',
+                  !f.full && 'line-clamp-2',
+                  isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground'
+                )}>
                   {f.value}
                 </p>
-                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 truncate">{f.sub}</p>}
+                {f.sub && <p className="text-[12px] text-muted-foreground/80 mt-1 leading-snug">{f.sub}</p>}
               </div>
             </div>
           );
