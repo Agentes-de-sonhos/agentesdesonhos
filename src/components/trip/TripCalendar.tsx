@@ -231,7 +231,7 @@ export function TripCalendar({
       </div>
 
       {/* Days grid */}
-      <div className="grid grid-cols-7 gap-1 px-2 pb-3">
+      <div className={cn("grid grid-cols-7", compact ? "gap-0.5 px-1.5 pb-2" : "gap-1 px-2 pb-3")}>
         {days.map((day, i) => {
           const dateStr = format(day, "yyyy-MM-dd");
           const inMonth = isSameMonth(day, cursor);
