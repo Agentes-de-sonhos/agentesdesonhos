@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft, ListChecks } from "lucide-react";
+import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft, ListChecks, Wallet } from "lucide-react";
 import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsConverterDialog";
 import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
+import { TripBudgetDialog } from "@/components/wallet/TripBudgetDialog";
 
 // Simple destination -> currency inference (best-effort)
 const COUNTRY_CURRENCY: Record<string, { code: string; symbol: string; name: string }> = {
