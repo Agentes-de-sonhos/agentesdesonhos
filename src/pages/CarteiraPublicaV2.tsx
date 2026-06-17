@@ -231,44 +231,55 @@ function PasswordGate({
             <button
               type="button"
               onClick={() => setHelpOpen((v) => !v)}
-              className="w-full bg-gradient-to-r from-slate-300 via-slate-100 to-white px-6 py-3 flex items-center justify-center gap-2 hover:from-slate-400/80 hover:via-slate-200 hover:to-white transition-colors"
+              className="w-full px-5 py-3 flex items-center justify-between"
               aria-expanded={helpOpen}
             >
-              <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center leading-tight">
-                <p>Precisa de ajuda?</p>
-                <p>Fale com o seu consultor de viagens</p>
-              </div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Precisa de ajuda?
+              </span>
               {helpOpen ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                <ChevronUp className="h-4 w-4 text-gray-400" />
               ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 text-gray-400" />
               )}
             </button>
             {helpOpen && (
-            <div className="p-6 border-t border-border/40">
-              <div className="flex flex-col items-center text-center space-y-4">
-                {branding.avatar_url ? (
-                  <img src={branding.avatar_url} alt={branding.name || ""} className="h-20 w-20 rounded-full object-cover border-4 border-primary/10 shadow-md ring-2 ring-white" />
-                ) : (
-                  <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-md ring-2 ring-white">
-                    {branding.name?.charAt(0).toUpperCase() || '?'}
+              <div className="px-5 pb-5">
+                <div className="flex items-center gap-4">
+                  {branding.avatar_url ? (
+                    <img
+                      src={branding.avatar_url}
+                      alt={branding.name || ""}
+                      className="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full object-cover border border-gray-200 shadow-sm"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-sm border border-gray-200">
+                      {branding.name?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {branding.name && (
+                      <p className="text-base font-bold text-gray-900 truncate">{branding.name}</p>
+                    )}
+                    {branding.agency_name && (
+                      <BrandText as="p" className="text-sm text-gray-500 font-medium truncate">
+                        {branding.agency_name}
+                      </BrandText>
+                    )}
                   </div>
-                )}
-                <div className="space-y-0.5">
-                  {branding.name && <p className="text-base font-bold text-foreground">{branding.name}</p>}
-                  {branding.agency_name && (
-                    <BrandText as="p" className="text-sm text-muted-foreground font-medium">{branding.agency_name}</BrandText>
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-sm transition-colors"
+                    >
+                      <WhatsAppIcon className="h-4 w-4" />
+                      WhatsApp
+                    </a>
                   )}
                 </div>
-                {whatsappUrl && (
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-7 py-3 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                    <WhatsAppIcon className="h-5 w-5" />
-                    Falar no WhatsApp
-                  </a>
-                )}
               </div>
-            </div>
             )}
           </div>
         )}
