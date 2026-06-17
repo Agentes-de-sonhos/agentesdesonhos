@@ -103,6 +103,162 @@ function TripCoverHero({
   );
 }
 
+// ===== Cruise visual helpers (premium UI inspired by reference design) =====
+
+function CruiseFactGrid({ data }: { data: any }) {
+  const mealLabel = (() => {
+    if (!data.meal_plan) return null;
+    if (data.meal_plan === 'pensao_completa') return 'Pensão completa';
+    if (data.meal_plan === 'all_inclusive') return 'All inclusive';
+    if (data.meal_plan === 'meia_pensao') return 'Meia pensão';
+    return String(data.meal_plan);
+  })();
+  const cabin = data.cabin_type
+    ? `${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}`
+    : null;
+  const passengers = Array.isArray(data.passengers) && data.passengers.length > 0
+    ? data.passengers.map((p: any) => p.name).filter(Boolean).join(', ')
+    : null;
+  const occupancyText = data.occupancy
+    ? String(data.occupancy)
+    : (Array.isArray(data.passengers) && data.passengers.length > 0
+        ? `${data.passengers.length} passageiros`
+        : null);
+
+  const facts: { icon: any; label: string; value: string; sub?: string; full?: boolean }[] = [];
+  if (data.cruise_company) facts.push({ icon: Ship, label: 'Companhia', value: data.cruise_company });
+  if (data.route) facts.push({ icon: Route, label: 'Roteiro', value: data.route, sub: data.reservation_status_label });
+  if (data.embarkation_port) facts.push({ icon: Anchor, label: 'Embarque', value: data.embarkation_port, sub: data.embarkation_port_status });
+  if (data.disembarkation_port) facts.push({ icon: MapPin, label: 'Desembarque', value: data.disembarkation_port, sub: data.disembarkation_port_status });
+  if (data.duration_label || data.nights) facts.push({ icon: Clock, label: 'Duração', value: data.duration_label || `${data.nights} noites` });
+  if (data.booking_number) facts.push({ icon: Ticket, label: 'Reserva', value: data.booking_number });
+  else facts.push({ icon: Ticket, label: 'Reserva', value: 'A confirmar' });
+  if (cabin) facts.push({ icon: BedDouble, label: 'Cabine', value: cabin });
+  else facts.push({ icon: BedDouble, label: 'Cabine', value: 'A confirmar' });
+  if (data.deck) facts.push({ icon: Layers, label: 'Deck', value: data.deck });
+  else facts.push({ icon: Layers, label: 'Deck', value: 'A confirmar' });
+  if (occupancyText) facts.push({ icon: Users, label: 'Ocupação', value: occupancyText });
+  if (mealLabel) facts.push({ icon: UtensilsCrossed, label: 'Alimentação', value: mealLabel });
+  if (passengers) facts.push({ icon: Users, label: 'Passageiros', value: passengers, full: true });
+
+  if (facts.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm divide-y divide-border/50 overflow-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-border/50">
+        {facts.map((f, i) => {
+          const Icon = f.icon;
+          const isMuted = /^a confirmar$/i.test(f.value);
+          return (
+            <div
+              key={i}
+              className={cn(
+                'flex items-start gap-3 p-3.5 sm:p-4 min-w-0',
+                f.full && 'col-span-2 sm:col-span-3 border-t border-border/50'
+              )}
+            >
+              <Icon className="h-[18px] w-[18px] text-primary shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
+                <p className={cn('text-[14px] font-semibold leading-snug truncate', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
+                  {f.value}
+                </p>
+                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 truncate">{f.sub}</p>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CruiseDayChip({ dateStr }: { dateStr?: string }) {
+  if (!dateStr) {
+    return (
+      <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-muted text-muted-foreground shrink-0">
+        <span className="text-[10px] font-semibold uppercase tracking-wider">—</span>
+      </div>
+    );
+  }
+  // Try DD/MM or DD/MM/YYYY or YYYY-MM-DD
+  let day = ''; let mon = '';
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+  const brMatch = /^(\d{1,2})\/(\d{1,2})/.exec(dateStr);
+  const monthShort = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  if (isoMatch) {
+    day = isoMatch[3];
+    mon = monthShort[parseInt(isoMatch[2], 10) - 1] || '';
+  } else if (brMatch) {
+    day = brMatch[1].padStart(2, '0');
+    mon = monthShort[parseInt(brMatch[2], 10) - 1] || '';
+  } else {
+    day = dateStr.slice(0, 2);
+  }
+  return (
+    <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-primary/8 ring-1 ring-primary/20 text-primary shrink-0">
+      <span className="text-[18px] font-bold leading-none">{day}</span>
+      <span className="text-[10px] font-semibold tracking-wider mt-0.5">{mon}</span>
+    </div>
+  );
+}
+
+function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
+  return (
+    <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-4 sm:p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <CalendarDays className="h-4 w-4 text-primary" />
+        <p className="text-[13px] font-semibold tracking-tight text-foreground">Roteiro</p>
+      </div>
+      <ol className="space-y-4">
+        {stops.map((stop: any, i: number) => {
+          const isNav = stop.stop_type === 'navegacao';
+          const isLast = i === stops.length - 1;
+          const role = stop.role || (i === 0 ? 'Embarque' : isLast ? 'Desembarque' : isNav ? 'Alto-mar' : 'Porto');
+          const roleTone =
+            role === 'Embarque' ? 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300'
+            : role === 'Desembarque' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+            : role === 'Alto-mar' ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
+            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
+
+          return (
+            <li key={i} className="flex gap-4">
+              <CruiseDayChip dateStr={stop.date} />
+              <div className="flex-1 min-w-0 relative">
+                {!isLast && <span className="absolute left-[-31px] top-14 bottom-[-16px] w-px border-l border-dashed border-border" />}
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-semibold text-foreground leading-tight">{stop.port || 'A confirmar'}</p>
+                    {stop.subtitle && (
+                      <p className="text-[12.5px] text-primary/80 font-medium mt-0.5">{stop.subtitle}</p>
+                    )}
+                    {stop.description && (
+                      <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">{stop.description}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold', roleTone)}>
+                      {role}
+                    </span>
+                    {(stop.arrival_time || stop.departure_time) ? (
+                      <div className="text-[11.5px] text-muted-foreground text-right">
+                        {stop.arrival_time && <div>Chegada <span className="text-foreground font-medium">{stop.arrival_time}</span></div>}
+                        {stop.departure_time && <div>Saída <span className="text-foreground font-medium">{stop.departure_time}</span></div>}
+                      </div>
+                    ) : isNav ? null : (
+                      <span className="text-[11px] text-muted-foreground/80 italic">A confirmar</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 function TripCalendarWithWeather(props: {
   destination: string;
   startDate: Date;
