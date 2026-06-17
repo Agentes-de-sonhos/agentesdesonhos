@@ -253,16 +253,22 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   );
 }
 
-export function TripConverters({ destination, tripId, services }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }> }) {
+export function TripConverters({ destination, tripId, services, international = true }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; international?: boolean }) {
   const [openCur, setOpenCur] = useState(false);
   const [openMeasure, setOpenMeasure] = useState(false);
   const [openTip, setOpenTip] = useState(false);
   const [openChecklist, setOpenChecklist] = useState(false);
 
+  const buttons: Array<"cur" | "measure" | "tip" | "checklist"> = [];
+  if (international) buttons.push("cur", "measure", "tip");
+  if (tripId) buttons.push("checklist");
+  if (buttons.length === 0) return null;
+  const colsClass = buttons.length >= 4 ? "grid-cols-2 sm:grid-cols-4" : buttons.length === 3 ? "grid-cols-3" : buttons.length === 2 ? "grid-cols-2" : "grid-cols-1";
+
   return (
     <>
-      <div className={"grid gap-2 " + (tripId ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
-        <Button
+      <div className={"grid gap-2 " + colsClass}>
+        {buttons.includes("cur") && <Button
           type="button"
           variant="outline"
           size="sm"
@@ -271,8 +277,8 @@ export function TripConverters({ destination, tripId, services }: { destination:
         >
           <Coins className="h-4 w-4 text-primary" />
           <span className="text-[11px] font-medium leading-tight text-center">Moeda</span>
-        </Button>
-        <Button
+        </Button>}
+        {buttons.includes("measure") && <Button
           type="button"
           variant="outline"
           size="sm"
@@ -281,8 +287,8 @@ export function TripConverters({ destination, tripId, services }: { destination:
         >
           <Ruler className="h-4 w-4 text-primary" />
           <span className="text-[11px] font-medium leading-tight text-center">Medidas</span>
-        </Button>
-        <Button
+        </Button>}
+        {buttons.includes("tip") && <Button
           type="button"
           variant="outline"
           size="sm"
@@ -291,8 +297,8 @@ export function TripConverters({ destination, tripId, services }: { destination:
         >
           <Receipt className="h-4 w-4 text-primary" />
           <span className="text-[11px] font-medium leading-tight text-center">Gorjetas</span>
-        </Button>
-        {tripId && (
+        </Button>}
+        {buttons.includes("checklist") && (
           <Button
             type="button"
             variant="outline"
@@ -305,9 +311,9 @@ export function TripConverters({ destination, tripId, services }: { destination:
           </Button>
         )}
       </div>
-      <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} />
-      <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />
-      <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />
+      {international && <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} />}
+      {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />}
+      {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />}
       {tripId && (
         <TripChecklistDialog open={openChecklist} onOpenChange={setOpenChecklist} tripId={tripId} services={services || []} />
       )}
