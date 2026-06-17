@@ -658,16 +658,33 @@ function PublicServiceCard({ service }: { service: TripService }) {
 
         {/* Cruise itinerary */}
         {isCruise && data.itinerary?.length > 0 && (
-          <div className="mt-3 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🗺 Roteiro</p>
-            {data.itinerary.map((stop: any, i: number) => (
-              <div key={i} className="text-xs text-muted-foreground pl-2 border-l-2 border-primary/20 py-0.5">
-                <span className="font-medium">{stop.date ? `${stop.date} – ` : ''}{stop.port}</span>
-                {stop.stop_type === 'navegacao' ? ' (Navegação)' : ''}
-                {stop.arrival_time && ` ${stop.arrival_time}`}
-                {stop.departure_time && ` – ${stop.departure_time}`}
-              </div>
-            ))}
+          <div className="mt-4 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-3">Roteiro</p>
+            <ol className="relative space-y-3 pl-4 before:absolute before:left-[5px] before:top-1.5 before:bottom-1.5 before:w-px before:bg-border">
+              {data.itinerary.map((stop: any, i: number) => (
+                <li key={i} className="relative">
+                  <span className="absolute -left-4 top-1.5 h-2.5 w-2.5 rounded-full bg-background ring-2 ring-primary/60" />
+                  {stop.date && (
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">{stop.date}</p>
+                  )}
+                  <p className="text-[14px] font-medium text-foreground leading-snug">
+                    {stop.port}
+                    {stop.stop_type === 'navegacao' && (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        Navegação
+                      </span>
+                    )}
+                  </p>
+                  {(stop.arrival_time || stop.departure_time) && (
+                    <p className="text-[12px] text-muted-foreground mt-0.5">
+                      {stop.arrival_time && <>Chegada {stop.arrival_time}</>}
+                      {stop.arrival_time && stop.departure_time && <span className="mx-1.5 text-muted-foreground/50">•</span>}
+                      {stop.departure_time && <>Saída {stop.departure_time}</>}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ol>
           </div>
         )}
 
@@ -709,12 +726,23 @@ function PublicServiceCard({ service }: { service: TripService }) {
 
         {/* Cruise ship info */}
         {isCruise && (data.onboard_currency || data.voltage || data.ship_website) && (
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
-            {data.onboard_currency && <span>💰 {data.onboard_currency}</span>}
-            {data.voltage && <span>🔌 {data.voltage}</span>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {data.onboard_currency && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[12px] text-foreground">
+                <span className="text-muted-foreground">Moeda</span>
+                <span className="font-medium">{data.onboard_currency}</span>
+              </span>
+            )}
+            {data.voltage && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[12px] text-foreground">
+                <span className="text-muted-foreground">Voltagem</span>
+                <span className="font-medium">{data.voltage}</span>
+              </span>
+            )}
             {data.ship_website && (
-              <a href={data.ship_website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                🚢 Site do navio
+              <a href={data.ship_website} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[12px] font-medium text-primary hover:bg-primary/10 transition-colors">
+                Site do navio →
               </a>
             )}
           </div>
