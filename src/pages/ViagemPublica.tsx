@@ -60,7 +60,7 @@ function TripCoverHero({
   const { data } = useActivityPhoto({ query: destination, destination });
   const photo = data?.photo_url || null;
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl shadow-md ring-1 ring-black/5 bg-muted aspect-[16/11] sm:aspect-[21/9]">
+    <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9] -mx-4 sm:mx-0">
       {photo ? (
         <img
           src={photo}
@@ -71,26 +71,24 @@ function TripCoverHero({
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--wallet-brand)/0.25)] via-[hsl(var(--wallet-brand)/0.15)] to-[hsl(var(--wallet-brand)/0.35)]" />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent/10" />
       <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7 text-white">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-sm leading-tight">
+        <h1 className="text-[1.75rem] sm:text-4xl font-bold tracking-tight drop-shadow-md leading-tight">
           {title}
         </h1>
-        <div className="mt-2 flex flex-nowrap items-center gap-x-3 sm:gap-x-5 gap-y-1 text-[13px] sm:text-sm font-medium whitespace-nowrap overflow-x-auto no-scrollbar">
+        <div className="mt-2.5 flex flex-nowrap items-center gap-x-4 sm:gap-x-5 gap-y-1 text-[13px] sm:text-sm font-medium whitespace-nowrap overflow-x-auto no-scrollbar">
           <span className="inline-flex items-center gap-1.5">
-            <MapPin className="h-4 w-4 shrink-0" />
+            <MapPin className="h-4 w-4 shrink-0 opacity-90" />
             <span>{destination}</span>
           </span>
-          <span className="opacity-50">|</span>
           <span className="inline-flex items-center gap-1.5">
-            <Calendar className="h-4 w-4 shrink-0" />
+            <Calendar className="h-4 w-4 shrink-0 opacity-90" />
             <span>
               {format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}
             </span>
           </span>
-          <span className="opacity-50">|</span>
           <span className="inline-flex items-center gap-1.5">
-            <CalendarDays className="h-4 w-4 shrink-0" />
+            <CalendarDays className="h-4 w-4 shrink-0 opacity-90" />
             <span>{days} dias</span>
           </span>
         </div>
