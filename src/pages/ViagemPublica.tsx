@@ -105,14 +105,14 @@ function TripCoverHero({
 
 // ===== Cruise visual helpers (premium UI inspired by reference design) =====
 
-function BoardingFact({ icon: Icon, label, value, full }: { icon: any; label: string; value: string; full?: boolean }) {
+function BoardingFact({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   const isMuted = /^a confirmar$/i.test(value);
   return (
-    <div className={cn('flex items-start gap-2.5 min-w-0', full && 'col-span-2 sm:col-span-3')}>
-      <Icon className="h-[16px] w-[16px] text-amber-700/90 dark:text-amber-400 shrink-0 mt-[3px]" />
+    <div className="flex items-start gap-2.5 min-w-0">
+      <Icon className="h-[18px] w-[18px] text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
       <div className="min-w-0">
-        <p className="text-[12.5px] font-semibold text-foreground leading-tight">{label}</p>
-        <p className={cn('text-[13px] leading-snug mt-1 break-words', isMuted ? 'text-muted-foreground/80 italic' : 'text-muted-foreground')}>
+        <p className="text-[12px] font-semibold text-foreground leading-tight">{label}</p>
+        <p className={cn('text-[12.5px] leading-snug mt-0.5', isMuted ? 'text-muted-foreground/80 italic' : 'text-muted-foreground')}>
           {value}
         </p>
       </div>
@@ -143,12 +143,15 @@ function CruiseFactGrid({ data }: { data: any }) {
   const facts: { icon: any; label: string; value: string; sub?: string; full?: boolean }[] = [];
   if (data.cruise_company) facts.push({ icon: Ship, label: 'Companhia', value: data.cruise_company });
   if (data.route) facts.push({ icon: Route, label: 'Roteiro', value: data.route, sub: data.reservation_status_label });
-  if (data.embarkation_port) facts.push({ icon: Anchor, label: 'Embarque', value: data.embarkation_port, sub: data.embarkation_port_status, full: true });
-  if (data.disembarkation_port) facts.push({ icon: MapPin, label: 'Desembarque', value: data.disembarkation_port, sub: data.disembarkation_port_status, full: true });
+  if (data.embarkation_port) facts.push({ icon: Anchor, label: 'Embarque', value: data.embarkation_port, sub: data.embarkation_port_status });
+  if (data.disembarkation_port) facts.push({ icon: MapPin, label: 'Desembarque', value: data.disembarkation_port, sub: data.disembarkation_port_status });
   if (data.duration_label || data.nights) facts.push({ icon: Clock, label: 'Duração', value: data.duration_label || `${data.nights} noites` });
   if (data.booking_number) facts.push({ icon: Ticket, label: 'Reserva', value: data.booking_number });
+  else facts.push({ icon: Ticket, label: 'Reserva', value: 'A confirmar' });
   if (cabin) facts.push({ icon: BedDouble, label: 'Cabine', value: cabin });
+  else facts.push({ icon: BedDouble, label: 'Cabine', value: 'A confirmar' });
   if (data.deck) facts.push({ icon: Layers, label: 'Deck', value: data.deck });
+  else facts.push({ icon: Layers, label: 'Deck', value: 'A confirmar' });
   if (occupancyText) facts.push({ icon: Users, label: 'Ocupação', value: occupancyText });
   if (mealLabel) facts.push({ icon: UtensilsCrossed, label: 'Alimentação', value: mealLabel });
   if (passengers) facts.push({ icon: Users, label: 'Passageiros', value: passengers, full: true });
@@ -157,7 +160,7 @@ function CruiseFactGrid({ data }: { data: any }) {
 
   return (
     <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm divide-y divide-border/50 overflow-hidden">
-      <div className="grid grid-cols-2 sm:grid-cols-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-border/50">
         {facts.map((f, i) => {
           const Icon = f.icon;
           const isMuted = /^a confirmar$/i.test(f.value);
@@ -165,23 +168,17 @@ function CruiseFactGrid({ data }: { data: any }) {
             <div
               key={i}
               className={cn(
-                'flex items-start gap-3 p-4 min-w-0 border-b border-border/50',
-                // alternating right border for 2-col mobile / 3-col desktop
-                'border-r border-border/50 last:border-b-0',
-                f.full && 'col-span-2 sm:col-span-3'
+                'flex items-start gap-3 p-3.5 sm:p-4 min-w-0',
+                f.full && 'col-span-2 sm:col-span-3 border-t border-border/50'
               )}
             >
-              <Icon className="h-[16px] w-[16px] text-primary/80 shrink-0 mt-[3px]" />
+              <Icon className="h-[18px] w-[18px] text-primary shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <p className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
-                <p className={cn(
-                  'text-[14.5px] font-semibold leading-snug mt-1 break-words',
-                  !f.full && 'line-clamp-2',
-                  isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground'
-                )}>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
+                <p className={cn('text-[14px] font-semibold leading-snug truncate', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
                   {f.value}
                 </p>
-                {f.sub && <p className="text-[12px] text-muted-foreground/80 mt-1 leading-snug">{f.sub}</p>}
+                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 truncate">{f.sub}</p>}
               </div>
             </div>
           );
@@ -246,14 +243,12 @@ function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
                 {!isLast && <span className="absolute left-[-31px] top-14 bottom-[-16px] w-px border-l border-dashed border-border" />}
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="min-w-0">
-                    <p className="text-[15.5px] font-semibold text-foreground leading-tight break-words">
-                      {stop.port && !/^a\s*confirmar$/i.test(stop.port) ? stop.port : (isNav ? 'Dia no mar' : 'Porto a confirmar')}
-                    </p>
+                    <p className="text-[15px] font-semibold text-foreground leading-tight">{stop.port || 'A confirmar'}</p>
                     {stop.subtitle && (
-                      <p className="text-[13px] text-primary/80 font-medium mt-1 leading-snug">{stop.subtitle}</p>
+                      <p className="text-[12.5px] text-primary/80 font-medium mt-0.5">{stop.subtitle}</p>
                     )}
                     {stop.description && (
-                      <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">{stop.description}</p>
+                      <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">{stop.description}</p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -261,12 +256,12 @@ function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
                       {role}
                     </span>
                     {(stop.arrival_time || stop.departure_time) ? (
-                      <div className="text-[12px] text-muted-foreground text-right leading-snug">
+                      <div className="text-[11.5px] text-muted-foreground text-right">
                         {stop.arrival_time && <div>Chegada <span className="text-foreground font-medium">{stop.arrival_time}</span></div>}
                         {stop.departure_time && <div>Saída <span className="text-foreground font-medium">{stop.departure_time}</span></div>}
                       </div>
                     ) : isNav ? null : (
-                      <span className="text-[11.5px] text-muted-foreground/80 italic">Horários a confirmar</span>
+                      <span className="text-[11px] text-muted-foreground/80 italic">A confirmar</span>
                     )}
                   </div>
                 </div>
@@ -524,17 +519,7 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       if (data.occupancy) cruiseDetails.push(`Ocupação: ${data.occupancy}`);
       if (data.meal_plan) cruiseDetails.push(`Alimentação: ${data.meal_plan === 'pensao_completa' ? 'Pensão Completa' : data.meal_plan === 'all_inclusive' ? 'All Inclusive' : data.meal_plan === 'meia_pensao' ? 'Meia Pensão' : data.meal_plan}`);
       if (data.passengers?.length > 0) cruiseDetails.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
-      const isPlaceholder = (v?: string) => !v || /^a\s*confirmar$/i.test(String(v).trim());
-      const fallbackTitle = (() => {
-        const company = !isPlaceholder(data.cruise_company) ? data.cruise_company : null;
-        const route = !isPlaceholder(data.route) ? data.route : null;
-        const nightsLabel = nights ? `${nights} noites` : null;
-        const right = [route, nightsLabel].filter(Boolean).join(' • ');
-        if (company && right) return `${company} — ${right}`;
-        return company || route || nightsLabel || 'Cruzeiro';
-      })();
-      const title = !isPlaceholder(data.ship_name) ? data.ship_name : fallbackTitle;
-      return { title, details: cruiseDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
+      return { title: data.ship_name, details: cruiseDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
     }
     case "train": {
       const time = data.departure_time && data.arrival_time ? `${data.departure_time} → ${data.arrival_time}` : '';
@@ -876,88 +861,72 @@ function PublicServiceCard({ service }: { service: TripService }) {
         )}
 
         {/* Cruise boarding instructions */}
-        {isCruise && (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes || data.dress_code || data.baggage_policy) && (
-          <div className="mt-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 ring-1 ring-amber-200/60 dark:ring-amber-900/40 p-4 sm:p-5">
-            <div className="flex items-center gap-2 mb-3.5">
+        {isCruise && (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes) && (
+          <div className="mt-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 ring-1 ring-amber-200/70 dark:ring-amber-900/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
-              <p className="text-[14px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
+              <p className="text-[13px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4">
               <BoardingFact icon={Building2} label="Terminal" value={data.boarding_terminal || 'A confirmar'} />
-              <BoardingFact icon={Users} label="Chegada" value={data.recommended_arrival || 'A confirmar'} />
               <BoardingFact icon={FileText} label="Documentos" value={data.required_documents || 'Passaportes válidos, vistos e formulários de check-in.'} />
-              <BoardingFact icon={Briefcase} label="Bagagem" value={data.baggage_policy || 'Conforme a companhia.'} />
-              <BoardingFact icon={Shirt} label="Dress code" value={data.dress_code || 'Casual; verificar noites temáticas.'} />
-              {data.boarding_notes && <BoardingFact icon={FileText} label="Observações" value={data.boarding_notes} full />}
+              <BoardingFact icon={Shirt} label="Dress Code" value={data.dress_code || 'Trajes casuais; verificar noites temáticas.'} />
+              <BoardingFact icon={Users} label="Chegada" value={data.recommended_arrival || 'Chegar no horário indicado no voucher final.'} />
+              <BoardingFact icon={Briefcase} label="Bagagem" value={data.baggage_policy || 'A confirmar conforme a companhia.'} />
+              {data.boarding_notes && <BoardingFact icon={FileText} label="Observações" value={data.boarding_notes} />}
             </div>
           </div>
         )}
 
         {/* Cruise check-in button */}
-        {isCruise && (() => {
-          const url: string | undefined = data.checkin_url;
-          const hasUrl = !!url && !/^a\s*confirmar$/i.test(String(url).trim()) && /^https?:\/\//i.test(String(url).trim());
-          const deadline = data.checkin_deadline && !/^a\s*confirmar$/i.test(String(data.checkin_deadline)) ? data.checkin_deadline : null;
-          return (
-            <div className="mt-5">
-              {hasUrl ? (
-                <a href={url!} target="_blank" rel="noopener noreferrer" className="block">
-                  <Button className="w-full h-12 rounded-2xl text-[14px] font-semibold shadow-md bg-[hsl(222_47%_18%)] hover:bg-[hsl(222_47%_24%)] text-white">
-                    <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
-                  </Button>
-                </a>
-              ) : (
-                <Button
-                  disabled
-                  className="w-full h-12 rounded-2xl text-[14px] font-semibold bg-muted text-muted-foreground/80 cursor-not-allowed"
-                >
-                  <CalendarDays className="h-4 w-4 mr-2 opacity-70" /> Check-in ainda indisponível
-                </Button>
-              )}
-              <p className="text-[11.5px] text-muted-foreground mt-2 text-center">
-                Prazo: <span className={cn('font-medium', !deadline && 'italic text-muted-foreground/80')}>{deadline || 'A confirmar'}</span>
-              </p>
-            </div>
-          );
-        })()}
+        {isCruise && data.checkin_url && (
+          <div className="mt-5">
+            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer" className="block">
+              <Button className="w-full h-12 rounded-2xl text-[14px] font-semibold shadow-md bg-[hsl(222_47%_18%)] hover:bg-[hsl(222_47%_24%)] text-white">
+                <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
+              </Button>
+            </a>
+            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-2 text-center">Prazo: {data.checkin_deadline}</p>}
+          </div>
+        )}
 
         {/* Cruise maps */}
         {isCruise && (data.port_maps_url || data.onboard_currency || data.voltage || data.ship_website) && (
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {data.port_maps_url && (
               <a href={data.port_maps_url} target="_blank" rel="noopener noreferrer"
-                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px] hover:ring-primary/40 transition-all">
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
                 <div className="flex items-center justify-between">
                   <MapPin className="h-4 w-4 text-primary" />
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Rota até o porto</p>
-                <p className="text-[13.5px] font-semibold text-foreground mt-0.5">Ver no mapa</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Rota até o porto</p>
+                <p className="text-[13px] font-semibold text-foreground">Ver no mapa</p>
               </a>
             )}
             {data.onboard_currency && (
-              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px]">
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
                 <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Moeda a bordo</p>
-                <p className="text-[13.5px] font-semibold text-foreground mt-0.5">{data.onboard_currency}</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Moeda a bordo</p>
+                <p className="text-[13px] font-semibold text-foreground">{data.onboard_currency}</p>
               </div>
             )}
             {(data.voltage || isCruise) && (
-              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px]">
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
                 <Plug className="h-4 w-4 text-primary" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Voltagem</p>
-                <p className={cn('text-[13.5px] font-semibold mt-0.5', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || 'A confirmar'}</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Voltagem</p>
+                <p className={cn('text-[13px] font-semibold', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || 'A confirmar'}</p>
               </div>
             )}
             {data.ship_website && (
               <a href={data.ship_website} target="_blank" rel="noopener noreferrer"
-                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px] hover:ring-primary/40 transition-all">
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
                 <div className="flex items-center justify-between">
                   <Globe className="h-4 w-4 text-primary" />
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
-                <p className="text-[13.5px] font-semibold text-foreground mt-0.5">Abrir site oficial</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
+                <p className="text-[13px] font-semibold text-foreground truncate">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               </a>
             )}
           </div>
