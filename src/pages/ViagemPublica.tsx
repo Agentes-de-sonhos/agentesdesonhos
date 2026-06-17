@@ -2141,18 +2141,21 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                       <p className="text-sm font-medium">{act.title}</p>
                                       {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
                                       {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
-                                      {act.location && <p className="text-xs text-muted-foreground">📍 {act.location}</p>}
-                                      {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
-                                      {act.maps_url && (
-                                        <a
-                                          href={act.maps_url.startsWith("http") ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
-                                        >
-                                          🗺️ Ver no Google Maps
-                                        </a>
+                                      {act.location && (
+                                        act.maps_url ? (
+                                          <a
+                                            href={act.maps_url.startsWith("http") ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-xs text-[hsl(var(--wallet-brand))] underline hover:opacity-80 cursor-pointer mt-1"
+                                          >
+                                            <MapPin className="h-3 w-3" /> {act.location} <ExternalLink className="h-3 w-3" />
+                                          </a>
+                                        ) : (
+                                          <p className="text-xs text-muted-foreground">📍 {act.location}</p>
+                                        )
                                       )}
+                                      {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
                                       {Array.isArray(act.photo_urls) && act.photo_urls.length > 0 && (
                                         <div className="flex gap-1.5 flex-wrap mt-2">
                                           {act.photo_urls.map((p: string, pi: number) => {
