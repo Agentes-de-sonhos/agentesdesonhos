@@ -2305,11 +2305,15 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   {itineraryActivities.length > 0 && (
                     <NextActivityCard
                       activities={itineraryActivities as any}
-                      onOpenItinerary={() => {
+                      onOpenItinerary={(dayDate?: string) => {
                         setItineraryOpen(true);
+                        if (dayDate) {
+                          setOpenDay(dayDate);
+                        }
                         setTimeout(() => {
-                          itineraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }, 100);
+                          const target = dayDate ? dayRefs.current[dayDate] : itineraryRef.current;
+                          target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }, dayDate ? 420 : 100);
                       }}
                     />
                   )}

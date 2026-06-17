@@ -56,7 +56,7 @@ export function NextActivityCard({
   onOpenItinerary,
 }: {
   activities: ItineraryActivityLike[];
-  onOpenItinerary: () => void;
+  onOpenItinerary: (dayDate?: string) => void;
 }) {
   const [now, setNow] = useState<Date>(() => new Date());
 
@@ -168,7 +168,7 @@ export function NextActivityCard({
               type="button"
               size="sm"
               variant="outline"
-              onClick={onOpenItinerary}
+              onClick={() => onOpenItinerary(next.a.day_date)}
               className={cn(
                 "shrink-0 self-stretch sm:self-auto border-[hsl(var(--wallet-brand)/0.3)]",
                 "hover:bg-[hsl(var(--wallet-brand-soft))] hover:text-[hsl(var(--wallet-brand))]"
