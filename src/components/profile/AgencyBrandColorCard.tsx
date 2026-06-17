@@ -200,23 +200,66 @@ function LogoEyedropperDialog({
     const canvas = canvasRef.current;
     if (!canvas) return;
     setLoading(true);
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const maxW = 600;
-      const scale = Math.min(1, maxW / img.width);
-      canvas.width = Math.round(img.width * scale);
-      canvas.height = Math.round(img.height * scale);
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      setLoading(false);
+    let objectUrl: string | null = null;
+    let cancelled = false;
+
+    const drawImage = (src: string, withCrossOrigin: boolean) =>
+      new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        if (withCrossOrigin) img.crossOrigin = "anonymous";
+        img.onload = () => {
+          if (cancelled) return resolve();
+          const maxW = 600;
+          const scale = Math.min(1, maxW / img.width);
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return reject(new Error("no ctx"));
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve();
+        };
+        img.onerror = () => reject(new Error("img load failed"));
+        img.src = src;
+      });
+
+    (async () => {
+      // Strategy 1: fetch as blob (works whenever the host returns CORS headers
+      // for the request — which Supabase Storage does — and produces a tainted-free
+      // same-origin blob URL we can safely sample with getImageData).
+      try {
+        const res = await fetch(logoUrl, { mode: "cors", cache: "no-store" });
+        if (!res.ok) throw new Error(`http ${res.status}`);
+        const blob = await res.blob();
+        objectUrl = URL.createObjectURL(blob);
+        await drawImage(objectUrl, false);
+        if (!cancelled) setLoading(false);
+        return;
+      } catch {
+        // fall through
+      }
+      // Strategy 2: direct image load with crossOrigin=anonymous.
+      try {
+        await drawImage(logoUrl, true);
+        if (!cancelled) setLoading(false);
+        return;
+      } catch {
+        // fall through
+      }
+      // Strategy 3: last-resort, load without CORS. Image will render but
+      // getImageData will throw — we surface that as a friendly hover state.
+      try {
+        await drawImage(logoUrl, false);
+      } catch {
+        /* ignore */
+      }
+      if (!cancelled) setLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-    img.onerror = () => {
-      setLoading(false);
-    };
-    img.src = logoUrl + (logoUrl.includes("?") ? "&" : "?") + "eyedrop=1";
   }, [open, logoUrl]);
 
   const readColor = (e: React.MouseEvent<HTMLCanvasElement>): string | null => {
