@@ -61,6 +61,7 @@ export function ServiceDetailOverlay({
         <SheetContent
           side="bottom"
           className="max-h-[85vh] p-0 rounded-t-2xl flex flex-col"
+          style={style}
         >
           <SheetHeader className="px-4 py-3 border-b text-left shrink-0">
             <SheetTitle className="flex items-center gap-2 text-base">
