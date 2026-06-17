@@ -2483,12 +2483,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           );
         })()}
 
-        {/* ─── Meu Orçamento (controle pessoal de gastos durante a viagem) ─── */}
-        <MyBudgetCard
-          tripId={tripData.id}
-          destination={tripData.destination}
-          endDate={endDate}
-        />
 
         {/* ─── Agent Signature (mesmo padrão do Orçamento) ─── */}
         {agentProfile && (() => {
