@@ -39,6 +39,7 @@ import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
+import { getWalletBrandStyle } from "@/lib/agencyColor";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the
