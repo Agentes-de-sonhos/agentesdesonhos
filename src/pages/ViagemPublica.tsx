@@ -2174,7 +2174,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 })}
               </div>
               )}
-            </div>
+              </div>
+            </ServiceDetailOverlay>
           );
         })()}
 
