@@ -179,24 +179,30 @@ export function TripCalendar({
   const today = new Date();
 
   return (
-    <div className="rounded-2xl border border-primary/15 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden">
+    <div className={cn(
+      "border border-primary/15 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden",
+      compact ? "rounded-xl" : "rounded-2xl"
+    )}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10">
+      <div className={cn(
+        "flex items-center justify-between bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/10",
+        compact ? "px-3 py-2" : "px-4 py-3"
+      )}>
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full hover:bg-primary/10"
+          className={cn("rounded-full hover:bg-primary/10", compact ? "h-7 w-7" : "h-8 w-8")}
           onClick={() => setCursor((c) => subMonths(c, 1))}
           aria-label="Mês anterior"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
         </Button>
         <div className="flex flex-col items-center">
-          <span className="text-xs uppercase tracking-[0.2em] text-primary/70 font-semibold">
+          <span className={cn("uppercase tracking-[0.2em] text-primary/70 font-semibold", compact ? "text-[10px]" : "text-xs")}>
             Calendário da viagem
           </span>
-          <span className="text-sm font-bold text-foreground capitalize">
+          <span className={cn("font-bold text-foreground capitalize", compact ? "text-[13px]" : "text-sm")}>
             {format(cursor, "MMMM 'de' yyyy", { locale: ptBR })}
           </span>
         </div>
@@ -204,11 +210,11 @@ export function TripCalendar({
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full hover:bg-primary/10"
+          className={cn("rounded-full hover:bg-primary/10", compact ? "h-7 w-7" : "h-8 w-8")}
           onClick={() => setCursor((c) => addMonths(c, 1))}
           aria-label="Próximo mês"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
         </Button>
       </div>
 
