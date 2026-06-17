@@ -41,7 +41,7 @@ import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
 import { NextActivityCard } from "@/components/wallet/NextActivityCard";
-import { MyBudgetCard } from "@/components/wallet/MyBudgetCard";
+
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
