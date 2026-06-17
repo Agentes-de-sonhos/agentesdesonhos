@@ -2000,35 +2000,14 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           );
         })()}
 
-        {/* Services Section */}
-        {services.length > 0 && (
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Serviços da viagem</h2>
-            <div className="space-y-3">
-              {availableTabs.map((type) => (
-                <ServiceSection
-                  key={type}
-                  type={type}
-                  services={grouped[type]}
-                  isOpen={openSection === `service-${type}`}
-                  onToggle={() => toggleSection(`service-${type}`)}
-                  sectionRef={(el) => { sectionRefs.current[type] = el; }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {services.length === 0 && (
+        {/* Services & Roteiro são acessados via Navegação Rápida (overlays). */}
+        {services.length === 0 && itineraryActivities.length === 0 && (
           <Card className="shadow-sm">
             <CardContent className="py-8 text-center text-muted-foreground">
               Nenhum serviço adicionado ainda
             </CardContent>
           </Card>
         )}
-
-        {/* Day-by-Day Itinerary Section */}
-        {itineraryActivities.length > 0 && (() => {
           const PERIOD_ICONS: Record<string, typeof Sun> = { morning: Sun, afternoon: Sunset, evening: Moon };
           const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
           const grouped_days = itineraryActivities.reduce((acc: Record<string, any[]>, act: any) => {
