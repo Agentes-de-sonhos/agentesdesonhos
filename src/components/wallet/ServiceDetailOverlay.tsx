@@ -1,11 +1,11 @@
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SERVICE_LABELS } from "@/lib/tripServiceLabels";
 import type { TripService } from "@/types/trip";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, TrainFront, FileText,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, TrainFront, FileText, Type,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -55,8 +55,45 @@ export function ServiceDetailOverlay({
   const label =
     title ?? (service ? SERVICE_LABELS[service.service_type] ?? "Serviço" : "Serviço");
 
+  const [fontScale, setFontScale] = useState<"sm" | "md" | "lg">(() => {
+    if (typeof window === "undefined") return "md";
+    const saved = window.localStorage.getItem("wallet:service:fontScale");
+    return saved === "sm" || saved === "lg" ? saved : "md";
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem("wallet:service:fontScale", fontScale); } catch {}
+  }, [fontScale]);
+
+  const FontScaler = (
+    <div
+      className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/80 backdrop-blur px-1 py-1 shadow-sm shrink-0"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <Type className="h-3.5 w-3.5 text-muted-foreground mx-1" />
+      <button
+        type="button"
+        onClick={() => setFontScale("sm")}
+        aria-label="Diminuir fonte"
+        className={`h-6 w-6 rounded-full text-[11px] font-semibold transition ${fontScale === "sm" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+      >A-</button>
+      <button
+        type="button"
+        onClick={() => setFontScale("md")}
+        aria-label="Fonte padrão"
+        className={`h-6 w-6 rounded-full text-[12px] font-semibold transition ${fontScale === "md" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+      >A</button>
+      <button
+        type="button"
+        onClick={() => setFontScale("lg")}
+        aria-label="Aumentar fonte"
+        className={`h-6 w-6 rounded-full text-[13px] font-semibold transition ${fontScale === "lg" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+      >A+</button>
+    </div>
+  );
+
   const Header = (
     <div className="flex items-center gap-3">
+      {FontScaler}
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/15 shrink-0">
         <Icon className="h-[18px] w-[18px] text-primary" />
       </div>
@@ -70,6 +107,9 @@ export function ServiceDetailOverlay({
       </div>
     </div>
   );
+
+  const zoom = fontScale === "sm" ? 0.92 : fontScale === "lg" ? 1.18 : 1;
+  const contentZoomStyle = { zoom } as CSSProperties;
 
   if (isMobile) {
     return (
@@ -86,7 +126,7 @@ export function ServiceDetailOverlay({
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-4 py-5 bg-gradient-to-b from-muted/20 to-background">
-            {children}
+            <div style={contentZoomStyle}>{children}</div>
           </div>
         </SheetContent>
       </Sheet>
@@ -102,7 +142,7 @@ export function ServiceDetailOverlay({
           </DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 py-6 bg-gradient-to-b from-muted/20 to-background">
-          {children}
+          <div style={contentZoomStyle}>{children}</div>
         </div>
       </DialogContent>
     </Dialog>
