@@ -876,72 +876,88 @@ function PublicServiceCard({ service }: { service: TripService }) {
         )}
 
         {/* Cruise boarding instructions */}
-        {isCruise && (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes) && (
-          <div className="mt-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 ring-1 ring-amber-200/70 dark:ring-amber-900/40 p-4 sm:p-5">
-            <div className="flex items-center gap-2 mb-4">
+        {isCruise && (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes || data.dress_code || data.baggage_policy) && (
+          <div className="mt-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 ring-1 ring-amber-200/60 dark:ring-amber-900/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-3.5">
               <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
-              <p className="text-[13px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
+              <p className="text-[14px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4">
               <BoardingFact icon={Building2} label="Terminal" value={data.boarding_terminal || 'A confirmar'} />
+              <BoardingFact icon={Users} label="Chegada" value={data.recommended_arrival || 'A confirmar'} />
               <BoardingFact icon={FileText} label="Documentos" value={data.required_documents || 'Passaportes válidos, vistos e formulários de check-in.'} />
-              <BoardingFact icon={Shirt} label="Dress Code" value={data.dress_code || 'Trajes casuais; verificar noites temáticas.'} />
-              <BoardingFact icon={Users} label="Chegada" value={data.recommended_arrival || 'Chegar no horário indicado no voucher final.'} />
-              <BoardingFact icon={Briefcase} label="Bagagem" value={data.baggage_policy || 'A confirmar conforme a companhia.'} />
-              {data.boarding_notes && <BoardingFact icon={FileText} label="Observações" value={data.boarding_notes} />}
+              <BoardingFact icon={Briefcase} label="Bagagem" value={data.baggage_policy || 'Conforme a companhia.'} />
+              <BoardingFact icon={Shirt} label="Dress code" value={data.dress_code || 'Casual; verificar noites temáticas.'} />
+              {data.boarding_notes && <BoardingFact icon={FileText} label="Observações" value={data.boarding_notes} full />}
             </div>
           </div>
         )}
 
         {/* Cruise check-in button */}
-        {isCruise && data.checkin_url && (
-          <div className="mt-5">
-            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer" className="block">
-              <Button className="w-full h-12 rounded-2xl text-[14px] font-semibold shadow-md bg-[hsl(222_47%_18%)] hover:bg-[hsl(222_47%_24%)] text-white">
-                <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
-              </Button>
-            </a>
-            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-2 text-center">Prazo: {data.checkin_deadline}</p>}
-          </div>
-        )}
+        {isCruise && (() => {
+          const url: string | undefined = data.checkin_url;
+          const hasUrl = !!url && !/^a\s*confirmar$/i.test(String(url).trim()) && /^https?:\/\//i.test(String(url).trim());
+          const deadline = data.checkin_deadline && !/^a\s*confirmar$/i.test(String(data.checkin_deadline)) ? data.checkin_deadline : null;
+          return (
+            <div className="mt-5">
+              {hasUrl ? (
+                <a href={url!} target="_blank" rel="noopener noreferrer" className="block">
+                  <Button className="w-full h-12 rounded-2xl text-[14px] font-semibold shadow-md bg-[hsl(222_47%_18%)] hover:bg-[hsl(222_47%_24%)] text-white">
+                    <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  disabled
+                  className="w-full h-12 rounded-2xl text-[14px] font-semibold bg-muted text-muted-foreground/80 cursor-not-allowed"
+                >
+                  <CalendarDays className="h-4 w-4 mr-2 opacity-70" /> Check-in ainda indisponível
+                </Button>
+              )}
+              <p className="text-[11.5px] text-muted-foreground mt-2 text-center">
+                Prazo: <span className={cn('font-medium', !deadline && 'italic text-muted-foreground/80')}>{deadline || 'A confirmar'}</span>
+              </p>
+            </div>
+          );
+        })()}
 
         {/* Cruise maps */}
         {isCruise && (data.port_maps_url || data.onboard_currency || data.voltage || data.ship_website) && (
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {data.port_maps_url && (
               <a href={data.port_maps_url} target="_blank" rel="noopener noreferrer"
-                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px] hover:ring-primary/40 transition-all">
                 <div className="flex items-center justify-between">
                   <MapPin className="h-4 w-4 text-primary" />
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Rota até o porto</p>
-                <p className="text-[13px] font-semibold text-foreground">Ver no mapa</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Rota até o porto</p>
+                <p className="text-[13.5px] font-semibold text-foreground mt-0.5">Ver no mapa</p>
               </a>
             )}
             {data.onboard_currency && (
-              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px]">
                 <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Moeda a bordo</p>
-                <p className="text-[13px] font-semibold text-foreground">{data.onboard_currency}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Moeda a bordo</p>
+                <p className="text-[13.5px] font-semibold text-foreground mt-0.5">{data.onboard_currency}</p>
               </div>
             )}
             {(data.voltage || isCruise) && (
-              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px]">
                 <Plug className="h-4 w-4 text-primary" />
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Voltagem</p>
-                <p className={cn('text-[13px] font-semibold', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || 'A confirmar'}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Voltagem</p>
+                <p className={cn('text-[13.5px] font-semibold mt-0.5', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || 'A confirmar'}</p>
               </div>
             )}
             {data.ship_website && (
               <a href={data.ship_website} target="_blank" rel="noopener noreferrer"
-                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3.5 min-h-[88px] hover:ring-primary/40 transition-all">
                 <div className="flex items-center justify-between">
                   <Globe className="h-4 w-4 text-primary" />
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
-                <p className="text-[13px] font-semibold text-foreground truncate">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
+                <p className="text-[13.5px] font-semibold text-foreground mt-0.5">Abrir site oficial</p>
               </a>
             )}
           </div>
