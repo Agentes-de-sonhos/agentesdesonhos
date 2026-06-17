@@ -2050,7 +2050,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       <div
                         key={day.date}
                         ref={(el) => { dayRefs.current[day.date] = el; }}
-                        style={{ scrollMarginTop: '80px' }}
                       >
                         <CollapsibleDayCard
                           day={day}
