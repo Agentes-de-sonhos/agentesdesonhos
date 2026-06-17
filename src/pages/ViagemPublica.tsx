@@ -50,17 +50,19 @@ function TripCoverHero({
   startDate,
   endDate,
   days,
+  coverUrl,
 }: {
   title: string;
   destination: string;
   startDate: Date;
   endDate: Date;
   days: number;
+  coverUrl?: string | null;
 }) {
-  const { data } = useActivityPhoto({ query: destination, destination });
-  const photo = data?.photo_url || null;
+  const { data } = useActivityPhoto({ query: destination, destination, enabled: !coverUrl });
+  const photo = coverUrl || data?.photo_url || null;
   return (
-    <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9] -mx-4 sm:mx-0">
+    <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9]">
       {photo ? (
         <img
           src={photo}
@@ -1897,6 +1899,17 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       </header>
 
       <div className="container max-w-5xl mx-auto px-4 pt-0 pb-6 space-y-6">
+        {/* Full-width cover hero — escapes the container padding so the image touches the sides */}
+        <div className="-mx-4">
+          <TripCoverHero
+            title={(tripData as any).trip_title || tripData.destination || "Sua Viagem"}
+            destination={tripData.destination}
+            startDate={startDate}
+            endDate={endDate}
+            days={days}
+            coverUrl={(tripData as any).wallet_cover_url || null}
+          />
+        </div>
         {/* Trip Overview + Calendar (side-by-side on desktop) */}
         {(() => {
           const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
@@ -1969,13 +1982,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
               <div className="space-y-4 min-w-0">
-                <TripCoverHero
-                  title={(tripData as any).trip_title || tripData.destination || "Sua Viagem"}
-                  destination={tripData.destination}
-                  startDate={startDate}
-                  endDate={endDate}
-                  days={days}
-                />
                 {navGrid}
               </div>
               <div className="md:w-[320px] md:justify-self-end w-full space-y-4">
