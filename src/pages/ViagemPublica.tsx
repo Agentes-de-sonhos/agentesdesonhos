@@ -505,9 +505,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
   return (
     <Card
       id={`service-${service.id}`}
-      className="border-border/40 shadow-sm hover:shadow transition-shadow scroll-mt-28"
+      className="border-border/30 shadow-none bg-card/60 backdrop-blur-sm hover:border-border/60 transition-colors scroll-mt-28"
     >
-      <CardContent className="p-4">
+      <CardContent className="p-5 sm:p-6">
         {/* Service images (gallery) */}
         {(() => {
           const urls = (service.image_urls && service.image_urls.length > 0)
@@ -515,20 +515,40 @@ function PublicServiceCard({ service }: { service: TripService }) {
             : (service.image_url && /^https?:\/\//i.test(service.image_url) ? [service.image_url] : []);
           if (urls.length === 0) return null;
           return (
-            <div className="mb-3">
+            <div className="mb-4 -mx-1 overflow-hidden rounded-xl">
               <ServiceImageCarousel images={urls} alt={title} />
             </div>
           );
         })()}
-        <h4 className="font-semibold text-sm mb-1">{title}</h4>
-        {dates && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
-            <Calendar className="h-3 w-3" /> {dates}
-          </p>
+        <div className="mb-4">
+          <h4 className="font-semibold text-lg sm:text-xl leading-tight tracking-tight text-foreground">{title}</h4>
+          {dates && (
+            <p className="mt-1.5 text-[13px] text-muted-foreground flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" /> <span>{dates}</span>
+            </p>
+          )}
+        </div>
+        {details.length > 0 && (
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-1">
+            {details.map((d, i) => {
+              const idx = d.indexOf(':');
+              const hasLabel = idx > 0 && idx < 28;
+              if (!hasLabel) {
+                return (
+                  <p key={i} className="text-[13px] text-muted-foreground sm:col-span-2">{d}</p>
+                );
+              }
+              const label = d.slice(0, idx).trim();
+              const value = d.slice(idx + 1).trim();
+              return (
+                <div key={i} className="flex flex-col gap-0.5">
+                  <dt className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-[0.12em]">{label}</dt>
+                  <dd className="text-[13.5px] text-foreground font-medium leading-snug">{value}</dd>
+                </div>
+              );
+            })}
+          </dl>
         )}
-        {details.map((d, i) => (
-          <p key={i} className="text-sm text-muted-foreground">{d}</p>
-        ))}
 
         {/* Flight segments timeline */}
         {isFlight && data.segments?.length > 0 && (
