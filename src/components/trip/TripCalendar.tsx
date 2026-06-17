@@ -164,6 +164,7 @@ export function TripCalendar({
   weatherByDate,
   timezone,
   destinationLabel,
+  compact = false,
 }: TripCalendarProps) {
   const [cursor, setCursor] = useState<Date>(startOfMonth(startDate));
 
