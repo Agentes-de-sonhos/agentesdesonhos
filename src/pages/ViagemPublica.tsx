@@ -329,11 +329,18 @@ function TripLocalClockBar(props: {
   );
 }
 
-function TripConvertersWrapper(props: { destination: string; startDate: Date; endDate: Date; }) {
+function TripConvertersWrapper(props: { destination: string; startDate: Date; endDate: Date; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }> }) {
   const { timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   if (!timezone) return null;
-  if (!isInternationalDestination(props.destination, timezone)) return null;
-  return <TripConverters destination={props.destination} />;
+  const international = isInternationalDestination(props.destination, timezone);
+  return (
+    <TripConverters
+      destination={props.destination}
+      tripId={props.tripId}
+      services={props.services}
+      international={international}
+    />
+  );
 }
 
 const SERVICE_ICONS: Record<TripServiceType, any> = {
@@ -2286,6 +2293,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 destination={tripData.destination}
                 startDate={startDate}
                 endDate={endDate}
+                tripId={tripData.id}
+                services={services}
               />
             </div>
           );
