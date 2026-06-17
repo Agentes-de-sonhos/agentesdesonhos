@@ -10237,6 +10237,7 @@ export type Database = {
           trip_title: string | null
           updated_at: string
           user_id: string
+          wallet_cover_url: string | null
         }
         Insert: {
           access_password?: string | null
@@ -10261,6 +10262,7 @@ export type Database = {
           trip_title?: string | null
           updated_at?: string
           user_id: string
+          wallet_cover_url?: string | null
         }
         Update: {
           access_password?: string | null
@@ -10285,6 +10287,7 @@ export type Database = {
           trip_title?: string | null
           updated_at?: string
           user_id?: string
+          wallet_cover_url?: string | null
         }
         Relationships: [
           {
