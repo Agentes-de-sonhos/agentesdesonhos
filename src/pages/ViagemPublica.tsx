@@ -2207,7 +2207,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           };
           const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Navegação rápida</h2>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-px flex-1 bg-border/60" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Navegação rápida
+                </span>
+                <div className="h-px flex-1 bg-border/60" />
+              </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3">
                 {availableTabs.map((type) => {
                   const Icon = SERVICE_ICONS[type];
@@ -2310,13 +2316,22 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </div>
               </div>
               {(services.length > 0 || itineraryActivities.length > 0) && (
-                <div className="md:hidden flex items-center gap-3 my-1">
-                  <div className="h-px flex-1 bg-border/60" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Ferramentas de apoio ao passageiro
-                  </span>
-                  <div className="h-px flex-1 bg-border/60" />
-                </div>
+                <>
+                  <div className="md:hidden flex items-center gap-3 my-1">
+                    <div className="h-px flex-1 bg-border/60" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Ferramentas de apoio ao passageiro
+                    </span>
+                    <div className="h-px flex-1 bg-border/60" />
+                  </div>
+                  <div className="hidden md:flex items-center gap-3 my-1">
+                    <div className="h-px flex-1 bg-border/60" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Ferramentas de apoio ao passageiro
+                    </span>
+                    <div className="h-px flex-1 bg-border/60" />
+                  </div>
+                </>
               )}
               <TripConvertersWrapper
                 destination={tripData.destination}
