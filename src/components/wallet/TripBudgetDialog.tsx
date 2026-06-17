@@ -399,10 +399,7 @@ export function TripBudgetDialog({
               <button
                 key={v}
                 type="button"
-                onClick={() => {
-                  if (!confirm(`Descontar ${formatMoney(v, state.currency)} do seu orçamento?`)) return;
-                  addEntry(v, "other");
-                }}
+                onClick={() => addEntry(v, "other")}
                 className="rounded-lg border border-[hsl(var(--wallet-brand)/0.25)] bg-[hsl(var(--wallet-brand-soft))] hover:bg-[hsl(var(--wallet-brand)/0.18)] text-[hsl(var(--wallet-brand))] text-sm font-semibold py-2 transition-colors active:scale-95"
               >
                 −{v}
