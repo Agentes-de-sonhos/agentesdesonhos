@@ -339,6 +339,7 @@ function TripConvertersWrapper(props: { destination: string; startDate: Date; en
       tripId={props.tripId}
       services={props.services}
       international={international}
+      endDate={props.endDate}
     />
   );
 }
