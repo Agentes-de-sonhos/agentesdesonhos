@@ -519,7 +519,17 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       if (data.occupancy) cruiseDetails.push(`Ocupação: ${data.occupancy}`);
       if (data.meal_plan) cruiseDetails.push(`Alimentação: ${data.meal_plan === 'pensao_completa' ? 'Pensão Completa' : data.meal_plan === 'all_inclusive' ? 'All Inclusive' : data.meal_plan === 'meia_pensao' ? 'Meia Pensão' : data.meal_plan}`);
       if (data.passengers?.length > 0) cruiseDetails.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
-      return { title: data.ship_name, details: cruiseDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
+      const isPlaceholder = (v?: string) => !v || /^a\s*confirmar$/i.test(String(v).trim());
+      const fallbackTitle = (() => {
+        const company = !isPlaceholder(data.cruise_company) ? data.cruise_company : null;
+        const route = !isPlaceholder(data.route) ? data.route : null;
+        const nightsLabel = nights ? `${nights} noites` : null;
+        const right = [route, nightsLabel].filter(Boolean).join(' • ');
+        if (company && right) return `${company} — ${right}`;
+        return company || route || nightsLabel || 'Cruzeiro';
+      })();
+      const title = !isPlaceholder(data.ship_name) ? data.ship_name : fallbackTitle;
+      return { title, details: cruiseDetails, dates: `${formatDate(data.start_date)} - ${formatDate(data.end_date)}` };
     }
     case "train": {
       const time = data.departure_time && data.arrival_time ? `${data.departure_time} → ${data.arrival_time}` : '';
