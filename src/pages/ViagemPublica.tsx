@@ -317,6 +317,7 @@ function TripLocalClockBar(props: {
   destination: string;
   startDate: Date;
   endDate: Date;
+  compact?: boolean;
 }) {
   const { weatherByDate, timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   if (!timezone) return null;
@@ -327,6 +328,7 @@ function TripLocalClockBar(props: {
       destinationLabel={props.destination}
       weatherByDate={weatherByDate}
       standalone
+      compact={props.compact}
     />
   );
 }
