@@ -2265,35 +2265,43 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </span>
                 <div className="h-px flex-1 bg-border/60" />
               </div>
-              <TripLocalClockBar
-                destination={tripData.destination}
-                startDate={startDate}
-                endDate={endDate}
-              />
-              <TripCalendarWithWeather
-                destination={tripData.destination}
-                startDate={startDate}
-                endDate={endDate}
-                itineraryDates={itineraryDates}
-                onDayClick={handleCalendarDayClick}
-              />
-              {services.length > 0 && (
-                <NextAppointmentCard
-                  services={services}
-                  onOpenService={handleOpenService}
-                />
-              )}
-              {itineraryActivities.length > 0 && (
-                <NextActivityCard
-                  activities={itineraryActivities as any}
-                  onOpenItinerary={() => {
-                    setItineraryOpen(true);
-                    setTimeout(() => {
-                      itineraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }, 100);
-                  }}
-                />
-              )}
+              <div className="flex flex-col gap-5 md:grid md:grid-cols-2">
+                <div className="flex flex-col gap-5">
+                  <TripLocalClockBar
+                    destination={tripData.destination}
+                    startDate={startDate}
+                    endDate={endDate}
+                    compact
+                  />
+                  <TripCalendarWithWeather
+                    destination={tripData.destination}
+                    startDate={startDate}
+                    endDate={endDate}
+                    itineraryDates={itineraryDates}
+                    onDayClick={handleCalendarDayClick}
+                    compact
+                  />
+                </div>
+                <div className="flex flex-col gap-5">
+                  {services.length > 0 && (
+                    <NextAppointmentCard
+                      services={services}
+                      onOpenService={handleOpenService}
+                    />
+                  )}
+                  {itineraryActivities.length > 0 && (
+                    <NextActivityCard
+                      activities={itineraryActivities as any}
+                      onOpenItinerary={() => {
+                        setItineraryOpen(true);
+                        setTimeout(() => {
+                          itineraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }, 100);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
               <TripConvertersWrapper
                 destination={tripData.destination}
                 startDate={startDate}
