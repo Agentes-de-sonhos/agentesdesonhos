@@ -2293,6 +2293,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 destination={tripData.destination}
                 startDate={startDate}
                 endDate={endDate}
+                tripId={tripData.id}
+                services={services}
               />
             </div>
           );
