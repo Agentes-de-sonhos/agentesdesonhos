@@ -41,7 +41,7 @@ import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
 import { NextActivityCard } from "@/components/wallet/NextActivityCard";
-import { MyBudgetCard } from "@/components/wallet/MyBudgetCard";
+
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
@@ -339,6 +339,7 @@ function TripConvertersWrapper(props: { destination: string; startDate: Date; en
       tripId={props.tripId}
       services={props.services}
       international={international}
+      endDate={props.endDate}
     />
   );
 }
@@ -2482,12 +2483,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           );
         })()}
 
-        {/* ─── Meu Orçamento (controle pessoal de gastos durante a viagem) ─── */}
-        <MyBudgetCard
-          tripId={tripData.id}
-          destination={tripData.destination}
-          endDate={endDate}
-        />
 
         {/* ─── Agent Signature (mesmo padrão do Orçamento) ─── */}
         {agentProfile && (() => {

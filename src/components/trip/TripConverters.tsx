@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft, ListChecks } from "lucide-react";
+import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft, ListChecks, Wallet } from "lucide-react";
 import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsConverterDialog";
 import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
+import { TripBudgetDialog } from "@/components/wallet/TripBudgetDialog";
 
 // Simple destination -> currency inference (best-effort)
 const COUNTRY_CURRENCY: Record<string, { code: string; symbol: string; name: string }> = {
@@ -253,17 +254,23 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   );
 }
 
-export function TripConverters({ destination, tripId, services, international = true }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; international?: boolean }) {
+export function TripConverters({ destination, tripId, services, international = true, endDate }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; international?: boolean; endDate?: Date | null }) {
   const [openCur, setOpenCur] = useState(false);
   const [openMeasure, setOpenMeasure] = useState(false);
   const [openTip, setOpenTip] = useState(false);
   const [openChecklist, setOpenChecklist] = useState(false);
+  const [openBudget, setOpenBudget] = useState(false);
 
-  const buttons: Array<"cur" | "measure" | "tip" | "checklist"> = [];
+  const buttons: Array<"cur" | "measure" | "tip" | "checklist" | "budget"> = [];
   if (international) buttons.push("cur", "measure", "tip");
-  if (tripId) buttons.push("checklist");
+  if (tripId) buttons.push("checklist", "budget");
   if (buttons.length === 0) return null;
-  const colsClass = buttons.length >= 4 ? "grid-cols-2 sm:grid-cols-4" : buttons.length === 3 ? "grid-cols-3" : buttons.length === 2 ? "grid-cols-2" : "grid-cols-1";
+  const colsClass =
+    buttons.length >= 5 ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" :
+    buttons.length >= 4 ? "grid-cols-2 sm:grid-cols-4" :
+    buttons.length === 3 ? "grid-cols-3" :
+    buttons.length === 2 ? "grid-cols-2" :
+    "grid-cols-1";
 
   return (
     <>
@@ -310,12 +317,27 @@ export function TripConverters({ destination, tripId, services, international = 
             <span className="text-[11px] font-medium leading-tight text-center">Checklist</span>
           </Button>
         )}
+        {buttons.includes("budget") && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-auto py-2.5 flex-col gap-1"
+            onClick={() => setOpenBudget(true)}
+          >
+            <Wallet className="h-4 w-4 text-primary" />
+            <span className="text-[11px] font-medium leading-tight text-center">Orçamento</span>
+          </Button>
+        )}
       </div>
       {international && <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} />}
       {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />}
       {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />}
       {tripId && (
         <TripChecklistDialog open={openChecklist} onOpenChange={setOpenChecklist} tripId={tripId} services={services || []} />
+      )}
+      {tripId && (
+        <TripBudgetDialog open={openBudget} onOpenChange={setOpenBudget} tripId={tripId} destination={destination} endDate={endDate || null} />
       )}
     </>
   );
