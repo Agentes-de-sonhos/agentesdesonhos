@@ -39,6 +39,7 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
+import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
@@ -2243,6 +2244,12 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
               <div className="space-y-4 min-w-0">
+                {services.length > 0 && (
+                  <NextAppointmentCard
+                    services={services}
+                    onOpenService={handleOpenService}
+                  />
+                )}
                 {navGrid}
               </div>
               <div className="md:w-[320px] md:justify-self-end w-full space-y-4">

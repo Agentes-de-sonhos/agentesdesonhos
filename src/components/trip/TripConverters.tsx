@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Coins, Footprints, ArrowRightLeft } from "lucide-react";
+import { Coins, Footprints, Ruler, Receipt, ArrowRightLeft } from "lucide-react";
+import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsConverterDialog";
+import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 
 // Simple destination -> currency inference (best-effort)
 const COUNTRY_CURRENCY: Record<string, { code: string; symbol: string; name: string }> = {
@@ -252,11 +254,12 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
 export function TripConverters({ destination }: { destination: string }) {
   const [openCur, setOpenCur] = useState(false);
-  const [openShoe, setOpenShoe] = useState(false);
+  const [openMeasure, setOpenMeasure] = useState(false);
+  const [openTip, setOpenTip] = useState(false);
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <Button
           type="button"
           variant="outline"
@@ -265,21 +268,32 @@ export function TripConverters({ destination }: { destination: string }) {
           onClick={() => setOpenCur(true)}
         >
           <Coins className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium">Conversor de moeda</span>
+          <span className="text-[11px] font-medium leading-tight text-center">Moeda</span>
         </Button>
         <Button
           type="button"
           variant="outline"
           size="sm"
           className="h-auto py-2.5 flex-col gap-1"
-          onClick={() => setOpenShoe(true)}
+          onClick={() => setOpenMeasure(true)}
         >
-          <Footprints className="h-4 w-4 text-primary" />
-          <span className="text-xs font-medium">Conversor de calçado</span>
+          <Ruler className="h-4 w-4 text-primary" />
+          <span className="text-[11px] font-medium leading-tight text-center">Medidas</span>
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-auto py-2.5 flex-col gap-1"
+          onClick={() => setOpenTip(true)}
+        >
+          <Receipt className="h-4 w-4 text-primary" />
+          <span className="text-[11px] font-medium leading-tight text-center">Gorjetas</span>
         </Button>
       </div>
       <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} />
-      <ShoeSizeDialog open={openShoe} onOpenChange={setOpenShoe} />
+      <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />
+      <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />
     </>
   );
 }
