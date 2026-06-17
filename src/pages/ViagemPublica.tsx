@@ -40,6 +40,7 @@ import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
+import { MyBudgetCard } from "@/components/wallet/MyBudgetCard";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
@@ -2456,6 +2457,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             </ServiceDetailOverlay>
           );
         })()}
+
+        {/* ─── Meu Orçamento (controle pessoal de gastos durante a viagem) ─── */}
+        <MyBudgetCard
+          tripId={tripData.id}
+          destination={tripData.destination}
+          endDate={endDate}
+        />
 
         {/* ─── Agent Signature (mesmo padrão do Orçamento) ─── */}
         {agentProfile && (() => {
