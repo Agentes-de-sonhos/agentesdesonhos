@@ -6,7 +6,9 @@ import { ptBR } from "date-fns/locale";
 import {
   Wallet, MapPin, Calendar, FileText, Loader2, Lock, Plane, Hotel, Car, Bus,
   Ticket, Shield, Ship, TrainFront, Download, ExternalLink, MessageSquare,
-  ChevronDown, ChevronUp, Sun, Sunset, Moon, CalendarDays, User, Briefcase, Save
+  ChevronDown, ChevronUp, Sun, Sunset, Moon, CalendarDays, User, Briefcase, Save,
+  Anchor, BedDouble, Layers, Users, UtensilsCrossed, Clock, Building2, Route,
+  DollarSign, Plug, Shirt, AlertTriangle, CheckCircle2, Globe
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -97,6 +99,177 @@ function TripCoverHero({
           </span>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ===== Cruise visual helpers (premium UI inspired by reference design) =====
+
+function BoardingFact({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  const isMuted = /^a confirmar$/i.test(value);
+  return (
+    <div className="flex items-start gap-2.5 min-w-0">
+      <Icon className="h-[18px] w-[18px] text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+      <div className="min-w-0">
+        <p className="text-[12px] font-semibold text-foreground leading-tight">{label}</p>
+        <p className={cn('text-[12.5px] leading-snug mt-0.5', isMuted ? 'text-muted-foreground/80 italic' : 'text-muted-foreground')}>
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CruiseFactGrid({ data }: { data: any }) {
+  const mealLabel = (() => {
+    if (!data.meal_plan) return null;
+    if (data.meal_plan === 'pensao_completa') return 'Pensão completa';
+    if (data.meal_plan === 'all_inclusive') return 'All inclusive';
+    if (data.meal_plan === 'meia_pensao') return 'Meia pensão';
+    return String(data.meal_plan);
+  })();
+  const cabin = data.cabin_type
+    ? `${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}`
+    : null;
+  const passengers = Array.isArray(data.passengers) && data.passengers.length > 0
+    ? data.passengers.map((p: any) => p.name).filter(Boolean).join(', ')
+    : null;
+  const occupancyText = data.occupancy
+    ? String(data.occupancy)
+    : (Array.isArray(data.passengers) && data.passengers.length > 0
+        ? `${data.passengers.length} passageiros`
+        : null);
+
+  const facts: { icon: any; label: string; value: string; sub?: string; full?: boolean }[] = [];
+  if (data.cruise_company) facts.push({ icon: Ship, label: 'Companhia', value: data.cruise_company });
+  if (data.route) facts.push({ icon: Route, label: 'Roteiro', value: data.route, sub: data.reservation_status_label });
+  if (data.embarkation_port) facts.push({ icon: Anchor, label: 'Embarque', value: data.embarkation_port, sub: data.embarkation_port_status });
+  if (data.disembarkation_port) facts.push({ icon: MapPin, label: 'Desembarque', value: data.disembarkation_port, sub: data.disembarkation_port_status });
+  if (data.duration_label || data.nights) facts.push({ icon: Clock, label: 'Duração', value: data.duration_label || `${data.nights} noites` });
+  if (data.booking_number) facts.push({ icon: Ticket, label: 'Reserva', value: data.booking_number });
+  else facts.push({ icon: Ticket, label: 'Reserva', value: 'A confirmar' });
+  if (cabin) facts.push({ icon: BedDouble, label: 'Cabine', value: cabin });
+  else facts.push({ icon: BedDouble, label: 'Cabine', value: 'A confirmar' });
+  if (data.deck) facts.push({ icon: Layers, label: 'Deck', value: data.deck });
+  else facts.push({ icon: Layers, label: 'Deck', value: 'A confirmar' });
+  if (occupancyText) facts.push({ icon: Users, label: 'Ocupação', value: occupancyText });
+  if (mealLabel) facts.push({ icon: UtensilsCrossed, label: 'Alimentação', value: mealLabel });
+  if (passengers) facts.push({ icon: Users, label: 'Passageiros', value: passengers, full: true });
+
+  if (facts.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm divide-y divide-border/50 overflow-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-border/50">
+        {facts.map((f, i) => {
+          const Icon = f.icon;
+          const isMuted = /^a confirmar$/i.test(f.value);
+          return (
+            <div
+              key={i}
+              className={cn(
+                'flex items-start gap-3 p-3.5 sm:p-4 min-w-0',
+                f.full && 'col-span-2 sm:col-span-3 border-t border-border/50'
+              )}
+            >
+              <Icon className="h-[18px] w-[18px] text-primary shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
+                <p className={cn('text-[14px] font-semibold leading-snug truncate', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
+                  {f.value}
+                </p>
+                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 truncate">{f.sub}</p>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CruiseDayChip({ dateStr }: { dateStr?: string }) {
+  if (!dateStr) {
+    return (
+      <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-muted text-muted-foreground shrink-0">
+        <span className="text-[10px] font-semibold uppercase tracking-wider">—</span>
+      </div>
+    );
+  }
+  // Try DD/MM or DD/MM/YYYY or YYYY-MM-DD
+  let day = ''; let mon = '';
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+  const brMatch = /^(\d{1,2})\/(\d{1,2})/.exec(dateStr);
+  const monthShort = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  if (isoMatch) {
+    day = isoMatch[3];
+    mon = monthShort[parseInt(isoMatch[2], 10) - 1] || '';
+  } else if (brMatch) {
+    day = brMatch[1].padStart(2, '0');
+    mon = monthShort[parseInt(brMatch[2], 10) - 1] || '';
+  } else {
+    day = dateStr.slice(0, 2);
+  }
+  return (
+    <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-primary/8 ring-1 ring-primary/20 text-primary shrink-0">
+      <span className="text-[18px] font-bold leading-none">{day}</span>
+      <span className="text-[10px] font-semibold tracking-wider mt-0.5">{mon}</span>
+    </div>
+  );
+}
+
+function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
+  return (
+    <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-4 sm:p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <CalendarDays className="h-4 w-4 text-primary" />
+        <p className="text-[13px] font-semibold tracking-tight text-foreground">Roteiro</p>
+      </div>
+      <ol className="space-y-4">
+        {stops.map((stop: any, i: number) => {
+          const isNav = stop.stop_type === 'navegacao';
+          const isLast = i === stops.length - 1;
+          const role = stop.role || (i === 0 ? 'Embarque' : isLast ? 'Desembarque' : isNav ? 'Alto-mar' : 'Porto');
+          const roleTone =
+            role === 'Embarque' ? 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300'
+            : role === 'Desembarque' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+            : role === 'Alto-mar' ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
+            : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
+
+          return (
+            <li key={i} className="flex gap-4">
+              <CruiseDayChip dateStr={stop.date} />
+              <div className="flex-1 min-w-0 relative">
+                {!isLast && <span className="absolute left-[-31px] top-14 bottom-[-16px] w-px border-l border-dashed border-border" />}
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-semibold text-foreground leading-tight">{stop.port || 'A confirmar'}</p>
+                    {stop.subtitle && (
+                      <p className="text-[12.5px] text-primary/80 font-medium mt-0.5">{stop.subtitle}</p>
+                    )}
+                    {stop.description && (
+                      <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">{stop.description}</p>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold', roleTone)}>
+                      {role}
+                    </span>
+                    {(stop.arrival_time || stop.departure_time) ? (
+                      <div className="text-[11.5px] text-muted-foreground text-right">
+                        {stop.arrival_time && <div>Chegada <span className="text-foreground font-medium">{stop.arrival_time}</span></div>}
+                        {stop.departure_time && <div>Saída <span className="text-foreground font-medium">{stop.departure_time}</span></div>}
+                      </div>
+                    ) : isNav ? null : (
+                      <span className="text-[11px] text-muted-foreground/80 italic">A confirmar</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }
@@ -494,6 +667,15 @@ function PublicServiceCard({ service }: { service: TripService }) {
   const voucherAccess = useContext(VoucherAccessCtx);
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
   const isCruise = service.service_type === 'cruise';
+  // helpers defined below: CruiseFactGrid, CruiseItineraryTimeline
+  const cruiseStatusLabel = (() => {
+    if (!isCruise) return null;
+    const s = (data.reservation_status || '').toString().toLowerCase();
+    if (s.includes('confirm') && !s.includes('a confirm') && !s.includes('pre')) return { label: 'Confirmado', tone: 'emerald' as const };
+    if (s.includes('pre') || s.includes('pré')) return { label: 'Pré-reserva', tone: 'amber' as const };
+    if (s.includes('opc') || s.includes('pend')) return { label: 'Opcional', tone: 'slate' as const };
+    return { label: 'A confirmar', tone: 'amber' as const };
+  })();
   const isFlight = service.service_type === 'flight';
   const isCarRental = service.service_type === 'car_rental';
   const isHotel = service.service_type === 'hotel';
@@ -520,15 +702,30 @@ function PublicServiceCard({ service }: { service: TripService }) {
             </div>
           );
         })()}
-        <div className="mb-4">
-          <h4 className="font-semibold text-lg sm:text-xl leading-tight tracking-tight text-foreground">{title}</h4>
-          {dates && (
-            <p className="mt-1.5 text-[13px] text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" /> <span>{dates}</span>
-            </p>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h4 className="font-semibold text-lg sm:text-xl leading-tight tracking-tight text-foreground">{title}</h4>
+            {dates && (
+              <p className="mt-1.5 text-[13px] text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" /> <span>{dates}</span>
+              </p>
+            )}
+          </div>
+          {cruiseStatusLabel && (
+            <span className={cn(
+              'inline-flex items-center rounded-full px-3 py-1 text-[11.5px] font-semibold shrink-0',
+              cruiseStatusLabel.tone === 'emerald' && 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
+              cruiseStatusLabel.tone === 'amber' && 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
+              cruiseStatusLabel.tone === 'slate' && 'bg-slate-100 text-slate-700 dark:bg-slate-900/40 dark:text-slate-300',
+            )}>
+              {cruiseStatusLabel.label}
+            </span>
           )}
         </div>
-        {details.length > 0 && (
+        {/* Cruise: premium fact grid with icons */}
+        {isCruise ? (
+          <CruiseFactGrid data={data} />
+        ) : details.length > 0 && (
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-1">
             {details.map((d, i) => {
               const idx = d.indexOf(':');
@@ -658,91 +855,78 @@ function PublicServiceCard({ service }: { service: TripService }) {
 
         {/* Cruise itinerary */}
         {isCruise && data.itinerary?.length > 0 && (
-          <div className="mt-4 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-3">Roteiro</p>
-            <ol className="relative space-y-3 pl-4 before:absolute before:left-[5px] before:top-1.5 before:bottom-1.5 before:w-px before:bg-border">
-              {data.itinerary.map((stop: any, i: number) => (
-                <li key={i} className="relative">
-                  <span className="absolute -left-4 top-1.5 h-2.5 w-2.5 rounded-full bg-background ring-2 ring-primary/60" />
-                  {stop.date && (
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">{stop.date}</p>
-                  )}
-                  <p className="text-[14px] font-medium text-foreground leading-snug">
-                    {stop.port}
-                    {stop.stop_type === 'navegacao' && (
-                      <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                        Navegação
-                      </span>
-                    )}
-                  </p>
-                  {(stop.arrival_time || stop.departure_time) && (
-                    <p className="text-[12px] text-muted-foreground mt-0.5">
-                      {stop.arrival_time && <>Chegada {stop.arrival_time}</>}
-                      {stop.arrival_time && stop.departure_time && <span className="mx-1.5 text-muted-foreground/50">•</span>}
-                      {stop.departure_time && <>Saída {stop.departure_time}</>}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ol>
+          <div className="mt-5">
+            <CruiseItineraryTimeline stops={data.itinerary} />
           </div>
         )}
 
         {/* Cruise boarding instructions */}
         {isCruise && (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes) && (
-          <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⚠️ Orientações de Embarque</p>
-            {data.boarding_terminal && <p className="text-xs text-muted-foreground">Terminal: {data.boarding_terminal}</p>}
-            {data.recommended_arrival && <p className="text-xs text-muted-foreground">Chegada: {data.recommended_arrival}</p>}
-            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
-            {data.baggage_policy && <p className="text-xs text-muted-foreground">Bagagem: {data.baggage_policy}</p>}
-            {data.dress_code && <p className="text-xs text-muted-foreground">Dress Code: {data.dress_code}</p>}
-            {data.boarding_notes && <p className="text-xs text-muted-foreground italic">{data.boarding_notes}</p>}
+          <div className="mt-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 ring-1 ring-amber-200/70 dark:ring-amber-900/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
+              <p className="text-[13px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4">
+              <BoardingFact icon={Building2} label="Terminal" value={data.boarding_terminal || 'A confirmar'} />
+              <BoardingFact icon={FileText} label="Documentos" value={data.required_documents || 'Passaportes válidos, vistos e formulários de check-in.'} />
+              <BoardingFact icon={Shirt} label="Dress Code" value={data.dress_code || 'Trajes casuais; verificar noites temáticas.'} />
+              <BoardingFact icon={Users} label="Chegada" value={data.recommended_arrival || 'Chegar no horário indicado no voucher final.'} />
+              <BoardingFact icon={Briefcase} label="Bagagem" value={data.baggage_policy || 'A confirmar conforme a companhia.'} />
+              {data.boarding_notes && <BoardingFact icon={FileText} label="Observações" value={data.boarding_notes} />}
+            </div>
           </div>
         )}
 
         {/* Cruise check-in button */}
         {isCruise && data.checkin_url && (
-          <div className="mt-3">
-            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer">
-              <Button variant="default" className="w-full sm:w-auto h-11 rounded-full text-sm font-medium shadow-sm px-6">
-                ✅ Fazer Check-in do Cruzeiro
+          <div className="mt-5">
+            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer" className="block">
+              <Button className="w-full h-12 rounded-2xl text-[14px] font-semibold shadow-md bg-[hsl(222_47%_18%)] hover:bg-[hsl(222_47%_24%)] text-white">
+                <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
               </Button>
             </a>
-            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-1">Prazo: {data.checkin_deadline}</p>}
+            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-2 text-center">Prazo: {data.checkin_deadline}</p>}
           </div>
         )}
 
         {/* Cruise maps */}
-        {isCruise && data.port_maps_url && (
-          <div className="mt-2">
-            <a href={data.port_maps_url} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3">
-                <MapPin className="h-3 w-3 mr-1" /> Rota até o porto
-              </Button>
-            </a>
-          </div>
-        )}
-
-        {/* Cruise ship info */}
-        {isCruise && (data.onboard_currency || data.voltage || data.ship_website) && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {data.onboard_currency && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[12px] text-foreground">
-                <span className="text-muted-foreground">Moeda</span>
-                <span className="font-medium">{data.onboard_currency}</span>
-              </span>
+        {isCruise && (data.port_maps_url || data.onboard_currency || data.voltage || data.ship_website) && (
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {data.port_maps_url && (
+              <a href={data.port_maps_url} target="_blank" rel="noopener noreferrer"
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
+                <div className="flex items-center justify-between">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Rota até o porto</p>
+                <p className="text-[13px] font-semibold text-foreground">Ver no mapa</p>
+              </a>
             )}
-            {data.voltage && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[12px] text-foreground">
-                <span className="text-muted-foreground">Voltagem</span>
-                <span className="font-medium">{data.voltage}</span>
-              </span>
+            {data.onboard_currency && (
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
+                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Moeda a bordo</p>
+                <p className="text-[13px] font-semibold text-foreground">{data.onboard_currency}</p>
+              </div>
+            )}
+            {(data.voltage || isCruise) && (
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
+                <Plug className="h-4 w-4 text-primary" />
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Voltagem</p>
+                <p className={cn('text-[13px] font-semibold', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || 'A confirmar'}</p>
+              </div>
             )}
             {data.ship_website && (
               <a href={data.ship_website} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[12px] font-medium text-primary hover:bg-primary/10 transition-colors">
-                Site do navio →
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
+                <div className="flex items-center justify-between">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
+                <p className="text-[13px] font-semibold text-foreground truncate">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               </a>
             )}
           </div>
