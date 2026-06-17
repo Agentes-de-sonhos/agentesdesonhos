@@ -1688,7 +1688,10 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${encodeURIComponent("Olá! Preciso de ajuda para acessar minha Carteira de Viagem.")}`
       : "";
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/5 flex items-center justify-center p-4">
+      <div
+        className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/5 flex items-center justify-center p-4"
+        style={getWalletBrandStyle(brand?.agency_primary_color)}
+      >
         <div className="w-full max-w-md space-y-5">
           {/* Logo da agência (mesmo padrão dos links públicos) */}
           {brand?.agency_logo_url && (
