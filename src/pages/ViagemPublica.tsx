@@ -175,10 +175,10 @@ function CruiseFactGrid({ data }: { data: any }) {
               <Icon className="h-[18px] w-[18px] text-primary shrink-0 mt-0.5" />
               <div className="min-w-0">
                 <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">{f.label}</p>
-                <p className={cn('text-[14px] font-semibold leading-snug truncate', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
+                <p className={cn('text-[14px] font-semibold leading-snug break-words', isMuted ? 'text-muted-foreground/80 italic font-medium' : 'text-foreground')}>
                   {f.value}
                 </p>
-                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 truncate">{f.sub}</p>}
+                {f.sub && <p className="text-[11.5px] text-muted-foreground/80 mt-0.5 break-words">{f.sub}</p>}
               </div>
             </div>
           );
@@ -791,7 +791,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                     <p className="text-sm font-medium mt-0.5">
                       {seg.origin_airport || seg.origin_city} → {seg.destination_airport || seg.destination_city}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[13px] text-foreground/80 leading-relaxed break-words">
                       {seg.flight_date ? formatDate(seg.flight_date) : ''}
                       {seg.departure_time ? ` • ${seg.departure_time}` : ''}
                       {seg.arrival_time ? ` → ${seg.arrival_time}` : ''}
@@ -810,7 +810,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-3">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👤 Passageiros</p>
             {data.passengers.map((p: any, i: number) => (
-              <p key={i} className="text-xs text-muted-foreground">
+              <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
                 {p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})
                 {p.seat ? ` • Assento ${p.seat}` : ''}
               </p>
@@ -822,10 +822,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isFlight && (data.carry_on || data.checked_baggage) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">🧳 Bagagem</p>
-            {data.carry_on && <p className="text-xs text-muted-foreground">Mão: {data.carry_on}</p>}
-            {data.checked_baggage && <p className="text-xs text-muted-foreground">Despachada: {data.checked_baggage}</p>}
-            {data.extra_baggage && <p className="text-xs text-muted-foreground">Extra: {data.extra_baggage}</p>}
-            {data.baggage_rules && <p className="text-xs text-muted-foreground italic mt-1">{data.baggage_rules}</p>}
+            {data.carry_on && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Mão: {data.carry_on}</p>}
+            {data.checked_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Despachada: {data.checked_baggage}</p>}
+            {data.extra_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Extra: {data.extra_baggage}</p>}
+            {data.baggage_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic mt-1">{data.baggage_rules}</p>}
           </div>
         )}
 
@@ -833,11 +833,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isFlight && (data.recommended_arrival || data.required_documents || data.boarding_notes) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⚠️ Orientações de Embarque</p>
-            {data.recommended_arrival && <p className="text-xs text-muted-foreground">Antecedência: {data.recommended_arrival}</p>}
-            {data.boarding_terminal && <p className="text-xs text-muted-foreground">Terminal: {data.boarding_terminal}</p>}
-            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
-            {data.immigration_rules && <p className="text-xs text-muted-foreground">Imigração: {data.immigration_rules}</p>}
-            {data.boarding_notes && <p className="text-xs text-muted-foreground italic">{data.boarding_notes}</p>}
+            {data.recommended_arrival && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Antecedência: {data.recommended_arrival}</p>}
+            {data.boarding_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Terminal: {data.boarding_terminal}</p>}
+            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Documentos: {data.required_documents}</p>}
+            {data.immigration_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Imigração: {data.immigration_rules}</p>}
+            {data.boarding_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.boarding_notes}</p>}
           </div>
         )}
 
@@ -849,7 +849,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 ✅ Fazer Check-in Online
               </Button>
             </a>
-            {data.checkin_open_date && <p className="text-xs text-muted-foreground mt-1">Abertura: {data.checkin_open_date}</p>}
+            {data.checkin_open_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">Abertura: {data.checkin_open_date}</p>}
           </div>
         )}
 
@@ -886,7 +886,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
               </Button>
             </a>
-            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-2 text-center">Prazo: {data.checkin_deadline}</p>}
+            {data.checkin_deadline && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-2 text-center">Prazo: {data.checkin_deadline}</p>}
           </div>
         )}
 
@@ -926,7 +926,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
-                <p className="text-[13px] font-semibold text-foreground truncate">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
+                <p className="text-[13px] font-semibold text-foreground break-words">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               </a>
             )}
           </div>
@@ -936,21 +936,21 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isHotel && (data.checkin_time || data.checkin_holder || data.reservation_code) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📅 Check-in</p>
-            {data.checkin_time && <p className="text-xs text-muted-foreground">Horário: {data.checkin_time}</p>}
-            {data.early_checkin && <p className="text-xs text-muted-foreground">Early check-in: {data.early_checkin === 'sim' ? '✅ Incluso' : data.early_checkin === 'mediante_taxa' ? '💰 Mediante taxa' : data.early_checkin === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
-            {data.checkin_holder && <p className="text-xs text-muted-foreground">Titular: {data.checkin_holder}</p>}
-            {data.checkin_instructions && <p className="text-xs text-muted-foreground italic">{data.checkin_instructions}</p>}
-            {data.late_arrival_policy && <p className="text-xs text-muted-foreground">Chegada tardia: {data.late_arrival_policy}</p>}
+            {data.checkin_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário: {data.checkin_time}</p>}
+            {data.early_checkin && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Early check-in: {data.early_checkin === 'sim' ? '✅ Incluso' : data.early_checkin === 'mediante_taxa' ? '💰 Mediante taxa' : data.early_checkin === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
+            {data.checkin_holder && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Titular: {data.checkin_holder}</p>}
+            {data.checkin_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.checkin_instructions}</p>}
+            {data.late_arrival_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Chegada tardia: {data.late_arrival_policy}</p>}
           </div>
         )}
 
         {isHotel && (data.checkout_time || data.late_checkout || data.checkout_procedure) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🧳 Check-out</p>
-            {data.checkout_time && <p className="text-xs text-muted-foreground">Horário: {data.checkout_time}</p>}
-            {data.late_checkout && <p className="text-xs text-muted-foreground">Late check-out: {data.late_checkout === 'sim' ? '✅ Incluso' : data.late_checkout === 'mediante_taxa' ? `💰 Mediante taxa${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
-            {data.checkout_procedure && <p className="text-xs text-muted-foreground">Procedimento: {data.checkout_procedure === 'recepcao' ? 'Recepção' : data.checkout_procedure === 'express' ? 'Express' : 'Online'}</p>}
-            {data.checkout_instructions && <p className="text-xs text-muted-foreground italic">{data.checkout_instructions}</p>}
+            {data.checkout_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário: {data.checkout_time}</p>}
+            {data.late_checkout && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Late check-out: {data.late_checkout === 'sim' ? '✅ Incluso' : data.late_checkout === 'mediante_taxa' ? `💰 Mediante taxa${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
+            {data.checkout_procedure && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Procedimento: {data.checkout_procedure === 'recepcao' ? 'Recepção' : data.checkout_procedure === 'express' ? 'Express' : 'Online'}</p>}
+            {data.checkout_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.checkout_instructions}</p>}
           </div>
         )}
 
@@ -958,10 +958,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isHotel && (data.bed_type || data.room_view || data.amenities) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🛏️ Acomodação</p>
-            {data.bed_type && <p className="text-xs text-muted-foreground">Cama: {data.bed_type === 'king' ? 'King' : data.bed_type === 'queen' ? 'Queen' : data.bed_type === 'twin' ? 'Twin (2 Solteiro)' : data.bed_type === 'single' ? 'Solteiro' : data.bed_type === 'double' ? 'Casal' : data.bed_type === 'triple' ? 'Triplo' : data.bed_type}</p>}
-            {data.guest_count && <p className="text-xs text-muted-foreground">Hóspedes: {data.guest_count}</p>}
-            {data.room_view && <p className="text-xs text-muted-foreground">Vista: {data.room_view}</p>}
-            {data.amenities && <p className="text-xs text-muted-foreground">Amenities: {data.amenities}</p>}
+            {data.bed_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Cama: {data.bed_type === 'king' ? 'King' : data.bed_type === 'queen' ? 'Queen' : data.bed_type === 'twin' ? 'Twin (2 Solteiro)' : data.bed_type === 'single' ? 'Solteiro' : data.bed_type === 'double' ? 'Casal' : data.bed_type === 'triple' ? 'Triplo' : data.bed_type}</p>}
+            {data.guest_count && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Hóspedes: {data.guest_count}</p>}
+            {data.room_view && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Vista: {data.room_view}</p>}
+            {data.amenities && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Amenities: {data.amenities}</p>}
           </div>
         )}
 
@@ -969,10 +969,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isHotel && (data.breakfast_hours || data.restaurants_included || data.food_notes || data.all_inclusive_rules) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🍽️ Alimentação</p>
-            {data.breakfast_hours && <p className="text-xs text-muted-foreground">Café da manhã: {data.breakfast_hours}</p>}
-            {data.restaurants_included && <p className="text-xs text-muted-foreground">Restaurantes: {data.restaurants_included}</p>}
-            {data.food_notes && <p className="text-xs text-muted-foreground italic">{data.food_notes}</p>}
-            {data.all_inclusive_rules && <p className="text-xs text-muted-foreground">All Inclusive: {data.all_inclusive_rules}</p>}
+            {data.breakfast_hours && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Café da manhã: {data.breakfast_hours}</p>}
+            {data.restaurants_included && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Restaurantes: {data.restaurants_included}</p>}
+            {data.food_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.food_notes}</p>}
+            {data.all_inclusive_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">All Inclusive: {data.all_inclusive_rules}</p>}
           </div>
         )}
 
@@ -987,8 +987,8 @@ function PublicServiceCard({ service }: { service: TripService }) {
               {data.parking_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">🅿️ Estacionamento</span>}
               {data.transfer_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">🚐 Transfer</span>}
             </div>
-            {data.resort_fee && <p className="text-xs text-muted-foreground mt-1">Resort Fee: {data.resort_fee}</p>}
-            {data.other_inclusions && <p className="text-xs text-muted-foreground">{data.other_inclusions}</p>}
+            {data.resort_fee && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">Resort Fee: {data.resort_fee}</p>}
+            {data.other_inclusions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.other_inclusions}</p>}
           </div>
         )}
 
@@ -996,11 +996,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isHotel && (data.cancellation_policy || data.mandatory_fees || data.hotel_deposit) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🧾 Políticas</p>
-            {data.cancellation_policy && <p className="text-xs text-muted-foreground">Cancelamento: {data.cancellation_policy}</p>}
-            {data.children_policy && <p className="text-xs text-muted-foreground">Crianças: {data.children_policy}</p>}
-            {data.pet_policy && <p className="text-xs text-muted-foreground">Pets: {data.pet_policy}</p>}
-            {data.mandatory_fees && <p className="text-xs text-muted-foreground font-medium">⚠️ Taxas no destino: {data.mandatory_fees}</p>}
-            {data.hotel_deposit && <p className="text-xs text-muted-foreground">Caução: {data.hotel_deposit}{data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}</p>}
+            {data.cancellation_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Cancelamento: {data.cancellation_policy}</p>}
+            {data.children_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Crianças: {data.children_policy}</p>}
+            {data.pet_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Pets: {data.pet_policy}</p>}
+            {data.mandatory_fees && <p className="text-[13px] text-foreground/80 leading-relaxed break-words font-medium">⚠️ Taxas no destino: {data.mandatory_fees}</p>}
+            {data.hotel_deposit && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Caução: {data.hotel_deposit}{data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}</p>}
           </div>
         )}
 
@@ -1009,7 +1009,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-2">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👨‍👩‍👧 Hóspedes</p>
             {data.guests.map((g: any, i: number) => (
-              <p key={i} className="text-xs text-muted-foreground">
+              <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
                 {g.name}{g.age ? ` (${g.age})` : ''}{g.notes ? ` • ${g.notes}` : ''}
               </p>
             ))}
@@ -1020,9 +1020,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isHotel && (data.address || data.hotel_phone || data.maps_url) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📍 Localização e Contato</p>
-            {data.address && <p className="text-xs text-muted-foreground">{data.address}</p>}
-            {data.hotel_phone && <p className="text-xs text-muted-foreground">📞 {data.hotel_phone}</p>}
-            {data.hotel_email && <p className="text-xs text-muted-foreground">✉️ {data.hotel_email}</p>}
+            {data.address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.address}</p>}
+            {data.hotel_phone && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 {data.hotel_phone}</p>}
+            {data.hotel_email && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">✉️ {data.hotel_email}</p>}
             {data.maps_url && (
               <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
@@ -1042,8 +1042,8 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isHotel && (data.special_requests || data.agency_notes) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📝 Observações</p>
-            {data.special_requests && <p className="text-xs text-muted-foreground">Solicitações: {data.special_requests}</p>}
-            {data.agency_notes && <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>}
+            {data.special_requests && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Solicitações: {data.special_requests}</p>}
+            {data.agency_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>}
           </div>
         )}
 
@@ -1051,12 +1051,12 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isCarRental && (data.pickup_date || data.pickup_time || data.pickup_address) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📍 Retirada</p>
-            {data.pickup_address && <p className="text-xs text-muted-foreground">{data.pickup_address}</p>}
-            {data.pickup_city && <p className="text-xs text-muted-foreground">{data.pickup_city}{data.pickup_country ? `, ${data.pickup_country}` : ''}</p>}
-            {data.pickup_date && <p className="text-xs text-muted-foreground">📅 {formatDate(data.pickup_date)}{data.pickup_time ? ` às ${data.pickup_time}` : ''}</p>}
-            {data.pickup_terminal && <p className="text-xs text-muted-foreground">Terminal: {data.pickup_terminal}</p>}
-            {data.pickup_phone && <p className="text-xs text-muted-foreground">📞 {data.pickup_phone}</p>}
-            {data.pickup_instructions && <p className="text-xs text-muted-foreground italic">{data.pickup_instructions}</p>}
+            {data.pickup_address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.pickup_address}</p>}
+            {data.pickup_city && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.pickup_city}{data.pickup_country ? `, ${data.pickup_country}` : ''}</p>}
+            {data.pickup_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📅 {formatDate(data.pickup_date)}{data.pickup_time ? ` às ${data.pickup_time}` : ''}</p>}
+            {data.pickup_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Terminal: {data.pickup_terminal}</p>}
+            {data.pickup_phone && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 {data.pickup_phone}</p>}
+            {data.pickup_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.pickup_instructions}</p>}
             {data.pickup_maps_url && (
               <a href={data.pickup_maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
@@ -1070,11 +1070,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isCarRental && (data.dropoff_date || data.dropoff_address) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🔁 Devolução</p>
-            {data.dropoff_address && <p className="text-xs text-muted-foreground">{data.dropoff_address}</p>}
-            {data.dropoff_city && <p className="text-xs text-muted-foreground">{data.dropoff_city}{data.dropoff_country ? `, ${data.dropoff_country}` : ''}</p>}
-            {data.dropoff_date && <p className="text-xs text-muted-foreground">📅 {formatDate(data.dropoff_date)}{data.dropoff_time ? ` às ${data.dropoff_time}` : ''}</p>}
-            {data.dropoff_instructions && <p className="text-xs text-muted-foreground italic">{data.dropoff_instructions}</p>}
-            {data.dropoff_late_policy && <p className="text-xs text-muted-foreground">⏰ {data.dropoff_late_policy}</p>}
+            {data.dropoff_address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.dropoff_address}</p>}
+            {data.dropoff_city && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.dropoff_city}{data.dropoff_country ? `, ${data.dropoff_country}` : ''}</p>}
+            {data.dropoff_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📅 {formatDate(data.dropoff_date)}{data.dropoff_time ? ` às ${data.dropoff_time}` : ''}</p>}
+            {data.dropoff_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.dropoff_instructions}</p>}
+            {data.dropoff_late_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">⏰ {data.dropoff_late_policy}</p>}
           </div>
         )}
 
@@ -1082,15 +1082,15 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isCarRental && (data.car_model || data.doors || data.passenger_capacity) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🚘 Veículo</p>
-            {data.car_model && <p className="text-xs text-muted-foreground">Modelo: {data.car_model}</p>}
-            {data.transmission && <p className="text-xs text-muted-foreground">Transmissão: {data.transmission === 'automatico' ? 'Automático' : 'Manual'}</p>}
-            {data.fuel_type && <p className="text-xs text-muted-foreground">Combustível: {data.fuel_type}</p>}
-            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-1">
+            {data.car_model && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Modelo: {data.car_model}</p>}
+            {data.transmission && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Transmissão: {data.transmission === 'automatico' ? 'Automático' : 'Manual'}</p>}
+            {data.fuel_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Combustível: {data.fuel_type}</p>}
+            <div className="flex flex-wrap gap-3 text-[13px] text-foreground/80 leading-relaxed break-words mt-1">
               {data.doors && <span>🚪 {data.doors} portas</span>}
               {data.passenger_capacity && <span>👤 {data.passenger_capacity} passageiros</span>}
               {data.luggage_capacity && <span>🧳 {data.luggage_capacity}</span>}
             </div>
-            {data.plate && <p className="text-xs text-muted-foreground">Placa: {data.plate}</p>}
+            {data.plate && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Placa: {data.plate}</p>}
           </div>
         )}
 
@@ -1098,13 +1098,13 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isCarRental && (data.basic_insurance || data.full_insurance || data.deductible) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🛡️ Seguros</p>
-            {data.basic_insurance && <p className="text-xs text-muted-foreground">Básico: {data.basic_insurance}</p>}
-            {data.full_insurance && <p className="text-xs text-muted-foreground">Total (CDW/LDW): {data.full_insurance}</p>}
-            {data.third_party_protection && <p className="text-xs text-muted-foreground">Terceiros: {data.third_party_protection}</p>}
-            {data.theft_protection && <p className="text-xs text-muted-foreground">Roubo: {data.theft_protection}</p>}
-            {data.damage_protection && <p className="text-xs text-muted-foreground">Danos: {data.damage_protection}</p>}
-            {data.deductible && <p className="text-xs text-muted-foreground font-medium">Franquia: {data.deductible}</p>}
-            {data.insurance_notes && <p className="text-xs text-muted-foreground italic">{data.insurance_notes}</p>}
+            {data.basic_insurance && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Básico: {data.basic_insurance}</p>}
+            {data.full_insurance && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Total (CDW/LDW): {data.full_insurance}</p>}
+            {data.third_party_protection && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Terceiros: {data.third_party_protection}</p>}
+            {data.theft_protection && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Roubo: {data.theft_protection}</p>}
+            {data.damage_protection && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Danos: {data.damage_protection}</p>}
+            {data.deductible && <p className="text-[13px] text-foreground/80 leading-relaxed break-words font-medium">Franquia: {data.deductible}</p>}
+            {data.insurance_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.insurance_notes}</p>}
           </div>
         )}
 
@@ -1124,7 +1124,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-2">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👤 Condutores</p>
             {data.drivers.map((d: any, i: number) => (
-              <p key={i} className="text-xs text-muted-foreground">
+              <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
                 {i === 0 ? '🔑 ' : '👤 '}{d.name}{d.document ? ` • ${d.document}` : ''}
               </p>
             ))}
@@ -1135,11 +1135,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isCarRental && data.fuel_policy && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⛽ Combustível</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[13px] text-foreground/80 leading-relaxed break-words">
               Política: {data.fuel_policy === 'cheio_cheio' ? 'Cheio-Cheio' : data.fuel_policy === 'cheio_vazio' ? 'Cheio-Vazio' : data.fuel_policy}
             </p>
-            {data.fuel_penalty && <p className="text-xs text-muted-foreground">Penalidade: {data.fuel_penalty}</p>}
-            {data.fuel_notes && <p className="text-xs text-muted-foreground italic">{data.fuel_notes}</p>}
+            {data.fuel_penalty && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Penalidade: {data.fuel_penalty}</p>}
+            {data.fuel_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.fuel_notes}</p>}
           </div>
         )}
 
@@ -1147,11 +1147,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isCarRental && (data.required_documents || data.international_permit || data.traffic_rules) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⚠️ Orientações</p>
-            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
-            {data.minimum_age && <p className="text-xs text-muted-foreground">Idade mínima: {data.minimum_age}</p>}
-            {data.international_permit && <p className="text-xs text-muted-foreground">PID (Permissão Internacional): {data.international_permit}</p>}
-            {data.traffic_rules && <p className="text-xs text-muted-foreground italic">{data.traffic_rules}</p>}
-            {data.emergency_contact && <p className="text-xs text-muted-foreground">📞 Emergência: {data.emergency_contact}</p>}
+            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Documentos: {data.required_documents}</p>}
+            {data.minimum_age && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Idade mínima: {data.minimum_age}</p>}
+            {data.international_permit && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">PID (Permissão Internacional): {data.international_permit}</p>}
+            {data.traffic_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.traffic_rules}</p>}
+            {data.emergency_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 Emergência: {data.emergency_contact}</p>}
           </div>
         )}
 
@@ -1159,11 +1159,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isTransfer && data.transfer_type === 'arrival' && (data.flight_number || data.arrival_airport || data.meeting_instructions) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">✈️ Detalhes da Chegada</p>
-            {data.flight_number && <p className="text-xs text-muted-foreground">Voo: {data.flight_number}</p>}
-            {data.arrival_time && <p className="text-xs text-muted-foreground">Chegada prevista: {data.arrival_time}</p>}
-            {data.arrival_airport && <p className="text-xs text-muted-foreground">Aeroporto: {data.arrival_airport}{data.arrival_terminal ? ` • Terminal ${data.arrival_terminal}` : ''}</p>}
-            {data.driver_wait_time && <p className="text-xs text-muted-foreground">Espera do motorista: {data.driver_wait_time}</p>}
-            {data.reception_type && <p className="text-xs text-muted-foreground">Recepção: {data.reception_type === 'placa' ? 'Com placa / nome' : data.reception_type === 'balcao' ? 'Balcão da empresa' : 'Ponto fixo'}</p>}
+            {data.flight_number && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Voo: {data.flight_number}</p>}
+            {data.arrival_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Chegada prevista: {data.arrival_time}</p>}
+            {data.arrival_airport && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Aeroporto: {data.arrival_airport}{data.arrival_terminal ? ` • Terminal ${data.arrival_terminal}` : ''}</p>}
+            {data.driver_wait_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Espera do motorista: {data.driver_wait_time}</p>}
+            {data.reception_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Recepção: {data.reception_type === 'placa' ? 'Com placa / nome' : data.reception_type === 'balcao' ? 'Balcão da empresa' : 'Ponto fixo'}</p>}
             {data.meeting_instructions && (
               <div className="mt-1 p-2 bg-primary/[0.06] border border-primary/15 rounded-xl">
                 <p className="text-xs font-medium text-primary">📍 Onde encontrar o motorista:</p>
@@ -1177,11 +1177,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isTransfer && data.transfer_type === 'departure' && (data.hotel_departure_time || data.departure_airport || data.departure_alert) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🧳 Detalhes da Saída</p>
-            {data.hotel_departure_time && <p className="text-xs text-muted-foreground">Saída do hotel: {data.hotel_departure_time}</p>}
-            {data.departure_flight_time && <p className="text-xs text-muted-foreground">Horário do voo: {data.departure_flight_time}</p>}
-            {data.departure_airport && <p className="text-xs text-muted-foreground">Aeroporto: {data.departure_airport}</p>}
-            {data.recommended_departure && <p className="text-xs text-muted-foreground">Saída recomendada: {data.recommended_departure}</p>}
-            {data.boarding_point && <p className="text-xs text-muted-foreground">Embarque: {data.boarding_point === 'lobby' ? 'Lobby / Recepção' : data.boarding_point === 'entrada' ? 'Entrada Principal' : data.boarding_point === 'estacionamento' ? 'Estacionamento' : data.boarding_point}</p>}
+            {data.hotel_departure_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Saída do hotel: {data.hotel_departure_time}</p>}
+            {data.departure_flight_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário do voo: {data.departure_flight_time}</p>}
+            {data.departure_airport && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Aeroporto: {data.departure_airport}</p>}
+            {data.recommended_departure && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Saída recomendada: {data.recommended_departure}</p>}
+            {data.boarding_point && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Embarque: {data.boarding_point === 'lobby' ? 'Lobby / Recepção' : data.boarding_point === 'entrada' ? 'Entrada Principal' : data.boarding_point === 'estacionamento' ? 'Estacionamento' : data.boarding_point}</p>}
             {data.departure_alert && (
               <div className="mt-1 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/60 rounded-xl">
                 <p className="text-xs font-medium text-amber-700 dark:text-amber-400">⚠️ {data.departure_alert}</p>
@@ -1194,9 +1194,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isTransfer && (data.driver_name || data.driver_phone) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">👤 Motorista</p>
-            {data.driver_name && <p className="text-xs text-muted-foreground">Nome: {data.driver_name}</p>}
-            {data.driver_language && <p className="text-xs text-muted-foreground">Idioma: {data.driver_language}</p>}
-            {data.vehicle_plate && <p className="text-xs text-muted-foreground">Placa: {data.vehicle_plate}</p>}
+            {data.driver_name && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Nome: {data.driver_name}</p>}
+            {data.driver_language && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Idioma: {data.driver_language}</p>}
+            {data.vehicle_plate && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Placa: {data.vehicle_plate}</p>}
             {data.driver_phone && (
               <div className="flex gap-2 mt-2">
                 <a href={`tel:${data.driver_phone}`}>
@@ -1214,14 +1214,14 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isTransfer && (data.vehicle_type || data.vehicle_capacity) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🚗 Veículo</p>
-            {data.vehicle_type && <p className="text-xs text-muted-foreground">Tipo: {data.vehicle_type === 'sedan' ? 'Sedan' : data.vehicle_type === 'suv' ? 'SUV' : data.vehicle_type === 'van' ? 'Van' : data.vehicle_type === 'minibus' ? 'Micro-ônibus' : data.vehicle_type === 'onibus' ? 'Ônibus' : data.vehicle_type}</p>}
-            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+            {data.vehicle_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Tipo: {data.vehicle_type === 'sedan' ? 'Sedan' : data.vehicle_type === 'suv' ? 'SUV' : data.vehicle_type === 'van' ? 'Van' : data.vehicle_type === 'minibus' ? 'Micro-ônibus' : data.vehicle_type === 'onibus' ? 'Ônibus' : data.vehicle_type}</p>}
+            <div className="flex flex-wrap gap-3 text-[13px] text-foreground/80 leading-relaxed break-words">
               {data.vehicle_capacity && <span>👤 {data.vehicle_capacity} passageiros</span>}
               {data.luggage_capacity && <span>🧳 {data.luggage_capacity}</span>}
               {data.air_conditioning === 'sim' && <span>❄️ Ar-condicionado</span>}
             </div>
-            {data.accessibility && <p className="text-xs text-muted-foreground">♿ {data.accessibility}</p>}
-            {data.vehicle_notes && <p className="text-xs text-muted-foreground italic">{data.vehicle_notes}</p>}
+            {data.accessibility && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">♿ {data.accessibility}</p>}
+            {data.vehicle_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.vehicle_notes}</p>}
           </div>
         )}
 
@@ -1230,7 +1230,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-2">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👨‍👩‍👧 Passageiros</p>
             {data.passengers.map((p: any, i: number) => (
-              <p key={i} className="text-xs text-muted-foreground">
+              <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
                 {p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})
                 {p.needs_child_seat === 'sim' ? ' 🪑 Cadeirinha' : ''}
               </p>
@@ -1242,9 +1242,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isTransfer && (data.pickup_address || data.destination_address || data.pickup_maps_url || data.destination_maps_url) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📍 Locais</p>
-            {data.pickup_address && <p className="text-xs text-muted-foreground">Embarque: {data.pickup_address}</p>}
-            {data.destination_address && <p className="text-xs text-muted-foreground">Destino: {data.destination_address}</p>}
-            {data.location_notes && <p className="text-xs text-muted-foreground italic">{data.location_notes}</p>}
+            {data.pickup_address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Embarque: {data.pickup_address}</p>}
+            {data.destination_address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Destino: {data.destination_address}</p>}
+            {data.location_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.location_notes}</p>}
             <div className="flex flex-wrap gap-2 mt-1">
               {data.pickup_maps_url && (
                 <a href={data.pickup_maps_url} target="_blank" rel="noopener noreferrer">
@@ -1268,16 +1268,16 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isTransfer && (data.required_documents || data.emergency_contact || data.plan_b || data.agency_notes) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⚠️ Orientações</p>
-            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
-            {data.emergency_contact && <p className="text-xs text-muted-foreground">📞 Emergência: {data.emergency_contact}</p>}
-            {data.agency_contact && <p className="text-xs text-muted-foreground">📱 Agência: {data.agency_contact}</p>}
+            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Documentos: {data.required_documents}</p>}
+            {data.emergency_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 Emergência: {data.emergency_contact}</p>}
+            {data.agency_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📱 Agência: {data.agency_contact}</p>}
             {data.plan_b && (
               <div className="mt-1 p-2 bg-primary/[0.06] border border-primary/15 rounded-xl">
                 <p className="text-xs font-medium text-primary">🔄 Plano B:</p>
                 <p className="text-xs text-foreground">{data.plan_b}</p>
               </div>
             )}
-            {data.agency_notes && <p className="text-xs text-muted-foreground italic mt-1">{data.agency_notes}</p>}
+            {data.agency_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic mt-1">{data.agency_notes}</p>}
           </div>
         )}
 
@@ -1303,11 +1303,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isAttraction && (data.entry_time || data.usage_window || data.duration || data.access_type) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📅 Detalhes de Uso</p>
-            {data.entry_time && <p className="text-xs text-muted-foreground">Horário de entrada: {data.entry_time}</p>}
-            {data.usage_window && <p className="text-xs text-muted-foreground">Janela de uso: {data.usage_window}</p>}
-            {data.duration && <p className="text-xs text-muted-foreground">Duração: {data.duration}</p>}
-            {data.access_type && <p className="text-xs text-muted-foreground">Acesso: {data.access_type === '1_dia' ? '1 Dia' : data.access_type === 'multi_day' ? 'Multi-Day' : data.access_type === 'open_date' ? 'Data Aberta' : 'Horário Marcado'}</p>}
-            {data.requires_reservation && <p className="text-xs text-muted-foreground">Reserva: {data.requires_reservation === 'sim' ? '✅ Necessária' : data.requires_reservation === 'recomendado' ? '📌 Recomendada' : '❌ Não necessária'}</p>}
+            {data.entry_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário de entrada: {data.entry_time}</p>}
+            {data.usage_window && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Janela de uso: {data.usage_window}</p>}
+            {data.duration && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Duração: {data.duration}</p>}
+            {data.access_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Acesso: {data.access_type === '1_dia' ? '1 Dia' : data.access_type === 'multi_day' ? 'Multi-Day' : data.access_type === 'open_date' ? 'Data Aberta' : 'Horário Marcado'}</p>}
+            {data.requires_reservation && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Reserva: {data.requires_reservation === 'sim' ? '✅ Necessária' : data.requires_reservation === 'recomendado' ? '📌 Recomendada' : '❌ Não necessária'}</p>}
           </div>
         )}
 
@@ -1324,7 +1324,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-2">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👨‍👩‍👧 Ingressos por Pessoa</p>
             {data.passengers.map((p: any, i: number) => (
-              <p key={i} className="text-xs text-muted-foreground">
+              <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
                 🎟️ {p.name} ({p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})
                 {p.document ? ` • ${p.document}` : ''}
               </p>
@@ -1336,9 +1336,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isAttraction && (data.address || data.venue_name || data.maps_url) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📍 Localização</p>
-            {data.venue_name && <p className="text-xs text-muted-foreground font-medium">{data.venue_name}</p>}
-            {data.address && <p className="text-xs text-muted-foreground">{data.address}</p>}
-            {data.entry_point && <p className="text-xs text-muted-foreground">Entrada: {data.entry_point}</p>}
+            {data.venue_name && <p className="text-[13px] text-foreground/80 leading-relaxed break-words font-medium">{data.venue_name}</p>}
+            {data.address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.address}</p>}
+            {data.entry_point && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Entrada: {data.entry_point}</p>}
             {data.maps_url && (
               <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
@@ -1353,12 +1353,12 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isAttraction && (data.attraction_rules || data.cancellation_policy || data.prohibited_items || data.dress_code || data.required_documents) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📌 Regras e Políticas</p>
-            {data.cancellation_policy && <p className="text-xs text-muted-foreground">Cancelamento: {data.cancellation_policy}</p>}
-            {data.change_policy && <p className="text-xs text-muted-foreground">Alteração: {data.change_policy}</p>}
-            {data.attraction_rules && <p className="text-xs text-muted-foreground">{data.attraction_rules}</p>}
-            {data.prohibited_items && <p className="text-xs text-muted-foreground">🚫 Proibido: {data.prohibited_items}</p>}
-            {data.dress_code && <p className="text-xs text-muted-foreground">👔 Dress code: {data.dress_code}</p>}
-            {data.required_documents && <p className="text-xs text-muted-foreground">📄 Documentos: {data.required_documents}</p>}
+            {data.cancellation_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Cancelamento: {data.cancellation_policy}</p>}
+            {data.change_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Alteração: {data.change_policy}</p>}
+            {data.attraction_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.attraction_rules}</p>}
+            {data.prohibited_items && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🚫 Proibido: {data.prohibited_items}</p>}
+            {data.dress_code && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">👔 Dress code: {data.dress_code}</p>}
+            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📄 Documentos: {data.required_documents}</p>}
           </div>
         )}
 
@@ -1374,8 +1374,8 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isAttraction && (data.attraction_contact || data.operator_contact || data.agency_contact) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📞 Contatos</p>
-            {data.attraction_contact && <p className="text-xs text-muted-foreground">Atração: {data.attraction_contact}</p>}
-            {data.operator_contact && <p className="text-xs text-muted-foreground">Operadora: {data.operator_contact}</p>}
+            {data.attraction_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Atração: {data.attraction_contact}</p>}
+            {data.operator_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Operadora: {data.operator_contact}</p>}
             {data.agency_contact && (
               <a href={`https://wa.me/${data.agency_contact.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
@@ -1383,7 +1383,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 </Button>
               </a>
             )}
-            {data.emergency_contact && <p className="text-xs text-muted-foreground">🆘 Emergência: {data.emergency_contact}</p>}
+            {data.emergency_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🆘 Emergência: {data.emergency_contact}</p>}
           </div>
         )}
 
@@ -1391,7 +1391,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isAttraction && data.agency_notes && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📝 Observações</p>
-            <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>
+            <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>
           </div>
         )}
 
@@ -1400,7 +1400,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-3">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👨‍👩‍👧 Segurados</p>
             {data.insured_persons.map((p: any, i: number) => (
-              <p key={i} className="text-xs text-muted-foreground">
+              <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
                 {p.name}{p.birth_date ? ` • ${p.birth_date}` : ''}
               </p>
             ))}
@@ -1423,9 +1423,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 <Button variant="outline" size="sm" className="text-xs w-full">💬 WhatsApp Assistência</Button>
               </a>
             )}
-            {data.emergency_email && <p className="text-xs text-muted-foreground">✉️ {data.emergency_email}</p>}
+            {data.emergency_email && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">✉️ {data.emergency_email}</p>}
             {data.emergency_24h === 'sim' && <p className="text-xs text-primary font-medium">✅ Atendimento 24 horas</p>}
-            {data.emergency_languages && <p className="text-xs text-muted-foreground">🌐 Idiomas: {data.emergency_languages}</p>}
+            {data.emergency_languages && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🌐 Idiomas: {data.emergency_languages}</p>}
             {data.insurer_website && (
               <a href={data.insurer_website} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs w-full">🌐 Site da Seguradora</Button>
@@ -1456,13 +1456,13 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🛡️ Dados da Apólice</p>
             {data.policy_number ? (
-              <p className="text-xs text-muted-foreground">Número da Apólice: <span className="font-mono font-medium text-foreground">{data.policy_number}</span></p>
+              <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Número da Apólice: <span className="font-mono font-medium text-foreground">{data.policy_number}</span></p>
             ) : (
-              <p className="text-xs text-muted-foreground italic">Número da Apólice: <span className="text-foreground/60">não informado</span></p>
+              <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">Número da Apólice: <span className="text-foreground/60">não informado</span></p>
             )}
-            {data.plan_name && <p className="text-xs text-muted-foreground">Plano: <span className="font-medium text-foreground">{data.plan_name}</span></p>}
-            {data.destination_covered && <p className="text-xs text-muted-foreground">Destino Coberto: <span className="font-medium text-foreground">{data.destination_covered}</span></p>}
-            {data.coverage_type && <p className="text-xs text-muted-foreground">Tipo de Cobertura: <span className="font-medium text-foreground">{data.coverage_type === 'internacional' ? 'Internacional' : data.coverage_type === 'nacional' ? 'Nacional' : data.coverage_type === 'schengen' ? 'Schengen' : 'Global'}</span></p>}
+            {data.plan_name && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Plano: <span className="font-medium text-foreground">{data.plan_name}</span></p>}
+            {data.destination_covered && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Destino Coberto: <span className="font-medium text-foreground">{data.destination_covered}</span></p>}
+            {data.coverage_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Tipo de Cobertura: <span className="font-medium text-foreground">{data.coverage_type === 'internacional' ? 'Internacional' : data.coverage_type === 'nacional' ? 'Nacional' : data.coverage_type === 'schengen' ? 'Schengen' : 'Global'}</span></p>}
           </div>
         )}
 
@@ -1471,9 +1471,9 @@ function PublicServiceCard({ service }: { service: TripService }) {
           <div className="mt-2 p-3 bg-primary/[0.06] border border-primary/15 rounded-2xl p-4 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🆘 Como Acionar sua Assistência</p>
             {data.how_to_activate && <p className="text-xs text-foreground whitespace-pre-line">{data.how_to_activate}</p>}
-            {data.required_documents_claim && <p className="text-xs text-muted-foreground mt-1">📄 Documentos: {data.required_documents_claim}</p>}
-            {data.hospital_procedure && <p className="text-xs text-muted-foreground">🏥 {data.hospital_procedure}</p>}
-            {data.reimbursement_info && <p className="text-xs text-muted-foreground">💰 Reembolso: {data.reimbursement_info}</p>}
+            {data.required_documents_claim && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">📄 Documentos: {data.required_documents_claim}</p>}
+            {data.hospital_procedure && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🏥 {data.hospital_procedure}</p>}
+            {data.reimbursement_info && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">💰 Reembolso: {data.reimbursement_info}</p>}
           </div>
         )}
 
@@ -1489,7 +1489,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isInsurance && data.agency_contact && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📞 Contato da Agência</p>
-            <p className="text-xs text-muted-foreground">📞 {data.agency_contact}</p>
+            <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 {data.agency_contact}</p>
             <a href={`https://wa.me/${data.agency_contact.replace(/[^0-9+]/g, '')}`} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="sm" className="text-xs h-7 w-full">
                 <MessageSquare className="h-3 w-3 mr-1" /> Falar com a Agência
@@ -1502,7 +1502,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isInsurance && data.agency_notes && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📝 Observações</p>
-            <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>
+            <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>
           </div>
         )}
 
@@ -1510,10 +1510,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isOther && (data.location_name || data.address || data.maps_url) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📍 Localização</p>
-            {data.location_name && <p className="text-xs text-muted-foreground font-medium">{data.location_name}</p>}
-            {data.address && <p className="text-xs text-muted-foreground">{data.address}</p>}
-            {data.meeting_point && <p className="text-xs text-muted-foreground">Ponto de encontro: {data.meeting_point}</p>}
-            {data.how_to_arrive && <p className="text-xs text-muted-foreground italic">{data.how_to_arrive}</p>}
+            {data.location_name && <p className="text-[13px] text-foreground/80 leading-relaxed break-words font-medium">{data.location_name}</p>}
+            {data.address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.address}</p>}
+            {data.meeting_point && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Ponto de encontro: {data.meeting_point}</p>}
+            {data.how_to_arrive && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.how_to_arrive}</p>}
             {data.maps_url && (
               <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
@@ -1528,8 +1528,8 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isOther && (data.contact_name || data.contact_phone || data.contact_whatsapp) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-2">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">👤 Contato</p>
-            {data.contact_name && <p className="text-xs text-muted-foreground">{data.contact_name}{data.contact_company ? ` — ${data.contact_company}` : ''}</p>}
-            {data.contact_language && <p className="text-xs text-muted-foreground">🌐 {data.contact_language}</p>}
+            {data.contact_name && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.contact_name}{data.contact_company ? ` — ${data.contact_company}` : ''}</p>}
+            {data.contact_language && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🌐 {data.contact_language}</p>}
             <div className="flex flex-wrap gap-2 mt-1">
               {data.contact_phone && (
                 <a href={`tel:${data.contact_phone}`}>
@@ -1554,12 +1554,12 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isOther && data.other_service_type === 'chip_internet' && (data.chip_operator || data.chip_activation_instructions) && (
           <div className="mt-2 p-3 bg-primary/[0.06] border border-primary/15 rounded-2xl p-4 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📶 Chip / Internet</p>
-            {data.chip_operator && <p className="text-xs text-muted-foreground">Operadora: {data.chip_operator}</p>}
-            {data.chip_type && <p className="text-xs text-muted-foreground">Tipo: {data.chip_type === 'esim' ? 'eSIM (digital)' : 'Chip Físico'}</p>}
+            {data.chip_operator && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Operadora: {data.chip_operator}</p>}
+            {data.chip_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Tipo: {data.chip_type === 'esim' ? 'eSIM (digital)' : 'Chip Físico'}</p>}
             {data.chip_activation_instructions && (
               <div className="mt-1">
                 <p className="text-xs font-medium text-foreground">📲 Instruções de Ativação:</p>
-                <p className="text-xs text-muted-foreground whitespace-pre-line">{data.chip_activation_instructions}</p>
+                <p className="text-[13px] text-foreground/80 leading-relaxed break-words whitespace-pre-line">{data.chip_activation_instructions}</p>
               </div>
             )}
             {data.chip_activation_url && (
@@ -1567,7 +1567,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 <Button variant="default" size="sm" className="text-xs w-full mt-1">📲 Link de Ativação</Button>
               </a>
             )}
-            {data.chip_support && <p className="text-xs text-muted-foreground mt-1">Suporte: {data.chip_support}</p>}
+            {data.chip_support && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">Suporte: {data.chip_support}</p>}
           </div>
         )}
 
@@ -1575,11 +1575,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isOther && data.other_service_type === 'guia_turistico' && (data.guide_name || data.guide_meeting_point) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🧭 Guia Turístico</p>
-            {data.guide_name && <p className="text-xs text-muted-foreground">Guia: {data.guide_name}</p>}
-            {data.guide_language && <p className="text-xs text-muted-foreground">Idioma: {data.guide_language}</p>}
-            {data.guide_tour_time && <p className="text-xs text-muted-foreground">Horário: {data.guide_tour_time}</p>}
-            {data.guide_tour_duration && <p className="text-xs text-muted-foreground">Duração: {data.guide_tour_duration}</p>}
-            {data.guide_meeting_point && <p className="text-xs text-muted-foreground">📍 Encontro: {data.guide_meeting_point}</p>}
+            {data.guide_name && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Guia: {data.guide_name}</p>}
+            {data.guide_language && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Idioma: {data.guide_language}</p>}
+            {data.guide_tour_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário: {data.guide_tour_time}</p>}
+            {data.guide_tour_duration && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Duração: {data.guide_tour_duration}</p>}
+            {data.guide_meeting_point && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📍 Encontro: {data.guide_meeting_point}</p>}
           </div>
         )}
 
@@ -1602,7 +1602,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
                 </Button>
               </a>
             )}
-            {data.emergency_contact && <p className="text-xs text-muted-foreground">🆘 Emergência: {data.emergency_contact}</p>}
+            {data.emergency_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🆘 Emergência: {data.emergency_contact}</p>}
           </div>
         )}
 
@@ -1610,7 +1610,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {isOther && data.agency_notes && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📝 Observações</p>
-            <p className="text-xs text-muted-foreground italic">{data.agency_notes}</p>
+            <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>
           </div>
         )}
 
@@ -2344,7 +2344,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           </div>
                           <div className="text-left">
                             <h4 className="font-semibold text-sm">Dia {idx + 1}</h4>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-[13px] text-foreground/80 leading-relaxed break-words">
                               {formatItineraryDayHeader(dayDate)}
                             </p>
                           </div>
@@ -2387,8 +2387,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                   {periodActs.map((act: any) => (
                                     <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
                                       <p className="text-sm font-medium">{act.title}</p>
-                                      {act.description && <p className="text-xs text-muted-foreground">{act.description}</p>}
-                                      {act.start_time && <p className="text-xs text-muted-foreground">⏰ {act.start_time}</p>}
+                                      {act.description && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{act.description}</p>}
+                                      {act.start_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">⏰ {act.start_time}</p>}
                                       {act.location && (
                                         act.maps_url ? (
                                           <a
@@ -2400,10 +2400,10 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                             <MapPin className="h-3 w-3" /> {act.location} <ExternalLink className="h-3 w-3" />
                                           </a>
                                         ) : (
-                                          <p className="text-xs text-muted-foreground">📍 {act.location}</p>
+                                          <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📍 {act.location}</p>
                                         )
                                       )}
-                                      {act.notes && <p className="text-xs text-muted-foreground italic">{act.notes}</p>}
+                                      {act.notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{act.notes}</p>}
                                       {Array.isArray(act.photo_urls) && act.photo_urls.length > 0 && (
                                         <div className="flex gap-1.5 flex-wrap mt-2">
                                           {act.photo_urls.map((p: string, pi: number) => {
@@ -2473,8 +2473,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{agentProfile.name}</p>
-                    {agentProfile.agency_name && <BrandText as="p" className="text-xs text-gray-500 truncate">{agentProfile.agency_name}</BrandText>}
+                    <p className="text-sm font-semibold text-gray-900 break-words">{agentProfile.name}</p>
+                    {agentProfile.agency_name && <BrandText as="p" className="text-xs text-gray-500 break-words">{agentProfile.agency_name}</BrandText>}
                   </div>
                   {whatsappUrl && (
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
