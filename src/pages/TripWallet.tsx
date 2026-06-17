@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon } from "lucide-react";
+import { Search, Globe2 } from "lucide-react";
+import { parseDestinationParts } from "@/lib/destination-parts";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TripItineraryV2 } from "@/components/wallet/TripItineraryV2";
@@ -69,7 +71,7 @@ function WalletCoverPicker({
 }) {
   const [open, setOpen] = useState(false);
   const current: string | null = trip?.wallet_cover_url || null;
-  const candidates: string[] = (() => {
+  const serviceCandidates: string[] = (() => {
     const seen = new Set<string>();
     const out: string[] = [];
     for (const s of (trip?.services || []) as TripService[]) {
@@ -82,6 +84,50 @@ function WalletCoverPicker({
     }
     return out;
   })();
+
+  const destinationParts = parseDestinationParts(trip?.destination);
+  const initialQuery = destinationParts[0] || trip?.destination || "";
+  const [query, setQuery] = useState<string>(initialQuery);
+  const [searchInput, setSearchInput] = useState<string>(initialQuery);
+  const [internetPhotos, setInternetPhotos] = useState<Array<{ photo_url: string; thumb_url: string; source: string }>>([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const photoCache = useState(() => new Map<string, Array<{ photo_url: string; thumb_url: string; source: string }>>())[0];
+
+  const runInternetSearch = async (term: string) => {
+    const q = (term || "").trim();
+    if (q.length < 2) return;
+    setQuery(q);
+    if (photoCache.has(q)) {
+      setInternetPhotos(photoCache.get(q)!);
+      return;
+    }
+    setLoadingPhotos(true);
+    setInternetPhotos([]);
+    try {
+      const { data, error } = await supabase.functions.invoke("activity-photo", {
+        body: { query: q, destination: q, limit: 18 },
+      });
+      if (error) throw error;
+      const list = (data?.photos ?? []) as Array<{ photo_url: string; thumb_url: string; source: string }>;
+      photoCache.set(q, list);
+      setInternetPhotos(list);
+    } catch (e) {
+      console.warn("cover internet search failed", e);
+      setInternetPhotos([]);
+    } finally {
+      setLoadingPhotos(false);
+    }
+  };
+
+  // Auto-run initial search when opening
+  useEffect(() => {
+    if (open && initialQuery) {
+      setSearchInput(initialQuery);
+      runInternetSearch(initialQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-muted-foreground">Foto de capa:</span>
@@ -115,14 +161,54 @@ function WalletCoverPicker({
         </Button>
       )}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Escolher foto de capa</DialogTitle>
           </DialogHeader>
           <p className="text-xs text-muted-foreground">
             A foto selecionada aparece como capa principal da Carteira Digital pública.
-            É independente das fotos do roteiro dia a dia.
+            Busque imagens panorâmicas do destino ou escolha uma foto já adicionada aos serviços.
           </p>
+
+          {/* Search bar */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); runInternetSearch(searchInput); }}
+            className="flex gap-2"
+          >
+            <Input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Ex: Florença, Coliseu, Duomo de Florença…"
+            />
+            <Button type="submit" size="sm" disabled={loadingPhotos} className="gap-1.5">
+              {loadingPhotos ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+              Buscar
+            </Button>
+          </form>
+
+          {/* Suggestion chips from destination parts */}
+          {destinationParts.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              <span className="text-[11px] text-muted-foreground self-center mr-1">Sugestões:</span>
+              {destinationParts.map((part) => (
+                <button
+                  key={part}
+                  type="button"
+                  onClick={() => { setSearchInput(part); runInternetSearch(part); }}
+                  className={cn(
+                    "text-[11px] px-2.5 py-1 rounded-full border transition",
+                    query.toLowerCase() === part.toLowerCase()
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted/40 hover:bg-muted text-foreground border-border"
+                  )}
+                >
+                  {part}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Automática */}
           <button
             type="button"
             onClick={async () => { await onChange(null); setOpen(false); }}
@@ -139,34 +225,85 @@ function WalletCoverPicker({
               <div className="text-xs text-muted-foreground">Usar a foto sugerida pelo destino.</div>
             </div>
           </button>
-          {candidates.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-              Nenhuma foto disponível ainda. Adicione fotos nos serviços da viagem
-              (hospedagem, atrações, etc.) para escolhê-las como capa.
+
+          {/* Internet photo grid */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Globe2 className="h-3.5 w-3.5" />
+              Imagens da internet {query ? `— "${query}"` : ""}
             </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[420px] overflow-y-auto pr-1">
-              {candidates.map((url) => {
-                const selected = current === url;
-                return (
-                  <button
-                    key={url}
-                    type="button"
-                    onClick={async () => { await onChange(url); setOpen(false); }}
-                    className={cn(
-                      "relative aspect-[16/10] rounded-lg overflow-hidden border bg-muted transition",
-                      selected ? "border-primary ring-2 ring-primary" : "hover:opacity-90"
-                    )}
-                  >
-                    <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                    {selected && (
-                      <span className="absolute top-1.5 right-1.5 bg-primary text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center">
-                        <Check className="h-3.5 w-3.5" />
+            {loadingPhotos && internetPhotos.length === 0 ? (
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : internetPhotos.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-5 text-center text-xs text-muted-foreground">
+                Nenhuma foto encontrada. Tente refinar a busca.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {internetPhotos.map((p) => {
+                  const selected = current === p.photo_url;
+                  return (
+                    <button
+                      key={p.photo_url}
+                      type="button"
+                      onClick={async () => { await onChange(p.photo_url); setOpen(false); }}
+                      className={cn(
+                        "relative aspect-[16/10] rounded-lg overflow-hidden border bg-muted transition",
+                        selected ? "border-primary ring-2 ring-primary" : "hover:opacity-90"
+                      )}
+                    >
+                      <img
+                        src={p.thumb_url || p.photo_url}
+                        alt=""
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                      {selected && (
+                        <span className="absolute top-1.5 right-1.5 bg-primary text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center">
+                          <Check className="h-3.5 w-3.5" />
+                        </span>
+                      )}
+                      <span className="absolute bottom-1 right-1 text-[9px] uppercase tracking-wider bg-black/55 text-white rounded px-1 py-0.5">
+                        {p.source.replace("_", " ")}
                       </span>
-                    )}
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Photos from trip services */}
+          {serviceCandidates.length > 0 && (
+            <div className="space-y-2 pt-2 border-t">
+              <div className="text-xs font-medium text-muted-foreground">
+                Fotos dos serviços da viagem
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[260px] overflow-y-auto pr-1">
+                {serviceCandidates.map((url) => {
+                  const selected = current === url;
+                  return (
+                    <button
+                      key={url}
+                      type="button"
+                      onClick={async () => { await onChange(url); setOpen(false); }}
+                      className={cn(
+                        "relative aspect-[16/10] rounded-lg overflow-hidden border bg-muted transition",
+                        selected ? "border-primary ring-2 ring-primary" : "hover:opacity-90"
+                      )}
+                    >
+                      <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      {selected && (
+                        <span className="absolute top-1.5 right-1.5 bg-primary text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center">
+                          <Check className="h-3.5 w-3.5" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </DialogContent>
