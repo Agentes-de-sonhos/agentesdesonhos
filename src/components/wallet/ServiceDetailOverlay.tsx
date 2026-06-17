@@ -29,6 +29,8 @@ interface ServiceDetailOverlayProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: ReactNode;
+  /** Inline CSS variables to theme the portal (e.g. agency brand color). */
+  style?: CSSProperties;
 }
 
 /**
