@@ -91,7 +91,7 @@ export function NextActivityCard({
 
   return (
     <section
-      aria-label="Próxima atividade"
+      aria-label="Próxima atividade do roteiro"
       className="rounded-2xl border bg-card shadow-sm overflow-hidden"
       style={{ borderColor: "hsl(var(--wallet-brand) / 0.18)" }}
     >
@@ -106,7 +106,7 @@ export function NextActivityCard({
           <Sparkles className="h-4 w-4" style={{ color: "hsl(var(--wallet-brand))" }} />
         </div>
         <h3 className="text-[13px] font-semibold uppercase tracking-wider text-foreground/70">
-          Próxima atividade
+          Próxima atividade do roteiro
         </h3>
       </div>
 
