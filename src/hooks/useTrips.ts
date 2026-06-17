@@ -84,6 +84,10 @@ export function useTrips() {
         updateData.trip_title = (updates as any).trip_title;
         historyEntries.push({ field_changed: "Título da viagem", old_value: (current as any)?.trip_title ?? null, new_value: (updates as any).trip_title ?? null });
       }
+      if ((updates as any).wallet_cover_url !== undefined && (updates as any).wallet_cover_url !== (current as any)?.wallet_cover_url) {
+        updateData.wallet_cover_url = (updates as any).wallet_cover_url;
+        historyEntries.push({ field_changed: "Foto de capa", old_value: (current as any)?.wallet_cover_url ?? null, new_value: (updates as any).wallet_cover_url ?? null });
+      }
       if ((updates as any).client_id !== undefined && (updates as any).client_id !== current?.client_id) {
         updateData.client_id = (updates as any).client_id;
       }
