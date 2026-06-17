@@ -1092,6 +1092,15 @@ function TripWalletContent() {
                   )}
                 </div>
 
+                {/* Foto de capa — escolhida pelo agente, usada na Carteira pública */}
+                <WalletCoverPicker
+                  trip={trip}
+                  isSaving={isUpdating}
+                  onChange={async (url) => {
+                    await updateTrip({ id: trip.id, wallet_cover_url: url } as any);
+                  }}
+                />
+
                 {/* Destino — editável */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-muted-foreground">Destino:</span>
