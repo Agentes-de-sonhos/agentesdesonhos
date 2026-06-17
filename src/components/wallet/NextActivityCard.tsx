@@ -91,7 +91,7 @@ export function NextActivityCard({
 
   return (
     <section
-      aria-label="Próxima atividade"
+      aria-label="Próxima atividade do roteiro"
       className="rounded-2xl border bg-card shadow-sm overflow-hidden"
       style={{ borderColor: "hsl(var(--wallet-brand) / 0.18)" }}
     >
