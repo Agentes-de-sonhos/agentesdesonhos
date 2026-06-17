@@ -1970,7 +1970,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
               <div className="space-y-4 min-w-0">
                 <TripCoverHero
-                  title={(tripData as any).trip_title || tripData.client_name}
+                  title={(tripData as any).trip_title || tripData.destination || "Sua Viagem"}
                   destination={tripData.destination}
                   startDate={startDate}
                   endDate={endDate}
