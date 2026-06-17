@@ -2062,6 +2062,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               onOpenChange={setItineraryOpen}
               title="Roteiro dia a dia"
               icon={CalendarDays}
+              style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
             >
               <div ref={itineraryRef}>
               {v2Days && v2Days.length > 0 ? (
