@@ -2316,13 +2316,22 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </div>
               </div>
               {(services.length > 0 || itineraryActivities.length > 0) && (
-                <div className="md:hidden flex items-center gap-3 my-1">
-                  <div className="h-px flex-1 bg-border/60" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Ferramentas de apoio ao passageiro
-                  </span>
-                  <div className="h-px flex-1 bg-border/60" />
-                </div>
+                <>
+                  <div className="md:hidden flex items-center gap-3 my-1">
+                    <div className="h-px flex-1 bg-border/60" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Ferramentas de apoio ao passageiro
+                    </span>
+                    <div className="h-px flex-1 bg-border/60" />
+                  </div>
+                  <div className="hidden md:flex items-center gap-3 my-1">
+                    <div className="h-px flex-1 bg-border/60" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Ferramentas de apoio ao passageiro
+                    </span>
+                    <div className="h-px flex-1 bg-border/60" />
+                  </div>
+                </>
               )}
               <TripConvertersWrapper
                 destination={tripData.destination}
