@@ -594,18 +594,19 @@ export default function Perfil() {
           </div>
         )}
 
-        {/* Community profile - full width below */}
-        <CommunityProfileCard />
+        {/* Community profile and Visual Identity side by side */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <CommunityProfileCard />
 
-        {/* Identidade Visual da Agência */}
-        <AgencyBrandColorCard
-          initialColor={profile?.agency_primary_color ?? null}
-          agencyLogoUrl={profile?.agency_logo_url ?? null}
-          onSaved={(color) => {
-            setProfile((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
-            setFormData((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
-          }}
-        />
+          <AgencyBrandColorCard
+            initialColor={profile?.agency_primary_color ?? null}
+            agencyLogoUrl={profile?.agency_logo_url ?? null}
+            onSaved={(color) => {
+              setProfile((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
+              setFormData((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
+            }}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );
