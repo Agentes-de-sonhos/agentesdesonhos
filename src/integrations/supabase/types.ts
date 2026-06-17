@@ -7042,6 +7042,7 @@ export type Database = {
           address_number: string | null
           agency_logo_url: string | null
           agency_name: string | null
+          agency_primary_color: string | null
           avatar_url: string | null
           bio: string | null
           city: string | null
@@ -7071,6 +7072,7 @@ export type Database = {
           address_number?: string | null
           agency_logo_url?: string | null
           agency_name?: string | null
+          agency_primary_color?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -7100,6 +7102,7 @@ export type Database = {
           address_number?: string | null
           agency_logo_url?: string | null
           agency_name?: string | null
+          agency_primary_color?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -10979,6 +10982,7 @@ export type Database = {
         Returns: {
           agency_logo_url: string
           agency_name: string
+          agency_primary_color: string
           avatar_url: string
           city: string
           name: string
