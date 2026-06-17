@@ -48,6 +48,7 @@ export function ServiceDetailOverlay({
   open,
   onOpenChange,
   children,
+  style,
 }: ServiceDetailOverlayProps) {
   const isMobile = useIsMobile();
   const Icon = icon ?? (service ? ICONS[service.service_type] ?? FileText : FileText);
