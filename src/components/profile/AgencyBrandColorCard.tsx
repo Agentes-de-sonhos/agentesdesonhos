@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,14 +192,24 @@ function LogoEyedropperDialog({
   onPick: (hex: string) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasEl, setCanvasEl] = useState<HTMLCanvasElement | null>(null);
   const [hoverColor, setHoverColor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const handleCanvasRef = useCallback((node: HTMLCanvasElement | null) => {
+    canvasRef.current = node;
+    setCanvasEl(node);
+  }, []);
 
   useEffect(() => {
-    if (!open || !logoUrl) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!open || !logoUrl || !canvasEl) return;
+    const canvas = canvasEl;
     setLoading(true);
+    setLoadError(null);
+    setHoverColor(null);
+    canvas.width = 0;
+    canvas.height = 0;
     let objectUrl: string | null = null;
     let cancelled = false;
 
@@ -209,10 +219,13 @@ function LogoEyedropperDialog({
         if (withCrossOrigin) img.crossOrigin = "anonymous";
         img.onload = () => {
           if (cancelled) return resolve();
+          const naturalWidth = img.naturalWidth || img.width;
+          const naturalHeight = img.naturalHeight || img.height;
+          if (!naturalWidth || !naturalHeight) return reject(new Error("empty image"));
           const maxW = 600;
-          const scale = Math.min(1, maxW / img.width);
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
+          const scale = Math.min(1, maxW / naturalWidth);
+          canvas.width = Math.max(1, Math.round(naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(naturalHeight * scale));
           const ctx = canvas.getContext("2d");
           if (!ctx) return reject(new Error("no ctx"));
           ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -251,7 +264,7 @@ function LogoEyedropperDialog({
       try {
         await drawImage(logoUrl, false);
       } catch {
-        /* ignore */
+        if (!cancelled) setLoadError("Não foi possível carregar o logotipo. Reenvie a imagem em PNG, JPG ou WebP e tente novamente.");
       }
       if (!cancelled) setLoading(false);
     })();
@@ -260,7 +273,7 @@ function LogoEyedropperDialog({
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [open, logoUrl]);
+  }, [open, logoUrl, canvasEl]);
 
   const readColor = (e: React.MouseEvent<HTMLCanvasElement>): string | null => {
     const canvas = canvasRef.current;
@@ -294,7 +307,7 @@ function LogoEyedropperDialog({
           <div className="relative flex items-center justify-center rounded-lg border bg-[linear-gradient(45deg,#f3f4f6_25%,transparent_25%),linear-gradient(-45deg,#f3f4f6_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f3f4f6_75%),linear-gradient(-45deg,transparent_75%,#f3f4f6_75%)] bg-[length:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0px] p-4 min-h-[260px]">
             {loading && <Loader2 className="absolute h-6 w-6 animate-spin text-muted-foreground" />}
             <canvas
-              ref={canvasRef}
+              ref={handleCanvasRef}
               className="max-w-full max-h-[400px] cursor-crosshair"
               onMouseMove={(e) => {
                 const c = readColor(e);
@@ -305,6 +318,9 @@ function LogoEyedropperDialog({
                 if (c) onPick(c);
               }}
             />
+            {loadError && !loading && (
+              <p className="px-6 text-center text-sm text-muted-foreground">{loadError}</p>
+            )}
           </div>
           {hoverColor && (
             <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
