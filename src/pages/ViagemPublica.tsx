@@ -530,7 +530,10 @@ function PublicServiceCard({ service }: { service: TripService }) {
             </p>
           )}
         </div>
-        {details.length > 0 && (
+        {/* Cruise: premium fact grid with icons */}
+        {isCruise ? (
+          <CruiseFactGrid data={data} />
+        ) : details.length > 0 && (
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-1">
             {details.map((d, i) => {
               const idx = d.indexOf(':');
