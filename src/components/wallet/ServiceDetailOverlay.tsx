@@ -108,7 +108,7 @@ export function ServiceDetailOverlay({
     </div>
   );
 
-  const zoom = fontScale === "sm" ? 0.92 : fontScale === "lg" ? 1.18 : 1;
+  const zoom = fontScale === "sm" ? 1 : fontScale === "lg" ? 1.25 : 1.18;
   const contentZoomStyle = { zoom } as CSSProperties;
 
   if (isMobile) {
