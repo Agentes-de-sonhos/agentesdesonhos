@@ -1929,7 +1929,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 {availableTabs.map((type) => {
                   const Icon = SERVICE_ICONS[type];
                   const colors = SERVICE_COLORS[type];
-                  const isActive = openSection === `service-${type}`;
                   return (
                     <button
                       key={type}
