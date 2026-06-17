@@ -702,12 +702,24 @@ function PublicServiceCard({ service }: { service: TripService }) {
             </div>
           );
         })()}
-        <div className="mb-4">
-          <h4 className="font-semibold text-lg sm:text-xl leading-tight tracking-tight text-foreground">{title}</h4>
-          {dates && (
-            <p className="mt-1.5 text-[13px] text-muted-foreground flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" /> <span>{dates}</span>
-            </p>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h4 className="font-semibold text-lg sm:text-xl leading-tight tracking-tight text-foreground">{title}</h4>
+            {dates && (
+              <p className="mt-1.5 text-[13px] text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" /> <span>{dates}</span>
+              </p>
+            )}
+          </div>
+          {cruiseStatusLabel && (
+            <span className={cn(
+              'inline-flex items-center rounded-full px-3 py-1 text-[11.5px] font-semibold shrink-0',
+              cruiseStatusLabel.tone === 'emerald' && 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
+              cruiseStatusLabel.tone === 'amber' && 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
+              cruiseStatusLabel.tone === 'slate' && 'bg-slate-100 text-slate-700 dark:bg-slate-900/40 dark:text-slate-300',
+            )}>
+              {cruiseStatusLabel.label}
+            </span>
           )}
         </div>
         {/* Cruise: premium fact grid with icons */}
