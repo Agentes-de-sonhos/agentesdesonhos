@@ -2220,32 +2220,30 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
             : "";
           return (
-            <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-              <summary className="list-none cursor-pointer bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3 flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center flex-1">Precisa de ajuda? Fale com o seu consultor de viagens</p>
-                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+            <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden" open>
+              <summary className="list-none cursor-pointer px-5 py-3 flex items-center justify-between gap-3">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Precisa de ajuda?</p>
+                <ChevronDown className="h-4 w-4 text-gray-400 transition-transform group-open:hidden" />
+                <ChevronUp className="h-4 w-4 text-gray-400 transition-transform hidden group-open:block" />
               </summary>
-              <div className="p-6 sm:p-8">
-                <div className="flex flex-col items-center text-center space-y-5">
+              <div className="px-5 pb-5 pt-1">
+                <div className="flex items-center gap-4">
                   {agentProfile.avatar_url ? (
-                    <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-28 w-28 rounded-full object-cover border-4 border-primary/10 shadow-lg ring-2 ring-white" />
+                    <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full object-cover border border-gray-200 shrink-0" />
                   ) : (
-                    <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold shadow-lg ring-2 ring-white">
+                    <div className="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600 text-2xl font-bold shrink-0">
                       {agentProfile.name?.charAt(0).toUpperCase() || '?'}
                     </div>
                   )}
-                  <div className="space-y-1">
-                    <p className="text-xl font-bold text-foreground">{agentProfile.name}</p>
-                    {agentProfile.agency_name && <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
-                    {(agentProfile.city || agentProfile.state) && (
-                      <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
-                    )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{agentProfile.name}</p>
+                    {agentProfile.agency_name && <BrandText as="p" className="text-xs text-gray-500 truncate">{agentProfile.agency_name}</BrandText>}
                   </div>
                   {whatsappUrl && (
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-8 py-3.5 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                      <WhatsAppIcon className="h-5 w-5" />
-                      Falar no WhatsApp
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-3.5 py-2 font-semibold text-xs shadow-sm transition-colors shrink-0">
+                      <WhatsAppIcon className="h-4 w-4" />
+                      WhatsApp
                     </a>
                   )}
                 </div>
