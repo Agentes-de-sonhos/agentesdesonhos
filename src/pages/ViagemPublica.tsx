@@ -2262,6 +2262,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         service={activeService}
         open={activeService !== null}
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
+        style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
       >
         {activeService && <PublicServiceCard service={activeService} />}
       </ServiceDetailOverlay>
