@@ -2062,6 +2062,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               onOpenChange={setItineraryOpen}
               title="Roteiro dia a dia"
               icon={CalendarDays}
+              style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
             >
               <div ref={itineraryRef}>
               {v2Days && v2Days.length > 0 ? (
@@ -2261,6 +2262,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         service={activeService}
         open={activeService !== null}
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
+        style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
       >
         {activeService && <PublicServiceCard service={activeService} />}
       </ServiceDetailOverlay>
@@ -2270,6 +2272,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
         title={activeGroupType ? SERVICE_LABELS[activeGroupType] : undefined}
         icon={activeGroupType ? SERVICE_ICONS[activeGroupType] : undefined}
+        style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
       >
         {activeGroupType && (
           <div className="space-y-3">

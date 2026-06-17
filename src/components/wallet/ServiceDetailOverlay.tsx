@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,6 +29,8 @@ interface ServiceDetailOverlayProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: ReactNode;
+  /** Inline CSS variables to theme the portal (e.g. agency brand color). */
+  style?: CSSProperties;
 }
 
 /**
@@ -46,6 +48,7 @@ export function ServiceDetailOverlay({
   open,
   onOpenChange,
   children,
+  style,
 }: ServiceDetailOverlayProps) {
   const isMobile = useIsMobile();
   const Icon = icon ?? (service ? ICONS[service.service_type] ?? FileText : FileText);
@@ -58,6 +61,7 @@ export function ServiceDetailOverlay({
         <SheetContent
           side="bottom"
           className="max-h-[85vh] p-0 rounded-t-2xl flex flex-col"
+          style={style}
         >
           <SheetHeader className="px-4 py-3 border-b text-left shrink-0">
             <SheetTitle className="flex items-center gap-2 text-base">
@@ -73,7 +77,7 @@ export function ServiceDetailOverlay({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[85vh] p-0 flex flex-col" style={style}>
         <DialogHeader className="px-6 py-4 border-b text-left">
           <DialogTitle className="flex items-center gap-2 text-base">
             <Icon className="h-5 w-5 text-primary" />
