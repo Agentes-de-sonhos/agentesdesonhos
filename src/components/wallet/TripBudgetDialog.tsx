@@ -102,141 +102,122 @@ function daysRemaining(endDate: Date | null): number {
   return Math.max(diff, 0);
 }
 
-/* ─── Setup dialog ─── */
-function SetupDialog({
-  open, onOpenChange, suggestedCurrency, initial, onSave,
+/* ─── Inline setup view (no nested dialog) ─── */
+function SetupView({
+  suggestedCurrency, initial, onSave, onCancel,
 }: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
   suggestedCurrency: Currency;
   initial?: { budget: number; currency: Currency };
   onSave: (budget: number, currency: Currency) => void;
+  onCancel: () => void;
 }) {
   const [amount, setAmount] = useState<string>(initial ? String(initial.budget) : "");
   const [currency, setCurrency] = useState<Currency>(initial?.currency || suggestedCurrency);
-
-  useEffect(() => {
-    if (open) {
-      setAmount(initial ? String(initial.budget) : "");
-      setCurrency(initial?.currency || suggestedCurrency);
-    }
-  }, [open, initial, suggestedCurrency]);
 
   const n = parseFloat(amount.replace(",", ".")) || 0;
   const valid = n > 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <PiggyBank className="h-5 w-5" style={{ color: "hsl(var(--wallet-brand))" }} />
-            {initial ? "Editar orçamento" : "Definir orçamento"}
-          </DialogTitle>
-          <DialogDescription>
-            Qual seu orçamento para esta viagem?
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70">Valor</label>
-            <Input
-              inputMode="decimal"
-              autoFocus
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Ex: 5000"
-              className="text-lg font-semibold"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70">Moeda</label>
-            <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(["USD", "EUR", "GBP"] as Currency[]).map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {CURRENCY_META[c].symbol} — {CURRENCY_META[c].label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="space-y-4">
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground/70">Valor</label>
+          <Input
+            inputMode="decimal"
+            autoFocus
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="Ex: 5000"
+            className="text-lg font-semibold"
+          />
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button disabled={!valid} onClick={() => { onSave(n, currency); onOpenChange(false); }}>
-            Salvar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground/70">Moeda</label>
+          <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(["USD", "EUR", "GBP"] as Currency[]).map((c) => (
+                <SelectItem key={c} value={c}>
+                  {CURRENCY_META[c].symbol} — {CURRENCY_META[c].label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        {initial && (
+          <Button variant="outline" onClick={onCancel}>Cancelar</Button>
+        )}
+        <Button
+          disabled={!valid}
+          onClick={() => onSave(n, currency)}
+          className="bg-[hsl(var(--wallet-brand))] hover:bg-[hsl(var(--wallet-brand)/0.9)] text-white"
+        >
+          Salvar
+        </Button>
+      </div>
+    </div>
   );
 }
 
-/* ─── Manual entry dialog ─── */
-function ManualEntryDialog({
-  open, onOpenChange, currency, onAdd,
+/* ─── Inline manual entry view (no nested dialog) ─── */
+function ManualEntryView({
+  currency, onAdd, onCancel,
 }: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
   currency: Currency;
   onAdd: (amount: number, category: CategoryId, note?: string) => void;
+  onCancel: () => void;
 }) {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<CategoryId>("food");
   const [note, setNote] = useState("");
 
-  useEffect(() => {
-    if (open) { setAmount(""); setCategory("food"); setNote(""); }
-  }, [open]);
-
   const n = parseFloat(amount.replace(",", ".")) || 0;
   const valid = n > 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Novo lançamento</DialogTitle>
-          <DialogDescription>
-            Registre um gasto em {CURRENCY_META[currency].symbol}.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70">Valor</label>
-            <Input
-              inputMode="decimal"
-              autoFocus
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Ex: 45,90"
-              className="text-lg font-semibold"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70">Categoria</label>
-            <Select value={category} onValueChange={(v) => setCategory(v as CategoryId)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70">Descrição (opcional)</label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex: Jantar no centro" />
-          </div>
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Registre um gasto em {CURRENCY_META[currency].symbol}.
+      </p>
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground/70">Valor</label>
+          <Input
+            inputMode="decimal"
+            autoFocus
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="Ex: 45,90"
+            className="text-lg font-semibold"
+          />
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button disabled={!valid} onClick={() => { onAdd(n, category, note.trim() || undefined); onOpenChange(false); }}>
-            Registrar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground/70">Categoria</label>
+          <Select value={category} onValueChange={(v) => setCategory(v as CategoryId)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground/70">Descrição (opcional)</label>
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ex: Jantar no centro" />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
+        <Button
+          disabled={!valid}
+          onClick={() => onAdd(n, category, note.trim() || undefined)}
+          className="bg-[hsl(var(--wallet-brand))] hover:bg-[hsl(var(--wallet-brand)/0.9)] text-white"
+        >
+          Registrar
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -255,8 +236,7 @@ export function TripBudgetDialog({
 }) {
   const suggested = useMemo(() => inferCurrency(destination), [destination]);
   const [state, setState] = useState<BudgetState | null>(() => loadState(tripId));
-  const [setupOpen, setSetupOpen] = useState(false);
-  const [manualOpen, setManualOpen] = useState(false);
+  const [view, setView] = useState<"main" | "setup" | "manual">("main");
 
   useEffect(() => {
     if (state) saveState(tripId, state);
@@ -265,6 +245,7 @@ export function TripBudgetDialog({
   useEffect(() => {
     if (open) {
       setState(loadState(tripId));
+      setView("main");
     }
   }, [open, tripId]);
 
@@ -274,6 +255,7 @@ export function TripBudgetDialog({
       currency,
       entries: prev?.entries || [],
     }));
+    setView("main");
   };
 
   const addEntry = (amount: number, category: CategoryId, note?: string) => {
@@ -288,6 +270,7 @@ export function TripBudgetDialog({
       };
       return { ...prev, entries: [e, ...prev.entries] };
     });
+    setView("main");
   };
 
   const removeEntry = (id: string) => {
@@ -298,9 +281,30 @@ export function TripBudgetDialog({
     if (!confirm("Tem certeza que deseja zerar este orçamento? Os lançamentos serão removidos.")) return;
     try { localStorage.removeItem(storageKey(tripId)); } catch {}
     setState(null);
+    setView("main");
   };
 
   const content = (() => {
+    if (view === "setup") {
+      return (
+        <SetupView
+          suggestedCurrency={suggested}
+          initial={state ? { budget: state.budget, currency: state.currency } : undefined}
+          onSave={handleSetup}
+          onCancel={() => setView("main")}
+        />
+      );
+    }
+    if (view === "manual" && state) {
+      return (
+        <ManualEntryView
+          currency={state.currency}
+          onAdd={addEntry}
+          onCancel={() => setView("main")}
+        />
+      );
+    }
+
     if (!state) {
       return (
         <div className="space-y-4">
@@ -308,7 +312,7 @@ export function TripBudgetDialog({
             Defina um orçamento e acompanhe seus gastos durante a viagem.
           </p>
           <Button
-            onClick={() => setSetupOpen(true)}
+            onClick={() => setView("setup")}
             className="w-full bg-[hsl(var(--wallet-brand))] hover:bg-[hsl(var(--wallet-brand)/0.9)] text-white"
           >
             <PiggyBank className="h-4 w-4 mr-1.5" />
@@ -381,7 +385,7 @@ export function TripBudgetDialog({
         </div>
 
         {/* Edit button */}
-        <Button variant="outline" size="sm" className="w-full" onClick={() => setSetupOpen(true)}>
+        <Button variant="outline" size="sm" className="w-full" onClick={() => setView("setup")}>
           Editar orçamento
         </Button>
 
@@ -408,7 +412,7 @@ export function TripBudgetDialog({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setManualOpen(true)}
+            onClick={() => setView("manual")}
             className="mt-2 w-full"
           >
             <Plus className="h-4 w-4 mr-1.5" />
@@ -499,20 +503,6 @@ export function TripBudgetDialog({
             <RotateCcw className="h-3 w-3" /> Zerar
           </button>
         </div>
-
-        <SetupDialog
-          open={setupOpen}
-          onOpenChange={setSetupOpen}
-          suggestedCurrency={suggested}
-          initial={state ? { budget: state.budget, currency: state.currency } : undefined}
-          onSave={handleSetup}
-        />
-        <ManualEntryDialog
-          open={manualOpen}
-          onOpenChange={setManualOpen}
-          currency={state.currency}
-          onAdd={addEntry}
-        />
       </div>
     );
   })();
@@ -523,9 +513,19 @@ export function TripBudgetDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wallet className="h-5 w-5" style={{ color: "hsl(var(--wallet-brand))" }} />
-            Meu orçamento
+            {view === "setup"
+              ? (state ? "Editar orçamento" : "Definir orçamento")
+              : view === "manual"
+              ? "Novo lançamento"
+              : "Meu orçamento"}
           </DialogTitle>
-          <DialogDescription>Controle seus gastos durante a viagem.</DialogDescription>
+          <DialogDescription>
+            {view === "setup"
+              ? "Qual seu orçamento para esta viagem?"
+              : view === "manual"
+              ? "Registre um gasto manual."
+              : "Controle seus gastos durante a viagem."}
+          </DialogDescription>
         </DialogHeader>
         {content}
       </DialogContent>
