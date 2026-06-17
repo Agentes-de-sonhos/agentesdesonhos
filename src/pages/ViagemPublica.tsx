@@ -1831,6 +1831,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     setActiveService(service);
   }, []);
 
+  // Quick-Nav now opens services & itinerary inside overlays instead of
+  // scrolling to long inline sections.
+  const [activeGroupType, setActiveGroupType] = useState<TripServiceType | null>(null);
+  const [itineraryOpen, setItineraryOpen] = useState(false);
+
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
   const { weatherByDate: itineraryWeather } = useTripWeather(
     tripData.destination,
@@ -1914,12 +1919,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         {(() => {
           const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
           const handleCalendarDayClick = (dateStr: string) => {
-            setOpenSection('itinerary');
             setOpenDay(dateStr);
-            setTimeout(() => {
-              const el = dayRefs.current[dateStr] || itineraryRef.current;
-              scrollToElement(el);
-            }, 120);
+            setItineraryOpen(true);
           };
           const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
             <div>
@@ -1928,17 +1929,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 {availableTabs.map((type) => {
                   const Icon = SERVICE_ICONS[type];
                   const colors = SERVICE_COLORS[type];
-                  const isActive = openSection === `service-${type}`;
                   return (
                     <button
                       key={type}
-                      onClick={() => {
-                        setOpenSection(`service-${type}`);
-                        setTimeout(() => scrollToElement(sectionRefs.current[type]), 80);
-                      }}
+                      onClick={() => setActiveGroupType(type)}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
-                        isActive ? cn(colors.activeBorder, colors.activeGlow, "shadow-md") : cn(colors.border, "hover:shadow-md"),
+                        cn(colors.border, "hover:shadow-md"),
                         colors.hoverBg
                       )}
                     >
@@ -1952,16 +1949,12 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 })}
                 {itineraryActivities.length > 0 && (() => {
                   const itColors = SERVICE_COLORS.itinerary;
-                  const isActive = openSection === 'itinerary';
                   return (
                     <button
-                      onClick={() => {
-                        setOpenSection('itinerary');
-                        setTimeout(() => scrollToElement(itineraryRef.current), 80);
-                      }}
+                      onClick={() => setItineraryOpen(true)}
                       className={cn(
                         "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
-                        isActive ? cn(itColors.activeBorder, itColors.activeGlow, "shadow-md") : cn(itColors.border, "hover:shadow-md"),
+                        cn(itColors.border, "hover:shadow-md"),
                         itColors.hoverBg
                       )}
                     >
@@ -2007,26 +2000,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           );
         })()}
 
-        {/* Services Section */}
-        {services.length > 0 && (
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Serviços da viagem</h2>
-            <div className="space-y-3">
-              {availableTabs.map((type) => (
-                <ServiceSection
-                  key={type}
-                  type={type}
-                  services={grouped[type]}
-                  isOpen={openSection === `service-${type}`}
-                  onToggle={() => toggleSection(`service-${type}`)}
-                  sectionRef={(el) => { sectionRefs.current[type] = el; }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {services.length === 0 && (
+        {/* Services & Roteiro são acessados via Navegação Rápida (overlays). */}
+        {services.length === 0 && itineraryActivities.length === 0 && (
           <Card className="shadow-sm">
             <CardContent className="py-8 text-center text-muted-foreground">
               Nenhum serviço adicionado ainda
@@ -2034,7 +2009,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           </Card>
         )}
 
-        {/* Day-by-Day Itinerary Section */}
+        {/* Itinerary overlay — opened from Navegação Rápida / Calendar */}
         {itineraryActivities.length > 0 && (() => {
           const PERIOD_ICONS: Record<string, typeof Sun> = { morning: Sun, afternoon: Sunset, evening: Moon };
           const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
@@ -2046,8 +2021,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           const sortedDates = Object.keys(grouped_days).sort();
 
           return (
-            <div ref={itineraryRef} style={{ scrollMarginTop: '110px' }}>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Roteiro dia a dia</h2>
+            <ServiceDetailOverlay
+              open={itineraryOpen}
+              onOpenChange={setItineraryOpen}
+              title="Roteiro dia a dia"
+              icon={CalendarDays}
+            >
+              <div ref={itineraryRef}>
               {v2Days && v2Days.length > 0 ? (
                 <div className="space-y-3">
                   {v2Days.map((day) => {
@@ -2194,7 +2174,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 })}
               </div>
               )}
-            </div>
+              </div>
+            </ServiceDetailOverlay>
           );
         })()}
 
@@ -2251,6 +2232,21 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
       >
         {activeService && <PublicServiceCard service={activeService} />}
+      </ServiceDetailOverlay>
+      {/* Group overlay: lista todos os serviços de um mesmo tipo (Passagens, Hospedagem, etc.) */}
+      <ServiceDetailOverlay
+        open={activeGroupType !== null}
+        onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
+        title={activeGroupType ? SERVICE_LABELS[activeGroupType] : undefined}
+        icon={activeGroupType ? SERVICE_ICONS[activeGroupType] : undefined}
+      >
+        {activeGroupType && (
+          <div className="space-y-3">
+            {(grouped[activeGroupType] || []).map((s) => (
+              <PublicServiceCard key={s.id} service={s} />
+            ))}
+          </div>
+        )}
       </ServiceDetailOverlay>
     </div>
     </VoucherAccessCtx.Provider>

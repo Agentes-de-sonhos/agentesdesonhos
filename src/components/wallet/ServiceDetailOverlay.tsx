@@ -22,7 +22,10 @@ const ICONS: Record<string, LucideIcon> = {
 };
 
 interface ServiceDetailOverlayProps {
-  service: TripService | null;
+  service?: TripService | null;
+  // Optional overrides used when rendering a group/list (no single service)
+  title?: string;
+  icon?: LucideIcon;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: ReactNode;
@@ -38,13 +41,16 @@ interface ServiceDetailOverlayProps {
  */
 export function ServiceDetailOverlay({
   service,
+  title,
+  icon,
   open,
   onOpenChange,
   children,
 }: ServiceDetailOverlayProps) {
   const isMobile = useIsMobile();
-  const Icon = service ? ICONS[service.service_type] ?? FileText : FileText;
-  const label = service ? SERVICE_LABELS[service.service_type] ?? "Serviço" : "Serviço";
+  const Icon = icon ?? (service ? ICONS[service.service_type] ?? FileText : FileText);
+  const label =
+    title ?? (service ? SERVICE_LABELS[service.service_type] ?? "Serviço" : "Serviço");
 
   if (isMobile) {
     return (
