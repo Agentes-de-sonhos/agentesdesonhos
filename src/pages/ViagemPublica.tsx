@@ -2007,21 +2007,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   startDate={startDate}
                   endDate={endDate}
                 />
-                <div
-                  style={{
-                    ["--primary" as any]: "0 0% 18%",
-                    ["--primary-foreground" as any]: "0 0% 100%",
-                    ["--ring" as any]: "0 0% 40%",
-                  }}
-                >
-                  <TripCalendarWithWeather
-                    destination={tripData.destination}
-                    startDate={startDate}
-                    endDate={endDate}
-                    itineraryDates={itineraryDates}
-                    onDayClick={handleCalendarDayClick}
-                  />
-                </div>
+                <TripCalendarWithWeather
+                  destination={tripData.destination}
+                  startDate={startDate}
+                  endDate={endDate}
+                  itineraryDates={itineraryDates}
+                  onDayClick={handleCalendarDayClick}
+                />
                 <TripConvertersWrapper
                   destination={tripData.destination}
                   startDate={startDate}
