@@ -56,7 +56,7 @@ export function NextActivityCard({
   onOpenItinerary,
 }: {
   activities: ItineraryActivityLike[];
-  onOpenItinerary: () => void;
+  onOpenItinerary: (dayDate?: string) => void;
 }) {
   const [now, setNow] = useState<Date>(() => new Date());
 
