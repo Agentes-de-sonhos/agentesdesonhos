@@ -297,7 +297,7 @@ export function TripCalendar({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 px-4 py-2 text-[10px] text-muted-foreground border-t border-border/40 bg-muted/30">
+      <div className={cn("flex items-center justify-center text-[10px] text-muted-foreground border-t border-border/40 bg-muted/30", compact ? "gap-3 px-3 py-1.5" : "gap-4 px-4 py-2")}>
         <span className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-sm bg-primary" /> Início/Fim
         </span>
