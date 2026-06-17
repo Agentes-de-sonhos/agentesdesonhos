@@ -2272,6 +2272,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
         title={activeGroupType ? SERVICE_LABELS[activeGroupType] : undefined}
         icon={activeGroupType ? SERVICE_ICONS[activeGroupType] : undefined}
+        style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
       >
         {activeGroupType && (
           <div className="space-y-3">
