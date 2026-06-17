@@ -2008,6 +2008,9 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             </CardContent>
           </Card>
         )}
+
+        {/* Itinerary overlay — opened from Navegação Rápida / Calendar */}
+        {itineraryActivities.length > 0 && (() => {
           const PERIOD_ICONS: Record<string, typeof Sun> = { morning: Sun, afternoon: Sunset, evening: Moon };
           const PERIOD_LABELS: Record<string, string> = { morning: "Manhã", afternoon: "Tarde", evening: "Noite" };
           const grouped_days = itineraryActivities.reduce((acc: Record<string, any[]>, act: any) => {
@@ -2018,8 +2021,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           const sortedDates = Object.keys(grouped_days).sort();
 
           return (
-            <div ref={itineraryRef} style={{ scrollMarginTop: '110px' }}>
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">Roteiro dia a dia</h2>
+            <ServiceDetailOverlay
+              open={itineraryOpen}
+              onOpenChange={setItineraryOpen}
+              title="Roteiro dia a dia"
+              icon={CalendarDays}
+            >
+              <div ref={itineraryRef}>
               {v2Days && v2Days.length > 0 ? (
                 <div className="space-y-3">
                   {v2Days.map((day) => {
