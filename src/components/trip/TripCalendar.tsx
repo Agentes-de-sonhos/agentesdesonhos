@@ -251,7 +251,8 @@ export function TripCalendar({
               disabled={!clickable}
               onClick={() => clickable && onDayClick?.(dateStr)}
               className={cn(
-                "relative aspect-square flex items-center justify-center text-xs rounded-lg transition-all duration-150",
+                "relative aspect-square flex items-center justify-center transition-all duration-150",
+                compact ? "text-[11px] rounded-md" : "text-xs rounded-lg",
                 !inMonth && "text-muted-foreground/40",
                 inMonth && !inTrip && "text-foreground/70",
                 inTrip && !isStart && !isEnd && "bg-primary/15 text-primary font-semibold",
