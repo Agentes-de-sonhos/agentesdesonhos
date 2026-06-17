@@ -1943,8 +1943,20 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         {(() => {
           const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
           const handleCalendarDayClick = (dateStr: string) => {
-            setOpenDay(dateStr);
+            const wasOpen = itineraryOpen;
+            const prevDay = openDay;
             setItineraryOpen(true);
+            setOpenDay(dateStr);
+            // Wait for the sheet open animation (~300ms) before scrolling,
+            // and a bit longer if we're also swapping the expanded day so the
+            // Collapsible transition has settled.
+            const delay = !wasOpen ? 420 : prevDay !== dateStr ? 350 : 60;
+            setTimeout(() => {
+              const el = dayRefs.current[dateStr];
+              if (el && typeof el.scrollIntoView === "function") {
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }, delay);
           };
           const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
             <div>
