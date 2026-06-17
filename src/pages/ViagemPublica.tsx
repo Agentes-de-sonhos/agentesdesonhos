@@ -1896,7 +1896,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         </div>
       </header>
 
-      <div className="container max-w-5xl mx-auto px-4 py-6 space-y-6">
+      <div className="container max-w-5xl mx-auto px-4 pt-0 pb-6 space-y-6">
         {/* Trip Overview + Calendar (side-by-side on desktop) */}
         {(() => {
           const itineraryDates = new Set<string>(itineraryActivities.map((a: any) => a.day_date));
