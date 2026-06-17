@@ -8,7 +8,10 @@ export interface DayWeather {
 }
 
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
-const FORECAST_HORIZON_DAYS = 16;
+// Open-Meteo's forecast endpoint accepts at most ~15 days ahead of today.
+// Using a larger value triggers an "out of allowed range" error that
+// rejects the entire request (no day comes back), so keep this conservative.
+const FORECAST_HORIZON_DAYS = 15;
 
 interface CacheShape {
   savedAt: number;
