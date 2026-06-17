@@ -828,91 +828,78 @@ function PublicServiceCard({ service }: { service: TripService }) {
 
         {/* Cruise itinerary */}
         {isCruise && data.itinerary?.length > 0 && (
-          <div className="mt-4 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-3">Roteiro</p>
-            <ol className="relative space-y-3 pl-4 before:absolute before:left-[5px] before:top-1.5 before:bottom-1.5 before:w-px before:bg-border">
-              {data.itinerary.map((stop: any, i: number) => (
-                <li key={i} className="relative">
-                  <span className="absolute -left-4 top-1.5 h-2.5 w-2.5 rounded-full bg-background ring-2 ring-primary/60" />
-                  {stop.date && (
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">{stop.date}</p>
-                  )}
-                  <p className="text-[14px] font-medium text-foreground leading-snug">
-                    {stop.port}
-                    {stop.stop_type === 'navegacao' && (
-                      <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                        Navegação
-                      </span>
-                    )}
-                  </p>
-                  {(stop.arrival_time || stop.departure_time) && (
-                    <p className="text-[12px] text-muted-foreground mt-0.5">
-                      {stop.arrival_time && <>Chegada {stop.arrival_time}</>}
-                      {stop.arrival_time && stop.departure_time && <span className="mx-1.5 text-muted-foreground/50">•</span>}
-                      {stop.departure_time && <>Saída {stop.departure_time}</>}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ol>
+          <div className="mt-5">
+            <CruiseItineraryTimeline stops={data.itinerary} />
           </div>
         )}
 
         {/* Cruise boarding instructions */}
         {isCruise && (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes) && (
-          <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⚠️ Orientações de Embarque</p>
-            {data.boarding_terminal && <p className="text-xs text-muted-foreground">Terminal: {data.boarding_terminal}</p>}
-            {data.recommended_arrival && <p className="text-xs text-muted-foreground">Chegada: {data.recommended_arrival}</p>}
-            {data.required_documents && <p className="text-xs text-muted-foreground">Documentos: {data.required_documents}</p>}
-            {data.baggage_policy && <p className="text-xs text-muted-foreground">Bagagem: {data.baggage_policy}</p>}
-            {data.dress_code && <p className="text-xs text-muted-foreground">Dress Code: {data.dress_code}</p>}
-            {data.boarding_notes && <p className="text-xs text-muted-foreground italic">{data.boarding_notes}</p>}
+          <div className="mt-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 ring-1 ring-amber-200/70 dark:ring-amber-900/40 p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
+              <p className="text-[13px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4">
+              <BoardingFact icon={Building2} label="Terminal" value={data.boarding_terminal || 'A confirmar'} />
+              <BoardingFact icon={FileText} label="Documentos" value={data.required_documents || 'Passaportes válidos, vistos e formulários de check-in.'} />
+              <BoardingFact icon={Shirt} label="Dress Code" value={data.dress_code || 'Trajes casuais; verificar noites temáticas.'} />
+              <BoardingFact icon={Users} label="Chegada" value={data.recommended_arrival || 'Chegar no horário indicado no voucher final.'} />
+              <BoardingFact icon={Briefcase} label="Bagagem" value={data.baggage_policy || 'A confirmar conforme a companhia.'} />
+              {data.boarding_notes && <BoardingFact icon={FileText} label="Observações" value={data.boarding_notes} />}
+            </div>
           </div>
         )}
 
         {/* Cruise check-in button */}
         {isCruise && data.checkin_url && (
-          <div className="mt-3">
-            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer">
-              <Button variant="default" className="w-full sm:w-auto h-11 rounded-full text-sm font-medium shadow-sm px-6">
-                ✅ Fazer Check-in do Cruzeiro
+          <div className="mt-5">
+            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer" className="block">
+              <Button className="w-full h-12 rounded-2xl text-[14px] font-semibold shadow-md bg-[hsl(222_47%_18%)] hover:bg-[hsl(222_47%_24%)] text-white">
+                <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
               </Button>
             </a>
-            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-1">Prazo: {data.checkin_deadline}</p>}
+            {data.checkin_deadline && <p className="text-xs text-muted-foreground mt-2 text-center">Prazo: {data.checkin_deadline}</p>}
           </div>
         )}
 
         {/* Cruise maps */}
-        {isCruise && data.port_maps_url && (
-          <div className="mt-2">
-            <a href={data.port_maps_url} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3">
-                <MapPin className="h-3 w-3 mr-1" /> Rota até o porto
-              </Button>
-            </a>
-          </div>
-        )}
-
-        {/* Cruise ship info */}
-        {isCruise && (data.onboard_currency || data.voltage || data.ship_website) && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {data.onboard_currency && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[12px] text-foreground">
-                <span className="text-muted-foreground">Moeda</span>
-                <span className="font-medium">{data.onboard_currency}</span>
-              </span>
+        {isCruise && (data.port_maps_url || data.onboard_currency || data.voltage || data.ship_website) && (
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {data.port_maps_url && (
+              <a href={data.port_maps_url} target="_blank" rel="noopener noreferrer"
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
+                <div className="flex items-center justify-between">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Rota até o porto</p>
+                <p className="text-[13px] font-semibold text-foreground">Ver no mapa</p>
+              </a>
             )}
-            {data.voltage && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-[12px] text-foreground">
-                <span className="text-muted-foreground">Voltagem</span>
-                <span className="font-medium">{data.voltage}</span>
-              </span>
+            {data.onboard_currency && (
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
+                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Moeda a bordo</p>
+                <p className="text-[13px] font-semibold text-foreground">{data.onboard_currency}</p>
+              </div>
+            )}
+            {(data.voltage || isCruise) && (
+              <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
+                <Plug className="h-4 w-4 text-primary" />
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Voltagem</p>
+                <p className={cn('text-[13px] font-semibold', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || 'A confirmar'}</p>
+              </div>
             )}
             {data.ship_website && (
               <a href={data.ship_website} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[12px] font-medium text-primary hover:bg-primary/10 transition-colors">
-                Site do navio →
+                className="group rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3 hover:ring-primary/40 transition-all">
+                <div className="flex items-center justify-between">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
+                <p className="text-[13px] font-semibold text-foreground truncate">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               </a>
             )}
           </div>
