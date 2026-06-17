@@ -52,12 +52,14 @@ export function LocalClock({
   destinationLabel,
   weatherByDate,
   standalone = false,
+  compact = false,
 }: {
   timezone: string;
   destinationLabel?: string;
   weatherByDate?: Record<string, DayWeather>;
   /** When true, renders with its own rounded card; otherwise as a header strip. */
   standalone?: boolean;
+  compact?: boolean;
 }) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
