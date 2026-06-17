@@ -283,6 +283,7 @@ function TripCalendarWithWeather(props: {
   endDate: Date;
   itineraryDates?: Set<string>;
   onDayClick?: (dateStr: string) => void;
+  compact?: boolean;
 }) {
   const { weatherByDate, timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   return (
@@ -294,6 +295,7 @@ function TripCalendarWithWeather(props: {
       weatherByDate={weatherByDate}
       timezone={timezone}
       destinationLabel={props.destination}
+      compact={props.compact}
     />
   );
 }
