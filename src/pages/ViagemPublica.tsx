@@ -2268,7 +2268,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               <div className="hidden md:flex items-center gap-3 my-1">
                 <div className="h-px flex-1 bg-border/60" />
                 <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Ferramentas e apoio ao passageiro
+                  Seu calendário
                 </span>
                 <div className="h-px flex-1 bg-border/60" />
               </div>
