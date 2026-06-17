@@ -57,6 +57,123 @@ const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   cruise: "Cruzeiro", train: "Trem", other: "Outros",
 };
 
+function WalletCoverPicker({
+  trip,
+  onChange,
+  isSaving,
+}: {
+  trip: any;
+  onChange: (url: string | null) => void | Promise<void>;
+  isSaving?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const current: string | null = trip?.wallet_cover_url || null;
+  const candidates: string[] = (() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const s of (trip?.services || []) as TripService[]) {
+      const all = [s.image_url, ...((s as any).image_urls || [])].filter(
+        (u): u is string => typeof u === "string" && !!u
+      );
+      for (const u of all) {
+        if (!seen.has(u)) { seen.add(u); out.push(u); }
+      }
+    }
+    return out;
+  })();
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-muted-foreground">Foto de capa:</span>
+      {current ? (
+        <img
+          src={current}
+          alt="Foto de capa atual"
+          className="h-10 w-16 rounded-md object-cover border"
+        />
+      ) : (
+        <span className="text-muted-foreground italic font-normal">Automática</span>
+      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-7 px-2 text-xs"
+        onClick={() => setOpen(true)}
+      >
+        <ImageIcon className="h-3.5 w-3.5 mr-1" />
+        {current ? "Trocar" : "Escolher"}
+      </Button>
+      {current && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs text-muted-foreground"
+          onClick={() => onChange(null)}
+          disabled={isSaving}
+        >
+          Remover
+        </Button>
+      )}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Escolher foto de capa</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground">
+            A foto selecionada aparece como capa principal da Carteira Digital pública.
+            É independente das fotos do roteiro dia a dia.
+          </p>
+          <button
+            type="button"
+            onClick={async () => { await onChange(null); setOpen(false); }}
+            className={cn(
+              "w-full flex items-center gap-3 rounded-lg border p-3 text-left text-sm hover:bg-muted/40 transition",
+              !current && "border-primary ring-2 ring-primary"
+            )}
+          >
+            <div className="h-10 w-10 rounded-md bg-muted flex items-center justify-center">
+              <ImageIcon className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <div className="font-medium">Automática</div>
+              <div className="text-xs text-muted-foreground">Usar a foto sugerida pelo destino.</div>
+            </div>
+          </button>
+          {candidates.length === 0 ? (
+            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+              Nenhuma foto disponível ainda. Adicione fotos nos serviços da viagem
+              (hospedagem, atrações, etc.) para escolhê-las como capa.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[420px] overflow-y-auto pr-1">
+              {candidates.map((url) => {
+                const selected = current === url;
+                return (
+                  <button
+                    key={url}
+                    type="button"
+                    onClick={async () => { await onChange(url); setOpen(false); }}
+                    className={cn(
+                      "relative aspect-[16/10] rounded-lg overflow-hidden border bg-muted transition",
+                      selected ? "border-primary ring-2 ring-primary" : "hover:opacity-90"
+                    )}
+                  >
+                    <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                    {selected && (
+                      <span className="absolute top-1.5 right-1.5 bg-primary text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center">
+                        <Check className="h-3.5 w-3.5" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 export default function TripWallet() {
   return (
     <SubscriptionGuard feature="trip_wallet">
