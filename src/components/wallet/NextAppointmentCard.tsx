@@ -215,7 +215,7 @@ export function NextAppointmentCard({
 
   return (
     <section
-      aria-label="Próximo compromisso"
+      aria-label="Próximo serviço contratado"
       className="rounded-2xl border bg-card shadow-sm overflow-hidden"
       style={{ borderColor: "hsl(var(--wallet-brand) / 0.18)" }}
     >
@@ -224,14 +224,14 @@ export function NextAppointmentCard({
           <CalendarClock className="h-4 w-4" style={{ color: "hsl(var(--wallet-brand))" }} />
         </div>
         <h3 className="text-[13px] font-semibold uppercase tracking-wider text-foreground/70">
-          Próximo compromisso
+          Próximo serviço contratado
         </h3>
       </div>
 
       {!next ? (
         <div className="px-4 py-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Nenhum compromisso futuro na sua agenda.
+            Nenhum serviço futuro na sua agenda.
           </p>
           <p className="text-[12px] text-muted-foreground/80 mt-1">
             Quando houver um próximo serviço programado, ele aparecerá aqui.
