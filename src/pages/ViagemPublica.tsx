@@ -2233,6 +2233,21 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       >
         {activeService && <PublicServiceCard service={activeService} />}
       </ServiceDetailOverlay>
+      {/* Group overlay: lista todos os serviços de um mesmo tipo (Passagens, Hospedagem, etc.) */}
+      <ServiceDetailOverlay
+        open={activeGroupType !== null}
+        onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
+        title={activeGroupType ? SERVICE_LABELS[activeGroupType] : undefined}
+        icon={activeGroupType ? SERVICE_ICONS[activeGroupType] : undefined}
+      >
+        {activeGroupType && (
+          <div className="space-y-3">
+            {(grouped[activeGroupType] || []).map((s) => (
+              <PublicServiceCard key={s.id} service={s} />
+            ))}
+          </div>
+        )}
+      </ServiceDetailOverlay>
     </div>
     </VoucherAccessCtx.Provider>
   );
