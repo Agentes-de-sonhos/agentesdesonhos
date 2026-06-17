@@ -37,6 +37,67 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
+import { useActivityPhoto } from "@/hooks/useActivityPhoto";
+
+/**
+ * Hero cover for the trip: shows a destination photo full-width with the
+ * trip title and meta info (destination, dates, duration) overlayed on a
+ * dark gradient. Replaces the old "Resumo da viagem" card.
+ */
+function TripCoverHero({
+  title,
+  destination,
+  startDate,
+  endDate,
+  days,
+}: {
+  title: string;
+  destination: string;
+  startDate: Date;
+  endDate: Date;
+  days: number;
+}) {
+  const { data } = useActivityPhoto({ query: destination, destination });
+  const photo = data?.photo_url || null;
+  return (
+    <div className="relative w-full overflow-hidden rounded-2xl shadow-md ring-1 ring-black/5 bg-muted aspect-[16/11] sm:aspect-[21/9]">
+      {photo ? (
+        <img
+          src={photo}
+          alt={destination}
+          loading="eager"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--wallet-brand)/0.25)] via-[hsl(var(--wallet-brand)/0.15)] to-[hsl(var(--wallet-brand)/0.35)]" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7 text-white">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight drop-shadow-sm leading-tight">
+          {title}
+        </h1>
+        <div className="mt-2 flex flex-nowrap items-center gap-x-3 sm:gap-x-5 gap-y-1 text-[13px] sm:text-sm font-medium whitespace-nowrap overflow-x-auto no-scrollbar">
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span>{destination}</span>
+          </span>
+          <span className="opacity-50">|</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="h-4 w-4 shrink-0" />
+            <span>
+              {format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}
+            </span>
+          </span>
+          <span className="opacity-50">|</span>
+          <span className="inline-flex items-center gap-1.5">
+            <CalendarDays className="h-4 w-4 shrink-0" />
+            <span>{days} dias</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function TripCalendarWithWeather(props: {
   destination: string;
@@ -1910,25 +1971,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div className="grid gap-4 md:grid-cols-[1fr_320px] items-start">
               <div className="space-y-4 min-w-0">
-                <Card className="bg-gradient-to-br from-primary/5 via-primary/8 to-primary/12 border-primary/20 shadow-md overflow-hidden">
-                  <CardContent className="pt-5 pb-5 relative">
-                    <h1 className="text-xl sm:text-2xl font-bold mb-3">{(tripData as any).trip_title || tripData.client_name}</h1>
-                    <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{tripData.destination}</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        <span>{format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span>{days} dias</span>
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <TripCoverHero
+                  title={(tripData as any).trip_title || tripData.client_name}
+                  destination={tripData.destination}
+                  startDate={startDate}
+                  endDate={endDate}
+                  days={days}
+                />
                 {navGrid}
               </div>
               <div className="md:w-[320px] md:justify-self-end w-full space-y-4">

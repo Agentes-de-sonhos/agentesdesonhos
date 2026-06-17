@@ -373,3 +373,7 @@ img {
 }
 .rt-body { font-size: var(--rt-body) !important; line-height: 1.6 !important; }
 .rt-body-lg { font-size: var(--rt-body-lg) !important; line-height: 1.6 !important; }
+
+/* Hide horizontal scrollbar on overflow rows (used on the wallet cover hero) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
