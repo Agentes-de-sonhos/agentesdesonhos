@@ -2342,7 +2342,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
           onPhotosSelected={handleGooglePhotosSelected}
           existingUrls={imageUrls}
           autoShow={placeKind === 'attraction'}
-          loadingLabel={placeKind === 'attraction' ? 'Buscando fotos do local...' : undefined}
+          {...(placeKind === 'attraction' ? { loadingLabel: 'Buscando fotos do local...', buttonLabel: undefined } : {})}
         />
       )}
     </div>
