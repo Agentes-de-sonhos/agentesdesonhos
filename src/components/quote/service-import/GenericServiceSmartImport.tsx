@@ -374,6 +374,52 @@ function ReviewScreen({
                 else if (f.type === "list") update(f.key, v.split(/\n+/).map((s) => s.trim()).filter(Boolean));
                 else update(f.key, v);
               };
+              if (f.type === "cruise_itinerary") {
+                const stops: any[] = Array.isArray(raw) ? raw : [];
+                if (stops.length === 0) return null;
+                return (
+                  <div key={f.key} className="sm:col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground">{f.label}</Label>
+                    <div className="mt-1 rounded-md border bg-muted/20 p-3 space-y-1.5 max-h-64 overflow-y-auto">
+                      <p className="text-[11px] text-muted-foreground">
+                        {stops.length} dia(s) identificado(s). Você poderá editar cada dia em detalhe na tela seguinte.
+                      </p>
+                      <ol className="space-y-1 text-xs">
+                        {stops.map((s: any, i: number) => {
+                          const port = String(s?.porto || s?.local || s?.port || "").trim();
+                          const date = String(s?.data || s?.date || "").trim();
+                          const tipo = String(s?.tipo || s?.stop_type || "").trim();
+                          const arr = String(s?.chegada || s?.arrival_time || "").trim();
+                          const dep = String(s?.saida || s?.departure_time || "").trim();
+                          const obs = String(s?.observacoes || s?.notes || s?.descricao || "").trim();
+                          return (
+                            <li key={i} className="flex items-baseline gap-2 border-b border-border/40 pb-1 last:border-0">
+                              <span className="font-semibold text-foreground">Dia {i + 1}</span>
+                              {date && <span className="text-muted-foreground">{date}</span>}
+                              <span className="text-foreground">{port || (tipo.toLowerCase().includes("naveg") ? "Navegação" : "—")}</span>
+                              {(arr || dep) && (
+                                <span className="text-muted-foreground">
+                                  {arr && `Cheg. ${arr}`}{arr && dep && " · "}{dep && `Saída ${dep}`}
+                                </span>
+                              )}
+                              {obs && <span className="text-muted-foreground italic truncate">— {obs}</span>}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                      <div className="pt-1 flex justify-end">
+                        <button
+                          type="button"
+                          className="text-[11px] text-muted-foreground hover:text-destructive underline"
+                          onClick={() => update(f.key, [])}
+                        >
+                          Remover itinerário
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
               if (f.type === "textarea" || f.type === "list") {
                 return (
                   <div key={f.key} className={f.full ? "sm:col-span-2" : "sm:col-span-2"}>
