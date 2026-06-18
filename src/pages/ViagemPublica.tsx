@@ -2588,11 +2588,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
       >
         {activeGroupType && (
-          <div className="space-y-3">
-            {(grouped[activeGroupType] || []).map((s) => (
-              <PublicServiceCard key={s.id} service={s} />
-            ))}
-          </div>
+          <CategoryServiceView
+            type={activeGroupType}
+            services={grouped[activeGroupType] || []}
+            renderFullCard={(s) => <PublicServiceCard service={s} />}
+          />
         )}
       </ServiceDetailOverlay>
     </div>
