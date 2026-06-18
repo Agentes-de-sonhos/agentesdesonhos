@@ -2737,6 +2737,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
       isUploading={isImgUploading}
       placeId={placeId}
       hotelMode={isHotel}
+      placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : 'other'}
     />
   );
   const formProps = {
