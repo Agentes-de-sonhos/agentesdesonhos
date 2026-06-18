@@ -23,6 +23,7 @@ import { TravelImporter } from "@/components/trip/TravelImporter";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
 import { TripEditForm } from "@/components/trip/TripEditForm";
+import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
