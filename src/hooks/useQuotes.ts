@@ -338,12 +338,50 @@ export function useQuote(id: string | undefined) {
     },
   });
 
+  const reorderServicesMutation = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      if (!id) throw new Error("Quote ID is required");
+      await Promise.all(
+        orderedIds.map((serviceId, index) =>
+          supabase
+            .from("quote_services")
+            .update({ order_index: index } as any)
+            .eq("id", serviceId)
+            .eq("quote_id", id)
+        )
+      );
+    },
+    onMutate: async (orderedIds: string[]) => {
+      await queryClient.cancelQueries({ queryKey: ["quote", id] });
+      const previous = queryClient.getQueryData<any>(["quote", id]);
+      if (previous?.services) {
+        const byId = new Map<string, any>(previous.services.map((s: any) => [s.id, s]));
+        const reordered = orderedIds
+          .map((sid, idx) => {
+            const s = byId.get(sid);
+            return s ? { ...s, order_index: idx } : null;
+          })
+          .filter(Boolean);
+        queryClient.setQueryData(["quote", id], { ...previous, services: reordered });
+      }
+      return { previous };
+    },
+    onError: (error, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(["quote", id], context.previous);
+      toast({ title: "Erro ao reordenar serviços", description: (error as Error).message, variant: "destructive" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quote", id] });
+    },
+  });
+
   return {
     quote,
     isLoading,
     addService: addServiceMutation.mutateAsync,
     updateService: updateServiceMutation.mutateAsync,
     deleteService: deleteServiceMutation.mutateAsync,
+    reorderServices: reorderServicesMutation.mutate,
     isAddingService: addServiceMutation.isPending,
   };
 }

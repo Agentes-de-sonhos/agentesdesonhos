@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront, GripVertical,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,14 @@ import { cn } from "@/lib/utils";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, computeFlightStatus, type FlightStatus } from "./flight-wizard/flightStatus";
 import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext, sortableKeyboardCoordinates, useSortable, arrayMove, verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const SERVICE_ICONS: Record<ServiceType, any> = {
   flight: Plane, hotel: Hotel, car_rental: Car, transfer: Bus,
@@ -153,9 +161,10 @@ interface ServiceCardProps {
   onDelete: (id: string) => void;
   onEdit: (service: QuoteService) => void;
   isDeleting?: boolean;
+  dragHandle?: React.ReactNode;
 }
 
-export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCardProps) {
+export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle }: ServiceCardProps) {
   const [open, setOpen] = useState(false);
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = getServiceLabel(service);
@@ -170,6 +179,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting }: ServiceCa
           {/* Header — always visible */}
           <div className="flex items-center justify-between gap-3 p-4">
             <div className="flex items-center gap-3 flex-1 min-w-0">
+              {dragHandle}
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
                 <Icon className="h-5 w-5 text-primary" />
               </div>
@@ -260,11 +270,22 @@ interface ServiceListProps {
   services: QuoteService[];
   onDeleteService: (id: string) => void;
   onEditService: (service: QuoteService) => void;
+  onReorder?: (orderedIds: string[]) => void;
 }
 
-export function ServiceList({ services, onDeleteService, onEditService }: ServiceListProps) {
+export function ServiceList({ services, onDeleteService, onEditService, onReorder }: ServiceListProps) {
   if (services.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">Nenhum serviço adicionado ainda</div>;
+  }
+  if (onReorder && services.length > 1) {
+    return (
+      <SortableServiceList
+        services={services}
+        onDeleteService={onDeleteService}
+        onEditService={onEditService}
+        onReorder={onReorder}
+      />
+    );
   }
   return (
     <div className="space-y-3">
@@ -276,6 +297,86 @@ export function ServiceList({ services, onDeleteService, onEditService }: Servic
           onEdit={onEditService}
         />
       ))}
+    </div>
+  );
+}
+
+function SortableServiceList({
+  services, onDeleteService, onEditService, onReorder,
+}: {
+  services: QuoteService[];
+  onDeleteService: (id: string) => void;
+  onEditService: (service: QuoteService) => void;
+  onReorder: (orderedIds: string[]) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const ids = services.map((s) => s.id);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    onReorder(arrayMove(ids, oldIndex, newIndex));
+  };
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+        <div className="space-y-3">
+          {services.map((service) => (
+            <SortableServiceItem
+              key={service.id}
+              service={service}
+              onDelete={onDeleteService}
+              onEdit={onEditService}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function SortableServiceItem({
+  service, onDelete, onEdit,
+}: {
+  service: QuoteService;
+  onDelete: (id: string) => void;
+  onEdit: (service: QuoteService) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: service.id });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 10 : "auto",
+  };
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ServiceCard
+        service={service}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        dragHandle={
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="touch-none cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 -m-1 rounded shrink-0"
+            aria-label="Arrastar para reordenar"
+            title="Arrastar para reordenar"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+        }
+      />
     </div>
   );
 }
