@@ -1499,6 +1499,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
           <FormItem><FormLabel>Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><TextareaWithTemplate placeholder="Observações sobre o ingresso..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
+        {photoSlot}
         {renderPaymentSlot(paymentSlot, totalAmount)}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
