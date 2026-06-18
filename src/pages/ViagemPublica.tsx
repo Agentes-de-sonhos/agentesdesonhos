@@ -2361,7 +2361,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   <div className="h-px flex-1 bg-border/60" />
                 </div>
               )}
-              {walletSettings.show_support_tools && (
+              {walletSettings.show_support_tools && (services.length > 0 || itineraryActivities.length > 0) && (
               <TripConvertersWrapper
                 destination={tripData.destination}
                 startDate={startDate}
