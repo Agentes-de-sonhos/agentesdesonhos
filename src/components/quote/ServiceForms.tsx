@@ -2134,7 +2134,7 @@ import { optimizeImage, validateImageFile, formatFileSize } from "@/utils/imageO
 
 const MAX_IMAGES_PER_SERVICE = 5;
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -2341,6 +2341,8 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
           placeId={placeId}
           onPhotosSelected={handleGooglePhotosSelected}
           existingUrls={imageUrls}
+          autoShow={placeKind === 'attraction'}
+          {...(placeKind === 'attraction' ? { loadingLabel: 'Buscando fotos do local...', buttonLabel: undefined } : {})}
         />
       )}
     </div>
@@ -2735,6 +2737,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
       isUploading={isImgUploading}
       placeId={placeId}
       hotelMode={isHotel}
+      placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : 'other'}
     />
   );
   const formProps = {
