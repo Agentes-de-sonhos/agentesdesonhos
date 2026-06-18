@@ -463,3 +463,387 @@ Perguntas canônicas validadas a partir da Base de Conhecimento Mestre.
 **ID:** `crm-faq-20`
 
 ---
+
+<!-- ============================================================ -->
+<!-- ONDA 1 — novas FAQs adicionadas em 2026-06-18 (crm-faq-21..40) -->
+<!-- ============================================================ -->
+
+## Como atribuir um responsável a uma oportunidade?
+
+**Pergunta:** Como atribuir um responsável a uma oportunidade?
+
+**O que o usuário pode perguntar:**
+- Como defino quem cuida do negócio?
+- Onde escolho o atendente da oportunidade?
+- Quero colocar um vendedor responsável.
+
+**Resposta direta:** Abra a oportunidade no Kanban, vá no campo Responsável e selecione o membro da equipe. O nome do responsável passa a aparecer no card.
+
+**Pré-requisitos:** Ter pelo menos um membro de equipe cadastrado e permissão para editar oportunidades.
+
+**Quem pode fazer:** titular, equipe com permissão de edição.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-21`
+
+---
+## Como trocar o responsável de uma oportunidade?
+
+**Pergunta:** Como trocar o responsável de uma oportunidade?
+
+**O que o usuário pode perguntar:**
+- Como passo a oportunidade para outro vendedor?
+- Como transfiro um negócio para outra pessoa?
+
+**Resposta direta:** Abra a oportunidade, clique no campo Responsável e selecione um novo membro. A troca fica registrada no histórico.
+
+**Pré-requisitos:** Permissão para editar a oportunidade.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-22`
+
+---
+## Como remover uma etiqueta de uma oportunidade?
+
+**Pergunta:** Como remover uma etiqueta de uma oportunidade?
+
+**O que o usuário pode perguntar:**
+- Como tiro uma tag do card?
+- Como apago uma marcação de uma negociação?
+
+**Resposta direta:** No card da oportunidade, abra o seletor de etiquetas e desmarque a etiqueta indesejada. Ela é removida apenas daquela oportunidade; a etiqueta continua existindo no CRM.
+
+**Pré-requisitos:** Permissão para editar a oportunidade.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-23`
+
+---
+## Como criar uma nova etiqueta no CRM?
+
+**Pergunta:** Como criar uma nova etiqueta no CRM?
+
+**O que o usuário pode perguntar:**
+- Como cadastro tags novas?
+- Onde adiciono uma classificação de oportunidade?
+
+**Resposta direta:** Acesse o gerenciador de etiquetas do CRM, clique em Nova etiqueta, defina o nome e a cor e salve. A etiqueta passa a ficar disponível em todas as oportunidades.
+
+**Pré-requisitos:** Permissão para gerenciar etiquetas.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-24`
+
+---
+## Como editar ou excluir uma etiqueta existente?
+
+**Pergunta:** Como editar ou excluir uma etiqueta existente?
+
+**O que o usuário pode perguntar:**
+- Como renomeio uma tag?
+- Como removo uma etiqueta antiga?
+
+**Resposta direta:** Abra o gerenciador de etiquetas, localize a etiqueta na lista, use Editar para alterar nome/cor ou Excluir para remover. Excluir desvincula a etiqueta de todas as oportunidades.
+
+**Pré-requisitos:** Permissão para gerenciar etiquetas.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-25`
+
+---
+## Como editar uma nota de uma oportunidade?
+
+**Pergunta:** Como editar uma nota de uma oportunidade?
+
+**O que o usuário pode perguntar:**
+- Como altero o texto de uma anotação?
+- Onde corrijo uma nota antiga?
+
+**Resposta direta:** Abra a oportunidade, vá na linha do tempo de notas, localize a nota e clique em Editar. Altere o texto e salve.
+
+**Pré-requisitos:** Ser autor da nota ou ter permissão para editar a oportunidade.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-26`
+
+---
+## Como excluir uma nota de uma oportunidade?
+
+**Pergunta:** Como excluir uma nota de uma oportunidade?
+
+**O que o usuário pode perguntar:**
+- Como apago uma anotação?
+- Quero remover um comentário do histórico de notas.
+
+**Resposta direta:** Abra a oportunidade, acesse a linha do tempo de notas, localize a nota e use Excluir. Confirme a exclusão; a nota é removida permanentemente.
+
+**Pré-requisitos:** Permissão para editar a oportunidade.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-27`
+
+---
+## Como marcar um follow-up como concluído?
+
+**Pergunta:** Como marcar um follow-up como concluído?
+
+**O que o usuário pode perguntar:**
+- Como dou baixa em um lembrete?
+- Como sinalizo que já fiz o contato planejado?
+
+**Resposta direta:** Abra a oportunidade, vá na seção Follow-ups, localize o item e marque como concluído. Ele sai da lista de pendentes.
+
+**Pré-requisitos:** Ter follow-ups registrados.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-28`
+
+---
+## Como filtrar oportunidades por etapa do funil?
+
+**Pergunta:** Como filtrar oportunidades por etapa do funil?
+
+**O que o usuário pode perguntar:**
+- Como vejo só os negócios em uma fase?
+- Quero ver apenas oportunidades em negociação.
+
+**Resposta direta:** No Kanban, cada coluna já é uma etapa. Para focar em uma única etapa, use o filtro do CRM e selecione a coluna desejada.
+
+**Pré-requisitos:** Ter etapas configuradas.
+
+**Quem pode fazer:** agente, titular, equipe.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-29`
+
+---
+## Como filtrar oportunidades por etiqueta?
+
+**Pergunta:** Como filtrar oportunidades por etiqueta?
+
+**O que o usuário pode perguntar:**
+- Como vejo só os negócios marcados com determinada tag?
+- Quero buscar por categoria.
+
+**Resposta direta:** No CRM, abra o filtro de etiquetas e selecione uma ou mais etiquetas. O Kanban passa a mostrar apenas oportunidades marcadas.
+
+**Pré-requisitos:** Etiquetas criadas e aplicadas em oportunidades.
+
+**Quem pode fazer:** agente, titular, equipe.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-30`
+
+---
+## Como ver todas as oportunidades de um cliente específico?
+
+**Pergunta:** Como ver todas as oportunidades de um cliente específico?
+
+**O que o usuário pode perguntar:**
+- Quais negócios esse cliente tem comigo?
+- Como vejo o histórico comercial de um cliente?
+
+**Resposta direta:** Abra o perfil do cliente em Gestão de Clientes (ou pelo card de cliente no CRM). A aba de oportunidades lista todas as negociações associadas.
+
+**Pré-requisitos:** Ter o cliente cadastrado.
+
+**Quem pode fazer:** agente, titular, equipe.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-31`
+
+---
+## Como excluir uma etapa do funil?
+
+**Pergunta:** Como excluir uma etapa do funil?
+
+**O que o usuário pode perguntar:**
+- Como removo uma coluna do Kanban?
+- Quero apagar uma fase do funil.
+
+**Resposta direta:** No CRM, abra o cabeçalho da coluna da etapa, escolha Excluir etapa e confirme. Se houver oportunidades na etapa, mova-as antes ou siga as instruções do diálogo de exclusão.
+
+**Pré-requisitos:** Permissão para gerenciar o funil. A etapa deve estar idealmente vazia.
+
+**Quem pode fazer:** titular.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-32`
+
+---
+## Como cadastrar rapidamente um novo cliente ao criar uma oportunidade?
+
+**Pergunta:** Como cadastrar rapidamente um novo cliente ao criar uma oportunidade?
+
+**O que o usuário pode perguntar:**
+- O cliente ainda não existe, como cadastro na hora?
+- Posso criar o cliente direto pelo formulário de oportunidade?
+
+**Resposta direta:** No formulário de nova oportunidade, ao não encontrar o cliente na busca, use Adicionar cliente. Preencha os dados mínimos e salve. A oportunidade já fica vinculada a esse novo cliente.
+
+**Pré-requisitos:** Permissão para criar clientes.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-33`
+
+---
+## Como criar uma viagem a partir do CRM?
+
+**Pergunta:** Como criar uma viagem a partir do CRM?
+
+**O que o usuário pode perguntar:**
+- Como abro a viagem a partir da negociação?
+- Como transformo a oportunidade em viagem?
+
+**Resposta direta:** Abra a oportunidade e use Adicionar viagem. Preencha destino, datas e dados principais; a viagem fica associada ao cliente e à oportunidade.
+
+**Pré-requisitos:** Cliente vinculado à oportunidade.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-34`
+
+---
+## Como importar uma lista de contatos para o CRM?
+
+**Pergunta:** Como importar uma lista de contatos para o CRM?
+
+**O que o usuário pode perguntar:**
+- Como subo uma planilha de clientes?
+- Como faço carga em massa de contatos?
+
+**Resposta direta:** No CRM, abra Importar contatos, baixe o modelo de planilha, preencha com seus contatos e envie. Confira o resumo antes de confirmar a importação.
+
+**Pré-requisitos:** Planilha no formato esperado pela ferramenta.
+
+**Quem pode fazer:** titular.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-35`
+
+---
+## Como acessar o dashboard do CRM?
+
+**Pergunta:** Como acessar o dashboard do CRM?
+
+**O que o usuário pode perguntar:**
+- Onde vejo a visão consolidada do funil?
+- Como abro o resumo do CRM?
+
+**Resposta direta:** Dentro do CRM, abra a aba Dashboard. Você verá indicadores consolidados como total de oportunidades, distribuição por etapa e visão geral do funil.
+
+**Pré-requisitos:** Ter oportunidades cadastradas para dados ricos.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-36`
+
+---
+## Como definir metas de vendas no CRM?
+
+**Pergunta:** Como definir metas de vendas no CRM?
+
+**O que o usuário pode perguntar:**
+- Onde cadastro meta mensal?
+- Como acompanho objetivo de vendas?
+
+**Resposta direta:** No CRM, abra a seção Metas de vendas e cadastre o valor e o período da meta. O acompanhamento aparece junto ao dashboard.
+
+**Pré-requisitos:** Permissão de gestão.
+
+**Quem pode fazer:** titular.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-37`
+
+---
+## Como adicionar viajantes a uma oportunidade?
+
+**Pergunta:** Como adicionar viajantes a uma oportunidade?
+
+**O que o usuário pode perguntar:**
+- Como cadastro os passageiros do negócio?
+- Onde informo quem vai viajar?
+
+**Resposta direta:** Abra a oportunidade, vá na seção Viajantes e adicione cada passageiro com nome e dados básicos. A lista alimenta orçamentos, roteiros e carteira gerados a partir dessa oportunidade.
+
+**Pré-requisitos:** Oportunidade criada.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-38`
+
+---
+## Como editar os dados de um cliente pelo CRM?
+
+**Pergunta:** Como editar os dados de um cliente pelo CRM?
+
+**O que o usuário pode perguntar:**
+- Posso atualizar o cliente sem sair do CRM?
+- Como corrijo o telefone do cliente direto na oportunidade?
+
+**Resposta direta:** No card do cliente dentro do CRM, abra Editar cliente. Atualize os campos e salve. As alterações refletem em Gestão de Clientes.
+
+**Pré-requisitos:** Permissão para editar clientes.
+
+**Quem pode fazer:** titular, equipe com permissão.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-39`
+
+---
+## Como abrir o perfil completo de um cliente a partir do CRM?
+
+**Pergunta:** Como abrir o perfil completo de um cliente a partir do CRM?
+
+**O que o usuário pode perguntar:**
+- Como vejo tudo sobre o cliente sem sair do CRM?
+- Onde está o histórico do cliente?
+
+**Resposta direta:** No card do cliente dentro do CRM, clique em Ver perfil. Você visualiza dados pessoais, oportunidades e viagens relacionadas em uma única tela.
+
+**Pré-requisitos:** Cliente cadastrado e vinculado a uma oportunidade.
+
+**Quem pode fazer:** agente, titular, equipe.
+
+**Plano ou permissão necessária:** todos.
+
+**Status da resposta:** pronto. **Nível de confiança:** confirmado. **ID:** `crm-faq-40`
