@@ -39,6 +39,7 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
+import { CategoryServiceView } from "@/components/wallet/category/CategoryServiceView";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
 import { NextActivityCard } from "@/components/wallet/NextActivityCard";
 
