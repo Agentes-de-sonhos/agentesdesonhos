@@ -103,8 +103,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "passagem cadastrada" : "passagens cadastradas"}`,
     seeAllLabel: "Ver todas as passagens",
     icon: Plane,
-    thumbBg: "bg-sky-50",
-    thumbIconColor: "text-sky-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const origin = labelOr(d.origin_city);
@@ -125,8 +125,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "hospedagem cadastrada" : "hospedagens cadastradas"}`,
     seeAllLabel: "Ver todas as hospedagens",
     icon: Hotel,
-    thumbBg: "bg-violet-50",
-    thumbIconColor: "text-violet-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const guests = Array.isArray(d.guests) ? d.guests.length : 0;
@@ -146,8 +146,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "locação cadastrada" : "locações cadastradas"}`,
     seeAllLabel: "Ver todas as locações",
     icon: Car,
-    thumbBg: "bg-amber-50",
-    thumbIconColor: "text-amber-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       return {
@@ -165,8 +165,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "transfer cadastrado" : "transfers cadastrados"}`,
     seeAllLabel: "Ver todos os transfers",
     icon: Bus,
-    thumbBg: "bg-orange-50",
-    thumbIconColor: "text-orange-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const origin = labelOr(d.origin_location || d.pickup_address);
@@ -190,8 +190,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "ingresso cadastrado" : "ingressos cadastrados"}`,
     seeAllLabel: "Ver todos os ingressos",
     icon: Ticket,
-    thumbBg: "bg-indigo-50",
-    thumbIconColor: "text-indigo-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const qty = Number(d.quantity) || (Array.isArray(d.passengers) ? d.passengers.length : 0);
@@ -210,8 +210,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "seguro cadastrado" : "seguros cadastrados"}`,
     seeAllLabel: "Ver todos os seguros",
     icon: Shield,
-    thumbBg: "bg-emerald-50",
-    thumbIconColor: "text-emerald-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const insured = Array.isArray(d.insured_persons) ? d.insured_persons.length : 0;
@@ -230,8 +230,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "cruzeiro cadastrado" : "cruzeiros cadastrados"}`,
     seeAllLabel: "Ver todos os cruzeiros",
     icon: Ship,
-    thumbBg: "bg-cyan-50",
-    thumbIconColor: "text-cyan-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const pax = Array.isArray(d.passengers) ? d.passengers.length : 0;
@@ -250,8 +250,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "trecho cadastrado" : "trechos cadastrados"}`,
     seeAllLabel: "Ver todos os trechos",
     icon: TrainFront,
-    thumbBg: "bg-rose-50",
-    thumbIconColor: "text-rose-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const origin = labelOr(d.origin_city);
@@ -271,8 +271,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     countWord: (n) => `${n} ${n === 1 ? "serviço cadastrado" : "serviços cadastrados"}`,
     seeAllLabel: "Ver todos os serviços",
     icon: FileText,
-    thumbBg: "bg-slate-100",
-    thumbIconColor: "text-slate-600",
+    thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
+    thumbIconColor: "text-[hsl(var(--wallet-brand))]",
     getCompactFields: (s) => {
       const d: any = s.service_data || {};
       const typeLabel = OTHER_TYPE[d.other_service_type] || d.custom_type_name;
