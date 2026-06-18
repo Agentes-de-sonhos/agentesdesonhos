@@ -355,7 +355,7 @@ export function useQuote(id: string | undefined) {
       await queryClient.cancelQueries({ queryKey: ["quote", id] });
       const previous = queryClient.getQueryData<any>(["quote", id]);
       if (previous?.services) {
-        const byId = new Map(previous.services.map((s: any) => [s.id, s]));
+        const byId = new Map<string, any>(previous.services.map((s: any) => [s.id, s]));
         const reordered = orderedIds
           .map((sid, idx) => {
             const s = byId.get(sid);
