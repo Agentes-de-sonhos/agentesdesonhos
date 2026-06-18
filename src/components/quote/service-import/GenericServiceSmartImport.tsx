@@ -18,7 +18,7 @@ export interface SmartImportField {
   /** Key returned by the edge function (Portuguese) */
   key: string;
   label: string;
-  type?: "text" | "number" | "date" | "time" | "textarea" | "list";
+  type?: "text" | "number" | "date" | "time" | "textarea" | "list" | "cruise_itinerary";
   placeholder?: string;
   full?: boolean;
 }
