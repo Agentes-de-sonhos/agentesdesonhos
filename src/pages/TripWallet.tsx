@@ -1371,6 +1371,23 @@ function TripWalletContent() {
             </AccordionContent>
           </AccordionItem>
 
+          {/* 4.5. Assinatura Comercial */}
+          <AccordionItem value="signature" className="border border-border rounded-lg overflow-hidden bg-card">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
+              <span className="text-base font-semibold">Assinatura Comercial</span>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pb-4">
+              <div className="max-w-2xl">
+                <DocumentSignatureCard
+                  table="trips"
+                  docId={trip.id}
+                  initialSnapshot={(trip as any).signature_snapshot ?? null}
+                  onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
           {/* 5. Histórico de Alterações */}
           <AccordionItem value="history" className="border border-border rounded-lg overflow-hidden bg-card">
             <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
