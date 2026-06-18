@@ -43,6 +43,9 @@ export function CategoryServiceView({
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const attachRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  const isSingleService = total === 1;
+  const showSmartSummary = total >= 4;
+
   const visibleSummary = showAllSummary
     ? services
     : services.slice(0, INITIAL_SUMMARY_COUNT);
@@ -97,6 +100,25 @@ export function CategoryServiceView({
     return () => window.clearTimeout(t);
   }, [openId, scrollToAttachId, prefersReducedMotion]);
 
+  // Single service: render the full card directly, no summary, no toggle.
+  if (isSingleService) {
+    const only = services[0];
+    return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base sm:text-lg font-semibold text-foreground tracking-tight">
+            {cfg.summaryTitle}
+          </h2>
+          <p className="mt-0.5 text-xs sm:text-sm text-[hsl(var(--wallet-brand))] font-medium inline-flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            {cfg.countWord(total)}
+          </p>
+        </div>
+        <div id={`service-card-${only.id}`}>{renderFullCard(only)}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       {/* Summary header */}
@@ -110,8 +132,8 @@ export function CategoryServiceView({
         </p>
       </div>
 
-      {/* Summary thumbnails */}
-      {total > 0 && (
+      {/* Summary thumbnails — only when 4+ services */}
+      {showSmartSummary && (
         <div>
           {showAllSummary ? (
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
@@ -200,7 +222,6 @@ function SummaryItem({
 }) {
   const cfg = CATEGORY_CONFIG[type];
   const Icon = cfg.icon;
-  const thumb = getServiceThumbnail(service);
   const name = getServiceShortName(service);
 
   return (
@@ -213,21 +234,12 @@ function SummaryItem({
       <div
         className={cn(
           "relative w-full aspect-square rounded-2xl overflow-hidden border border-border/40 shadow-sm transition group-hover:shadow-md group-active:scale-[0.97]",
-          !thumb && cfg.thumbBg,
+          cfg.thumbBg,
         )}
       >
-        {thumb ? (
-          <img
-            src={thumb}
-            alt={name}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Icon className={cn("h-7 w-7", cfg.thumbIconColor)} aria-hidden />
-          </div>
-        )}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Icon className={cn("h-7 w-7", cfg.thumbIconColor)} aria-hidden />
+        </div>
         <span
           className="absolute top-1 left-1 h-5 w-5 rounded-full bg-[hsl(var(--wallet-brand))] text-white text-[10px] font-bold flex items-center justify-center shadow"
           aria-hidden
@@ -308,7 +320,7 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
             {/* Thumbnail */}
             <div
               className={cn(
-                "relative h-14 w-14 sm:h-16 sm:w-16 rounded-xl overflow-hidden shrink-0 border border-border/40",
+                "relative w-20 sm:w-24 aspect-[4/3] rounded-xl overflow-hidden shrink-0 border border-border/40",
                 !thumb && cfg.thumbBg,
               )}
             >
