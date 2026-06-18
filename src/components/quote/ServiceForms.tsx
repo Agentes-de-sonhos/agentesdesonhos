@@ -1634,11 +1634,76 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
     defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
   });
 
+  /* ─── Itinerário do cruzeiro (dia a dia) ─── */
+  type Stop = {
+    date?: string;
+    port?: string;
+    arrival_time?: string;
+    departure_time?: string;
+    stop_type?: "embarque" | "porto" | "navegacao" | "desembarque";
+    notes?: string;
+  };
+  const initialStops: Stop[] = Array.isArray(init?.itinerary) ? (init!.itinerary as Stop[]) : [];
+  const [stops, setStops] = useState<Stop[]>(initialStops);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const emptyStop: Stop = { date: "", port: "", arrival_time: "", departure_time: "", stop_type: "porto", notes: "" };
+  const [draft, setDraft] = useState<Stop>(emptyStop);
+
+  const resetDraft = () => { setDraft(emptyStop); setEditingIdx(null); };
+
+  const saveDraft = () => {
+    if (!draft.port?.trim() && draft.stop_type !== "navegacao") {
+      toast({ title: "Informe o porto/local do dia", variant: "destructive" });
+      return;
+    }
+    const clean: Stop = {
+      date: draft.date || "",
+      port: draft.port?.trim() || (draft.stop_type === "navegacao" ? "Navegação" : ""),
+      arrival_time: draft.arrival_time || "",
+      departure_time: draft.departure_time || "",
+      stop_type: draft.stop_type || "porto",
+      notes: draft.notes?.trim() || "",
+    };
+    if (editingIdx == null) setStops([...stops, clean]);
+    else setStops(stops.map((s, i) => (i === editingIdx ? clean : s)));
+    resetDraft();
+  };
+
+  const editStop = (i: number) => { setDraft({ ...stops[i] }); setEditingIdx(i); };
+  const removeStop = (i: number) => {
+    setStops(stops.filter((_, idx) => idx !== i));
+    if (editingIdx === i) resetDraft();
+  };
+  const moveStop = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= stops.length) return;
+    const next = [...stops];
+    [next[i], next[j]] = [next[j], next[i]];
+    setStops(next);
+  };
+
+  const stopTypeLabel = (t?: string) =>
+    t === "embarque" ? "Embarque" : t === "desembarque" ? "Desembarque" : t === "navegacao" ? "Navegação" : "Porto";
+
+  /** Resumo da rota gerado a partir do itinerário (Santos → Búzios → ...). */
+  const summaryFromStops = (list: Stop[]) =>
+    list
+      .map((s) => (s.stop_type === "navegacao" ? "Navegação" : (s.port || "").trim()))
+      .filter(Boolean)
+      .join(" → ");
+
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
+    const routeFinal = (values.route && values.route.trim()) || summaryFromStops(stops);
     onSubmit({
-      ship_name: values.ship_name, route: values.route,
+      ship_name: values.ship_name, route: routeFinal,
       start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"),
       cabin_type: values.cabin_type, price: values.price, notes: values.notes || "",
+      itinerary: stops.map((s) => ({
+        ...s,
+        // duplicamos `notes` como `description` para que a Carteira Pública
+        // (CruiseItineraryTimeline) exiba o texto sem precisar de mapeamento.
+        description: s.notes || "",
+      })),
     }, values.price);
   };
 
@@ -1649,7 +1714,18 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
           <FormItem><FormLabel>Nome do Navio</FormLabel><FormControl><Input placeholder="MSC Seaview, Costa Diadema..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="route" render={({ field }) => (
-          <FormItem><FormLabel>Rota</FormLabel><FormControl><Input placeholder="Santos → Búzios → Ilha Grande → Santos" {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem>
+            <FormLabel>Rota (resumo)</FormLabel>
+            <FormControl>
+              <Input placeholder="Santos → Búzios → Ilha Grande → Santos" {...field} />
+            </FormControl>
+            {stops.length > 0 && !field.value?.trim() && (
+              <p className="text-[11px] text-muted-foreground">
+                Será gerado automaticamente a partir do itinerário se você deixar em branco.
+              </p>
+            )}
+            <FormMessage />
+          </FormItem>
         )} />
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="start_date" render={({ field }) => (
@@ -1691,6 +1767,115 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
+
+        {/* ─────────── Itinerário do cruzeiro ─────────── */}
+        <div className="rounded-lg border bg-card/50 p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold">🚢 Itinerário do cruzeiro</p>
+              <p className="text-[11px] text-muted-foreground">
+                Adicione um dia por linha: porto, horários e observações.
+                {stops.length > 0 ? ` ${stops.length} dia(s) cadastrado(s).` : ""}
+              </p>
+            </div>
+          </div>
+
+          {stops.length > 0 && (
+            <ol className="space-y-2">
+              {stops.map((s, i) => (
+                <li
+                  key={i}
+                  className={cn(
+                    "flex items-start gap-2 rounded-md border bg-background px-3 py-2 text-sm",
+                    editingIdx === i && "ring-1 ring-primary/40"
+                  )}
+                >
+                  <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="font-medium">{s.port || (s.stop_type === "navegacao" ? "Navegação" : "—")}</span>
+                      <span className="text-[11px] text-muted-foreground">{stopTypeLabel(s.stop_type)}</span>
+                      {s.date && (
+                        <span className="text-[11px] text-muted-foreground">
+                          • {(() => { try { return format(parseLocalDate(s.date!), "dd/MM/yyyy", { locale: ptBR }); } catch { return s.date; } })()}
+                        </span>
+                      )}
+                    </div>
+                    {(s.arrival_time || s.departure_time) && (
+                      <p className="text-[12px] text-muted-foreground">
+                        {s.arrival_time && <>Chegada {s.arrival_time}</>}
+                        {s.arrival_time && s.departure_time && " • "}
+                        {s.departure_time && <>Saída {s.departure_time}</>}
+                      </p>
+                    )}
+                    {s.notes && <p className="text-[12px] text-muted-foreground mt-0.5">{s.notes}</p>}
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={i === 0} onClick={() => moveStop(i, -1)} aria-label="Mover para cima">
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={i === stops.length - 1} onClick={() => moveStop(i, 1)} aria-label="Mover para baixo">
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => editStop(i)} aria-label="Editar">
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeStop(i)} aria-label="Remover">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+
+          <div className="rounded-md border bg-background p-3 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {editingIdx == null ? "Adicionar dia" : `Editando dia ${editingIdx + 1}`}
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Input type="date" value={draft.date || ""} onChange={(e) => setDraft({ ...draft, date: e.target.value })} placeholder="Data" />
+              <Select value={draft.stop_type || "porto"} onValueChange={(v) => setDraft({ ...draft, stop_type: v as Stop["stop_type"] })}>
+                <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="embarque">Embarque</SelectItem>
+                  <SelectItem value="porto">Porto / Parada</SelectItem>
+                  <SelectItem value="navegacao">Navegação (alto-mar)</SelectItem>
+                  <SelectItem value="desembarque">Desembarque</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              placeholder="Porto / Local (ex.: Santos, Búzios)"
+              value={draft.port || ""}
+              onChange={(e) => setDraft({ ...draft, port: e.target.value })}
+            />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Input type="time" placeholder="Chegada" value={draft.arrival_time || ""} onChange={(e) => setDraft({ ...draft, arrival_time: e.target.value })} />
+              <Input type="time" placeholder="Saída" value={draft.departure_time || ""} onChange={(e) => setDraft({ ...draft, departure_time: e.target.value })} />
+            </div>
+            <Textarea
+              placeholder="Observações do dia (opcional)"
+              value={draft.notes || ""}
+              onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
+              className="min-h-[60px]"
+            />
+            <div className="flex justify-end gap-2">
+              {editingIdx != null && (
+                <Button type="button" variant="ghost" size="sm" onClick={resetDraft}>
+                  Cancelar edição
+                </Button>
+              )}
+              <Button type="button" variant="outline" size="sm" onClick={saveDraft}>
+                <Plus className="h-3.5 w-3.5 mr-1" />
+                {editingIdx == null ? "Adicionar dia" : "Salvar dia"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
