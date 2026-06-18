@@ -33,6 +33,7 @@ export interface CategoryConfig {
   plural: string;
   summaryTitle: string; // "Seus ingressos", "Suas hospedagens"…
   countWord: (n: number) => string; // "10 ingressos cadastrados"
+  seeAllLabel: string; // "Ver todos os ingressos" / "Ver todas as hospedagens"
   icon: LucideIcon;
   /** Cor pastel do fallback da miniatura (tom suave por categoria). */
   thumbBg: string;
