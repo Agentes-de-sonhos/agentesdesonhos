@@ -14,6 +14,7 @@ import {
   X,
   Image,
   Users,
+  Wallet,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -624,6 +625,25 @@ export default function Perfil() {
             </p>
             <Button asChild variant="outline">
               <Link to="/assinaturas-comerciais">Gerenciar assinaturas</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Configurações da Carteira Digital */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-primary" />
+              Configurações da Carteira Digital
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Personalize quais módulos serão exibidos para seus passageiros na Carteira Digital
+              Pública. As preferências valem para toda a agência.
+            </p>
+            <Button asChild variant="outline">
+              <Link to="/configuracoes/carteira">Abrir configurações</Link>
             </Button>
           </CardContent>
         </Card>
