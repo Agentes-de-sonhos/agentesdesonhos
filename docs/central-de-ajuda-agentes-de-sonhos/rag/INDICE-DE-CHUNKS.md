@@ -19,3 +19,9 @@ Geração inicial em 2026-06-18.
 ## Próximos ciclos
 - Completar FAQs canônicas dos demais módulos principais.
 - Adicionar chunks de tutoriais, problemas comuns e boas práticas.
+
+## Atualização Onda 1 (2026-06-18)
+- Módulo aprofundado: CRM e Oportunidades.
+- Novos chunks confirmados publicados: 37 (20 FAQs adicionais, 8 tutoriais, 5 problemas comuns, 4 boas práticas).
+- Total atual no BASE-RAG.jsonl: 187 chunks.
+- Demais módulos da Onda 1 (Gestão de Clientes, Operações, Orçamentos, Carteira Digital, Roteiros, Financeiro Visão Geral, Vendas, Comissões e Vendedores, Equipe e Permissões): apenas mapa de produção criado. Nenhum chunk novo publicado, conforme política de "não inventar".

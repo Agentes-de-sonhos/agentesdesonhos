@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-18",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "language": "pt-BR",
   "fields": [
     "id",
@@ -178,5 +178,25 @@
         "name": "Painel do Fornecedor"
       }
     ]
+  },
+  "last_updated": "2026-06-18",
+  "waves": {
+    "onda-1": {
+      "data": "2026-06-18",
+      "modulo_aprofundado": "crm",
+      "novos_chunks_confirmados": 37,
+      "modulos_com_mapa_de_producao": [
+        "gestao-clientes",
+        "operacoes",
+        "orcamentos",
+        "carteira-digital",
+        "roteiros",
+        "financeiro",
+        "vendas",
+        "comissoes-vendedores",
+        "equipe-e-permissoes"
+      ],
+      "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
+    }
   }
 }
