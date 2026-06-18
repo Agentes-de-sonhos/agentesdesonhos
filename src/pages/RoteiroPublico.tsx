@@ -186,6 +186,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           age: p?.age ?? null,
         })),
         passengerInterests: (itineraryData as any).passenger_interests || [],
+        // @ts-ignore — extra field passed through for SignatureSnapshot rendering
+        signature_snapshot: (itineraryData as any).signature_snapshot || null,
       };
 
       setItinerary(mappedItinerary);
