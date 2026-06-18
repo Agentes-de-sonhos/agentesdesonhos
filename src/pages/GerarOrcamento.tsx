@@ -140,7 +140,7 @@ export default function GerarOrcamento() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
-  const { quote, addService, updateService, deleteService, isAddingService } = useQuote(id);
+  const { quote, addService, updateService, deleteService, reorderServices, isAddingService } = useQuote(id);
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
   // Persist UI state in sessionStorage so tab switches don't lose progress
@@ -843,6 +843,7 @@ export default function GerarOrcamento() {
                       services={quote.services}
                       onDeleteService={deleteService}
                       onEditService={handleEditService}
+                      onReorder={reorderServices}
                     />
                   )}
                 </CardContent>
