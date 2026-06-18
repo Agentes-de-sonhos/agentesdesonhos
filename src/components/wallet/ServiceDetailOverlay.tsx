@@ -1,11 +1,11 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SERVICE_LABELS } from "@/lib/tripServiceLabels";
 import type { TripService } from "@/types/trip";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, TrainFront, FileText, Type,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, TrainFront, FileText, Type, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -117,16 +117,41 @@ export function ServiceDetailOverlay({
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           side="bottom"
-          className="max-h-[90vh] p-0 rounded-t-3xl flex flex-col bg-background border-t border-border/50"
-          style={style}
+          hideCloseButton
+          className="p-0 rounded-t-3xl flex flex-col bg-background border-t border-border/50 overflow-hidden"
+          style={{
+            ...style,
+            marginTop: 'max(56px, env(safe-area-inset-top) + 40px)',
+            height: 'calc(100dvh - max(56px, env(safe-area-inset-top) + 40px))',
+            maxHeight: 'calc(100dvh - max(56px, env(safe-area-inset-top) + 40px))',
+          }}
         >
+          {/* Drag handle */}
           <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-muted-foreground/25 shrink-0" />
-          <SheetHeader className="px-5 pt-3 pb-4 border-b border-border/50 text-left shrink-0">
+
+          {/* Custom close button — always visible, respects safe area */}
+          <SheetClose
+            className="absolute z-20 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm ring-1 ring-border/50 text-muted-foreground hover:text-foreground transition"
+            style={{
+              top: 'max(8px, env(safe-area-inset-top))',
+              right: '16px',
+              minWidth: '44px',
+              minHeight: '44px',
+            }}
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Fechar</span>
+          </SheetClose>
+
+          {/* Sticky/fixed header */}
+          <SheetHeader className="px-5 pt-3 pb-4 border-b border-border/50 text-left shrink-0 bg-background">
             <SheetTitle asChild>
               {Header}
             </SheetTitle>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 py-5 bg-gradient-to-b from-muted/20 to-background">
+
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-5 bg-gradient-to-b from-muted/20 to-background">
             <div style={contentZoomStyle}>{children}</div>
           </div>
         </SheetContent>
