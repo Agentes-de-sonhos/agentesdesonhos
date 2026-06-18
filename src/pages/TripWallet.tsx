@@ -879,17 +879,6 @@ function TripWalletContent() {
           </Card>
         )}
 
-        {/* Assinatura Comercial */}
-        <div className="max-w-2xl">
-          <DocumentSignatureCard
-            table="trips"
-            docId={trip.id}
-            initialSnapshot={(trip as any).signature_snapshot ?? null}
-            onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })}
-          />
-        </div>
-
-        <Accordion type="multiple" className="space-y-3" value={accordionValue} onValueChange={(v) => setAccordionValue(v as string[])}>
           {/* 1. Serviços da Viagem */}
           <AccordionItem value="services" id="trip-services-section" className="border border-border rounded-lg overflow-hidden bg-card">
             <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
