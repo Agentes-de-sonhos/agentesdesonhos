@@ -20,6 +20,7 @@ import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+import { getWalletBrandStyle } from "@/lib/agencyColor";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -43,16 +44,18 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
+  // Unified agency-theme: every service inherits the agency primary color.
+  // Differentiation comes from icon + content, not color.
   flight: "from-primary/15 to-primary/5 text-primary",
-  hotel: "from-amber-500/15 to-amber-600/5 text-amber-600",
-  car_rental: "from-emerald-500/15 to-emerald-600/5 text-emerald-600",
-  transfer: "from-violet-500/15 to-violet-600/5 text-violet-600",
-  attraction: "from-pink-500/15 to-pink-600/5 text-pink-600",
-  insurance: "from-cyan-500/15 to-cyan-600/5 text-cyan-600",
-  cruise: "from-primary/10 to-primary/5 text-primary",
-  rail_transport: "from-teal-500/15 to-teal-600/5 text-teal-600",
-  circuit: "from-indigo-500/15 to-indigo-600/5 text-indigo-600",
-  other: "from-muted to-muted/50 text-muted-foreground",
+  hotel: "from-primary/15 to-primary/5 text-primary",
+  car_rental: "from-primary/15 to-primary/5 text-primary",
+  transfer: "from-primary/15 to-primary/5 text-primary",
+  attraction: "from-primary/15 to-primary/5 text-primary",
+  insurance: "from-primary/15 to-primary/5 text-primary",
+  cruise: "from-primary/15 to-primary/5 text-primary",
+  rail_transport: "from-primary/15 to-primary/5 text-primary",
+  circuit: "from-primary/15 to-primary/5 text-primary",
+  other: "from-primary/15 to-primary/5 text-primary",
 };
 
 let quoteCurrency: QuoteCurrency = 'BRL';
