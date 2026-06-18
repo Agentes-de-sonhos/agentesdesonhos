@@ -43,6 +43,9 @@ export function CategoryServiceView({
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const attachRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  const isSingleService = total === 1;
+  const showSmartSummary = total >= 4;
+
   const visibleSummary = showAllSummary
     ? services
     : services.slice(0, INITIAL_SUMMARY_COUNT);
@@ -97,6 +100,25 @@ export function CategoryServiceView({
     return () => window.clearTimeout(t);
   }, [openId, scrollToAttachId, prefersReducedMotion]);
 
+  // Single service: render the full card directly, no summary, no toggle.
+  if (isSingleService) {
+    const only = services[0];
+    return (
+      <div className="space-y-5">
+        <div>
+          <h2 className="text-base sm:text-lg font-semibold text-foreground tracking-tight">
+            {cfg.summaryTitle}
+          </h2>
+          <p className="mt-0.5 text-xs sm:text-sm text-[hsl(var(--wallet-brand))] font-medium inline-flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            {cfg.countWord(total)}
+          </p>
+        </div>
+        <div id={`service-card-${only.id}`}>{renderFullCard(only)}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       {/* Summary header */}
@@ -110,8 +132,8 @@ export function CategoryServiceView({
         </p>
       </div>
 
-      {/* Summary thumbnails */}
-      {total > 0 && (
+      {/* Summary thumbnails — only when 4+ services */}
+      {showSmartSummary && (
         <div>
           {showAllSummary ? (
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
