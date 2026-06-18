@@ -131,11 +131,31 @@ const SCHEMAS: Record<ServiceKey, { fnName: string; description: string; propert
       numero_cabine: { type: "string" },
       regime: { type: "string", description: "Pensão completa, all-inclusive..." },
       portos_visitados: { type: "array", items: { type: "string" } },
+      itinerario: {
+        type: "array",
+        description: "Itinerário dia a dia do cruzeiro. Inclua um item por dia, na ordem cronológica. NUNCA invente dados — se um campo não estiver no documento, deixe em branco/omita.",
+        items: {
+          type: "object",
+          properties: {
+            data: { type: "string", description: "YYYY-MM-DD se houver." },
+            porto: { type: "string", description: "Porto/local do dia (Santos, Búzios, etc.). Use 'Navegação' para dias em alto-mar." },
+            chegada: { type: "string", description: "HH:MM (24h) se houver." },
+            saida: { type: "string", description: "HH:MM (24h) se houver." },
+            tipo: { type: "string", description: "embarque | porto | navegacao | desembarque" },
+            observacoes: { type: "string" },
+          },
+        },
+      },
       taxas_portuarias: { type: ["number", "null"] },
       passageiros: { type: ["integer", "null"] },
       ...COMMON_META,
     },
-    promptExtras: "Documento de CRUZEIRO MARÍTIMO/FLUVIAL. Identifique companhia, navio, rota, portos, datas, tipo de cabine, regime e valores.",
+    promptExtras:
+      "Documento de CRUZEIRO MARÍTIMO/FLUVIAL. Identifique companhia, navio, rota, portos, datas, tipo de cabine, regime e valores. " +
+      "Extraia também o ITINERÁRIO DIA A DIA em 'itinerario' (um item por dia, em ordem cronológica): " +
+      "porto/local do dia, chegada, saída, tipo (embarque/porto/navegacao/desembarque) e observações. " +
+      "Marque dias em alto-mar como tipo 'navegacao' e porto 'Navegação'. " +
+      "Se uma informação não constar no documento, deixe o campo em branco — NUNCA invente horários, datas ou portos.",
   },
   circuit: {
     fnName: "extract_circuit_document",
