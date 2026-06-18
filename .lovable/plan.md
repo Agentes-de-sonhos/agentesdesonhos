@@ -1,79 +1,48 @@
-# Avaliação: como abrir o serviço a partir do chip do roteiro
+## Objetivo
 
-## 1. Comparação das abordagens
+Evoluir o overlay de categoria (ex.: Ingressos/Atrações, Hospedagem, Transfer) da Carteira Digital Pública para facilitar a localização e consulta quando houver muitos serviços (10, 15, 20+). Mantém o cabeçalho atual, a janela/modal atual e a identidade visual da agência. Sem novo menu inferior. Sem nova página.
 
-| Abordagem | Vantagens | Desvantagens | Adequação |
-|---|---|---|---|
-| **Scroll para seção (atual)** | Já implementado, zero custo | Mobile: usuário "se perde" — sai do dia do roteiro, precisa rolar de volta, perde o estado do acordeão; ainda exibe os outros serviços do mesmo tipo, tira o foco do que ele clicou | Ruim no mobile |
-| **Modal/Sheet sobreposto** | Mantém o roteiro intacto por baixo, fechar = voltar exatamente para o mesmo ponto, padrão familiar (Nubank, Apple Wallet), reaproveita 100% o `TripServiceCard`, sem mudança de rota | Em telas muito densas pode parecer apertado — mitigado usando Sheet full-height no mobile | **Melhor opção** |
-| **Tela cheia com rota dedicada (`/carteira/:code/servico/:id`)** | URL compartilhável, histórico nativo do navegador (botão voltar do sistema funciona) | Custo alto: nova rota pública, novo loader, RPC ou query separada, gestão de auth/voucher, duplica scaffolding de página, e o "voltar" precisa restaurar o dia/acordeão aberto do roteiro | Overkill para o ganho |
-| **Inline expand dentro da atividade** | Mantém contexto absoluto | Quebra o ritmo do roteiro (atividades viram cards gigantes), dificulta scroll, e replica conteúdo se o mesmo serviço estiver vinculado a várias atividades | Não recomendado |
+Hoje, o overlay de grupo (em `ViagemPublica.tsx` ~linha 2583) apenas faz `map` dos serviços renderizando o `PublicServiceCard` completo — pesado, sem resumo no topo, sem âncoras e sem distinção compacto/expandido.
 
-**Recomendação:** **Sheet no mobile + Dialog grande no desktop**, ambos renderizando o **mesmo `TripServiceCard`** que a Carteira já usa. É a única alternativa que preserva o contexto do roteiro sem duplicar componentes nem criar rotas novas.
+## Escopo desta entrega
 
-## 2. Por que reaproveita tudo
+1. Novo componente `CategoryServiceView` que substitui o conteúdo do "Group overlay" para todas as categorias.
+2. `CategoryServiceSummary` — bloco horizontal no topo com até 8 miniaturas numeradas, swipe horizontal, e "Ver mais N / Mostrar menos" quando houver mais de 8.
+3. `CompactServiceCard` — card compacto reutilizável, com:
+   - miniatura (imagem personalizada do serviço se houver, senão ícone padrão da categoria com fundo pastel);
+   - nome, linha secundária (produto/modalidade), quantidade de pessoas;
+   - badge de status (só quando preenchido);
+   - ícone de documento com contador (só quando houver anexos);
+   - seta de expandir (só quando `hasAdditionalDetails(service)` for verdadeiro).
+4. `ExpandableServiceDetails` — accordion interno que reaproveita o `PublicServiceCard` já existente para mostrar todos os detalhes. Em mobile, apenas um card aberto por vez.
+5. Comportamento de navegação: tocar numa miniatura faz scroll suave até `service-card-{id}` e aplica destaque temporário (~1,5s) com borda azul suave. Respeita `prefers-reduced-motion`. Tocar no ícone de documento expande o card e rola até a seção de arquivos.
+6. Configuração por categoria (`categoryPresentationConfig`): nome singular/plural, título do resumo ("Seus ingressos", "Suas hospedagens"…), ícone padrão da categoria, cor pastel do fallback e seletor dos campos principais do card compacto.
+7. Helper `hasAdditionalDetails(service)` — ignora null/strings vazias/arrays vazios e campos já mostrados no card compacto. Sem detalhes → sem seta, sem expansão.
 
-O `TripServiceCard` (`src/components/trip/TripServiceCard.tsx`) já é o componente único que a Carteira Pública (`ViagemPublica.tsx`) renderiza dentro de cada seção colapsável. Ele já trata todos os tipos (voo, hotel, ingresso, transfer, seguro, cruzeiro, locação, trem, outros) com voucher, PDF, localizador, observações e anexos.
+## Itens explicitamente fora desta entrega
 
-Basta envolvê-lo num `Sheet`/`Dialog` controlado por estado no `ViagemPublica.tsx`. Zero duplicação.
+- Menu inferior, busca, filtros, mistura de categorias, datas no resumo, nova página/modal, alterações no cadastro de serviços, imagens específicas por parque/hotel/fornecedor.
+- Não vou trocar o `PublicServiceCard` existente — ele continua sendo a fonte dos detalhes completos dentro da expansão e do overlay individual de serviço.
 
-## 3. Fluxo proposto
+## Detalhes técnicos
 
-```
-Carteira → Roteiro → Dia → Atividade
-                              │
-                              ▼  (clique no chip "Ver hospedagem")
-                    ┌────────────────────────┐
-                    │  Sheet (mobile)        │
-                    │  ou Dialog (desktop)   │
-                    │                        │
-                    │  ← Voltar              │
-                    │  ─────────────────     │
-                    │  <TripServiceCard />   │
-                    │  (mesmo da Carteira)   │
-                    └────────────────────────┘
-                              │  fechar
-                              ▼
-                    Volta exatamente ao dia/atividade
-                    (roteiro nunca saiu da tela)
-```
+- Arquivo principal modificado: `src/pages/ViagemPublica.tsx` — substituir o conteúdo do `ServiceDetailOverlay` de grupo pelo novo `CategoryServiceView`.
+- Novos arquivos:
+  - `src/components/wallet/category/CategoryServiceView.tsx`
+  - `src/components/wallet/category/CategoryServiceSummary.tsx`
+  - `src/components/wallet/category/CompactServiceCard.tsx`
+  - `src/components/wallet/category/ExpandableServiceDetails.tsx`
+  - `src/components/wallet/category/categoryPresentationConfig.ts` (labels singular/plural, ícone padrão, cores pastel, seletores de campos compactos por `service_type`).
+  - `src/components/wallet/category/serviceDetailsHelpers.ts` (`hasAdditionalDetails`, `getCompactFields`, `getServiceThumbnail`, `getServiceAttachments`).
+- Estilo: usa tokens da agência (`--wallet-brand`) já existentes; cards arredondados, sombras suaves, fundo branco. Mobile-first, alvos de toque ≥ 44 px.
+- Acessibilidade: `aria-expanded`, labels descritivos nas setas e no ícone de documento ("X possui N documentos"), alt nas miniaturas, navegação por teclado, foco visível, `prefers-reduced-motion`.
+- Reutiliza `SERVICE_ICONS`, `SERVICE_COLORS` e `SERVICE_LABELS` que já existem em `ViagemPublica.tsx` — exportados ou movidos para `categoryPresentationConfig.ts` conforme conveniente.
 
-- **Mobile**: `Sheet side="bottom"` ocupando ~92vh, com handle de arrastar para fechar (já é o padrão do projeto — ver memória `Chat UX`).
-- **Desktop**: `Dialog` centralizado, largura ~640px, scroll interno.
-- **Cabeçalho do overlay**: ícone do tipo de serviço + label ("Hospedagem", "Passagem aérea", etc.) + botão fechar/voltar.
-- **Sem mudança de rota** → botão "voltar" do sistema fecha o overlay (mapear via histórico opcional, ou apenas via X/swipe).
+## Critérios de aceite (atendidos pela implementação)
 
-## 4. Detalhes técnicos (seção para a equipe)
+Todos os 23 critérios do prompt aplicados sobre o overlay de grupo: resumo no topo sem datas, até 8 no estado inicial com swipe, "Ver mais X" / "Mostrar menos", scroll com destaque temporário usando `service-card-{id}`, miniatura personalizada com fallback por categoria, cards compactos com campos essenciais, omissão de campos vazios e status vazio, ícone de documento com contador que expande direto na seção de arquivos, seta apenas quando há conteúdo adicional, mesma janela atual da Carteira Digital, layout responsivo.
 
-**Arquivos afetados (estimativa):**
-- `src/pages/ViagemPublica.tsx`: substituir `handleOpenService` (que hoje faz `setOpenSection` + `scrollIntoView`) por `setActiveService(service)`; renderizar um único `<ServiceDetailOverlay service={activeService} onClose={...} />` no fim do JSX. Manter o scroll antigo como fallback para o caso de o usuário clicar no header da seção (não no chip).
-- **Novo** `src/components/wallet/ServiceDetailOverlay.tsx` (~60 linhas): wrapper responsivo que escolhe `Sheet` (mobile via `useIsMobile`) ou `Dialog` (desktop), com header padronizado, e renderiza `<TripServiceCard service={...} variant="detail" />` dentro. Sem lógica de dados.
-- `src/components/trip/TripServiceCard.tsx`: aceitar prop opcional `variant?: 'inline' | 'detail'` para remover bordas/sombras quando exibido dentro do overlay (já vem com bordas próprias). Mudança mínima e retrocompatível.
-- `CollapsibleDayCard.tsx`: nenhum ajuste — continua chamando `onOpenService(service)`.
+## Pontos para você confirmar antes de eu codar
 
-**Estado e dados:**
-- A lista `services` já está carregada na `ViagemPublica` (mesma query que alimenta as seções). O chip resolve o `linked_trip_service_id` para um item dessa lista → passa direto para o overlay. Zero fetch adicional, zero nova RPC.
-
-**Auth / vouchers:**
-- O `TripServiceCard` já lida com signed URLs/serve-voucher pelo contexto da carteira pública. Como ele continua sendo renderizado dentro da mesma página com o mesmo contexto, nada muda.
-
-**Histórico/voltar do sistema (opcional, fase 2):**
-- Pode-se fazer `pushState` ao abrir e interceptar `popstate` para fechar. Útil no mobile (botão físico voltar). Opcional — não é bloqueante para MVP.
-
-## 5. O que NÃO muda
-
-- Estrutura do banco (já temos `linked_trip_service_id`).
-- RPC `get_public_trip_itinerary_v2`.
-- Seções colapsáveis da Carteira: continuam funcionando para quem entra pela aba de tipo de serviço.
-- Editor de roteiro: nenhuma mudança.
-
-## 6. Recomendação final
-
-Implementar **Sheet (mobile) + Dialog (desktop)** reaproveitando `TripServiceCard`. É a opção com a melhor relação custo/UX:
-
-- Preserva contexto do roteiro (objetivo principal).
-- Reutiliza 100% do componente de detalhes do serviço.
-- ~1 componente novo + ~30 linhas alteradas em `ViagemPublica.tsx`.
-- Reversível: se quisermos voltar a scroll, basta trocar o handler.
-
-A rota dedicada fica como evolução futura caso surja necessidade de compartilhar link direto de um serviço específico — hoje não é o caso.
+1. Confirmar que a evolução fica restrita ao overlay de **grupo por categoria** (acessado pela Navegação Rápida) e que o overlay individual de serviço (tocado a partir de uma atividade do roteiro) continua usando o `PublicServiceCard` cheio como hoje.
+2. OK reutilizar o `PublicServiceCard` atual dentro da expansão (sem reescrever os blocos de detalhes), ou prefere que eu construa uma versão de detalhes mais enxuta seguindo a referência?
