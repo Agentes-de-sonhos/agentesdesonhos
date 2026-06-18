@@ -1679,6 +1679,57 @@ export type Database = {
           },
         ]
       }
+      commercial_signatures: {
+        Row: {
+          created_at: string
+          custom_message: string | null
+          display_order: number
+          email: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          phone: string | null
+          photo_url: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          custom_message?: string | null
+          display_order?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          custom_message?: string | null
+          display_order?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       community_highlights: {
         Row: {
           contribution_summary: string
@@ -4252,6 +4303,7 @@ export type Database = {
           share_expires_at: string | null
           share_token: string | null
           show_destination_intro: boolean
+          signature_snapshot: Json | null
           source_itinerary_id: string | null
           start_date: string
           status: string
@@ -4275,6 +4327,7 @@ export type Database = {
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
+          signature_snapshot?: Json | null
           source_itinerary_id?: string | null
           start_date: string
           status?: string
@@ -4298,6 +4351,7 @@ export type Database = {
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
+          signature_snapshot?: Json | null
           source_itinerary_id?: string | null
           start_date?: string
           status?: string
@@ -7645,6 +7699,7 @@ export type Database = {
           show_destination_intro: boolean
           show_detailed_prices: boolean
           show_investment_section: boolean
+          signature_snapshot: Json | null
           start_date: string
           status: string
           total_amount: number
@@ -7683,6 +7738,7 @@ export type Database = {
           show_destination_intro?: boolean
           show_detailed_prices?: boolean
           show_investment_section?: boolean
+          signature_snapshot?: Json | null
           start_date: string
           status?: string
           total_amount?: number
@@ -7721,6 +7777,7 @@ export type Database = {
           show_destination_intro?: boolean
           show_detailed_prices?: boolean
           show_investment_section?: boolean
+          signature_snapshot?: Json | null
           start_date?: string
           status?: string
           total_amount?: number
@@ -10234,6 +10291,7 @@ export type Database = {
           share_expires_at: string | null
           share_token: string | null
           short_code: string | null
+          signature_snapshot: Json | null
           slug: string | null
           start_date: string
           status: string
@@ -10259,6 +10317,7 @@ export type Database = {
           share_expires_at?: string | null
           share_token?: string | null
           short_code?: string | null
+          signature_snapshot?: Json | null
           slug?: string | null
           start_date: string
           status?: string
@@ -10284,6 +10343,7 @@ export type Database = {
           share_expires_at?: string | null
           share_token?: string | null
           short_code?: string | null
+          signature_snapshot?: Json | null
           slug?: string | null
           start_date?: string
           status?: string
