@@ -198,5 +198,16 @@
       ],
       "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
     }
-  }
+  },
+  "versao": "1.2.0",
+  "ultima_atualizacao": "2026-06-18",
+  "total_chunks": 261,
+  "historico": [
+    {
+      "versao": "1.2.0",
+      "data": "2026-06-18",
+      "descricao": "Subonda 1B: 74 chunks adicionados (Gestão de Clientes + Operações).",
+      "chunks_adicionados": 74
+    }
+  ]
 }
