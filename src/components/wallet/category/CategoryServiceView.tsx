@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ChevronDown, FileText, Paperclip } from "lucide-react";
+import { ChevronDown, FileText, Paperclip, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TripService, TripServiceType } from "@/types/trip";
 import {
@@ -26,8 +26,6 @@ interface CategoryServiceViewProps {
   renderFullCard: (service: TripService) => ReactNode;
 }
 
-const INITIAL_SUMMARY_COUNT = 8;
-
 export function CategoryServiceView({
   type,
   services,
@@ -35,21 +33,17 @@ export function CategoryServiceView({
 }: CategoryServiceViewProps) {
   const cfg = CATEGORY_CONFIG[type];
   const total = services.length;
-  const [showAllSummary, setShowAllSummary] = useState(false);
+  const [gridMode, setGridMode] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [scrollToAttachId, setScrollToAttachId] = useState<string | null>(null);
+  const [scrollToCardId, setScrollToCardId] = useState<string | null>(null);
 
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const attachRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isSingleService = total === 1;
   const showSmartSummary = total >= 4;
-
-  const visibleSummary = showAllSummary
-    ? services
-    : services.slice(0, INITIAL_SUMMARY_COUNT);
-  const remaining = Math.max(0, total - INITIAL_SUMMARY_COUNT);
 
   const prefersReducedMotion = useMemo(() => {
     if (typeof window === "undefined") return false;
@@ -62,7 +56,7 @@ export function CategoryServiceView({
       if (el && typeof el.scrollIntoView === "function") {
         el.scrollIntoView({
           behavior: prefersReducedMotion ? "auto" : "smooth",
-          block: "center",
+          block: "start",
         });
       }
       setHighlightId(id);
@@ -74,13 +68,44 @@ export function CategoryServiceView({
   );
 
   const handleToggle = useCallback((id: string) => {
-    setOpenId((prev) => (prev === id ? null : id));
+    setOpenId((prev) => {
+      const next = prev === id ? null : id;
+      // Only scroll when expanding, never when collapsing.
+      if (next === id) setScrollToCardId(id);
+      return next;
+    });
   }, []);
 
   const handleOpenAttachments = useCallback((id: string) => {
     setOpenId(id);
     setScrollToAttachId(id);
   }, []);
+
+  // Scroll the card top into view after expansion has rendered.
+  useEffect(() => {
+    if (!scrollToCardId) return;
+    if (openId !== scrollToCardId) return;
+    const id = scrollToCardId;
+    const raf = window.requestAnimationFrame(() => {
+      const t = window.setTimeout(() => {
+        const el = cardRefs.current[id];
+        if (el && typeof el.scrollIntoView === "function") {
+          el.scrollIntoView({
+            behavior: prefersReducedMotion ? "auto" : "smooth",
+            block: "start",
+          });
+        }
+        setScrollToCardId(null);
+      }, 180);
+      // store cleanup
+      (window as any).__catScrollTimer = t;
+    });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      const t = (window as any).__catScrollTimer;
+      if (t) window.clearTimeout(t);
+    };
+  }, [openId, scrollToCardId, prefersReducedMotion]);
 
   // Scroll to attachments section once the card has expanded and rendered.
   useEffect(() => {
@@ -135,26 +160,30 @@ export function CategoryServiceView({
       {/* Summary thumbnails — only when 4+ services */}
       {showSmartSummary && (
         <div>
-          {showAllSummary ? (
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-              {services.map((s, idx) => (
+          {gridMode ? (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              {services.map((s) => (
                 <SummaryItem
                   key={s.id}
                   service={s}
-                  index={idx + 1}
                   type={type}
                   onClick={() => focusCard(s.id)}
                 />
               ))}
             </div>
           ) : (
-            <div className="-mx-1 overflow-x-auto scrollbar-none">
-              <div className="flex gap-3 px-1 snap-x snap-mandatory">
-                {visibleSummary.map((s, idx) => (
-                  <div key={s.id} className="shrink-0 w-[88px] snap-start">
+            <div
+              className="-mx-1 overflow-x-auto scrollbar-none"
+              style={{ scrollSnapType: "x proximity" }}
+            >
+              <div className="flex gap-3 px-1 items-start">
+                {services.map((s) => (
+                  <div
+                    key={s.id}
+                    className="shrink-0 w-[96px] snap-start"
+                  >
                     <SummaryItem
                       service={s}
-                      index={idx + 1}
                       type={type}
                       onClick={() => focusCard(s.id)}
                     />
@@ -164,23 +193,24 @@ export function CategoryServiceView({
             </div>
           )}
 
-          {remaining > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowAllSummary((v) => !v)}
-              className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[hsl(var(--wallet-brand))] hover:opacity-80 transition"
-            >
-              {showAllSummary
-                ? "Mostrar menos"
-                : `Ver mais ${remaining} ${remaining === 1 ? cfg.singular : cfg.plural}`}
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform",
-                  showAllSummary && "rotate-180",
-                )}
-              />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setGridMode((v) => !v)}
+            aria-label={gridMode ? "Ver em carrossel" : cfg.seeAllLabel}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--wallet-brand))] hover:opacity-80 transition"
+          >
+            {gridMode ? (
+              <>
+                <Rows3 className="h-4 w-4" aria-hidden />
+                Ver em carrossel
+              </>
+            ) : (
+              <>
+                <LayoutGrid className="h-4 w-4" aria-hidden />
+                {cfg.seeAllLabel}
+              </>
+            )}
+          </button>
         </div>
       )}
 
@@ -211,12 +241,10 @@ export function CategoryServiceView({
 
 function SummaryItem({
   service,
-  index,
   type,
   onClick,
 }: {
   service: TripService;
-  index: number;
   type: TripServiceType;
   onClick: () => void;
 }) {
@@ -229,25 +257,17 @@ function SummaryItem({
       type="button"
       onClick={onClick}
       title={name}
-      className="group flex w-full flex-col items-center gap-1.5 text-center focus:outline-none"
+      className="group flex w-full flex-col items-start gap-1.5 text-left focus:outline-none min-h-[44px]"
     >
       <div
         className={cn(
-          "relative w-full aspect-square rounded-2xl overflow-hidden border border-border/40 shadow-sm transition group-hover:shadow-md group-active:scale-[0.97]",
+          "relative w-full aspect-square rounded-2xl overflow-hidden border border-border/40 shadow-sm transition group-hover:shadow-md group-active:scale-[0.97] flex items-center justify-center",
           cfg.thumbBg,
         )}
       >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Icon className={cn("h-7 w-7", cfg.thumbIconColor)} aria-hidden />
-        </div>
-        <span
-          className="absolute top-1 left-1 h-5 w-5 rounded-full bg-[hsl(var(--wallet-brand))] text-white text-[10px] font-bold flex items-center justify-center shadow"
-          aria-hidden
-        >
-          {index}
-        </span>
+        <Icon className={cn("h-7 w-7", cfg.thumbIconColor)} aria-hidden />
       </div>
-      <span className="text-[11px] leading-tight font-medium text-foreground/80 line-clamp-2 min-h-[2.2em]">
+      <span className="w-full text-[11px] leading-snug font-medium text-foreground/80 whitespace-normal break-words">
         {name}
       </span>
     </button>
@@ -296,7 +316,7 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
           ref={ref}
           id={`service-card-${service.id}`}
           className={cn(
-            "rounded-2xl bg-card border transition-all duration-300",
+            "rounded-2xl bg-card border transition-all duration-300 scroll-mt-20",
             isHighlighted
               ? "border-[hsl(var(--wallet-brand)/0.55)] shadow-[0_0_0_3px_hsl(var(--wallet-brand)/0.15)] bg-[hsl(var(--wallet-brand-soft)/0.4)]"
               : "border-border/50 shadow-sm",

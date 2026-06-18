@@ -33,6 +33,7 @@ export interface CategoryConfig {
   plural: string;
   summaryTitle: string; // "Seus ingressos", "Suas hospedagens"…
   countWord: (n: number) => string; // "10 ingressos cadastrados"
+  seeAllLabel: string; // "Ver todos os ingressos" / "Ver todas as hospedagens"
   icon: LucideIcon;
   /** Cor pastel do fallback da miniatura (tom suave por categoria). */
   thumbBg: string;
@@ -100,6 +101,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "passagens",
     summaryTitle: "Suas passagens",
     countWord: (n) => `${n} ${n === 1 ? "passagem cadastrada" : "passagens cadastradas"}`,
+    seeAllLabel: "Ver todas as passagens",
     icon: Plane,
     thumbBg: "bg-sky-50",
     thumbIconColor: "text-sky-600",
@@ -121,6 +123,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "hospedagens",
     summaryTitle: "Suas hospedagens",
     countWord: (n) => `${n} ${n === 1 ? "hospedagem cadastrada" : "hospedagens cadastradas"}`,
+    seeAllLabel: "Ver todas as hospedagens",
     icon: Hotel,
     thumbBg: "bg-violet-50",
     thumbIconColor: "text-violet-600",
@@ -141,6 +144,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "locações",
     summaryTitle: "Suas locações de veículo",
     countWord: (n) => `${n} ${n === 1 ? "locação cadastrada" : "locações cadastradas"}`,
+    seeAllLabel: "Ver todas as locações",
     icon: Car,
     thumbBg: "bg-amber-50",
     thumbIconColor: "text-amber-600",
@@ -159,6 +163,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "transfers",
     summaryTitle: "Seus transfers",
     countWord: (n) => `${n} ${n === 1 ? "transfer cadastrado" : "transfers cadastrados"}`,
+    seeAllLabel: "Ver todos os transfers",
     icon: Bus,
     thumbBg: "bg-orange-50",
     thumbIconColor: "text-orange-600",
@@ -183,6 +188,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "ingressos",
     summaryTitle: "Seus ingressos",
     countWord: (n) => `${n} ${n === 1 ? "ingresso cadastrado" : "ingressos cadastrados"}`,
+    seeAllLabel: "Ver todos os ingressos",
     icon: Ticket,
     thumbBg: "bg-indigo-50",
     thumbIconColor: "text-indigo-600",
@@ -202,6 +208,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "seguros",
     summaryTitle: "Seus seguros",
     countWord: (n) => `${n} ${n === 1 ? "seguro cadastrado" : "seguros cadastrados"}`,
+    seeAllLabel: "Ver todos os seguros",
     icon: Shield,
     thumbBg: "bg-emerald-50",
     thumbIconColor: "text-emerald-600",
@@ -221,6 +228,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "cruzeiros",
     summaryTitle: "Seus cruzeiros",
     countWord: (n) => `${n} ${n === 1 ? "cruzeiro cadastrado" : "cruzeiros cadastrados"}`,
+    seeAllLabel: "Ver todos os cruzeiros",
     icon: Ship,
     thumbBg: "bg-cyan-50",
     thumbIconColor: "text-cyan-600",
@@ -240,6 +248,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "trechos de trem",
     summaryTitle: "Seus trens",
     countWord: (n) => `${n} ${n === 1 ? "trecho cadastrado" : "trechos cadastrados"}`,
+    seeAllLabel: "Ver todos os trechos",
     icon: TrainFront,
     thumbBg: "bg-rose-50",
     thumbIconColor: "text-rose-600",
@@ -260,6 +269,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     plural: "serviços",
     summaryTitle: "Outros serviços",
     countWord: (n) => `${n} ${n === 1 ? "serviço cadastrado" : "serviços cadastrados"}`,
+    seeAllLabel: "Ver todos os serviços",
     icon: FileText,
     thumbBg: "bg-slate-100",
     thumbIconColor: "text-slate-600",
