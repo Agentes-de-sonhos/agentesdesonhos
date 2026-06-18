@@ -963,11 +963,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  const whatsappNumber = agentProfile?.phone?.replace(/\D/g, "") || "";
-  const whatsappMessage = encodeURIComponent(`Olá! Vi o orçamento para ${quote.destination} e gostaria de mais informações.`);
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${whatsappMessage}`
-    : "";
+  const signatureContact = resolveSignatureContact((quote as any).signature_snapshot, agentProfile as any);
+  const whatsappUrl = buildWhatsAppUrl(
+    signatureContact.whatsapp || signatureContact.phone,
+    `Olá! Vi o orçamento para ${quote.destination} e gostaria de mais informações.`,
+  );
 
   const handleToggleService = (index: number) => {
     setOpenServiceIndices(prev => {
