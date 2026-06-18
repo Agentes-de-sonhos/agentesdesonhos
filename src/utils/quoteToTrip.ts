@@ -250,7 +250,9 @@ function mapCruise(d: CruiseData): { type: TripServiceType; data: TripServiceDat
       booking_number: "",
       cabin_type: d.cabin_type || "", cabin_number: "", cabin_category: "",
       deck: "", occupancy: "", meal_plan: "",
-      passengers: [], itinerary: [],
+      passengers: [],
+      // Preserva o itinerário cadastrado/importado no orçamento.
+      itinerary: Array.isArray((d as any).itinerary) ? (d as any).itinerary : [],
       checkin_url: "", checkin_status: "", checkin_deadline: "",
       boarding_terminal: "", port_address: "", port_maps_url: "",
       recommended_arrival: "", required_documents: "", baggage_policy: "",

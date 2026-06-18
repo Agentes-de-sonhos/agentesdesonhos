@@ -229,6 +229,7 @@ export const SERVICE_IMPORT_CONFIGS: Record<GenericServiceKey, ServiceImportConf
       { key: "valor_total", label: "Valor total (moeda original)", type: "number" },
       { key: "valor_total_brl", label: "Valor total em R$", type: "number" },
       { key: "portos_visitados", label: "Portos visitados (1 por linha)", type: "list", full: true },
+      { key: "itinerario", label: "Itinerário do cruzeiro (dia a dia)", type: "cruise_itinerary", full: true } as any,
     ],
     mapToInitialData: (p) => {
       const total = typeof p.valor_total_brl === "number" ? p.valor_total_brl : num(p.valor_total);
@@ -250,6 +251,38 @@ export const SERVICE_IMPORT_CONFIGS: Record<GenericServiceKey, ServiceImportConf
         extraNotes.push("", "Portos visitados:");
         p.portos_visitados.forEach((c: string) => extraNotes.push(`• ${c}`));
       }
+
+      // Normaliza itinerário extraído pela IA.
+      // Aceita formato estruturado: [{ data, porto/local, chegada, saida, tipo, observacoes }].
+      // Campos não identificados ficam em branco (nunca inventamos dados).
+      const rawIt = Array.isArray(p.itinerario) ? p.itinerario : [];
+      const itinerary = rawIt
+        .map((s: any) => {
+          if (!s || typeof s !== "object") return null;
+          const port = String(s.porto || s.local || s.port || "").trim();
+          const rawType = String(s.tipo || s.stop_type || "").toLowerCase();
+          let stop_type: "embarque" | "porto" | "navegacao" | "desembarque" = "porto";
+          if (rawType.includes("embarq")) stop_type = "embarque";
+          else if (rawType.includes("desemb")) stop_type = "desembarque";
+          else if (rawType.includes("naveg") || rawType.includes("mar")) stop_type = "navegacao";
+          else if (!port && /naveg/i.test(String(s.observacoes || ""))) stop_type = "navegacao";
+          const date = String(s.data || s.date || "").trim();
+          const arrival = String(s.chegada || s.arrival_time || "").trim();
+          const departure = String(s.saida || s.departure_time || "").trim();
+          const notes = String(s.observacoes || s.notes || s.descricao || "").trim();
+          if (!port && !date && !arrival && !departure && !notes && stop_type !== "navegacao") return null;
+          return {
+            date,
+            port: port || (stop_type === "navegacao" ? "Navegação" : ""),
+            arrival_time: arrival,
+            departure_time: departure,
+            stop_type,
+            notes,
+            description: notes,
+          };
+        })
+        .filter(Boolean);
+
       return {
         service_data: {
           ship_name: p.nome_navio || "",
@@ -259,6 +292,7 @@ export const SERVICE_IMPORT_CONFIGS: Record<GenericServiceKey, ServiceImportConf
           cabin_type,
           price: total,
           notes: joinMeta(p, extraNotes),
+          itinerary,
         },
         amount: total,
       };
