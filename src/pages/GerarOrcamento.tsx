@@ -39,6 +39,11 @@ import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
 import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
+import { SignatureSelector } from "@/components/signatures/SignatureSelector";
+import { useCommercialSignatures } from "@/hooks/useCommercialSignatures";
+import { buildSnapshot } from "@/lib/commercialSignature";
+import type { SignatureSnapshot } from "@/types/signature";
+import { UserCircle2 } from "lucide-react";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -898,6 +903,9 @@ export default function GerarOrcamento() {
                 </CardContent>
               )}
             </Card>
+
+            {/* Assinatura Comercial */}
+            <QuoteSignatureCard quote={quote} onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })} />
           </div>
         </div>
       </div>
