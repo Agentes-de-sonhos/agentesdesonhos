@@ -2114,6 +2114,11 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
   // Fetch agency-wide wallet preferences (which modules to show)
   useEffect(() => {
+    const embedded = (tripData as any)?.wallet_settings;
+    if (embedded && typeof embedded === "object") {
+      setWalletSettings({ ...DEFAULT_WALLET_SETTINGS, ...embedded });
+      return;
+    }
     const ownerId = (tripData as any)?.user_id;
     if (!ownerId) return;
     let cancelled = false;
@@ -2121,7 +2126,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       if (!cancelled) setWalletSettings(s);
     });
     return () => { cancelled = true; };
-  }, [(tripData as any)?.user_id]);
+  }, [(tripData as any)?.user_id, (tripData as any)?.wallet_settings]);
 
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
   const { weatherByDate: itineraryWeather } = useTripWeather(
