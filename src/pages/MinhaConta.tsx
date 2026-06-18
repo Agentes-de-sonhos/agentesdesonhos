@@ -133,24 +133,6 @@ export default function MinhaConta() {
           </CardContent>
         </Card>
 
-        {/* Assinaturas Comerciais */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              Assinaturas Comerciais
-            </CardTitle>
-            <CardDescription>
-              Crie identidades (consultores, vendedores, atendentes) para exibir em Orçamentos, Carteira Digital e Roteiros — sem criar novos usuários ou logins.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline">
-              <Link to="/assinaturas-comerciais">Gerenciar assinaturas</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
         {/* Gerenciar assinatura */}
         {isPaid && (
           <Card>
