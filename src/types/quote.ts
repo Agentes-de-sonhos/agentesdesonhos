@@ -184,6 +184,23 @@ export interface CruiseData {
   cabin_type: string;
   price: number;
   notes?: string;
+  /**
+   * Itinerário detalhado do cruzeiro (dia a dia).
+   * Compatível com o renderizador `CruiseItineraryTimeline` da carteira pública.
+   */
+  itinerary?: CruiseItineraryStop[];
+}
+
+export interface CruiseItineraryStop {
+  /** Data no formato YYYY-MM-DD (opcional — pode estar em branco). */
+  date?: string;
+  /** Porto / Local (ex.: Santos, Búzios, Navegação). */
+  port?: string;
+  arrival_time?: string;
+  departure_time?: string;
+  /** Tipo da parada: embarque | porto | navegacao | desembarque. */
+  stop_type?: "embarque" | "porto" | "navegacao" | "desembarque";
+  notes?: string;
 }
 
 export interface OtherServiceData {
