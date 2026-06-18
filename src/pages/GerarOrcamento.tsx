@@ -39,6 +39,7 @@ import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
 import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
+import { QuoteSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -898,6 +899,9 @@ export default function GerarOrcamento() {
                 </CardContent>
               )}
             </Card>
+
+            {/* Assinatura Comercial */}
+            <QuoteSignatureCard quote={quote} onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })} />
           </div>
         </div>
       </div>

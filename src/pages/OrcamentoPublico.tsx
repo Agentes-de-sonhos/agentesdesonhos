@@ -21,6 +21,7 @@ import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
+import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -962,11 +963,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  const whatsappNumber = agentProfile?.phone?.replace(/\D/g, "") || "";
-  const whatsappMessage = encodeURIComponent(`Olá! Vi o orçamento para ${quote.destination} e gostaria de mais informações.`);
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${whatsappMessage}`
-    : "";
+  const signatureContact = resolveSignatureContact((quote as any).signature_snapshot, agentProfile as any);
+  const whatsappUrl = buildWhatsAppUrl(
+    signatureContact.whatsapp || signatureContact.phone,
+    `Olá! Vi o orçamento para ${quote.destination} e gostaria de mais informações.`,
+  );
 
   const handleToggleService = (index: number) => {
     setOpenServiceIndices(prev => {
@@ -1362,39 +1363,42 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         </div>
 
         {/* ─── Agent Signature ─── */}
-        {agentProfile && (
+        {(agentProfile || (quote as any).signature_snapshot) && (
           <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="relative p-8 sm:p-12">
               <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-7">
-                Sua consultora de viagens
+                {signatureContact.title || "Sua consultora de viagens"}
               </p>
               <div className="flex flex-col items-center text-center gap-5">
                 <div className="relative">
                   <span className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-md" aria-hidden />
-                  {agentProfile.avatar_url ? (
+                  {signatureContact.photo_url ? (
                     <img
-                      src={agentProfile.avatar_url}
-                      alt={agentProfile.name}
+                      src={signatureContact.photo_url}
+                      alt={signatureContact.name}
                       className="relative h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
                     />
                   ) : (
                     <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]">
-                      {agentProfile.name.charAt(0).toUpperCase()}
+                      {signatureContact.name.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
                 <div className="space-y-1.5 max-w-md">
-                  <p className="text-2xl font-bold tracking-tight text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && (
+                  <p className="text-2xl font-bold tracking-tight text-foreground">{signatureContact.name}</p>
+                  {agentProfile?.agency_name && (
                     <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>
                   )}
-                  {(agentProfile.city || agentProfile.state) && (
+                  {agentProfile && (agentProfile.city || agentProfile.state) && (
                     <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}
                   <p className="pt-3 text-[15px] text-foreground/75 leading-relaxed italic">
-                    “Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem.”
+                    “{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}”
                   </p>
+                  {signatureContact.email && (
+                    <p className="pt-2 text-xs text-muted-foreground">{signatureContact.email}</p>
+                  )}
                 </div>
                 {whatsappUrl && (
                   <a

@@ -1,48 +1,123 @@
-## Objetivo
+## Assinaturas Comerciais
 
-Evoluir o overlay de categoria (ex.: Ingressos/Atrações, Hospedagem, Transfer) da Carteira Digital Pública para facilitar a localização e consulta quando houver muitos serviços (10, 15, 20+). Mantém o cabeçalho atual, a janela/modal atual e a identidade visual da agência. Sem novo menu inferior. Sem nova página.
+Nova entidade independente de usuários/permissões para representar a identidade comercial exibida em Orçamentos, Carteira Digital e Roteiros públicos.
 
-Hoje, o overlay de grupo (em `ViagemPublica.tsx` ~linha 2583) apenas faz `map` dos serviços renderizando o `PublicServiceCard` completo — pesado, sem resumo no topo, sem âncoras e sem distinção compacto/expandido.
+---
 
-## Escopo desta entrega
+### 1. Banco de dados (migration)
 
-1. Novo componente `CategoryServiceView` que substitui o conteúdo do "Group overlay" para todas as categorias.
-2. `CategoryServiceSummary` — bloco horizontal no topo com até 8 miniaturas numeradas, swipe horizontal, e "Ver mais N / Mostrar menos" quando houver mais de 8.
-3. `CompactServiceCard` — card compacto reutilizável, com:
-   - miniatura (imagem personalizada do serviço se houver, senão ícone padrão da categoria com fundo pastel);
-   - nome, linha secundária (produto/modalidade), quantidade de pessoas;
-   - badge de status (só quando preenchido);
-   - ícone de documento com contador (só quando houver anexos);
-   - seta de expandir (só quando `hasAdditionalDetails(service)` for verdadeiro).
-4. `ExpandableServiceDetails` — accordion interno que reaproveita o `PublicServiceCard` já existente para mostrar todos os detalhes. Em mobile, apenas um card aberto por vez.
-5. Comportamento de navegação: tocar numa miniatura faz scroll suave até `service-card-{id}` e aplica destaque temporário (~1,5s) com borda azul suave. Respeita `prefers-reduced-motion`. Tocar no ícone de documento expande o card e rola até a seção de arquivos.
-6. Configuração por categoria (`categoryPresentationConfig`): nome singular/plural, título do resumo ("Seus ingressos", "Suas hospedagens"…), ícone padrão da categoria, cor pastel do fallback e seletor dos campos principais do card compacto.
-7. Helper `hasAdditionalDetails(service)` — ignora null/strings vazias/arrays vazios e campos já mostrados no card compacto. Sem detalhes → sem seta, sem expansão.
+**Nova tabela `commercial_signatures`**
+- `id` uuid PK
+- `user_id` uuid (dono da agência) — FK profiles
+- `name` text not null
+- `title` text
+- `phone` text
+- `whatsapp` text
+- `email` text
+- `photo_url` text
+- `custom_message` text
+- `display_order` int default 0
+- `is_active` bool default true
+- `is_default` bool default false
+- `created_at`, `updated_at`
 
-## Itens explicitamente fora desta entrega
+RLS: dono CRUD próprio; SELECT público liberado (necessário para renderizar snapshot/atualização em páginas públicas, embora o snapshot já garanta histórico). Restringimos SELECT público apenas a `is_active` se necessário. GRANTs padrão.
 
-- Menu inferior, busca, filtros, mistura de categorias, datas no resumo, nova página/modal, alterações no cadastro de serviços, imagens específicas por parque/hotel/fornecedor.
-- Não vou trocar o `PublicServiceCard` existente — ele continua sendo a fonte dos detalhes completos dentro da expansão e do overlay individual de serviço.
+**Snapshot nos documentos**
+Adicionar coluna `signature_snapshot jsonb` em:
+- `quotes`
+- `trips` (carteira digital)
+- `itineraries` (roteiros)
 
-## Detalhes técnicos
+Snapshot contém: `{ id, name, title, phone, whatsapp, email, photo_url, custom_message, updated_at }`.
 
-- Arquivo principal modificado: `src/pages/ViagemPublica.tsx` — substituir o conteúdo do `ServiceDetailOverlay` de grupo pelo novo `CategoryServiceView`.
-- Novos arquivos:
-  - `src/components/wallet/category/CategoryServiceView.tsx`
-  - `src/components/wallet/category/CategoryServiceSummary.tsx`
-  - `src/components/wallet/category/CompactServiceCard.tsx`
-  - `src/components/wallet/category/ExpandableServiceDetails.tsx`
-  - `src/components/wallet/category/categoryPresentationConfig.ts` (labels singular/plural, ícone padrão, cores pastel, seletores de campos compactos por `service_type`).
-  - `src/components/wallet/category/serviceDetailsHelpers.ts` (`hasAdditionalDetails`, `getCompactFields`, `getServiceThumbnail`, `getServiceAttachments`).
-- Estilo: usa tokens da agência (`--wallet-brand`) já existentes; cards arredondados, sombras suaves, fundo branco. Mobile-first, alvos de toque ≥ 44 px.
-- Acessibilidade: `aria-expanded`, labels descritivos nas setas e no ícone de documento ("X possui N documentos"), alt nas miniaturas, navegação por teclado, foco visível, `prefers-reduced-motion`.
-- Reutiliza `SERVICE_ICONS`, `SERVICE_COLORS` e `SERVICE_LABELS` que já existem em `ViagemPublica.tsx` — exportados ou movidos para `categoryPresentationConfig.ts` conforme conveniente.
+Nenhum FK rígido — exclusão da assinatura não quebra documentos. Implementaremos "soft delete" via `is_active=false` quando vinculada.
 
-## Critérios de aceite (atendidos pela implementação)
+---
 
-Todos os 23 critérios do prompt aplicados sobre o overlay de grupo: resumo no topo sem datas, até 8 no estado inicial com swipe, "Ver mais X" / "Mostrar menos", scroll com destaque temporário usando `service-card-{id}`, miniatura personalizada com fallback por categoria, cards compactos com campos essenciais, omissão de campos vazios e status vazio, ícone de documento com contador que expande direto na seção de arquivos, seta apenas quando há conteúdo adicional, mesma janela atual da Carteira Digital, layout responsivo.
+### 2. UI — Configurações
 
-## Pontos para você confirmar antes de eu codar
+Nova aba **"Assinaturas Comerciais"** dentro de `Configurações` (ou `MinhaConta`/área de configurações existente).
 
-1. Confirmar que a evolução fica restrita ao overlay de **grupo por categoria** (acessado pela Navegação Rápida) e que o overlay individual de serviço (tocado a partir de uma atividade do roteiro) continua usando o `PublicServiceCard` cheio como hoje.
-2. OK reutilizar o `PublicServiceCard` atual dentro da expansão (sem reescrever os blocos de detalhes), ou prefere que eu construa uma versão de detalhes mais enxuta seguindo a referência?
+Funcionalidades:
+- Lista em cards (foto, nome, cargo, badges "Padrão"/"Inativa")
+- Criar / Editar (Dialog com formulário)
+- Duplicar (clona registro)
+- Definir como padrão (radio, apenas 1 padrão; trigger desmarca os outros)
+- Inativar (toggle)
+- Excluir: se houver documentos referenciando (`signature_snapshot->>'id'`), bloquear com aviso e oferecer Inativar
+
+---
+
+### 3. Hook reutilizável
+
+`useCommercialSignatures()`:
+- `signatures` lista ativa
+- `defaultSignature`
+- CRUD + setDefault + duplicate
+- `buildSnapshot(signature)` helper
+
+Componente `<SignatureSelector value onChange />` reutilizável (cards com radio, mobile-friendly).
+
+Helper `getSignatureContact(snapshot, fallbackAgentProfile)` para uso nas páginas públicas — usa snapshot quando existir, senão cai no `agentProfile` atual (compatibilidade).
+
+---
+
+### 4. Integração — Orçamentos
+
+- Em `GerarOrcamento.tsx` (etapa Resumo): adicionar `<SignatureSelector>` que salva `signature_snapshot` no quote.
+- Default: ao criar novo orçamento, pré-preencher com snapshot da assinatura padrão.
+- Em `OrcamentoPublicoV2.tsx`: ler `quote.signature_snapshot` e usar para nome/foto/WhatsApp/email/mensagem na seção de contato e nos botões de ação. Fallback para `agentProfile` atual quando snapshot ausente (orçamentos antigos).
+
+### 5. Integração — Carteira Digital (Trips)
+
+- Em configuração do trip (página de gestão da carteira): `<SignatureSelector>` salvando em `trips.signature_snapshot`.
+- Em `CarteiraPublica.tsx` e `ViagemPublica.tsx`: aplicar snapshot na área do consultor responsável e botões WhatsApp/contato.
+
+### 6. Integração — Roteiros (Itineraries)
+
+- Editor de roteiro: `<SignatureSelector>` salvando em `itineraries.signature_snapshot`.
+- Em `RoteiroPublicoV2.tsx`: aplicar snapshot.
+
+---
+
+### 7. Comportamento histórico
+
+- Snapshot é gravado no momento da seleção — alterações posteriores na assinatura não afetam documentos antigos.
+- Botão "Atualizar para versão atual" opcional ao lado do seletor (não obrigatório nesta entrega).
+
+---
+
+### 8. Compatibilidade
+
+- Agências sem nenhuma assinatura: documentos seguem usando dados do `agentProfile` (comportamento atual). Nenhum fluxo quebra.
+- Critério 19 e 20 atendidos via fallback + auto-uso da padrão.
+
+---
+
+### Arquivos principais a criar/editar
+
+Novo:
+- Migration SQL
+- `src/hooks/useCommercialSignatures.ts`
+- `src/components/signatures/SignatureSelector.tsx`
+- `src/components/signatures/SignatureFormDialog.tsx`
+- `src/pages/configuracoes/AssinaturasComerciais.tsx` (ou seção integrada à página de configurações existente)
+- `src/lib/commercialSignature.ts` (helpers `buildSnapshot`, `resolveSignatureContact`)
+
+Editar:
+- `src/pages/GerarOrcamento.tsx` (etapa Resumo)
+- `src/pages/OrcamentoPublicoV2.tsx`
+- Editor de carteira (trips) + `CarteiraPublica.tsx` / `ViagemPublica.tsx`
+- Editor de roteiro + `RoteiroPublicoV2.tsx`
+- Rota/menu de Configurações para incluir nova seção
+- `src/types/quote.ts`, `src/types/itinerary.ts` para o tipo `SignatureSnapshot`
+
+---
+
+### Pontos a confirmar antes de implementar
+
+1. **Onde adicionar a aba**: em `MinhaConta` (atual área de perfil) ou criar página dedicada `/configuracoes/assinaturas`?
+2. **Foto**: upload via `MediaManager` (bucket `media-files`) — confirma?
+3. **Mensagem personalizada**: aparece em qual ponto exato do documento público (junto da área do consultor, no topo, ou após o resumo)?
+4. **Exclusão hard**: confirmar que assinatura sem vínculo pode ser excluída de fato (DELETE), e com vínculo só permite inativar.

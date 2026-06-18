@@ -8,6 +8,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
+import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
@@ -932,6 +933,13 @@ export default function CriarRoteiro() {
                 }}
               />
             )}
+
+            <DocumentSignatureCard
+              table="itineraries"
+              docId={currentItinerary.id}
+              initialSnapshot={(currentItinerary as any).signature_snapshot ?? (currentItinerary as any).signatureSnapshot ?? null}
+              onSaved={() => loadItinerary(currentItinerary.id)}
+            />
           </div>
         )}
 

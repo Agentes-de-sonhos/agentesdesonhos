@@ -21,6 +21,7 @@ import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
+import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 
 const tripTypeLabels: Record<string, string> = {
   familia: "Viagem em Família", casal: "Viagem de Casal",
@@ -185,6 +186,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           age: p?.age ?? null,
         })),
         passengerInterests: (itineraryData as any).passenger_interests || [],
+        // @ts-ignore — extra field passed through for SignatureSnapshot rendering
+        signature_snapshot: (itineraryData as any).signature_snapshot || null,
       };
 
       setItinerary(mappedItinerary);
@@ -216,11 +219,11 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     );
   }
 
-  const whatsappNumber = agentProfile?.phone?.replace(/\D/g, "") || "";
-  const whatsappMessage = encodeURIComponent(`Olá! Vi o roteiro para ${itinerary.destination} e gostaria de mais informações.`);
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${whatsappMessage}`
-    : "";
+  const sig = resolveSignatureContact((itinerary as any).signature_snapshot, agentProfile as any);
+  const whatsappUrl = buildWhatsAppUrl(
+    sig.whatsapp || sig.phone,
+    `Olá! Vi o roteiro para ${itinerary.destination} e gostaria de mais informações.`,
+  );
 
   const tripStart = parseLocalDate(itinerary.startDate);
   const tripEnd = parseLocalDate(itinerary.endDate);
@@ -518,15 +521,15 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         )}
 
         {/* ─── Agent Signature (horizontal, premium) ─── */}
-        {agentProfile && (
+        {(agentProfile || (itinerary as any).signature_snapshot) && (
           <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="flex items-center gap-3 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-4">
-              {agentProfile.avatar_url ? (
-                <img src={agentProfile.avatar_url} alt={agentProfile.name}
+              {sig.photo_url ? (
+                <img src={sig.photo_url} alt={sig.name}
                   className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover ring-2 ring-primary/10 shrink-0" />
               ) : (
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-base font-bold ring-2 ring-white shrink-0">
-                  {agentProfile.name.charAt(0).toUpperCase()}
+                  {sig.name.charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="flex-1 min-w-0">
@@ -556,11 +559,14 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             <div className={`overflow-hidden transition-all duration-300 ${agentOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
               <div className="px-5 pb-5 pt-1 border-t border-border/40 space-y-3">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-bold text-foreground">{agentProfile.name}</p>
-                  {agentProfile.agency_name && <BrandText as="p" className="text-[12px] text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
-                  {(agentProfile.city || agentProfile.state) && (
+                  <p className="text-sm font-bold text-foreground">{sig.name}</p>
+                  {sig.title && <p className="text-[12px] text-muted-foreground font-medium">{sig.title}</p>}
+                  {!sig.title && agentProfile?.agency_name && <BrandText as="p" className="text-[12px] text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>}
+                  {agentProfile && (agentProfile.city || agentProfile.state) && (
                     <p className="text-[11px] text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
                   )}
+                  {sig.email && <p className="text-[11px] text-muted-foreground">{sig.email}</p>}
+                  {sig.custom_message && <p className="text-[12px] text-muted-foreground italic pt-1">{sig.custom_message}</p>}
                 </div>
                 {whatsappUrl && (
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"

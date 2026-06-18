@@ -36,6 +36,7 @@ import { verifyTripAccess } from "@/hooks/useTrips";
 import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
@@ -2533,11 +2534,9 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
 
         {/* ─── Agent Signature (mesmo padrão do Orçamento) ─── */}
-        {agentProfile && (() => {
-          const whatsappNumber = agentProfile.phone?.replace(/\D/g, "") || "";
-          const whatsappUrl = whatsappNumber
-            ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
-            : "";
+        {(agentProfile || (tripData as any).signature_snapshot) && (() => {
+          const sig = resolveSignatureContact((tripData as any).signature_snapshot, agentProfile as any);
+          const whatsappUrl = buildWhatsAppUrl(sig.whatsapp || sig.phone);
           return (
             <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden" open>
               <summary className="list-none cursor-pointer px-5 py-3 flex items-center justify-between gap-3">
@@ -2547,16 +2546,18 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               </summary>
               <div className="px-5 pb-5 pt-1">
                 <div className="flex items-center gap-4">
-                  {agentProfile.avatar_url ? (
-                    <img src={agentProfile.avatar_url} alt={agentProfile.name} className="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full object-cover border border-gray-200 shrink-0" />
+                  {sig.photo_url ? (
+                    <img src={sig.photo_url} alt={sig.name} className="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full object-cover border border-gray-200 shrink-0" />
                   ) : (
                     <div className="h-16 w-16 sm:h-[72px] sm:w-[72px] rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600 text-2xl font-bold shrink-0">
-                      {agentProfile.name?.charAt(0).toUpperCase() || '?'}
+                      {sig.name?.charAt(0).toUpperCase() || '?'}
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-gray-900 break-words">{agentProfile.name}</p>
-                    {agentProfile.agency_name && <BrandText as="p" className="text-xs text-gray-500 break-words">{agentProfile.agency_name}</BrandText>}
+                    <p className="text-sm font-semibold text-gray-900 break-words">{sig.name}</p>
+                    {sig.title && <p className="text-xs text-gray-500 break-words">{sig.title}</p>}
+                    {!sig.title && agentProfile?.agency_name && <BrandText as="p" className="text-xs text-gray-500 break-words">{agentProfile.agency_name}</BrandText>}
+                    {sig.custom_message && <p className="text-xs text-gray-500 mt-1 italic break-words">{sig.custom_message}</p>}
                   </div>
                   {whatsappUrl && (
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"

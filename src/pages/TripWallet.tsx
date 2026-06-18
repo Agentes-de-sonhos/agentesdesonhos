@@ -23,6 +23,7 @@ import { TravelImporter } from "@/components/trip/TravelImporter";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
 import { TripEditForm } from "@/components/trip/TripEditForm";
+import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { TripEditHistory } from "@/components/trip/TripEditHistory";
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
@@ -877,6 +878,16 @@ function TripWalletContent() {
             </CardContent>
           </Card>
         )}
+
+        {/* Assinatura Comercial */}
+        <div className="max-w-2xl">
+          <DocumentSignatureCard
+            table="trips"
+            docId={trip.id}
+            initialSnapshot={(trip as any).signature_snapshot ?? null}
+            onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })}
+          />
+        </div>
 
         <Accordion type="multiple" className="space-y-3" value={accordionValue} onValueChange={(v) => setAccordionValue(v as string[])}>
           {/* 1. Serviços da Viagem */}
