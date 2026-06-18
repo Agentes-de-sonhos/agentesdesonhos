@@ -1,4 +1,5 @@
 import {
+  forwardRef,
   useCallback,
   useEffect,
   useMemo,
@@ -256,23 +257,20 @@ interface CompactCardProps {
   renderFullCard: (s: TripService) => ReactNode;
 }
 
-const CompactServiceCard = (() => {
-  // Use forwardRef inline to keep this component co-located.
-  // eslint-disable-next-line react/display-name
-  return require("react").forwardRef<HTMLDivElement, CompactCardProps>(
-    (
-      {
-        service,
-        type,
-        isOpen,
-        isHighlighted,
-        onToggle,
-        onOpenAttachments,
-        attachAnchorRef,
-        renderFullCard,
-      }: CompactCardProps,
-      ref: any,
-    ) => {
+const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
+  function CompactServiceCard(
+    {
+      service,
+      type,
+      isOpen,
+      isHighlighted,
+      onToggle,
+      onOpenAttachments,
+      attachAnchorRef,
+      renderFullCard,
+    },
+    ref,
+  ) {
       const cfg = CATEGORY_CONFIG[type];
       const Icon = cfg.icon;
       const compact = cfg.getCompactFields(service);
@@ -404,7 +402,6 @@ const CompactServiceCard = (() => {
         </div>
       );
     },
-  );
-})();
+);
 
 export default CategoryServiceView;
