@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   User,
@@ -13,6 +13,7 @@ import {
   Save,
   X,
   Image,
+  Users,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -607,6 +608,25 @@ export default function Perfil() {
             }}
           />
         </div>
+
+        {/* Assinaturas Comerciais */}
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Assinaturas Comerciais
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Crie identidades (consultores, vendedores, atendentes) para exibir em Orçamentos,
+              Carteira Digital e Roteiros — sem criar novos usuários ou logins.
+            </p>
+            <Button asChild variant="outline">
+              <Link to="/assinaturas-comerciais">Gerenciar assinaturas</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
