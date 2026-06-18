@@ -1017,7 +1017,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: "Retorno" });
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0">
+    <div
+      className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0"
+      style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
+    >
       {/* ─── Slim Premium Header ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
