@@ -730,13 +730,13 @@ function CollapsibleServiceCard({
         const display = getServicePaymentDisplay(service.amount, payConfig, feeInfo);
         if (!display) return null;
         return (
-          <div className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-3 flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+          <div className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-3 flex items-start gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-0.5">
               <CreditCard className="h-4 w-4 text-primary" />
             </div>
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
               <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/70">Parcelamento</span>
-              <span className="text-sm font-bold text-primary truncate">{display}</span>
+              <span className="text-sm font-bold text-primary break-words leading-snug">{display}</span>
             </div>
           </div>
         );
@@ -878,10 +878,20 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
 
-  // Premium UX: services start collapsed (resumo first, detalhes on demand)
+  // Premium UX: auto-open services based on count
+  //  • 1 service: open it
+  //  • 2–3 services: open all
+  //  • 4+ services: open only the first
   useEffect(() => {
     if (!servicesInitialized.current && quote?.services?.length) {
-      setOpenServiceIndices(new Set());
+      const count = quote.services.length;
+      const initial = new Set<number>();
+      if (count <= 3) {
+        for (let i = 0; i < count; i++) initial.add(i);
+      } else {
+        initial.add(0);
+      }
+      setOpenServiceIndices(initial);
       servicesInitialized.current = true;
     }
   }, [quote?.services]);
@@ -1021,18 +1031,27 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       <section className="relative w-full overflow-hidden">
         <div className="relative min-h-[520px] sm:min-h-[600px] w-full">
           {heroImage ? (
-            <img
-              src={heroImage}
-              alt={quote.destination}
-              className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
-              loading="eager"
-            />
+            <>
+              <img
+                src={heroImage}
+                alt={quote.destination}
+                className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
+                loading="eager"
+              />
+              {/* cinematic gradient overlay (only with image) */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
+            </>
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/20 to-slate-900" />
+            <>
+              {/* Solid primary-blue base (no image) */}
+              <div className="absolute inset-0 bg-primary" />
+              {/* Subtle top sheen for depth */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-transparent" />
+              {/* Soft dark wash only near the bottom for text contrast */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/55" />
+            </>
           )}
-          {/* cinematic gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.55),transparent_65%)]" />
 
           {/* floating agency logo badge — premium circular signature */}
           {agentProfile?.agency_logo_url && (
