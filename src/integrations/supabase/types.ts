@@ -720,6 +720,42 @@ export type Database = {
           },
         ]
       }
+      agency_wallet_settings: {
+        Row: {
+          created_at: string
+          show_calendar: boolean
+          show_next_activity: boolean
+          show_next_service: boolean
+          show_signature: boolean
+          show_support_tools: boolean
+          show_whatsapp: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          show_calendar?: boolean
+          show_next_activity?: boolean
+          show_next_service?: boolean
+          show_signature?: boolean
+          show_support_tools?: boolean
+          show_whatsapp?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          show_calendar?: boolean
+          show_next_activity?: boolean
+          show_next_service?: boolean
+          show_signature?: boolean
+          show_support_tools?: boolean
+          show_whatsapp?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agenda_filter_preferences: {
         Row: {
           created_at: string
@@ -10978,6 +11014,17 @@ export type Database = {
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
       get_agency_slug_for_user: { Args: { p_user_id: string }; Returns: string }
+      get_agency_wallet_settings: {
+        Args: { _user_id: string }
+        Returns: {
+          show_calendar: boolean
+          show_next_activity: boolean
+          show_next_service: boolean
+          show_signature: boolean
+          show_support_tools: boolean
+          show_whatsapp: boolean
+        }[]
+      }
       get_gamification_ranking: {
         Args: { limit_count?: number }
         Returns: {

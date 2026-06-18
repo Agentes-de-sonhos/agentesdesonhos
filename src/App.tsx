@@ -45,6 +45,7 @@ const Noticias = lazy(() => import("./pages/Noticias"));
 const Perfil = lazy(() => import("./pages/Perfil"));
 const MinhaConta = lazy(() => import("./pages/MinhaConta"));
 const AssinaturasComerciais = lazy(() => import("./pages/AssinaturasComerciais"));
+const ConfiguracoesCarteira = lazy(() => import("./pages/ConfiguracoesCarteira"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Materiais = lazy(() => import("./pages/Materiais"));
@@ -208,6 +209,7 @@ const App = () => (
             <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
             <Route path="/minha-conta" element={<ProtectedRoute><MinhaConta /></ProtectedRoute>} />
             <Route path="/assinaturas-comerciais" element={<ProtectedRoute><AssinaturasComerciais /></ProtectedRoute>} />
+            <Route path="/configuracoes/carteira" element={<ProtectedRoute><ConfiguracoesCarteira /></ProtectedRoute>} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
             <Route path="/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />

@@ -37,6 +37,11 @@ import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
+import {
+  AgencyWalletSettings,
+  DEFAULT_WALLET_SETTINGS,
+  fetchAgencyWalletSettings,
+} from "@/lib/walletSettings";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
@@ -1715,6 +1720,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [gateAttempts, setGateAttempts] = useState(0);
   const [gateLocked, setGateLocked] = useState(false);
   const [gateBranding, setGateBranding] = useState<AgentProfile | null>(null);
+  const [walletSettings, setWalletSettings] = useState<AgencyWalletSettings>({ ...DEFAULT_WALLET_SETTINGS });
 
   // Load public branding (logo, agency, agent) for the password gate
   useEffect(() => {
@@ -2106,6 +2112,17 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [activeGroupType, setActiveGroupType] = useState<TripServiceType | null>(null);
   const [itineraryOpen, setItineraryOpen] = useState(false);
 
+  // Fetch agency-wide wallet preferences (which modules to show)
+  useEffect(() => {
+    const ownerId = (tripData as any)?.user_id;
+    if (!ownerId) return;
+    let cancelled = false;
+    fetchAgencyWalletSettings(ownerId).then((s) => {
+      if (!cancelled) setWalletSettings(s);
+    });
+    return () => { cancelled = true; };
+  }, [(tripData as any)?.user_id]);
+
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
   const { weatherByDate: itineraryWeather } = useTripWeather(
     tripData.destination,
@@ -2266,79 +2283,80 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div className="space-y-5">
               {navGrid}
-              <div className="md:hidden flex items-center gap-3 my-1">
-                <div className="h-px flex-1 bg-border/60" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Seu calendário
-                </span>
-                <div className="h-px flex-1 bg-border/60" />
-              </div>
-              <div className="hidden md:flex items-center gap-3 my-1">
-                <div className="h-px flex-1 bg-border/60" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Seu calendário
-                </span>
-                <div className="h-px flex-1 bg-border/60" />
-              </div>
-              <div className="flex flex-col gap-5 md:grid md:grid-cols-2">
-                <div className="flex flex-col gap-5">
-                  <TripLocalClockBar
-                    destination={tripData.destination}
-                    startDate={startDate}
-                    endDate={endDate}
-                    compact
-                  />
-                  <TripCalendarWithWeather
-                    destination={tripData.destination}
-                    startDate={startDate}
-                    endDate={endDate}
-                    itineraryDates={itineraryDates}
-                    onDayClick={handleCalendarDayClick}
-                    compact
-                  />
+              {walletSettings.show_calendar && (
+                <div className="flex items-center gap-3 my-1">
+                  <div className="h-px flex-1 bg-border/60" />
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Seu calendário
+                  </span>
+                  <div className="h-px flex-1 bg-border/60" />
                 </div>
-                <div className="flex flex-col gap-5">
-                  {services.length > 0 && (
-                    <NextAppointmentCard
-                      services={services}
-                      onOpenService={handleOpenService}
-                    />
-                  )}
-                  {itineraryActivities.length > 0 && (
-                    <NextActivityCard
-                      activities={itineraryActivities as any}
-                      onOpenItinerary={(dayDate?: string) => {
-                        setItineraryOpen(true);
-                        if (dayDate) {
-                          setOpenDay(dayDate);
-                        }
-                        setTimeout(() => {
-                          const target = dayDate ? dayRefs.current[dayDate] : itineraryRef.current;
-                          target?.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }, dayDate ? 420 : 100);
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-              {(services.length > 0 || itineraryActivities.length > 0) && (
-                <>
-                  <div className="md:hidden flex items-center gap-3 my-1">
-                    <div className="h-px flex-1 bg-border/60" />
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Ferramentas de apoio ao passageiro
-                    </span>
-                    <div className="h-px flex-1 bg-border/60" />
-                  </div>
-                  <div className="hidden md:flex items-center gap-3 my-1">
-                    <div className="h-px flex-1 bg-border/60" />
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Ferramentas de apoio ao passageiro
-                    </span>
-                    <div className="h-px flex-1 bg-border/60" />
-                  </div>
-                </>
               )}
+              {(() => {
+                const showLeft = walletSettings.show_calendar;
+                const showNextService = walletSettings.show_next_service && services.length > 0;
+                const showNextActivity = walletSettings.show_next_activity && itineraryActivities.length > 0;
+                const showRight = showNextService || showNextActivity;
+                if (!showLeft && !showRight) return null;
+                const useGrid = showLeft && showRight;
+                return (
+                  <div className={cn("flex flex-col gap-5", useGrid && "md:grid md:grid-cols-2")}>
+                    {showLeft && (
+                      <div className="flex flex-col gap-5">
+                        <TripLocalClockBar
+                          destination={tripData.destination}
+                          startDate={startDate}
+                          endDate={endDate}
+                          compact
+                        />
+                        <TripCalendarWithWeather
+                          destination={tripData.destination}
+                          startDate={startDate}
+                          endDate={endDate}
+                          itineraryDates={itineraryDates}
+                          onDayClick={handleCalendarDayClick}
+                          compact
+                        />
+                      </div>
+                    )}
+                    {showRight && (
+                      <div className="flex flex-col gap-5">
+                        {showNextService && (
+                          <NextAppointmentCard
+                            services={services}
+                            onOpenService={handleOpenService}
+                          />
+                        )}
+                        {showNextActivity && (
+                          <NextActivityCard
+                            activities={itineraryActivities as any}
+                            onOpenItinerary={(dayDate?: string) => {
+                              setItineraryOpen(true);
+                              if (dayDate) {
+                                setOpenDay(dayDate);
+                              }
+                              setTimeout(() => {
+                                const target = dayDate ? dayRefs.current[dayDate] : itineraryRef.current;
+                                target?.scrollIntoView({ behavior: "smooth", block: "start" });
+                              }, dayDate ? 420 : 100);
+                            }}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+              {walletSettings.show_support_tools && (services.length > 0 || itineraryActivities.length > 0) && (
+                <div className="flex items-center gap-3 my-1">
+                  <div className="h-px flex-1 bg-border/60" />
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Ferramentas de apoio ao passageiro
+                  </span>
+                  <div className="h-px flex-1 bg-border/60" />
+                </div>
+              )}
+              {walletSettings.show_support_tools && (
               <TripConvertersWrapper
                 destination={tripData.destination}
                 startDate={startDate}
@@ -2346,6 +2364,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 tripId={tripData.id}
                 services={services}
               />
+              )}
             </div>
           );
         })()}
@@ -2534,9 +2553,25 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
 
         {/* ─── Agent Signature (mesmo padrão do Orçamento) ─── */}
-        {(agentProfile || (tripData as any).signature_snapshot) && (() => {
+        {(walletSettings.show_signature || walletSettings.show_whatsapp) &&
+          (agentProfile || (tripData as any).signature_snapshot) && (() => {
           const sig = resolveSignatureContact((tripData as any).signature_snapshot, agentProfile as any);
-          const whatsappUrl = buildWhatsAppUrl(sig.whatsapp || sig.phone);
+          const whatsappUrl = walletSettings.show_whatsapp ? buildWhatsAppUrl(sig.whatsapp || sig.phone) : null;
+          const showSig = walletSettings.show_signature;
+          if (!showSig && !whatsappUrl) return null;
+          // WhatsApp only (no signature) — slim card
+          if (!showSig && whatsappUrl) {
+            return (
+              <div className="rounded-2xl border border-border/40 bg-white shadow-sm px-5 py-4 flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-gray-700">Precisa de ajuda? Fale com a gente.</p>
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-3.5 py-2 font-semibold text-xs shadow-sm transition-colors shrink-0">
+                  <WhatsAppIcon className="h-4 w-4" />
+                  WhatsApp
+                </a>
+              </div>
+            );
+          }
           return (
             <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden" open>
               <summary className="list-none cursor-pointer px-5 py-3 flex items-center justify-between gap-3">
