@@ -1,0 +1,182 @@
+{
+  "generated_at": "2026-06-18",
+  "version": "1.0.0",
+  "language": "pt-BR",
+  "fields": [
+    "id",
+    "title",
+    "content",
+    "module",
+    "submodule",
+    "type",
+    "audience",
+    "plan",
+    "permissions",
+    "intents",
+    "keywords",
+    "confidence",
+    "status",
+    "related_ids",
+    "source_reference",
+    "last_reviewed"
+  ],
+  "confidence_levels": [
+    "confirmado",
+    "inferido",
+    "pendente"
+  ],
+  "status_levels": [
+    "pronto",
+    "revisão-necessária",
+    "bloqueado-por-informação"
+  ],
+  "excluded_from_rag": [
+    "bloqueado-por-informação"
+  ],
+  "modules": {
+    "main": [
+      {
+        "slug": "crm",
+        "name": "CRM e Oportunidades"
+      },
+      {
+        "slug": "gestao-clientes",
+        "name": "Gestão de Clientes"
+      },
+      {
+        "slug": "operacoes",
+        "name": "Operações"
+      },
+      {
+        "slug": "orcamentos",
+        "name": "Orçamentos"
+      },
+      {
+        "slug": "roteiros",
+        "name": "Roteiros"
+      },
+      {
+        "slug": "carteira-digital",
+        "name": "Carteira Digital"
+      },
+      {
+        "slug": "financeiro",
+        "name": "Financeiro"
+      },
+      {
+        "slug": "vendas",
+        "name": "Vendas"
+      },
+      {
+        "slug": "entradas-despesas",
+        "name": "Entradas e Despesas"
+      },
+      {
+        "slug": "faturas",
+        "name": "Faturas"
+      },
+      {
+        "slug": "comissoes-vendedores",
+        "name": "Comissões e Vendedores"
+      },
+      {
+        "slug": "equipe-e-permissoes",
+        "name": "Equipe e Permissões"
+      },
+      {
+        "slug": "configuracoes",
+        "name": "Configurações, Conta e Onboarding"
+      },
+      {
+        "slug": "captacao-leads",
+        "name": "Captação de Leads"
+      },
+      {
+        "slug": "marketing",
+        "name": "Marketing — Vitrine, Cartão e Lâminas"
+      },
+      {
+        "slug": "suporte",
+        "name": "Suporte"
+      }
+    ],
+    "secondary": [
+      {
+        "slug": "materiais",
+        "name": "Materiais de Divulgação"
+      },
+      {
+        "slug": "bloqueios-aereos",
+        "name": "Bloqueios Aéreos"
+      },
+      {
+        "slug": "mapa-turismo",
+        "name": "Mapa do Turismo"
+      },
+      {
+        "slug": "hotel-raio-x",
+        "name": "Raio-X do Hotel"
+      },
+      {
+        "slug": "travel-advisor",
+        "name": "Travel Advisor"
+      },
+      {
+        "slug": "requisitos-viagem",
+        "name": "Central de Requisitos de Viagem"
+      },
+      {
+        "slug": "beneficios",
+        "name": "Benefícios e Descontos"
+      },
+      {
+        "slug": "educatravel-academy",
+        "name": "EducaTravel Academy"
+      },
+      {
+        "slug": "cursos-mentorias",
+        "name": "Cursos e Mentorias"
+      },
+      {
+        "slug": "noticias",
+        "name": "Notícias do Trade"
+      },
+      {
+        "slug": "comunidade",
+        "name": "Comunidade"
+      },
+      {
+        "slug": "perguntas-respostas",
+        "name": "Perguntas e Respostas"
+      },
+      {
+        "slug": "ferramentas-ia",
+        "name": "Ferramentas de IA"
+      },
+      {
+        "slug": "agenda",
+        "name": "Agenda"
+      },
+      {
+        "slug": "bloco-notas",
+        "name": "Bloco de Notas"
+      },
+      {
+        "slug": "calculadora",
+        "name": "Calculadora"
+      },
+      {
+        "slug": "gamificacao",
+        "name": "Gamificação"
+      },
+      {
+        "slug": "planos-assinatura",
+        "name": "Planos e Assinatura"
+      },
+      {
+        "slug": "dashboard-fornecedor",
+        "name": "Painel do Fornecedor"
+      }
+    ]
+  }
+}

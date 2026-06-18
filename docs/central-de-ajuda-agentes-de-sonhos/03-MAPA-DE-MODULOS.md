@@ -1,0 +1,132 @@
+# Mapa de módulos
+
+A plataforma é organizada em módulos principais (uso recorrente nas jornadas comerciais e operacionais) e secundários (recursos complementares).
+
+## Módulos principais
+- **CRM e Oportunidades** — Gerencie negociações no funil Kanban, do primeiro contato ao fechamento.
+  - Acesso: `/crm`
+  - Público: agente, titular, equipe
+  - Documentação: [`modulos/crm/`](./modulos/crm/00-visao-geral.md)
+- **Gestão de Clientes** — Cadastre e organize clientes, viagens vinculadas e metas comerciais.
+  - Acesso: `/gestao-clientes`
+  - Público: agente, titular, equipe
+  - Documentação: [`modulos/gestao-clientes/`](./modulos/gestao-clientes/00-visao-geral.md)
+- **Operações** — Acompanhe a viagem após a venda com tarefas, checklist e prazos.
+  - Acesso: `/gestao-clientes/operacoes`
+  - Público: agente, titular, equipe
+  - Documentação: [`modulos/operacoes/`](./modulos/operacoes/00-visao-geral.md)
+- **Orçamentos** — Elabore propostas multimoeda com fotos, termos por serviço e link público.
+  - Acesso: `/ferramentas-ia/gerar-orcamento`
+  - Público: agente, titular
+  - Documentação: [`modulos/orcamentos/`](./modulos/orcamentos/00-visao-geral.md)
+- **Roteiros** — Monte programações dia a dia com atividades por período e apoio de IA.
+  - Acesso: `/ferramentas-ia/criar-roteiro`
+  - Público: agente, titular
+  - Documentação: [`modulos/roteiros/`](./modulos/roteiros/00-visao-geral.md)
+- **Carteira Digital** — Centralize toda a viagem em um app-like para o viajante.
+  - Acesso: `/ferramentas-ia/trip-wallet`
+  - Público: agente, titular, viajante
+  - Documentação: [`modulos/carteira-digital/`](./modulos/carteira-digital/00-visao-geral.md)
+- **Financeiro** — Controle vendas, entradas, despesas, faturas, comissões e fluxo de caixa.
+  - Acesso: `/financeiro`
+  - Público: titular, financeiro
+  - Documentação: [`modulos/financeiro/`](./modulos/financeiro/00-visao-geral.md)
+- **Vendas** — Registre vendas concretizadas e vincule a clientes, vendedores e comissões.
+  - Acesso: `/financeiro?tab=sales`
+  - Público: titular, financeiro
+  - Documentação: [`modulos/vendas/`](./modulos/vendas/00-visao-geral.md)
+- **Entradas e Despesas** — Lance recebimentos e pagamentos com recorrência e categorias.
+  - Acesso: `/financeiro?tab=entries`
+  - Público: titular, financeiro
+  - Documentação: [`modulos/entradas-despesas/`](./modulos/entradas-despesas/00-visao-geral.md)
+- **Faturas** — Emita faturas com parcelas, serviços e baixa de pagamentos.
+  - Acesso: `/financeiro?tab=invoices`
+  - Público: titular, financeiro
+  - Documentação: [`modulos/faturas/`](./modulos/faturas/00-visao-geral.md)
+- **Comissões e Vendedores** — Cadastre vendedores e acompanhe comissões a pagar e a receber.
+  - Acesso: `/financeiro?tab=sellers`
+  - Público: titular, financeiro
+  - Documentação: [`modulos/comissoes-vendedores/`](./modulos/comissoes-vendedores/00-visao-geral.md)
+- **Equipe e Permissões** — Adicione colaboradores, defina permissões por módulo e por etapa do funil.
+  - Acesso: `/minha-conta?tab=team`
+  - Público: titular
+  - Documentação: [`modulos/equipe-e-permissoes/`](./modulos/equipe-e-permissoes/00-visao-geral.md)
+- **Configurações, Conta e Onboarding** — Ajuste agência, marca, idioma e finalize o onboarding inicial.
+  - Acesso: `/minha-conta`
+  - Público: titular, administrador
+  - Documentação: [`modulos/configuracoes/`](./modulos/configuracoes/00-visao-geral.md)
+- **Captação de Leads** — Capture interessados com formulários, wizard conversacional e landings.
+  - Acesso: `/meus-leads`
+  - Público: agente, titular
+  - Documentação: [`modulos/captacao-leads/`](./modulos/captacao-leads/00-visao-geral.md)
+- **Marketing — Vitrine, Cartão e Lâminas** — Crie vitrine de ofertas, cartão digital e peças promocionais.
+  - Acesso: `/minha-vitrine`
+  - Público: agente, titular
+  - Documentação: [`modulos/marketing/`](./modulos/marketing/00-visao-geral.md)
+- **Suporte** — Abra chamados, acompanhe respostas em tempo real e anexe arquivos.
+  - Acesso: `/suporte`
+  - Público: todos
+  - Documentação: [`modulos/suporte/`](./modulos/suporte/00-visao-geral.md)
+
+## Módulos secundários
+- **Materiais de Divulgação** — Banco de imagens e peças sincronizadas via Drive.
+  - Acesso: `/materiais`
+  - Documentação: [`modulos/materiais/`](./modulos/materiais/00-visao-geral.md)
+- **Bloqueios Aéreos** — Consulte lotes de assentos com busca inteligente.
+  - Acesso: `/bloqueios-aereos`
+  - Documentação: [`modulos/bloqueios-aereos/`](./modulos/bloqueios-aereos/00-visao-geral.md)
+- **Mapa do Turismo** — Diretório de fornecedores, operadoras e parceiros.
+  - Acesso: `/mapa-turismo`
+  - Documentação: [`modulos/mapa-turismo/`](./modulos/mapa-turismo/00-visao-geral.md)
+- **Raio-X do Hotel** — Análise estratégica de hotéis com IA e Google Places.
+  - Acesso: `/ferramentas-ia/hotel-raio-x`
+  - Documentação: [`modulos/hotel-raio-x/`](./modulos/hotel-raio-x/00-visao-geral.md)
+- **Travel Advisor** — Recomendações curadas por categoria (hotéis, restaurantes, atrações).
+  - Acesso: `/travel-advisor`
+  - Documentação: [`modulos/travel-advisor/`](./modulos/travel-advisor/00-visao-geral.md)
+- **Central de Requisitos de Viagem** — Consulte vistos, vacinas e documentos por destino.
+  - Acesso: `/requisitos-viagem`
+  - Documentação: [`modulos/requisitos-viagem/`](./modulos/requisitos-viagem/00-visao-geral.md)
+- **Benefícios e Descontos** — Cupons e benefícios oferecidos aos assinantes.
+  - Acesso: `/beneficios`
+  - Documentação: [`modulos/beneficios/`](./modulos/beneficios/00-visao-geral.md)
+- **EducaTravel Academy** — Trilhas internas de treinamento com vídeos e quizzes.
+  - Acesso: `/academy`
+  - Documentação: [`modulos/educatravel-academy/`](./modulos/educatravel-academy/00-visao-geral.md)
+- **Cursos e Mentorias** — Marketplace de cursos pagos e mentorias agendáveis.
+  - Acesso: `/cursos-marketplace`
+  - Documentação: [`modulos/cursos-mentorias/`](./modulos/cursos-mentorias/00-visao-geral.md)
+- **Notícias do Trade** — Curadoria de notícias do setor de turismo.
+  - Acesso: `/atualizacoes`
+  - Documentação: [`modulos/noticias/`](./modulos/noticias/00-visao-geral.md)
+- **Comunidade** — Rede social do trade com posts, perguntas e grupos.
+  - Acesso: `/comunidade`
+  - Documentação: [`modulos/comunidade/`](./modulos/comunidade/00-visao-geral.md)
+- **Perguntas e Respostas** — Feed comunitário de dúvidas e respostas.
+  - Acesso: `/perguntas-respostas`
+  - Documentação: [`modulos/perguntas-respostas/`](./modulos/perguntas-respostas/00-visao-geral.md)
+- **Ferramentas de IA** — Hub das ferramentas inteligentes da plataforma.
+  - Acesso: `/ferramentas-ia`
+  - Documentação: [`modulos/ferramentas-ia/`](./modulos/ferramentas-ia/00-visao-geral.md)
+- **Agenda** — Compromissos com sincronização Google Calendar.
+  - Acesso: `/agenda`
+  - Documentação: [`modulos/agenda/`](./modulos/agenda/00-visao-geral.md)
+- **Bloco de Notas** — Anotações com templates de texto.
+  - Acesso: `/bloco-notas`
+  - Documentação: [`modulos/bloco-notas/`](./modulos/bloco-notas/00-visao-geral.md)
+- **Calculadora** — Calculadora rápida para uso comercial.
+  - Acesso: `/calculadora`
+  - Documentação: [`modulos/calculadora/`](./modulos/calculadora/00-visao-geral.md)
+- **Gamificação** — Pontuação, níveis e ranking de uso da plataforma.
+  - Acesso: `/gamificacao`
+  - Documentação: [`modulos/gamificacao/`](./modulos/gamificacao/00-visao-geral.md)
+- **Planos e Assinatura** — Compare planos Start, Profissional e Premium.
+  - Acesso: `/planos`
+  - Documentação: [`modulos/planos-assinatura/`](./modulos/planos-assinatura/00-visao-geral.md)
+- **Painel do Fornecedor** — Área restrita para fornecedores editarem seu perfil.
+  - Acesso: `/dashboard-fornecedor`
+  - Documentação: [`modulos/dashboard-fornecedor/`](./modulos/dashboard-fornecedor/00-visao-geral.md)
+
+## Conteúdo interno
+
+O módulo de Administração concentra recursos exclusivos da equipe interna do Agentes de Sonhos e não faz parte da Central de Ajuda para clientes.
