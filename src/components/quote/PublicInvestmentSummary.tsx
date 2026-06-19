@@ -284,7 +284,7 @@ export function PublicInvestmentSummary({
                     {rows.map((r, i) => (
                       <p key={i} className="leading-snug">
                         <span className="text-sm text-muted-foreground">{r.label}: </span>
-                        <span className={cn("text-lg sm:text-xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                        <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
                           {r.value}
                         </span>
                       </p>
@@ -295,7 +295,7 @@ export function PublicInvestmentSummary({
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     {totalLabelText}
                   </p>
-                  <p className={cn("mt-2 text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                  <p className={cn("mt-2 text-xl sm:text-2xl font-normal tracking-tight", VALUE_PRIMARY)}>
                     {fmt(item.total)}
                   </p>
                 </div>
