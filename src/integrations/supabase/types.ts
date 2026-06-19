@@ -7633,6 +7633,53 @@ export type Database = {
           },
         ]
       }
+      quote_entry_extras: {
+        Row: {
+          calculation_mode: string
+          created_at: string
+          description: string | null
+          id: string
+          quote_id: string
+          sort_order: number
+          type: string
+          updated_at: string
+          value: number
+          visible_to_client: boolean
+        }
+        Insert: {
+          calculation_mode?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          quote_id: string
+          sort_order?: number
+          type: string
+          updated_at?: string
+          value?: number
+          visible_to_client?: boolean
+        }
+        Update: {
+          calculation_mode?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          quote_id?: string
+          sort_order?: number
+          type?: string
+          updated_at?: string
+          value?: number
+          visible_to_client?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_entry_extras_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_services: {
         Row: {
           amount: number
