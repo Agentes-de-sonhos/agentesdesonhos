@@ -940,6 +940,18 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     }
   }, [quote?.services]);
 
+  // Hide floating CTA when signature section is visible
+  useEffect(() => {
+    const el = signatureRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSignatureVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Auto-redirect legacy vitrine.tur.br/orcamento/* links to the new domain
   // so any cached or previously shared link lands on the correct host.
   useEffect(() => {
