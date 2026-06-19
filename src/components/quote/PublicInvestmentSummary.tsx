@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
   Plane, Building2, Ship, MapPin, Shield, Car, Ticket, TrainFront,
-  Sparkles, Wallet, CreditCard, Info,
+  Sparkles, Wallet, CreditCard, Info, Users,
 } from "lucide-react";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import { SERVICE_TYPE_LABELS } from "@/types/quote";
