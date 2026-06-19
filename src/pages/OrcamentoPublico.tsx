@@ -1044,7 +1044,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
   return (
     <div
-      className="min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0"
+      className="min-h-screen bg-[hsl(var(--background))]"
       style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
     >
       {/* ─── Slim Premium Header ─── */}
