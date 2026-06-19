@@ -85,6 +85,9 @@ function formatDateShort(dateStr: string) {
 
 type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment" | "total_only";
 
+/** Layout principal da apresentação do investimento. */
+type InvestmentLayout = "legacy" | "consolidated" | "ungrouped" | "grouped";
+
 const PAYMENT_MODE_OPTIONS_INVESTMENT: { value: PaymentDisplayMode; label: string; description: string }[] = [
   { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
   { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
