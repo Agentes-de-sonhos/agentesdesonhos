@@ -880,13 +880,22 @@ function TripWalletContent() {
           </Card>
         )}
 
-        <Accordion type="multiple" className="space-y-3" value={accordionValue} onValueChange={(v) => setAccordionValue(v as string[])}>
+        <Accordion type="multiple" className="grid gap-4 sm:gap-6" value={accordionValue} onValueChange={(v) => setAccordionValue(v as string[])}>
           {/* 1. Serviços da Viagem */}
-          <AccordionItem value="services" id="trip-services-section" className="border border-border rounded-lg overflow-hidden bg-card">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
-              <span className="text-base font-semibold">Serviços da Viagem</span>
+          <AccordionItem value="services" id="trip-services-section" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
+            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
+              <div className="w-fit">
+                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Plus className="h-5 w-5 text-sky-500" />
+                  Serviços da Viagem
+                  {trip.services && trip.services.length > 0 && (
+                    <Badge variant="secondary" className="text-xs ml-1">{trip.services.length}</Badge>
+                  )}
+                </h2>
+                <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
+              </div>
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
               {selectedServiceType && !editingService ? (
                   <div className="space-y-4">
                     <h3 className="font-medium">{SERVICE_TYPE_LABELS[selectedServiceType]}</h3>
@@ -939,19 +948,13 @@ function TripWalletContent() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex flex-wrap gap-2 mb-6 mt-4">
-                      {(Object.keys(SERVICE_TYPE_LABELS) as TripServiceType[]).map((type) => (
-                        <Button key={type} variant="outline" size="sm" onClick={() => setSelectedServiceType(type)}>
-                          <Plus className="mr-1 h-3 w-3" /> {SERVICE_TYPE_LABELS[type]}
-                        </Button>
-                      ))}
-                      <Button size="sm" variant="outline" onClick={() => setShowImportQuote(true)}>
-                        <FileTextIcon className="mr-1 h-3 w-3" /> Importar orçamento
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setShowAIImport(true)}>
-                        <Sparkles className="mr-1 h-3 w-3" /> Importar com IA
-                      </Button>
-                    </div>
+                    <TripServiceCategoryGrid
+                      services={trip.services || []}
+                      onSelect={(type) => setSelectedServiceType(type)}
+                      onImportQuote={() => setShowImportQuote(true)}
+                      onAIImport={() => setShowAIImport(true)}
+                    />
+                    <div className="h-4" />
                     <TripServiceList
                       services={trip.services || []}
                       onDeleteService={deleteService}
@@ -1067,11 +1070,17 @@ function TripWalletContent() {
           </Dialog>
 
           {/* 2. Roteiro dia a dia */}
-          <AccordionItem value="itinerary" className="border border-border rounded-lg overflow-hidden bg-card">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
-              <span className="text-base font-semibold">Roteiro dia a dia</span>
+          <AccordionItem value="itinerary" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
+            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
+              <div className="w-fit">
+                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                  <MapIcon className="h-5 w-5 text-amber-500" />
+                  Roteiro dia a dia
+                </h2>
+                <div className="mt-2 h-1 w-full rounded-full bg-amber-500" />
+              </div>
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
               {trip.itinerary_mode === "v2" ? (
                 <TripItineraryV2 trip={trip} />
               ) : trip.itinerary_mode === "legacy" ? (
@@ -1083,13 +1092,17 @@ function TripWalletContent() {
           </AccordionItem>
 
           {/* 3. Acesso do Cliente */}
-          <AccordionItem value="access" className="border border-border rounded-lg overflow-hidden bg-card">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
-              <span className="text-base font-semibold flex items-center gap-2">
-                <Lock className="h-4 w-4" /> Acesso do Cliente
-              </span>
+          <AccordionItem value="access" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
+            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
+              <div className="w-fit">
+                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Lock className="h-5 w-5 text-violet-500" />
+                  Acesso do Cliente
+                </h2>
+                <div className="mt-2 h-1 w-full rounded-full bg-violet-500" />
+              </div>
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
               <div className="space-y-3">
                 {trip.is_locked ? (
                   <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 space-y-2">
@@ -1160,11 +1173,17 @@ function TripWalletContent() {
           </AccordionItem>
 
           {/* 4. Resumo */}
-          <AccordionItem value="summary" className="border border-border rounded-lg overflow-hidden bg-card">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
-              <span className="text-base font-semibold">Resumo</span>
+          <AccordionItem value="summary" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
+            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
+              <div className="w-fit">
+                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-emerald-500" />
+                  Resumo
+                </h2>
+                <div className="mt-2 h-1 w-full rounded-full bg-emerald-500" />
+              </div>
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
               <div className="space-y-2 text-sm">
                 {/* Cliente — editável */}
                 <div className="flex items-center gap-2 flex-wrap">
@@ -1373,11 +1392,17 @@ function TripWalletContent() {
           </AccordionItem>
 
           {/* 4.5. Assinatura Comercial */}
-          <AccordionItem value="signature" className="border border-border rounded-lg overflow-hidden bg-card">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
-              <span className="text-base font-semibold">Assinatura Comercial</span>
+          <AccordionItem value="signature" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
+            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
+              <div className="w-fit">
+                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                  <ClipboardSignature className="h-5 w-5 text-rose-500" />
+                  Assinatura Comercial
+                </h2>
+                <div className="mt-2 h-1 w-full rounded-full bg-rose-500" />
+              </div>
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
               <div className="max-w-2xl">
                 <DocumentSignatureCard
                   table="trips"
@@ -1390,11 +1415,17 @@ function TripWalletContent() {
           </AccordionItem>
 
           {/* 5. Histórico de Alterações */}
-          <AccordionItem value="history" className="border border-border rounded-lg overflow-hidden bg-card">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/40">
-              <span className="text-base font-semibold">Histórico de Alterações</span>
+          <AccordionItem value="history" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
+            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
+              <div className="w-fit">
+                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                  <History className="h-5 w-5 text-slate-500" />
+                  Histórico de Alterações
+                </h2>
+                <div className="mt-2 h-1 w-full rounded-full bg-slate-500" />
+              </div>
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
               <TripEditHistory history={editHistory} />
             </AccordionContent>
           </AccordionItem>
