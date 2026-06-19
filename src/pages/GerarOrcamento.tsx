@@ -235,7 +235,8 @@ export default function GerarOrcamento() {
     entry_percentage: entryPercentage,
     payment_method_label: paymentMethodLabel || null,
     full_payment_discount_percent: fullPaymentDiscountPercent,
-  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent]);
+    investment_summary_layout: investmentSummaryLayout,
+  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, investmentSummaryLayout]);
 
   const buildValiditySnapshot = useCallback(() => JSON.stringify({
     valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
