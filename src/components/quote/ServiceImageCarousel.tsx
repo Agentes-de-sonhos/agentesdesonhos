@@ -99,8 +99,8 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false }: Ser
             {images.map((url, i) => (
               <div
                 key={i}
-                className="flex-[0_0_88%] sm:flex-[0_0_55%] lg:flex-[0_0_38%] min-w-0 cursor-pointer rounded-xl overflow-hidden border border-border/30 bg-muted"
-                onClick={() => openLightbox(i)}
+                className={`flex-[0_0_88%] sm:flex-[0_0_55%] lg:flex-[0_0_38%] min-w-0 rounded-xl overflow-hidden border border-border/30 bg-muted ${!disableExpand ? "cursor-pointer" : ""}`}
+                onClick={!disableExpand ? () => openLightbox(i) : undefined}
               >
                 <img
                   src={url}
@@ -135,7 +135,7 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false }: Ser
         </div>
       </div>
 
-      {lightboxOpen && (
+      {!disableExpand && lightboxOpen && (
         <Lightbox
           images={images}
           index={lightboxIndex}
