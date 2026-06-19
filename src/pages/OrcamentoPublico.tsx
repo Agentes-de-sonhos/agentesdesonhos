@@ -1158,20 +1158,31 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         {timelineNodes.length >= 2 && (
           <section>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground text-center mb-5">Sua jornada</p>
-            <div className="flex items-center justify-center flex-wrap gap-y-3">
-              {timelineNodes.map((n, i) => (
-                <div key={i} className="flex items-center">
-                  <div className="flex flex-col items-center gap-1.5 min-w-[78px] sm:min-w-[110px]">
-                    <div className="h-11 w-11 rounded-full bg-white border border-border shadow-sm flex items-center justify-center text-primary">
-                      {n.icon}
+            {/* Mobile: single-line horizontal scroll with edge fade indicating more items.
+                Tablet/desktop: classic centered flex when space allows. */}
+            <div className="relative">
+              {/* Edge fade (mobile only) — sinaliza continuidade horizontal */}
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10 sm:hidden" />
+              <div
+                className="flex items-center gap-1 overflow-x-auto sm:overflow-visible snap-x snap-mandatory sm:snap-none sm:justify-center sm:flex-wrap gap-y-3 px-1 -mx-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                role="list"
+                aria-label="Etapas da sua jornada"
+              >
+                {timelineNodes.map((n, i) => (
+                  <div key={i} className="flex items-center snap-start" role="listitem">
+                    {/* Largura calculada para mostrar 3 itens inteiros + ~50% do 4º no mobile */}
+                    <div className="flex flex-col items-center gap-1.5 w-[28vw] max-w-[110px] shrink-0 sm:w-auto sm:min-w-[110px]">
+                      <div className="h-11 w-11 rounded-full bg-white border border-border shadow-sm flex items-center justify-center text-primary">
+                        {n.icon}
+                      </div>
+                      <span className="text-[11px] sm:text-xs font-medium text-foreground/80 text-center leading-tight">{n.label}</span>
                     </div>
-                    <span className="text-[11px] sm:text-xs font-medium text-foreground/80 text-center leading-tight">{n.label}</span>
+                    {i < timelineNodes.length - 1 && (
+                      <div className="h-px w-4 sm:w-10 bg-gradient-to-r from-border via-foreground/20 to-border mx-1 shrink-0" />
+                    )}
                   </div>
-                  {i < timelineNodes.length - 1 && (
-                    <div className="h-px w-6 sm:w-10 bg-gradient-to-r from-border via-foreground/20 to-border mx-1" />
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -1389,13 +1400,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-4 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.02] w-full sm:w-auto"
+                    className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-4 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.02] w-full sm:w-auto"
                   >
-                    <span className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-full">
-                      <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent blur-sm animate-shimmer-slide" />
-                    </span>
-                    <WhatsAppIcon className="relative h-4 w-4" />
-                    <span className="relative">Falar com meu consultor</span>
+                    <WhatsAppIcon className="h-4 w-4" />
+                    <span>Falar com meu consultor</span>
                   </a>
                 </div>
               )}
