@@ -179,7 +179,7 @@ export default function GerarOrcamento() {
   const [entryPercentage, setEntryPercentage] = useState(30);
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
-  const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<"legacy" | "grouped" | "ungrouped">("legacy");
+  const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<InvestmentLayout>("legacy");
   
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const [showInvestmentLocal, setShowInvestmentLocal] = useState<boolean | null>(null);
@@ -262,7 +262,7 @@ export default function GerarOrcamento() {
       const initialEntryPercentage = (quote as any).entry_percentage || 30;
       const initialPaymentMethodLabel = (quote as any).payment_method_label || "";
       const initialFullPaymentDiscountPercent = (quote as any).full_payment_discount_percent || 0;
-      const initialInvestmentSummaryLayout = ((quote as any).investment_summary_layout as "legacy" | "grouped" | "ungrouped" | null) || "legacy";
+      const initialInvestmentSummaryLayout = ((quote as any).investment_summary_layout as InvestmentLayout | null) || "legacy";
 
       setPaymentTerms(initialPaymentTerms);
       setValidUntil(initialValidUntil);
@@ -377,23 +377,52 @@ export default function GerarOrcamento() {
     await supabase.from("quotes").update({ use_service_payment: checked } as any).eq("id", quote.id);
   };
 
-  const handleSetInvestmentSummaryLayout = async (
-    value: "legacy" | "grouped" | "ungrouped"
-  ) => {
+  /**
+   * Define o layout principal da apresentação do investimento e sincroniza
+   * as flags legadas (show_investment_section / show_detailed_prices) para
+   * preservar compatibilidade com orçamentos antigos e com a renderização
+   * pública em modo `legacy`.
+   */
+  const handleSetInvestmentLayout = async (value: InvestmentLayout) => {
     setInvestmentSummaryLayout(value);
     if (!quote) return;
+
+    // Sincroniza flags legadas com base na nova escolha
+    const nextShowInvestment = true;
+    const nextShowDetailed = value === "grouped" || value === "ungrouped";
+    setShowInvestmentLocal(nextShowInvestment);
+    setShowDetailedLocal(nextShowDetailed);
+
+    // Normaliza o modo de pagamento: "total_only" só faz sentido nos modos
+    // detalhados/agrupados; no consolidado, força um valor inicial coerente.
+    let nextPaymentMode = paymentDisplayMode;
+    if (value === "consolidated" && paymentDisplayMode === "total_only") {
+      nextPaymentMode = "full_payment";
+      setPaymentDisplayMode("full_payment");
+    }
+
     const { error } = await supabase
       .from("quotes")
-      .update({ investment_summary_layout: value } as any)
+      .update({
+        investment_summary_layout: value,
+        show_investment_section: nextShowInvestment,
+        show_detailed_prices: nextShowDetailed,
+        payment_display_mode: nextPaymentMode,
+      } as any)
       .eq("id", quote.id);
     if (error) {
       toast({ title: "Erro ao salvar apresentação", description: error.message, variant: "destructive" });
       return;
     }
-    // Keep payment snapshot ref in sync so the debounced autosave doesn't overwrite
+
+    // Mantém o snapshot sincronizado para o autosave debounced não sobrescrever
     try {
       const prev = paymentSnapshotRef.current ? JSON.parse(paymentSnapshotRef.current) : {};
-      paymentSnapshotRef.current = JSON.stringify({ ...prev, investment_summary_layout: value });
+      paymentSnapshotRef.current = JSON.stringify({
+        ...prev,
+        investment_summary_layout: value,
+        payment_display_mode: nextPaymentMode,
+      });
     } catch { /* ignore */ }
     showAutoSavedFeedback();
   };
