@@ -4,8 +4,8 @@ titulo: Orçamentos — Mapa de produção (Onda 1)
 modulo: Orçamentos
 tipo: índice-de-producao
 publico: [equipe-documentacao]
-status: parcialmente-concluído
-confianca: pendente
+status: concluído com pendências pontuais
+confianca: confirmado
 ultima-revisao: 2026-06-19
 fonte-interna: docs/base-conhecimento-agentes-de-sonhos/modulos/orcamentos.md
 ---
@@ -15,7 +15,7 @@ fonte-interna: docs/base-conhecimento-agentes-de-sonhos/modulos/orcamentos.md
 > Este arquivo lista a estrutura planejada para a Onda 1. O conteúdo profundo deste módulo será produzido em rodada dedicada após CRM (módulo de referência).
 
 ## Status
-**Bloqueado por informação:** aguardando autorização do proprietário e validação de versões/fluxos atuais antes da escrita definitiva. Nenhum conteúdo inferido foi promovido a RAG.
+**Concluído com pendências pontuais.** Todas as metas documentais da Onda 1 para Orçamentos foram atingidas (visão geral, primeiros passos, 20 novas FAQs confirmadas, 8 tutoriais, 5 problemas comuns, 4 boas práticas). Restam apenas decisões de produto: definição V1 × V2 do link público, mapeamento por plano (Start/Profissional/Premium) e confirmação das métricas de visualização do orçamento (`orcamentos-faq-19`, rebaixada para `revisão-necessária / pendente` e fora do RAG).
 
 ### Atenção (versão pública)
 A documentação de detalhes do link público aguarda confirmação sobre qual versão está em uso (atual vs legado) antes de orientar passo a passo.
