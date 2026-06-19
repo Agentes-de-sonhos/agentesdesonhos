@@ -762,6 +762,41 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+/**
+ * Floating CTA — mobile only. Aparece quando o usuário rola para baixo
+ * (> 200px) e desaparece suavemente ao voltar ao topo. Ocupa ~metade da
+ * largura, alinhado à direita, respeitando safe-area do iOS.
+ */
+function MobileFloatingCta({ href }: { href: string }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 200);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <div
+      className={`fixed right-3 z-40 sm:hidden transition-all duration-300 ease-out ${
+        visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
+      }`}
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+      aria-hidden={!visible}
+    >
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Quero reservar esta viagem"
+        className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] text-white px-5 py-3.5 font-semibold text-sm shadow-[0_12px_30px_-8px_rgba(37,211,102,0.6)] active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#25D366] min-h-12 w-[50vw] max-w-[260px]"
+      >
+        <WhatsAppIcon className="h-4 w-4" />
+        <span>Quero reservar</span>
+      </a>
+    </div>
+  );
+}
+
 interface PublicDocument {
   id: string;
   file_name: string;
