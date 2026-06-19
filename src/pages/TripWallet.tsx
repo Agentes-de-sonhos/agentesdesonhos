@@ -1,6 +1,6 @@
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, History, UserCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, History, UserCircle2, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Search, Globe2 } from "lucide-react";
 import { parseDestinationParts } from "@/lib/destination-parts";
@@ -433,6 +433,11 @@ function TripWalletContent() {
   const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
   // Supplier (tour_operators) link for the ADD flow
   const [addSupplier, setAddSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
+  // Supplier confirmation flow (asked AFTER first save when nothing was provided)
+  const [confirmSupplierOpen, setConfirmSupplierOpen] = useState(false);
+  const [confirmLinkMode, setConfirmLinkMode] = useState(false);
+  const [pendingSupplier, setPendingSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
+  const pendingAddPayloadRef = useRef<{ serviceData: any; files?: File[] } | null>(null);
   // Hotel place id for EDIT flow (mirrors DB and is updated when user picks new prediction)
   const [editPlaceId, setEditPlaceId] = useState<string | null>(null);
   // Supplier (tour_operators) link for the EDIT flow
@@ -518,7 +523,12 @@ function TripWalletContent() {
     setIsEditingTrip(false);
   };
 
-  const handleAddService = async (serviceData: any, files?: File[]) => {
+  // Persist a brand-new service. Supplier is asked AFTER the user fills the form.
+  const persistNewService = async (
+    serviceData: any,
+    files: File[] | undefined,
+    supplier: SupplierSelectorValue,
+  ) => {
     if (!selectedServiceType) return;
     try {
       setIsUploading(true);
@@ -531,13 +541,13 @@ function TripWalletContent() {
       }
       const mergedServiceData = {
         ...(serviceData || {}),
-        ...(addSupplier.operator_id ? { supplier_operator_id: addSupplier.operator_id } : {}),
-        ...(addSupplier.supplier_name ? { supplier_name: addSupplier.supplier_name } : {}),
+        ...(supplier.operator_id ? { supplier_operator_id: supplier.operator_id } : {}),
+        ...(supplier.supplier_name ? { supplier_name: supplier.supplier_name } : {}),
       };
-      await addService({ 
-        service_type: selectedServiceType, 
-        service_data: mergedServiceData, 
-        voucher_url: attachments[0]?.url, 
+      await addService({
+        service_type: selectedServiceType,
+        service_data: mergedServiceData,
+        voucher_url: attachments[0]?.url,
         voucher_name: attachments[0]?.name,
         attachments,
         image_urls: addImageUrls,
@@ -550,6 +560,22 @@ function TripWalletContent() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Called when TripServiceForm submits (Add flow). Ask the supplier question
+  // ONLY now — never up-front. If something was already typed (rare, since the
+  // selector is hidden), skip the prompt.
+  const handleAddService = async (serviceData: any, files?: File[]) => {
+    if (!selectedServiceType) return;
+    const hasSupplier = Boolean(addSupplier.operator_id || (addSupplier.supplier_name || "").trim());
+    if (hasSupplier) {
+      await persistNewService(serviceData, files, addSupplier);
+      return;
+    }
+    pendingAddPayloadRef.current = { serviceData, files };
+    setPendingSupplier({ operator_id: null, supplier_name: "" });
+    setConfirmLinkMode(false);
+    setConfirmSupplierOpen(true);
   };
 
   const handleImportServices = async (services: { service_type: TripServiceType; service_data: any }[]) => {
@@ -1016,13 +1042,6 @@ function TripWalletContent() {
               </DialogHeader>
               {selectedServiceType && !editingService && (
                 <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Fornecedor</label>
-                    <SupplierSelector value={addSupplier} onChange={setAddSupplier} />
-                    <p className="text-xs text-muted-foreground">
-                      Selecione um fornecedor cadastrado ou digite livremente.
-                    </p>
-                  </div>
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}
@@ -1077,13 +1096,6 @@ function TripWalletContent() {
               </DialogHeader>
               {editingService && selectedServiceType && (
                 <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Fornecedor</label>
-                    <SupplierSelector value={editSupplier} onChange={setEditSupplier} />
-                    <p className="text-xs text-muted-foreground">
-                      Selecione um fornecedor cadastrado ou digite livremente.
-                    </p>
-                  </div>
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}
@@ -1158,10 +1170,81 @@ function TripWalletContent() {
                       }
                     />
                   </PassengerPoolProvider>
+                  {/* Fornecedor — última seção do formulário de edição */}
+                  <div className="rounded-lg border bg-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <label className="text-sm font-semibold">Fornecedor</label>
+                    </div>
+                    <SupplierSelector value={editSupplier} onChange={setEditSupplier} />
+                    <p className="text-xs text-muted-foreground">
+                      Selecione um fornecedor cadastrado ou digite livremente. A vinculação é aplicada ao salvar.
+                    </p>
+                  </div>
                 </div>
               )}
             </DialogContent>
           </Dialog>
+
+          {/* Supplier confirmation — shown after Save when no supplier was set */}
+          <AlertDialog
+            open={confirmSupplierOpen}
+            onOpenChange={(o) => { setConfirmSupplierOpen(o); if (!o) setConfirmLinkMode(false); }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {confirmLinkMode ? "Vincular fornecedor" : "Deseja vincular um fornecedor a este serviço?"}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {confirmLinkMode
+                    ? "Busque um fornecedor existente ou digite o nome livremente."
+                    : "Vincular um fornecedor ajuda no controle financeiro, pagamentos, comissões e acompanhamento operacional. Você pode fazer isso agora ou depois, na edição do serviço."}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              {confirmLinkMode && (
+                <div className="py-2">
+                  <SupplierSelector value={pendingSupplier} onChange={setPendingSupplier} />
+                </div>
+              )}
+              <AlertDialogFooter>
+                {confirmLinkMode ? (
+                  <>
+                    <Button variant="outline" onClick={() => setConfirmLinkMode(false)}>Voltar</Button>
+                    <Button
+                      disabled={!pendingSupplier.operator_id && !(pendingSupplier.supplier_name || "").trim()}
+                      onClick={async () => {
+                        const payload = pendingAddPayloadRef.current;
+                        pendingAddPayloadRef.current = null;
+                        setAddSupplier(pendingSupplier);
+                        setConfirmSupplierOpen(false);
+                        setConfirmLinkMode(false);
+                        if (payload) await persistNewService(payload.serviceData, payload.files, pendingSupplier);
+                      }}
+                    >
+                      Salvar com fornecedor
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" onClick={() => setConfirmLinkMode(true)}>
+                      Vincular fornecedor
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        const payload = pendingAddPayloadRef.current;
+                        pendingAddPayloadRef.current = null;
+                        setConfirmSupplierOpen(false);
+                        if (payload) await persistNewService(payload.serviceData, payload.files, { operator_id: null, supplier_name: "" });
+                      }}
+                    >
+                      Agora não
+                    </Button>
+                  </>
+                )}
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* 2. Roteiro dia a dia */}
           <AccordionItem value="itinerary" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
