@@ -523,7 +523,12 @@ function TripWalletContent() {
     setIsEditingTrip(false);
   };
 
-  const handleAddService = async (serviceData: any, files?: File[]) => {
+  // Persist a brand-new service. Supplier is asked AFTER the user fills the form.
+  const persistNewService = async (
+    serviceData: any,
+    files: File[] | undefined,
+    supplier: SupplierSelectorValue,
+  ) => {
     if (!selectedServiceType) return;
     try {
       setIsUploading(true);
@@ -536,13 +541,13 @@ function TripWalletContent() {
       }
       const mergedServiceData = {
         ...(serviceData || {}),
-        ...(addSupplier.operator_id ? { supplier_operator_id: addSupplier.operator_id } : {}),
-        ...(addSupplier.supplier_name ? { supplier_name: addSupplier.supplier_name } : {}),
+        ...(supplier.operator_id ? { supplier_operator_id: supplier.operator_id } : {}),
+        ...(supplier.supplier_name ? { supplier_name: supplier.supplier_name } : {}),
       };
-      await addService({ 
-        service_type: selectedServiceType, 
-        service_data: mergedServiceData, 
-        voucher_url: attachments[0]?.url, 
+      await addService({
+        service_type: selectedServiceType,
+        service_data: mergedServiceData,
+        voucher_url: attachments[0]?.url,
         voucher_name: attachments[0]?.name,
         attachments,
         image_urls: addImageUrls,
@@ -555,6 +560,22 @@ function TripWalletContent() {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Called when TripServiceForm submits (Add flow). Ask the supplier question
+  // ONLY now — never up-front. If something was already typed (rare, since the
+  // selector is hidden), skip the prompt.
+  const handleAddService = async (serviceData: any, files?: File[]) => {
+    if (!selectedServiceType) return;
+    const hasSupplier = Boolean(addSupplier.operator_id || (addSupplier.supplier_name || "").trim());
+    if (hasSupplier) {
+      await persistNewService(serviceData, files, addSupplier);
+      return;
+    }
+    pendingAddPayloadRef.current = { serviceData, files };
+    setPendingSupplier({ operator_id: null, supplier_name: "" });
+    setConfirmLinkMode(false);
+    setConfirmSupplierOpen(true);
   };
 
   const handleImportServices = async (services: { service_type: TripServiceType; service_data: any }[]) => {
