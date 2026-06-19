@@ -176,6 +176,7 @@ export default function GerarOrcamento() {
   const [entryPercentage, setEntryPercentage] = useState(30);
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
+  const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<"legacy" | "grouped" | "ungrouped">("legacy");
   
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const [showInvestmentLocal, setShowInvestmentLocal] = useState<boolean | null>(null);
