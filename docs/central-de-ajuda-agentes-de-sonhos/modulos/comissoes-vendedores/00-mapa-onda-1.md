@@ -4,46 +4,26 @@ titulo: Comissões e Vendedores — Mapa de produção (Onda 1)
 modulo: Comissões e Vendedores
 tipo: índice-de-producao
 publico: [equipe-documentacao]
-status: bloqueado-por-informação
-confianca: pendente
-ultima-revisao: 2026-06-18
+status: concluído com pendências pontuais
+confianca: confirmado
+ultima-revisao: 2026-06-19
 fonte-interna: docs/base-conhecimento-agentes-de-sonhos/modulos/comissoes-vendedores.md
 ---
 
 # Comissões e Vendedores — Mapa de produção da Onda 1
 
-> Este arquivo lista a estrutura planejada para a Onda 1. O conteúdo profundo deste módulo será produzido em rodada dedicada após CRM (módulo de referência).
-
 ## Status
-**Bloqueado por informação:** aguardando autorização do proprietário e validação de versões/fluxos atuais antes da escrita definitiva. Nenhum conteúdo inferido foi promovido a RAG.
+**Concluído com pendências pontuais.** Todas as entregas documentais foram produzidas e publicadas em RAG. Restam apenas decisões de produto.
 
+## Entregas (Subonda 1E)
+- 20 FAQs canônicas confirmadas (cv-faq-01..20)
+- 10 tutoriais (cv-tut-01..10)
+- 5 problemas comuns (cv-prob-01..05)
+- 4 boas práticas (cv-bp-01..04)
+- 39 chunks adicionados ao RAG
 
-
-## Tutoriais planejados
-- Cadastrar um vendedor
-- Vincular vendedor a um usuário
-- Cadastrar vendedor sem usuário
-- Definir percentual de comissão
-- Acompanhar comissões geradas
-- Corrigir uma comissão
-- Cancelar uma comissão
-- Diferenciar comissão da agência e comissão do vendedor
-
-## Problemas comuns planejados
-- Comissão não foi lançada após venda
-- Valor da comissão diferente do esperado
-- Vendedor sem usuário não recebe acesso (esperado)
-- Comissão duplicada
-- Vendedor inativado continua aparecendo
-
-## Boas práticas planejadas
-- Mantenha cadastro de vendedores atualizado
-- Padronize percentuais por tipo de produto
-- Concilie comissões mensalmente
-- Não exclua comissões sem entender o impacto na venda
-
-## FAQs novas planejadas
-Meta: 20 FAQs canônicas adicionais com confiança 'confirmado'. Pré-requisito: revisão das FAQs existentes em `./faq/00-perguntas-frequentes.md` para garantir distinção de intenções.
-
-## Perguntas ao proprietário do produto
-Ver `../../07-PERGUNTAS-PENDENTES-DE-VALIDACAO.md` e o relatório da Onda 1.
+## Pendências de produto
+- Fórmula exata de cálculo da despesa de comissão de vendedor (percentual sobre valor da venda vs valor da comissão da agência).
+- Lista oficial de status de NF e impactos no recebimento.
+- Reativação de vendedor desativado (atualmente exige novo cadastro).
+- Aplicabilidade por plano.

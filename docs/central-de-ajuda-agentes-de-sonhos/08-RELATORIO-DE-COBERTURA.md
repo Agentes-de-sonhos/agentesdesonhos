@@ -78,3 +78,10 @@ Status na geração inicial (2026-06-18). Os números refletem o que foi efetiva
 - Financeiro — Visão Geral: 20 FAQs + 8 tutoriais + 5 problemas + 4 boas práticas (37 chunks).
 - Total RAG: 408 (era 334).
 - Pendências: versão pública oficial do roteiro (V1/V2); fórmulas detalhadas de indicadores; quota IA por plano.
+
+
+## Subonda 1E — 2026-06-19
+- Vendas: 20 FAQs + 10 tutoriais + 5 problemas + 4 boas práticas (39 chunks). Status: **concluído com pendências pontuais**.
+- Comissões e Vendedores: 20 FAQs + 10 tutoriais + 5 problemas + 4 boas práticas (39 chunks). Status: **concluído com pendências pontuais**.
+- Total RAG: 486 (era 408).
+- Pendências: confirmar fórmula exata de despesa automática de comissão de vendedor; confirmar status oficiais de NF e impacto em recebimento; planos aplicáveis (Start/Profissional/Premium) por funcionalidade.
