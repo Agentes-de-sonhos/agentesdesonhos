@@ -1216,7 +1216,7 @@ export default function GerarOrcamento() {
                             <button
                               key={opt.value}
                               type="button"
-                              onClick={() => setInvestmentSummaryLayout(opt.value)}
+                              onClick={() => handleSetInvestmentSummaryLayout(opt.value)}
                               className={cn(
                                 "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
                                 active
