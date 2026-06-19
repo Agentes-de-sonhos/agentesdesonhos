@@ -1096,13 +1096,6 @@ function TripWalletContent() {
               </DialogHeader>
               {editingService && selectedServiceType && (
                 <div className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Fornecedor</label>
-                    <SupplierSelector value={editSupplier} onChange={setEditSupplier} />
-                    <p className="text-xs text-muted-foreground">
-                      Selecione um fornecedor cadastrado ou digite livremente.
-                    </p>
-                  </div>
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}
@@ -1177,6 +1170,17 @@ function TripWalletContent() {
                       }
                     />
                   </PassengerPoolProvider>
+                  {/* Fornecedor — última seção do formulário de edição */}
+                  <div className="rounded-lg border bg-muted/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <label className="text-sm font-semibold">Fornecedor</label>
+                    </div>
+                    <SupplierSelector value={editSupplier} onChange={setEditSupplier} />
+                    <p className="text-xs text-muted-foreground">
+                      Selecione um fornecedor cadastrado ou digite livremente. A vinculação é aplicada ao salvar.
+                    </p>
+                  </div>
                 </div>
               )}
             </DialogContent>
