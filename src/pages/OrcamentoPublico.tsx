@@ -1117,7 +1117,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
           {/* floating agency logo badge — premium circular signature */}
           {agentProfile?.agency_logo_url && (
-            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-32 w-32 sm:h-40 sm:w-40 overflow-hidden rounded-full bg-white p-3 sm:p-4 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
+            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full bg-white p-2.5 sm:p-3 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
               <img
                 src={agentProfile.agency_logo_url}
                 alt={agentProfile.agency_name || "Agência"}
@@ -1126,11 +1126,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
           )}
 
-          <div className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-44 sm:pt-56 pb-20 sm:pb-24 flex flex-col text-white animate-fade-up">
+          <div className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-40 sm:pt-52 pb-20 sm:pb-24 flex flex-col text-white animate-fade-up">
             <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
               <MapPin className="h-3 w-3" /> {quote.destination}
             </span>
-            <h1 className="mt-4 text-[2.6rem] sm:text-7xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
+            <h1 className="mt-4 text-[2.15rem] sm:text-7xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] whitespace-nowrap">
               {tripTitle || quote.destination}
             </h1>
             <p className="mt-4 text-base sm:text-xl font-light text-white/90 max-w-2xl leading-relaxed">
