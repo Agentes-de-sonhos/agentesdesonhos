@@ -14,10 +14,14 @@ interface Props {
   docId: string;
   initialSnapshot: SignatureSnapshot | null | undefined;
   onSaved?: () => void;
+  /** When true, omits the outer Card wrapper (useful inside another card/accordion) */
+  unwrapped?: boolean;
+  /** When true, omits the internal title/icon/header (useful when the parent already shows it) */
+  hideHeader?: boolean;
 }
 
 /** Reusable signature card for any document editor */
-export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot, onSaved }: Props) {
+export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot, onSaved, unwrapped = false, hideHeader = false }: Props) {
   const { defaultSignature } = useCommercialSignatures();
   const [snap, setSnap] = useState<SignatureSnapshot | null>(initialSnapshot ?? null);
   const [saving, setSaving] = useState(false);
@@ -56,20 +60,30 @@ export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot
     persist(next);
   };
 
-  return (
-    <Card className="shadow-card">
-      <CardContent className="px-5 sm:px-6 py-5 space-y-3">
+  const inner = (
+    <div className="space-y-3">
+      {!hideHeader && (
         <div>
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
             <UserCircle2 className="h-5 w-5 text-sky-500" />
             Assinatura Comercial
           </h2>
           <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
-          <p className="text-xs text-muted-foreground mt-3">
-            Define quem aparece como responsável neste documento (nome, foto, WhatsApp e e-mail). {saving && "Salvando..."}
-          </p>
         </div>
-        <SignatureSelector value={snap} onChange={handleChange} />
+      )}
+      <p className="text-xs text-muted-foreground">
+        Define quem aparece como responsável neste documento (nome, foto, WhatsApp e e-mail). {saving && "Salvando..."}
+      </p>
+      <SignatureSelector value={snap} onChange={handleChange} />
+    </div>
+  );
+
+  if (unwrapped) return inner;
+
+  return (
+    <Card className="shadow-card">
+      <CardContent className="px-5 sm:px-6 py-5">
+        {inner}
       </CardContent>
     </Card>
   );

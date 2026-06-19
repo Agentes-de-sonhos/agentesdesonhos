@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, History } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, History, UserCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Search, Globe2 } from "lucide-react";
 import { parseDestinationParts } from "@/lib/destination-parts";
@@ -1483,10 +1483,10 @@ function TripWalletContent() {
             <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
               <div className="w-fit">
                 <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <ClipboardSignature className="h-5 w-5 text-rose-500" />
+                  <UserCircle2 className="h-5 w-5 text-sky-500" />
                   Assinatura Comercial
                 </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-rose-500" />
+                <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
@@ -1496,6 +1496,8 @@ function TripWalletContent() {
                   docId={trip.id}
                   initialSnapshot={(trip as any).signature_snapshot ?? null}
                   onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })}
+                  unwrapped
+                  hideHeader
                 />
               </div>
             </AccordionContent>
