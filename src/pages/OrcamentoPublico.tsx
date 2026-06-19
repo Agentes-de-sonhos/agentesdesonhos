@@ -1492,7 +1492,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
                 {/* Info */}
                 <div className="flex-1 min-w-0 space-y-0.5 pt-0.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary/80">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary/80 whitespace-nowrap text-center">
                     {signatureContact.title || "Sua consultora de viagens"}
                   </p>
                   <p className="text-lg font-bold tracking-tight text-foreground leading-tight">
@@ -1541,7 +1541,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
                 {/* ── Col 2: Info ── */}
                 <div className="flex-1 min-w-0 space-y-1">
-                  <p className="text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
+                  <p className="text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 whitespace-nowrap text-center">
                     {signatureContact.title || "Sua consultora de viagens"}
                   </p>
                   <p className="text-xl lg:text-[1.65rem] font-bold tracking-tight text-foreground leading-tight">
