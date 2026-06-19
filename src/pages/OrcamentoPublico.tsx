@@ -1126,11 +1126,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
           )}
 
-          <div className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-44 sm:pt-56 pb-20 sm:pb-24 flex flex-col text-white animate-fade-up">
+          <div className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-40 sm:pt-52 pb-20 sm:pb-24 flex flex-col text-white animate-fade-up">
             <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
               <MapPin className="h-3 w-3" /> {quote.destination}
             </span>
-            <h1 className="mt-4 text-[2.6rem] sm:text-7xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
+            <h1 className="mt-4 text-[2.15rem] sm:text-7xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] whitespace-nowrap">
               {tripTitle || quote.destination}
             </h1>
             <p className="mt-4 text-base sm:text-xl font-light text-white/90 max-w-2xl leading-relaxed">
