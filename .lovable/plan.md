@@ -1,123 +1,142 @@
-## Assinaturas Comerciais
+## Nova Apresentação do Investimento no Orçamento Público (com agrupamento opcional)
 
-Nova entidade independente de usuários/permissões para representar a identidade comercial exibida em Orçamentos, Carteira Digital e Roteiros públicos.
-
----
-
-### 1. Banco de dados (migration)
-
-**Nova tabela `commercial_signatures`**
-- `id` uuid PK
-- `user_id` uuid (dono da agência) — FK profiles
-- `name` text not null
-- `title` text
-- `phone` text
-- `whatsapp` text
-- `email` text
-- `photo_url` text
-- `custom_message` text
-- `display_order` int default 0
-- `is_active` bool default true
-- `is_default` bool default false
-- `created_at`, `updated_at`
-
-RLS: dono CRUD próprio; SELECT público liberado (necessário para renderizar snapshot/atualização em páginas públicas, embora o snapshot já garanta histórico). Restringimos SELECT público apenas a `is_active` se necessário. GRANTs padrão.
-
-**Snapshot nos documentos**
-Adicionar coluna `signature_snapshot jsonb` em:
-- `quotes`
-- `trips` (carteira digital)
-- `itineraries` (roteiros)
-
-Snapshot contém: `{ id, name, title, phone, whatsapp, email, photo_url, custom_message, updated_at }`.
-
-Nenhum FK rígido — exclusão da assinatura não quebra documentos. Implementaremos "soft delete" via `is_active=false` quando vinculada.
+### Resumo
+Substituir o bloco de investimento do orçamento público pelo layout aprovado (cards "Condições de Pagamento" + card final "Investimento Total da Viagem" + rodapé financeiro), adicionando a opção de **agrupar por tipo de serviço + condição de pagamento** ou **exibir serviço por serviço**, preservando 100% dos cálculos atuais (entrada, taxas/RAV/fee, parcelas, desconto à vista, meio de pagamento, observações) e todos os orçamentos/links públicos já existentes.
 
 ---
 
-### 2. UI — Configurações
+### 1. Modelo de dados (compatibilidade)
 
-Nova aba **"Assinaturas Comerciais"** dentro de `Configurações` (ou `MinhaConta`/área de configurações existente).
+Adicionar um novo campo de configuração no orçamento:
 
-Funcionalidades:
-- Lista em cards (foto, nome, cargo, badges "Padrão"/"Inativa")
-- Criar / Editar (Dialog com formulário)
-- Duplicar (clona registro)
-- Definir como padrão (radio, apenas 1 padrão; trigger desmarca os outros)
-- Inativar (toggle)
-- Excluir: se houver documentos referenciando (`signature_snapshot->>'id'`), bloquear com aviso e oferecer Inativar
+- Nome sugerido: `investment_summary_layout`
+- Valores: `'legacy' | 'grouped' | 'ungrouped'`
+- Default no banco: `'legacy'` (não impacta orçamentos antigos)
+- Default no editor para **novos orçamentos**: `'grouped'`
+- Migration apenas adiciona a coluna nullable com default `'legacy'`. Nenhum recálculo, nenhuma escrita em registros existentes.
 
----
+Critério de renderização no público:
+- `legacy` → renderiza o componente atual (intocado).
+- `grouped` / `ungrouped` → renderiza o novo componente.
 
-### 3. Hook reutilizável
-
-`useCommercialSignatures()`:
-- `signatures` lista ativa
-- `defaultSignature`
-- CRUD + setDefault + duplicate
-- `buildSnapshot(signature)` helper
-
-Componente `<SignatureSelector value onChange />` reutilizável (cards com radio, mobile-friendly).
-
-Helper `getSignatureContact(snapshot, fallbackAgentProfile)` para uso nas páginas públicas — usa snapshot quando existir, senão cai no `agentProfile` atual (compatibilidade).
+Isso garante os critérios 15, 16 e 17 (orçamentos antigos preservados; novo layout só após o agente abrir e salvar com a nova config).
 
 ---
 
-### 4. Integração — Orçamentos
+### 2. Editor do agente — etapa "Apresentação do Investimento"
 
-- Em `GerarOrcamento.tsx` (etapa Resumo): adicionar `<SignatureSelector>` que salva `signature_snapshot` no quote.
-- Default: ao criar novo orçamento, pré-preencher com snapshot da assinatura padrão.
-- Em `OrcamentoPublicoV2.tsx`: ler `quote.signature_snapshot` e usar para nome/foto/WhatsApp/email/mensagem na seção de contato e nos botões de ação. Fallback para `agentProfile` atual quando snapshot ausente (orçamentos antigos).
+Arquivo provável: passo de investimento dentro de `src/components/quote/` (a confirmar na leitura). Mudanças:
 
-### 5. Integração — Carteira Digital (Trips)
+- Manter intocadas as seções:
+  - "O que exibir para o cliente?" (Total / Detalhado / Total+Detalhado)
+  - "Como exibir o valor para o cliente?" (sem entrada / com entrada / à vista)
+  - Complementos (desconto à vista, meio de pagamento, observações)
 
-- Em configuração do trip (página de gestão da carteira): `<SignatureSelector>` salvando em `trips.signature_snapshot`.
-- Em `CarteiraPublica.tsx` e `ViagemPublica.tsx`: aplicar snapshot na área do consultor responsável e botões WhatsApp/contato.
+- **Nova seção** ao final: **"Como organizar os serviços no resumo financeiro?"**
+  - Radio cards: `Agrupar por tipo de serviço — recomendado` | `Não agrupar, exibir serviço por serviço`
+  - Visível apenas quando "O que exibir" ∈ {Detalhado, Total+Detalhado}.
+  - Caso contrário, mostrar mensagem discreta: *"Esta opção fica disponível quando a apresentação inclui valores detalhados."*
 
-### 6. Integração — Roteiros (Itineraries)
-
-- Editor de roteiro: `<SignatureSelector>` salvando em `itineraries.signature_snapshot`.
-- Em `RoteiroPublicoV2.tsx`: aplicar snapshot.
-
----
-
-### 7. Comportamento histórico
-
-- Snapshot é gravado no momento da seleção — alterações posteriores na assinatura não afetam documentos antigos.
-- Botão "Atualizar para versão atual" opcional ao lado do seletor (não obrigatório nesta entrega).
+- Novos orçamentos: default = `Total + Detalhado` + `grouped`.
+- Orçamentos existentes abertos no editor: se `investment_summary_layout` for `legacy`/null, manter como está; quando o agente interagir com a nova seção e salvar, gravar `grouped`/`ungrouped`.
 
 ---
 
-### 8. Compatibilidade
+### 3. Novo componente público de investimento
 
-- Agências sem nenhuma assinatura: documentos seguem usando dados do `agentProfile` (comportamento atual). Nenhum fluxo quebra.
-- Critério 19 e 20 atendidos via fallback + auto-uso da padrão.
+Criar `src/components/quote/PublicInvestmentSummary.tsx` (nome a ajustar conforme convenção do projeto):
 
----
+Props:
+- `services` (com tipo, nome, fornecedor, total, condição de pagamento já calculada)
+- `displayMode`: `total` | `detailed` | `total_and_detailed`
+- `groupingMode`: `grouped` | `ungrouped`
+- `paymentSummary` (total, total à vista, desconto %, meio de pagamento, observações)
+- helpers de moeda existentes (não criar novos)
 
-### Arquivos principais a criar/editar
+Renderização:
+- Título **"Condições de Pagamento"** + subtítulo (variante agrupado / sem agrupamento).
+- Lista de cards (grupo ou serviço) com 3 colunas: identidade (ícone + nome + qtd/fornecedor), Total do grupo/serviço, Forma de pagamento (entrada + parcelas, ou à vista).
+- Card final **"Investimento Total da Viagem"** quando o modo de exibição inclui total: total, à vista com desconto (se houver), total de serviços, total de grupos (apenas no agrupado), meio de pagamento.
+- Rodapé financeiro discreto com meio de pagamento + observações (oculto se ambos vazios).
+- Ícones por tipo (Lucide): Plane, Building2, Ship, MapPin, Shield, Car, Ticket, TrainFront, Sparkles.
+- `useMemo` para agrupamento, formatação BRL via helper atual.
 
-Novo:
-- Migration SQL
-- `src/hooks/useCommercialSignatures.ts`
-- `src/components/signatures/SignatureSelector.tsx`
-- `src/components/signatures/SignatureFormDialog.tsx`
-- `src/pages/configuracoes/AssinaturasComerciais.tsx` (ou seção integrada à página de configurações existente)
-- `src/lib/commercialSignature.ts` (helpers `buildSnapshot`, `resolveSignatureContact`)
-
-Editar:
-- `src/pages/GerarOrcamento.tsx` (etapa Resumo)
-- `src/pages/OrcamentoPublicoV2.tsx`
-- Editor de carteira (trips) + `CarteiraPublica.tsx` / `ViagemPublica.tsx`
-- Editor de roteiro + `RoteiroPublicoV2.tsx`
-- Rota/menu de Configurações para incluir nova seção
-- `src/types/quote.ts`, `src/types/itinerary.ts` para o tipo `SignatureSnapshot`
+Regras de agrupamento (chave de grupo):
+`tipo + condição (sem entrada / com entrada / à vista) + nº parcelas + valor da entrada + meio de pagamento relevante`.
+Serviços incompatíveis viram grupos separados (Critério 5).
 
 ---
 
-### Pontos a confirmar antes de implementar
+### 4. Cálculos financeiros — preservar 100%
 
-1. **Onde adicionar a aba**: em `MinhaConta` (atual área de perfil) ou criar página dedicada `/configuracoes/assinaturas`?
-2. **Foto**: upload via `MediaManager` (bucket `media-files`) — confirma?
-3. **Mensagem personalizada**: aparece em qual ponto exato do documento público (junto da área do consultor, no topo, ou após o resumo)?
-4. **Exclusão hard**: confirmar que assinatura sem vínculo pode ser excluída de fato (DELETE), e com vínculo só permite inativar.
+- Reutilizar as funções existentes em `src/lib/servicePayment.ts`, `src/lib/quoteCurrency.ts`, etc.
+- O novo componente apenas **lê** os valores já calculados por serviço e soma dentro do grupo. Não recalcula entrada, não redistribui RAV/fee/taxas.
+- A soma dos grupos === total do orçamento (mesmos helpers de arredondamento já usados).
+
+---
+
+### 5. Renderização condicional no OrçamentoPúblico
+
+Em `src/pages/OrcamentoPublicoV2.tsx` (e `OrcamentoPublico.tsx` se aplicável):
+
+```ts
+if (quote.investment_summary_layout === 'grouped' || quote.investment_summary_layout === 'ungrouped') {
+  <PublicInvestmentSummary ... />
+} else {
+  <ComponenteAtual ... />  // legacy intocado
+}
+```
+
+Barra fixa inferior mobile permanece como está (apenas botão "Quero reservar", já implementado).
+
+---
+
+### 6. Responsividade & acessibilidade
+
+- Cards: grid 3 colunas em ≥sm; empilhado vertical no mobile.
+- Sem scroll horizontal; valores nunca truncados.
+- Ícones decorativos com `aria-hidden`; cards de grupo com `aria-label` descritivo; foco visível; navegação por teclado nos radios do editor.
+- Contraste via tokens do design system (sem cores hardcoded).
+
+---
+
+### 7. Migration (Lovable Cloud)
+
+```sql
+ALTER TABLE public.quotes
+  ADD COLUMN IF NOT EXISTS investment_summary_layout text
+  DEFAULT 'legacy'
+  CHECK (investment_summary_layout IN ('legacy','grouped','ungrouped'));
+```
+(Sem alteração de RLS/GRANTs — coluna nova em tabela já protegida.)
+
+---
+
+### 8. Fora de escopo (não fazer agora)
+
+- Edição manual avançada de grupos.
+- Personalização individual por grupo.
+- Tela de condições híbridas.
+- Recalcular qualquer valor financeiro.
+- Mudar rotas públicas ou nomes de URL.
+
+---
+
+### 9. Validação
+
+- Abrir orçamento antigo no preview → layout atual permanece (legacy).
+- Criar novo orçamento → default Total+Detalhado + grouped → novo layout no público.
+- Trocar para "Não agrupar" → cards por serviço.
+- Trocar "O que exibir" para apenas Total → seção de organização some + cliente vê só total consolidado.
+- Casos: parcelado sem entrada, com entrada + RAV/fee, à vista com desconto → valores idênticos aos do layout antigo.
+- Responsivo 320–1920px; teste com leitor de tela nos cards.
+
+---
+
+### Arquivos previstos
+
+- **Migration:** nova (adiciona coluna).
+- **Editar:** passo de investimento no editor de orçamentos (em `src/components/quote/`), `src/pages/OrcamentoPublicoV2.tsx`, possivelmente `OrcamentoPublico.tsx`, `src/types/quote.ts`, `src/lib/orcamento-domain.ts` (default).
+- **Criar:** `src/components/quote/PublicInvestmentSummary.tsx` (+ subcomponentes/ícones).
+
+Confirma que posso seguir com essa abordagem? Em particular: (a) nome do campo `investment_summary_layout`, (b) default `legacy` para registros antigos e `grouped` para novos no editor, (c) criar o novo componente em paralelo ao atual sem remover o antigo.
