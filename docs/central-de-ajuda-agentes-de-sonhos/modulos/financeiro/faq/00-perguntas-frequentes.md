@@ -462,3 +462,384 @@ Perguntas canônicas validadas a partir da Base de Conhecimento Mestre.
 **ID:** `financeiro-faq-20`
 
 ---
+
+## Onde fica o módulo Financeiro?
+
+**Pergunta:** Onde fica o módulo Financeiro?
+
+**O que o usuário pode perguntar:**
+- onde fica financeiro
+- acessar financeiro
+
+**Resposta direta:** No menu principal, em **Financeiro** (caminho `/financeiro`). A tela abre na aba **Visão Geral**.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-21`
+
+---
+## Quais abas existem dentro do Financeiro?
+
+**Pergunta:** Quais abas existem dentro do Financeiro?
+
+**O que o usuário pode perguntar:**
+- abas financeiro
+- navegação financeiro
+
+**Resposta direta:** Visão Geral, Vendas, Entradas, Despesas, Faturas, Comissões, Fornecedores e Vendedores. As cinco primeiras são primárias; as demais aparecem em **Mais**.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-22`
+
+---
+## Qual é a diferença entre Visão Geral e as outras abas?
+
+**Pergunta:** Qual é a diferença entre Visão Geral e as outras abas?
+
+**O que o usuário pode perguntar:**
+- diferenca visao geral
+- dashboard financeiro
+
+**Resposta direta:** A **Visão Geral** mostra o resumo consolidado do mês. As demais abas listam e permitem editar registros específicos.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-23`
+
+---
+## Como filtro por mês no dashboard?
+
+**Pergunta:** Como filtro por mês no dashboard?
+
+**O que o usuário pode perguntar:**
+- filtrar mes
+- periodo dashboard
+
+**Resposta direta:** Use o seletor de período no topo do dashboard. O filtro afeta indicadores, listas e exportações.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-24`
+
+---
+## O que é uma venda no Financeiro?
+
+**Pergunta:** O que é uma venda no Financeiro?
+
+**O que o usuário pode perguntar:**
+- conceito venda
+- o que é venda
+
+**Resposta direta:** É o registro do fechamento de um produto ou serviço para um cliente. Toda venda alimenta os indicadores de faturamento.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-25`
+
+---
+## O que é uma entrada?
+
+**Pergunta:** O que é uma entrada?
+
+**O que o usuário pode perguntar:**
+- conceito entrada
+- recebimento
+
+**Resposta direta:** É o recebimento financeiro, geralmente vinculado a uma venda. Entradas alimentam o fluxo de caixa realizado.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-26`
+
+---
+## O que é uma despesa?
+
+**Pergunta:** O que é uma despesa?
+
+**O que o usuário pode perguntar:**
+- conceito despesa
+- conta a pagar
+
+**Resposta direta:** É um pagamento ou conta a pagar da agência. Inclui despesas operacionais e comissões de vendedores.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-27`
+
+---
+## O que é uma fatura?
+
+**Pergunta:** O que é uma fatura?
+
+**O que o usuário pode perguntar:**
+- conceito fatura
+- fatura cliente
+
+**Resposta direta:** Representa um documento agrupando serviços a serem pagos pelo cliente em uma ou mais parcelas.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-28`
+
+---
+## Como é calculado o lucro líquido?
+
+**Pergunta:** Como é calculado o lucro líquido?
+
+**O que o usuário pode perguntar:**
+- lucro liquido
+- formula resultado
+
+**Resposta direta:** Lucro líquido = comissões da agência − (despesas + comissões de vendedores). O cálculo é exibido no dashboard.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-29`
+
+---
+## Comissão de vendedor é despesa?
+
+**Pergunta:** Comissão de vendedor é despesa?
+
+**O que o usuário pode perguntar:**
+- comissao despesa
+- comissao automatica
+
+**Resposta direta:** Sim. Quando uma venda é vinculada a um vendedor, a plataforma cria/atualiza uma despesa do tipo comissão automaticamente.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-30`
+
+---
+## Como exportar a Visão Geral?
+
+**Pergunta:** Como exportar a Visão Geral?
+
+**O que o usuário pode perguntar:**
+- exportar dashboard
+- baixar planilha
+
+**Resposta direta:** Use o botão **Exportar** disponível nas tabelas das abas. Formatos: XLSX e PDF. Os filtros ativos são respeitados.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-31`
+
+---
+## Por que o dashboard está vazio?
+
+**Pergunta:** Por que o dashboard está vazio?
+
+**O que o usuário pode perguntar:**
+- dashboard vazio
+- sem dados
+
+**Resposta direta:** Provavelmente o período selecionado não tem vendas, entradas ou despesas registradas. Confira o filtro de mês.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-32`
+
+---
+## Os números do dashboard incluem orçamentos não fechados?
+
+**Pergunta:** Os números do dashboard incluem orçamentos não fechados?
+
+**O que o usuário pode perguntar:**
+- orçamento dashboard
+- proposta vs venda
+
+**Resposta direta:** Não. Apenas vendas registradas no módulo Financeiro entram nos indicadores. Orçamentos servem para proposta comercial.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-33`
+
+---
+## Quais perfis acessam o Financeiro?
+
+**Pergunta:** Quais perfis acessam o Financeiro?
+
+**O que o usuário pode perguntar:**
+- perfis
+- permissoes financeiro
+
+**Resposta direta:** Titular e perfis com permissão financeira. Agentes sem permissão não veem o módulo.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-34`
+
+---
+## Como vejo a relação entre uma venda e a comissão gerada?
+
+**Pergunta:** Como vejo a relação entre uma venda e a comissão gerada?
+
+**O que o usuário pode perguntar:**
+- venda comissao
+- rastreio comissao
+
+**Resposta direta:** Abra a venda e veja a comissão criada na aba **Comissões**. A despesa correspondente aparece em **Despesas**.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-35`
+
+---
+## Onde acompanho contas a receber?
+
+**Pergunta:** Onde acompanho contas a receber?
+
+**O que o usuário pode perguntar:**
+- contas a receber
+- pendentes
+
+**Resposta direta:** Na aba **Entradas**, com filtro por status (pendente, recebido, atrasado).
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-36`
+
+---
+## Onde acompanho contas a pagar?
+
+**Pergunta:** Onde acompanho contas a pagar?
+
+**O que o usuário pode perguntar:**
+- contas a pagar
+- despesas
+
+**Resposta direta:** Na aba **Despesas**, com filtro por status. Despesas recorrentes geram ocorrências automáticas.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-37`
+
+---
+## Posso excluir um registro financeiro?
+
+**Pergunta:** Posso excluir um registro financeiro?
+
+**O que o usuário pode perguntar:**
+- excluir
+- cascata financeiro
+
+**Resposta direta:** Sim, com permissão. Exclusões podem afetar despesas vinculadas (ex.: comissão automática). Verifique dependências antes.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-38`
+
+---
+## O Financeiro funciona em qualquer plano?
+
+**Pergunta:** O Financeiro funciona em qualquer plano?
+
+**O que o usuário pode perguntar:**
+- plano financeiro
+- recursos por plano
+
+**Resposta direta:** O módulo está disponível conforme o plano da agência. Alguns recursos avançados podem variar entre Start, Profissional e Premium.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-39`
+
+---
+## Como reportar uma divergência no dashboard?
+
+**Pergunta:** Como reportar uma divergência no dashboard?
+
+**O que o usuário pode perguntar:**
+- divergencia
+- reportar dashboard
+
+**Resposta direta:** Confirme o período e os filtros. Se a divergência persistir, abra um ticket no Suporte com os números observados e o período.
+
+**Pré-requisitos:** Ter acesso ao módulo correspondente com permissão suficiente.
+
+**Status da resposta:** pronto.
+
+**Nível de confiança:** confirmado.
+
+**ID:** `fin-faq-40`
+
+---

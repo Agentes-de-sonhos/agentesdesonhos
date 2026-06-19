@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-19",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "language": "pt-BR",
   "fields": [
     "id",
@@ -201,7 +201,7 @@
   },
   "versao": "1.2.1",
   "ultima_atualizacao": "2026-06-19",
-  "total_chunks": 334,
+  "total_chunks": 408,
   "historico": [
     {
       "versao": "1.2.0",
