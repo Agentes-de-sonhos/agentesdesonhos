@@ -31,7 +31,7 @@ Documentar de forma confiável a operação da aba **Financeiro → Despesas**: 
 - 10 tutoriais
 - 5 problemas comuns
 - 4 boas práticas
-- 39 chunks adicionados ao RAG
+- 41 chunks adicionados ao RAG
 
 ## Itens pendentes
 Nenhuma entrega quantitativa pendente. Decisões específicas de produto registradas em `23-DECISOES-PENDENTES-PROPRIETARIO.md` permanecem fora deste módulo.

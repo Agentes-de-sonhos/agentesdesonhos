@@ -345,14 +345,14 @@ Total atual no BASE-RAG.jsonl: **526 chunks**.
 
 ## Subonda 2A — Entradas + Despesas (2026-06-19)
 
-### Entradas (39 chunks)
+### Entradas (41 chunks)
 - entradas-visao-geral, entradas-primeiros-passos
 - FAQs: en-faq-01..20
 - Tutoriais: en-tut-01..10
 - Problemas comuns: en-prob-01..05
 - Boas práticas: en-bp-01..04
 
-### Despesas (39 chunks)
+### Despesas (41 chunks)
 - despesas-visao-geral, despesas-primeiros-passos
 - FAQs: dp-faq-01..20
 - Tutoriais: dp-tut-01..10
