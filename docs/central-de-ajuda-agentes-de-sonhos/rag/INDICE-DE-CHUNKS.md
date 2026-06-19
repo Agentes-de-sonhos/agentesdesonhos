@@ -129,8 +129,6 @@ Adicionados 73 chunks confirmados nesta subonda (37 em Carteira Digital + 36 em 
 - `carteira-digital-prob-01` a `carteira-digital-prob-05` (5 problemas comuns)
 - `carteira-digital-bp-01` a `carteira-digital-bp-04` (4 boas práticas)
 
-Total atual no BASE-RAG.jsonl: **334 chunks**.
-
 
 ## Subonda 1D (2026-06-19)
 
@@ -297,4 +295,49 @@ Total atual no BASE-RAG.jsonl: **334 chunks**.
 - cv-bp-03 — Acompanhe comissões atrasadas semanalmente
 - cv-bp-04 — Concilie comissão da agência e comissão de vendedor mensalmente
 
-Total atual no BASE-RAG.jsonl: **486 chunks**.
+
+
+## Equipe e Permissões (Subonda 1F)
+
+- ep-faq-01 — Onde cadastro um membro da equipe?
+- ep-faq-02 — Qual a diferença entre o titular e um membro da equipe?
+- ep-faq-03 — Qual a diferença entre um vendedor e um membro da equipe?
+- ep-faq-04 — Qual a diferença entre fornecedor e membro da equipe?
+- ep-faq-05 — Quantos membros posso cadastrar?
+- ep-faq-06 — Como o membro faz login?
+- ep-faq-07 — Posso redefinir a senha de um membro?
+- ep-faq-08 — Como desativo um membro sem excluir?
+- ep-faq-09 — Como reativo um membro bloqueado?
+- ep-faq-10 — Como excluo um membro?
+- ep-faq-11 — Como libero acesso a Clientes e Oportunidades para um membro?
+- ep-faq-12 — Como libero acesso ao Financeiro?
+- ep-faq-13 — O que são permissões por etapa do funil?
+- ep-faq-14 — Posso restringir um membro a uma etapa específica do funil?
+- ep-faq-15 — Membro pode ver dados de outros membros?
+- ep-faq-16 — Por que o membro vê um menu, mas não consegue abrir o conteúdo?
+- ep-faq-17 — O que acontece com as oportunidades criadas por um membro desativado?
+- ep-faq-18 — Posso usar o mesmo login para vários membros?
+- ep-faq-19 — O membro pode mudar a própria senha?
+- ep-faq-20 — O acesso do membro expira por inatividade?
+- ep-tut-01 — Cadastrar um membro da equipe
+- ep-tut-02 — Editar dados e cargo de um membro
+- ep-tut-03 — Configurar permissões por módulo
+- ep-tut-04 — Configurar permissões por etapa do funil
+- ep-tut-05 — Redefinir a senha de um membro
+- ep-tut-06 — Desativar (bloquear) um membro
+- ep-tut-07 — Reativar um membro bloqueado
+- ep-tut-08 — Excluir um membro definitivamente
+- ep-tut-09 — Liberar acesso ao Financeiro para um membro
+- ep-tut-10 — Testar o acesso de um membro após configurar permissões
+- ep-prob-01 — Membro não consegue entrar com o login
+- ep-prob-02 — Membro não enxerga um módulo que deveria ver
+- ep-prob-03 — Membro vê registros que não deveria ver
+- ep-prob-04 — Permissão por etapa do funil não está sendo aplicada
+- ep-prob-05 — Limite de membros da equipe foi atingido
+- ep-bp-01 — Conceda o menor acesso necessário
+- ep-bp-02 — Revise as permissões periodicamente
+- ep-bp-03 — Separe vendedor, fornecedor e membro da equipe
+- ep-bp-04 — Nunca compartilhe o login do titular
+- ep-bp-05 — Teste o acesso após mudanças de permissão
+
+Total atual no BASE-RAG.jsonl: **526 chunks**.
