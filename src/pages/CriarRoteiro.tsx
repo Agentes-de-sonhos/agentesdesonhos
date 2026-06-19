@@ -711,7 +711,19 @@ export default function CriarRoteiro() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="text-base font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Configurações do Roteiro
+                </CardTitle>
+                <CardDescription>
+                  Centralize aqui as informações principais que aparecem no topo do roteiro e no link público.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 space-y-5">
+                {/* Destino */}
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Destino</div>
+                  <div className="flex items-center gap-2">
                   {isEditingDestination ? (
                     <div className="flex items-center gap-2 flex-1">
                       <Input
@@ -765,7 +777,7 @@ export default function CriarRoteiro() {
                     </div>
                   ) : (
                     <>
-                      {currentItinerary.destination}
+                      <span className="text-lg font-semibold">{currentItinerary.destination}</span>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -779,14 +791,244 @@ export default function CriarRoteiro() {
                       </Button>
                     </>
                   )}
-                </CardTitle>
-                <CardDescription>
-                  {currentItinerary.travelersCount} viajante(s) •{" "}
-                  {currentItinerary.days?.length || 0} dias
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex flex-col md:flex-row gap-4">
+                  </div>
+                </div>
+
+                {/* Viajantes + Datas + Duração */}
+                <div className="grid sm:grid-cols-3 gap-3">
+                  {/* Viajantes */}
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Viajantes</div>
+                    <Popover open={travelersPopoverOpen} onOpenChange={(open) => {
+                      setTravelersPopoverOpen(open);
+                      if (open) setEditTravelers(currentItinerary.travelersCount);
+                    }}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between rounded-xl">
+                          <span className="inline-flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            {currentItinerary.travelersCount} viajante(s)
+                          </span>
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64 p-3" align="start">
+                        <Label className="text-xs text-muted-foreground">Quantidade de viajantes</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={99}
+                          value={editTravelers}
+                          onChange={(e) => setEditTravelers(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="mt-1.5"
+                          autoFocus
+                        />
+                        <div className="flex justify-end gap-2 mt-3">
+                          <Button variant="ghost" size="sm" onClick={() => setTravelersPopoverOpen(false)} disabled={savingTravelers}>
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            disabled={savingTravelers}
+                            onClick={async () => {
+                              setSavingTravelers(true);
+                              try {
+                                await updateItineraryDetails.mutateAsync({
+                                  itineraryId: currentItinerary.id,
+                                  updates: { travelers_count: editTravelers },
+                                });
+                                setCurrentItinerary({ ...currentItinerary, travelersCount: editTravelers });
+                                setTravelersPopoverOpen(false);
+                                toast.success("Viajantes atualizado!");
+                              } catch {
+                                toast.error("Não foi possível salvar.");
+                              } finally {
+                                setSavingTravelers(false);
+                              }
+                            }}
+                          >
+                            {savingTravelers ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Salvar"}
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Datas */}
+                  <div className="sm:col-span-2">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Datas da viagem</div>
+                    <Popover open={datesPopoverOpen} onOpenChange={(open) => {
+                      setDatesPopoverOpen(open);
+                      if (open) {
+                        setEditStartDate(parseLocalDate(currentItinerary.startDate));
+                        setEditEndDate(parseLocalDate(currentItinerary.endDate));
+                      }
+                    }}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between rounded-xl">
+                          <span className="inline-flex items-center gap-2 truncate">
+                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                            <span className="truncate">
+                              {format(parseLocalDate(currentItinerary.startDate), "dd MMM", { locale: ptBR })} – {format(parseLocalDate(currentItinerary.endDate), "dd MMM yyyy", { locale: ptBR })}
+                              {" • "}
+                              {currentItinerary.days?.length || 0} dias
+                            </span>
+                          </span>
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-3" align="start">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Ida</Label>
+                            <CalendarPicker
+                              mode="single"
+                              selected={editStartDate}
+                              onSelect={(d) => {
+                                if (!d) return;
+                                setEditStartDate(d);
+                                if (editEndDate && editEndDate < d) setEditEndDate(d);
+                              }}
+                              className="pointer-events-auto"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Volta</Label>
+                            <CalendarPicker
+                              mode="single"
+                              selected={editEndDate}
+                              onSelect={(d) => d && setEditEndDate(d)}
+                              disabled={(d) => !!editStartDate && d < editStartDate}
+                              className="pointer-events-auto"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="text-xs text-muted-foreground">
+                            {editStartDate && editEndDate
+                              ? `${Math.max(1, Math.round((editEndDate.getTime() - editStartDate.getTime()) / 86400000) + 1)} dias`
+                              : ""}
+                          </span>
+                          <div className="flex gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => setDatesPopoverOpen(false)} disabled={savingDates}>
+                              Cancelar
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={savingDates || !editStartDate || !editEndDate}
+                              onClick={async () => {
+                                if (!editStartDate || !editEndDate) return;
+                                setSavingDates(true);
+                                try {
+                                  await adjustItineraryDates.mutateAsync({
+                                    itineraryId: currentItinerary.id,
+                                    startDate: editStartDate,
+                                    endDate: editEndDate,
+                                  });
+                                  setDatesPopoverOpen(false);
+                                  await loadItinerary(currentItinerary.id);
+                                  toast.success("Datas atualizadas!");
+                                } catch (err: any) {
+                                  toast.error(err?.message || "Não foi possível salvar.");
+                                } finally {
+                                  setSavingDates(false);
+                                }
+                              }}
+                            >
+                              {savingDates ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Salvar"}
+                            </Button>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                {/* Frase de destaque */}
+                {(() => {
+                  const fallbackHeadline = `${currentItinerary.days?.length || 0} ${(currentItinerary.days?.length || 0) === 1 ? "dia" : "dias"} para viver ${currentItinerary.destination} de um jeito único`;
+                  return (
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1.5">
+                          <Quote className="h-3.5 w-3.5 text-primary" />
+                          Frase de destaque do roteiro
+                        </span>
+                        {!isEditingHeadline && (
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              setEditHeadline(currentItinerary.headline || "");
+                              setIsEditingHeadline(true);
+                            }}
+                            title="Editar frase"
+                          >
+                            <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                          </Button>
+                        )}
+                      </div>
+                      {isEditingHeadline ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editHeadline}
+                            onChange={(e) => setEditHeadline(e.target.value)}
+                            rows={2}
+                            autoFocus
+                            placeholder={fallbackHeadline}
+                            className="resize-none text-sm"
+                            onKeyDown={(e) => {
+                              if (e.key === "Escape") setIsEditingHeadline(false);
+                            }}
+                          />
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              disabled={savingHeadline}
+                              onClick={async () => {
+                                setSavingHeadline(true);
+                                try {
+                                  const value = editHeadline.trim() || null;
+                                  await updateItineraryDetails.mutateAsync({
+                                    itineraryId: currentItinerary.id,
+                                    updates: { headline: value },
+                                  });
+                                  setCurrentItinerary({ ...currentItinerary, headline: value });
+                                  setIsEditingHeadline(false);
+                                  toast.success("Frase atualizada!");
+                                } catch {
+                                  toast.error("Não foi possível salvar.");
+                                } finally {
+                                  setSavingHeadline(false);
+                                }
+                              }}
+                            >
+                              {savingHeadline ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Check className="h-3.5 w-3.5 mr-1" />}
+                              Salvar
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setIsEditingHeadline(false)} disabled={savingHeadline}>
+                              Cancelar
+                            </Button>
+                            {!editHeadline.trim() && (
+                              <span className="ml-auto text-[11px] text-muted-foreground italic">
+                                Em branco usa a sugestão automática
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className={`text-sm leading-relaxed ${currentItinerary.headline ? "text-foreground/85" : "text-muted-foreground italic"}`}>
+                          {currentItinerary.headline || `Sugestão automática: "${fallbackHeadline}"`}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* Apresentação do destino + Capa */}
+                <div className="flex flex-col md:flex-row gap-4 pt-2 border-t border-border/60">
                   {/* Cover thumbnail */}
                   <div className="md:w-48 shrink-0">
                     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted">
