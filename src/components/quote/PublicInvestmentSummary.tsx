@@ -306,91 +306,46 @@ export function PublicInvestmentSummary({
       </ul>
 
       {showTotalCard && (
-        <>
-          {/* MOBILE: card total refinado */}
-          <div className="sm:hidden mt-5 rounded-2xl border border-primary/30 bg-gradient-to-b from-primary/[0.07] to-primary/[0.03] p-6 shadow-[0_4px_18px_-6px_rgba(15,23,42,0.12)]">
+        <div className="mt-5 rounded-2xl border border-primary/25 bg-primary/[0.05] p-6 sm:p-7">
           <div className="flex flex-col items-center text-center">
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm" aria-hidden="true">
               <Wallet className="h-5 w-5" />
             </span>
-            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+            <p className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
               Investimento Total da Viagem
             </p>
-            <p className="mt-2 text-3xl font-extrabold tracking-tight text-primary">
+            <p className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
               {fmt(totalAll)}
             </p>
             {totalAVista !== null && (
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
                 À vista com {discountPct}% de desconto:{" "}
                 <span className="font-semibold text-primary">{fmt(totalAVista)}</span>
               </p>
             )}
           </div>
 
-          <div className="mt-5 flex flex-wrap items-stretch justify-center gap-3">
-            <div className="flex-1 min-w-[140px] max-w-[220px] rounded-xl bg-white/70 border border-primary/15 px-4 py-3 text-center">
+          <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2">
+            <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Total de serviços
               </p>
-              <p className="mt-1 text-sm font-semibold text-foreground">
+              <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
                 {services.length} serviço{services.length === 1 ? "" : "s"}
               </p>
             </div>
             {groupingMode === "grouped" && (
-              <div className="flex-1 min-w-[140px] max-w-[220px] rounded-xl bg-white/70 border border-primary/15 px-4 py-3 text-center">
+              <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Tipos de serviço
                 </p>
-                <p className="mt-1 text-sm font-semibold text-foreground">
+                <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
                   {items.length} tipo{items.length === 1 ? "" : "s"}
                 </p>
               </div>
             )}
           </div>
-          </div>
-
-          {/* DESKTOP/TABLET: card total — versão anterior */}
-          <div className="hidden sm:block mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-6">
-            <div className="text-center space-y-2">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground" aria-hidden="true">
-                <Wallet className="h-5 w-5" />
-              </span>
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary/80">
-                Investimento Total da Viagem
-              </p>
-              <p className="text-4xl font-extrabold tracking-tight text-primary">
-                {fmt(totalAll)}
-              </p>
-              {totalAVista !== null && (
-                <p className="text-sm text-muted-foreground">
-                  À vista com {discountPct}% de desconto:{" "}
-                  <span className="font-semibold text-primary">{fmt(totalAVista)}</span>
-                </p>
-              )}
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 text-center">
-              <div className="rounded-lg bg-white/60 border border-primary/15 px-3 py-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Total de serviços
-                </p>
-                <p className="mt-0.5 text-base font-semibold text-foreground">
-                  {services.length} serviço{services.length === 1 ? "" : "s"}
-                </p>
-              </div>
-              {groupingMode === "grouped" && (
-                <div className="rounded-lg bg-white/60 border border-primary/15 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Tipos de serviço
-                  </p>
-                  <p className="mt-0.5 text-base font-semibold text-foreground">
-                    {items.length} tipo{items.length === 1 ? "" : "s"}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
+        </div>
       )}
 
       {(globalPayment.methodLabel || paymentTerms) && (
