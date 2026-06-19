@@ -8,7 +8,12 @@ interface ServiceImageCarouselProps {
 }
 
 export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, dragFree: false });
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    dragFree: true,
+    containScroll: "trimSnaps",
+    align: "start",
+  });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -67,7 +72,7 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
           <img
             src={images[0]}
             alt={alt}
-            className="w-full aspect-[4/3] sm:aspect-[16/10] object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full aspect-[4/3] sm:h-56 lg:h-52 sm:aspect-auto object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
         </div>
@@ -88,18 +93,18 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
     <>
       <div className="relative group">
         {/* Carousel */}
-        <div ref={emblaRef} className="overflow-hidden rounded-xl border border-border/30 bg-muted">
-          <div className="flex">
+        <div ref={emblaRef} className="overflow-hidden rounded-xl">
+          <div className="flex gap-2 sm:gap-3">
             {images.map((url, i) => (
               <div
                 key={i}
-                className="flex-[0_0_100%] min-w-0 cursor-pointer"
+                className="flex-[0_0_88%] sm:flex-[0_0_55%] lg:flex-[0_0_38%] min-w-0 cursor-pointer rounded-xl overflow-hidden border border-border/30 bg-muted"
                 onClick={() => openLightbox(i)}
               >
                 <img
                   src={url}
                   alt={`${alt} ${i + 1}`}
-                  className="w-full aspect-[4/3] sm:aspect-[16/10] object-cover hover:scale-[1.02] transition-transform duration-300"
+                  className="w-full aspect-[4/3] sm:h-56 lg:h-52 sm:aspect-auto object-cover hover:scale-[1.02] transition-transform duration-300"
                   loading="lazy"
                 />
               </div>
@@ -123,24 +128,8 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
           <ChevronRight className="h-5 w-5" />
         </button>
 
-        {/* Dot indicators */}
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              onClick={(e) => { e.stopPropagation(); emblaApi?.scrollTo(i); }}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === selectedIndex
-                  ? "w-6 bg-white shadow-md"
-                  : "w-2 bg-white/50 hover:bg-white/80"
-              }`}
-              aria-label={`Imagem ${i + 1}`}
-            />
-          ))}
-        </div>
-
         {/* Counter badge */}
-        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
+        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full pointer-events-none">
           {selectedIndex + 1} / {images.length}
         </div>
       </div>
