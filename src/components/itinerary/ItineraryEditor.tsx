@@ -761,6 +761,47 @@ export function ItineraryEditor({
                                         </div>
                                       </div>
                                       <div className="space-y-2">
+                                        <div className="flex items-center justify-between gap-2">
+                                          <Label className="flex items-center gap-1.5">
+                                            <MapPin className="h-3.5 w-3.5" />
+                                            Link do Google Maps
+                                          </Label>
+                                          {(editingActivity.location || "").trim() && (
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              className="h-7 px-2 text-[11px] text-muted-foreground"
+                                              onClick={() => {
+                                                const loc = (editingActivity.location || "").trim();
+                                                if (!loc) return;
+                                                setEditingActivity({
+                                                  ...editingActivity,
+                                                  mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`,
+                                                });
+                                              }}
+                                            >
+                                              Gerar a partir do local
+                                            </Button>
+                                          )}
+                                        </div>
+                                        <Input
+                                          type="url"
+                                          inputMode="url"
+                                          placeholder="https://maps.google.com/..."
+                                          value={editingActivity.mapsUrl || ""}
+                                          onChange={(e) =>
+                                            setEditingActivity({
+                                              ...editingActivity,
+                                              mapsUrl: e.target.value,
+                                            })
+                                          }
+                                        />
+                                        <p className="text-[11px] text-muted-foreground">
+                                          Deixe em branco para preencher automaticamente a partir do local ao salvar. No roteiro público, o Local fica clicável quando há link.
+                                        </p>
+                                      </div>
+                                      <div className="space-y-2">
                                         <Label>Custo Estimado</Label>
                                         <Input
                                           value={editingActivity.estimatedCost || ""}
