@@ -225,17 +225,17 @@ export function PublicInvestmentSummary({
 
   return (
     <section
-      className="rounded-2xl border border-border/40 bg-white p-5 sm:p-7 shadow-sm animate-fade-up"
+      className="rounded-2xl border border-border/40 bg-white p-5 sm:p-8 shadow-sm animate-fade-up"
       aria-labelledby="condicoes-pagamento-title"
     >
-      <div className="mb-5 sm:mb-6">
+      <div className="mb-6 sm:mb-8 text-center">
         <h3 id="condicoes-pagamento-title" className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
           Condições de Pagamento
         </h3>
-        <p className="mt-1 text-sm text-muted-foreground">{totalLabel}</p>
+        <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">{totalLabel}</p>
       </div>
 
-      <ul className="space-y-3">
+      <ul className="space-y-4 sm:space-y-5 list-none p-0">
         {items.map((item) => {
           const Icon = SERVICE_ICON[item.type] || Sparkles;
           const rows = item.payment.render(item.total);
@@ -247,48 +247,51 @@ export function PublicInvestmentSummary({
           return (
             <li
               key={item.key}
-              className="rounded-xl border border-border/40 bg-card p-4 sm:p-5"
+              className="rounded-2xl border border-border/40 bg-card p-6 sm:p-8 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_18px_-6px_rgba(15,23,42,0.12)] transition-shadow"
               aria-label={`${item.title}${item.subtitle ? `, ${item.subtitle}` : ""}, ${totalLabelText} ${fmt(item.total)}`}
             >
-              <div className="space-y-4">
-                {/* Linha 1: identidade do serviço (alinhada à esquerda) */}
-                <div className="flex items-center gap-3 min-w-0">
+              <div className="flex flex-col items-center text-center">
+                {/* Bloco 1 — Cabeçalho do serviço */}
+                <div className="flex flex-col items-center gap-2">
                   <span
-                    className={cn("flex h-11 w-11 items-center justify-center rounded-full shrink-0", TONE_PRIMARY)}
+                    className={cn("flex h-12 w-12 items-center justify-center rounded-full", TONE_PRIMARY)}
                     aria-hidden="true"
                   >
                     <Icon className="h-5 w-5" />
                   </span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-foreground leading-tight truncate">{item.title}</p>
-                    {item.subtitle && (
-                      <p className="text-xs sm:text-sm text-muted-foreground truncate">{item.subtitle}</p>
-                    )}
-                  </div>
+                  <p className="text-base sm:text-lg font-semibold text-foreground leading-tight">
+                    {item.title}
+                  </p>
+                  {item.subtitle && (
+                    <p className="text-xs sm:text-sm text-muted-foreground">{item.subtitle}</p>
+                  )}
                 </div>
 
-                {/* Linha 2: valores financeiros — centralizados */}
-                <div className="grid gap-4 sm:grid-cols-2 sm:items-start text-center">
-                  <div className="sm:border-r sm:border-border/40 sm:pr-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      {totalLabelText}
-                    </p>
-                    <p className={cn("mt-1 text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
-                      {fmt(item.total)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Forma de pagamento
-                    </p>
-                    <ul className="mt-1 space-y-1 text-sm text-foreground/90">
-                      {rows.map((r, i) => (
-                        <li key={i} className="leading-snug">
-                          <span className="text-muted-foreground">{r.label}: </span>
-                          <span className="font-semibold text-foreground">{r.value}</span>
-                        </li>
-                      ))}
-                    </ul>
+                {/* Bloco 2 — Valor total (protagonista) */}
+                <div className="mt-6 sm:mt-7">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    {totalLabelText}
+                  </p>
+                  <p className={cn("mt-2 text-3xl sm:text-4xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                    {fmt(item.total)}
+                  </p>
+                </div>
+
+                {/* Divisor sutil */}
+                <div className="mt-6 sm:mt-7 h-px w-12 bg-border/60" aria-hidden="true" />
+
+                {/* Bloco 3 — Forma de pagamento */}
+                <div className="mt-6 sm:mt-7 w-full">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Forma de pagamento
+                  </p>
+                  <div className="mt-3 space-y-2 text-sm sm:text-base text-foreground/90">
+                    {rows.map((r, i) => (
+                      <p key={i} className="leading-snug">
+                        <span className="text-muted-foreground">{r.label}: </span>
+                        <span className="font-semibold text-foreground">{r.value}</span>
+                      </p>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -298,40 +301,40 @@ export function PublicInvestmentSummary({
       </ul>
 
       {showTotalCard && (
-        <div className="mt-5 sm:mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6">
-          <div className="text-center space-y-2">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground" aria-hidden="true">
-              <Wallet className="h-5 w-5" />
+        <div className="mt-6 sm:mt-8 rounded-2xl border border-primary/30 bg-gradient-to-b from-primary/[0.07] to-primary/[0.03] p-7 sm:p-9 shadow-[0_4px_18px_-6px_rgba(15,23,42,0.12)]">
+          <div className="flex flex-col items-center text-center">
+            <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm" aria-hidden="true">
+              <Wallet className="h-6 w-6" />
             </span>
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-primary/80">
+            <p className="mt-4 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-primary/80">
               Investimento Total da Viagem
             </p>
-            <p className="text-3xl sm:text-4xl font-extrabold tracking-tight text-primary">
+            <p className="mt-3 text-4xl sm:text-5xl font-extrabold tracking-tight text-primary">
               {fmt(totalAll)}
             </p>
             {totalAVista !== null && (
-              <p className="text-sm text-muted-foreground">
+              <p className="mt-3 text-sm text-muted-foreground">
                 À vista com {discountPct}% de desconto:{" "}
                 <span className="font-semibold text-primary">{fmt(totalAVista)}</span>
               </p>
             )}
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 text-center">
-            <div className="rounded-lg bg-white/60 border border-primary/15 px-3 py-2">
+          <div className="mt-7 flex flex-wrap items-stretch justify-center gap-3 sm:gap-4">
+            <div className="flex-1 min-w-[140px] max-w-[220px] rounded-xl bg-white/70 border border-primary/15 px-4 py-3 text-center">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Total de serviços
               </p>
-              <p className="mt-0.5 text-base font-semibold text-foreground">
+              <p className="mt-1 text-base sm:text-lg font-semibold text-foreground">
                 {services.length} serviço{services.length === 1 ? "" : "s"}
               </p>
             </div>
             {groupingMode === "grouped" && (
-              <div className="rounded-lg bg-white/60 border border-primary/15 px-3 py-2">
+              <div className="flex-1 min-w-[140px] max-w-[220px] rounded-xl bg-white/70 border border-primary/15 px-4 py-3 text-center">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Tipos de serviço
                 </p>
-                <p className="mt-0.5 text-base font-semibold text-foreground">
+                <p className="mt-1 text-base sm:text-lg font-semibold text-foreground">
                   {items.length} tipo{items.length === 1 ? "" : "s"}
                 </p>
               </div>
