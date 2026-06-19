@@ -27,31 +27,26 @@ const SERVICE_ICON: Record<ServiceType, typeof Plane> = {
   other: Sparkles,
 };
 
-/** Tons suaves por categoria — apenas decorativos. */
-const SERVICE_TONE: Record<ServiceType, string> = {
-  flight: "bg-sky-50 text-sky-600",
-  hotel: "bg-violet-50 text-violet-600",
-  cruise: "bg-emerald-50 text-emerald-600",
-  attraction: "bg-amber-50 text-amber-600",
-  insurance: "bg-rose-50 text-rose-600",
-  transfer: "bg-indigo-50 text-indigo-600",
-  car_rental: "bg-indigo-50 text-indigo-600",
-  rail_transport: "bg-cyan-50 text-cyan-600",
-  circuit: "bg-teal-50 text-teal-600",
-  other: "bg-muted text-muted-foreground",
-};
+/**
+ * Cor única: tudo herda a cor primária da agência (ou do sistema, quando
+ * a agência não tem cor configurada). Os ícones se distinguem pela forma,
+ * não pela cor.
+ */
+const TONE_PRIMARY = "bg-primary/10 text-primary";
+const VALUE_PRIMARY = "text-primary";
 
-const VALUE_TONE: Record<ServiceType, string> = {
-  flight: "text-sky-600",
-  hotel: "text-violet-600",
-  cruise: "text-emerald-600",
-  attraction: "text-amber-600",
-  insurance: "text-rose-600",
-  transfer: "text-indigo-600",
-  car_rental: "text-indigo-600",
-  rail_transport: "text-cyan-600",
-  circuit: "text-teal-600",
-  other: "text-foreground",
+/** Rótulo natural por tipo: "Total da Passagem Aérea", "Total do Cruzeiro" etc. */
+const GROUP_TOTAL_LABEL: Record<ServiceType, string> = {
+  flight: "Total da Passagem Aérea",
+  hotel: "Total da Hospedagem",
+  cruise: "Total do Cruzeiro",
+  attraction: "Total dos Ingressos",
+  insurance: "Total do Seguro",
+  transfer: "Total do Transfer",
+  car_rental: "Total da Locação",
+  rail_transport: "Total do Transporte",
+  circuit: "Total do Circuito",
+  other: "Total dos Serviços",
 };
 
 export type InvestmentDisplayMode = "investment" | "detailed" | "both";
@@ -243,10 +238,11 @@ export function PublicInvestmentSummary({
       <ul className="space-y-3">
         {items.map((item) => {
           const Icon = SERVICE_ICON[item.type] || Sparkles;
-          const tone = SERVICE_TONE[item.type] || SERVICE_TONE.other;
-          const valueTone = VALUE_TONE[item.type] || VALUE_TONE.other;
           const rows = item.payment.render(item.total);
-          const totalLabelText = groupingMode === "grouped" ? "Total do grupo" : "Total do serviço";
+          const totalLabelText =
+            groupingMode === "grouped"
+              ? (GROUP_TOTAL_LABEL[item.type] || "Total dos Serviços")
+              : "Total do serviço";
 
           return (
             <li
@@ -254,14 +250,14 @@ export function PublicInvestmentSummary({
               className="rounded-xl border border-border/40 bg-card p-4 sm:p-5"
               aria-label={`${item.title}${item.subtitle ? `, ${item.subtitle}` : ""}, ${totalLabelText} ${fmt(item.total)}`}
             >
-              <div className="grid gap-4 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)] sm:items-center">
-                {/* Coluna 1: identidade */}
+              <div className="space-y-4">
+                {/* Linha 1: identidade do serviço (alinhada à esquerda) */}
                 <div className="flex items-center gap-3 min-w-0">
                   <span
-                    className={cn("flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full shrink-0", tone)}
+                    className={cn("flex h-11 w-11 items-center justify-center rounded-full shrink-0", TONE_PRIMARY)}
                     aria-hidden="true"
                   >
-                    <Icon className="h-5 w-5 sm:h-5.5 sm:w-5.5" />
+                    <Icon className="h-5 w-5" />
                   </span>
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground leading-tight truncate">{item.title}</p>
@@ -271,30 +267,29 @@ export function PublicInvestmentSummary({
                   </div>
                 </div>
 
-                {/* Coluna 2: total */}
-                <div className="sm:border-l sm:border-border/40 sm:pl-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    {totalLabelText}
-                  </p>
-                  <p className={cn("mt-0.5 text-lg sm:text-xl font-bold tracking-tight", valueTone)}>
-                    {fmt(item.total)}
-                  </p>
-                </div>
-
-                {/* Coluna 3: forma de pagamento */}
-                <div className="sm:border-l sm:border-border/40 sm:pl-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Forma de pagamento
-                  </p>
-                  <ul className="mt-1 space-y-0.5 text-sm text-foreground/90">
-                    {rows.map((r, i) => (
-                      <li key={i} className="flex items-baseline gap-1.5">
-                        <span className="inline-block h-1 w-1 rounded-full bg-muted-foreground/60" aria-hidden="true" />
-                        <span className="text-muted-foreground">{r.label}:</span>
-                        <span className="font-medium text-foreground">{r.value}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Linha 2: valores financeiros — centralizados */}
+                <div className="grid gap-4 sm:grid-cols-2 sm:items-start text-center">
+                  <div className="sm:border-r sm:border-border/40 sm:pr-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      {totalLabelText}
+                    </p>
+                    <p className={cn("mt-1 text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                      {fmt(item.total)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Forma de pagamento
+                    </p>
+                    <ul className="mt-1 space-y-1 text-sm text-foreground/90">
+                      {rows.map((r, i) => (
+                        <li key={i} className="leading-snug">
+                          <span className="text-muted-foreground">{r.label}: </span>
+                          <span className="font-semibold text-foreground">{r.value}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </li>
@@ -303,32 +298,27 @@ export function PublicInvestmentSummary({
       </ul>
 
       {showTotalCard && (
-        <div className="mt-5 sm:mt-6 rounded-xl border border-emerald-200/70 bg-emerald-50/60 p-4 sm:p-5">
-          <div className="grid gap-3 sm:gap-4 sm:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,1fr))] sm:items-center">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600 text-white shrink-0" aria-hidden="true">
-                <Wallet className="h-5 w-5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.14em] text-emerald-900/80">
-                  Investimento Total da Viagem
-                </p>
-                <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-emerald-700">
-                  {fmt(totalAll)}
-                </p>
-              </div>
-            </div>
-
+        <div className="mt-5 sm:mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6">
+          <div className="text-center space-y-2">
+            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground" aria-hidden="true">
+              <Wallet className="h-5 w-5" />
+            </span>
+            <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-primary/80">
+              Investimento Total da Viagem
+            </p>
+            <p className="text-3xl sm:text-4xl font-extrabold tracking-tight text-primary">
+              {fmt(totalAll)}
+            </p>
             {totalAVista !== null && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  À vista com {discountPct}% de desconto
-                </p>
-                <p className="mt-0.5 text-base sm:text-lg font-bold text-emerald-700">{fmt(totalAVista)}</p>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                À vista com {discountPct}% de desconto:{" "}
+                <span className="font-semibold text-primary">{fmt(totalAVista)}</span>
+              </p>
             )}
+          </div>
 
-            <div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 text-center">
+            <div className="rounded-lg bg-white/60 border border-primary/15 px-3 py-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Total de serviços
               </p>
@@ -336,14 +326,13 @@ export function PublicInvestmentSummary({
                 {services.length} serviço{services.length === 1 ? "" : "s"}
               </p>
             </div>
-
             {groupingMode === "grouped" && (
-              <div>
+              <div className="rounded-lg bg-white/60 border border-primary/15 px-3 py-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Total de grupos
+                  Tipos de serviço
                 </p>
                 <p className="mt-0.5 text-base font-semibold text-foreground">
-                  {items.length} grupo{items.length === 1 ? "" : "s"}
+                  {items.length} tipo{items.length === 1 ? "" : "s"}
                 </p>
               </div>
             )}
