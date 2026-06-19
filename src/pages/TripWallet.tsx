@@ -1186,6 +1186,66 @@ function TripWalletContent() {
             </DialogContent>
           </Dialog>
 
+          {/* Supplier confirmation — shown after Save when no supplier was set */}
+          <AlertDialog
+            open={confirmSupplierOpen}
+            onOpenChange={(o) => { setConfirmSupplierOpen(o); if (!o) setConfirmLinkMode(false); }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {confirmLinkMode ? "Vincular fornecedor" : "Deseja vincular um fornecedor a este serviço?"}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {confirmLinkMode
+                    ? "Busque um fornecedor existente ou digite o nome livremente."
+                    : "Vincular um fornecedor ajuda no controle financeiro, pagamentos, comissões e acompanhamento operacional. Você pode fazer isso agora ou depois, na edição do serviço."}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              {confirmLinkMode && (
+                <div className="py-2">
+                  <SupplierSelector value={pendingSupplier} onChange={setPendingSupplier} />
+                </div>
+              )}
+              <AlertDialogFooter>
+                {confirmLinkMode ? (
+                  <>
+                    <Button variant="outline" onClick={() => setConfirmLinkMode(false)}>Voltar</Button>
+                    <Button
+                      disabled={!pendingSupplier.operator_id && !(pendingSupplier.supplier_name || "").trim()}
+                      onClick={async () => {
+                        const payload = pendingAddPayloadRef.current;
+                        pendingAddPayloadRef.current = null;
+                        setAddSupplier(pendingSupplier);
+                        setConfirmSupplierOpen(false);
+                        setConfirmLinkMode(false);
+                        if (payload) await persistNewService(payload.serviceData, payload.files, pendingSupplier);
+                      }}
+                    >
+                      Salvar com fornecedor
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" onClick={() => setConfirmLinkMode(true)}>
+                      Vincular fornecedor
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        const payload = pendingAddPayloadRef.current;
+                        pendingAddPayloadRef.current = null;
+                        setConfirmSupplierOpen(false);
+                        if (payload) await persistNewService(payload.serviceData, payload.files, { operator_id: null, supplier_name: "" });
+                      }}
+                    >
+                      Agora não
+                    </Button>
+                  </>
+                )}
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           {/* 2. Roteiro dia a dia */}
           <AccordionItem value="itinerary" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
             <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
