@@ -432,9 +432,9 @@ Perguntas canônicas validadas a partir da Base de Conhecimento Mestre.
 
 **Plano ou permissão necessária:** todos.
 
-**Status da resposta:** pronto.
+**Status da resposta:** revisão-necessária.
 
-**Nível de confiança:** confirmado.
+**Nível de confiança:** pendente.
 
 **ID:** `orcamentos-faq-19`
 

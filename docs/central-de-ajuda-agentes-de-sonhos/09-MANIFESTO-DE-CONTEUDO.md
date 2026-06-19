@@ -48,7 +48,7 @@
 | orcamentos-faq-16 | FAQ 16 — Orçamentos | Orçamentos | faq | agente | pronto | confirmado | modulos/orcamentos/faq/00-perguntas-frequentes.md |
 | orcamentos-faq-17 | FAQ 17 — Orçamentos | Orçamentos | faq | agente | pronto | confirmado | modulos/orcamentos/faq/00-perguntas-frequentes.md |
 | orcamentos-faq-18 | FAQ 18 — Orçamentos | Orçamentos | faq | agente | pronto | confirmado | modulos/orcamentos/faq/00-perguntas-frequentes.md |
-| orcamentos-faq-19 | FAQ 19 — Orçamentos | Orçamentos | faq | agente | pronto | confirmado | modulos/orcamentos/faq/00-perguntas-frequentes.md |
+| orcamentos-faq-19 | FAQ 19 — Orçamentos | Orçamentos | faq | agente | revisão-necessária | pendente | modulos/orcamentos/faq/00-perguntas-frequentes.md |
 | orcamentos-faq-20 | FAQ 20 — Orçamentos | Orçamentos | faq | agente | pronto | confirmado | modulos/orcamentos/faq/00-perguntas-frequentes.md |
 | roteiros-visao-geral | Roteiros — Visão geral | Roteiros | visão-geral | agente | pronto | confirmado | modulos/roteiros/00-visao-geral.md |
 | roteiros-primeiros-passos | Roteiros — Primeiros passos | Roteiros | tutorial | agente | pronto | confirmado | modulos/roteiros/01-primeiros-passos.md |

@@ -7,7 +7,7 @@ Status na geração inicial (2026-06-18). Os números refletem o que foi efetiva
 - Módulos principais: 16
 - Módulos secundários: 19
 - Artigos de visão geral + primeiros passos publicados: 70
-- FAQs canônicas validadas (módulos principais): 80 de 320
+- FAQs canônicas validadas (módulos principais): 79 de 320
 - FAQs iniciais em revisão (módulos secundários): 190 de 190
 - Conteúdos prontos para RAG: artigos confirmados + FAQs validadas
 - Conteúdos em construção: tutoriais, problemas comuns e boas práticas por módulo
@@ -19,7 +19,7 @@ Status na geração inicial (2026-06-18). Os números refletem o que foi efetiva
 | CRM e Oportunidades | Principal | 1 | 1 | 20 | Sim | Pronto |
 | Gestão de Clientes | Principal | 1 | 1 | 0 | Não — em construção | Parcial |
 | Operações | Principal | 1 | 1 | 0 | Não — em construção | Parcial |
-| Orçamentos | Principal | 1 | 1 | 20 | Sim | Pronto |
+| Orçamentos | Principal | 1 | 1 | 20 | Sim (19 confirmadas, 1 pendente) | Pronto com pendência pontual |
 | Roteiros | Principal | 1 | 1 | 0 | Não — em construção | Parcial |
 | Carteira Digital | Principal | 1 | 1 | 20 | Sim | Pronto |
 | Financeiro | Principal | 1 | 1 | 20 | Sim | Pronto |
@@ -64,6 +64,7 @@ Status na geração inicial (2026-06-18). Os números refletem o que foi efetiva
 - Os módulos secundários têm 10 perguntas iniciais marcadas como pendente de revisão até validação com o proprietário do produto.
 - Conteúdos com confiança *pendente* não devem ser publicados no chatbot público.
 - Divergências entre documentação e implementação estão registradas em `07-PERGUNTAS-PENDENTES-DE-VALIDACAO.md`.
+- **Orçamentos:** a FAQ `orcamentos-faq-19` (métricas de visualização do orçamento) foi rebaixada para `status: revisão-necessária` e `confianca: pendente`, e está fora do RAG até confirmação do proprietário do produto.
 
 ## Próximos ciclos sugeridos
 

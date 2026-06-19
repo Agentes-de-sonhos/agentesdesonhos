@@ -199,15 +199,21 @@
       "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
     }
   },
-  "versao": "1.2.0",
-  "ultima_atualizacao": "2026-06-18",
-  "total_chunks": 261,
+  "versao": "1.2.1",
+  "ultima_atualizacao": "2026-06-19",
+  "total_chunks": 334,
   "historico": [
     {
       "versao": "1.2.0",
       "data": "2026-06-18",
       "descricao": "Subonda 1B: 74 chunks adicionados (Gestão de Clientes + Operações).",
       "chunks_adicionados": 74
+    },
+    {
+      "versao": "1.2.1",
+      "data": "2026-06-19",
+      "descricao": "Subonda 1C (Orçamentos + Carteira Digital): 74 chunks adicionados e 1 chunk rebaixado/removido (orcamentos-faq-19) — saldo líquido +73.",
+      "chunks_adicionados": 73
     }
   ]
 }
