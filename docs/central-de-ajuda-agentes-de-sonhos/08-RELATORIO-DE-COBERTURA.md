@@ -85,3 +85,9 @@ Status na geração inicial (2026-06-18). Os números refletem o que foi efetiva
 - Comissões e Vendedores: 20 FAQs + 10 tutoriais + 5 problemas + 4 boas práticas (39 chunks). Status: **concluído com pendências pontuais**.
 - Total RAG: 486 (era 408).
 - Pendências: confirmar fórmula exata de despesa automática de comissão de vendedor; confirmar status oficiais de NF e impacto em recebimento; planos aplicáveis (Start/Profissional/Premium) por funcionalidade.
+
+
+## Subonda 1F — 2026-06-19
+- Equipe e Permissões: 20 FAQs + 10 tutoriais + 5 problemas + 5 boas práticas (40 chunks). Status: **concluído com pendências pontuais**.
+- Total RAG: 526 (era 486).
+- Onda 1 encerrada com 10/10 módulos principais documentados.

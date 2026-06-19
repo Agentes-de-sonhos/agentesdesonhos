@@ -13,3 +13,15 @@
 - Suspeita de bug, instabilidade ou indisponibilidade.
 - Dúvidas sobre conta, assinatura, cobrança ou cancelamento.
 - Solicitação explícita do usuário para falar com um humano.
+
+## Tópicos com fallback obrigatório (atualizado na Subonda 1F)
+- Versão pública oficial de Roteiros (V1/V2) não confirmada.
+- Fórmulas financeiras não confirmadas (faturamento previsto, fluxo de caixa, indicadores).
+- Exclusão ou cancelamento com impacto financeiro (vendas, comissões, faturas).
+- Permissões backend vs interface não auditadas (Equipe e Permissões).
+- Dúvidas sobre limites por plano (membros de equipe, cotas de IA).
+- Ações que exigem decisão do titular (excluir membros, alterar plano).
+- Automações não confirmadas.
+- Comportamento de IA sem quota confirmada.
+- Reativação/exclusão de usuários, membros ou vendedores.
+- Status de NF e impacto financeiro.

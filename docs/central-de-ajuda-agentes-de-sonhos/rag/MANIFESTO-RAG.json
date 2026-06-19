@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-19",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "language": "pt-BR",
   "fields": [
     "id",
@@ -197,9 +197,9 @@
       "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
     }
   },
-  "versao": "1.4.0",
+  "versao": "1.5.0",
   "ultima_atualizacao": "2026-06-19",
-  "total_chunks": 486,
+  "total_chunks": 526,
   "historico": [
     {
       "versao": "1.2.0",
@@ -218,6 +218,12 @@
       "data": "2026-06-19",
       "descricao": "Subonda 1E (Vendas + Comissões e Vendedores): chunks adicionados.",
       "chunks_adicionados": 78
+    },
+    {
+      "versao": "1.5.0",
+      "data": "2026-06-19",
+      "descricao": "Subonda 1F (Equipe e Permissões): 40 chunks adicionados. Encerramento documental da Onda 1.",
+      "chunks_adicionados": 40
     }
   ]
 }

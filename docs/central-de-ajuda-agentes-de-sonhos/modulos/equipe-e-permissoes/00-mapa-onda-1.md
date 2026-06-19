@@ -4,47 +4,26 @@ titulo: Equipe e Permissões — Mapa de produção (Onda 1)
 modulo: Equipe e Permissões
 tipo: índice-de-producao
 publico: [equipe-documentacao]
-status: bloqueado-por-informação
-confianca: pendente
-ultima-revisao: 2026-06-18
-fonte-interna: docs/base-conhecimento-agentes-de-sonhos/modulos/equipe-e-permissoes.md
+status: pronto
+confianca: confirmado
+ultima-revisao: 2026-06-19
+fonte-interna: src/components/team/* | src/lib/teamPermissions.ts | src/contexts/TeamSessionContext.tsx | src/hooks/useTeamMembers.ts | supabase/functions/team-*
 ---
 
 # Equipe e Permissões — Mapa de produção da Onda 1
 
-> Este arquivo lista a estrutura planejada para a Onda 1. O conteúdo profundo deste módulo será produzido em rodada dedicada após CRM (módulo de referência).
-
 ## Status
-**Bloqueado por informação:** aguardando autorização do proprietário e validação de versões/fluxos atuais antes da escrita definitiva. Nenhum conteúdo inferido foi promovido a RAG.
+**Concluído com pendências pontuais** (Subonda 1F). Documentação principal pronta. Pendem decisões do proprietário sobre limites exatos por plano e disponibilidade de logs de auditoria ao usuário final.
 
-### Atenção
-Diferenças entre bloqueio visual e bloqueio efetivo de dados não devem ser apresentadas como garantia de segurança no conteúdo público sem confirmação técnica.
+## Entregas
+- 20 FAQs canônicas confirmadas (ep-faq-01 a ep-faq-20).
+- 10 tutoriais (ep-tut-01 a ep-tut-10).
+- 5 problemas comuns (ep-prob-01 a ep-prob-05).
+- 5 boas práticas (ep-bp-01 a ep-bp-05).
+- 40 chunks RAG correspondentes adicionados em `rag/BASE-RAG.jsonl`.
 
-## Tutoriais planejados
-- Cadastrar um membro de equipe
-- Definir login e senha do membro
-- Ativar e desativar um membro
-- Configurar permissões por módulo
-- Configurar permissões por etapa do CRM
-- Redefinir acesso do membro
-- Excluir um membro
-- Revisar auditoria disponível
-
-## Problemas comuns planejados
-- Membro não consegue entrar
-- Membro vê módulo que não deveria
-- Membro não vê módulo que deveria
-- Permissão por etapa não está sendo aplicada
-- Reativação não restaurou permissões
-
-## Boas práticas planejadas
-- Revise permissões a cada mudança da equipe
-- Use o princípio do menor privilégio
-- Documente internamente quem é responsável pelo quê
-- Não compartilhe credenciais entre membros
-
-## FAQs novas planejadas
-Meta: 20 FAQs canônicas adicionais com confiança 'confirmado'. Pré-requisito: revisão das FAQs existentes em `./faq/00-perguntas-frequentes.md` para garantir distinção de intenções.
-
-## Perguntas ao proprietário do produto
-Ver `../../07-PERGUNTAS-PENDENTES-DE-VALIDACAO.md` e o relatório da Onda 1.
+## Pendências de produto
+- Quota exata de membros por plano (Start, Profissional, Premium).
+- Permissões financeiras granulares (hoje liberadas em bloco).
+- Permitir o membro redefinir a própria senha sem ação do titular.
+- Exposição de auditoria de equipe ao titular na interface.
