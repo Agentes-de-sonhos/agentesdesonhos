@@ -1486,7 +1486,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
         {/* ─── Agent Signature ─── */}
         {(agentProfile || (quote as any).signature_snapshot) && (
-          <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
+          <section ref={signatureRef} className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="relative p-4 sm:p-12">
               <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-3 sm:mb-7">
