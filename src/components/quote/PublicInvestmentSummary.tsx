@@ -238,8 +238,8 @@ export function PublicInvestmentSummary({
         </p>
       </div>
 
-      {/* MOBILE: nova versão refinada (hierarquia visual + centralização) */}
-      <ul className="space-y-3 sm:space-y-4 list-none p-0 sm:hidden">
+      {/* Cards de serviço — layout unificado conforme referência visual */}
+      <ul className="space-y-4 list-none p-0">
         {items.map((item) => {
           const Icon = SERVICE_ICON[item.type] || Sparkles;
           const rows = item.payment.render(item.total);
@@ -248,155 +248,56 @@ export function PublicInvestmentSummary({
               ? (GROUP_TOTAL_LABEL[item.type] || "Total dos Serviços")
               : "Total do serviço";
 
-          const isParcelado = rows.some(
-            (r) => r.label.includes("x de") || r.label === "Entrada"
-          );
-
           return (
             <li
               key={item.key}
-              className="rounded-2xl border border-border/40 bg-card p-5 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_18px_-6px_rgba(15,23,42,0.12)] transition-shadow"
+              className="rounded-2xl border border-border/40 bg-card p-5 sm:p-6 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.08)] hover:shadow-[0_4px_18px_-6px_rgba(15,23,42,0.12)] transition-shadow"
               aria-label={`${item.title}${item.subtitle ? `, ${item.subtitle}` : ""}, ${totalLabelText} ${fmt(item.total)}`}
             >
-              <div className="flex flex-col items-center text-center">
-                {/* Bloco 1 — Cabeçalho do serviço */}
-                <div className="flex flex-col items-center gap-1.5">
-                  <span
-                    className={cn("flex h-10 w-10 items-center justify-center rounded-full", TONE_PRIMARY)}
-                    aria-hidden="true"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <p className="text-sm font-semibold text-foreground leading-tight">
+              {/* Cabeçalho: ícone + título + pill de contagem (alinhado à esquerda) */}
+              <div className="flex items-center gap-3 min-w-0">
+                <span
+                  className={cn("flex h-11 w-11 items-center justify-center rounded-full shrink-0", TONE_PRIMARY)}
+                  aria-hidden="true"
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
+                  <p className="text-base sm:text-lg font-bold text-foreground leading-tight">
                     {item.title}
                   </p>
                   {item.subtitle && (
-                    <p className="text-[11px] text-muted-foreground">{item.subtitle}</p>
+                    <span className="inline-flex items-center rounded-md border border-border/60 bg-background px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      {item.subtitle}
+                    </span>
                   )}
                 </div>
-
-                {isParcelado ? (
-                  <>
-                    {/* Bloco 2 — Forma de pagamento (protagonista) */}
-                    <div className="mt-4 w-full">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        Forma de pagamento
-                      </p>
-                      <div className="mt-2 space-y-1">
-                        {rows.map((r, i) => (
-                          <p key={i} className="leading-snug">
-                            <span className="text-xs text-muted-foreground">{r.label}: </span>
-                            <span className={cn("text-lg font-bold tracking-tight", VALUE_PRIMARY)}>
-                              {r.value}
-                            </span>
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Divisor sutil */}
-                    <div className="mt-4 h-px w-10 bg-border/60" aria-hidden="true" />
-
-                    {/* Bloco 3 — Valor total (secundário) */}
-                    <div className="mt-4">
-                      <p className="text-xs text-muted-foreground">
-                        {totalLabelText}: <span className="font-semibold text-foreground">{fmt(item.total)}</span>
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Bloco 2 — Valor total (protagonista) */}
-                    <div className="mt-4">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        {totalLabelText}
-                      </p>
-                      <p className={cn("mt-1.5 text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
-                        {fmt(item.total)}
-                      </p>
-                    </div>
-
-                    {/* Divisor sutil */}
-                    <div className="mt-4 h-px w-10 bg-border/60" aria-hidden="true" />
-
-                    {/* Bloco 3 — Forma de pagamento */}
-                    <div className="mt-4 w-full">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        Forma de pagamento
-                      </p>
-                      <div className="mt-2 space-y-1 text-xs text-foreground/90">
-                        {rows.map((r, i) => (
-                          <p key={i} className="leading-snug">
-                            <span className="text-muted-foreground">{r.label}: </span>
-                            <span className="font-semibold text-foreground">{r.value}</span>
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
               </div>
-            </li>
-          );
-        })}
-      </ul>
 
-      {/* DESKTOP/TABLET: versão anterior (antes das 15:46) */}
-      <ul className="hidden sm:block space-y-3">
-        {items.map((item) => {
-          const Icon = SERVICE_ICON[item.type] || Sparkles;
-          const rows = item.payment.render(item.total);
-          const totalLabelText =
-            groupingMode === "grouped"
-              ? (GROUP_TOTAL_LABEL[item.type] || "Total dos Serviços")
-              : "Total do serviço";
-
-          return (
-            <li
-              key={item.key}
-              className="rounded-xl border border-border/40 bg-card p-4 sm:p-5"
-              aria-label={`${item.title}${item.subtitle ? `, ${item.subtitle}` : ""}, ${totalLabelText} ${fmt(item.total)}`}
-            >
-              <div className="space-y-4">
-                {/* Linha 1: identidade do serviço (alinhada à esquerda) */}
-                <div className="flex items-center gap-3 min-w-0">
-                  <span
-                    className={cn("flex h-11 w-11 items-center justify-center rounded-full shrink-0", TONE_PRIMARY)}
-                    aria-hidden="true"
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-foreground leading-tight truncate">{item.title}</p>
-                    {item.subtitle && (
-                      <p className="text-xs sm:text-sm text-muted-foreground truncate">{item.subtitle}</p>
-                    )}
+              {/* Grid financeiro: Forma de pagamento | Total (divisor central) */}
+              <div className="mt-5 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 sm:items-center text-center">
+                <div className="sm:border-r sm:border-border/50 sm:pr-6">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Forma de pagamento
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {rows.map((r, i) => (
+                      <p key={i} className="leading-snug">
+                        <span className="text-sm text-muted-foreground">{r.label}: </span>
+                        <span className={cn("text-lg sm:text-xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                          {r.value}
+                        </span>
+                      </p>
+                    ))}
                   </div>
                 </div>
-
-                {/* Linha 2: valores financeiros — centralizados */}
-                <div className="grid gap-4 sm:grid-cols-2 sm:items-start text-center">
-                  <div className="sm:border-r sm:border-border/40 sm:pr-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      {totalLabelText}
-                    </p>
-                    <p className={cn("mt-1 text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
-                      {fmt(item.total)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Forma de pagamento
-                    </p>
-                    <ul className="mt-1 space-y-1 text-sm text-foreground/90">
-                      {rows.map((r, i) => (
-                        <li key={i} className="leading-snug">
-                          <span className="text-muted-foreground">{r.label}: </span>
-                          <span className="font-semibold text-foreground">{r.value}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="border-t border-border/50 pt-4 sm:border-t-0 sm:pt-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    {totalLabelText}
+                  </p>
+                  <p className={cn("mt-2 text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                    {fmt(item.total)}
+                  </p>
                 </div>
               </div>
             </li>
