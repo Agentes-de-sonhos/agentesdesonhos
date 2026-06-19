@@ -293,6 +293,12 @@ export function PublicInvestmentSummary({
                 </div>
               </div>
 
+              {/* Informação complementar de passageiros */}
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/80">
+                <Users className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden="true" />
+                <span>{passengerLabel}</span>
+              </div>
+
               {/* Grid financeiro: Forma de pagamento | Total (divisor central) */}
               <div className="mt-5 grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 sm:items-center text-center">
                 <div className="sm:border-r sm:border-border/50 sm:pr-6">
