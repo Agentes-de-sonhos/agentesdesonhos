@@ -1,6 +1,6 @@
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
