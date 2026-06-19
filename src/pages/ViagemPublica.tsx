@@ -2287,45 +2287,46 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
           return (
             <div className="space-y-5">
-              {navGrid}
-              {walletSettings.show_calendar && (
-                <div className="flex items-center gap-3 my-1">
-                  <div className="h-px flex-1 bg-border/60" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Seu calendário
-                  </span>
-                  <div className="h-px flex-1 bg-border/60" />
-                </div>
-              )}
-              {(() => {
-                const showLeft = walletSettings.show_calendar;
-                const showNextService = walletSettings.show_next_service && services.length > 0;
-                const showNextActivity = walletSettings.show_next_activity && itineraryActivities.length > 0;
-                const showRight = showNextService || showNextActivity;
-                if (!showLeft && !showRight) return null;
-                const useGrid = showLeft && showRight;
-                return (
-                  <div className={cn("flex flex-col gap-5", useGrid && "md:grid md:grid-cols-2")}>
-                    {showLeft && (
+              {/* ── Desktop: 2 colunas (Calendário + Navegação) | Mobile: coluna única ── */}
+              <div className="flex flex-col gap-5 md:grid md:grid-cols-2">
+
+                {/* COLUNA ESQUERDA no desktop = Calendário + Next cards */}
+                {/* order-2 no mobile (aparece depois da nav), order-1 no desktop */}
+                <div className="space-y-5 order-2 md:order-1">
+                  {walletSettings.show_calendar && (
+                    <div className="flex items-center gap-3 my-1">
+                      <div className="h-px flex-1 bg-border/60" />
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        Seu calendário
+                      </span>
+                      <div className="h-px flex-1 bg-border/60" />
+                    </div>
+                  )}
+                  {(() => {
+                    const showCal = walletSettings.show_calendar;
+                    const showNextService = walletSettings.show_next_service && services.length > 0;
+                    const showNextActivity = walletSettings.show_next_activity && itineraryActivities.length > 0;
+                    if (!showCal && !showNextService && !showNextActivity) return null;
+                    return (
                       <div className="flex flex-col gap-5">
-                        <TripLocalClockBar
-                          destination={tripData.destination}
-                          startDate={startDate}
-                          endDate={endDate}
-                          compact
-                        />
-                        <TripCalendarWithWeather
-                          destination={tripData.destination}
-                          startDate={startDate}
-                          endDate={endDate}
-                          itineraryDates={itineraryDates}
-                          onDayClick={handleCalendarDayClick}
-                          compact
-                        />
-                      </div>
-                    )}
-                    {showRight && (
-                      <div className="flex flex-col gap-5">
+                        {showCal && (
+                          <div className="flex flex-col gap-5">
+                            <TripLocalClockBar
+                              destination={tripData.destination}
+                              startDate={startDate}
+                              endDate={endDate}
+                              compact
+                            />
+                            <TripCalendarWithWeather
+                              destination={tripData.destination}
+                              startDate={startDate}
+                              endDate={endDate}
+                              itineraryDates={itineraryDates}
+                              onDayClick={handleCalendarDayClick}
+                              compact
+                            />
+                          </div>
+                        )}
                         {showNextService && (
                           <NextAppointmentCard
                             services={services}
@@ -2348,10 +2349,19 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           />
                         )}
                       </div>
-                    )}
-                  </div>
-                );
-              })()}
+                    );
+                  })()}
+                </div>
+
+                {/* COLUNA DIREITA no desktop = Navegação Rápida */}
+                {/* order-1 no mobile (aparece primeiro), order-2 no desktop */}
+                <div className="space-y-5 order-1 md:order-2">
+                  {navGrid}
+                </div>
+
+              </div>
+
+              {/* ── Abaixo das colunas: Ferramentas de apoio (largura total) ── */}
               {walletSettings.show_support_tools && (services.length > 0 || itineraryActivities.length > 0) && (
                 <div className="flex items-center gap-3 my-1">
                   <div className="h-px flex-1 bg-border/60" />
@@ -2362,13 +2372,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </div>
               )}
               {walletSettings.show_support_tools && (
-              <TripConvertersWrapper
-                destination={tripData.destination}
-                startDate={startDate}
-                endDate={endDate}
-                tripId={tripData.id}
-                services={services}
-              />
+                <TripConvertersWrapper
+                  destination={tripData.destination}
+                  startDate={startDate}
+                  endDate={endDate}
+                  tripId={tripData.id}
+                  services={services}
+                />
               )}
             </div>
           );
