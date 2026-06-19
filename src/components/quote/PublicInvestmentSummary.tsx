@@ -314,7 +314,7 @@ export function PublicInvestmentSummary({
             <p className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
               Investimento Total da Viagem
             </p>
-            <p className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            <p className="mt-2 text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               {fmt(totalAll)}
             </p>
             {totalAVista !== null && (
