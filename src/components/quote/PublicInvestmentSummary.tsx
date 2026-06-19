@@ -189,11 +189,12 @@ export function PublicInvestmentSummary({
         const payment = buildPaymentInfo(s, globalPayment, useServicePayment);
         const sd: any = (s as any).service_data || {};
         const subtitle = sd.supplier || sd.airline || sd.hotel_name || sd.cruise_line || sd.operator || undefined;
+        const serviceName = (s as any).service_name || s.option_label || sd.hotel_name || sd.airline || SERVICE_TYPE_LABELS[s.service_type];
         return {
           key: s.id,
           type: s.service_type,
-          title: s.service_name || SERVICE_TYPE_LABELS[s.service_type],
-          subtitle: subtitle && subtitle !== s.service_name ? subtitle : undefined,
+          title: serviceName,
+          subtitle: subtitle && subtitle !== serviceName ? subtitle : undefined,
           total: Number(s.amount) || 0,
           payment,
           count: 1,
