@@ -1443,11 +1443,50 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         {(agentProfile || (quote as any).signature_snapshot) && (
           <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-            <div className="relative p-8 sm:p-12">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-7">
+            <div className="relative p-5 sm:p-12">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-5 sm:mb-7">
                 {signatureContact.title || "Sua consultora de viagens"}
               </p>
-              <div className="flex flex-col items-center text-center gap-5">
+              {/* MOBILE: 2 colunas no topo (avatar | nome+agência+cidade), frase abaixo, sem botão.
+                  DESKTOP/TABLET: layout centralizado tradicional com botão. */}
+              <div className="sm:hidden">
+                <div className="flex items-center gap-4">
+                  <div className="relative shrink-0">
+                    {signatureContact.photo_url ? (
+                      <img
+                        src={signatureContact.photo_url}
+                        alt={signatureContact.name}
+                        className="h-20 w-20 rounded-full object-cover ring-2 ring-white shadow-md"
+                      />
+                    ) : (
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-2xl font-bold ring-2 ring-white shadow-md">
+                        {signatureContact.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <p className="text-base font-bold tracking-tight text-foreground truncate">{signatureContact.name}</p>
+                    {agentProfile?.agency_name && (
+                      <BrandText as="p" className="text-xs text-muted-foreground font-medium truncate">
+                        {agentProfile.agency_name}
+                      </BrandText>
+                    )}
+                    {agentProfile && (agentProfile.city || agentProfile.state) && (
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-foreground/75 leading-relaxed italic text-center">
+                  “{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}”
+                </p>
+                {signatureContact.email && (
+                  <p className="mt-2 text-[11px] text-muted-foreground text-center">{signatureContact.email}</p>
+                )}
+              </div>
+
+              <div className="hidden sm:flex flex-col items-center text-center gap-5">
                 <div className="relative">
                   <span className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-md" aria-hidden />
                   {signatureContact.photo_url ? (
@@ -1482,13 +1521,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group relative mt-1 inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-3.5 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.03]"
+                    className="mt-1 inline-flex items-center justify-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-3.5 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.03]"
                   >
-                    <span className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-full">
-                      <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent blur-sm animate-shimmer-slide" />
-                    </span>
-                    <WhatsAppIcon className="relative h-5 w-5" />
-                    <span className="relative">Conversar no WhatsApp</span>
+                    <WhatsAppIcon className="h-5 w-5" />
+                    <span>Conversar no WhatsApp</span>
                   </a>
                 )}
               </div>
@@ -1497,28 +1533,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         )}
       </main>
 
-      {/* ─── Sticky mobile conversion bar ─── */}
-      {whatsappUrl && (
-        <div
-          className="fixed bottom-0 inset-x-0 z-30 sm:hidden border-t border-border/30 bg-white/95 backdrop-blur-xl shadow-[0_-10px_32px_-14px_rgba(0,0,0,0.18)]"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
-          <div className="px-4 py-3 max-w-4xl mx-auto">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Quero reservar esta viagem"
-              className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-[#25D366] text-white px-5 py-3.5 font-semibold text-sm shadow-[0_8px_24px_-6px_rgba(37,211,102,0.55)] active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#25D366] min-h-12"
-            >
-              <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
-                <span className="absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-sm animate-shimmer-slide" />
-              </span>
-              <WhatsAppIcon className="relative h-4 w-4" /> <span className="relative">Quero reservar</span>
-            </a>
-          </div>
-        </div>
-      )}
+      {/* ─── Floating mobile CTA — aparece ao rolar para baixo, recolhido no topo ─── */}
+      {whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
     </div>
   );
 }
