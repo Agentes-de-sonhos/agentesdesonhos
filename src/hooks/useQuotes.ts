@@ -47,6 +47,7 @@ export function useQuotes() {
           currency_mode: formData.currency_mode || "fixed",
           exchange_rate: formData.exchange_rate ?? null,
           opportunity_id: formData.opportunity_id || null,
+          investment_summary_layout: "grouped",
         } as any)
         .select()
         .single();
@@ -126,6 +127,7 @@ export function useQuotes() {
           show_destination_intro: (source as any).show_destination_intro ?? true,
           destination_intro_text: (source as any).destination_intro_text ?? null,
           destination_intro_images: (source as any).destination_intro_images ?? [],
+          investment_summary_layout: (source as any).investment_summary_layout ?? "grouped",
         } as any)
         .select()
         .single();
