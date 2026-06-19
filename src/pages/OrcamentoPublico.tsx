@@ -1471,14 +1471,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
         {/* ─── Agent Signature ─── */}
         {(agentProfile || (quote as any).signature_snapshot) && (
-          <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
-            <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-            <div className="relative p-4 sm:p-12">
-              <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-3 sm:mb-7">
+          <section className="relative overflow-hidden rounded-3xl border border-border/30 bg-white shadow-[0_12px_40px_-16px_rgba(0,0,0,0.12)] animate-fade-up">
+            <div className="relative px-5 sm:px-7 py-6 sm:py-7">
+              <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-3 sm:mb-7 sm:hidden">
                 {signatureContact.title || "Sua consultora de viagens"}
               </p>
-              {/* MOBILE: 2 colunas no topo (avatar | nome+agência+cidade), frase abaixo, sem botão.
-                  DESKTOP/TABLET: layout centralizado tradicional com botão. */}
+              {/* MOBILE: 2 colunas no topo (avatar | nome+agência+cidade), frase abaixo, sem botão. */}
               <div className="sm:hidden">
                 <div className="flex items-center gap-3">
                   <div className="relative shrink-0">
@@ -1509,54 +1507,78 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   </div>
                 </div>
                 <p className="mt-3 text-xs text-foreground/70 leading-snug italic text-center max-w-xs mx-auto">
-                  “{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}”
+                  "{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}"
                 </p>
                 {signatureContact.email && (
                   <p className="mt-1.5 text-[11px] text-muted-foreground text-center">{signatureContact.email}</p>
                 )}
               </div>
 
-              <div className="hidden sm:flex flex-col items-center text-center gap-5">
-                <div className="relative">
-                  <span className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-md" aria-hidden />
+              {/* DESKTOP/TABLET: 3-col horizontal layout */}
+              <div className="hidden sm:flex items-center gap-5 lg:gap-7">
+                {/* ── Col 1: Logo / Avatar ── */}
+                <div className="shrink-0 flex items-center justify-center">
                   {signatureContact.photo_url ? (
                     <img
                       src={signatureContact.photo_url}
                       alt={signatureContact.name}
-                      className="relative h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
+                      className="h-[72px] w-[72px] lg:h-20 lg:w-20 rounded-full object-cover shadow-[0_4px_14px_-4px_rgba(0,0,0,0.18)] ring-[3px] ring-white"
                     />
                   ) : (
-                    <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-4xl font-bold ring-4 ring-white shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]">
+                    <div className="h-[72px] w-[72px] lg:h-20 lg:w-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-[0_4px_14px_-4px_rgba(0,0,0,0.18)] ring-[3px] ring-white">
                       {signatureContact.name.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
-                <div className="space-y-1.5 max-w-md">
-                  <p className="text-2xl font-bold tracking-tight text-foreground">{signatureContact.name}</p>
+
+                {/* Divider */}
+                <div className="w-px h-14 lg:h-16 bg-border/40 shrink-0" />
+
+                {/* ── Col 2: Info ── */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
+                    {signatureContact.title || "Sua consultora de viagens"}
+                  </p>
+                  <p className="text-xl lg:text-[1.65rem] font-bold tracking-tight text-foreground leading-tight">
+                    {signatureContact.name}
+                  </p>
                   {agentProfile?.agency_name && (
-                    <BrandText as="p" className="text-sm text-muted-foreground font-medium">{agentProfile.agency_name}</BrandText>
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Briefcase className="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                      <BrandText as="span" className="font-medium">{agentProfile.agency_name}</BrandText>
+                    </div>
                   )}
                   {agentProfile && (agentProfile.city || agentProfile.state) && (
-                    <p className="text-xs text-muted-foreground">{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</p>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
+                      <MapPin className="h-3.5 w-3.5 text-primary/60 shrink-0" />
+                      <span>{[agentProfile.city, agentProfile.state].filter(Boolean).join(", ")}</span>
+                    </div>
                   )}
-                  <p className="pt-3 text-[15px] text-foreground/75 leading-relaxed italic">
-                    “{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}”
+                  <p className="pt-1 text-sm text-foreground/60 leading-snug italic">
+                    "{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}"
                   </p>
                   {signatureContact.email && (
-                    <p className="pt-2 text-xs text-muted-foreground">{signatureContact.email}</p>
+                    <p className="text-[11px] text-muted-foreground">{signatureContact.email}</p>
                   )}
                 </div>
-                {whatsappUrl && (
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 inline-flex items-center justify-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-3.5 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.03]"
-                  >
-                    <WhatsAppIcon className="h-5 w-5" />
-                    <span>Conversar no WhatsApp</span>
-                  </a>
-                )}
+
+                {/* Divider */}
+                <div className="w-px h-14 lg:h-16 bg-border/40 shrink-0" />
+
+                {/* ── Col 3: CTA ── */}
+                <div className="shrink-0 flex items-center">
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 lg:px-7 py-3 font-semibold text-sm shadow-[0_6px_20px_-6px_rgba(37,211,102,0.45)] transition-all hover:scale-[1.03] whitespace-nowrap"
+                    >
+                      <WhatsAppIcon className="h-5 w-5 shrink-0" />
+                      <span>Conversar no WhatsApp</span>
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </section>
