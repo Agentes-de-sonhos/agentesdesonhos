@@ -67,8 +67,8 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false }: Ser
     return (
       <>
         <div
-          className="rounded-xl overflow-hidden border border-border/30 cursor-pointer bg-muted"
-          onClick={() => openLightbox(0)}
+          className={`rounded-xl overflow-hidden border border-border/30 bg-muted ${!disableExpand ? "cursor-pointer" : ""}`}
+          onClick={!disableExpand ? () => openLightbox(0) : undefined}
         >
           <img
             src={images[0]}
@@ -77,7 +77,7 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false }: Ser
             loading="lazy"
           />
         </div>
-        {lightboxOpen && (
+        {!disableExpand && lightboxOpen && (
           <Lightbox
             images={images}
             index={lightboxIndex}
