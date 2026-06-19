@@ -1206,6 +1206,17 @@ export default function GerarOrcamento() {
                           </div>
                         );
                       })()}
+                      {quote && effectiveLayout === "consolidated" && (
+                        <div className="sm:col-span-2">
+                          <QuoteEntryExtrasManager
+                            quoteId={quote.id}
+                            totalServicos={quote.total_amount}
+                            baseEntryValue={quote.total_amount * (entryPercentage / 100)}
+                            installmentsCount={installmentsCount}
+                            initial={(quote as any).entry_extras || []}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
 
