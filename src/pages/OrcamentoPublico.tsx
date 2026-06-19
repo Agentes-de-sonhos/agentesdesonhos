@@ -1193,7 +1193,27 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         <PublicQuoteDocuments quoteId={quote.id} />
 
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
-        {(quote as any).show_investment_section !== false && (() => {
+        {useNewInvestmentLayout && (
+          <PublicInvestmentSummary
+            quote={quote}
+            services={quote.services || []}
+            displayMode={
+              (quote as any).show_investment_section !== false ? "both" : "detailed"
+            }
+            groupingMode={investmentLayout === "ungrouped" ? "ungrouped" : "grouped"}
+            globalPayment={{
+              mode: ((quote as any).payment_display_mode || "full_payment") as any,
+              installments: (quote as any).installments_count || 10,
+              entryPercentage: (quote as any).entry_percentage || 0,
+              fullPaymentDiscountPercent: (quote as any).full_payment_discount_percent || 0,
+              methodLabel: ((quote as any).payment_method_label as string | null) || null,
+            }}
+            useServicePayment={useServicePayment}
+            paymentTerms={paymentTerms}
+          />
+        )}
+
+        {!useNewInvestmentLayout && (quote as any).show_investment_section !== false && (() => {
           const mode = (quote as any).payment_display_mode || "full_payment";
           const installments = (quote as any).installments_count || 10;
           const entryPct = (quote as any).entry_percentage || 0;
