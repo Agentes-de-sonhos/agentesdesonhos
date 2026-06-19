@@ -9,7 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2 } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -153,7 +154,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 });
 
 
-function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
@@ -398,7 +399,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FlightAutoImport onImport={handleFlightImport} />
+        {!hideInlineImport && <FlightAutoImport onImport={handleFlightImport} />}
 
         <CollapsibleFormSection title="✈️ Informações Principais">
         {imageSlot}
