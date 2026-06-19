@@ -209,6 +209,8 @@ export interface Activity {
   photoUrl?: string | null;
   /** Voucher / document URLs attached to this activity. */
   documentUrls?: string[];
+  /** Direct Google Maps URL for the activity's location. */
+  mapsUrl?: string | null;
   /**
    * Optional link to a `trip_services` row when this V2 itinerary is bound
    * to a Carteira Digital trip. Lets the public day-by-day render a
