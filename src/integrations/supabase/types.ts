@@ -7725,6 +7725,7 @@ export type Database = {
           full_payment_discount_percent: number | null
           id: string
           installments_count: number | null
+          investment_summary_layout: string | null
           opportunity_id: string | null
           payment_display_mode: string
           payment_method_label: string | null
@@ -7764,6 +7765,7 @@ export type Database = {
           full_payment_discount_percent?: number | null
           id?: string
           installments_count?: number | null
+          investment_summary_layout?: string | null
           opportunity_id?: string | null
           payment_display_mode?: string
           payment_method_label?: string | null
@@ -7803,6 +7805,7 @@ export type Database = {
           full_payment_discount_percent?: number | null
           id?: string
           installments_count?: number | null
+          investment_summary_layout?: string | null
           opportunity_id?: string | null
           payment_display_mode?: string
           payment_method_label?: string | null
