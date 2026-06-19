@@ -130,3 +130,84 @@ Adicionados 73 chunks confirmados nesta subonda (37 em Carteira Digital + 36 em 
 - `carteira-digital-bp-01` a `carteira-digital-bp-04` (4 boas práticas)
 
 Total atual no BASE-RAG.jsonl: **334 chunks**.
+
+
+## Subonda 1D (2026-06-19)
+
+### Roteiros
+- rt-faq-21 — Onde encontro o módulo Roteiros?
+- rt-faq-22 — Como crio um roteiro novo?
+- rt-faq-23 — Preciso vincular um cliente ao roteiro?
+- rt-faq-24 — Como adiciono dias ao roteiro?
+- rt-faq-25 — Como adiciono atividades em um dia?
+- rt-faq-26 — Quais períodos do dia o roteiro suporta?
+- rt-faq-27 — Como uso a IA para gerar o roteiro?
+- rt-faq-28 — Posso editar o roteiro gerado pela IA?
+- rt-faq-29 — Como reordeno as atividades de um dia?
+- rt-faq-30 — Como adiciono uma foto à atividade?
+- rt-faq-31 — Existe limite diário de roteiros gerados por IA?
+- rt-faq-32 — Como compartilho um roteiro com o cliente?
+- rt-faq-33 — Qual é o domínio do link público do roteiro?
+- rt-faq-34 — Como vinculo o roteiro a uma Carteira Digital?
+- rt-faq-35 — Onde encontro os modelos de roteiro?
+- rt-faq-36 — Como clono um modelo de roteiro?
+- rt-faq-37 — Posso editar a descrição do destino do roteiro?
+- rt-faq-38 — Como gero o PDF do roteiro?
+- rt-faq-39 — O roteiro é salvo automaticamente?
+- rt-faq-40 — Quem pode editar um roteiro?
+- rt-tut-01 — Criar um roteiro do zero
+- rt-tut-02 — Gerar um roteiro com IA
+- rt-tut-03 — Adicionar e editar atividades em um dia
+- rt-tut-04 — Reordenar atividades dentro de um período
+- rt-tut-05 — Adicionar foto a uma atividade
+- rt-tut-06 — Usar um modelo de roteiro como ponto de partida
+- rt-tut-07 — Compartilhar o link público do roteiro
+- rt-tut-08 — Vincular o roteiro a uma Carteira Digital
+- rt-prob-01 — Limite diário de roteiros por IA atingido
+- rt-prob-02 — Erro ao carregar roteiro existente
+- rt-prob-03 — Falha ao vincular roteiro à Carteira Digital
+- rt-prob-04 — Erro ao gerar PDF do roteiro
+- rt-prob-05 — Alterações no roteiro não aparecem no link público
+- rt-bp-01 — Sempre revise o roteiro gerado por IA antes de enviar
+- rt-bp-02 — Padronize a granularidade das atividades
+- rt-bp-03 — Use imagens com direito de uso
+- rt-bp-04 — Confirme a versão pública do roteiro antes de orientar o cliente
+
+### Financeiro — Visão Geral
+- fin-faq-21 — Onde fica o módulo Financeiro?
+- fin-faq-22 — Quais abas existem dentro do Financeiro?
+- fin-faq-23 — Qual é a diferença entre Visão Geral e as outras abas?
+- fin-faq-24 — Como filtro por mês no dashboard?
+- fin-faq-25 — O que é uma venda no Financeiro?
+- fin-faq-26 — O que é uma entrada?
+- fin-faq-27 — O que é uma despesa?
+- fin-faq-28 — O que é uma fatura?
+- fin-faq-29 — Como é calculado o lucro líquido?
+- fin-faq-30 — Comissão de vendedor é despesa?
+- fin-faq-31 — Como exportar a Visão Geral?
+- fin-faq-32 — Por que o dashboard está vazio?
+- fin-faq-33 — Os números do dashboard incluem orçamentos não fechados?
+- fin-faq-34 — Quais perfis acessam o Financeiro?
+- fin-faq-35 — Como vejo a relação entre uma venda e a comissão gerada?
+- fin-faq-36 — Onde acompanho contas a receber?
+- fin-faq-37 — Onde acompanho contas a pagar?
+- fin-faq-38 — Posso excluir um registro financeiro?
+- fin-faq-39 — O Financeiro funciona em qualquer plano?
+- fin-faq-40 — Como reportar uma divergência no dashboard?
+- fin-tut-01 — Acessar o módulo Financeiro
+- fin-tut-02 — Filtrar o dashboard por período
+- fin-tut-03 — Interpretar os principais indicadores
+- fin-tut-04 — Navegar entre as abas do Financeiro
+- fin-tut-05 — Exportar uma tabela do Financeiro
+- fin-tut-06 — Localizar uma venda específica
+- fin-tut-07 — Conferir a comissão gerada por uma venda
+- fin-tut-08 — Acompanhar o mês usando a Visão Geral
+- fin-prob-01 — Dashboard aparece zerado
+- fin-prob-02 — Números divergentes entre Visão Geral e Vendas
+- fin-prob-03 — Exportação gera arquivo vazio
+- fin-prob-04 — Comissão aparece sem venda relacionada
+- fin-prob-05 — Não consigo acessar o Financeiro
+- fin-bp-01 — Padronize o uso de períodos
+- fin-bp-02 — Concilie comissões e despesas mensalmente
+- fin-bp-03 — Evite excluir registros sem checar dependências
+- fin-bp-04 — Use a Visão Geral como leitura executiva

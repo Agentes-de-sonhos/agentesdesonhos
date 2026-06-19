@@ -342,3 +342,7 @@
 | dashboard-fornecedor-faq-08 | FAQ 8 — Painel do Fornecedor | Painel do Fornecedor | faq | agente | revisão-necessária | pendente | modulos/dashboard-fornecedor/faq/00-perguntas-frequentes.md |
 | dashboard-fornecedor-faq-09 | FAQ 9 — Painel do Fornecedor | Painel do Fornecedor | faq | agente | revisão-necessária | pendente | modulos/dashboard-fornecedor/faq/00-perguntas-frequentes.md |
 | dashboard-fornecedor-faq-10 | FAQ 10 — Painel do Fornecedor | Painel do Fornecedor | faq | agente | revisão-necessária | pendente | modulos/dashboard-fornecedor/faq/00-perguntas-frequentes.md |
+
+## Subonda 1D (2026-06-19)
+- Roteiros: rt-faq-21..40, rt-tut-01..08, rt-prob-01..05, rt-bp-01..04 — todos `status: pronto`, `confianca: confirmado`.
+- Financeiro — Visão Geral: fin-faq-21..40, fin-tut-01..08, fin-prob-01..05, fin-bp-01..04 — todos `status: pronto`, `confianca: confirmado`.

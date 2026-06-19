@@ -72,3 +72,9 @@ Status na geração inicial (2026-06-18). Os números refletem o que foi efetiva
 2. Redigir tutoriais passo a passo das tarefas mais frequentes nos módulos principais.
 3. Validar e elevar para confiança *confirmado* as FAQs dos módulos secundários.
 4. Produzir artigos de problemas comuns e boas práticas.
+
+## Subonda 1D — 2026-06-19
+- Roteiros: 20 FAQs + 8 tutoriais + 5 problemas + 4 boas práticas (37 chunks).
+- Financeiro — Visão Geral: 20 FAQs + 8 tutoriais + 5 problemas + 4 boas práticas (37 chunks).
+- Total RAG: 408 (era 334).
+- Pendências: versão pública oficial do roteiro (V1/V2); fórmulas detalhadas de indicadores; quota IA por plano.
