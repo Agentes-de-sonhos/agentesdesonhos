@@ -433,6 +433,11 @@ function TripWalletContent() {
   const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
   // Supplier (tour_operators) link for the ADD flow
   const [addSupplier, setAddSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
+  // Supplier confirmation flow (asked AFTER first save when nothing was provided)
+  const [confirmSupplierOpen, setConfirmSupplierOpen] = useState(false);
+  const [confirmLinkMode, setConfirmLinkMode] = useState(false);
+  const [pendingSupplier, setPendingSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
+  const pendingAddPayloadRef = useRef<{ serviceData: any; files?: File[] } | null>(null);
   // Hotel place id for EDIT flow (mirrors DB and is updated when user picks new prediction)
   const [editPlaceId, setEditPlaceId] = useState<string | null>(null);
   // Supplier (tour_operators) link for the EDIT flow
