@@ -22,6 +22,7 @@ import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
+import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
