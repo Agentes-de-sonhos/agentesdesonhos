@@ -99,6 +99,7 @@ export function useItineraries() {
             isApproved: a.is_approved,
             photoUrl: (a as any).photo_url ?? null,
             documentUrls: (a as any).document_urls ?? [],
+            mapsUrl: (a as any).maps_url ?? null,
             linkedTripServiceId: (a as any).linked_trip_service_id ?? null,
           })),
         };
@@ -370,6 +371,7 @@ export function useItineraries() {
         period: "manha" | "tarde" | "noite";
         day_id: string;
         linked_trip_service_id: string | null;
+        maps_url: string | null;
       }>;
     }) => {
       const { error } = await supabase

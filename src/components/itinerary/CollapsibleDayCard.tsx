@@ -187,9 +187,21 @@ export function CollapsibleDayCard({
 
                         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-muted-foreground/90 pt-0.5">
                           {activity.location && (
-                            <span className="inline-flex items-center gap-1">
-                              <MapPin className="h-3 w-3" /> {activity.location}
-                            </span>
+                            (activity as any).mapsUrl ? (
+                              <a
+                                href={(activity as any).mapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
+                                title="Abrir no Google Maps"
+                              >
+                                <MapPin className="h-3 w-3" /> {activity.location}
+                              </a>
+                            ) : (
+                              <span className="inline-flex items-center gap-1">
+                                <MapPin className="h-3 w-3" /> {activity.location}
+                              </span>
+                            )
                           )}
                           {activity.estimatedDuration && (
                             <span className="inline-flex items-center gap-1">
@@ -204,19 +216,6 @@ export function CollapsibleDayCard({
                         </div>
 
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-0.5">
-                          {(activity as any).mapsUrl && (
-                            <a
-                              href={(activity as any).mapsUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
-                            >
-                              <MapPin className="h-3 w-3" />
-                              Ver no mapa
-                              <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                          )}
-
                           {(() => {
                             const linkedId = (activity as any).linkedTripServiceId as string | null | undefined;
                             if (!linkedId || !servicesById) return null;

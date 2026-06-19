@@ -4428,6 +4428,7 @@ export type Database = {
           is_approved: boolean
           linked_trip_service_id: string | null
           location: string | null
+          maps_url: string | null
           order_index: number
           period: string
           photo_url: string | null
@@ -4445,6 +4446,7 @@ export type Database = {
           is_approved?: boolean
           linked_trip_service_id?: string | null
           location?: string | null
+          maps_url?: string | null
           order_index?: number
           period: string
           photo_url?: string | null
@@ -4462,6 +4464,7 @@ export type Database = {
           is_approved?: boolean
           linked_trip_service_id?: string | null
           location?: string | null
+          maps_url?: string | null
           order_index?: number
           period?: string
           photo_url?: string | null
