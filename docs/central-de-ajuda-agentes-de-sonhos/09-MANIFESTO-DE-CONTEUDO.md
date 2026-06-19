@@ -346,3 +346,7 @@
 ## Subonda 1D (2026-06-19)
 - Roteiros: rt-faq-21..40, rt-tut-01..08, rt-prob-01..05, rt-bp-01..04 — todos `status: pronto`, `confianca: confirmado`.
 - Financeiro — Visão Geral: fin-faq-21..40, fin-tut-01..08, fin-prob-01..05, fin-bp-01..04 — todos `status: pronto`, `confianca: confirmado`.
+
+## Subonda 1E (2026-06-19)
+- Vendas: vd-faq-01..20, vd-tut-01..10, vd-prob-01..05, vd-bp-01..04 — todos `status: pronto`, `confianca: confirmado`.
+- Comissões e Vendedores: cv-faq-01..20, cv-tut-01..10, cv-prob-01..05, cv-bp-01..04 — todos `status: pronto`, `confianca: confirmado`.

@@ -211,3 +211,90 @@ Total atual no BASE-RAG.jsonl: **334 chunks**.
 - fin-bp-02 — Concilie comissões e despesas mensalmente
 - fin-bp-03 — Evite excluir registros sem checar dependências
 - fin-bp-04 — Use a Visão Geral como leitura executiva
+
+
+## Subonda 1E (2026-06-19)
+
+### Vendas
+- vd-faq-01 — Onde fica o módulo Vendas?
+- vd-faq-02 — Como inicio uma nova venda?
+- vd-faq-03 — O cliente é obrigatório ao registrar uma venda?
+- vd-faq-04 — Posso criar uma venda a partir de uma oportunidade do CRM?
+- vd-faq-05 — Qual a diferença entre orçamento, oportunidade e venda?
+- vd-faq-06 — Como adiciono um produto ou serviço à venda?
+- vd-faq-07 — Posso registrar mais de um produto na mesma venda?
+- vd-faq-08 — Como vinculo um vendedor à venda?
+- vd-faq-09 — Vendedor é obrigatório?
+- vd-faq-10 — Como configuro a comissão da agência por produto?
+- vd-faq-11 — O que são taxas não comissionáveis?
+- vd-faq-12 — Como defino a regra de pagamento de um produto?
+- vd-faq-13 — Posso usar uma data manual de recebimento da comissão?
+- vd-faq-14 — Como salvo uma venda em rascunho?
+- vd-faq-15 — Como edito uma venda já registrada?
+- vd-faq-16 — Como excluo uma venda?
+- vd-faq-17 — O que acontece com a comissão se eu alterar o valor da venda?
+- vd-faq-18 — Como filtro as vendas por mês?
+- vd-faq-19 — Como exporto a lista de vendas?
+- vd-faq-20 — Quais perfis podem registrar vendas?
+- vd-tut-01 — Registrar uma venda do zero
+- vd-tut-02 — Importar uma venda a partir de uma oportunidade do CRM
+- vd-tut-03 — Adicionar vários produtos à mesma venda
+- vd-tut-04 — Definir comissão por percentual ou valor fixo
+- vd-tut-05 — Vincular um vendedor e ajustar a comissão de vendedor
+- vd-tut-06 — Editar uma venda existente
+- vd-tut-07 — Excluir uma venda com segurança
+- vd-tut-08 — Filtrar vendas por mês
+- vd-tut-09 — Exportar vendas em XLSX ou PDF
+- vd-tut-10 — Conferir a venda antes de salvar
+- vd-prob-01 — A venda não é salva ao clicar em Salvar
+- vd-prob-02 — O cliente desejado não aparece no seletor
+- vd-prob-03 — O fornecedor não aparece no seletor de produtos
+- vd-prob-04 — O valor total da venda não corresponde à soma dos produtos
+- vd-prob-05 — A comissão do vendedor não virou despesa
+- vd-bp-01 — Sempre registre a venda somente após a confirmação comercial
+- vd-bp-02 — Detalhe cada produto da venda separadamente
+- vd-bp-03 — Separe sempre as taxas não comissionáveis
+- vd-bp-04 — Revise vínculos antes de excluir uma venda
+
+### Comissões e Vendedores
+- cv-faq-01 — Onde cadastro um vendedor?
+- cv-faq-02 — Vendedor precisa ter login na plataforma?
+- cv-faq-03 — Qual a diferença entre vendedor e usuário da equipe?
+- cv-faq-04 — Como defino a comissão padrão de um vendedor?
+- cv-faq-05 — Posso alterar a comissão de um vendedor a qualquer momento?
+- cv-faq-06 — Como vinculo um vendedor a uma venda?
+- cv-faq-07 — Posso desativar um vendedor?
+- cv-faq-08 — Vendedor inativo continua aparecendo nas vendas antigas?
+- cv-faq-09 — O que é comissão da agência?
+- cv-faq-10 — O que é comissão de vendedor?
+- cv-faq-11 — Comissão da agência e comissão do vendedor são a mesma coisa?
+- cv-faq-12 — Onde acompanho as comissões a receber?
+- cv-faq-13 — Quais subabas existem dentro de Comissões?
+- cv-faq-14 — Como funciona a data esperada da comissão?
+- cv-faq-15 — O que significa comissão atrasada?
+- cv-faq-16 — Como marco uma comissão como recebida?
+- cv-faq-17 — Comissão exige nota fiscal?
+- cv-faq-18 — O que é o Ranking de Fornecedores?
+- cv-faq-19 — Como filtro comissões por vendedor ou por fornecedor?
+- cv-faq-20 — Quem pode editar vendedores e comissões?
+- cv-tut-01 — Cadastrar um vendedor
+- cv-tut-02 — Editar o percentual padrão de um vendedor
+- cv-tut-03 — Desativar um vendedor
+- cv-tut-04 — Vincular um vendedor a uma venda nova
+- cv-tut-05 — Consultar a Central de Comissões
+- cv-tut-06 — Filtrar comissões por mês
+- cv-tut-07 — Acompanhar comissões atrasadas
+- cv-tut-08 — Acompanhar notas fiscais relacionadas a comissões
+- cv-tut-09 — Consultar o ranking de fornecedores
+- cv-tut-10 — Conferir comissão de vendedor após registrar a venda
+- cv-prob-01 — O vendedor não aparece no seletor de Nova Venda
+- cv-prob-02 — A comissão da agência está com valor diferente do esperado
+- cv-prob-03 — A comissão do vendedor não virou despesa
+- cv-prob-04 — Comissão aparece como atrasada mesmo após o recebimento
+- cv-prob-05 — Não consigo editar um vendedor
+- cv-bp-01 — Cadastre todos os vendedores antes de iniciar a operação do mês
+- cv-bp-02 — Padronize o percentual padrão por perfil de vendedor
+- cv-bp-03 — Acompanhe comissões atrasadas semanalmente
+- cv-bp-04 — Concilie comissão da agência e comissão de vendedor mensalmente
+
+Total atual no BASE-RAG.jsonl: **486 chunks**.
