@@ -108,3 +108,22 @@ Adicionados 74 chunks confirmados.
 - `operacoes-bp-02` — Use checklists padrão (boas-praticas)
 - `operacoes-bp-03` — Prazos claros nas tarefas (boas-praticas)
 - `operacoes-bp-04` — Separe operacional do financeiro (boas-praticas)
+
+
+## Subonda 1C — Orçamentos e Carteira Digital (2026-06-19)
+
+Adicionados 74 chunks confirmados (37 por módulo).
+
+### Orçamentos
+- `orcamentos-faq-21` a `orcamentos-faq-40` (20 novas FAQs)
+- `orcamentos-tut-01` a `orcamentos-tut-08` (8 tutoriais)
+- `orcamentos-prob-01` a `orcamentos-prob-05` (5 problemas comuns)
+- `orcamentos-bp-01` a `orcamentos-bp-04` (4 boas práticas)
+
+### Carteira Digital
+- `carteira-digital-faq-21` a `carteira-digital-faq-40` (20 novas FAQs)
+- `carteira-digital-tut-01` a `carteira-digital-tut-08` (8 tutoriais)
+- `carteira-digital-prob-01` a `carteira-digital-prob-05` (5 problemas comuns)
+- `carteira-digital-bp-01` a `carteira-digital-bp-04` (4 boas práticas)
+
+Total atual no BASE-RAG.jsonl: **335 chunks**.

@@ -4,9 +4,9 @@ titulo: Orçamentos — Mapa de produção (Onda 1)
 modulo: Orçamentos
 tipo: índice-de-producao
 publico: [equipe-documentacao]
-status: bloqueado-por-informação
+status: parcialmente-concluído
 confianca: pendente
-ultima-revisao: 2026-06-18
+ultima-revisao: 2026-06-19
 fonte-interna: docs/base-conhecimento-agentes-de-sonhos/modulos/orcamentos.md
 ---
 
