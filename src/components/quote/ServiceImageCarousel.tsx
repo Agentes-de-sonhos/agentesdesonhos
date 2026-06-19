@@ -5,9 +5,10 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 interface ServiceImageCarouselProps {
   images: string[];
   alt: string;
+  disableExpand?: boolean;
 }
 
-export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps) {
+export function ServiceImageCarousel({ images, alt, disableExpand = false }: ServiceImageCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
     dragFree: true,
