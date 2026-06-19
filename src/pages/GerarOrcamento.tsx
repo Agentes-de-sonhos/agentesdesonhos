@@ -374,6 +374,27 @@ export default function GerarOrcamento() {
     await supabase.from("quotes").update({ use_service_payment: checked } as any).eq("id", quote.id);
   };
 
+  const handleSetInvestmentSummaryLayout = async (
+    value: "legacy" | "grouped" | "ungrouped"
+  ) => {
+    setInvestmentSummaryLayout(value);
+    if (!quote) return;
+    const { error } = await supabase
+      .from("quotes")
+      .update({ investment_summary_layout: value } as any)
+      .eq("id", quote.id);
+    if (error) {
+      toast({ title: "Erro ao salvar apresentação", description: error.message, variant: "destructive" });
+      return;
+    }
+    // Keep payment snapshot ref in sync so the debounced autosave doesn't overwrite
+    try {
+      const prev = paymentSnapshotRef.current ? JSON.parse(paymentSnapshotRef.current) : {};
+      paymentSnapshotRef.current = JSON.stringify({ ...prev, investment_summary_layout: value });
+    } catch { /* ignore */ }
+    showAutoSavedFeedback();
+  };
+
   const handleServicePaymentChange = async (serviceId: string, config: ServicePaymentConfig) => {
     setServicePaymentConfigs((prev) => ({ ...prev, [serviceId]: config }));
     await supabase.from("quote_services").update({
@@ -1195,7 +1216,7 @@ export default function GerarOrcamento() {
                             <button
                               key={opt.value}
                               type="button"
-                              onClick={() => setInvestmentSummaryLayout(opt.value)}
+                              onClick={() => handleSetInvestmentSummaryLayout(opt.value)}
                               className={cn(
                                 "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
                                 active
