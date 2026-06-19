@@ -295,7 +295,7 @@ export function PublicInvestmentSummary({
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     {totalLabelText}
                   </p>
-                  <p className={cn("mt-2 text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                  <p className={cn("mt-2 text-xl sm:text-2xl font-normal tracking-tight", VALUE_PRIMARY)}>
                     {fmt(item.total)}
                   </p>
                 </div>
