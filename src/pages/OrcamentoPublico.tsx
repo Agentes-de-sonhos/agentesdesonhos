@@ -1166,7 +1166,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-10 sm:pb-14 space-y-8 sm:space-y-10">
+      <main className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-24 sm:pb-14 space-y-8 sm:space-y-10">
         {/* ─── Smart Trip Highlights ─── */}
         <section className="-mt-32 sm:-mt-40 relative z-10 animate-fade-up">
           <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] border border-border/40 p-7 sm:p-9 transition-shadow duration-500 hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.3)]">
