@@ -9,7 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2 } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -153,7 +154,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 });
 
 
-function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
@@ -398,7 +399,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FlightAutoImport onImport={handleFlightImport} />
+        {!hideInlineImport && <FlightAutoImport onImport={handleFlightImport} />}
 
         <CollapsibleFormSection title="✈️ Informações Principais">
         {imageSlot}
@@ -5017,7 +5018,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
   const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot };
   const placesProps = { placeId, onPlaceIdChange, googlePhotoSlot };
   switch (serviceType) {
-    case "flight": return <FlightForm {...props} />;
+    case "flight": return <FlightEntry {...props} />;
     case "hotel": return <HotelForm {...props} {...placesProps} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} />;
     case "transfer": return <TransferForm {...props} {...placesProps} />;
@@ -5028,4 +5029,183 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "other": return <OtherForm {...props} />;
     default: return null;
   }
+}
+
+/* ───────── Flight entry: chooser → AI import (modal) or step-by-step manual form ─────────
+   Mirrors the Orçamento (Quote) flight entry pattern. Editing existing services skips the
+   chooser and opens the form directly (no regression). */
+
+function FlightModeChooserTrip({ onChoose }: { onChoose: (mode: "import" | "manual") => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="text-center space-y-1">
+        <h3 className="text-lg font-semibold">Como você prefere preencher a passagem aérea?</h3>
+        <p className="text-sm text-muted-foreground">
+          Escolha o modo que for mais confortável agora. Você pode trocar a qualquer momento.
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => onChoose("import")}
+          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">Importar com IA</span>
+          </div>
+          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
+          <p className="text-sm text-muted-foreground">
+            A IA identifica as informações da passagem aérea e preenche os campos automaticamente.
+          </p>
+        </button>
+        <button
+          type="button"
+          onClick={() => onChoose("manual")}
+          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Plane className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold text-muted-foreground">Preencher passo a passo</span>
+          </div>
+          <p className="font-semibold mb-1">Responder em etapas</p>
+          <p className="text-sm text-muted-foreground">
+            Responda passo a passo, pule o que ainda não souber e complete depois.
+          </p>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Convert FlightAutoImport result → FlightForm `defaultValues` shape.
+ *  Mirrors the logic inside FlightForm.handleFlightImport but as a pure mapper
+ *  so we can seed the form when the user chooses the IA flow from the chooser. */
+function mapFlightImportToDefaults(importData: any) {
+  const incoming: any[] = Array.isArray(importData?.segments) && importData.segments.length > 0
+    ? importData.segments
+    : [importData];
+
+  const toSeg = (data: any, idx: number, total: number): FlightSegmentInput => {
+    const seg: FlightSegmentInput = emptySegment();
+    if (data.airline) seg.airline = resolveAirlineDisplay(data.airline);
+    if (data.flight_number) seg.flight_number = data.flight_number;
+    if (data.origin_airport) seg.origin_airport = data.origin_airport;
+    if (data.origin_city) seg.origin_city = data.origin_city;
+    if (data.destination_airport) seg.destination_airport = data.destination_airport;
+    if (data.destination_city) seg.destination_city = data.destination_city;
+    if (data.flight_date) seg.flight_date = data.flight_date;
+    if (data.departure_time) {
+      const t = data.departure_time;
+      seg.departure_time = t.includes("T")
+        ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        : t;
+      if (t.includes("T")) seg.flight_date = t.split("T")[0];
+    }
+    if (data.arrival_time) {
+      const t = data.arrival_time;
+      seg.arrival_time = t.includes("T")
+        ? new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        : t;
+    }
+    if (total > 1) {
+      seg.segment_type = idx === 0 ? 'ida' : idx === total - 1 ? 'volta' : 'conexao';
+    }
+    return seg;
+  };
+
+  const segments = incoming.map((s, i) => toSeg(s, i, incoming.length));
+  const firstIn = incoming[0];
+  const lastIn = incoming[incoming.length - 1];
+
+  // Baggage friendly text
+  let checked_baggage = "";
+  let carry_on = "";
+  if (importData?.checked_baggage === true) checked_baggage = "Inclui bagagem despachada";
+  else if (importData?.checked_baggage === false) checked_baggage = "Não inclui bagagem despachada";
+  if (importData?.carry_on === true) carry_on = "Bagagem de mão inclusa";
+  else if (importData?.carry_on === false) carry_on = "Sem bagagem de mão";
+
+  // Boarding notes summary
+  const summaryParts: string[] = [];
+  if (importData?.auto_summary) summaryParts.push(importData.auto_summary);
+  if (typeof importData?.total_price === "number") {
+    const cur = importData.currency || "";
+    summaryParts.push(`Valor total: ${cur} ${importData.total_price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+  }
+  if (typeof importData?.boarding_tax === "number") {
+    summaryParts.push(`Taxa de embarque: ${importData.boarding_tax.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+  }
+  if (typeof importData?.exchange_rate === "number") summaryParts.push(`Câmbio: ${importData.exchange_rate}`);
+  if (importData?.fare_notes) summaryParts.push(`Tarifa: ${importData.fare_notes}`);
+  if (importData?.additional_cities?.length) summaryParts.push(`Outras cidades: ${importData.additional_cities.join(", ")}`);
+
+  return {
+    main_airline: importData?.airlines
+      || (firstIn?.airline ? resolveAirlineDisplay(firstIn.airline) : ""),
+    origin_city: importData?.origin_city || firstIn?.origin_city || "",
+    destination_city: importData?.destination_city || lastIn?.destination_city || "",
+    trip_type: importData?.trip_type || (segments.length > 1 ? "multi_trechos" : "ida"),
+    flight_status: "confirmado",
+    checkin_status: "pendente",
+    locator_code: "",
+    carry_on,
+    checked_baggage,
+    extra_baggage: "",
+    baggage_rules: "",
+    baggage_notes: importData?.baggage_notes || "",
+    checkin_url: "",
+    checkin_open_date: "",
+    checkin_notes: "",
+    recommended_arrival: "",
+    boarding_terminal: "",
+    required_documents: "",
+    immigration_rules: "",
+    boarding_notes: summaryParts.join("\n"),
+    segments,
+    passengers: [],
+  };
+}
+
+function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
+  const isEditing = !!props.defaultValues;
+  const [mode, setMode] = useState<"chooser" | "import" | "manual">(isEditing ? "manual" : "chooser");
+  const [importedDefaults, setImportedDefaults] = useState<any | null>(null);
+
+  if (mode === "chooser") {
+    return <FlightModeChooserTrip onChoose={(m) => setMode(m)} />;
+  }
+
+  if (mode === "import") {
+    return (
+      <>
+        {/* Keep the chooser visible behind so closing the dialog returns to it */}
+        <FlightModeChooserTrip onChoose={(m) => setMode(m)} />
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] sm:max-h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Importar passagem aérea com IA</DialogTitle>
+              <DialogDescription>
+                Envie um PDF, imagem ou cole o texto. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <FlightAutoImport
+                onImport={(data) => {
+                  setImportedDefaults(mapFlightImportToDefaults(data));
+                  setMode("manual");
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  // manual
+  const merged = importedDefaults
+    ? { ...props, defaultValues: { ...(props.defaultValues || {}), ...importedDefaults } }
+    : props;
+  return <FlightForm {...merged} hideInlineImport />;
 }
