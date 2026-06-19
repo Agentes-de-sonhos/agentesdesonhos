@@ -63,6 +63,7 @@ import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings"
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles, Wallet } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
+import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
@@ -1205,6 +1206,17 @@ export default function GerarOrcamento() {
                           </div>
                         );
                       })()}
+                      {quote && effectiveLayout === "consolidated" && (
+                        <div className="sm:col-span-2">
+                          <QuoteEntryExtrasManager
+                            quoteId={quote.id}
+                            totalServicos={quote.total_amount}
+                            baseEntryValue={quote.total_amount * (entryPercentage / 100)}
+                            installmentsCount={installmentsCount}
+                            initial={(quote as any).entry_extras || []}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
 

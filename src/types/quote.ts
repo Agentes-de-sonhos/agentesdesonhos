@@ -17,6 +17,7 @@ export interface Quote {
   created_at: string;
   updated_at: string;
   services?: QuoteService[];
+  entry_extras?: import("@/lib/quoteEntryExtras").QuoteEntryExtra[];
 }
 
 export interface QuoteService {
