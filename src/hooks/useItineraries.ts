@@ -27,6 +27,7 @@ export function useItineraries() {
     destinationIntroText: (data as any).destination_intro_text ?? null,
     destinationIntroImages: (data as any).destination_intro_images ?? [],
     showDestinationIntro: (data as any).show_destination_intro ?? true,
+    headline: (data as any).headline ?? null,
     passengers: ((data as any).passengers ?? []).map((p: any) => ({
       name: p?.name ?? "",
       age: p?.age ?? null,
@@ -502,6 +503,9 @@ export function useItineraries() {
         destination_intro_images: string[];
         cover_image_url: string | null;
         show_destination_intro: boolean;
+        headline: string | null;
+        start_date: string;
+        end_date: string;
       }>;
     }) => {
       const { error } = await supabase
@@ -510,6 +514,81 @@ export function useItineraries() {
         .eq("id", itineraryId);
 
       if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+    },
+  });
+
+  const adjustItineraryDates = useMutation({
+    mutationFn: async ({
+      itineraryId,
+      startDate,
+      endDate,
+    }: {
+      itineraryId: string;
+      startDate: Date;
+      endDate: Date;
+    }) => {
+      const startStr = format(startDate, "yyyy-MM-dd");
+      const endStr = format(endDate, "yyyy-MM-dd");
+      const newDayCount = differenceInDays(endDate, startDate) + 1;
+      if (newDayCount < 1) throw new Error("A data final precisa ser igual ou posterior à inicial.");
+
+      // Update itinerary dates
+      const { error: updErr } = await supabase
+        .from("itineraries")
+        .update({ start_date: startStr, end_date: endStr })
+        .eq("id", itineraryId);
+      if (updErr) throw updErr;
+
+      // Load existing days
+      const { data: existingDays, error: daysErr } = await supabase
+        .from("itinerary_days")
+        .select("id, day_number, date")
+        .eq("itinerary_id", itineraryId)
+        .order("day_number", { ascending: true });
+      if (daysErr) throw daysErr;
+
+      const existing = existingDays || [];
+
+      // Shift dates for kept days (up to newDayCount)
+      const keptCount = Math.min(existing.length, newDayCount);
+      for (let i = 0; i < keptCount; i++) {
+        const newDate = format(addDays(startDate, i), "yyyy-MM-dd");
+        const day = existing[i];
+        if (day.date !== newDate || day.day_number !== i + 1) {
+          const { error } = await supabase
+            .from("itinerary_days")
+            .update({ date: newDate, day_number: i + 1 })
+            .eq("id", day.id);
+          if (error) throw error;
+        }
+      }
+
+      // Remove extra days (cascade deletes activities)
+      if (existing.length > newDayCount) {
+        const toDelete = existing.slice(newDayCount).map((d) => d.id);
+        const { error } = await supabase
+          .from("itinerary_days")
+          .delete()
+          .in("id", toDelete);
+        if (error) throw error;
+      }
+
+      // Add new empty days if needed
+      if (existing.length < newDayCount) {
+        const toInsert = [];
+        for (let i = existing.length; i < newDayCount; i++) {
+          toInsert.push({
+            itinerary_id: itineraryId,
+            day_number: i + 1,
+            date: format(addDays(startDate, i), "yyyy-MM-dd"),
+          });
+        }
+        const { error } = await supabase.from("itinerary_days").insert(toInsert);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["itineraries"] });
@@ -545,6 +624,7 @@ export function useItineraries() {
     reorderActivities,
     updateItineraryStatus,
     updateItineraryDetails,
+    adjustItineraryDates,
     deleteItinerary,
   };
 }

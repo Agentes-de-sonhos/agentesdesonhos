@@ -181,6 +181,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         destinationIntroText: (itineraryData as any).destination_intro_text || null,
         destinationIntroImages: (itineraryData as any).destination_intro_images || [],
         showDestinationIntro: (itineraryData as any).show_destination_intro ?? true,
+        headline: (itineraryData as any).headline ?? null,
         passengers: ((itineraryData as any).passengers || []).map((p: any) => ({
           name: p?.name ?? "",
           age: p?.age ?? null,
@@ -299,7 +300,9 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 {itinerary.destination}
               </h1>
               <p className="mt-1.5 text-[13px] sm:text-base font-light text-white/90 leading-snug max-w-2xl">
-                {itinerary.days.length} {itinerary.days.length === 1 ? "dia" : "dias"} para viver {itinerary.destination} de um jeito único.
+                {itinerary.headline?.trim()
+                  ? itinerary.headline
+                  : `${itinerary.days.length} ${itinerary.days.length === 1 ? "dia" : "dias"} para viver ${itinerary.destination} de um jeito único.`}
               </p>
 
               <div className="mt-3 flex flex-wrap gap-1.5">

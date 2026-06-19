@@ -4333,6 +4333,7 @@ export type Database = {
           destination_intro_images: string[]
           destination_intro_text: string | null
           end_date: string
+          headline: string | null
           id: string
           passengers: Json
           public_access_code: string | null
@@ -4357,6 +4358,7 @@ export type Database = {
           destination_intro_images?: string[]
           destination_intro_text?: string | null
           end_date: string
+          headline?: string | null
           id?: string
           passengers?: Json
           public_access_code?: string | null
@@ -4381,6 +4383,7 @@ export type Database = {
           destination_intro_images?: string[]
           destination_intro_text?: string | null
           end_date?: string
+          headline?: string | null
           id?: string
           passengers?: Json
           public_access_code?: string | null
