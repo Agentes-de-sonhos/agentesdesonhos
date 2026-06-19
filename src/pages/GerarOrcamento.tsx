@@ -1175,6 +1175,52 @@ export default function GerarOrcamento() {
                     />
                   </div>
 
+                  <Separator />
+
+                  {/* Nova seção: como organizar os serviços no resumo financeiro */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Como organizar os serviços no resumo financeiro?</Label>
+                    {currentViewMode === "investment" ? (
+                      <p className="text-xs text-muted-foreground rounded-md border border-dashed border-border bg-muted/30 px-3 py-2">
+                        Esta opção fica disponível quando a apresentação inclui valores detalhados.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {([
+                          { value: "grouped", label: "Agrupar por tipo de serviço — recomendado", description: "Agrupa serviços semelhantes para deixar a proposta mais clara. Serviços só são agrupados quando têm o mesmo tipo e a mesma condição de pagamento." },
+                          { value: "ungrouped", label: "Não agrupar, exibir serviço por serviço", description: "Exibe cada serviço individualmente no resumo financeiro, sem somar serviços do mesmo tipo." },
+                        ] as const).map((opt) => {
+                          const active = (investmentSummaryLayout === "legacy" ? "grouped" : investmentSummaryLayout) === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setInvestmentSummaryLayout(opt.value)}
+                              className={cn(
+                                "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
+                                active
+                                  ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                  : "border-border hover:border-border/80 hover:bg-muted/30"
+                              )}
+                              aria-pressed={active}
+                            >
+                              <div className={cn(
+                                "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                                active ? "border-primary" : "border-muted-foreground/40"
+                              )}>
+                                {active && <div className="h-2 w-2 rounded-full bg-primary" />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{opt.label}</p>
+                                <p className="text-xs text-muted-foreground">{opt.description}</p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
           </div>
           );
         }}
