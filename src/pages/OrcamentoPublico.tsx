@@ -1474,7 +1474,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           <section className="relative overflow-hidden rounded-3xl border border-border/30 bg-white shadow-[0_12px_40px_-16px_rgba(0,0,0,0.12)] animate-fade-up">
             <div className="relative px-5 sm:px-7 py-6 sm:py-7">
               {/* MOBILE: horizontal layout matching reference image */}
-              <div className="sm:hidden flex items-start gap-4">
+              <div className="sm:hidden flex items-center gap-4">
                 {/* Avatar */}
                 <div className="shrink-0">
                   {signatureContact.photo_url ? (
