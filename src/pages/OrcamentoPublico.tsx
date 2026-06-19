@@ -767,7 +767,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
  * (> 200px) e desaparece suavemente ao voltar ao topo. Ocupa ~metade da
  * largura, alinhado à direita, respeitando safe-area do iOS.
  */
-function MobileFloatingCta({ href }: { href: string }) {
+function MobileFloatingCta({ href, signatureVisible }: { href: string; signatureVisible?: boolean }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 200);
@@ -775,13 +775,14 @@ function MobileFloatingCta({ href }: { href: string }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  const isReallyVisible = visible && !signatureVisible;
   return (
     <div
       className={`fixed right-3 z-40 sm:hidden transition-all duration-300 ease-out ${
-        visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
+        isReallyVisible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
       }`}
       style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
-      aria-hidden={!visible}
+      aria-hidden={!isReallyVisible}
     >
       <a
         href={href}
