@@ -983,82 +983,89 @@ function TripWalletContent() {
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              {selectedServiceType && !editingService ? (
-                  <div className="space-y-4">
-                    <h3 className="font-medium">{SERVICE_TYPE_LABELS[selectedServiceType]}</h3>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-medium">Fornecedor</label>
-                      <SupplierSelector value={addSupplier} onChange={setAddSupplier} />
-                      <p className="text-xs text-muted-foreground">
-                        Selecione um fornecedor cadastrado ou digite livremente.
-                      </p>
-                    </div>
-                    <PassengerPoolProvider services={trip.services || []}>
-                      <TripServiceForm
-                        serviceType={selectedServiceType}
-                        onSubmit={handleAddService}
-                        onCancel={handleCancelServiceForm}
-                        isLoading={isAddingService || isUpdatingService || isUploading}
-                        placeId={addPlaceId}
-                        onPlaceIdChange={setAddPlaceId}
-                        googlePhotoSlot={
-                          ["hotel","attraction","transfer","car_rental","cruise"].includes(selectedServiceType) ? (
-                            <div className="space-y-2">
-                              {addImageUrls.length > 0 && (
-                                <div className="flex gap-2 overflow-x-auto pb-1">
-                                  {addImageUrls.map((url, i) => (
-                                    <div key={i} className="relative shrink-0">
-                                      <img src={url} alt={`Foto ${i+1}`} className="h-20 w-28 object-cover rounded-md border" />
-                                      <button
-                                        type="button"
-                                        onClick={() => setAddImageUrls(prev => prev.filter((_, idx) => idx !== i))}
-                                        className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs"
-                                        aria-label="Remover foto"
-                                      >×</button>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              <GoogleHotelPhotos
-                                placeId={addPlaceId}
-                                existingUrls={addImageUrls}
-                                loadingLabel={`Buscando fotos do Google...`}
-                                headingLabel="Fotos do Google"
-                                autoShow
-                                onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
-                              />
-                            </div>
-                          ) : null
-                        }
-                      />
-                    </PassengerPoolProvider>
-                  </div>
-                ) : (
-                  <>
-                    <TripServiceCategoryGrid
-                      services={trip.services || []}
-                      onSelect={(type) => setSelectedServiceType(type)}
-                      onImportQuote={() => setShowImportQuote(true)}
-                      onAIImport={() => setShowAIImport(true)}
-                    />
-                    <div className="h-4" />
-                    <TripServiceList
-                      services={trip.services || []}
-                      onDeleteService={deleteService}
-                      onEditService={handleEditService}
-                      onReplaceVoucher={handleReplaceVoucher}
-                      onRemoveVoucher={removeVoucher}
-                      onAddAttachment={handleAddAttachment}
-                      onRemoveAttachment={handleRemoveAttachment}
-                      onUploadServiceImage={handleUploadServiceImage}
-                      onRemoveServiceImage={handleRemoveServiceImage}
-                      groupByType={false}
-                      onReorder={(orderedIds) => reorderServices(orderedIds)}
-                    />
-                  </>
-                )}
+              <TripServiceCategoryGrid
+                services={trip.services || []}
+                onSelect={(type) => setSelectedServiceType(type)}
+                onImportQuote={() => setShowImportQuote(true)}
+                onAIImport={() => setShowAIImport(true)}
+              />
+              <div className="h-4" />
+              <TripServiceList
+                services={trip.services || []}
+                onDeleteService={deleteService}
+                onEditService={handleEditService}
+                onReplaceVoucher={handleReplaceVoucher}
+                onRemoveVoucher={removeVoucher}
+                onAddAttachment={handleAddAttachment}
+                onRemoveAttachment={handleRemoveAttachment}
+                onUploadServiceImage={handleUploadServiceImage}
+                onRemoveServiceImage={handleRemoveServiceImage}
+                groupByType={false}
+                onReorder={(orderedIds) => reorderServices(orderedIds)}
+              />
             </AccordionContent>
           </AccordionItem>
+
+          {/* Add Service Dialog */}
+          <Dialog open={!!selectedServiceType && !editingService} onOpenChange={(open) => { if (!open) handleCancelServiceForm(); }}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  Adicionar {selectedServiceType ? SERVICE_TYPE_LABELS[selectedServiceType] : "Serviço"}
+                </DialogTitle>
+              </DialogHeader>
+              {selectedServiceType && !editingService && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Fornecedor</label>
+                    <SupplierSelector value={addSupplier} onChange={setAddSupplier} />
+                    <p className="text-xs text-muted-foreground">
+                      Selecione um fornecedor cadastrado ou digite livremente.
+                    </p>
+                  </div>
+                  <PassengerPoolProvider services={trip.services || []}>
+                    <TripServiceForm
+                      serviceType={selectedServiceType}
+                      onSubmit={handleAddService}
+                      onCancel={handleCancelServiceForm}
+                      isLoading={isAddingService || isUpdatingService || isUploading}
+                      placeId={addPlaceId}
+                      onPlaceIdChange={setAddPlaceId}
+                      googlePhotoSlot={
+                        ["hotel","attraction","transfer","car_rental","cruise"].includes(selectedServiceType) ? (
+                          <div className="space-y-2">
+                            {addImageUrls.length > 0 && (
+                              <div className="flex gap-2 overflow-x-auto pb-1">
+                                {addImageUrls.map((url, i) => (
+                                  <div key={i} className="relative shrink-0">
+                                    <img src={url} alt={`Foto ${i+1}`} className="h-20 w-28 object-cover rounded-md border" />
+                                    <button
+                                      type="button"
+                                      onClick={() => setAddImageUrls(prev => prev.filter((_, idx) => idx !== i))}
+                                      className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center text-xs"
+                                      aria-label="Remover foto"
+                                    >×</button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <GoogleHotelPhotos
+                              placeId={addPlaceId}
+                              existingUrls={addImageUrls}
+                              loadingLabel={`Buscando fotos do Google...`}
+                              headingLabel="Fotos do Google"
+                              autoShow
+                              onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
+                            />
+                          </div>
+                        ) : null
+                      }
+                    />
+                  </PassengerPoolProvider>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* Edit Service Dialog */}
           <Dialog open={!!editingService && !!selectedServiceType} onOpenChange={(open) => { if (!open) handleCancelServiceForm(); }}>
