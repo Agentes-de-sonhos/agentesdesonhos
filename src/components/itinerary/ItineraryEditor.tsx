@@ -302,6 +302,13 @@ export function ItineraryEditor({
 
   const handleSaveEdit = () => {
     if (editingActivity && editingActivity.id) {
+      const trimmedMaps = (editingActivity.mapsUrl || "").trim();
+      const trimmedLocation = (editingActivity.location || "").trim();
+      const mapsToSave =
+        trimmedMaps ||
+        (trimmedLocation
+          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(trimmedLocation)}`
+          : null);
       onUpdateActivity(editingActivity.id, {
         title: editingActivity.title,
         description: editingActivity.description,
@@ -309,6 +316,7 @@ export function ItineraryEditor({
         estimatedDuration: editingActivity.estimatedDuration,
         estimatedCost: editingActivity.estimatedCost,
         linkedTripServiceId: editingActivity.linkedTripServiceId ?? null,
+        mapsUrl: mapsToSave,
       });
       setEditingActivity(null);
     }
