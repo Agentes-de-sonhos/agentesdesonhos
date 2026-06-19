@@ -1760,13 +1760,6 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
               </SelectContent>
             </Select><FormMessage /></FormItem>
         )} />
-        <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-        )} />
-        {renderPaymentSlot(paymentSlot, form.watch("price"))}
-        <FormField control={form.control} name="notes" render={({ field }) => (
-          <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
 
         {/* ─────────── Itinerário do cruzeiro ─────────── */}
         <div className="rounded-lg border bg-card/50 p-4 space-y-3">
@@ -1875,6 +1868,14 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
             </div>
           </div>
         </div>
+
+        <FormField control={form.control} name="price" render={({ field }) => (
+          <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+        )} />
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
+        <FormField control={form.control} name="notes" render={({ field }) => (
+          <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
 
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
