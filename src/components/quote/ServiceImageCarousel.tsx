@@ -67,7 +67,7 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
           <img
             src={images[0]}
             alt={alt}
-            className="w-full aspect-[16/10] object-contain hover:scale-105 transition-transform duration-300"
+            className="w-full aspect-[4/3] sm:aspect-[16/10] object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
         </div>
@@ -99,7 +99,7 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
                 <img
                   src={url}
                   alt={`${alt} ${i + 1}`}
-                  className="w-full aspect-[16/10] object-contain hover:scale-[1.02] transition-transform duration-300"
+                  className="w-full aspect-[4/3] sm:aspect-[16/10] object-cover hover:scale-[1.02] transition-transform duration-300"
                   loading="lazy"
                 />
               </div>
