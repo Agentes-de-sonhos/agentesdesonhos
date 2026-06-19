@@ -1,6 +1,6 @@
 # Resumo Executivo — Subonda 1C
 
-**Status geral:** SUBONDA 1C FINALIZADA.
+**Status geral:** SUBONDA 1C FINALIZADA — concluída com pendências pontuais (apenas decisões de produto).
 **Escopo:** Orçamentos + Carteira Digital.
 **Data:** 2026-06-19.
 
@@ -31,12 +31,12 @@ A Subonda 1C entregou conteúdo aprofundado, confirmado e validado para os módu
 - Novos tutoriais: **16**
 - Novos problemas comuns: **10**
 - Novas boas práticas: **8**
-- Novos chunks RAG confirmados: **74**
-- **Total atual de chunks no `rag/BASE-RAG.jsonl`: 335**
+- Novos chunks RAG confirmados (subonda): **74 adicionados**, **1 pré-existente rebaixado/removido** (`orcamentos-faq-19`) → **+73 líquidos**
+- **Total atual de chunks no `rag/BASE-RAG.jsonl`: 334**
 
 ## 5. Validação do JSON e JSONL
-- `rag/MANIFESTO-RAG.json`: **válido**, atualizado para `version: 1.2.0` e `generated_at: 2026-06-19`.
-- `rag/BASE-RAG.jsonl`: **válido**, 335 linhas, todas parseáveis individualmente.
+- `rag/MANIFESTO-RAG.json`: **válido**, atualizado para `versao: 1.2.1`, `ultima_atualizacao: 2026-06-19`, `total_chunks: 334`.
+- `rag/BASE-RAG.jsonl`: **válido**, 334 linhas, todas parseáveis individualmente.
 
 ## 6. IDs duplicados
 - **0 duplicados** detectados na verificação automática (contra os 261 chunks pré-existentes e entre os 74 novos).
@@ -45,8 +45,15 @@ A Subonda 1C entregou conteúdo aprofundado, confirmado e validado para os módu
 - Nenhum link interno quebrado identificado nos artigos novos. As referências cruzadas (`artigos-relacionados`) usam IDs estáveis publicados nesta mesma subonda ou nas FAQs canônicas anteriores.
 
 ## 8. Conteúdos pendentes excluídos do RAG
-- **0 novos pendentes nesta subonda.** Todos os 74 chunks têm `confidence: confirmado` e `status: pronto`.
-- Conteúdos com qualquer dúvida sobre comportamento real do produto não foram redigidos (ex.: métricas detalhadas de visualização do orçamento, conversão automática orçamento→venda).
+- **0 chunks novos pendentes nesta subonda.** Todos os 74 chunks novos têm `confidence: confirmado` e `status: pronto`.
+- **1 chunk pré-existente foi rebaixado nesta revisão** e ficou fora do RAG: `orcamentos-faq-19` ("Como acompanhar visualizações do orçamento?"), agora com `status: revisão-necessária` e `confianca: pendente`. Isso resolve a contradição apontada entre "0 novos pendentes" e a menção a `orcamentos-faq-19` no relatório original.
+- Conteúdos com qualquer dúvida sobre comportamento real do produto não foram redigidos (ex.: conversão automática orçamento→venda).
+
+### Confirmação sobre `orcamentos-faq-19`
+- ✅ Fora do RAG (`rag/BASE-RAG.jsonl`).
+- ✅ `status: revisão-necessária` no `09-MANIFESTO-DE-CONTEUDO.md` e na FAQ canônica.
+- ✅ `confianca: pendente` no `09-MANIFESTO-DE-CONTEUDO.md` e na FAQ canônica.
+- ✅ **Não contabilizada** como FAQ confirmada (Orçamentos passou a contar 19 FAQs confirmadas, não 20; cobertura em `08-RELATORIO-DE-COBERTURA.md` ajustada para 79/320).
 
 ## 9. Auditoria das versões públicas V1/V2
 
@@ -60,7 +67,7 @@ A Subonda 1C entregou conteúdo aprofundado, confirmado e validado para os módu
 ## 10. Pendências concretas
 1. Decisão oficial sobre V1 × V2 (Orçamento e Carteira).
 2. Mapeamento por plano (Start/Profissional/Premium) — todos os artigos novos estão como `plano: não-confirmado`.
-3. Métricas de visualização do orçamento (artigo `orcamentos-faq-19` permanece marcado como pendente de confirmação no texto).
+3. Métricas de visualização do orçamento — `orcamentos-faq-19` rebaixada para `revisão-necessária / pendente` e fora do RAG até confirmação do proprietário do produto.
 4. Conversão automática de orçamento em venda — `orcamentos-faq-20` descreve fluxo manual atual; eventual automação precisa ser documentada quando existir.
 
 ## 11. Principais arquivos criados
@@ -76,11 +83,14 @@ A Subonda 1C entregou conteúdo aprofundado, confirmado e validado para os módu
 ## 12. Principais arquivos atualizados
 - `modulos/orcamentos/faq/00-perguntas-frequentes.md` (+20 FAQs)
 - `modulos/carteira-digital/faq/00-perguntas-frequentes.md` (+20 FAQs)
-- `modulos/orcamentos/00-mapa-onda-1.md` (status → `parcialmente-concluído`)
-- `modulos/carteira-digital/00-mapa-onda-1.md` (status → `parcialmente-concluído`)
-- `rag/BASE-RAG.jsonl` (+74 chunks; total 335)
+- `modulos/orcamentos/00-mapa-onda-1.md` (status → `concluído com pendências pontuais`)
+- `modulos/carteira-digital/00-mapa-onda-1.md` (status → `concluído com pendências pontuais`)
+- `modulos/orcamentos/faq/00-perguntas-frequentes.md` (`orcamentos-faq-19` → `revisão-necessária / pendente`)
+- `09-MANIFESTO-DE-CONTEUDO.md` (linha de `orcamentos-faq-19` rebaixada)
+- `08-RELATORIO-DE-COBERTURA.md` (79/320 FAQs confirmadas em principais; nota de pendência em Orçamentos)
+- `rag/BASE-RAG.jsonl` (+74 chunks novos, −1 pré-existente removido; total **334**)
 - `rag/INDICE-DE-CHUNKS.md` (nova seção Subonda 1C)
-- `rag/MANIFESTO-RAG.json` (`version: 1.2.0`)
+- `rag/MANIFESTO-RAG.json` (`versao: 1.2.1`, `total_chunks: 334`)
 
 ## 13. Confirmação de segurança
 - Nenhum dado sensível, credencial, segredo, project ID, URL interna ou identificador privado foi incluído nos artigos.
