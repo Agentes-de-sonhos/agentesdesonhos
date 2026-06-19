@@ -924,17 +924,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
 
-  // Premium UX: auto-open services based on count
-  //  • 1 service: open it
-  //  • 2–3 services: open all
-  //  • 4+ services: open only the first
+  // UX: auto-open single service; keep all closed when multiple services
   useEffect(() => {
     if (!servicesInitialized.current && quote?.services?.length) {
       const count = quote.services.length;
       const initial = new Set<number>();
-      if (count <= 3) {
-        for (let i = 0; i < count; i++) initial.add(i);
-      } else {
+      if (count === 1) {
         initial.add(0);
       }
       setOpenServiceIndices(initial);
