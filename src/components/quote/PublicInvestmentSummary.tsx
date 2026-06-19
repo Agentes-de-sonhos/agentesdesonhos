@@ -244,6 +244,10 @@ export function PublicInvestmentSummary({
               ? (GROUP_TOTAL_LABEL[item.type] || "Total dos Serviços")
               : "Total do serviço";
 
+          const isParcelado = rows.some(
+            (r) => r.label.includes("x de") || r.label === "Entrada"
+          );
+
           return (
             <li
               key={item.key}
@@ -267,33 +271,66 @@ export function PublicInvestmentSummary({
                   )}
                 </div>
 
-                {/* Bloco 2 — Valor total (protagonista) */}
-                <div className="mt-6 sm:mt-7">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    {totalLabelText}
-                  </p>
-                  <p className={cn("mt-2 text-3xl sm:text-4xl font-bold tracking-tight", VALUE_PRIMARY)}>
-                    {fmt(item.total)}
-                  </p>
-                </div>
-
-                {/* Divisor sutil */}
-                <div className="mt-6 sm:mt-7 h-px w-12 bg-border/60" aria-hidden="true" />
-
-                {/* Bloco 3 — Forma de pagamento */}
-                <div className="mt-6 sm:mt-7 w-full">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Forma de pagamento
-                  </p>
-                  <div className="mt-3 space-y-2 text-sm sm:text-base text-foreground/90">
-                    {rows.map((r, i) => (
-                      <p key={i} className="leading-snug">
-                        <span className="text-muted-foreground">{r.label}: </span>
-                        <span className="font-semibold text-foreground">{r.value}</span>
+                {isParcelado ? (
+                  <>
+                    {/* Bloco 2 — Forma de pagamento (protagonista) */}
+                    <div className="mt-6 sm:mt-7 w-full">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        Forma de pagamento
                       </p>
-                    ))}
-                  </div>
-                </div>
+                      <div className="mt-3 space-y-2">
+                        {rows.map((r, i) => (
+                          <p key={i} className="leading-snug">
+                            <span className="text-sm sm:text-base text-muted-foreground">{r.label}: </span>
+                            <span className={cn("text-xl sm:text-2xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                              {r.value}
+                            </span>
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Divisor sutil */}
+                    <div className="mt-6 sm:mt-7 h-px w-12 bg-border/60" aria-hidden="true" />
+
+                    {/* Bloco 3 — Valor total (secundário) */}
+                    <div className="mt-6 sm:mt-7">
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        {totalLabelText}: <span className="font-semibold text-foreground">{fmt(item.total)}</span>
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Bloco 2 — Valor total (protagonista) */}
+                    <div className="mt-6 sm:mt-7">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        {totalLabelText}
+                      </p>
+                      <p className={cn("mt-2 text-3xl sm:text-4xl font-bold tracking-tight", VALUE_PRIMARY)}>
+                        {fmt(item.total)}
+                      </p>
+                    </div>
+
+                    {/* Divisor sutil */}
+                    <div className="mt-6 sm:mt-7 h-px w-12 bg-border/60" aria-hidden="true" />
+
+                    {/* Bloco 3 — Forma de pagamento */}
+                    <div className="mt-6 sm:mt-7 w-full">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        Forma de pagamento
+                      </p>
+                      <div className="mt-3 space-y-2 text-sm sm:text-base text-foreground/90">
+                        {rows.map((r, i) => (
+                          <p key={i} className="leading-snug">
+                            <span className="text-muted-foreground">{r.label}: </span>
+                            <span className="font-semibold text-foreground">{r.value}</span>
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </li>
           );
