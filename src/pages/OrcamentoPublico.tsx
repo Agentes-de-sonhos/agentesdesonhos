@@ -959,6 +959,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const validUntil = (quote as any).valid_until as string | null;
   const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
   const useServicePayment = (quote as any).use_service_payment || quote.services?.some((s: any) => s.is_custom_payment === true) || false;
+  const investmentLayout = ((quote as any).investment_summary_layout as "legacy" | "grouped" | "ungrouped" | null) || "legacy";
+  const useNewInvestmentLayout =
+    (investmentLayout === "grouped" || investmentLayout === "ungrouped") &&
+    showDetailedPrices &&
+    (quote.services?.length ?? 0) > 0;
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
