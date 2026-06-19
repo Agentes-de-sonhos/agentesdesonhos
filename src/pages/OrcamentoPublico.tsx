@@ -1478,8 +1478,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         {(agentProfile || (quote as any).signature_snapshot) && (
           <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-            <div className="relative p-4 sm:p-10">
-              <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-3 sm:mb-6">
+            <div className="relative p-4 sm:p-12">
+              <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-3 sm:mb-7">
                 {signatureContact.title || "Sua consultora de viagens"}
               </p>
               {/* MOBILE: 2 colunas no topo (avatar | nome+agência+cidade), frase abaixo, sem botão.
@@ -1521,7 +1521,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 )}
               </div>
 
-              <div className="hidden sm:flex flex-col items-center text-center gap-4">
+              <div className="hidden sm:flex flex-col items-center text-center gap-5">
                 <div className="relative">
                   <span className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-br from-primary/30 to-primary/0 blur-md" aria-hidden />
                   {signatureContact.photo_url ? (
