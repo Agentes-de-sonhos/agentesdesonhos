@@ -22,6 +22,7 @@ import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
+import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -959,6 +960,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const validUntil = (quote as any).valid_until as string | null;
   const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
   const useServicePayment = (quote as any).use_service_payment || quote.services?.some((s: any) => s.is_custom_payment === true) || false;
+  const investmentLayout = ((quote as any).investment_summary_layout as "legacy" | "grouped" | "ungrouped" | null) || "legacy";
+  const useNewInvestmentLayout =
+    (investmentLayout === "grouped" || investmentLayout === "ungrouped") &&
+    showDetailedPrices &&
+    (quote.services?.length ?? 0) > 0;
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -1187,7 +1193,27 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         <PublicQuoteDocuments quoteId={quote.id} />
 
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
-        {(quote as any).show_investment_section !== false && (() => {
+        {useNewInvestmentLayout && (
+          <PublicInvestmentSummary
+            quote={quote}
+            services={quote.services || []}
+            displayMode={
+              (quote as any).show_investment_section !== false ? "both" : "detailed"
+            }
+            groupingMode={investmentLayout === "ungrouped" ? "ungrouped" : "grouped"}
+            globalPayment={{
+              mode: ((quote as any).payment_display_mode || "full_payment") as any,
+              installments: (quote as any).installments_count || 10,
+              entryPercentage: (quote as any).entry_percentage || 0,
+              fullPaymentDiscountPercent: (quote as any).full_payment_discount_percent || 0,
+              methodLabel: ((quote as any).payment_method_label as string | null) || null,
+            }}
+            useServicePayment={useServicePayment}
+            paymentTerms={paymentTerms}
+          />
+        )}
+
+        {!useNewInvestmentLayout && (quote as any).show_investment_section !== false && (() => {
           const mode = (quote as any).payment_display_mode || "full_payment";
           const installments = (quote as any).installments_count || 10;
           const entryPct = (quote as any).entry_percentage || 0;
@@ -1302,7 +1328,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         })()}
 
         {/* ─── Commercial CTA block (Scenario B: no total) ─── */}
-        {(quote as any).show_investment_section === false && !useServicePayment && (
+        {!useNewInvestmentLayout && (quote as any).show_investment_section === false && !useServicePayment && (
           <section className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-b from-white to-muted/30 p-8 sm:p-12 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
@@ -1335,7 +1361,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         )}
 
         {/* ─── Payment terms ─── */}
-        {paymentTerms && (
+        {!useNewInvestmentLayout && paymentTerms && (
           <div className="rounded-2xl border border-border/40 bg-card p-6 sm:p-8 animate-fade-up">
             <div className="flex items-center gap-2 mb-3">
               <CreditCard className="h-4 w-4 text-primary" />
