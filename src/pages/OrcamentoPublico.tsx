@@ -1239,10 +1239,18 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           const discountPct = (quote as any).full_payment_discount_percent || 0;
           const methodLabel = (quote as any).payment_method_label as string | null;
           const total = totalForBar;
+          // Adicionais na entrada (somente no modo consolidado + parcelado com entrada)
+          const entryExtras: QuoteEntryExtra[] =
+            investmentLayout === "consolidated" && mode === "installments_with_entry"
+              ? ((quote as any).entry_extras as QuoteEntryExtra[] | undefined) || []
+              : [];
+          const extrasTotal = computeExtrasTotal(entryExtras, total);
+          const visibleExtras = entryExtras.filter((e) => e.visible_to_client);
+          const investimentoTotal = total + extrasTotal;
 
           const headlineTotal = mode === "full_payment" && discountPct > 0
             ? total * (1 - discountPct / 100)
-            : total;
+            : investimentoTotal;
           const isTotalOnly = mode === "total_only";
 
           let primaryDisplay: React.ReactNode = null;
@@ -1273,8 +1281,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
             );
           } else if (mode === "installments_with_entry") {
-            const entryValue = total * (entryPct / 100);
-            const remainder = total - entryValue;
+            const baseEntry = total * (entryPct / 100);
+            const entryValue = baseEntry + extrasTotal;
+            const remainder = Math.max(0, investimentoTotal - entryValue);
             const installmentValue = remainder / (installments || 1);
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
@@ -1290,9 +1299,24 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
             );
             secondaryDisplay = (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Valor total:</span>
-                <span className="font-medium text-foreground/80">{formatCurrency(total)}</span>
+              <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span>Valor total:</span>
+                  <span className="font-medium text-foreground/80">{formatCurrency(investimentoTotal)}</span>
+                </div>
+                {visibleExtras.length > 0 && (
+                  <ul className="text-xs text-muted-foreground/90 space-y-0.5">
+                    {visibleExtras.map((e) => (
+                      <li key={e.id}>
+                        + {e.description?.trim() || ENTRY_EXTRA_TYPE_LABELS[e.type]}:{" "}
+                        <span className="font-medium text-foreground/80">
+                          {formatCurrency(computeExtraAmount(e, total))}
+                        </span>
+                        {" "}na entrada
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             );
           } else if (!isTotalOnly && discountPct > 0) {
