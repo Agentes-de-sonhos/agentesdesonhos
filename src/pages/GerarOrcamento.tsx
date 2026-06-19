@@ -85,6 +85,9 @@ function formatDateShort(dateStr: string) {
 
 type PaymentDisplayMode = "installments" | "installments_with_entry" | "full_payment" | "total_only";
 
+/** Layout principal da apresentação do investimento. */
+type InvestmentLayout = "legacy" | "consolidated" | "ungrouped" | "grouped";
+
 const PAYMENT_MODE_OPTIONS_INVESTMENT: { value: PaymentDisplayMode; label: string; description: string }[] = [
   { value: "installments", label: "Parcelado (sem entrada)", description: "Ex: 10x de R$ 2.400" },
   { value: "installments_with_entry", label: "Parcelado com entrada", description: "Ex: Entrada + 9x de R$ 2.400" },
@@ -176,7 +179,7 @@ export default function GerarOrcamento() {
   const [entryPercentage, setEntryPercentage] = useState(30);
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
-  const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<"legacy" | "grouped" | "ungrouped">("legacy");
+  const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<InvestmentLayout>("legacy");
   
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const [showInvestmentLocal, setShowInvestmentLocal] = useState<boolean | null>(null);
@@ -259,7 +262,7 @@ export default function GerarOrcamento() {
       const initialEntryPercentage = (quote as any).entry_percentage || 30;
       const initialPaymentMethodLabel = (quote as any).payment_method_label || "";
       const initialFullPaymentDiscountPercent = (quote as any).full_payment_discount_percent || 0;
-      const initialInvestmentSummaryLayout = ((quote as any).investment_summary_layout as "legacy" | "grouped" | "ungrouped" | null) || "legacy";
+      const initialInvestmentSummaryLayout = ((quote as any).investment_summary_layout as InvestmentLayout | null) || "legacy";
 
       setPaymentTerms(initialPaymentTerms);
       setValidUntil(initialValidUntil);
@@ -374,23 +377,52 @@ export default function GerarOrcamento() {
     await supabase.from("quotes").update({ use_service_payment: checked } as any).eq("id", quote.id);
   };
 
-  const handleSetInvestmentSummaryLayout = async (
-    value: "legacy" | "grouped" | "ungrouped"
-  ) => {
+  /**
+   * Define o layout principal da apresentação do investimento e sincroniza
+   * as flags legadas (show_investment_section / show_detailed_prices) para
+   * preservar compatibilidade com orçamentos antigos e com a renderização
+   * pública em modo `legacy`.
+   */
+  const handleSetInvestmentLayout = async (value: InvestmentLayout) => {
     setInvestmentSummaryLayout(value);
     if (!quote) return;
+
+    // Sincroniza flags legadas com base na nova escolha
+    const nextShowInvestment = true;
+    const nextShowDetailed = value === "grouped" || value === "ungrouped";
+    setShowInvestmentLocal(nextShowInvestment);
+    setShowDetailedLocal(nextShowDetailed);
+
+    // Normaliza o modo de pagamento: "total_only" só faz sentido nos modos
+    // detalhados/agrupados; no consolidado, força um valor inicial coerente.
+    let nextPaymentMode = paymentDisplayMode;
+    if (value === "consolidated" && paymentDisplayMode === "total_only") {
+      nextPaymentMode = "full_payment";
+      setPaymentDisplayMode("full_payment");
+    }
+
     const { error } = await supabase
       .from("quotes")
-      .update({ investment_summary_layout: value } as any)
+      .update({
+        investment_summary_layout: value,
+        show_investment_section: nextShowInvestment,
+        show_detailed_prices: nextShowDetailed,
+        payment_display_mode: nextPaymentMode,
+      } as any)
       .eq("id", quote.id);
     if (error) {
       toast({ title: "Erro ao salvar apresentação", description: error.message, variant: "destructive" });
       return;
     }
-    // Keep payment snapshot ref in sync so the debounced autosave doesn't overwrite
+
+    // Mantém o snapshot sincronizado para o autosave debounced não sobrescrever
     try {
       const prev = paymentSnapshotRef.current ? JSON.parse(paymentSnapshotRef.current) : {};
-      paymentSnapshotRef.current = JSON.stringify({ ...prev, investment_summary_layout: value });
+      paymentSnapshotRef.current = JSON.stringify({
+        ...prev,
+        investment_summary_layout: value,
+        payment_display_mode: nextPaymentMode,
+      });
     } catch { /* ignore */ }
     showAutoSavedFeedback();
   };
@@ -987,80 +1019,109 @@ export default function GerarOrcamento() {
         renderPayment={() => {
           const investOn = showInvestmentLocal !== null ? showInvestmentLocal : (quote as any).show_investment_section !== false;
           const detailedOn = showDetailed;
-          const currentViewMode: "investment" | "detailed" | "both" =
-            investOn && detailedOn ? "both" : investOn ? "investment" : "detailed";
-          const activePaymentModeOptions = currentViewMode === "both"
-            ? PAYMENT_MODE_OPTIONS_BOTH
-            : PAYMENT_MODE_OPTIONS_INVESTMENT;
+
+          // Deriva o layout efetivo: orçamentos antigos (legacy) são mapeados
+          // automaticamente para a opção mais próxima na nova UI, sem alterar
+          // a configuração persistida até que o agente confirme uma escolha.
+          const effectiveLayout: Exclude<InvestmentLayout, "legacy"> =
+            investmentSummaryLayout === "legacy"
+              ? (detailedOn ? (investOn ? "grouped" : "ungrouped") : "consolidated")
+              : investmentSummaryLayout;
+
+          const activePaymentModeOptions = effectiveLayout === "consolidated"
+            ? PAYMENT_MODE_OPTIONS_INVESTMENT
+            : PAYMENT_MODE_OPTIONS_BOTH;
+
+          // Alerta inteligente: condições de pagamento heterogêneas + consolidado
+          const hasMixedServiceConditions = (() => {
+            const cfgs = (quote.services || [])
+              .map((s: any) => extractServicePaymentConfig(s))
+              .filter((c) => c.is_custom_payment && !!c.payment_type);
+            if (cfgs.length < 2) return useServicePayment && cfgs.length >= 1;
+            const sig = (c: ReturnType<typeof extractServicePaymentConfig>) =>
+              `${c.payment_type}|${c.installments}|${c.entry_value}|${c.discount_type}|${c.discount_value}|${c.payment_method ?? ""}`;
+            const first = sig(cfgs[0]);
+            return cfgs.some((c) => sig(c) !== first);
+          })();
+
+          const layoutOptions: { value: Exclude<InvestmentLayout, "legacy">; label: string; description: string }[] = [
+            {
+              value: "consolidated",
+              label: "Valor total do orçamento",
+              description: "Soma todos os itens do orçamento em um único valor consolidado. Ideal quando todos os serviços possuem a mesma condição de pagamento, entrada e parcelamento.",
+            },
+            {
+              value: "ungrouped",
+              label: "Valores detalhados por serviço",
+              description: "Exibe cada serviço separadamente na apresentação do investimento, com seu respectivo valor e condição de pagamento.",
+            },
+            {
+              value: "grouped",
+              label: "Agrupar por tipo de serviço",
+              description: "Agrupa serviços semelhantes por tipo e condição de pagamento, exibindo o total por categoria e o investimento total da viagem no final.",
+            },
+          ];
+
           return (
           <div className="space-y-4">
-                  {/* Tri-state display selector — centralizes financial display logic */}
+                  {/* Nova lógica: O QUE exibir para o cliente (3 opções consolidadas) */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
-                    {(() => {
-                      const currentMode = currentViewMode;
-                      const modes: { value: "investment" | "detailed" | "both"; label: string; description: string }[] = [
-                        { value: "investment", label: "Valor Total do Orçamento", description: "Exibe apenas o valor total da viagem e as condições de pagamento." },
-                        { value: "detailed", label: "Valores Detalhados por Serviço", description: "Exibe os valores individualmente para cada serviço do orçamento." },
-                        { value: "both", label: "Valor Total + Valores Detalhados", description: "Exibe os valores de cada serviço e também o valor total consolidado da viagem." },
-                      ];
-                      const applyMode = async (mode: "investment" | "detailed" | "both") => {
-                        if (!quote) return;
-                        const nextInvestment = mode === "investment" || mode === "both";
-                        const nextDetailed = mode === "detailed" || mode === "both";
-                        setShowInvestmentLocal(nextInvestment);
-                        setShowDetailedLocal(nextDetailed);
-                        // Normalize payment_display_mode when switching between investment/both
-                        if (mode === "both" && paymentDisplayMode === "full_payment") {
-                          setPaymentDisplayMode("total_only");
-                        } else if (mode === "investment" && paymentDisplayMode === "total_only") {
-                          setPaymentDisplayMode("full_payment");
-                        }
-                        await supabase
-                          .from("quotes")
-                          .update({
-                            show_investment_section: nextInvestment,
-                            show_detailed_prices: nextDetailed,
-                          } as any)
-                          .eq("id", quote.id);
-                      };
-                      return (
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          {modes.map((opt) => (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => applyMode(opt.value)}
-                              className={cn(
-                                "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
-                                currentMode === opt.value
-                                  ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                                  : "border-border hover:border-border/80 hover:bg-muted/30"
-                              )}
-                            >
-                              <div className={cn(
-                                "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
-                                currentMode === opt.value ? "border-primary" : "border-muted-foreground/40"
-                              )}>
-                                {currentMode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">{opt.label}</p>
-                                <p className="text-xs text-muted-foreground">{opt.description}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      );
-                    })()}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {layoutOptions.map((opt) => {
+                        const active = effectiveLayout === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => handleSetInvestmentLayout(opt.value)}
+                            className={cn(
+                              "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
+                              active
+                                ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                : "border-border hover:border-border/80 hover:bg-muted/30"
+                            )}
+                            aria-pressed={active}
+                          >
+                            <div className={cn(
+                              "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                              active ? "border-primary" : "border-muted-foreground/40"
+                            )}>
+                              {active && <div className="h-2 w-2 rounded-full bg-primary" />}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">{opt.label}</p>
+                              <p className="text-xs text-muted-foreground">{opt.description}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Alerta inteligente: condições heterogêneas + consolidado */}
+                    {effectiveLayout === "consolidated" && hasMixedServiceConditions && (
+                      <div
+                        role="alert"
+                        className="mt-2 rounded-md border border-amber-300/70 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+                      >
+                        <span className="font-semibold">Atenção:</span> este orçamento possui serviços com condições
+                        de pagamento diferentes. A opção <span className="font-semibold">“Valor total do orçamento”</span>
+                        apresenta uma condição consolidada única. Para evitar confusão, considere usar
+                        <span className="font-semibold"> “Valores detalhados por serviço”</span> ou
+                        <span className="font-semibold"> “Agrupar por tipo de serviço”</span>. Este aviso aparece somente para você.
+                      </div>
+                    )}
                   </div>
 
-                  {currentViewMode !== "detailed" && (
-                    <>
-                      <Separator />
+                  <Separator />
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {effectiveLayout === "consolidated"
+                        ? "Define a condição de pagamento aplicada ao valor consolidado do orçamento."
+                        : "Define a condição de pagamento padrão para serviços/grupos que não tenham condição própria configurada."}
+                    </p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {activePaymentModeOptions.map((opt) => (
                         <button
@@ -1182,9 +1243,7 @@ export default function GerarOrcamento() {
                         </div>
                       )}
 
-                      <Separator />
-                    </>
-                  )}
+                  <Separator />
 
                   <div className="space-y-1.5">
                     <Label className="text-sm">Observações adicionais de pagamento</Label>
@@ -1194,52 +1253,6 @@ export default function GerarOrcamento() {
                       onChange={(e) => setPaymentTerms(e.target.value)}
                       rows={3}
                     />
-                  </div>
-
-                  <Separator />
-
-                  {/* Nova seção: como organizar os serviços no resumo financeiro */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Como organizar os serviços no resumo financeiro?</Label>
-                    {currentViewMode === "investment" ? (
-                      <p className="text-xs text-muted-foreground rounded-md border border-dashed border-border bg-muted/30 px-3 py-2">
-                        Esta opção fica disponível quando a apresentação inclui valores detalhados.
-                      </p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {([
-                          { value: "grouped", label: "Agrupar por tipo de serviço — recomendado", description: "Agrupa serviços semelhantes para deixar a proposta mais clara. Serviços só são agrupados quando têm o mesmo tipo e a mesma condição de pagamento." },
-                          { value: "ungrouped", label: "Não agrupar, exibir serviço por serviço", description: "Exibe cada serviço individualmente no resumo financeiro, sem somar serviços do mesmo tipo." },
-                        ] as const).map((opt) => {
-                          const active = (investmentSummaryLayout === "legacy" ? "grouped" : investmentSummaryLayout) === opt.value;
-                          return (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => handleSetInvestmentSummaryLayout(opt.value)}
-                              className={cn(
-                                "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
-                                active
-                                  ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                                  : "border-border hover:border-border/80 hover:bg-muted/30"
-                              )}
-                              aria-pressed={active}
-                            >
-                              <div className={cn(
-                                "mt-0.5 h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0",
-                                active ? "border-primary" : "border-muted-foreground/40"
-                              )}>
-                                {active && <div className="h-2 w-2 rounded-full bg-primary" />}
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium">{opt.label}</p>
-                                <p className="text-xs text-muted-foreground">{opt.description}</p>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
                   </div>
 
           </div>

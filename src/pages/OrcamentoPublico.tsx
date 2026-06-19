@@ -960,10 +960,23 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const validUntil = (quote as any).valid_until as string | null;
   const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
   const useServicePayment = (quote as any).use_service_payment || quote.services?.some((s: any) => s.is_custom_payment === true) || false;
-  const investmentLayout = ((quote as any).investment_summary_layout as "legacy" | "grouped" | "ungrouped" | null) || "legacy";
+  const investmentLayout =
+    ((quote as any).investment_summary_layout as
+      | "legacy"
+      | "consolidated"
+      | "grouped"
+      | "ungrouped"
+      | null) || "legacy";
+  // Os 3 novos layouts compartilham a regra: cards de serviços nunca
+  // exibem preços/parcelamentos, e o resumo financeiro fica centralizado
+  // no bloco de Investimento. O modo "legacy" preserva o comportamento
+  // antigo de orçamentos já publicados.
+  const isNewLayout =
+    investmentLayout === "consolidated" ||
+    investmentLayout === "grouped" ||
+    investmentLayout === "ungrouped";
   const useNewInvestmentLayout =
     (investmentLayout === "grouped" || investmentLayout === "ungrouped") &&
-    showDetailedPrices &&
     (quote.services?.length ?? 0) > 0;
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
@@ -1179,10 +1192,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 <CollapsibleServiceCard
                   key={service.id}
                   service={service}
-                  showPrice={showDetailedPrices}
+                  showPrice={isNewLayout ? false : showDetailedPrices}
                   isOpen={openServiceIndices.has(index)}
                   onToggle={() => handleToggleService(index)}
-                  showPaymentPerService={useServicePayment}
+                  showPaymentPerService={isNewLayout ? false : useServicePayment}
                 />
               ))}
             </div>
