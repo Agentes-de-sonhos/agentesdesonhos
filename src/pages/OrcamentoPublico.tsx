@@ -924,6 +924,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const isLoading = quoteOverride ? false : isFetching;
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
+  const signatureRef = useRef<HTMLElement>(null);
+  const [signatureVisible, setSignatureVisible] = useState(false);
 
   // UX: auto-open single service; keep all closed when multiple services
   useEffect(() => {
