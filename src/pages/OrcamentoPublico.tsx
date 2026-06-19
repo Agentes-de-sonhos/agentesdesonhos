@@ -23,6 +23,12 @@ import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsInclude
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
+import {
+  computeExtrasTotal,
+  computeExtraAmount,
+  ENTRY_EXTRA_TYPE_LABELS,
+  type QuoteEntryExtra,
+} from "@/lib/quoteEntryExtras";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
