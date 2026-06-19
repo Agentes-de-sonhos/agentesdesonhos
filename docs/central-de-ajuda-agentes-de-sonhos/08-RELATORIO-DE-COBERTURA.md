@@ -24,7 +24,9 @@ Status na geração inicial (2026-06-18). Os números refletem o que foi efetiva
 | Carteira Digital | Principal | 1 | 1 | 20 | Sim | Pronto |
 | Financeiro | Principal | 1 | 1 | 20 | Sim | Pronto |
 | Vendas | Principal | 1 | 1 | 0 | Não — em construção | Parcial |
-| Entradas e Despesas | Principal | 1 | 1 | 0 | Não — em construção | Parcial |
+| Entradas e Despesas (legado) | Principal | 1 | 1 | 0 | Substituído | Substituído pelos módulos independentes Entradas e Despesas |
+| Entradas | Principal | 1 | 1 | 20 | Sim | Pronto |
+| Despesas | Principal | 1 | 1 | 20 | Sim | Pronto |
 | Faturas | Principal | 1 | 1 | 0 | Não — em construção | Parcial |
 | Comissões e Vendedores | Principal | 1 | 1 | 0 | Não — em construção | Parcial |
 | Equipe e Permissões | Principal | 1 | 1 | 0 | Não — em construção | Parcial |

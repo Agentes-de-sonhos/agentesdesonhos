@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-19",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "language": "pt-BR",
   "fields": [
     "id",
@@ -197,9 +197,9 @@
       "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
     }
   },
-  "versao": "1.5.0",
+  "versao": "2.0.0",
   "ultima_atualizacao": "2026-06-19",
-  "total_chunks": 526,
+  "total_chunks": 608,
   "historico": [
     {
       "versao": "1.2.0",
@@ -224,6 +224,12 @@
       "data": "2026-06-19",
       "descricao": "Subonda 1F (Equipe e Permissões): 40 chunks adicionados. Encerramento documental da Onda 1.",
       "chunks_adicionados": 40
+    },
+    {
+      "versao": "2.0.0",
+      "data": "2026-06-19",
+      "descricao": "Subonda 2A (Entradas + Despesas): 82 chunks adicionados — 41 Entradas + 41 Despesas.",
+      "chunks_adicionados": 82
     }
   ]
 }
