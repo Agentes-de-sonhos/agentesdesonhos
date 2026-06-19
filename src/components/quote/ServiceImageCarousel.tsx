@@ -5,9 +5,10 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 interface ServiceImageCarouselProps {
   images: string[];
   alt: string;
+  disableExpand?: boolean;
 }
 
-export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps) {
+export function ServiceImageCarousel({ images, alt, disableExpand = false }: ServiceImageCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
     dragFree: true,
@@ -66,8 +67,8 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
     return (
       <>
         <div
-          className="rounded-xl overflow-hidden border border-border/30 cursor-pointer bg-muted"
-          onClick={() => openLightbox(0)}
+          className={`rounded-xl overflow-hidden border border-border/30 bg-muted ${!disableExpand ? "cursor-pointer" : ""}`}
+          onClick={!disableExpand ? () => openLightbox(0) : undefined}
         >
           <img
             src={images[0]}
@@ -76,7 +77,7 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
             loading="lazy"
           />
         </div>
-        {lightboxOpen && (
+        {!disableExpand && lightboxOpen && (
           <Lightbox
             images={images}
             index={lightboxIndex}
@@ -98,8 +99,8 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
             {images.map((url, i) => (
               <div
                 key={i}
-                className="flex-[0_0_88%] sm:flex-[0_0_55%] lg:flex-[0_0_38%] min-w-0 cursor-pointer rounded-xl overflow-hidden border border-border/30 bg-muted"
-                onClick={() => openLightbox(i)}
+                className={`flex-[0_0_88%] sm:flex-[0_0_55%] lg:flex-[0_0_38%] min-w-0 rounded-xl overflow-hidden border border-border/30 bg-muted ${!disableExpand ? "cursor-pointer" : ""}`}
+                onClick={!disableExpand ? () => openLightbox(i) : undefined}
               >
                 <img
                   src={url}
@@ -134,7 +135,7 @@ export function ServiceImageCarousel({ images, alt }: ServiceImageCarouselProps)
         </div>
       </div>
 
-      {lightboxOpen && (
+      {!disableExpand && lightboxOpen && (
         <Lightbox
           images={images}
           index={lightboxIndex}
