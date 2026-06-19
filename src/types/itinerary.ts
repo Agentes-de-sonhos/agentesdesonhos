@@ -245,6 +245,7 @@ export interface Itinerary {
   showDestinationIntro?: boolean;
   passengers?: { name: string; age?: number | null }[];
   passengerInterests?: string[];
+  headline?: string | null;
 }
 
 export interface AIGeneratedDay {
