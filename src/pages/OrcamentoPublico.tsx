@@ -767,7 +767,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
  * (> 200px) e desaparece suavemente ao voltar ao topo. Ocupa ~metade da
  * largura, alinhado à direita, respeitando safe-area do iOS.
  */
-function MobileFloatingCta({ href }: { href: string }) {
+function MobileFloatingCta({ href, signatureVisible }: { href: string; signatureVisible?: boolean }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 200);
@@ -775,13 +775,14 @@ function MobileFloatingCta({ href }: { href: string }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+  const isReallyVisible = visible && !signatureVisible;
   return (
     <div
       className={`fixed right-3 z-40 sm:hidden transition-all duration-300 ease-out ${
-        visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
+        isReallyVisible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
       }`}
       style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
-      aria-hidden={!visible}
+      aria-hidden={!isReallyVisible}
     >
       <a
         href={href}
@@ -923,6 +924,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const isLoading = quoteOverride ? false : isFetching;
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
+  const signatureRef = useRef<HTMLElement>(null);
+  const [signatureVisible, setSignatureVisible] = useState(false);
 
   // UX: auto-open single service; keep all closed when multiple services
   useEffect(() => {
@@ -936,6 +939,18 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       servicesInitialized.current = true;
     }
   }, [quote?.services]);
+
+  // Hide floating CTA when signature section is visible
+  useEffect(() => {
+    const el = signatureRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setSignatureVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Auto-redirect legacy vitrine.tur.br/orcamento/* links to the new domain
   // so any cached or previously shared link lands on the correct host.
@@ -1471,7 +1486,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
         {/* ─── Agent Signature ─── */}
         {(agentProfile || (quote as any).signature_snapshot) && (
-          <section className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
+          <section ref={signatureRef} className="relative overflow-hidden rounded-[2rem] border border-border/40 bg-gradient-to-br from-white via-white to-muted/30 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.18)] animate-fade-up">
             <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="relative p-4 sm:p-12">
               <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 text-center mb-3 sm:mb-7">
@@ -1564,7 +1579,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       </main>
 
       {/* ─── Floating mobile CTA — aparece ao rolar para baixo, recolhido no topo ─── */}
-      {whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
+      {whatsappUrl && <MobileFloatingCta href={whatsappUrl} signatureVisible={signatureVisible} />}
     </div>
   );
 }
