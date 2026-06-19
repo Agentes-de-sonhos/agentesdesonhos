@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
   Plane, Building2, Ship, MapPin, Shield, Car, Ticket, TrainFront,
-  Sparkles, Wallet, CreditCard, Info,
+  Sparkles, Wallet, CreditCard, Info, Users,
 } from "lucide-react";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import { SERVICE_TYPE_LABELS } from "@/types/quote";
@@ -223,6 +223,25 @@ export function PublicInvestmentSummary({
     ? "Veja abaixo o investimento detalhado por tipo de serviço e as condições de pagamento da sua viagem."
     : "Veja abaixo o investimento detalhado por serviço e as condições de pagamento da sua viagem.";
 
+  // Formatação da string de passageiros para contextualizar os valores
+  const adults = Number(quote.adults_count) || 0;
+  const children = Number(quote.children_count) || 0;
+  const infants = Number((quote as any).infants_count) || 0;
+
+  const hasAgeBreakdown = children > 0 || infants > 0;
+  const totalPassengers = adults + children + infants;
+
+  const passengerLabel = useMemo(() => {
+    if (!hasAgeBreakdown) {
+      return `${totalPassengers} passageiro${totalPassengers === 1 ? "" : "s"}`;
+    }
+    const parts: string[] = [];
+    if (adults > 0) parts.push(`${adults} adulto${adults === 1 ? "" : "s"}`);
+    if (children > 0) parts.push(`${children} criança${children === 1 ? "" : "s"}`);
+    if (infants > 0) parts.push(`${infants} bebê${infants === 1 ? "" : "s"}`);
+    return parts.join(" • ");
+  }, [adults, children, infants, hasAgeBreakdown, totalPassengers]);
+
   return (
     <section
       className="rounded-2xl border border-border/40 bg-white p-5 sm:p-7 shadow-sm animate-fade-up"
@@ -272,6 +291,12 @@ export function PublicInvestmentSummary({
                     </span>
                   )}
                 </div>
+              </div>
+
+              {/* Informação complementar de passageiros */}
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/80">
+                <Users className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden="true" />
+                <span>{passengerLabel}</span>
               </div>
 
               {/* Grid financeiro: Forma de pagamento | Total (divisor central) */}
