@@ -592,7 +592,7 @@ export function ItineraryEditor({
                               photoUrl={activity.photoUrl ?? null}
                               onChange={(updates) =>
                                 onUpdateActivity(activity.id!, {
-                                  photoUrl: updates.photo_url ?? null,
+                                  photo_url: updates.photo_url ?? null,
                                 } as Partial<Activity>)
                               }
                             />
