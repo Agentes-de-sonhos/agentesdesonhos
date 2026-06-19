@@ -96,37 +96,31 @@ function buildPaymentInfo(
   const cfg = extractServicePaymentConfig(service as any);
   if (useServicePayment && cfg.is_custom_payment && cfg.payment_type) {
     const feeInfo = extractFlightFeeInfo(service as any);
-    const result = calculateServicePayment(Number(service.amount) || 0, cfg, feeInfo);
     // assinatura inclui todos os campos relevantes
     const sig = `svc:${cfg.payment_type}|${cfg.installments}|${cfg.entry_value}|${cfg.discount_type}|${cfg.discount_value}|${cfg.payment_method ?? ""}`;
-    if (result.type === "installments") {
-      if ("firstInstallmentValue" in result && result.firstInstallmentValue) {
-        return {
-          signature: sig,
-          render: () => [
-            { label: "1ª parcela", value: fmt(result.firstInstallmentValue!) },
-            { label: `+ ${result.installmentCount - 1}x de`, value: fmt(result.installmentValue) },
-          ],
-        };
-      }
-      return {
-        signature: sig,
-        render: () => [{ label: `${result.installmentCount}x de`, value: fmt(result.installmentValue) }],
-      };
-    }
-    if (result.type === "installments_with_entry") {
-      return {
-        signature: sig,
-        render: () => [
-          { label: "Entrada", value: fmt(result.entryValue) },
-          { label: `${result.installmentCount}x de`, value: fmt(result.installmentValue) },
-        ],
-      };
-    }
-    // full_payment
     return {
       signature: sig,
-      render: () => [{ label: "À vista", value: fmt(result.hasDiscount ? result.discountedTotal : result.total) }],
+      // Recalcula sobre o total do grupo para que serviços agrupados
+      // (mesma assinatura de pagamento) somem corretamente os valores.
+      render: (groupTotal: number) => {
+        const r = calculateServicePayment(groupTotal, cfg, feeInfo);
+        if (r.type === "installments") {
+          if ("firstInstallmentValue" in r && r.firstInstallmentValue) {
+            return [
+              { label: "1ª parcela", value: fmt(r.firstInstallmentValue!) },
+              { label: `+ ${r.installmentCount - 1}x de`, value: fmt(r.installmentValue) },
+            ];
+          }
+          return [{ label: `${r.installmentCount}x de`, value: fmt(r.installmentValue) }];
+        }
+        if (r.type === "installments_with_entry") {
+          return [
+            { label: "Entrada", value: fmt(r.entryValue) },
+            { label: `${r.installmentCount}x de`, value: fmt(r.installmentValue) },
+          ];
+        }
+        return [{ label: "À vista", value: fmt(r.hasDiscount ? r.discountedTotal : r.total) }];
+      },
     };
   }
 
