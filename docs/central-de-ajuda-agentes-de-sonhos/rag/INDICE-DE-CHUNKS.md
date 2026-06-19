@@ -341,3 +341,22 @@ Adicionados 73 chunks confirmados nesta subonda (37 em Carteira Digital + 36 em 
 - ep-bp-05 — Teste o acesso após mudanças de permissão
 
 Total atual no BASE-RAG.jsonl: **526 chunks**.
+
+
+## Subonda 2A — Entradas + Despesas (2026-06-19)
+
+### Entradas (39 chunks)
+- entradas-visao-geral, entradas-primeiros-passos
+- FAQs: en-faq-01..20
+- Tutoriais: en-tut-01..10
+- Problemas comuns: en-prob-01..05
+- Boas práticas: en-bp-01..04
+
+### Despesas (39 chunks)
+- despesas-visao-geral, despesas-primeiros-passos
+- FAQs: dp-faq-01..20
+- Tutoriais: dp-tut-01..10
+- Problemas comuns: dp-prob-01..05
+- Boas práticas: dp-bp-01..04
+
+**Total acumulado:** 608 chunks (Manifesto RAG v2.0.0).
