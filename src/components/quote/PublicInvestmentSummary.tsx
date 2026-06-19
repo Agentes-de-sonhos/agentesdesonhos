@@ -294,7 +294,7 @@ export function PublicInvestmentSummary({
               </div>
 
               {/* Informação complementar de passageiros */}
-              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground/80">
+              <div className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground/80">
                 <Users className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden="true" />
                 <span>{passengerLabel}</span>
               </div>
