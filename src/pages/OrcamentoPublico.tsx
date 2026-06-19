@@ -1361,7 +1361,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         )}
 
         {/* ─── Payment terms ─── */}
-        {paymentTerms && (
+        {!useNewInvestmentLayout && paymentTerms && (
           <div className="rounded-2xl border border-border/40 bg-card p-6 sm:p-8 animate-fade-up">
             <div className="flex items-center gap-2 mb-3">
               <CreditCard className="h-4 w-4 text-primary" />
