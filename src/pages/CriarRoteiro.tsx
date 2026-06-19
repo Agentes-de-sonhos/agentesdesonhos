@@ -108,11 +108,22 @@ export default function CriarRoteiro() {
     reorderActivities,
     updateItineraryStatus,
     updateItineraryDetails,
+    adjustItineraryDates,
     deleteItinerary,
   } = useItineraries();
 
   const [isEditingDestination, setIsEditingDestination] = useState(false);
   const [editDestination, setEditDestination] = useState("");
+  const [travelersPopoverOpen, setTravelersPopoverOpen] = useState(false);
+  const [editTravelers, setEditTravelers] = useState(1);
+  const [savingTravelers, setSavingTravelers] = useState(false);
+  const [datesPopoverOpen, setDatesPopoverOpen] = useState(false);
+  const [editStartDate, setEditStartDate] = useState<Date | undefined>(undefined);
+  const [editEndDate, setEditEndDate] = useState<Date | undefined>(undefined);
+  const [savingDates, setSavingDates] = useState(false);
+  const [isEditingHeadline, setIsEditingHeadline] = useState(false);
+  const [editHeadline, setEditHeadline] = useState("");
+  const [savingHeadline, setSavingHeadline] = useState(false);
 
   const { canUse: canCreateItinerary, remaining: itinerariesRemaining, hasLimit, incrementUsage } = useDailyLimit("itinerary");
 
