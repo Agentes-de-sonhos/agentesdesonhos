@@ -63,6 +63,7 @@ import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings"
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles, Wallet } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
+import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
