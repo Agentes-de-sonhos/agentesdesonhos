@@ -112,13 +112,16 @@ Adicionados 74 chunks confirmados.
 
 ## Subonda 1C — Orçamentos e Carteira Digital (2026-06-19)
 
-Adicionados 74 chunks confirmados (37 por módulo).
+Adicionados 73 chunks confirmados nesta subonda (37 em Carteira Digital + 36 em Orçamentos).
+
+> **Correção pós-entrega (2026-06-19):** o chunk `orcamentos-faq-19` ("Como acompanhar visualizações do orçamento?") foi **removido do RAG** porque a própria resposta declara que as métricas estão pendentes de confirmação. O artigo foi rebaixado para `status: revisão-necessária` e `confianca: pendente` e passa a constar em `07-PERGUNTAS-PENDENTES-DE-VALIDACAO.md`. Por isso a Subonda 1C contribuiu líquidos **73** chunks confirmados (não 74) e o módulo Orçamentos passou a ter **19** FAQs confirmadas (em vez de 20).
 
 ### Orçamentos
-- `orcamentos-faq-21` a `orcamentos-faq-40` (20 novas FAQs)
+- `orcamentos-faq-21` a `orcamentos-faq-40` (20 novas FAQs confirmadas)
 - `orcamentos-tut-01` a `orcamentos-tut-08` (8 tutoriais)
 - `orcamentos-prob-01` a `orcamentos-prob-05` (5 problemas comuns)
 - `orcamentos-bp-01` a `orcamentos-bp-04` (4 boas práticas)
+- **Excluído do RAG:** `orcamentos-faq-19` (rebaixado a `revisão-necessária / pendente`).
 
 ### Carteira Digital
 - `carteira-digital-faq-21` a `carteira-digital-faq-40` (20 novas FAQs)
@@ -126,4 +129,4 @@ Adicionados 74 chunks confirmados (37 por módulo).
 - `carteira-digital-prob-01` a `carteira-digital-prob-05` (5 problemas comuns)
 - `carteira-digital-bp-01` a `carteira-digital-bp-04` (4 boas práticas)
 
-Total atual no BASE-RAG.jsonl: **335 chunks**.
+Total atual no BASE-RAG.jsonl: **334 chunks**.
