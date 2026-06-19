@@ -1579,7 +1579,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       </main>
 
       {/* ─── Floating mobile CTA — aparece ao rolar para baixo, recolhido no topo ─── */}
-      {whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
+      {whatsappUrl && <MobileFloatingCta href={whatsappUrl} signatureVisible={signatureVisible} />}
     </div>
   );
 }
