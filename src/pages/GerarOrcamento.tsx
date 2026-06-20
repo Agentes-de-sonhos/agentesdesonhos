@@ -377,6 +377,12 @@ export default function GerarOrcamento() {
     await supabase.from("quotes").update({ show_detailed_prices: checked } as any).eq("id", quote.id);
   };
 
+  const handleToggleHideInvestmentTotal = async (checked: boolean) => {
+    if (!quote) return;
+    setHideInvestmentTotal(checked);
+    await supabase.from("quotes").update({ hide_investment_total: checked } as any).eq("id", quote.id);
+  };
+
   const handleToggleServicePayment = async (checked: boolean) => {
     if (!quote) return;
     setUseServicePayment(checked);
