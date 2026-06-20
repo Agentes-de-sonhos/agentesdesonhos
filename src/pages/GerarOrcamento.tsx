@@ -181,6 +181,7 @@ export default function GerarOrcamento() {
   const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
   const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<InvestmentLayout>("legacy");
+  const [hideInvestmentTotal, setHideInvestmentTotal] = useState(false);
   
   const [showDetailedLocal, setShowDetailedLocal] = useState<boolean | null>(null);
   const [showInvestmentLocal, setShowInvestmentLocal] = useState<boolean | null>(null);
@@ -240,7 +241,8 @@ export default function GerarOrcamento() {
     payment_method_label: paymentMethodLabel || null,
     full_payment_discount_percent: fullPaymentDiscountPercent,
     investment_summary_layout: investmentSummaryLayout,
-  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, investmentSummaryLayout]);
+    hide_investment_total: hideInvestmentTotal,
+  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, investmentSummaryLayout, hideInvestmentTotal]);
 
   const buildValiditySnapshot = useCallback(() => JSON.stringify({
     valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
