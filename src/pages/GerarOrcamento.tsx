@@ -266,6 +266,7 @@ export default function GerarOrcamento() {
       const initialPaymentMethodLabel = (quote as any).payment_method_label || "";
       const initialFullPaymentDiscountPercent = (quote as any).full_payment_discount_percent || 0;
       const initialInvestmentSummaryLayout = ((quote as any).investment_summary_layout as InvestmentLayout | null) || "legacy";
+      const initialHideInvestmentTotal = (quote as any).hide_investment_total || false;
 
       setPaymentTerms(initialPaymentTerms);
       setValidUntil(initialValidUntil);
@@ -277,6 +278,7 @@ export default function GerarOrcamento() {
       setFullPaymentDiscountPercent(initialFullPaymentDiscountPercent);
       setUseServicePayment((quote as any).use_service_payment ?? false);
       setInvestmentSummaryLayout(initialInvestmentSummaryLayout);
+      setHideInvestmentTotal(initialHideInvestmentTotal);
 
       paymentSnapshotRef.current = JSON.stringify({
         payment_terms: initialPaymentTerms || null,
