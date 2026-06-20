@@ -1123,6 +1123,29 @@ export default function GerarOrcamento() {
                         <span className="font-semibold"> “Agrupar por tipo de serviço”</span>. Este aviso aparece somente para você.
                       </div>
                     )}
+
+                    {/* Ocultar total do investimento — disponível nos modos detalhados */}
+                    {(effectiveLayout === "ungrouped" || effectiveLayout === "grouped") && (
+                      <div className="mt-2 flex items-start gap-3 rounded-xl border border-border bg-muted/30 p-3 transition-colors">
+                        <div className="mt-0.5 shrink-0">
+                          <input
+                            id="hide-investment-total"
+                            type="checkbox"
+                            checked={hideInvestmentTotal}
+                            onChange={(e) => handleToggleHideInvestmentTotal(e.target.checked)}
+                            className="h-4 w-4 rounded border-muted-foreground/40 text-primary focus:ring-primary"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <label htmlFor="hide-investment-total" className="cursor-pointer text-sm font-medium">
+                            Ocultar o valor total do investimento
+                          </label>
+                          <p className="text-xs text-muted-foreground">
+                            Esconde o investimento total consolidado no final do orçamento público. O cliente continua vendo os valores e condições de pagamento de cada serviço individualmente.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <Separator />
