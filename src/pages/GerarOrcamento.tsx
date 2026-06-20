@@ -288,6 +288,7 @@ export default function GerarOrcamento() {
         payment_method_label: initialPaymentMethodLabel || null,
         full_payment_discount_percent: initialFullPaymentDiscountPercent,
         investment_summary_layout: initialInvestmentSummaryLayout,
+        hide_investment_total: initialHideInvestmentTotal,
       });
 
       validitySnapshotRef.current = JSON.stringify({
