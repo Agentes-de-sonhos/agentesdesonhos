@@ -11,6 +11,7 @@ export interface Quote {
   status: 'draft' | 'published';
   share_token: string | null;
   show_detailed_prices: boolean;
+  hide_investment_total?: boolean;
   payment_terms: string | null;
   valid_until: string | null;
   validity_disclaimer: string;

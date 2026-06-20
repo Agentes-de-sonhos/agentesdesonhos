@@ -1258,7 +1258,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             quote={quote}
             services={quote.services || []}
             displayMode={
-              (quote as any).show_investment_section !== false ? "both" : "detailed"
+              (quote as any).hide_investment_total ? "detailed" : "both"
             }
             groupingMode={investmentLayout === "ungrouped" ? "ungrouped" : "grouped"}
             globalPayment={{

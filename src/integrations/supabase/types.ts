@@ -7776,6 +7776,7 @@ export type Database = {
           entry_percentage: number | null
           exchange_rate: number | null
           full_payment_discount_percent: number | null
+          hide_investment_total: boolean | null
           id: string
           installments_count: number | null
           investment_summary_layout: string | null
@@ -7816,6 +7817,7 @@ export type Database = {
           entry_percentage?: number | null
           exchange_rate?: number | null
           full_payment_discount_percent?: number | null
+          hide_investment_total?: boolean | null
           id?: string
           installments_count?: number | null
           investment_summary_layout?: string | null
@@ -7856,6 +7858,7 @@ export type Database = {
           entry_percentage?: number | null
           exchange_rate?: number | null
           full_payment_discount_percent?: number | null
+          hide_investment_total?: boolean | null
           id?: string
           installments_count?: number | null
           investment_summary_layout?: string | null
