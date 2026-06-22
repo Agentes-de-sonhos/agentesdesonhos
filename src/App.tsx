@@ -13,6 +13,7 @@ import { AdminRoute } from "@/components/auth/AdminRoute";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
 import { WhatsAppSupportButton } from "./components/layout/WhatsAppSupportButton";
+import { HelpAssistantWidget } from "./components/help-assistant/HelpAssistantWidget";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingScreen } from "./components/auth/LoadingScreen";
@@ -285,6 +286,7 @@ const App = () => (
           </Routes>
           </Suspense>
           <WhatsAppSupportButton />
+          <HelpAssistantWidget />
           </NewLeadAlertProvider>
           </SubscriptionProvider>
           </TeamSessionProvider>
