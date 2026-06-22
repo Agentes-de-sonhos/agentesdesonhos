@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-19",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "language": "pt-BR",
   "fields": [
     "id",
@@ -213,10 +213,26 @@
       ],
       "novos_chunks_confirmados": 78,
       "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
+    },
+    "onda-2-2d": {
+      "data": "2026-06-22",
+      "tipo": "auditoria-final",
+      "modulos_auditados": [
+        "entradas",
+        "despesas",
+        "faturas",
+        "suporte",
+        "configuracoes",
+        "agenda"
+      ],
+      "chunks_legados_normalizados": 74,
+      "novos_chunks": 0,
+      "status_rag": "Estado B — Pronto com pendências pontuais",
+      "criterio": "Auditoria final, normalização de 74 chunks legados (PT-BR → schema EN), validação completa do JSONL."
     }
   },
   "versao": "2.0.0",
-  "ultima_atualizacao": "2026-06-19",
+  "ultima_atualizacao": "2026-06-22",
   "total_chunks": 764,
   "historico": [
     {
@@ -260,6 +276,12 @@
       "data": "2026-06-22",
       "descricao": "Subonda 2C (Configurações, Conta e Onboarding + Agenda): chunks adicionados.",
       "chunks_adicionados": 78
+    },
+    {
+      "versao": "2.3.0",
+      "data": "2026-06-22",
+      "descricao": "Subonda 2D: auditoria final da Onda 2, 74 chunks legados normalizados para o esquema obrigatório atual. Nenhum novo chunk adicionado.",
+      "chunks_adicionados": 0
     }
   ]
 }
