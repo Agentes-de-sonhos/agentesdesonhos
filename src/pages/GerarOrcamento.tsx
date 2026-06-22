@@ -915,6 +915,7 @@ export default function GerarOrcamento() {
                       onDeleteService={deleteService}
                       onEditService={handleEditService}
                       onReorder={reorderServices}
+                      currency={quoteCurrencyCode}
                     />
                   )}
                 </CardContent>

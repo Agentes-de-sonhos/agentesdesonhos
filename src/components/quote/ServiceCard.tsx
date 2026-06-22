@@ -67,7 +67,7 @@ function getServiceDescription(service: QuoteService): string {
   }
 }
 
-function getServiceDetails(service: QuoteService): string[] {
+function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL'): string[] {
   const data = service.service_data as any;
   const details: string[] = [];
   switch (service.service_type) {
@@ -121,8 +121,8 @@ function getServiceDetails(service: QuoteService): string[] {
     case "transfer": details.push(`Data: ${formatDate(data.date)}`); break;
     case "attraction":
       details.push(`Data: ${formatDate(data.date)}`);
-      if (data.adult_price > 0) details.push(`Adulto: R$ ${data.adult_price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
-      if (data.child_price > 0) details.push(`Criança: R$ ${data.child_price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      if (data.adult_price > 0) details.push(`Adulto: ${formatQuoteCurrency(data.adult_price, currency)}`);
+      if (data.child_price > 0) details.push(`Criança: ${formatQuoteCurrency(data.child_price, currency)}`);
       break;
     case "insurance":
       details.push(`${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
@@ -162,13 +162,14 @@ interface ServiceCardProps {
   onEdit: (service: QuoteService) => void;
   isDeleting?: boolean;
   dragHandle?: React.ReactNode;
+  currency?: QuoteCurrency;
 }
 
-export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle }: ServiceCardProps) {
+export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle, currency = 'BRL' }: ServiceCardProps) {
   const [open, setOpen] = useState(false);
   const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = getServiceLabel(service);
-  const details = getServiceDetails(service);
+  const details = getServiceDetails(service, currency);
   const images = service.image_urls?.length ? service.image_urls : (service.image_url ? [service.image_url] : []);
   const hasExpandableContent = details.length > 0 || service.description || images.length > 0;
 
@@ -208,7 +209,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle 
               </div>
             </div>
             <div className="flex items-center gap-1 shrink-0">
-              <span className="font-semibold text-primary mr-1 whitespace-nowrap">{formatCurrency(service.amount)}</span>
+              <span className="font-semibold text-primary mr-1 whitespace-nowrap">{formatCurrency(service.amount, currency)}</span>
               {hasExpandableContent && (
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
@@ -271,9 +272,10 @@ interface ServiceListProps {
   onDeleteService: (id: string) => void;
   onEditService: (service: QuoteService) => void;
   onReorder?: (orderedIds: string[]) => void;
+  currency?: QuoteCurrency;
 }
 
-export function ServiceList({ services, onDeleteService, onEditService, onReorder }: ServiceListProps) {
+export function ServiceList({ services, onDeleteService, onEditService, onReorder, currency = 'BRL' }: ServiceListProps) {
   if (services.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">Nenhum serviço adicionado ainda</div>;
   }
@@ -284,6 +286,7 @@ export function ServiceList({ services, onDeleteService, onEditService, onReorde
         onDeleteService={onDeleteService}
         onEditService={onEditService}
         onReorder={onReorder}
+        currency={currency}
       />
     );
   }
@@ -295,6 +298,7 @@ export function ServiceList({ services, onDeleteService, onEditService, onReorde
           service={service}
           onDelete={onDeleteService}
           onEdit={onEditService}
+          currency={currency}
         />
       ))}
     </div>
@@ -302,12 +306,13 @@ export function ServiceList({ services, onDeleteService, onEditService, onReorde
 }
 
 function SortableServiceList({
-  services, onDeleteService, onEditService, onReorder,
+  services, onDeleteService, onEditService, onReorder, currency,
 }: {
   services: QuoteService[];
   onDeleteService: (id: string) => void;
   onEditService: (service: QuoteService) => void;
   onReorder: (orderedIds: string[]) => void;
+  currency?: QuoteCurrency;
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -335,6 +340,7 @@ function SortableServiceList({
               service={service}
               onDelete={onDeleteService}
               onEdit={onEditService}
+              currency={currency}
             />
           ))}
         </div>
@@ -344,11 +350,12 @@ function SortableServiceList({
 }
 
 function SortableServiceItem({
-  service, onDelete, onEdit,
+  service, onDelete, onEdit, currency,
 }: {
   service: QuoteService;
   onDelete: (id: string) => void;
   onEdit: (service: QuoteService) => void;
+  currency?: QuoteCurrency;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: service.id });
@@ -364,6 +371,7 @@ function SortableServiceItem({
         service={service}
         onDelete={onDelete}
         onEdit={onEdit}
+        currency={currency}
         dragHandle={
           <button
             type="button"
