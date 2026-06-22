@@ -1,0 +1,1 @@
+GRANT INSERT, UPDATE, SELECT ON public.help_center_chunks TO sandbox_exec;
