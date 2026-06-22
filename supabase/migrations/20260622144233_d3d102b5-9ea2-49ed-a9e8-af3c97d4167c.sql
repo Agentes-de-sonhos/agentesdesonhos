@@ -1,0 +1,1 @@
+REVOKE INSERT, UPDATE, SELECT ON public.help_center_chunks FROM sandbox_exec;
