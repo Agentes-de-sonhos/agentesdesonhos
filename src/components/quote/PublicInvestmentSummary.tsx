@@ -7,11 +7,14 @@ import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import { SERVICE_TYPE_LABELS } from "@/types/quote";
 import { extractServicePaymentConfig, extractFlightFeeInfo, calculateServicePayment } from "@/lib/servicePayment";
 import { cn } from "@/lib/utils";
+import { formatQuoteCurrency, getQuoteCurrencyInfo, type QuoteCurrency } from "@/lib/quoteCurrency";
 
-/** Formatação BRL única, igual ao restante do orçamento público. */
-function fmt(value: number) {
-  if (!Number.isFinite(value)) return "—";
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+/** Formatação na moeda do orçamento. */
+function makeFmt(currency: QuoteCurrency) {
+  return (value: number) => {
+    if (!Number.isFinite(value)) return "—";
+    return formatQuoteCurrency(value, currency);
+  };
 }
 
 const SERVICE_ICON: Record<ServiceType, typeof Plane> = {
@@ -87,6 +90,7 @@ function buildPaymentInfo(
   service: QuoteService,
   global: PublicInvestmentSummaryProps["globalPayment"],
   useServicePayment: boolean,
+  fmt: (v: number) => string,
 ): PaymentInfo {
   const cfg = extractServicePaymentConfig(service as any);
   if (useServicePayment && cfg.is_custom_payment && cfg.payment_type) {
@@ -167,6 +171,8 @@ export function PublicInvestmentSummary({
   useServicePayment,
   paymentTerms,
 }: PublicInvestmentSummaryProps) {
+  const { currency } = getQuoteCurrencyInfo(quote);
+  const fmt = useMemo(() => makeFmt(currency), [currency]);
   const totalAll = useMemo(
     () => services.reduce((s, x) => s + (Number(x.amount) || 0), 0),
     [services],
@@ -175,7 +181,7 @@ export function PublicInvestmentSummary({
   const items: GroupItem[] = useMemo(() => {
     if (groupingMode === "ungrouped") {
       return services.map((s) => {
-        const payment = buildPaymentInfo(s, globalPayment, useServicePayment);
+        const payment = buildPaymentInfo(s, globalPayment, useServicePayment, fmt);
         const sd: any = (s as any).service_data || {};
         const serviceName = (s as any).service_name || sd.hotel_name || sd.airline || sd.cruise_line || sd.operator || SERVICE_TYPE_LABELS[s.service_type];
         const subtitle = s.option_label || (sd.supplier && sd.supplier !== serviceName ? sd.supplier : undefined);
@@ -193,7 +199,7 @@ export function PublicInvestmentSummary({
     // Agrupamento por tipo + assinatura de condição de pagamento
     const buckets = new Map<string, GroupItem>();
     for (const s of services) {
-      const payment = buildPaymentInfo(s, globalPayment, useServicePayment);
+      const payment = buildPaymentInfo(s, globalPayment, useServicePayment, fmt);
       const key = `${s.service_type}__${payment.signature}`;
       const existing = buckets.get(key);
       const amount = Number(s.amount) || 0;
@@ -214,7 +220,7 @@ export function PublicInvestmentSummary({
       }
     }
     return Array.from(buckets.values());
-  }, [services, groupingMode, globalPayment, useServicePayment]);
+  }, [services, groupingMode, globalPayment, useServicePayment, fmt]);
 
   const showTotalCard = displayMode === "both";
   const discountPct = globalPayment.fullPaymentDiscountPercent || 0;
