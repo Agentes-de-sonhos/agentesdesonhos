@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-19",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "language": "pt-BR",
   "fields": [
     "id",
@@ -179,7 +179,7 @@
       }
     ]
   },
-  "last_updated": "2026-06-19",
+  "last_updated": "2026-06-22",
   "waves": {
     "onda-1": {
       "data": "2026-06-18",
@@ -195,11 +195,20 @@
         "equipe-e-permissoes"
       ],
       "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
+    },
+    "onda-2-2b": {
+      "data": "2026-06-22",
+      "modulos_aprofundados": [
+        "faturas",
+        "suporte"
+      ],
+      "novos_chunks_confirmados": 78,
+      "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
     }
   },
   "versao": "2.0.0",
   "ultima_atualizacao": "2026-06-19",
-  "total_chunks": 608,
+  "total_chunks": 686,
   "historico": [
     {
       "versao": "1.2.0",
@@ -230,6 +239,12 @@
       "data": "2026-06-19",
       "descricao": "Subonda 2A (Entradas + Despesas): 82 chunks adicionados — 41 Entradas + 41 Despesas.",
       "chunks_adicionados": 82
+    },
+    {
+      "versao": "2.1.0",
+      "data": "2026-06-22",
+      "descricao": "Subonda 2B (Faturas + Suporte): chunks adicionados.",
+      "chunks_adicionados": 78
     }
   ]
 }

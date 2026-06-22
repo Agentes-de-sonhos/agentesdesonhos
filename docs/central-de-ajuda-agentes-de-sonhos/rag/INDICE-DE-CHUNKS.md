@@ -360,3 +360,22 @@ Total atual no BASE-RAG.jsonl: **526 chunks**.
 - Boas práticas: dp-bp-01..04
 
 **Total acumulado:** 608 chunks (Manifesto RAG v2.0.0).
+
+
+## Subonda 2B — Faturas + Suporte (2026-06-22)
+
+### Faturas (41 chunks no módulo, 39 publicados como novos nesta subonda — visão e primeiros passos já existiam)
+- faturas-visao-geral, faturas-primeiros-passos
+- FAQs: ft-faq-01..20
+- Tutoriais: ft-tut-01..10
+- Problemas comuns: ft-prob-01..05
+- Boas práticas: ft-bp-01..04
+
+### Suporte (41 chunks no módulo, 39 publicados como novos nesta subonda — visão e primeiros passos já existiam)
+- suporte-visao-geral, suporte-primeiros-passos
+- FAQs: sp-faq-01..20
+- Tutoriais: sp-tut-01..10
+- Problemas comuns: sp-prob-01..05
+- Boas práticas: sp-bp-01..04
+
+**Total acumulado:** 686 chunks (Manifesto RAG v2.1.0).
