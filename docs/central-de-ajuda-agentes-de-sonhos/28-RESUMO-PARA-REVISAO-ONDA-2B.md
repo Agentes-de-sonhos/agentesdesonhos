@@ -1,7 +1,7 @@
 # 28 — Resumo para revisão externa da Subonda 2B (Faturas + Suporte)
 
 ## 1. Resumo executivo
-A Subonda 2B foi concluída com 82 chunks novos publicados no RAG (Faturas: 41; Suporte: 41). O Manifesto RAG passou da versão 2.0.0 para 2.1.0 e o total de chunks confirmados publicados subiu de 608 para 686. Nenhuma alteração foi feita em código, banco de dados, migrations, políticas, Edge Functions, integrações ou na Base de Conhecimento Mestre.
+A Subonda 2B foi concluída com 78 chunks novos (4 visões/primeiros-passos já estavam publicados desde ondas anteriores) publicados no RAG (Faturas: 41; Suporte: 41). O Manifesto RAG passou da versão 2.0.0 para 2.1.0 e o total de chunks confirmados publicados subiu de 608 para 686. Nenhuma alteração foi feita em código, banco de dados, migrations, políticas, Edge Functions, integrações ou na Base de Conhecimento Mestre.
 
 ## 2. Resultado de Faturas
 - 20 FAQs canônicas confirmadas.

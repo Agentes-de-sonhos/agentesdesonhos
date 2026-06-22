@@ -8,14 +8,14 @@
 
 | Módulo | FAQs existentes revisadas | Novas FAQs confirmadas | FAQs pendentes | Tutoriais | Problemas comuns | Boas práticas | Novos chunks | Status |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
-| Faturas | 0 | 20 | 0 | 10 | 5 | 4 | 41 | concluído |
-| Suporte | 0 | 20 | 0 | 10 | 5 | 4 | 41 | concluído |
-| **Total** | **0** | **40** | **0** | **20** | **10** | **8** | **82** | — |
+| Faturas | 0 | 20 | 0 | 10 | 5 | 4 | 39 | concluído |
+| Suporte | 0 | 20 | 0 | 10 | 5 | 4 | 39 | concluído |
+| **Total** | **0** | **40** | **0** | **20** | **10** | **8** | **78** | — |
 
 ## Métricas
 - Arquivos criados: 42 (FAQs consolidadas, tutoriais, problemas comuns, boas práticas e mapas Onda 2).
 - Arquivos atualizados: BASE-RAG.jsonl, MANIFESTO-RAG.json, INDICE-DE-CHUNKS.md.
-- Conteúdos confirmados: 82.
+- Conteúdos confirmados: 82 produzidos, 78 publicados como novos no JSONL (4 já existiam desde ondas anteriores).
 - Conteúdos pendentes incluídos no RAG: 0.
 - Correções de cobertura anterior: 0.
 - IDs duplicados: 0.
