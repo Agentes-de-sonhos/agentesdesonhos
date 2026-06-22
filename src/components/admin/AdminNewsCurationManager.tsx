@@ -245,6 +245,18 @@ export function AdminNewsCurationManager() {
     },
   });
 
+  const showPendingWithoutFilters = () => {
+    setFilterStatus("pendente");
+    setFilterFonte("todas");
+    setFilterCategoria("todas");
+    setScoreRange("all");
+    setPerfilRange("all");
+    setSearch("");
+    setSortField("created_at");
+    setSortDir("desc");
+    setSelectedIds(new Set());
+  };
+
   const collectMutation = useMutation({
     mutationFn: async (params?: { since?: string; sources?: string[]; reset?: boolean }) => {
       const body: Record<string, unknown> = {};
@@ -258,11 +270,12 @@ export function AdminNewsCurationManager() {
       return data;
     },
     onSuccess: (data) => {
+      showPendingWithoutFilters();
       queryClient.invalidateQueries({ queryKey: ["admin-noticias-curadas"] });
       setCollectDialogOpen(false);
       toast({
         title: "Coleta concluída!",
-        description: `${data.fetched || 0} notícias coletadas, ${data.curated || 0} curadas pela IA`,
+        description: `${data.fetched || 0} notícias coletadas, ${data.curated || 0} curadas pela IA. Mostrando pendentes sem filtros.`,
       });
     },
     onError: (error) => {
@@ -594,6 +607,9 @@ export function AdminNewsCurationManager() {
             <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-40" />
             <p>Nenhuma notícia encontrada com os filtros atuais</p>
             <p className="text-sm mt-1">Ajuste os filtros ou clique em "Coletar Agora" para buscar novas notícias</p>
+            <Button variant="outline" size="sm" className="mt-4" onClick={showPendingWithoutFilters}>
+              Mostrar pendentes sem filtros
+            </Button>
           </div>
         ) : (
           <div className="space-y-3">
