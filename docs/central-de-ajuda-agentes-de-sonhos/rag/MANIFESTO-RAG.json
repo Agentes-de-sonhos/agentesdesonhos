@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-19",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "language": "pt-BR",
   "fields": [
     "id",
@@ -204,11 +204,20 @@
       ],
       "novos_chunks_confirmados": 78,
       "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
+    },
+    "onda-2-2c": {
+      "data": "2026-06-22",
+      "modulos_aprofundados": [
+        "configuracoes",
+        "agenda"
+      ],
+      "novos_chunks_confirmados": 78,
+      "criterio": "Somente chunks com confianca=confirmado e status=pronto foram publicados no BASE-RAG.jsonl."
     }
   },
   "versao": "2.0.0",
   "ultima_atualizacao": "2026-06-19",
-  "total_chunks": 686,
+  "total_chunks": 764,
   "historico": [
     {
       "versao": "1.2.0",
@@ -244,6 +253,12 @@
       "versao": "2.1.0",
       "data": "2026-06-22",
       "descricao": "Subonda 2B (Faturas + Suporte): chunks adicionados.",
+      "chunks_adicionados": 78
+    },
+    {
+      "versao": "2.2.0",
+      "data": "2026-06-22",
+      "descricao": "Subonda 2C (Configurações, Conta e Onboarding + Agenda): chunks adicionados.",
       "chunks_adicionados": 78
     }
   ]
