@@ -76,7 +76,7 @@ interface NoticiasDashboard {
 
 const CATEGORIAS = ["Aéreo", "Turismo", "Destinos", "Cruzeiros", "Mercado", "Eventos"];
 
-const FILTERS_STORAGE_KEY = "admin-news-curation-filters-v1";
+const FILTERS_STORAGE_KEY = "admin-news-curation-filters-v2";
 
 type SortField = "relevancia_score" | "score_perfil" | "data_publicacao" | "created_at";
 type SortDir = "desc" | "asc";
