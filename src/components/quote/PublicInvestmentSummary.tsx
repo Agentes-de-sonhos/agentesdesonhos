@@ -177,8 +177,8 @@ export function PublicInvestmentSummary({
       return services.map((s) => {
         const payment = buildPaymentInfo(s, globalPayment, useServicePayment);
         const sd: any = (s as any).service_data || {};
-        const subtitle = sd.supplier || sd.airline || sd.hotel_name || sd.cruise_line || sd.operator || undefined;
-        const serviceName = (s as any).service_name || s.option_label || sd.hotel_name || sd.airline || SERVICE_TYPE_LABELS[s.service_type];
+        const serviceName = (s as any).service_name || sd.hotel_name || sd.airline || sd.cruise_line || sd.operator || SERVICE_TYPE_LABELS[s.service_type];
+        const subtitle = s.option_label || (sd.supplier && sd.supplier !== serviceName ? sd.supplier : undefined);
         return {
           key: s.id,
           type: s.service_type,
