@@ -41,8 +41,15 @@ Conteúdos confirmados de Entradas, Despesas, Faturas, Suporte, Configurações 
 Todas as perguntas sobre: automações financeiras, recorrência, exclusões, SLA, NF, sincronização bidirecional, alteração de e-mail principal, propagação de marca em links públicos. Ver `chatbot/FALLBACK-E-ESCALONAMENTO.md`.
 
 ### Pendente
-19 decisões consolidadas em `31-DECISOES-PENDENTES-PROPRIETARIO-ONDA-2.md`.
+Nenhuma decisão pendente bloqueia o Chatbot MVP. As 19 decisões originalmente pendentes foram **resolvidas para o MVP** em 2026-06-22 (modo conservador, com fallback obrigatório). Ver `31-DECISOES-PENDENTES-PROPRIETARIO-ONDA-2.md` e `37-DECISOES-RESOLVIDAS-CHATBOT-MVP.md`.
 
 Data da finalização: 2026-06-22.
 
 *Nenhuma alteração funcional foi feita nesta onda.*
+
+## Prontidão para Chatbot MVP (atualizada em 2026-06-22)
+
+- Todos os módulos da Onda 2 estão **prontos para o MVP com fallback obrigatório**.
+- As 19 decisões pendentes foram resolvidas no modo conservador: o chatbot não promete automações, integrações ou prazos não confirmados.
+- Automações futuras (NF integrada, SLA público, recorrência nativa, notificações automáticas, upload de comprovantes, sincronização bidirecional total, propagação automática de marca, alteração livre de e-mail, exclusões financeiras automáticas) seguem como **evolução de produto** e não bloqueiam o MVP.
+- O Chatbot MVP pode ser planejado e ativado com base nas Ondas 1 e 2, respeitando `chatbot/FALLBACK-E-ESCALONAMENTO.md` e `chatbot/CONTEUDOS-NAO-PUBLICAVEIS.md`.

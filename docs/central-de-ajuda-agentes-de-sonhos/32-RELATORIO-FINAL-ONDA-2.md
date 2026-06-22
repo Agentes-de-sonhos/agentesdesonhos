@@ -93,3 +93,13 @@ Sequência sugerida, sem iniciar:
 
 ## 15.9 Confirmação de segurança
 Nenhuma alteração funcional foi feita: código, banco, migrations, políticas, Edge Functions, integrações, configurações e a Base de Conhecimento Mestre permanecem inalterados. Todas as mudanças desta subonda estão restritas a `docs/central-de-ajuda-agentes-de-sonhos/`.
+
+## 15.10 Consolidação das decisões pendentes (2026-06-22)
+
+As 19 decisões pendentes da Onda 2 (`DP-O2-01` a `DP-O2-19`) foram **resolvidas para o MVP do chatbot** em modo conservador. Cada decisão originou uma regra oficial de fallback registrada em `chatbot/FALLBACK-E-ESCALONAMENTO.md` e uma restrição em `chatbot/CONTEUDOS-NAO-PUBLICAVEIS.md`. O detalhamento completo está em `37-DECISOES-RESOLVIDAS-CHATBOT-MVP.md`.
+
+- 19 decisões processadas; 19 resolvidas para o MVP.
+- 0 decisões em aberto bloqueando o Chatbot MVP.
+- Automações e recursos não confirmados (NF integrada, SLA, recorrência, notificações automáticas, upload de comprovantes, sincronização bidirecional total, propagação automática de marca em links antigos, alteração livre de e-mail, exclusões financeiras automáticas) permanecem como **evolução futura de produto**.
+- Todos os módulos da Onda 2 mantêm a classificação "Pronto com fallback obrigatório".
+- Chatbot MVP pode ser planejado com segurança usando as Ondas 1 e 2, respeitando as regras de fallback e os conteúdos não publicáveis.
