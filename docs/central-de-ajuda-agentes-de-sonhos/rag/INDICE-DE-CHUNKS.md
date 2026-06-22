@@ -463,3 +463,16 @@ Total atual no BASE-RAG.jsonl: **526 chunks**.
 - `ag-bp-02` — Vincule eventos a clientes ou oportunidades sempre que possível (boas-praticas)
 - `ag-bp-03` — Revise sua agenda no início e no fim do dia (boas-praticas)
 - `ag-bp-04` — Evite duplicidades com o Google Calendar (boas-praticas)
+
+## Subonda 2D — Auditoria final da Onda 2
+
+- **Data:** 2026-06-22
+- **Tipo:** Auditoria final, sem novos artigos aprofundados.
+- **Total final de chunks:** 764.
+- **Módulos da Onda 2 auditados:** Entradas, Despesas, Faturas, Suporte, Configurações (Conta e Onboarding), Agenda.
+- **Chunks legados normalizados:** 74 (Gestão de Clientes: 37; Operações: 37).
+- **Campos preenchidos na normalização:** `title`, `content`, `module`, `submodule`, `type`, `audience`, `plan`, `permissions`, `intents`, `keywords`, `confidence`, `status`, `related_ids`, `source_reference`, `last_reviewed`.
+- **IDs preservados:** 74 (0 alterados).
+- **Pendências remanescentes:** decisões de produto listadas em `31-DECISOES-PENDENTES-PROPRIETARIO-ONDA-2.md`.
+- **Status final do RAG:** Estado B — Pronto com pendências pontuais (decisões de produto), sem corrupção, sem IDs duplicados, sem campos obrigatórios ausentes.
+- **Prontidão para chatbot:** liberado para chatbot MVP com fallback obrigatório nos temas indicados em `chatbot/FALLBACK-E-ESCALONAMENTO.md`.
