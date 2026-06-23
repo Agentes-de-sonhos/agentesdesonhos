@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useSubscription } from "@/hooks/useSubscription";
+import { shouldApplyPremiumFundadorFilter } from "@/lib/sidebarVisibility";
 
 // Lazy load heavy dashboard cards to reduce initial bundle
 const CuratedNewsFeed = lazy(() => import("@/components/dashboard/CuratedNewsFeed").then(m => ({ default: m.CuratedNewsFeed })));
@@ -63,6 +66,9 @@ const iconMap: Record<string, LucideIcon> = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { isAdmin } = useUserRole();
+  const { plan } = useSubscription();
+  const isSimplifiedDashboard = shouldApplyPremiumFundadorFilter(isAdmin, plan);
 
   // Register daily login for gamification
   const { registerDailyLogin } = useGamification();
@@ -198,34 +204,52 @@ export default function Dashboard() {
             </section>
 
             {/* 3. Radar do Turismo & EducaTravel Academy */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
-              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CuratedNewsFeed /></div>
-              <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard /></div>
-            </section>
+            {isSimplifiedDashboard ? (
+              <>
+                {/* Radar do Turismo & Comunidade */}
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-3">
+                  <div className="min-w-0"><CuratedNewsFeed /></div>
+                  <div className="min-w-0"><CommunitySocialFeed defaultExpanded /></div>
+                </section>
 
-            {/* 3b. Perguntas da Comunidade & Mapa do Turismo */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-[3.5]">
-              <div className="min-w-0"><CommunitySocialFeed /></div>
-              <div className="min-w-0"><MapaTurismoCard /></div>
-            </section>
+                {/* EducaTravel Academy & Mapa do Turismo */}
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-[3.5]">
+                  <div className="min-w-0"><AcademyCollapsibleCard /></div>
+                  <div className="min-w-0"><MapaTurismoCard alwaysExpanded /></div>
+                </section>
+              </>
+            ) : (
+              <>
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
+                  <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CuratedNewsFeed /></div>
+                  <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard /></div>
+                </section>
 
-            {/* 4. Clientes + Financeiro lado a lado */}
-            <section className="order-4 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
-              <div className="min-w-0"><ClientesCard /></div>
-              <div className="min-w-0"><FinanceiroCard /></div>
-            </section>
+                {/* 3b. Perguntas da Comunidade & Mapa do Turismo */}
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-[3.5]">
+                  <div className="min-w-0"><CommunitySocialFeed /></div>
+                  <div className="min-w-0"><MapaTurismoCard /></div>
+                </section>
 
-            {/* 5b. Marketing + Ferramentas do Agente lado a lado (alturas independentes) */}
-            <section className="order-[5.5] grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
-              <div className="min-w-0"><MarketingCard /></div>
-              <div className="min-w-0"><AgentToolsCard /></div>
-            </section>
+                {/* 4. Clientes + Financeiro lado a lado */}
+                <section className="order-4 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+                  <div className="min-w-0"><ClientesCard /></div>
+                  <div className="min-w-0"><FinanceiroCard /></div>
+                </section>
 
-            {/* 6. Recursos de Vendas + Guias e Referências lado a lado */}
-            <section className="order-6 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
-              <div className="min-w-0"><SalesResourcesCard /></div>
-              <div className="min-w-0"><GuidesReferencesCard /></div>
-            </section>
+                {/* 5b. Marketing + Ferramentas do Agente lado a lado (alturas independentes) */}
+                <section className="order-[5.5] grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+                  <div className="min-w-0"><MarketingCard /></div>
+                  <div className="min-w-0"><AgentToolsCard /></div>
+                </section>
+
+                {/* 6. Recursos de Vendas + Guias e Referências lado a lado */}
+                <section className="order-6 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+                  <div className="min-w-0"><SalesResourcesCard /></div>
+                  <div className="min-w-0"><GuidesReferencesCard /></div>
+                </section>
+              </>
+            )}
           </Suspense>
         )}
       </div>
