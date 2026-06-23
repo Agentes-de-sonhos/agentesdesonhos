@@ -88,14 +88,21 @@ export function useGoogleCalendar() {
         const pushErrors = data.push_errors?.length || 0;
         const pullErrors = data.pull_errors?.length || 0;
         const totalErrors = pushErrors + pullErrors;
+        const pCreated = data.pushed_created ?? 0;
+        const pUpdated = data.pushed_updated ?? 0;
+        const pSkipped = data.pushed_skipped ?? 0;
+        const lCreated = data.pulled_created ?? 0;
+        const lUpdated = data.pulled_updated ?? 0;
+        const lSkipped = data.pulled_skipped ?? 0;
+        const summary =
+          `Enviados: ${pCreated} criados, ${pUpdated} atualizados, ${pSkipped} ignorados · ` +
+          `Importados: ${lCreated} criados, ${lUpdated} atualizados, ${lSkipped} ignorados`;
         if (totalErrors > 0) {
-          toast.warning(
-            `Sincronizado parcialmente: ${data.pushed} enviados, ${data.pulled} importados, ${totalErrors} erro(s). Veja os logs.`
-          );
+          toast.warning(`${summary} · ${totalErrors} erro(s). Veja os logs.`);
           console.error("[calendar-sync] push_errors:", data.push_errors);
           console.error("[calendar-sync] pull_errors:", data.pull_errors);
         } else {
-          toast.success(`Sincronizado! ${data.pushed} enviados, ${data.pulled} importados`);
+          toast.success(`Sincronizado! ${summary}`);
         }
         await checkStatus();
       } else if (data?.error) {
