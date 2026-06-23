@@ -6,6 +6,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
 
 type QuoteDocument = {
@@ -823,7 +824,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           const installments = quote.installments_count || 10;
           const entryPct = quote.entry_percentage || 0;
           const discountPct = quote.full_payment_discount_percent || 0;
-          const methodLabel = quote.payment_method_label || "";
+          const methodLabel = formatPaymentMethodsInline(quote.payment_method_label) || "";
 
           let paymentHtml = "";
           if (mode === "installments") {

@@ -15,6 +15,7 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
+import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
@@ -1278,7 +1279,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           const installments = (quote as any).installments_count || 10;
           const entryPct = (quote as any).entry_percentage || 0;
           const discountPct = (quote as any).full_payment_discount_percent || 0;
-          const methodLabel = (quote as any).payment_method_label as string | null;
+          const methodLabel = formatPaymentMethodsInline((quote as any).payment_method_label) || null;
           const total = totalForBar;
           // Adicionais na entrada (somente no modo consolidado + parcelado com entrada)
           const entryExtras: QuoteEntryExtra[] =

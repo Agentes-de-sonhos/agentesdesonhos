@@ -64,6 +64,8 @@ import { AIImportServiceModal, type AIImportResult } from "@/components/shared/A
 import { Sparkles, Wallet } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
 import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { parsePaymentMethods, serializePaymentMethods, formatPaymentMethodsInline } from "@/lib/paymentMethods";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
@@ -102,6 +104,7 @@ const PAYMENT_MODE_OPTIONS_BOTH: { value: PaymentDisplayMode; label: string; des
 ];
 
 const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
+const PAYMENT_METHOD_SELECT_OPTIONS = PAYMENT_METHOD_OPTIONS.map((m) => ({ value: m, label: m }));
 
 function QuoteHistoryRow({
   q,
@@ -178,7 +181,7 @@ export default function GerarOrcamento() {
   const [paymentDisplayMode, setPaymentDisplayMode] = useState<PaymentDisplayMode>("full_payment");
   const [installmentsCount, setInstallmentsCount] = useState(10);
   const [entryPercentage, setEntryPercentage] = useState(30);
-  const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
   const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<InvestmentLayout>("legacy");
   const [hideInvestmentTotal, setHideInvestmentTotal] = useState(false);
@@ -238,11 +241,11 @@ export default function GerarOrcamento() {
     payment_display_mode: paymentDisplayMode,
     installments_count: installmentsCount,
     entry_percentage: entryPercentage,
-    payment_method_label: paymentMethodLabel || null,
+    payment_method_label: serializePaymentMethods(paymentMethods),
     full_payment_discount_percent: fullPaymentDiscountPercent,
     investment_summary_layout: investmentSummaryLayout,
     hide_investment_total: hideInvestmentTotal,
-  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, investmentSummaryLayout, hideInvestmentTotal]);
+  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethods, fullPaymentDiscountPercent, investmentSummaryLayout, hideInvestmentTotal]);
 
   const buildValiditySnapshot = useCallback(() => JSON.stringify({
     valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
@@ -263,7 +266,7 @@ export default function GerarOrcamento() {
       const initialPaymentDisplayMode = ((quote as any).payment_display_mode as PaymentDisplayMode) || "full_payment";
       const initialInstallmentsCount = (quote as any).installments_count || 10;
       const initialEntryPercentage = (quote as any).entry_percentage || 30;
-      const initialPaymentMethodLabel = (quote as any).payment_method_label || "";
+      const initialPaymentMethods = parsePaymentMethods((quote as any).payment_method_label);
       const initialFullPaymentDiscountPercent = (quote as any).full_payment_discount_percent || 0;
       const initialInvestmentSummaryLayout = ((quote as any).investment_summary_layout as InvestmentLayout | null) || "legacy";
       const initialHideInvestmentTotal = (quote as any).hide_investment_total || false;
@@ -274,7 +277,7 @@ export default function GerarOrcamento() {
       setPaymentDisplayMode(initialPaymentDisplayMode);
       setInstallmentsCount(initialInstallmentsCount);
       setEntryPercentage(initialEntryPercentage);
-      setPaymentMethodLabel(initialPaymentMethodLabel);
+      setPaymentMethods(initialPaymentMethods);
       setFullPaymentDiscountPercent(initialFullPaymentDiscountPercent);
       setUseServicePayment((quote as any).use_service_payment ?? false);
       setInvestmentSummaryLayout(initialInvestmentSummaryLayout);
@@ -285,7 +288,7 @@ export default function GerarOrcamento() {
         payment_display_mode: initialPaymentDisplayMode,
         installments_count: initialInstallmentsCount,
         entry_percentage: initialEntryPercentage,
-        payment_method_label: initialPaymentMethodLabel || null,
+        payment_method_label: serializePaymentMethods(initialPaymentMethods),
         full_payment_discount_percent: initialFullPaymentDiscountPercent,
         investment_summary_layout: initialInvestmentSummaryLayout,
         hide_investment_total: initialHideInvestmentTotal,
@@ -413,6 +416,14 @@ export default function GerarOrcamento() {
       setPaymentDisplayMode("full_payment");
     }
 
+    // Default: nos modos detalhados/agrupados, o total consolidado fica oculto.
+    // O usuário pode reverter manualmente. Mantém escolha existente nos demais casos.
+    let nextHideInvestmentTotal = hideInvestmentTotal;
+    if ((value === "ungrouped" || value === "grouped") && !hideInvestmentTotal) {
+      nextHideInvestmentTotal = true;
+      setHideInvestmentTotal(true);
+    }
+
     const { error } = await supabase
       .from("quotes")
       .update({
@@ -420,6 +431,7 @@ export default function GerarOrcamento() {
         show_investment_section: nextShowInvestment,
         show_detailed_prices: nextShowDetailed,
         payment_display_mode: nextPaymentMode,
+        hide_investment_total: nextHideInvestmentTotal,
       } as any)
       .eq("id", quote.id);
     if (error) {
@@ -434,6 +446,7 @@ export default function GerarOrcamento() {
         ...prev,
         investment_summary_layout: value,
         payment_display_mode: nextPaymentMode,
+        hide_investment_total: nextHideInvestmentTotal,
       });
     } catch { /* ignore */ }
     showAutoSavedFeedback();
@@ -1151,6 +1164,8 @@ export default function GerarOrcamento() {
 
                   <Separator />
 
+                  {effectiveLayout === "consolidated" && (
+                  <>
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
                     <p className="text-xs text-muted-foreground">
@@ -1190,22 +1205,15 @@ export default function GerarOrcamento() {
 
                   {paymentDisplayMode === "installments" && (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Nº de parcelas</Label>
                         <Input type="number" min={2} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-sm">Meio de pagamento</Label>
-                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                          <option value="">Selecione...</option>
-                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                        </select>
                       </div>
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
                             Destaque: <span className="font-bold">{installmentsCount}x de {fmt(quote.total_amount / (installmentsCount || 1))}</span>
-                            {paymentMethodLabel && <span className="text-muted-foreground font-normal"> no {paymentMethodLabel}</span>}
+                            {paymentMethods.length > 0 && <span className="text-muted-foreground font-normal"> via {formatPaymentMethodsInline(paymentMethods)}</span>}
                           </p>
                         </div>
                       )}
@@ -1221,13 +1229,6 @@ export default function GerarOrcamento() {
                       <div className="space-y-1.5">
                         <Label className="text-sm">Nº de parcelas (saldo)</Label>
                         <Input type="number" min={1} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-sm">Meio de pagamento</Label>
-                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                          <option value="">Selecione...</option>
-                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                        </select>
                       </div>
                       {quote && (() => {
                         const entry = quote.total_amount * (entryPercentage / 100);
@@ -1257,23 +1258,16 @@ export default function GerarOrcamento() {
 
                   {paymentDisplayMode === "full_payment" && (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Desconto à vista (%)</Label>
                         <Input type="number" min={0} max={50} value={fullPaymentDiscountPercent} onChange={(e) => setFullPaymentDiscountPercent(Number(e.target.value))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-sm">Meio de pagamento</Label>
-                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                          <option value="">Selecione...</option>
-                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                        </select>
                       </div>
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
                             Destaque: <span className="font-bold">{fmt(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
                             {fullPaymentDiscountPercent > 0 && (
-                              <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethodLabel ? ` via ${paymentMethodLabel}` : ""})</span>
+                              <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethods.length > 0 ? ` via ${formatPaymentMethodsInline(paymentMethods)}` : ""})</span>
                             )}
                           </p>
                         </div>
@@ -1289,6 +1283,24 @@ export default function GerarOrcamento() {
                           </p>
                         </div>
                       )}
+                  </>
+                  )}
+
+                  <Separator />
+
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">Meio de pagamento</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Selecione um ou mais meios de pagamento aceitos. Eles aparecerão para o cliente em todos os formatos de apresentação do investimento.
+                    </p>
+                    <MultiSelect
+                      options={PAYMENT_METHOD_SELECT_OPTIONS}
+                      selected={paymentMethods}
+                      onChange={setPaymentMethods}
+                      placeholder="Selecione os meios de pagamento..."
+                      searchPlaceholder="Buscar meio de pagamento..."
+                    />
+                  </div>
 
                   <Separator />
 
