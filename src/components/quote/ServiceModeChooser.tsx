@@ -93,8 +93,7 @@ export function ServiceModeChooser({
           onClick={() => onChoose(secondaryMode)}
           className={cn(
             "group text-left rounded-xl border bg-white p-4 transition-all",
-            "border-border hover:-translate-y-0.5 hover:shadow-sm",
-            `hover:${theme.borderStrong}`,
+            "border-border hover:-translate-y-0.5 hover:shadow-sm hover:border-foreground/30",
           )}
         >
           <div className="flex items-center gap-2 mb-2">
