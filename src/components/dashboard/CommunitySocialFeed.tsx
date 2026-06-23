@@ -53,7 +53,11 @@ function initials(name?: string | null) {
     .join("");
 }
 
-export function CommunitySocialFeed() {
+interface CommunitySocialFeedProps {
+  defaultExpanded?: boolean;
+}
+
+export function CommunitySocialFeed({ defaultExpanded = false }: CommunitySocialFeedProps = {}) {
   const { user } = useAuth();
   const { role } = useUserRole();
   const isAdmin = role === "admin";
@@ -70,7 +74,7 @@ export function CommunitySocialFeed() {
     deleteComment,
   } = useCommunityFeed();
 
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(!defaultExpanded);
   const [content, setContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
