@@ -305,6 +305,7 @@ export type Database = {
           event_time: string | null
           event_type: string
           event_url: string | null
+          followup_id: string | null
           id: string
           location_address: string | null
           location_city: string | null
@@ -324,6 +325,7 @@ export type Database = {
           event_time?: string | null
           event_type?: string
           event_url?: string | null
+          followup_id?: string | null
           id?: string
           location_address?: string | null
           location_city?: string | null
@@ -343,6 +345,7 @@ export type Database = {
           event_time?: string | null
           event_type?: string
           event_url?: string | null
+          followup_id?: string | null
           id?: string
           location_address?: string | null
           location_city?: string | null
@@ -357,6 +360,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_events_followup_id_fkey"
+            columns: ["followup_id"]
+            isOneToOne: true
+            referencedRelation: "opportunity_followups"
             referencedColumns: ["id"]
           },
           {
