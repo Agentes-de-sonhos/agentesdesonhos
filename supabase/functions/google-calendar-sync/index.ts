@@ -372,11 +372,11 @@ Deno.serve(async (req) => {
 
       try {
         if (existing) {
-          const res = await fetch(
+          const res = await fetchGoogle(
             `https://www.googleapis.com/calendar/v3/calendars/primary/events/${existing.google_event_id}`,
             {
               method: "PUT",
-              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify(googleEvent),
             }
           );
@@ -403,11 +403,11 @@ Deno.serve(async (req) => {
             console.log(`[calendar-sync] push-updated event=${event.id} google=${existing.google_event_id}`);
           }
         } else {
-          const res = await fetch(
+          const res = await fetchGoogle(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             {
               method: "POST",
-              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify(googleEvent),
             }
           );
@@ -466,9 +466,9 @@ Deno.serve(async (req) => {
         continue;
       }
       try {
-        const res = await fetch(
+        const res = await fetchGoogle(
           `https://www.googleapis.com/calendar/v3/calendars/primary/events/${mapping.google_event_id}`,
-          { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } }
+          { method: "DELETE" }
         );
         // 200/204 = deleted, 404/410 = already gone (treat as success)
         if (res.ok || res.status === 404 || res.status === 410) {
