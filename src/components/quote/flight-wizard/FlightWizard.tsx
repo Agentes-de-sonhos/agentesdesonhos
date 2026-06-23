@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { computeFlightStatus } from "./flightStatus";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments } from "@/lib/flightSegments";
+import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import type { SegmentType } from "@/types/quote";
 
 /* ─── Types ─── */
