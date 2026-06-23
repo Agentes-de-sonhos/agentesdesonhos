@@ -15,6 +15,14 @@ interface GoogleEvent {
   updated?: string;
 }
 
+function localEventSignature(event: any): string {
+  const title = String(event.title || "").trim().toLowerCase();
+  const date = String(event.event_date || "");
+  const time = event.event_time ? String(event.event_time).slice(0, 5) : "all-day";
+  const description = String(event.description || "").trim().toLowerCase();
+  return `${title}|${date}|${time}|${description}`;
+}
+
 async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number } | null> {
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -170,13 +178,19 @@ Deno.serve(async (req) => {
     }
 
     const syncMap = new Map((existingSyncs || []).map((s: any) => [s.agency_event_id, s]));
+    const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
+    const justPushedGoogleIds = new Set<string>();
     const localIds = new Set((localEvents || []).map((e: any) => e.id));
     const mappedInWindow = (localEvents || []).filter((e: any) => syncMap.has(e.id)).length;
     const unmappedInWindow = (localEvents || []).length - mappedInWindow;
     const orphanMappings = (existingSyncs || []).filter((s: any) => !localIds.has(s.agency_event_id)).length;
+    const mappedLocalSignatures = new Map<string, string>();
+    for (const event of localEvents || []) {
+      if (syncMap.has(event.id)) mappedLocalSignatures.set(localEventSignature(event), event.id);
+    }
 
     console.log(
-      `[calendar-sync] inventory local_events=${localEvents?.length || 0} existing_mappings=${existingSyncs?.length || 0} mapped_in_window=${mappedInWindow} unmapped_in_window=${unmappedInWindow} orphan_mappings_outside_window=${orphanMappings}`
+      `[calendar-sync] inventory local_events=${localEvents?.length || 0} existing_mappings=${existingSyncs?.length || 0} reverse_mappings=${reverseSyncMap.size} mapped_in_window=${mappedInWindow} unmapped_in_window=${unmappedInWindow} orphan_mappings_outside_window=${orphanMappings}`
     );
     let pushedCreated = 0;
     let pushedUpdated = 0;
