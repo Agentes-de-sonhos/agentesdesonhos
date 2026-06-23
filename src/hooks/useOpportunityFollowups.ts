@@ -4,6 +4,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 
+// Fire-and-forget trigger to push the mirrored agency_events to Google Calendar
+// immediately after a follow-up create/update/delete. Uses force:true to bypass
+// the 60s rate-limit so deletions propagate without waiting for the cron.
+function triggerGoogleCalendarSync() {
+  if (typeof window === "undefined") return;
+  setTimeout(() => {
+    supabase.functions
+      .invoke("google-calendar-sync", { body: { action: "sync", force: true } })
+      .catch(() => { /* cron will catch up */ });
+  }, 500);
+}
+
 export interface OpportunityFollowup {
   id: string;
   opportunity_id: string;
@@ -171,6 +183,8 @@ export function useOpportunityFollowups(opportunityId?: string) {
       queryClient.invalidateQueries({ queryKey: ["opportunity-followups", vars.opportunity_id] });
       queryClient.invalidateQueries({ queryKey: ["all-followups"] });
       queryClient.invalidateQueries({ queryKey: ["agenda-followups"] });
+      queryClient.invalidateQueries({ queryKey: ["agency-events"] });
+      triggerGoogleCalendarSync();
     },
     onError: (err: any) => {
       console.error("Erro ao salvar follow-ups:", err);
