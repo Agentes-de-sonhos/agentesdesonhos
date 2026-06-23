@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { parseLocalDateSafe } from "@/lib/dateParsing";
 import { CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,8 +78,8 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
     defaultValues: {
       client_id: opportunity?.client_id || "",
       destination: opportunity?.destination || "",
-      start_date: opportunity?.start_date ? new Date(opportunity.start_date) : undefined,
-      end_date: opportunity?.end_date ? new Date(opportunity.end_date) : undefined,
+      start_date: parseLocalDateSafe(opportunity?.start_date) || undefined,
+      end_date: parseLocalDateSafe(opportunity?.end_date) || undefined,
       adults_count: opportunity?.adults_count ?? opportunity?.passengers_count ?? 1,
       children_count: opportunity?.children_count ?? 0,
       estimated_value: opportunity?.estimated_value || 0,
