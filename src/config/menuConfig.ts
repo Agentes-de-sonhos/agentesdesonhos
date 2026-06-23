@@ -9,13 +9,14 @@ export interface MenuItemConfig {
 
 export const MAIN_MENU_ITEMS: MenuItemConfig[] = [
   { key: "inicio", label: "Início" },
-  { key: "section_conhecimento", label: "Conhecimento", isSection: true, sectionKey: "conhecimento" },
-  { key: "section_guias", label: "Guias e Referências", isSection: true, sectionKey: "guias" },
-  { key: "section_recursos_vendas", label: "Recursos de Vendas", isSection: true, sectionKey: "recursos_vendas" },
+  // Ordem das seções após a divisória do menu principal
   { key: "section_criar", label: "Criar", isSection: true, sectionKey: "criar" },
+  { key: "section_conhecimento", label: "Conhecimento", isSection: true, sectionKey: "conhecimento" },
   { key: "section_clientes", label: "Clientes", isSection: true, sectionKey: "clientes" },
   { key: "section_financeiro", label: "Financeiro", isSection: true, sectionKey: "financeiro" },
   { key: "section_marketing", label: "Ferramentas de Marketing", isSection: true, sectionKey: "marketing" },
+  { key: "section_guias", label: "Guias e Referências", isSection: true, sectionKey: "guias" },
+  { key: "section_recursos_vendas", label: "Recursos de Vendas", isSection: true, sectionKey: "recursos_vendas" },
 ];
 
 export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
