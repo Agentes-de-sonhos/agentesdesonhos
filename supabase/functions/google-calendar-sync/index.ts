@@ -201,13 +201,41 @@ Deno.serve(async (req) => {
     };
 
     try {
-    const accessToken = await getValidToken(supabase, tokenRecord);
+    let accessToken = await getValidToken(supabase, tokenRecord);
     if (!accessToken) {
       // Token refresh failed, remove stale record
       await releaseLock("error", "Token expirado");
       await supabase.from("google_calendar_tokens").delete().eq("user_id", userId);
       return new Response(JSON.stringify({ error: "Token expirado. Reconecte o Google Calendar." }), { status: 401, headers: corsHeaders });
     }
+
+    // Wrapper: on 401, refresh token once and retry the request.
+    const fetchGoogle = async (url: string, init: RequestInit = {}): Promise<Response> => {
+      const withAuth = (token: string): RequestInit => ({
+        ...init,
+        headers: { ...(init.headers || {}), Authorization: `Bearer ${token}` },
+      });
+      let res = await fetch(url, withAuth(accessToken!));
+      if (res.status !== 401) return res;
+      console.warn(`[calendar-sync] token-refresh-retry user=${userId} url=${url.split("?")[0]}`);
+      const refreshed = await refreshAccessToken(tokenRecord.refresh_token);
+      if (!refreshed) {
+        console.error(`[calendar-sync] token-refresh-failed user=${userId}`);
+        return res;
+      }
+      const newExpiry = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
+      await supabase
+        .from("google_calendar_tokens")
+        .update({ access_token: refreshed.access_token, token_expires_at: newExpiry, updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
+      accessToken = refreshed.access_token;
+      console.log(`[calendar-sync] token-refresh-success user=${userId}`);
+      res = await fetch(url, withAuth(accessToken!));
+      if (res.status === 401) {
+        console.error(`[calendar-sync] token-refresh-failed user=${userId} reason=still-401-after-refresh`);
+      }
+      return res;
+    };
 
     // Sync window: 30 days back → 730 days forward
     const now = new Date();
