@@ -229,9 +229,10 @@ export function ServiceModal(props: Props) {
             </div>
           )}
           <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
-          {!editingService && (
-            <ServiceFormHeader serviceType={serviceType} />
-          )}
+          <ServiceFormHeader
+            serviceType={serviceType}
+            subtitle={editingService ? `Edite os dados de ${SERVICE_TYPE_LABELS[serviceType].toLowerCase()}.` : undefined}
+          />
           <ServiceForm
             key={editingService?.id || `new-${serviceType}`}
             serviceType={serviceType}
