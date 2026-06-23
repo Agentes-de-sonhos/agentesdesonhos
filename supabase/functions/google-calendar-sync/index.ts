@@ -188,6 +188,17 @@ Deno.serve(async (req) => {
     for (const event of localEvents || []) {
       const existing = syncMap.get(event.id);
 
+      // Skip push if local event hasn't changed since last sync
+      if (existing && existing.last_synced_at && event.updated_at) {
+        const localUpdated = new Date(event.updated_at).getTime();
+        const lastSynced = new Date(existing.last_synced_at).getTime();
+        if (localUpdated <= lastSynced) {
+          pushedSkipped++;
+          console.log(`[calendar-sync] push-skipped event=${event.id} reason=unchanged-since-last-sync`);
+          continue;
+        }
+      }
+
       // Build start/end. If timed, ensure end >= start + 1h (Google rejects end == start).
       let start: Record<string, string>;
       let end: Record<string, string>;
@@ -233,6 +244,10 @@ Deno.serve(async (req) => {
             pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
           } else {
             pushedUpdated++;
+            await supabase
+              .from("google_calendar_sync")
+              .update({ last_synced_at: new Date().toISOString() })
+              .eq("id", existing.id);
             console.log(`[calendar-sync] push-updated event=${event.id} google=${existing.google_event_id}`);
           }
         } else {
@@ -256,6 +271,7 @@ Deno.serve(async (req) => {
               user_id: userId,
               agency_event_id: event.id,
               google_event_id: created.id,
+              last_synced_at: new Date().toISOString(),
             });
             pushedCreated++;
             console.log(`[calendar-sync] push-created event=${event.id} google=${created.id}`);
