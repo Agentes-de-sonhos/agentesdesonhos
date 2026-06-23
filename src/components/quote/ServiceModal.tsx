@@ -88,6 +88,12 @@ export function ServiceModal(props: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [linkMode, setLinkMode] = useState(false);
   const [pendingSupplier, setPendingSupplier] = useState<SupplierSelectorValue>({ operator_id: null, supplier_name: "" });
+  const [isChooserActive, setIsChooserActive] = useState(false);
+
+  // Reset chooser-active state when the modal is closed or the service changes
+  useEffect(() => {
+    if (!open) setIsChooserActive(false);
+  }, [open, serviceType]);
 
   // Show inline supplier section only when editing a service that already has a linked supplier
   const hasLinkedSupplier = Boolean(
@@ -138,7 +144,12 @@ export function ServiceModal(props: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden border-0 bg-muted">
+      <DialogContent
+        className={cn(
+          "max-w-4xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden border-0",
+          isChooserActive ? "bg-card" : "bg-muted"
+        )}
+      >
         <DialogHeader className="sr-only">
           <DialogTitle>
             {title}{optionNumber ? ` (Opção ${optionNumber})` : ""}
@@ -147,132 +158,187 @@ export function ServiceModal(props: Props) {
             Preencha os dados do serviço. As alterações são salvas ao clicar em Salvar.
           </DialogDescription>
         </DialogHeader>
-        <div
-          className={cn(
-            "flex-1 overflow-y-auto px-4 sm:px-6 pt-10 pb-6 space-y-4",
-            // Unified visual language for every service form (matches Flight pattern):
-            //  • Modal: solid light gray base (set on DialogContent above)
-            //  • Main card: white surface with a single solid, soft gray border
-            //  • Inputs/Selects/Textareas: solid soft gray fill with discrete border
-            "[&_input:not([type=checkbox]):not([type=radio]):not([type=file])]:bg-muted",
-            "[&_textarea]:bg-muted",
-            "[&_button[role=combobox]]:bg-muted",
-          )}
-        >
-          {hasLinkedSupplier && (
-            <div className="rounded-xl border border-border bg-card p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs text-muted-foreground">Fornecedor vinculado</p>
-                    <p className="text-sm font-medium truncate">
-                      {supplier.supplier_name || "Sem nome"}
-                    </p>
+        {isChooserActive ? (
+          // Chooser layout: white modal -> contextual header -> themed colored area
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-4 sm:px-6 pt-6 pb-2">
+              <ServiceFormHeader
+                serviceType={serviceType}
+                subtitle={editingService ? `Edite os dados de ${SERVICE_TYPE_LABELS[serviceType].toLowerCase()}.` : undefined}
+              />
+            </div>
+            <div className="px-4 sm:px-6 pb-6">
+              <ServiceForm
+                key={editingService?.id || `new-${serviceType}`}
+                serviceType={serviceType}
+                onSubmit={handleSubmit}
+                onCancel={() => onOpenChange(false)}
+                isLoading={isLoading}
+                showOptionLabel={isMulti}
+                tripStartDate={tripStartDate}
+                tripEndDate={tripEndDate}
+                adultsCount={adultsCount}
+                childrenCount={childrenCount}
+                initialData={editingService ? {
+                  service_data: editingService.service_data,
+                  amount: editingService.amount,
+                  option_label: editingService.option_label,
+                  description: editingService.description,
+                  image_url: editingService.image_url,
+                  image_urls: editingService.image_urls || [],
+                } : undefined}
+                paymentSlot={editingService ? (
+                  (liveAmount: number) => (
+                    <ServicePaymentForm
+                      amount={liveAmount || editingService.amount}
+                      config={servicePaymentConfigs[editingService.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
+                      onChange={(config) => onServicePaymentChange(editingService.id, config)}
+                      feeInfo={extractFlightFeeInfo(editingService)}
+                    />
+                  )
+                ) : (
+                  (liveAmount: number) => (
+                    <ServicePaymentForm
+                      amount={liveAmount}
+                      config={newServicePaymentConfig}
+                      onChange={setNewServicePaymentConfig}
+                    />
+                  )
+                )}
+                onChooserActiveChange={setIsChooserActive}
+              />
+            </div>
+          </div>
+        ) : (
+          // Form layout: gray modal -> white card with header + fields
+          <div
+            className={cn(
+              "flex-1 overflow-y-auto px-4 sm:px-6 pt-10 pb-6 space-y-4",
+              // Unified visual language for every service form (matches Flight pattern):
+              //  • Modal: solid light gray base (set on DialogContent above)
+              //  • Main card: white surface with a single solid, soft gray border
+              //  • Inputs/Selects/Textareas: solid soft gray fill with discrete border
+              "[&_input:not([type=checkbox]):not([type=radio]):not([type=file])]:bg-muted",
+              "[&_textarea]:bg-muted",
+              "[&_button[role=combobox]]:bg-muted",
+            )}
+          >
+            {hasLinkedSupplier && (
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">Fornecedor vinculado</p>
+                      <p className="text-sm font-medium truncate">
+                        {supplier.supplier_name || "Sem nome"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditSupplierOpen((v) => !v)}
+                    >
+                      {editSupplierOpen ? "Fechar" : "Alterar"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSupplier({ operator_id: null, supplier_name: "" })}
+                      title="Remover fornecedor"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditSupplierOpen((v) => !v)}
-                  >
-                    {editSupplierOpen ? "Fechar" : "Alterar"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSupplier({ operator_id: null, supplier_name: "" })}
-                    title="Remover fornecedor"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Collapsible open={editSupplierOpen} onOpenChange={setEditSupplierOpen}>
+                  <CollapsibleContent className="pt-3">
+                    <SupplierSelector value={supplier} onChange={setSupplier} />
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      A alteração será aplicada ao salvar o serviço.
+                    </p>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
-              <Collapsible open={editSupplierOpen} onOpenChange={setEditSupplierOpen}>
-                <CollapsibleContent className="pt-3">
-                  <SupplierSelector value={supplier} onChange={setSupplier} />
-                  <p className="mt-1.5 text-xs text-muted-foreground">
-                    A alteração será aplicada ao salvar o serviço.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
-          {editingService && !hasLinkedSupplier && (
-            <div className="flex items-center justify-between rounded-xl border border-dashed border-border bg-card p-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Building2 className="h-4 w-4" />
-                Nenhum fornecedor vinculado
-                {supplier.supplier_name ? (
-                  <span className="text-foreground font-medium">· {supplier.supplier_name}</span>
-                ) : null}
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setEditSupplierOpen((v) => !v)}
-              >
-                {editSupplierOpen ? "Fechar" : "Vincular"}
-              </Button>
-            </div>
-          )}
-          {editingService && !hasLinkedSupplier && editSupplierOpen && (
-            <div className="rounded-xl border border-border bg-card p-4">
-              <SupplierSelector value={supplier} onChange={setSupplier} />
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                A vinculação será aplicada ao salvar o serviço.
-              </p>
-            </div>
-          )}
-          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
-          <ServiceFormHeader
-            serviceType={serviceType}
-            subtitle={editingService ? `Edite os dados de ${SERVICE_TYPE_LABELS[serviceType].toLowerCase()}.` : undefined}
-          />
-          <ServiceForm
-            key={editingService?.id || `new-${serviceType}`}
-            serviceType={serviceType}
-            onSubmit={handleSubmit}
-            onCancel={() => onOpenChange(false)}
-            isLoading={isLoading}
-            showOptionLabel={isMulti}
-            tripStartDate={tripStartDate}
-            tripEndDate={tripEndDate}
-            adultsCount={adultsCount}
-            childrenCount={childrenCount}
-            initialData={editingService ? {
-              service_data: editingService.service_data,
-              amount: editingService.amount,
-              option_label: editingService.option_label,
-              description: editingService.description,
-              image_url: editingService.image_url,
-              image_urls: editingService.image_urls || [],
-            } : undefined}
-            paymentSlot={editingService ? (
-              (liveAmount: number) => (
-                <ServicePaymentForm
-                  amount={liveAmount || editingService.amount}
-                  config={servicePaymentConfigs[editingService.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
-                  onChange={(config) => onServicePaymentChange(editingService.id, config)}
-                  feeInfo={extractFlightFeeInfo(editingService)}
-                />
-              )
-            ) : (
-              (liveAmount: number) => (
-                <ServicePaymentForm
-                  amount={liveAmount}
-                  config={newServicePaymentConfig}
-                  onChange={setNewServicePaymentConfig}
-                />
-              )
             )}
-          />
+            {editingService && !hasLinkedSupplier && (
+              <div className="flex items-center justify-between rounded-xl border border-dashed border-border bg-card p-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Building2 className="h-4 w-4" />
+                  Nenhum fornecedor vinculado
+                  {supplier.supplier_name ? (
+                    <span className="text-foreground font-medium">· {supplier.supplier_name}</span>
+                  ) : null}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditSupplierOpen((v) => !v)}
+                >
+                  {editSupplierOpen ? "Fechar" : "Vincular"}
+                </Button>
+              </div>
+            )}
+            {editingService && !hasLinkedSupplier && editSupplierOpen && (
+              <div className="rounded-xl border border-border bg-card p-4">
+                <SupplierSelector value={supplier} onChange={setSupplier} />
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  A vinculação será aplicada ao salvar o serviço.
+                </p>
+              </div>
+            )}
+            <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
+              <ServiceFormHeader
+                serviceType={serviceType}
+                subtitle={editingService ? `Edite os dados de ${SERVICE_TYPE_LABELS[serviceType].toLowerCase()}.` : undefined}
+              />
+              <ServiceForm
+                key={editingService?.id || `new-${serviceType}`}
+                serviceType={serviceType}
+                onSubmit={handleSubmit}
+                onCancel={() => onOpenChange(false)}
+                isLoading={isLoading}
+                showOptionLabel={isMulti}
+                tripStartDate={tripStartDate}
+                tripEndDate={tripEndDate}
+                adultsCount={adultsCount}
+                childrenCount={childrenCount}
+                initialData={editingService ? {
+                  service_data: editingService.service_data,
+                  amount: editingService.amount,
+                  option_label: editingService.option_label,
+                  description: editingService.description,
+                  image_url: editingService.image_url,
+                  image_urls: editingService.image_urls || [],
+                } : undefined}
+                paymentSlot={editingService ? (
+                  (liveAmount: number) => (
+                    <ServicePaymentForm
+                      amount={liveAmount || editingService.amount}
+                      config={servicePaymentConfigs[editingService.id] || { is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null }}
+                      onChange={(config) => onServicePaymentChange(editingService.id, config)}
+                      feeInfo={extractFlightFeeInfo(editingService)}
+                    />
+                  )
+                ) : (
+                  (liveAmount: number) => (
+                    <ServicePaymentForm
+                      amount={liveAmount}
+                      config={newServicePaymentConfig}
+                      onChange={setNewServicePaymentConfig}
+                    />
+                  )
+                )}
+                onChooserActiveChange={setIsChooserActive}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </DialogContent>
       <AlertDialog open={confirmOpen} onOpenChange={(o) => { setConfirmOpen(o); if (!o) setLinkMode(false); }}>
         <AlertDialogContent>
