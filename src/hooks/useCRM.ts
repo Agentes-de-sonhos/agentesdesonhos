@@ -47,16 +47,39 @@ export function useClients() {
     }) => {
       if (!ensurePermission('clients.create')) denyAction();
       if (!user) throw new Error("Not authenticated");
+      const ownerId = agencyOwnerId || user.id;
+      const normalizedEmail = data.email ? data.email.trim().toLowerCase() : null;
+      if (normalizedEmail) {
+        const { data: existing } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("user_id", ownerId)
+          .eq("email", normalizedEmail)
+          .maybeSingle();
+        if (existing) {
+          const err: any = new Error("Já existe um cliente cadastrado com este e-mail.");
+          err.code = "DUPLICATE_EMAIL";
+          throw err;
+        }
+      }
       const { data: result, error } = await supabase
         .from("clients")
         .insert({
           ...data,
-          user_id: agencyOwnerId || user.id,
+          email: normalizedEmail,
+          user_id: ownerId,
           status: data.status || "lead",
         })
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === "23505") {
+          const err: any = new Error("Já existe um cliente cadastrado com este e-mail.");
+          err.code = "DUPLICATE_EMAIL";
+          throw err;
+        }
+        throw error;
+      }
       return result as Client;
     },
     onSuccess: (result) => {
@@ -74,8 +97,34 @@ export function useClients() {
   const updateClientMutation = useMutation({
     mutationFn: async ({ id, ...data }: Partial<Client> & { id: string }) => {
       if (!ensurePermission('clients.edit')) denyAction();
-      const { error } = await supabase.from("clients").update(data).eq("id", id);
-      if (error) throw error;
+      const payload: any = { ...data };
+      if (Object.prototype.hasOwnProperty.call(payload, "email")) {
+        payload.email = payload.email ? String(payload.email).trim().toLowerCase() : null;
+      }
+      if (payload.email) {
+        const ownerId = agencyOwnerId || user?.id;
+        const { data: existing } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("user_id", ownerId)
+          .eq("email", payload.email)
+          .neq("id", id)
+          .maybeSingle();
+        if (existing) {
+          const err: any = new Error("Já existe um cliente cadastrado com este e-mail.");
+          err.code = "DUPLICATE_EMAIL";
+          throw err;
+        }
+      }
+      const { error } = await supabase.from("clients").update(payload).eq("id", id);
+      if (error) {
+        if ((error as any).code === "23505") {
+          const err: any = new Error("Já existe um cliente cadastrado com este e-mail.");
+          err.code = "DUPLICATE_EMAIL";
+          throw err;
+        }
+        throw error;
+      }
       return id;
     },
     onSuccess: (id) => {
