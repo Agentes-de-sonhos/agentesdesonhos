@@ -129,7 +129,7 @@ export function ServiceFormHeader({
           theme.borderStrong,
         )}
       >
-        <Icon className={cn("h-4.5 w-4.5", theme.iconStrong)} />
+        <Icon className={cn("h-4 w-4", theme.iconStrong)} />
       </span>
       <div className="min-w-0">
         <p className={cn("text-xs font-semibold uppercase tracking-wide", theme.textStrong)}>
