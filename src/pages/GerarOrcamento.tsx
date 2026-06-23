@@ -102,6 +102,7 @@ const PAYMENT_MODE_OPTIONS_BOTH: { value: PaymentDisplayMode; label: string; des
 ];
 
 const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
+const PAYMENT_METHOD_SELECT_OPTIONS = PAYMENT_METHOD_OPTIONS.map((m) => ({ value: m, label: m }));
 
 function QuoteHistoryRow({
   q,
