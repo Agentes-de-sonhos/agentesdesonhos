@@ -181,7 +181,7 @@ export default function GerarOrcamento() {
   const [paymentDisplayMode, setPaymentDisplayMode] = useState<PaymentDisplayMode>("full_payment");
   const [installmentsCount, setInstallmentsCount] = useState(10);
   const [entryPercentage, setEntryPercentage] = useState(30);
-  const [paymentMethodLabel, setPaymentMethodLabel] = useState("");
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
   const [fullPaymentDiscountPercent, setFullPaymentDiscountPercent] = useState(0);
   const [investmentSummaryLayout, setInvestmentSummaryLayout] = useState<InvestmentLayout>("legacy");
   const [hideInvestmentTotal, setHideInvestmentTotal] = useState(false);
@@ -241,11 +241,11 @@ export default function GerarOrcamento() {
     payment_display_mode: paymentDisplayMode,
     installments_count: installmentsCount,
     entry_percentage: entryPercentage,
-    payment_method_label: paymentMethodLabel || null,
+    payment_method_label: serializePaymentMethods(paymentMethods),
     full_payment_discount_percent: fullPaymentDiscountPercent,
     investment_summary_layout: investmentSummaryLayout,
     hide_investment_total: hideInvestmentTotal,
-  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethodLabel, fullPaymentDiscountPercent, investmentSummaryLayout, hideInvestmentTotal]);
+  }), [paymentTerms, paymentDisplayMode, installmentsCount, entryPercentage, paymentMethods, fullPaymentDiscountPercent, investmentSummaryLayout, hideInvestmentTotal]);
 
   const buildValiditySnapshot = useCallback(() => JSON.stringify({
     valid_until: validUntil ? format(validUntil, "yyyy-MM-dd") : null,
@@ -266,7 +266,7 @@ export default function GerarOrcamento() {
       const initialPaymentDisplayMode = ((quote as any).payment_display_mode as PaymentDisplayMode) || "full_payment";
       const initialInstallmentsCount = (quote as any).installments_count || 10;
       const initialEntryPercentage = (quote as any).entry_percentage || 30;
-      const initialPaymentMethodLabel = (quote as any).payment_method_label || "";
+      const initialPaymentMethods = parsePaymentMethods((quote as any).payment_method_label);
       const initialFullPaymentDiscountPercent = (quote as any).full_payment_discount_percent || 0;
       const initialInvestmentSummaryLayout = ((quote as any).investment_summary_layout as InvestmentLayout | null) || "legacy";
       const initialHideInvestmentTotal = (quote as any).hide_investment_total || false;
@@ -277,7 +277,7 @@ export default function GerarOrcamento() {
       setPaymentDisplayMode(initialPaymentDisplayMode);
       setInstallmentsCount(initialInstallmentsCount);
       setEntryPercentage(initialEntryPercentage);
-      setPaymentMethodLabel(initialPaymentMethodLabel);
+      setPaymentMethods(initialPaymentMethods);
       setFullPaymentDiscountPercent(initialFullPaymentDiscountPercent);
       setUseServicePayment((quote as any).use_service_payment ?? false);
       setInvestmentSummaryLayout(initialInvestmentSummaryLayout);
@@ -288,7 +288,7 @@ export default function GerarOrcamento() {
         payment_display_mode: initialPaymentDisplayMode,
         installments_count: initialInstallmentsCount,
         entry_percentage: initialEntryPercentage,
-        payment_method_label: initialPaymentMethodLabel || null,
+        payment_method_label: serializePaymentMethods(initialPaymentMethods),
         full_payment_discount_percent: initialFullPaymentDiscountPercent,
         investment_summary_layout: initialInvestmentSummaryLayout,
         hide_investment_total: initialHideInvestmentTotal,
