@@ -294,6 +294,7 @@ Deno.serve(async (req) => {
     );
 
     let pulledCreated = 0;
+    let pulledUpdated = 0;
     let pulledSkipped = 0;
     const pullErrors: Array<{ google_event_id?: string; status?: number; error: string }> = [];
     let googleEvents: GoogleEvent[] = [];
@@ -318,11 +319,6 @@ Deno.serve(async (req) => {
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled`);
           continue;
         }
-        if (reverseSyncMap.has(gEvent.id)) {
-          pulledSkipped++; skipAlreadyMapped++;
-          continue;
-        }
-
         const startDate = gEvent.start?.date || gEvent.start?.dateTime?.split("T")[0];
         if (!startDate) {
           pulledSkipped++; skipNoDate++;
@@ -333,6 +329,44 @@ Deno.serve(async (req) => {
         const startTime = gEvent.start?.dateTime
           ? gEvent.start.dateTime.split("T")[1]?.substring(0, 5)
           : null;
+
+        const mapped = reverseSyncMap.get(gEvent.id);
+        if (mapped) {
+          // Already mapped: update local only if Google version is newer than last sync
+          const gUpdated = gEvent.updated ? new Date(gEvent.updated).getTime() : 0;
+          const lastSynced = mapped.last_synced_at ? new Date(mapped.last_synced_at).getTime() : 0;
+          if (gUpdated <= lastSynced) {
+            pulledSkipped++; skipAlreadyMapped++;
+            continue;
+          }
+          try {
+            const { error: updErr } = await supabase
+              .from("agency_events")
+              .update({
+                title: gEvent.summary || "Sem título",
+                description: gEvent.description || null,
+                event_date: startDate,
+                event_time: startTime,
+              })
+              .eq("id", mapped.agency_event_id)
+              .eq("user_id", userId);
+            if (updErr) {
+              console.error(`[calendar-sync] pull-error update google=${gEvent.id} err=${updErr.message}`);
+              pullErrors.push({ google_event_id: gEvent.id, error: updErr.message });
+              continue;
+            }
+            await supabase
+              .from("google_calendar_sync")
+              .update({ last_synced_at: new Date().toISOString() })
+              .eq("id", mapped.id);
+            pulledUpdated++;
+            console.log(`[calendar-sync] pull-updated google=${gEvent.id} local=${mapped.agency_event_id}`);
+          } catch (e: any) {
+            console.error(`[calendar-sync] pull-error exception update google=${gEvent.id} err=${e?.message || e}`);
+            pullErrors.push({ google_event_id: gEvent.id, error: String(e?.message || e) });
+          }
+          continue;
+        }
 
         try {
           const { data: inserted, error: insErr } = await supabase
@@ -359,6 +393,7 @@ Deno.serve(async (req) => {
             user_id: userId,
             agency_event_id: inserted.id,
             google_event_id: gEvent.id,
+            last_synced_at: new Date().toISOString(),
           });
           pulledCreated++;
           console.log(`[calendar-sync] pull-created google=${gEvent.id} local=${inserted.id}`);
@@ -369,7 +404,7 @@ Deno.serve(async (req) => {
       }
 
       console.log(
-        `[calendar-sync] pull-summary skipped_cancelled=${skipCancelled} skipped_already_mapped=${skipAlreadyMapped} skipped_no_date=${skipNoDate}`
+        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} skipped_cancelled=${skipCancelled} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_no_date=${skipNoDate}`
       );
     }
 
@@ -380,9 +415,9 @@ Deno.serve(async (req) => {
       .eq("user_id", userId);
 
     const pushed = pushedCreated + pushedUpdated;
-    const pulled = pulledCreated;
+    const pulled = pulledCreated + pulledUpdated;
     console.log(
-      `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} total_google=${googleEvents.length}`
+      `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_updated=${pulledUpdated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} total_google=${googleEvents.length}`
     );
 
     return new Response(
@@ -394,6 +429,7 @@ Deno.serve(async (req) => {
         pushed_updated: pushedUpdated,
         pushed_skipped: pushedSkipped,
         pulled_created: pulledCreated,
+        pulled_updated: pulledUpdated,
         pulled_skipped: pulledSkipped,
         total_google: googleEvents.length,
         push_errors: pushErrors,
