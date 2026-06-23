@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
 import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
@@ -200,7 +201,12 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     const entries: MenuEntry[] = [];
 
     for (const section of allSections) {
-      const sortedItems = [...section.items].sort((a, b) => {
+      if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
+      const filteredItems = section.items.filter(
+        (it) => !isItemHiddenForUser(it.key, isAdmin, plan)
+      );
+      if (filteredItems.length === 0) continue;
+      const sortedItems = filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
@@ -245,7 +251,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     }
 
     return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan]);
+  }, [allSections, standaloneItems, orderMap, isStartPlan, isAdmin, plan]);
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
   const startPlanLockedUrls = ["/comunidade", "/cursos", "/beneficios"];

@@ -62,6 +62,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
+import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import {
   Tooltip,
   TooltipContent,
@@ -356,8 +357,11 @@ export function AppSidebar() {
     const entries: MenuEntry[] = [];
 
     for (const section of allSections) {
-      const filteredItems = section.items.filter(isPermittedForTeam);
-      if (isTeamMember && filteredItems.length === 0) continue;
+      if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
+      const filteredItems = section.items
+        .filter(isPermittedForTeam)
+        .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan));
+      if (filteredItems.length === 0) continue;
       const sortedItems = filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
@@ -405,7 +409,7 @@ export function AppSidebar() {
     }
 
     return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan, showStartPlanSection, isPermittedForTeam]);
+  }, [allSections, standaloneItems, orderMap, isStartPlan, showStartPlanSection, isPermittedForTeam, isAdmin, plan]);
 
   const toggleSection = (title: string) => {
     setUserInteracted(true);
