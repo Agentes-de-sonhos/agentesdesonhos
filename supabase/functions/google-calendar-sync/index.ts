@@ -423,6 +423,7 @@ Deno.serve(async (req) => {
       let skipNoDate = 0;
       let skipJustPushed = 0;
       let skipDuplicateLocal = 0;
+      let skipTombstone = 0;
 
       for (const gEvent of googleEvents) {
         if (justPushedGoogleIds.has(gEvent.id)) {
@@ -432,8 +433,40 @@ Deno.serve(async (req) => {
         }
 
         if (gEvent.status === "cancelled") {
-          pulledSkipped++; skipCancelled++;
-          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled`);
+          const cancelledMapping = reverseSyncMap.get(gEvent.id);
+          if (cancelledMapping && !cancelledMapping.deleted_at) {
+            console.log(`[calendar-sync] delete-local-start google=${gEvent.id} local=${cancelledMapping.agency_event_id}`);
+            try {
+              const tombstoneAt = new Date().toISOString();
+              const { error: softErr } = await supabase
+                .from("agency_events")
+                .update({ deleted_at: tombstoneAt, deleted_by_sync: true })
+                .eq("id", cancelledMapping.agency_event_id)
+                .eq("user_id", userId);
+              if (softErr) {
+                deleteErrors++;
+                console.error(`[calendar-sync] delete-local-error google=${gEvent.id} local=${cancelledMapping.agency_event_id} err=${softErr.message}`);
+                pullErrors.push({ google_event_id: gEvent.id, error: softErr.message });
+                continue;
+              }
+              await supabase
+                .from("google_calendar_sync")
+                .update({ deleted_at: tombstoneAt, last_synced_at: tombstoneAt })
+                .eq("id", cancelledMapping.id);
+              cancelledMapping.deleted_at = tombstoneAt;
+              reverseSyncMap.set(gEvent.id, cancelledMapping);
+              syncMap.set(cancelledMapping.agency_event_id, cancelledMapping);
+              deletedLocal++;
+              console.log(`[calendar-sync] delete-local-success google=${gEvent.id} local=${cancelledMapping.agency_event_id}`);
+            } catch (e: any) {
+              deleteErrors++;
+              console.error(`[calendar-sync] delete-local-error exception google=${gEvent.id} err=${e?.message || e}`);
+              pullErrors.push({ google_event_id: gEvent.id, error: String(e?.message || e) });
+            }
+          } else {
+            pulledSkipped++; skipCancelled++;
+            console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled-${cancelledMapping ? "already-tombstoned" : "unmapped"}`);
+          }
           continue;
         }
         const startDate = gEvent.start?.date || gEvent.start?.dateTime?.split("T")[0];
@@ -449,6 +482,12 @@ Deno.serve(async (req) => {
 
         const mapped = reverseSyncMap.get(gEvent.id);
         if (mapped) {
+          // Tombstone guard: mapping already marked deleted → do not resurrect
+          if (mapped.deleted_at) {
+            pulledSkipped++; skipTombstone++;
+            console.log(`[calendar-sync] skipped-deleted google=${gEvent.id} reason=mapping-tombstone local=${mapped.agency_event_id}`);
+            continue;
+          }
           // Already mapped: update local only if Google version is newer than last sync
           const gUpdated = gEvent.updated ? new Date(gEvent.updated).getTime() : 0;
           const lastSynced = mapped.last_synced_at ? new Date(mapped.last_synced_at).getTime() : 0;
@@ -552,7 +591,7 @@ Deno.serve(async (req) => {
       }
 
       console.log(
-        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} skipped_cancelled=${skipCancelled} skipped_just_pushed=${skipJustPushed} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_duplicate_local=${skipDuplicateLocal} skipped_no_date=${skipNoDate}`
+        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} deleted_local=${deletedLocal} skipped_cancelled=${skipCancelled} skipped_tombstone=${skipTombstone} skipped_just_pushed=${skipJustPushed} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_duplicate_local=${skipDuplicateLocal} skipped_no_date=${skipNoDate}`
       );
     }
 
@@ -565,7 +604,7 @@ Deno.serve(async (req) => {
     const pushed = pushedCreated + pushedUpdated;
     const pulled = pulledCreated + pulledUpdated;
     console.log(
-      `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_updated=${pulledUpdated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} total_google=${googleEvents.length}`
+      `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_updated=${pulledUpdated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} deleted_google=${deletedGoogle} deleted_local=${deletedLocal} deleted_skipped=${deletedSkipped} delete_errors=${deleteErrors} total_google=${googleEvents.length}`
     );
 
     return new Response(
@@ -579,6 +618,10 @@ Deno.serve(async (req) => {
         pulled_created: pulledCreated,
         pulled_updated: pulledUpdated,
         pulled_skipped: pulledSkipped,
+        deleted_google: deletedGoogle,
+        deleted_local: deletedLocal,
+        deleted_skipped: deletedSkipped,
+        delete_errors: deleteErrors,
         total_google: googleEvents.length,
         push_errors: pushErrors,
         pull_errors: pullErrors,
