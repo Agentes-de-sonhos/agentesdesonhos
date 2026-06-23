@@ -288,16 +288,30 @@ Deno.serve(async (req) => {
     } else {
       const googleData = await googleRes.json();
       googleEvents = googleData.items || [];
-      console.log(`[calendar-sync] pull-start google_events=${googleEvents.length}`);
+      console.log(`[calendar-sync] pull-list google_events=${googleEvents.length}`);
 
       const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
+      let skipCancelled = 0;
+      let skipAlreadyMapped = 0;
+      let skipNoDate = 0;
 
       for (const gEvent of googleEvents) {
-        if (gEvent.status === "cancelled") { pulledSkipped++; continue; }
-        if (reverseSyncMap.has(gEvent.id)) { pulledSkipped++; continue; }
+        if (gEvent.status === "cancelled") {
+          pulledSkipped++; skipCancelled++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled`);
+          continue;
+        }
+        if (reverseSyncMap.has(gEvent.id)) {
+          pulledSkipped++; skipAlreadyMapped++;
+          continue;
+        }
 
         const startDate = gEvent.start?.date || gEvent.start?.dateTime?.split("T")[0];
-        if (!startDate) { pulledSkipped++; continue; }
+        if (!startDate) {
+          pulledSkipped++; skipNoDate++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=no-start-date`);
+          continue;
+        }
 
         const startTime = gEvent.start?.dateTime
           ? gEvent.start.dateTime.split("T")[1]?.substring(0, 5)
@@ -336,6 +350,10 @@ Deno.serve(async (req) => {
           pullErrors.push({ google_event_id: gEvent.id, error: String(e?.message || e) });
         }
       }
+
+      console.log(
+        `[calendar-sync] pull-summary skipped_cancelled=${skipCancelled} skipped_already_mapped=${skipAlreadyMapped} skipped_no_date=${skipNoDate}`
+      );
     }
 
     // Update last sync
