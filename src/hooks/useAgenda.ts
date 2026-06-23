@@ -65,6 +65,7 @@ export function useAgenda(year?: number) {
         .select("*")
         .eq("user_id", user.id)
         .is("deleted_at", null)
+        .neq("event_type", "followup")
         .gte("event_date", startDate)
         .lte("event_date", endDate)
         .order("event_date", { ascending: true });
