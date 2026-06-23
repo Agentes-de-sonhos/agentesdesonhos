@@ -52,6 +52,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import { Feature } from "@/types/subscription";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
@@ -266,7 +267,12 @@ export function MobileSidebar() {
     const entries: MenuEntry[] = [];
 
     for (const section of allSections) {
-      const sortedItems = [...section.items].sort((a, b) => {
+      if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
+      const filteredItems = section.items.filter(
+        (it) => !isItemHiddenForUser(it.key, isAdmin, plan)
+      );
+      if (filteredItems.length === 0) continue;
+      const sortedItems = filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
@@ -287,7 +293,7 @@ export function MobileSidebar() {
     }
 
     return entries.sort((a, b) => a.orderIdx - b.orderIdx);
-  }, [allSections, standaloneItems, orderMap]);
+  }, [allSections, standaloneItems, orderMap, isAdmin, plan]);
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
 
