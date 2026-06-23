@@ -202,6 +202,15 @@ Deno.serve(async (req) => {
     for (const event of localEvents || []) {
       const existing = syncMap.get(event.id);
 
+      if (!existing) {
+        const mappedTwinId = mappedLocalSignatures.get(localEventSignature(event));
+        if (mappedTwinId && mappedTwinId !== event.id) {
+          pushedSkipped++;
+          console.log(`[calendar-sync] push-skipped event=${event.id} reason=duplicate-of-mapped-local-event mapped_event=${mappedTwinId}`);
+          continue;
+        }
+      }
+
       // Skip push if local event hasn't changed since last sync
       if (existing && existing.last_synced_at && event.updated_at) {
         const localUpdated = new Date(event.updated_at).getTime();
@@ -257,11 +266,21 @@ Deno.serve(async (req) => {
             console.error(`[calendar-sync] push-error update event=${event.id} status=${res.status} body=${errText.slice(0, 300)}`);
             pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
           } else {
+            const syncedAt = new Date().toISOString();
             pushedUpdated++;
-            await supabase
+            const { error: mapUpdateErr } = await supabase
               .from("google_calendar_sync")
-              .update({ last_synced_at: new Date().toISOString() })
+              .update({ last_synced_at: syncedAt })
               .eq("id", existing.id);
+            if (mapUpdateErr) {
+              console.error(`[calendar-sync] mapping-error update event=${event.id} google=${existing.google_event_id} err=${mapUpdateErr.message}`);
+              pushErrors.push({ event_id: event.id, error: mapUpdateErr.message });
+            } else {
+              existing.last_synced_at = syncedAt;
+              syncMap.set(event.id, existing);
+              reverseSyncMap.set(existing.google_event_id, existing);
+              console.log(`[calendar-sync] mapping-updated event=${event.id} google=${existing.google_event_id} synced_at=${syncedAt}`);
+            }
             console.log(`[calendar-sync] push-updated event=${event.id} google=${existing.google_event_id}`);
           }
         } else {
@@ -281,13 +300,25 @@ Deno.serve(async (req) => {
           }
           const created = await res.json();
           if (created.id) {
-            await supabase.from("google_calendar_sync").insert({
+            const syncedAt = new Date().toISOString();
+            const { data: insertedMapping, error: mapInsertErr } = await supabase.from("google_calendar_sync").upsert({
               user_id: userId,
               agency_event_id: event.id,
               google_event_id: created.id,
-              last_synced_at: new Date().toISOString(),
-            });
+              last_synced_at: syncedAt,
+              sync_direction: "bidirectional",
+            }, { onConflict: "user_id,agency_event_id" }).select("*").single();
+            if (mapInsertErr || !insertedMapping) {
+              console.error(`[calendar-sync] mapping-error create event=${event.id} google=${created.id} err=${mapInsertErr?.message || "mapping upsert failed"}`);
+              pushErrors.push({ event_id: event.id, error: mapInsertErr?.message || "mapping upsert failed" });
+              continue;
+            }
+            syncMap.set(event.id, insertedMapping);
+            reverseSyncMap.set(created.id, insertedMapping);
+            mappedLocalSignatures.set(localEventSignature(event), event.id);
+            justPushedGoogleIds.add(created.id);
             pushedCreated++;
+            console.log(`[calendar-sync] mapping-created event=${event.id} google=${created.id} synced_at=${syncedAt}`);
             console.log(`[calendar-sync] push-created event=${event.id} google=${created.id}`);
           } else {
             pushedSkipped++;
