@@ -1193,22 +1193,15 @@ export default function GerarOrcamento() {
 
                   {paymentDisplayMode === "installments" && (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Nº de parcelas</Label>
                         <Input type="number" min={2} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-sm">Meio de pagamento</Label>
-                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                          <option value="">Selecione...</option>
-                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                        </select>
                       </div>
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
                             Destaque: <span className="font-bold">{installmentsCount}x de {fmt(quote.total_amount / (installmentsCount || 1))}</span>
-                            {paymentMethodLabel && <span className="text-muted-foreground font-normal"> no {paymentMethodLabel}</span>}
+                            {paymentMethods.length > 0 && <span className="text-muted-foreground font-normal"> via {formatPaymentMethodsInline(paymentMethods)}</span>}
                           </p>
                         </div>
                       )}
@@ -1224,13 +1217,6 @@ export default function GerarOrcamento() {
                       <div className="space-y-1.5">
                         <Label className="text-sm">Nº de parcelas (saldo)</Label>
                         <Input type="number" min={1} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-sm">Meio de pagamento</Label>
-                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                          <option value="">Selecione...</option>
-                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                        </select>
                       </div>
                       {quote && (() => {
                         const entry = quote.total_amount * (entryPercentage / 100);
@@ -1260,23 +1246,16 @@ export default function GerarOrcamento() {
 
                   {paymentDisplayMode === "full_payment" && (
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Desconto à vista (%)</Label>
                         <Input type="number" min={0} max={50} value={fullPaymentDiscountPercent} onChange={(e) => setFullPaymentDiscountPercent(Number(e.target.value))} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-sm">Meio de pagamento</Label>
-                        <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={paymentMethodLabel} onChange={(e) => setPaymentMethodLabel(e.target.value)}>
-                          <option value="">Selecione...</option>
-                          {PAYMENT_METHOD_OPTIONS.map((m) => <option key={m} value={m}>{m}</option>)}
-                        </select>
                       </div>
                       {quote && (
                         <div className="sm:col-span-2 rounded-lg bg-muted/50 p-3">
                           <p className="text-sm font-medium text-primary">
                             Destaque: <span className="font-bold">{fmt(quote.total_amount * (1 - fullPaymentDiscountPercent / 100))} à vista</span>
                             {fullPaymentDiscountPercent > 0 && (
-                              <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethodLabel ? ` via ${paymentMethodLabel}` : ""})</span>
+                              <span className="text-xs text-muted-foreground ml-1">({fullPaymentDiscountPercent}% de desconto{paymentMethods.length > 0 ? ` via ${formatPaymentMethodsInline(paymentMethods)}` : ""})</span>
                             )}
                           </p>
                         </div>
