@@ -416,6 +416,14 @@ export default function GerarOrcamento() {
       setPaymentDisplayMode("full_payment");
     }
 
+    // Default: nos modos detalhados/agrupados, o total consolidado fica oculto.
+    // O usuário pode reverter manualmente. Mantém escolha existente nos demais casos.
+    let nextHideInvestmentTotal = hideInvestmentTotal;
+    if ((value === "ungrouped" || value === "grouped") && !hideInvestmentTotal) {
+      nextHideInvestmentTotal = true;
+      setHideInvestmentTotal(true);
+    }
+
     const { error } = await supabase
       .from("quotes")
       .update({
@@ -423,6 +431,7 @@ export default function GerarOrcamento() {
         show_investment_section: nextShowInvestment,
         show_detailed_prices: nextShowDetailed,
         payment_display_mode: nextPaymentMode,
+        hide_investment_total: nextHideInvestmentTotal,
       } as any)
       .eq("id", quote.id);
     if (error) {
@@ -437,6 +446,7 @@ export default function GerarOrcamento() {
         ...prev,
         investment_summary_layout: value,
         payment_display_mode: nextPaymentMode,
+        hide_investment_total: nextHideInvestmentTotal,
       });
     } catch { /* ignore */ }
     showAutoSavedFeedback();
