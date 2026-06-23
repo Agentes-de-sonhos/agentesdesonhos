@@ -157,12 +157,17 @@ Deno.serve(async (req) => {
     // Atomic lock: clear stale locks first (>5min), then acquire if free.
     const lockCutoff = new Date(Date.now() - 5 * 60_000).toISOString();
     const lockNow = new Date().toISOString();
-    await supabase
+    const { data: staleLocks } = await supabase
       .from("google_calendar_tokens")
       .update({ sync_in_progress: false, sync_lock_at: null })
       .eq("user_id", userId)
       .eq("sync_in_progress", true)
-      .lt("sync_lock_at", lockCutoff);
+      .lt("sync_lock_at", lockCutoff)
+      .select("id");
+    if (staleLocks && staleLocks.length > 0) {
+      console.log(`[calendar-sync] stale-lock-detected user=${userId} cutoff=${lockCutoff}`);
+      console.log(`[calendar-sync] stale-lock-released user=${userId}`);
+    }
     const { data: lockRow, error: lockErr } = await supabase
       .from("google_calendar_tokens")
       .update({ sync_in_progress: true, sync_lock_at: lockNow, last_sync_status: "syncing" })
@@ -196,13 +201,41 @@ Deno.serve(async (req) => {
     };
 
     try {
-    const accessToken = await getValidToken(supabase, tokenRecord);
+    let accessToken = await getValidToken(supabase, tokenRecord);
     if (!accessToken) {
       // Token refresh failed, remove stale record
       await releaseLock("error", "Token expirado");
       await supabase.from("google_calendar_tokens").delete().eq("user_id", userId);
       return new Response(JSON.stringify({ error: "Token expirado. Reconecte o Google Calendar." }), { status: 401, headers: corsHeaders });
     }
+
+    // Wrapper: on 401, refresh token once and retry the request.
+    const fetchGoogle = async (url: string, init: RequestInit = {}): Promise<Response> => {
+      const withAuth = (token: string): RequestInit => ({
+        ...init,
+        headers: { ...(init.headers || {}), Authorization: `Bearer ${token}` },
+      });
+      let res = await fetch(url, withAuth(accessToken!));
+      if (res.status !== 401) return res;
+      console.warn(`[calendar-sync] token-refresh-retry user=${userId} url=${url.split("?")[0]}`);
+      const refreshed = await refreshAccessToken(tokenRecord.refresh_token);
+      if (!refreshed) {
+        console.error(`[calendar-sync] token-refresh-failed user=${userId}`);
+        return res;
+      }
+      const newExpiry = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
+      await supabase
+        .from("google_calendar_tokens")
+        .update({ access_token: refreshed.access_token, token_expires_at: newExpiry, updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
+      accessToken = refreshed.access_token;
+      console.log(`[calendar-sync] token-refresh-success user=${userId}`);
+      res = await fetch(url, withAuth(accessToken!));
+      if (res.status === 401) {
+        console.error(`[calendar-sync] token-refresh-failed user=${userId} reason=still-401-after-refresh`);
+      }
+      return res;
+    };
 
     // Sync window: 30 days back → 730 days forward
     const now = new Date();
@@ -339,11 +372,11 @@ Deno.serve(async (req) => {
 
       try {
         if (existing) {
-          const res = await fetch(
+          const res = await fetchGoogle(
             `https://www.googleapis.com/calendar/v3/calendars/primary/events/${existing.google_event_id}`,
             {
               method: "PUT",
-              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify(googleEvent),
             }
           );
@@ -370,11 +403,11 @@ Deno.serve(async (req) => {
             console.log(`[calendar-sync] push-updated event=${event.id} google=${existing.google_event_id}`);
           }
         } else {
-          const res = await fetch(
+          const res = await fetchGoogle(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
             {
               method: "POST",
-              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify(googleEvent),
             }
           );
@@ -433,9 +466,9 @@ Deno.serve(async (req) => {
         continue;
       }
       try {
-        const res = await fetch(
+        const res = await fetchGoogle(
           `https://www.googleapis.com/calendar/v3/calendars/primary/events/${mapping.google_event_id}`,
-          { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } }
+          { method: "DELETE" }
         );
         // 200/204 = deleted, 404/410 = already gone (treat as success)
         if (res.ok || res.status === 404 || res.status === 410) {
@@ -470,25 +503,43 @@ Deno.serve(async (req) => {
 
     // 2. Pull Google events → local
     console.log(`[calendar-sync] pull-start range=${windowStart}..${windowEnd}`);
-    const googleRes = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(windowStart)}&timeMax=${encodeURIComponent(windowEnd)}&singleEvents=true&maxResults=500&orderBy=startTime`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-
     let pulledCreated = 0;
     let pulledUpdated = 0;
     let pulledSkipped = 0;
     const pullErrors: Array<{ google_event_id?: string; status?: number; error: string }> = [];
     let googleEvents: GoogleEvent[] = [];
+    let pullPageError = false;
+    {
+      // Paginate through all pages via nextPageToken
+      let pageToken: string | undefined = undefined;
+      let pageNum = 0;
+      const MAX_PAGES = 50; // safety cap (~12.5k events)
+      do {
+        pageNum++;
+        const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(windowStart)}&timeMax=${encodeURIComponent(windowEnd)}&singleEvents=true&maxResults=250&orderBy=startTime`;
+        const url = pageToken ? `${baseUrl}&pageToken=${encodeURIComponent(pageToken)}` : baseUrl;
+        const pageRes = await fetchGoogle(url);
+        if (!pageRes.ok) {
+          const errText = await pageRes.text();
+          console.error(`[calendar-sync] pull-error list page=${pageNum} status=${pageRes.status} body=${errText.slice(0, 300)}`);
+          pullErrors.push({ status: pageRes.status, error: errText.slice(0, 200) });
+          pullPageError = true;
+          break;
+        }
+        const pageData = await pageRes.json();
+        const items: GoogleEvent[] = pageData.items || [];
+        googleEvents = googleEvents.concat(items);
+        console.log(`[calendar-sync] pull-page page=${pageNum} events=${items.length}`);
+        pageToken = pageData.nextPageToken;
+        if (pageNum >= MAX_PAGES && pageToken) {
+          console.warn(`[calendar-sync] pull-page-cap reached pages=${pageNum} more_pages_skipped=true`);
+          break;
+        }
+      } while (pageToken);
+      console.log(`[calendar-sync] pull-list google_events=${googleEvents.length} pages=${pageNum}`);
+    }
 
-    if (!googleRes.ok) {
-      const errText = await googleRes.text();
-      console.error(`[calendar-sync] pull-error list status=${googleRes.status} body=${errText.slice(0, 300)}`);
-      pullErrors.push({ status: googleRes.status, error: errText.slice(0, 200) });
-    } else {
-      const googleData = await googleRes.json();
-      googleEvents = googleData.items || [];
-      console.log(`[calendar-sync] pull-list google_events=${googleEvents.length}`);
+    if (!pullPageError) {
       console.log(`[calendar-sync] reverse-map-before-pull mappings=${reverseSyncMap.size} just_pushed=${justPushedGoogleIds.size}`);
 
       let skipCancelled = 0;
