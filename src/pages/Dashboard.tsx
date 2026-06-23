@@ -192,34 +192,40 @@ export default function Dashboard() {
             {/* 1. Banner Rotativo */}
             <DashboardBanner />
 
-            {/* 2. Minha Agenda & Próximas Viagens */}
-            <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
-              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
-              <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
-            </section>
-
-            {/* 2b. Leads aguardando atendimento */}
-            <section className="order-[2.5]">
-              <LeadsAwaitingCard />
-            </section>
-
-            {/* 3. Radar do Turismo & EducaTravel Academy */}
             {isSimplifiedDashboard ? (
               <>
-                {/* Radar do Turismo & Comunidade */}
-                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-3">
-                  <div className="min-w-0"><CuratedNewsFeed /></div>
-                  <div className="min-w-0"><CommunitySocialFeed defaultExpanded /></div>
+                {/* 2b. Leads aguardando atendimento */}
+                <section className="order-[2.5]">
+                  <LeadsAwaitingCard />
                 </section>
 
-                {/* EducaTravel Academy & Mapa do Turismo */}
-                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-start order-[3.5]">
-                  <div className="min-w-0"><AcademyCollapsibleCard /></div>
-                  <div className="min-w-0"><MapaTurismoCard alwaysExpanded /></div>
+                {/* Fluxo independente por coluna (masonry-like) */}
+                <section className="order-3 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+                  <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
+                    <UpcomingAgendaEventsCard />
+                    <CuratedNewsFeed />
+                    <AcademyCollapsibleCard />
+                  </div>
+                  <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
+                    <TripRemindersCard />
+                    <CommunitySocialFeed defaultExpanded />
+                    <MapaTurismoCard alwaysExpanded />
+                  </div>
                 </section>
               </>
             ) : (
               <>
+                {/* 2. Minha Agenda & Próximas Viagens */}
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
+                  <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
+                  <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
+                </section>
+
+                {/* 2b. Leads aguardando atendimento */}
+                <section className="order-[2.5]">
+                  <LeadsAwaitingCard />
+                </section>
+
                 <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-3">
                   <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CuratedNewsFeed /></div>
                   <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard /></div>
