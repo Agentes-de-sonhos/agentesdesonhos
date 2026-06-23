@@ -180,27 +180,40 @@ Deno.serve(async (req) => {
     const syncMap = new Map((existingSyncs || []).map((s: any) => [s.agency_event_id, s]));
     const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
     const justPushedGoogleIds = new Set<string>();
-    const localIds = new Set((localEvents || []).map((e: any) => e.id));
-    const mappedInWindow = (localEvents || []).filter((e: any) => syncMap.has(e.id)).length;
-    const unmappedInWindow = (localEvents || []).length - mappedInWindow;
+    const liveLocalEvents = (localEvents || []).filter((e: any) => !e.deleted_at);
+    const deletedLocalEvents = (localEvents || []).filter((e: any) => !!e.deleted_at);
+    const localIds = new Set(liveLocalEvents.map((e: any) => e.id));
+    const mappedInWindow = liveLocalEvents.filter((e: any) => syncMap.has(e.id)).length;
+    const unmappedInWindow = liveLocalEvents.length - mappedInWindow;
     const orphanMappings = (existingSyncs || []).filter((s: any) => !localIds.has(s.agency_event_id)).length;
     const mappedLocalSignatures = new Map<string, string>();
-    for (const event of localEvents || []) {
+    for (const event of liveLocalEvents) {
       if (syncMap.has(event.id)) mappedLocalSignatures.set(localEventSignature(event), event.id);
     }
 
     console.log(
-      `[calendar-sync] inventory local_events=${localEvents?.length || 0} existing_mappings=${existingSyncs?.length || 0} reverse_mappings=${reverseSyncMap.size} mapped_in_window=${mappedInWindow} unmapped_in_window=${unmappedInWindow} orphan_mappings_outside_window=${orphanMappings}`
+      `[calendar-sync] inventory local_events=${liveLocalEvents.length} deleted_local=${deletedLocalEvents.length} existing_mappings=${existingSyncs?.length || 0} reverse_mappings=${reverseSyncMap.size} mapped_in_window=${mappedInWindow} unmapped_in_window=${unmappedInWindow} orphan_mappings_outside_window=${orphanMappings}`
     );
     let pushedCreated = 0;
     let pushedUpdated = 0;
     let pushedSkipped = 0;
+    let deletedGoogle = 0;
+    let deletedLocal = 0;
+    let deletedSkipped = 0;
+    let deleteErrors = 0;
     const pushErrors: Array<{ event_id: string; status?: number; error: string }> = [];
 
-    console.log(`[calendar-sync] push-start count=${localEvents?.length || 0}`);
+    console.log(`[calendar-sync] push-start count=${liveLocalEvents.length}`);
 
-    for (const event of localEvents || []) {
+    for (const event of liveLocalEvents) {
       const existing = syncMap.get(event.id);
+
+      // Tombstone guard: never recreate an event whose mapping was marked deleted
+      if (existing && existing.deleted_at) {
+        pushedSkipped++; deletedSkipped++;
+        console.log(`[calendar-sync] skipped-deleted event=${event.id} reason=mapping-tombstone google=${existing.google_event_id}`);
+        continue;
+      }
 
       if (!existing) {
         const mappedTwinId = mappedLocalSignatures.get(localEventSignature(event));
@@ -327,6 +340,57 @@ Deno.serve(async (req) => {
         }
       } catch (e: any) {
         console.error(`[calendar-sync] push-error exception event=${event.id} err=${e?.message || e}`);
+        pushErrors.push({ event_id: event.id, error: String(e?.message || e) });
+      }
+    }
+
+    // 1b. Delete-from-Google: events soft-deleted locally with an active mapping
+    console.log(`[calendar-sync] delete-google-start count=${deletedLocalEvents.length}`);
+    for (const event of deletedLocalEvents) {
+      const mapping = syncMap.get(event.id);
+      if (!mapping) {
+        // No mapping → nothing to delete on Google. Safe to physically remove the row now.
+        await supabase.from("agency_events").delete().eq("id", event.id).eq("user_id", userId);
+        console.log(`[calendar-sync] delete-local-cleanup event=${event.id} reason=no-mapping`);
+        continue;
+      }
+      if (mapping.deleted_at) {
+        deletedSkipped++;
+        console.log(`[calendar-sync] skipped-deleted event=${event.id} reason=already-deleted-on-google google=${mapping.google_event_id}`);
+        continue;
+      }
+      try {
+        const res = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${mapping.google_event_id}`,
+          { method: "DELETE", headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        // 200/204 = deleted, 404/410 = already gone (treat as success)
+        if (res.ok || res.status === 404 || res.status === 410) {
+          const tombstoneAt = new Date().toISOString();
+          const { error: tombErr } = await supabase
+            .from("google_calendar_sync")
+            .update({ deleted_at: tombstoneAt, last_synced_at: tombstoneAt })
+            .eq("id", mapping.id);
+          if (tombErr) {
+            deleteErrors++;
+            console.error(`[calendar-sync] delete-google-error tombstone event=${event.id} err=${tombErr.message}`);
+            pushErrors.push({ event_id: event.id, error: tombErr.message });
+            continue;
+          }
+          mapping.deleted_at = tombstoneAt;
+          syncMap.set(event.id, mapping);
+          reverseSyncMap.set(mapping.google_event_id, mapping);
+          deletedGoogle++;
+          console.log(`[calendar-sync] delete-google-success event=${event.id} google=${mapping.google_event_id} status=${res.status}`);
+        } else {
+          const errText = await res.text();
+          deleteErrors++;
+          console.error(`[calendar-sync] delete-google-error event=${event.id} google=${mapping.google_event_id} status=${res.status} body=${errText.slice(0, 300)}`);
+          pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+        }
+      } catch (e: any) {
+        deleteErrors++;
+        console.error(`[calendar-sync] delete-google-error exception event=${event.id} err=${e?.message || e}`);
         pushErrors.push({ event_id: event.id, error: String(e?.message || e) });
       }
     }
