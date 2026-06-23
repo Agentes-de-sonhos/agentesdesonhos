@@ -8,6 +8,7 @@ import { SERVICE_TYPE_LABELS } from "@/types/quote";
 import { extractServicePaymentConfig, extractFlightFeeInfo, calculateServicePayment } from "@/lib/servicePayment";
 import { cn } from "@/lib/utils";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, type QuoteCurrency } from "@/lib/quoteCurrency";
+import { parsePaymentMethods } from "@/lib/paymentMethods";
 
 /** Formatação na moeda do orçamento. */
 function makeFmt(currency: QuoteCurrency) {
