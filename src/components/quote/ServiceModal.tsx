@@ -137,7 +137,7 @@ export function ServiceModal(props: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden bg-muted/40">
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden border-0 bg-muted">
         <DialogHeader className="sr-only">
           <DialogTitle>
             {title}{optionNumber ? ` (Opção ${optionNumber})` : ""}
@@ -150,16 +150,16 @@ export function ServiceModal(props: Props) {
           className={cn(
             "flex-1 overflow-y-auto px-4 sm:px-6 pt-10 pb-6 space-y-4",
             // Unified visual language for every service form (matches Flight pattern):
-            //  • Modal: light gray base (set on DialogContent above)
-            //  • Inputs/Selects/Textareas: subtle gray fill with discrete border
-            //  • Switches: cleaner active state
-            "[&_input:not([type=checkbox]):not([type=radio]):not([type=file])]:bg-muted/40",
-            "[&_textarea]:bg-muted/40",
-            "[&_button[role=combobox]]:bg-muted/40",
+            //  • Modal: solid light gray base (set on DialogContent above)
+            //  • Main card: white surface with a single solid, soft gray border
+            //  • Inputs/Selects/Textareas: solid soft gray fill with discrete border
+            "[&_input:not([type=checkbox]):not([type=radio]):not([type=file])]:bg-muted",
+            "[&_textarea]:bg-muted",
+            "[&_button[role=combobox]]:bg-muted",
           )}
         >
           {hasLinkedSupplier && (
-            <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -201,7 +201,7 @@ export function ServiceModal(props: Props) {
             </div>
           )}
           {editingService && !hasLinkedSupplier && (
-            <div className="flex items-center justify-between rounded-xl border border-dashed border-border/60 bg-card/60 p-3">
+            <div className="flex items-center justify-between rounded-xl border border-dashed border-border bg-card p-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Building2 className="h-4 w-4" />
                 Nenhum fornecedor vinculado
@@ -220,14 +220,14 @@ export function ServiceModal(props: Props) {
             </div>
           )}
           {editingService && !hasLinkedSupplier && editSupplierOpen && (
-            <div className="rounded-xl border border-border/60 bg-card p-4 shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-4">
               <SupplierSelector value={supplier} onChange={setSupplier} />
               <p className="mt-1.5 text-xs text-muted-foreground">
                 A vinculação será aplicada ao salvar o serviço.
               </p>
             </div>
           )}
-          <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
           <ServiceForm
             key={editingService?.id || `new-${serviceType}`}
             serviceType={serviceType}
