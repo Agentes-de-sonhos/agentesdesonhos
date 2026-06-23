@@ -503,25 +503,43 @@ Deno.serve(async (req) => {
 
     // 2. Pull Google events → local
     console.log(`[calendar-sync] pull-start range=${windowStart}..${windowEnd}`);
-    const googleRes = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(windowStart)}&timeMax=${encodeURIComponent(windowEnd)}&singleEvents=true&maxResults=500&orderBy=startTime`,
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-
     let pulledCreated = 0;
     let pulledUpdated = 0;
     let pulledSkipped = 0;
     const pullErrors: Array<{ google_event_id?: string; status?: number; error: string }> = [];
     let googleEvents: GoogleEvent[] = [];
+    let pullPageError = false;
+    {
+      // Paginate through all pages via nextPageToken
+      let pageToken: string | undefined = undefined;
+      let pageNum = 0;
+      const MAX_PAGES = 50; // safety cap (~12.5k events)
+      do {
+        pageNum++;
+        const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(windowStart)}&timeMax=${encodeURIComponent(windowEnd)}&singleEvents=true&maxResults=250&orderBy=startTime`;
+        const url = pageToken ? `${baseUrl}&pageToken=${encodeURIComponent(pageToken)}` : baseUrl;
+        const pageRes = await fetchGoogle(url);
+        if (!pageRes.ok) {
+          const errText = await pageRes.text();
+          console.error(`[calendar-sync] pull-error list page=${pageNum} status=${pageRes.status} body=${errText.slice(0, 300)}`);
+          pullErrors.push({ status: pageRes.status, error: errText.slice(0, 200) });
+          pullPageError = true;
+          break;
+        }
+        const pageData = await pageRes.json();
+        const items: GoogleEvent[] = pageData.items || [];
+        googleEvents = googleEvents.concat(items);
+        console.log(`[calendar-sync] pull-page page=${pageNum} events=${items.length}`);
+        pageToken = pageData.nextPageToken;
+        if (pageNum >= MAX_PAGES && pageToken) {
+          console.warn(`[calendar-sync] pull-page-cap reached pages=${pageNum} more_pages_skipped=true`);
+          break;
+        }
+      } while (pageToken);
+      console.log(`[calendar-sync] pull-list google_events=${googleEvents.length} pages=${pageNum}`);
+    }
 
-    if (!googleRes.ok) {
-      const errText = await googleRes.text();
-      console.error(`[calendar-sync] pull-error list status=${googleRes.status} body=${errText.slice(0, 300)}`);
-      pullErrors.push({ status: googleRes.status, error: errText.slice(0, 200) });
-    } else {
-      const googleData = await googleRes.json();
-      googleEvents = googleData.items || [];
-      console.log(`[calendar-sync] pull-list google_events=${googleEvents.length}`);
+    if (!pullPageError) {
       console.log(`[calendar-sync] reverse-map-before-pull mappings=${reverseSyncMap.size} just_pushed=${justPushedGoogleIds.size}`);
 
       let skipCancelled = 0;
