@@ -43,6 +43,7 @@ import { CarRentalSmartImport } from "./car-rental-import/CarRentalSmartImport";
 import { Sparkles, Ticket, Shield, Ship, Map as MapIcon, Package, TramFront } from "lucide-react";
 import { GenericServiceSmartImport, type GenericServiceKey } from "./service-import/GenericServiceSmartImport";
 import { SERVICE_IMPORT_CONFIGS } from "./service-import/serviceImportConfigs";
+import { ServiceModeChooser } from "./ServiceModeChooser";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
