@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { useSupportTickets, useTicketMessages } from "@/hooks/useSupportTickets";
 import { TICKET_CATEGORIES, TICKET_STATUSES, type TicketCategory, type SupportTicket } from "@/types/support";
 import { ResetSessionButton } from "@/components/settings/ResetSessionButton";
+import { HelpAssistantWidget } from "@/components/help-assistant/HelpAssistantWidget";
 
 function NewTicketDialog({ onCreated }: { onCreated: (id: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -376,6 +377,7 @@ export default function Suporte() {
           </CardContent>
         </Card>
       </div>
+      <HelpAssistantWidget />
     </DashboardLayout>
   );
 }
