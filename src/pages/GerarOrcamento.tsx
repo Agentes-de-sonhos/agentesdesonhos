@@ -64,6 +64,8 @@ import { AIImportServiceModal, type AIImportResult } from "@/components/shared/A
 import { Sparkles, Wallet } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
 import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { parsePaymentMethods, serializePaymentMethods, formatPaymentMethodsInline } from "@/lib/paymentMethods";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
