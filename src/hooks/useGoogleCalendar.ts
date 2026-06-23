@@ -6,7 +6,12 @@ import { toast } from "sonner";
 interface GoogleCalendarStatus {
   connected: boolean;
   sync_enabled?: boolean;
+  auto_sync_enabled?: boolean;
   last_sync_at?: string | null;
+  sync_in_progress?: boolean;
+  last_sync_status?: "idle" | "syncing" | "synced" | "error" | null;
+  last_sync_error?: string | null;
+  last_sync_duration_ms?: number | null;
 }
 
 export function useGoogleCalendar() {
@@ -81,10 +86,19 @@ export function useGoogleCalendar() {
     setIsSyncing(true);
     try {
       const { data, error } = await supabase.functions.invoke("google-calendar-sync", {
-        body: { action: "sync" },
+        body: { action: "sync", force: true },
       });
       if (error) throw error;
-      if (data?.success) {
+      if (data?.success && data?.skipped) {
+        toast.info(
+          data.skipped === "rate-limit"
+            ? "Sincronização recente. Aguarde alguns segundos para forçar de novo."
+            : data.skipped === "lock"
+            ? "Já existe uma sincronização em andamento."
+            : `Ignorado: ${data.skipped}`
+        );
+        await checkStatus();
+      } else if (data?.success) {
         const pushErrors = data.push_errors?.length || 0;
         const pullErrors = data.pull_errors?.length || 0;
         const dErrors = data.delete_errors ?? 0;
