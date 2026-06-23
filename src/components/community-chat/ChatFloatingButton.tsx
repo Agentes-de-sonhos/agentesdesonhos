@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useUserRole } from "@/hooks/useUserRole";
+import { shouldApplyPremiumFundadorFilter } from "@/lib/sidebarVisibility";
 import { useDirectMessages } from "@/hooks/useDirectMessages";
 import { useCommunityChat, CommunityRoom } from "@/hooks/useCommunityChat";
 import { usePresence, OnlineAgent } from "@/hooks/usePresence";
@@ -28,7 +29,7 @@ import { useOverlayPresence } from "@/hooks/useOverlayPresence";
 type ChatView = "menu" | "room" | "dm" | "conversations";
 
 export function ChatFloatingButton() {
-  const { hasFeature } = useSubscription();
+  const { hasFeature, plan } = useSubscription();
   const { isAdmin } = useUserRole();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +80,9 @@ export function ChatFloatingButton() {
   if (!isAdmin && !hasFeature("community")) return null;
 
   const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
-  const shouldShow = isDashboard || totalUnread > 0 || isOpen;
+  // Hide chat button on dashboard for Premium/Fundador non-admin users
+  const hideOnDashboardForPlan = isDashboard && shouldApplyPremiumFundadorFilter(isAdmin, plan);
+  const shouldShow = (isDashboard || totalUnread > 0 || isOpen) && !hideOnDashboardForPlan;
   if (!shouldShow) return null;
   // Hide button when other overlays (modals, drawers, expanded sidebar) are open,
   // unless the chat panel itself is the active overlay.
