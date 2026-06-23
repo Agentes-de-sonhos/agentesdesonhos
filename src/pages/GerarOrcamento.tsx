@@ -1154,6 +1154,8 @@ export default function GerarOrcamento() {
 
                   <Separator />
 
+                  {effectiveLayout === "consolidated" && (
+                  <>
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
                     <p className="text-xs text-muted-foreground">
@@ -1271,6 +1273,24 @@ export default function GerarOrcamento() {
                           </p>
                         </div>
                       )}
+                  </>
+                  )}
+
+                  <Separator />
+
+                  <div className="space-y-1.5">
+                    <Label className="text-sm">Meio de pagamento</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Selecione um ou mais meios de pagamento aceitos. Eles aparecerão para o cliente em todos os formatos de apresentação do investimento.
+                    </p>
+                    <MultiSelect
+                      options={PAYMENT_METHOD_SELECT_OPTIONS}
+                      selected={paymentMethods}
+                      onChange={setPaymentMethods}
+                      placeholder="Selecione os meios de pagamento..."
+                      searchPlaceholder="Buscar meio de pagamento..."
+                    />
+                  </div>
 
                   <Separator />
 
