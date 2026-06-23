@@ -154,14 +154,20 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Atomic lock: acquire only if not locked OR previous lock is stale (>5min).
+    // Atomic lock: clear stale locks first (>5min), then acquire if free.
     const lockCutoff = new Date(Date.now() - 5 * 60_000).toISOString();
     const lockNow = new Date().toISOString();
+    await supabase
+      .from("google_calendar_tokens")
+      .update({ sync_in_progress: false, sync_lock_at: null })
+      .eq("user_id", userId)
+      .eq("sync_in_progress", true)
+      .lt("sync_lock_at", lockCutoff);
     const { data: lockRow, error: lockErr } = await supabase
       .from("google_calendar_tokens")
       .update({ sync_in_progress: true, sync_lock_at: lockNow, last_sync_status: "syncing" })
       .eq("user_id", userId)
-      .or(`sync_in_progress.eq.false,sync_lock_at.lt.${lockCutoff}`)
+      .eq("sync_in_progress", false)
       .select("id")
       .maybeSingle();
     if (lockErr || !lockRow) {
