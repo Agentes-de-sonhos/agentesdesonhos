@@ -352,13 +352,21 @@ Deno.serve(async (req) => {
       const googleData = await googleRes.json();
       googleEvents = googleData.items || [];
       console.log(`[calendar-sync] pull-list google_events=${googleEvents.length}`);
+      console.log(`[calendar-sync] reverse-map-before-pull mappings=${reverseSyncMap.size} just_pushed=${justPushedGoogleIds.size}`);
 
-      const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
       let skipCancelled = 0;
       let skipAlreadyMapped = 0;
       let skipNoDate = 0;
+      let skipJustPushed = 0;
+      let skipDuplicateLocal = 0;
 
       for (const gEvent of googleEvents) {
+        if (justPushedGoogleIds.has(gEvent.id)) {
+          pulledSkipped++; skipJustPushed++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=created-during-current-push mapped_local=${reverseSyncMap.get(gEvent.id)?.agency_event_id || "unknown"}`);
+          continue;
+        }
+
         if (gEvent.status === "cancelled") {
           pulledSkipped++; skipCancelled++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled`);
@@ -382,6 +390,7 @@ Deno.serve(async (req) => {
           const lastSynced = mapped.last_synced_at ? new Date(mapped.last_synced_at).getTime() : 0;
           if (gUpdated <= lastSynced) {
             pulledSkipped++; skipAlreadyMapped++;
+            console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=already-mapped-unchanged local=${mapped.agency_event_id}`);
             continue;
           }
           try {
@@ -413,6 +422,19 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        const candidateSignature = localEventSignature({
+          title: gEvent.summary || "Sem título",
+          description: gEvent.description || null,
+          event_date: startDate,
+          event_time: startTime,
+        });
+        const duplicateMappedLocalId = mappedLocalSignatures.get(candidateSignature);
+        if (duplicateMappedLocalId) {
+          pulledSkipped++; skipDuplicateLocal++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=duplicate-of-mapped-local-event mapped_event=${duplicateMappedLocalId}`);
+          continue;
+        }
+
         try {
           const { data: inserted, error: insErr } = await supabase
             .from("agency_events")
@@ -434,13 +456,24 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          await supabase.from("google_calendar_sync").insert({
+          const syncedAt = new Date().toISOString();
+          const { data: insertedMapping, error: mapInsertErr } = await supabase.from("google_calendar_sync").upsert({
             user_id: userId,
             agency_event_id: inserted.id,
             google_event_id: gEvent.id,
-            last_synced_at: new Date().toISOString(),
-          });
+            last_synced_at: syncedAt,
+            sync_direction: "bidirectional",
+          }, { onConflict: "user_id,google_event_id" }).select("*").single();
+          if (mapInsertErr || !insertedMapping) {
+            console.error(`[calendar-sync] mapping-error create-from-pull google=${gEvent.id} local=${inserted.id} err=${mapInsertErr?.message || "mapping upsert failed"}`);
+            pullErrors.push({ google_event_id: gEvent.id, error: mapInsertErr?.message || "mapping upsert failed" });
+            continue;
+          }
+          reverseSyncMap.set(gEvent.id, insertedMapping);
+          syncMap.set(inserted.id, insertedMapping);
+          mappedLocalSignatures.set(candidateSignature, inserted.id);
           pulledCreated++;
+          console.log(`[calendar-sync] mapping-created-from-pull google=${gEvent.id} local=${inserted.id} synced_at=${syncedAt}`);
           console.log(`[calendar-sync] pull-created google=${gEvent.id} local=${inserted.id}`);
         } catch (e: any) {
           console.error(`[calendar-sync] pull-error exception google=${gEvent.id} err=${e?.message || e}`);
@@ -449,7 +482,7 @@ Deno.serve(async (req) => {
       }
 
       console.log(
-        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} skipped_cancelled=${skipCancelled} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_no_date=${skipNoDate}`
+        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} skipped_cancelled=${skipCancelled} skipped_just_pushed=${skipJustPushed} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_duplicate_local=${skipDuplicateLocal} skipped_no_date=${skipNoDate}`
       );
     }
 
