@@ -131,24 +131,52 @@ Deno.serve(async (req) => {
     const windowStartDay = windowStartDate.toISOString().slice(0, 10);
     const windowEndDay = windowEndDate.toISOString().slice(0, 10);
 
-    console.log(`[calendar-sync] start user=${userId} window=${windowStartDay}..${windowEndDay}`);
+    // Resolve agency_id for context (best-effort, never blocks sync)
+    let agencyId: string | null = null;
+    try {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("agency_id")
+        .eq("id", userId)
+        .maybeSingle();
+      agencyId = prof?.agency_id ?? null;
+    } catch (_) { /* ignore */ }
+
+    const calendarId = "primary";
+    console.log(
+      `[calendar-sync] boot user=${userId} agency=${agencyId ?? "n/a"} calendar=${calendarId} window=${windowStartDay}..${windowEndDay} window_iso=${windowStart}..${windowEnd}`
+    );
 
     // 1. Push local events → Google
-    const { data: localEvents } = await supabase
+    const { data: localEvents, error: localErr } = await supabase
       .from("agency_events")
       .select("*")
       .eq("user_id", userId)
       .gte("event_date", windowStartDay)
       .lte("event_date", windowEndDay);
 
-    console.log(`[calendar-sync] token-ok local_events=${localEvents?.length || 0}`);
+    if (localErr) {
+      console.error(`[calendar-sync] local-fetch-error err=${localErr.message}`);
+    }
 
-    const { data: existingSyncs } = await supabase
+    const { data: existingSyncs, error: syncErr } = await supabase
       .from("google_calendar_sync")
       .select("*")
       .eq("user_id", userId);
 
+    if (syncErr) {
+      console.error(`[calendar-sync] sync-fetch-error err=${syncErr.message}`);
+    }
+
     const syncMap = new Map((existingSyncs || []).map((s: any) => [s.agency_event_id, s]));
+    const localIds = new Set((localEvents || []).map((e: any) => e.id));
+    const mappedInWindow = (localEvents || []).filter((e: any) => syncMap.has(e.id)).length;
+    const unmappedInWindow = (localEvents || []).length - mappedInWindow;
+    const orphanMappings = (existingSyncs || []).filter((s: any) => !localIds.has(s.agency_event_id)).length;
+
+    console.log(
+      `[calendar-sync] inventory local_events=${localEvents?.length || 0} existing_mappings=${existingSyncs?.length || 0} mapped_in_window=${mappedInWindow} unmapped_in_window=${unmappedInWindow} orphan_mappings_outside_window=${orphanMappings}`
+    );
     let pushedCreated = 0;
     let pushedUpdated = 0;
     let pushedSkipped = 0;
@@ -260,16 +288,30 @@ Deno.serve(async (req) => {
     } else {
       const googleData = await googleRes.json();
       googleEvents = googleData.items || [];
-      console.log(`[calendar-sync] pull-start google_events=${googleEvents.length}`);
+      console.log(`[calendar-sync] pull-list google_events=${googleEvents.length}`);
 
       const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
+      let skipCancelled = 0;
+      let skipAlreadyMapped = 0;
+      let skipNoDate = 0;
 
       for (const gEvent of googleEvents) {
-        if (gEvent.status === "cancelled") { pulledSkipped++; continue; }
-        if (reverseSyncMap.has(gEvent.id)) { pulledSkipped++; continue; }
+        if (gEvent.status === "cancelled") {
+          pulledSkipped++; skipCancelled++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled`);
+          continue;
+        }
+        if (reverseSyncMap.has(gEvent.id)) {
+          pulledSkipped++; skipAlreadyMapped++;
+          continue;
+        }
 
         const startDate = gEvent.start?.date || gEvent.start?.dateTime?.split("T")[0];
-        if (!startDate) { pulledSkipped++; continue; }
+        if (!startDate) {
+          pulledSkipped++; skipNoDate++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=no-start-date`);
+          continue;
+        }
 
         const startTime = gEvent.start?.dateTime
           ? gEvent.start.dateTime.split("T")[1]?.substring(0, 5)
@@ -308,6 +350,10 @@ Deno.serve(async (req) => {
           pullErrors.push({ google_event_id: gEvent.id, error: String(e?.message || e) });
         }
       }
+
+      console.log(
+        `[calendar-sync] pull-summary skipped_cancelled=${skipCancelled} skipped_already_mapped=${skipAlreadyMapped} skipped_no_date=${skipNoDate}`
+      );
     }
 
     // Update last sync
