@@ -39,7 +39,8 @@ export function HighlightedEventsCard() {
         const { data } = await supabase
           .from("agency_events")
           .select("id, title, event_date, event_type, color, event_time")
-          .in("id", agencyIds);
+          .in("id", agencyIds)
+          .is("deleted_at", null);
         if (data) results.push(...data);
       }
 
