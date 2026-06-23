@@ -298,6 +298,8 @@ export type Database = {
           client_id: string | null
           color: string | null
           created_at: string
+          deleted_at: string | null
+          deleted_by_sync: boolean
           description: string | null
           event_date: string
           event_time: string | null
@@ -315,6 +317,8 @@ export type Database = {
           client_id?: string | null
           color?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by_sync?: boolean
           description?: string | null
           event_date: string
           event_time?: string | null
@@ -332,6 +336,8 @@ export type Database = {
           client_id?: string | null
           color?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deleted_by_sync?: boolean
           description?: string | null
           event_date?: string
           event_time?: string | null
@@ -3540,6 +3546,7 @@ export type Database = {
         Row: {
           agency_event_id: string | null
           created_at: string | null
+          deleted_at: string | null
           google_event_id: string
           id: string
           last_synced_at: string | null
@@ -3549,6 +3556,7 @@ export type Database = {
         Insert: {
           agency_event_id?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           google_event_id: string
           id?: string
           last_synced_at?: string | null
@@ -3558,6 +3566,7 @@ export type Database = {
         Update: {
           agency_event_id?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           google_event_id?: string
           id?: string
           last_synced_at?: string | null

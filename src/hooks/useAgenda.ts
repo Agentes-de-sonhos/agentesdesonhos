@@ -41,6 +41,7 @@ export function useAgenda(year?: number) {
         .from("agency_events")
         .select("*")
         .eq("user_id", user.id)
+        .is("deleted_at", null)
         .gte("event_date", startDate)
         .lte("event_date", endDate)
         .order("event_date", { ascending: true });
@@ -324,9 +325,12 @@ export function useAgenda(year?: number) {
   // Delete agency event
   const deleteEventMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Soft-delete: keeps the row so the next Google Calendar sync can propagate
+      // the deletion. The sync function removes the event from Google and then
+      // marks the mapping as deleted (tombstone) to prevent re-creation.
       const { error } = await supabase
         .from("agency_events")
-        .delete()
+        .update({ deleted_at: new Date().toISOString(), deleted_by_sync: false } as any)
         .eq("id", id);
 
       if (error) throw error;
