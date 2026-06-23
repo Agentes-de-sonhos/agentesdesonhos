@@ -85,7 +85,18 @@ export function useGoogleCalendar() {
       });
       if (error) throw error;
       if (data?.success) {
-        toast.success(`Sincronizado! ${data.pushed} enviados, ${data.pulled} importados`);
+        const pushErrors = data.push_errors?.length || 0;
+        const pullErrors = data.pull_errors?.length || 0;
+        const totalErrors = pushErrors + pullErrors;
+        if (totalErrors > 0) {
+          toast.warning(
+            `Sincronizado parcialmente: ${data.pushed} enviados, ${data.pulled} importados, ${totalErrors} erro(s). Veja os logs.`
+          );
+          console.error("[calendar-sync] push_errors:", data.push_errors);
+          console.error("[calendar-sync] pull_errors:", data.pull_errors);
+        } else {
+          toast.success(`Sincronizado! ${data.pushed} enviados, ${data.pulled} importados`);
+        }
         await checkStatus();
       } else if (data?.error) {
         toast.error(data.error);

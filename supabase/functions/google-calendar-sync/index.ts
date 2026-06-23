@@ -122,18 +122,26 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Token expirado. Reconecte o Google Calendar." }), { status: 401, headers: corsHeaders });
     }
 
-    // Get current year range
+    // Sync window: 30 days back → 730 days forward
     const now = new Date();
-    const yearStart = `${now.getFullYear()}-01-01T00:00:00Z`;
-    const yearEnd = `${now.getFullYear()}-12-31T23:59:59Z`;
+    const windowStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const windowEndDate = new Date(now.getTime() + 730 * 24 * 60 * 60 * 1000);
+    const windowStart = windowStartDate.toISOString();
+    const windowEnd = windowEndDate.toISOString();
+    const windowStartDay = windowStartDate.toISOString().slice(0, 10);
+    const windowEndDay = windowEndDate.toISOString().slice(0, 10);
+
+    console.log(`[calendar-sync] start user=${userId} window=${windowStartDay}..${windowEndDay}`);
 
     // 1. Push local events → Google
     const { data: localEvents } = await supabase
       .from("agency_events")
       .select("*")
       .eq("user_id", userId)
-      .gte("event_date", `${now.getFullYear()}-01-01`)
-      .lte("event_date", `${now.getFullYear()}-12-31`);
+      .gte("event_date", windowStartDay)
+      .lte("event_date", windowEndDay);
+
+    console.log(`[calendar-sync] token-ok local_events=${localEvents?.length || 0}`);
 
     const { data: existingSyncs } = await supabase
       .from("google_calendar_sync")
@@ -141,97 +149,164 @@ Deno.serve(async (req) => {
       .eq("user_id", userId);
 
     const syncMap = new Map((existingSyncs || []).map((s: any) => [s.agency_event_id, s]));
-    let pushed = 0;
-    let pulled = 0;
+    let pushedCreated = 0;
+    let pushedUpdated = 0;
+    let pushedSkipped = 0;
+    const pushErrors: Array<{ event_id: string; status?: number; error: string }> = [];
+
+    console.log(`[calendar-sync] push-start count=${localEvents?.length || 0}`);
 
     for (const event of localEvents || []) {
       const existing = syncMap.get(event.id);
 
+      // Build start/end. If timed, ensure end >= start + 1h (Google rejects end == start).
+      let start: Record<string, string>;
+      let end: Record<string, string>;
+      if (event.event_time) {
+        const timeStr = String(event.event_time).slice(0, 5); // HH:MM
+        const startDateTime = `${event.event_date}T${timeStr}:00`;
+        const startMs = new Date(`${startDateTime}-03:00`).getTime();
+        const endMs = startMs + 60 * 60 * 1000;
+        const endLocal = new Date(endMs);
+        // Format as YYYY-MM-DDTHH:MM:00 in America/Sao_Paulo (UTC-3)
+        const endShifted = new Date(endMs - 3 * 60 * 60 * 1000);
+        const endDateTime = endShifted.toISOString().slice(0, 19);
+        start = { dateTime: startDateTime, timeZone: "America/Sao_Paulo" };
+        end = { dateTime: endDateTime, timeZone: "America/Sao_Paulo" };
+      } else {
+        // All-day event: Google requires end.date = start.date + 1 day
+        const startDay = new Date(`${event.event_date}T00:00:00Z`);
+        const endDay = new Date(startDay.getTime() + 24 * 60 * 60 * 1000);
+        start = { date: event.event_date };
+        end = { date: endDay.toISOString().slice(0, 10) };
+      }
+
       const googleEvent = {
         summary: event.title,
         description: event.description || "",
-        start: event.event_time
-          ? { dateTime: `${event.event_date}T${event.event_time}:00`, timeZone: "America/Sao_Paulo" }
-          : { date: event.event_date },
-        end: event.event_time
-          ? { dateTime: `${event.event_date}T${event.event_time}:00`, timeZone: "America/Sao_Paulo" }
-          : { date: event.event_date },
+        start,
+        end,
       };
 
-      if (existing) {
-        // Update existing
-        await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${existing.google_event_id}`,
-          {
-            method: "PUT",
-            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-            body: JSON.stringify(googleEvent),
+      try {
+        if (existing) {
+          const res = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/primary/events/${existing.google_event_id}`,
+            {
+              method: "PUT",
+              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify(googleEvent),
+            }
+          );
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error(`[calendar-sync] push-error update event=${event.id} status=${res.status} body=${errText.slice(0, 300)}`);
+            pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+          } else {
+            pushedUpdated++;
+            console.log(`[calendar-sync] push-updated event=${event.id} google=${existing.google_event_id}`);
           }
-        );
-      } else {
-        // Create new
-        const res = await fetch(
-          "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-          {
-            method: "POST",
-            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-            body: JSON.stringify(googleEvent),
+        } else {
+          const res = await fetch(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            {
+              method: "POST",
+              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify(googleEvent),
+            }
+          );
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error(`[calendar-sync] push-error create event=${event.id} status=${res.status} body=${errText.slice(0, 300)}`);
+            pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+            continue;
           }
-        );
-        const created = await res.json();
-        if (created.id) {
-          await supabase.from("google_calendar_sync").insert({
-            user_id: userId,
-            agency_event_id: event.id,
-            google_event_id: created.id,
-          });
-          pushed++;
+          const created = await res.json();
+          if (created.id) {
+            await supabase.from("google_calendar_sync").insert({
+              user_id: userId,
+              agency_event_id: event.id,
+              google_event_id: created.id,
+            });
+            pushedCreated++;
+            console.log(`[calendar-sync] push-created event=${event.id} google=${created.id}`);
+          } else {
+            pushedSkipped++;
+            console.warn(`[calendar-sync] push-skipped event=${event.id} reason=no-id`);
+          }
         }
+      } catch (e: any) {
+        console.error(`[calendar-sync] push-error exception event=${event.id} err=${e?.message || e}`);
+        pushErrors.push({ event_id: event.id, error: String(e?.message || e) });
       }
     }
 
     // 2. Pull Google events → local
+    console.log(`[calendar-sync] pull-start range=${windowStart}..${windowEnd}`);
     const googleRes = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(yearStart)}&timeMax=${encodeURIComponent(yearEnd)}&singleEvents=true&maxResults=500`,
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(windowStart)}&timeMax=${encodeURIComponent(windowEnd)}&singleEvents=true&maxResults=500&orderBy=startTime`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
-    const googleData = await googleRes.json();
-    const googleEvents: GoogleEvent[] = googleData.items || [];
 
-    const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
+    let pulledCreated = 0;
+    let pulledSkipped = 0;
+    const pullErrors: Array<{ google_event_id?: string; status?: number; error: string }> = [];
+    let googleEvents: GoogleEvent[] = [];
 
-    for (const gEvent of googleEvents) {
-      if (gEvent.status === "cancelled") continue;
-      if (reverseSyncMap.has(gEvent.id)) continue; // Already synced from local
+    if (!googleRes.ok) {
+      const errText = await googleRes.text();
+      console.error(`[calendar-sync] pull-error list status=${googleRes.status} body=${errText.slice(0, 300)}`);
+      pullErrors.push({ status: googleRes.status, error: errText.slice(0, 200) });
+    } else {
+      const googleData = await googleRes.json();
+      googleEvents = googleData.items || [];
+      console.log(`[calendar-sync] pull-start google_events=${googleEvents.length}`);
 
-      const startDate = gEvent.start?.date || gEvent.start?.dateTime?.split("T")[0];
-      if (!startDate) continue;
+      const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
 
-      const startTime = gEvent.start?.dateTime
-        ? gEvent.start.dateTime.split("T")[1]?.substring(0, 5)
-        : null;
+      for (const gEvent of googleEvents) {
+        if (gEvent.status === "cancelled") { pulledSkipped++; continue; }
+        if (reverseSyncMap.has(gEvent.id)) { pulledSkipped++; continue; }
 
-      const { data: inserted } = await supabase
-        .from("agency_events")
-        .insert({
-          user_id: userId,
-          title: gEvent.summary || "Sem título",
-          description: gEvent.description || null,
-          event_type: "compromisso",
-          event_date: startDate,
-          event_time: startTime,
-          color: "#22c55e",
-        })
-        .select("id")
-        .single();
+        const startDate = gEvent.start?.date || gEvent.start?.dateTime?.split("T")[0];
+        if (!startDate) { pulledSkipped++; continue; }
 
-      if (inserted) {
-        await supabase.from("google_calendar_sync").insert({
-          user_id: userId,
-          agency_event_id: inserted.id,
-          google_event_id: gEvent.id,
-        });
-        pulled++;
+        const startTime = gEvent.start?.dateTime
+          ? gEvent.start.dateTime.split("T")[1]?.substring(0, 5)
+          : null;
+
+        try {
+          const { data: inserted, error: insErr } = await supabase
+            .from("agency_events")
+            .insert({
+              user_id: userId,
+              title: gEvent.summary || "Sem título",
+              description: gEvent.description || null,
+              event_type: "compromisso",
+              event_date: startDate,
+              event_time: startTime,
+              color: "#22c55e",
+            })
+            .select("id")
+            .single();
+
+          if (insErr || !inserted) {
+            console.error(`[calendar-sync] pull-error insert google=${gEvent.id} err=${insErr?.message}`);
+            pullErrors.push({ google_event_id: gEvent.id, error: insErr?.message || "insert failed" });
+            continue;
+          }
+
+          await supabase.from("google_calendar_sync").insert({
+            user_id: userId,
+            agency_event_id: inserted.id,
+            google_event_id: gEvent.id,
+          });
+          pulledCreated++;
+          console.log(`[calendar-sync] pull-created google=${gEvent.id} local=${inserted.id}`);
+        } catch (e: any) {
+          console.error(`[calendar-sync] pull-error exception google=${gEvent.id} err=${e?.message || e}`);
+          pullErrors.push({ google_event_id: gEvent.id, error: String(e?.message || e) });
+        }
       }
     }
 
@@ -241,8 +316,27 @@ Deno.serve(async (req) => {
       .update({ last_sync_at: new Date().toISOString() })
       .eq("user_id", userId);
 
+    const pushed = pushedCreated + pushedUpdated;
+    const pulled = pulledCreated;
+    console.log(
+      `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} total_google=${googleEvents.length}`
+    );
+
     return new Response(
-      JSON.stringify({ success: true, pushed, pulled, total_google: googleEvents.length }),
+      JSON.stringify({
+        success: true,
+        pushed,
+        pulled,
+        pushed_created: pushedCreated,
+        pushed_updated: pushedUpdated,
+        pushed_skipped: pushedSkipped,
+        pulled_created: pulledCreated,
+        pulled_skipped: pulledSkipped,
+        total_google: googleEvents.length,
+        push_errors: pushErrors,
+        pull_errors: pullErrors,
+        window: { start: windowStartDay, end: windowEndDay },
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
