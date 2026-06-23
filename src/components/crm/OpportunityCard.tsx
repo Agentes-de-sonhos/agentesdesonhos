@@ -86,6 +86,7 @@ import {
 } from "@/hooks/useOpportunityExtras";
 import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, CLIENT_STATUS_LABELS, type Opportunity, type OpportunityStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -477,10 +478,10 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                 <Calendar className="h-3.5 w-3.5" />
                 <span>
                   {opportunity.start_date &&
-                    format(new Date(opportunity.start_date), "dd/MM", { locale: ptBR })}
+                    format(parseLocalDate(opportunity.start_date), "dd/MM", { locale: ptBR })}
                   {opportunity.start_date && opportunity.end_date && " → "}
                   {opportunity.end_date &&
-                    format(new Date(opportunity.end_date), "dd/MM", { locale: ptBR })}
+                    format(parseLocalDate(opportunity.end_date), "dd/MM", { locale: ptBR })}
                 </span>
               </div>
             )}
