@@ -87,16 +87,20 @@ export function useGoogleCalendar() {
       if (data?.success) {
         const pushErrors = data.push_errors?.length || 0;
         const pullErrors = data.pull_errors?.length || 0;
-        const totalErrors = pushErrors + pullErrors;
+        const dErrors = data.delete_errors ?? 0;
+        const totalErrors = pushErrors + pullErrors + dErrors;
         const pCreated = data.pushed_created ?? 0;
         const pUpdated = data.pushed_updated ?? 0;
         const pSkipped = data.pushed_skipped ?? 0;
         const lCreated = data.pulled_created ?? 0;
         const lUpdated = data.pulled_updated ?? 0;
         const lSkipped = data.pulled_skipped ?? 0;
+        const dGoogle = data.deleted_google ?? 0;
+        const dLocal = data.deleted_local ?? 0;
         const summary =
           `Enviados: ${pCreated} criados, ${pUpdated} atualizados, ${pSkipped} ignorados · ` +
-          `Importados: ${lCreated} criados, ${lUpdated} atualizados, ${lSkipped} ignorados`;
+          `Importados: ${lCreated} criados, ${lUpdated} atualizados, ${lSkipped} ignorados · ` +
+          `Exclusões: ${dGoogle} no Google, ${dLocal} na Agenda`;
         if (totalErrors > 0) {
           toast.warning(`${summary} · ${totalErrors} erro(s). Veja os logs.`);
           console.error("[calendar-sync] push_errors:", data.push_errors);
