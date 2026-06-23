@@ -190,7 +190,6 @@ Deno.serve(async (req) => {
     };
 
     try {
-    try {
     const accessToken = await getValidToken(supabase, tokenRecord);
     if (!accessToken) {
       // Token refresh failed, remove stale record
