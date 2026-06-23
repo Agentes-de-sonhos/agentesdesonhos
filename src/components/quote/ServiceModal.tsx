@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Building2, X } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 interface Props {
   open: boolean;
