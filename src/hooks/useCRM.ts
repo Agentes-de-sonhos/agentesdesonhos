@@ -148,6 +148,8 @@ export function useClients() {
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({ title: "Cliente excluído" });
+      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ["operations"] });
       logTeamAction({ action: 'client.delete', entity_type: 'client', entity_id: id });
     },
     onError: (error) => {
