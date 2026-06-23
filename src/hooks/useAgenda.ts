@@ -308,6 +308,7 @@ export function useAgenda(year?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agency-events"] });
       toast.success("Evento criado com sucesso!");
+      triggerGoogleCalendarSync();
     },
     onError: (error) => {
       console.error("Error creating event:", error);
@@ -338,6 +339,7 @@ export function useAgenda(year?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agency-events"] });
       toast.success("Evento atualizado com sucesso!");
+      triggerGoogleCalendarSync();
     },
     onError: (error) => {
       console.error("Error updating event:", error);
@@ -361,6 +363,7 @@ export function useAgenda(year?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agency-events"] });
       toast.success("Evento excluído com sucesso!");
+      triggerGoogleCalendarSync();
     },
     onError: (error) => {
       console.error("Error deleting event:", error);
