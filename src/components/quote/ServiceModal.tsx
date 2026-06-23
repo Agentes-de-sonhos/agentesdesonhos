@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Building2, X } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { ServiceFormHeader } from "@/components/quote/ServiceModeChooser";
 
 interface Props {
   open: boolean;
@@ -228,6 +229,10 @@ export function ServiceModal(props: Props) {
             </div>
           )}
           <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
+          <ServiceFormHeader
+            serviceType={serviceType}
+            subtitle={editingService ? `Edite os dados de ${SERVICE_TYPE_LABELS[serviceType].toLowerCase()}.` : undefined}
+          />
           <ServiceForm
             key={editingService?.id || `new-${serviceType}`}
             serviceType={serviceType}

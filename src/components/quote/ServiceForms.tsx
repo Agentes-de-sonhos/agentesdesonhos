@@ -43,6 +43,7 @@ import { CarRentalSmartImport } from "./car-rental-import/CarRentalSmartImport";
 import { Sparkles, Ticket, Shield, Ship, Map as MapIcon, Package, TramFront } from "lucide-react";
 import { GenericServiceSmartImport, type GenericServiceKey } from "./service-import/GenericServiceSmartImport";
 import { SERVICE_IMPORT_CONFIGS } from "./service-import/serviceImportConfigs";
+import { ServiceModeChooser } from "./ServiceModeChooser";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
@@ -2584,32 +2585,12 @@ function HotelEntry(props: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdCh
 
 function HotelModeChooser({ onChoose }: { onChoose: (mode: "manual" | "import") => void }) {
   return (
-    <div className="space-y-4">
-      <div className="text-center space-y-1">
-        <h3 className="text-lg font-semibold">Como você quer preencher a hospedagem?</h3>
-        <p className="text-sm text-muted-foreground">Escolha o modo que for mais confortável agora.</p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button type="button" onClick={() => onChoose("import")}
-          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">Importar com IA</span>
-          </div>
-          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
-          <p className="text-sm text-muted-foreground">A IA lê a reserva, extrai hotel, datas, regime, valores e taxas, e abre a tela de revisão.</p>
-        </button>
-        <button type="button" onClick={() => onChoose("manual")}
-          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <Hotel className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-semibold text-muted-foreground">Preencher manualmente</span>
-          </div>
-          <p className="font-semibold mb-1">Formulário tradicional</p>
-          <p className="text-sm text-muted-foreground">Digite os dados da hospedagem campo a campo.</p>
-        </button>
-      </div>
-    </div>
+    <ServiceModeChooser
+      serviceType="hotel"
+      importDescription="A IA lê a reserva, extrai hotel, cidade, datas, regime, valores e taxas, e abre a tela de revisão."
+      secondaryDescription="Digite os dados da hospedagem campo a campo."
+      onChoose={(m) => onChoose(m as "manual" | "import")}
+    />
   );
 }
 
@@ -2660,32 +2641,12 @@ function CarRentalEntry(props: Omit<ServiceFormProps, "serviceType"> & { onPlace
 
 function CarRentalModeChooser({ onChoose }: { onChoose: (mode: "manual" | "import") => void }) {
   return (
-    <div className="space-y-4">
-      <div className="text-center space-y-1">
-        <h3 className="text-lg font-semibold">Como você quer preencher a locação?</h3>
-        <p className="text-sm text-muted-foreground">Escolha o modo que for mais confortável agora.</p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button type="button" onClick={() => onChoose("import")}
-          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">Importar com IA</span>
-          </div>
-          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
-          <p className="text-sm text-muted-foreground">A IA lê a reserva, extrai locadora, veículo, datas, valores e taxas, e abre a tela de revisão.</p>
-        </button>
-        <button type="button" onClick={() => onChoose("manual")}
-          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <Car className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-semibold text-muted-foreground">Preencher manualmente</span>
-          </div>
-          <p className="font-semibold mb-1">Formulário tradicional</p>
-          <p className="text-sm text-muted-foreground">Digite os dados da locação campo a campo.</p>
-        </button>
-      </div>
-    </div>
+    <ServiceModeChooser
+      serviceType="car_rental"
+      importDescription="A IA lê a reserva, extrai locadora, veículo, datas, locais, valores e proteções, e abre a tela de revisão."
+      secondaryDescription="Digite os dados da locação campo a campo."
+      onChoose={(m) => onChoose(m as "manual" | "import")}
+    />
   );
 }
 
@@ -2875,33 +2836,25 @@ function GenericImportEntry({
 function GenericModeChooser({
   label, icon, onChoose,
 }: { label: string; icon: React.ReactNode; onChoose: (mode: "manual" | "import") => void }) {
+  // Map label back to ServiceType for theming (icon prop is intentionally ignored
+  // in favor of the centralized service-theme tokens).
+  const labelToType: Record<string, ServiceType> = {
+    "Transfer": "transfer",
+    "Ingressos/Atrações": "attraction",
+    "Ingressos / Atrações": "attraction",
+    "Seguro Viagem": "insurance",
+    "Cruzeiro": "cruise",
+    "Cruzeiros": "cruise",
+    "Circuitos": "circuit",
+    "Transporte Ferroviário": "rail_transport",
+    "Outros Serviços": "other",
+  };
+  const serviceType: ServiceType = labelToType[label] ?? "other";
   return (
-    <div className="space-y-4">
-      <div className="text-center space-y-1">
-        <h3 className="text-lg font-semibold">Como você quer preencher o serviço de {label}?</h3>
-        <p className="text-sm text-muted-foreground">Escolha o modo que for mais confortável agora.</p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button type="button" onClick={() => onChoose("import")}
-          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">Importar com IA</span>
-          </div>
-          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
-          <p className="text-sm text-muted-foreground">A IA lê a reserva, extrai os dados principais e abre a tela de revisão.</p>
-        </button>
-        <button type="button" onClick={() => onChoose("manual")}
-          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            {icon}
-            <span className="text-sm font-semibold text-muted-foreground">Preencher manualmente</span>
-          </div>
-          <p className="font-semibold mb-1">Formulário tradicional</p>
-          <p className="text-sm text-muted-foreground">Digite os dados campo a campo.</p>
-        </button>
-      </div>
-    </div>
+    <ServiceModeChooser
+      serviceType={serviceType}
+      onChoose={(m) => onChoose(m as "manual" | "import")}
+    />
   );
 }
 
