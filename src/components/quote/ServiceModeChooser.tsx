@@ -40,24 +40,9 @@ export function ServiceModeChooser({
 
   return (
     <div className={cn("rounded-2xl p-5 sm:p-6 space-y-5", theme.bgSoft)}>
-      <div className="flex items-center gap-3">
-        <span
-          className={cn(
-            "inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm border",
-            theme.borderStrong,
-          )}
-        >
-          <Icon className={cn("h-5 w-5", theme.iconStrong)} />
-        </span>
-        <div className="min-w-0">
-          <p className={cn("text-xs font-semibold uppercase tracking-wide", theme.textStrong)}>
-            {theme.label}
-          </p>
-          <h3 className="text-base sm:text-lg font-semibold leading-tight">
-            {heading}
-          </h3>
-        </div>
-      </div>
+      <h3 className="text-center text-base sm:text-lg font-semibold leading-tight">
+        {heading}
+      </h3>
 
       <div className="grid gap-3 sm:grid-cols-2">
         {/* AI import — themed primary card */}

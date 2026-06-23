@@ -81,6 +81,8 @@ interface ServiceFormProps {
   paymentSlot?: ((liveAmount: number) => React.ReactNode) | React.ReactNode;
   /** Optional slot for photo upload */
   photoSlot?: React.ReactNode;
+  /** Called when the service mode chooser becomes active/inactive so the parent modal can adapt its layout */
+  onChooserActiveChange?: (active: boolean) => void;
 }
 
 /** Resolve paymentSlot: if it's a function, call with amount; otherwise render as-is */
@@ -2545,6 +2547,10 @@ function HotelEntry(props: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdCh
   const [mode, setMode] = useState<"chooser" | "manual" | "import">(isEditing ? "manual" : "chooser");
   const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
 
+  useEffect(() => {
+    props.onChooserActiveChange?.(mode !== "manual");
+  }, [mode, props.onChooserActiveChange]);
+
   if (mode === "chooser") {
     return <HotelModeChooser onChoose={(m) => setMode(m)} />;
   }
@@ -2600,6 +2606,10 @@ function CarRentalEntry(props: Omit<ServiceFormProps, "serviceType"> & { onPlace
   const isEditing = !!props.initialData;
   const [mode, setMode] = useState<"chooser" | "manual" | "import">(isEditing ? "manual" : "chooser");
   const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
+
+  useEffect(() => {
+    props.onChooserActiveChange?.(mode !== "manual");
+  }, [mode, props.onChooserActiveChange]);
 
   if (mode === "chooser") {
     return <CarRentalModeChooser onChoose={(m) => setMode(m)} />;
@@ -2657,6 +2667,10 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
   const [mode, setMode] = useState<"chooser" | "wizard" | "manual" | "import">(isEditing ? "manual" : "chooser");
   const [wizardPrefill, setWizardPrefill] = useState<WizardFlightDraft | undefined>(undefined);
   const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
+
+  useEffect(() => {
+    props.onChooserActiveChange?.(mode !== "manual");
+  }, [mode, props.onChooserActiveChange]);
 
   if (mode === "chooser") {
     return <FlightModeChooser onChoose={(m) => setMode(m)} />;
@@ -2772,10 +2786,13 @@ function GenericImportEntry({
   const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
   const cfg = SERVICE_IMPORT_CONFIGS[serviceKey];
 
+  useEffect(() => {
+    props.onChooserActiveChange?.(mode !== "manual");
+  }, [mode, props.onChooserActiveChange]);
+
   const Chooser = (
     <GenericModeChooser
-      label={cfg.serviceLabel}
-      icon={icon}
+      serviceType={serviceKey}
       onChoose={(m) => setMode(m)}
     />
   );
@@ -2834,22 +2851,12 @@ function GenericImportEntry({
 }
 
 function GenericModeChooser({
-  label, icon, onChoose,
-}: { label: string; icon: React.ReactNode; onChoose: (mode: "manual" | "import") => void }) {
-  // Map label back to ServiceType for theming (icon prop is intentionally ignored
-  // in favor of the centralized service-theme tokens).
-  const labelToType: Record<string, ServiceType> = {
-    "Transfer": "transfer",
-    "Ingressos/Atrações": "attraction",
-    "Ingressos / Atrações": "attraction",
-    "Seguro Viagem": "insurance",
-    "Cruzeiro": "cruise",
-    "Cruzeiros": "cruise",
-    "Circuitos": "circuit",
-    "Transporte Ferroviário": "rail_transport",
-    "Outros Serviços": "other",
-  };
-  const serviceType: ServiceType = labelToType[label] ?? "other";
+  serviceType,
+  onChoose,
+}: {
+  serviceType: GenericServiceKey;
+  onChoose: (mode: "manual" | "import") => void;
+}) {
   return (
     <ServiceModeChooser
       serviceType={serviceType}
