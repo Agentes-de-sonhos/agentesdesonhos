@@ -190,9 +190,11 @@ Deno.serve(async (req) => {
     };
 
     try {
+    try {
     const accessToken = await getValidToken(supabase, tokenRecord);
     if (!accessToken) {
       // Token refresh failed, remove stale record
+      await releaseLock("error", "Token expirado");
       await supabase.from("google_calendar_tokens").delete().eq("user_id", userId);
       return new Response(JSON.stringify({ error: "Token expirado. Reconecte o Google Calendar." }), { status: 401, headers: corsHeaders });
     }
