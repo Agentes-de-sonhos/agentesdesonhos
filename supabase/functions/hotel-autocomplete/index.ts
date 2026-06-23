@@ -59,9 +59,14 @@ serve(async (req) => {
 
     if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
       console.error("Autocomplete API error:", data.status, data.error_message);
-      return new Response(JSON.stringify({ predictions: [] }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          predictions: [],
+          error: "upstream_error",
+          status: data.status,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Filter and format predictions - prioritize lodging
@@ -89,7 +94,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("hotel-autocomplete error:", e);
     return new Response(
-      JSON.stringify({ predictions: [] }),
+      JSON.stringify({ predictions: [], error: "internal_error" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
