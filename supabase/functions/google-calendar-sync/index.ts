@@ -663,17 +663,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Update last sync
-    await supabase
-      .from("google_calendar_tokens")
-      .update({ last_sync_at: new Date().toISOString() })
-      .eq("user_id", userId);
-
     const pushed = pushedCreated + pushedUpdated;
     const pulled = pulledCreated + pulledUpdated;
     console.log(
       `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_updated=${pulledUpdated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} deleted_google=${deletedGoogle} deleted_local=${deletedLocal} deleted_skipped=${deletedSkipped} delete_errors=${deleteErrors} total_google=${googleEvents.length}`
     );
+
+    const totalErrors = pushErrors.length + pullErrors.length + deleteErrors;
+    await releaseLock(totalErrors > 0 ? "error" : "synced",
+      totalErrors > 0 ? `${totalErrors} erro(s) durante a sincronização` : null);
 
     return new Response(
       JSON.stringify({
@@ -690,6 +688,7 @@ Deno.serve(async (req) => {
         deleted_local: deletedLocal,
         deleted_skipped: deletedSkipped,
         delete_errors: deleteErrors,
+        duration_ms: Date.now() - syncStartedAt,
         total_google: googleEvents.length,
         push_errors: pushErrors,
         pull_errors: pullErrors,
@@ -697,6 +696,11 @@ Deno.serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+    } catch (innerErr) {
+      console.error(`[calendar-sync] sync-failed user=${userId} err=${(innerErr as any)?.message || innerErr}`);
+      await releaseLock("error", String((innerErr as any)?.message || innerErr).slice(0, 500));
+      throw innerErr;
+    }
   } catch (error) {
     console.error("Sync error:", error);
     return new Response(JSON.stringify({ error: "Erro na sincronização" }), {
