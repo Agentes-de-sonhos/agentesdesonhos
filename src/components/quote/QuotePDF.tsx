@@ -6,6 +6,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
 
 type QuoteDocument = {
