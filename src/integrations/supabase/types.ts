@@ -3586,12 +3586,18 @@ export type Database = {
       google_calendar_tokens: {
         Row: {
           access_token: string
+          auto_sync_enabled: boolean
           calendar_id: string | null
           created_at: string | null
           id: string
           last_sync_at: string | null
+          last_sync_duration_ms: number | null
+          last_sync_error: string | null
+          last_sync_status: string | null
           refresh_token: string
           sync_enabled: boolean | null
+          sync_in_progress: boolean
+          sync_lock_at: string | null
           sync_token: string | null
           token_expires_at: string
           updated_at: string | null
@@ -3599,12 +3605,18 @@ export type Database = {
         }
         Insert: {
           access_token: string
+          auto_sync_enabled?: boolean
           calendar_id?: string | null
           created_at?: string | null
           id?: string
           last_sync_at?: string | null
+          last_sync_duration_ms?: number | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
           refresh_token: string
           sync_enabled?: boolean | null
+          sync_in_progress?: boolean
+          sync_lock_at?: string | null
           sync_token?: string | null
           token_expires_at: string
           updated_at?: string | null
@@ -3612,12 +3624,18 @@ export type Database = {
         }
         Update: {
           access_token?: string
+          auto_sync_enabled?: boolean
           calendar_id?: string | null
           created_at?: string | null
           id?: string
           last_sync_at?: string | null
+          last_sync_duration_ms?: number | null
+          last_sync_error?: string | null
+          last_sync_status?: string | null
           refresh_token?: string
           sync_enabled?: boolean | null
+          sync_in_progress?: boolean
+          sync_lock_at?: string | null
           sync_token?: string | null
           token_expires_at?: string
           updated_at?: string | null

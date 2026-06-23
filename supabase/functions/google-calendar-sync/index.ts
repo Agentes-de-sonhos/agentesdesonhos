@@ -63,33 +63,43 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const internalKey = req.headers.get("x-internal-key");
+  const isInternal = !!internalKey && internalKey === serviceRoleKey;
+
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
-    }
-
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(
-      authHeader.replace("Bearer ", "")
-    );
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
-    }
-
-    const userId = claimsData.claims.sub;
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
     const body = await req.json().catch(() => ({}));
     const action = body.action || "sync";
+
+    let userId: string;
+    if (isInternal) {
+      if (!body.user_id || typeof body.user_id !== "string") {
+        return new Response(JSON.stringify({ error: "user_id required for internal call" }), { status: 400, headers: corsHeaders });
+      }
+      userId = body.user_id;
+    } else {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      }
+      const supabaseUser = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+      const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(
+        authHeader.replace("Bearer ", "")
+      );
+      if (claimsError || !claimsData?.claims) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      }
+      userId = claimsData.claims.sub;
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      serviceRoleKey
+    );
 
     // Handle disconnect
     if (action === "disconnect") {
@@ -104,7 +114,7 @@ Deno.serve(async (req) => {
     if (action === "status") {
       const { data: token } = await supabase
         .from("google_calendar_tokens")
-        .select("sync_enabled, last_sync_at, created_at")
+        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms")
         .eq("user_id", userId)
         .single();
 
@@ -124,9 +134,72 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Google Calendar não conectado" }), { status: 400, headers: corsHeaders });
     }
 
+    // Auto-sync disabled blocks only cron triggers; manual sync still works.
+    if (isInternal && tokenRecord.auto_sync_enabled === false) {
+      console.log(`[calendar-sync] auto-sync-disabled user=${userId}`);
+      return new Response(JSON.stringify({ success: true, skipped: "auto-sync-disabled" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Rate-limit: ignore non-forced calls less than 60s after the last sync.
+    const force = body.force === true;
+    if (!force && tokenRecord.last_sync_at) {
+      const sinceLast = Date.now() - new Date(tokenRecord.last_sync_at).getTime();
+      if (sinceLast < 60_000) {
+        console.log(`[calendar-sync] rate-limit-skip user=${userId} since_last_ms=${sinceLast}`);
+        return new Response(JSON.stringify({ success: true, skipped: "rate-limit", since_last_ms: sinceLast }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Atomic lock: clear stale locks first (>5min), then acquire if free.
+    const lockCutoff = new Date(Date.now() - 5 * 60_000).toISOString();
+    const lockNow = new Date().toISOString();
+    await supabase
+      .from("google_calendar_tokens")
+      .update({ sync_in_progress: false, sync_lock_at: null })
+      .eq("user_id", userId)
+      .eq("sync_in_progress", true)
+      .lt("sync_lock_at", lockCutoff);
+    const { data: lockRow, error: lockErr } = await supabase
+      .from("google_calendar_tokens")
+      .update({ sync_in_progress: true, sync_lock_at: lockNow, last_sync_status: "syncing" })
+      .eq("user_id", userId)
+      .eq("sync_in_progress", false)
+      .select("id")
+      .maybeSingle();
+    if (lockErr || !lockRow) {
+      console.log(`[calendar-sync] lock-skip user=${userId} err=${lockErr?.message || "already-locked"}`);
+      return new Response(JSON.stringify({ success: true, skipped: "lock" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const syncStartedAt = Date.now();
+    const releaseLock = async (status: "synced" | "error", errorMsg: string | null) => {
+      try {
+        await supabase
+          .from("google_calendar_tokens")
+          .update({
+            sync_in_progress: false,
+            sync_lock_at: null,
+            last_sync_at: new Date().toISOString(),
+            last_sync_status: status,
+            last_sync_error: errorMsg,
+            last_sync_duration_ms: Date.now() - syncStartedAt,
+          })
+          .eq("user_id", userId);
+      } catch (e) {
+        console.error(`[calendar-sync] release-lock-error user=${userId} err=${(e as any)?.message || e}`);
+      }
+    };
+
+    try {
     const accessToken = await getValidToken(supabase, tokenRecord);
     if (!accessToken) {
       // Token refresh failed, remove stale record
+      await releaseLock("error", "Token expirado");
       await supabase.from("google_calendar_tokens").delete().eq("user_id", userId);
       return new Response(JSON.stringify({ error: "Token expirado. Reconecte o Google Calendar." }), { status: 401, headers: corsHeaders });
     }
@@ -595,17 +668,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Update last sync
-    await supabase
-      .from("google_calendar_tokens")
-      .update({ last_sync_at: new Date().toISOString() })
-      .eq("user_id", userId);
-
     const pushed = pushedCreated + pushedUpdated;
     const pulled = pulledCreated + pulledUpdated;
     console.log(
       `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_updated=${pulledUpdated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} deleted_google=${deletedGoogle} deleted_local=${deletedLocal} deleted_skipped=${deletedSkipped} delete_errors=${deleteErrors} total_google=${googleEvents.length}`
     );
+
+    const totalErrors = pushErrors.length + pullErrors.length + deleteErrors;
+    await releaseLock(totalErrors > 0 ? "error" : "synced",
+      totalErrors > 0 ? `${totalErrors} erro(s) durante a sincronização` : null);
 
     return new Response(
       JSON.stringify({
@@ -622,6 +693,7 @@ Deno.serve(async (req) => {
         deleted_local: deletedLocal,
         deleted_skipped: deletedSkipped,
         delete_errors: deleteErrors,
+        duration_ms: Date.now() - syncStartedAt,
         total_google: googleEvents.length,
         push_errors: pushErrors,
         pull_errors: pullErrors,
@@ -629,6 +701,11 @@ Deno.serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+    } catch (innerErr) {
+      console.error(`[calendar-sync] sync-failed user=${userId} err=${(innerErr as any)?.message || innerErr}`);
+      await releaseLock("error", String((innerErr as any)?.message || innerErr).slice(0, 500));
+      throw innerErr;
+    }
   } catch (error) {
     console.error("Sync error:", error);
     return new Response(JSON.stringify({ error: "Erro na sincronização" }), {

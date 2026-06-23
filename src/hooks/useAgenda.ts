@@ -3,6 +3,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
+
+// Debounced fire-and-forget Google Calendar sync trigger.
+// Avoids spamming the edge function when the user makes several edits in a row.
+let __gcalSyncTimer: ReturnType<typeof setTimeout> | null = null;
+function triggerGoogleCalendarSync() {
+  if (typeof window === "undefined") return;
+  if (__gcalSyncTimer) clearTimeout(__gcalSyncTimer);
+  __gcalSyncTimer = setTimeout(() => {
+    __gcalSyncTimer = null;
+    // Only attempts a sync; the edge function silently skips if the user has
+    // not connected Google Calendar or if the rate limit / lock is active.
+    supabase.functions
+      .invoke("google-calendar-sync", { body: { action: "sync" } })
+      .then((res) => {
+        if ((res as any)?.error) {
+          console.debug("[calendar-sync] auto-trigger ignored:", (res as any).error?.message || (res as any).error);
+        } else {
+          console.debug("[calendar-sync] auto-trigger ok", (res as any)?.data?.skipped || "");
+        }
+      })
+      .catch(() => { /* network issue: cron will catch up */ });
+  }, 1500);
+}
 import { 
   AgencyEvent, 
   PresetEvent, 
@@ -285,6 +308,7 @@ export function useAgenda(year?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agency-events"] });
       toast.success("Evento criado com sucesso!");
+      triggerGoogleCalendarSync();
     },
     onError: (error) => {
       console.error("Error creating event:", error);
@@ -315,6 +339,7 @@ export function useAgenda(year?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agency-events"] });
       toast.success("Evento atualizado com sucesso!");
+      triggerGoogleCalendarSync();
     },
     onError: (error) => {
       console.error("Error updating event:", error);
@@ -338,6 +363,7 @@ export function useAgenda(year?: number) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["agency-events"] });
       toast.success("Evento excluído com sucesso!");
+      triggerGoogleCalendarSync();
     },
     onError: (error) => {
       console.error("Error deleting event:", error);
