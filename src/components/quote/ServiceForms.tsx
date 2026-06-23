@@ -737,6 +737,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [searchStatus, setSearchStatus] = useState<"idle" | "empty" | "error">("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -749,15 +750,27 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   }, []);
 
   const fetchAutocomplete = useCallback(async (input: string) => {
-    if (input.trim().length < 3) { setPredictions([]); setShowDropdown(false); return; }
+    if (input.trim().length < 3) { setPredictions([]); setShowDropdown(false); setSearchStatus("idle"); return; }
     setIsSearching(true);
     try {
       const cityVal = form.getValues("city");
-      const { data } = await supabase.functions.invoke("hotel-autocomplete", {
+      const { data, error } = await supabase.functions.invoke("hotel-autocomplete", {
         body: { input: input.trim(), city: cityVal?.trim() || undefined },
       });
-      if (data?.predictions) { setPredictions(data.predictions); setShowDropdown(data.predictions.length > 0); }
-    } catch {} finally { setIsSearching(false); }
+      if (error || data?.error) {
+        setPredictions([]);
+        setSearchStatus("error");
+        setShowDropdown(true);
+      } else if (data?.predictions) {
+        setPredictions(data.predictions);
+        setSearchStatus(data.predictions.length === 0 ? "empty" : "idle");
+        setShowDropdown(true);
+      }
+    } catch {
+      setPredictions([]);
+      setSearchStatus("error");
+      setShowDropdown(true);
+    } finally { setIsSearching(false); }
   }, [form]);
 
   const handleHotelNameInput = useCallback((value: string, formOnChange: (v: string) => void) => {
@@ -824,9 +837,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
                     {selectedPlaceId && !isSearching && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500" />}
                   </div>
                 </FormControl>
-                {showDropdown && predictions.length > 0 && (
+                {showDropdown && (predictions.length > 0 || searchStatus === "empty" || searchStatus === "error") && (
                   <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
-                    {predictions.map((p) => (
+                    {predictions.length > 0 && predictions.map((p) => (
                       <button key={p.place_id} type="button" className="w-full flex items-start gap-3 px-3 py-2 hover:bg-accent/50 transition-colors text-left"
                         onClick={() => handleSelectPrediction(p)}>
                         <div className="mt-0.5 shrink-0">{p.is_hotel ? <Hotel className="h-4 w-4 text-primary" /> : <MapPin className="h-4 w-4 text-muted-foreground" />}</div>
@@ -837,6 +850,12 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
                         {p.is_hotel && <Badge variant="secondary" className="text-[10px] shrink-0 mt-0.5">Hotel</Badge>}
                       </button>
                     ))}
+                    {predictions.length === 0 && searchStatus === "empty" && (
+                      <div className="px-3 py-2 text-xs text-muted-foreground">Nenhum hotel encontrado. Tente buscar por outro nome.</div>
+                    )}
+                    {predictions.length === 0 && searchStatus === "error" && (
+                      <div className="px-3 py-2 text-xs text-muted-foreground">Não foi possível buscar hotéis agora. Tente novamente em instantes.</div>
+                    )}
                   </div>
                 )}
               </div>
