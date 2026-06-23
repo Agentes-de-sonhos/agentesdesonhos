@@ -379,22 +379,41 @@ export function PublicInvestmentSummary({
         </div>
       )}
 
-      {(globalPayment.methodLabel || paymentTerms) && (
-        <div className="mt-4 rounded-lg border border-border/40 bg-muted/40 px-4 py-3 text-xs sm:text-sm text-foreground/80">
-          <div className="flex items-start gap-2">
-            <Info className="h-4 w-4 mt-0.5 text-primary/80 shrink-0" aria-hidden="true" />
-            <div className="space-y-1">
-              {globalPayment.methodLabel && (
-                <p>
-                  <span className="font-semibold text-foreground">Meio de pagamento:</span>{" "}
-                  {globalPayment.methodLabel}
-                </p>
-              )}
-              {paymentTerms && <p className="leading-relaxed">{paymentTerms}</p>}
+      {(() => {
+        const methods = parsePaymentMethods(globalPayment.methodLabel);
+        if (methods.length === 0 && !paymentTerms) return null;
+        return (
+          <div className="mt-4 rounded-lg border border-border/40 bg-muted/40 px-4 py-3 text-xs sm:text-sm text-foreground/80">
+            <div className="flex items-start gap-2">
+              <Info className="h-4 w-4 mt-0.5 text-primary/80 shrink-0" aria-hidden="true" />
+              <div className="space-y-1.5 min-w-0">
+                {methods.length === 1 && (
+                  <p>
+                    <span className="font-semibold text-foreground">Forma de pagamento:</span>{" "}
+                    {methods[0]}
+                  </p>
+                )}
+                {methods.length > 1 && (
+                  <div>
+                    <p className="font-semibold text-foreground">Formas de pagamento aceitas:</p>
+                    <ul className="mt-1 flex flex-wrap gap-1.5">
+                      {methods.map((m) => (
+                        <li
+                          key={m}
+                          className="inline-flex items-center rounded-full border border-border/60 bg-background/70 px-2.5 py-0.5 text-[11px] sm:text-xs font-medium text-foreground/85"
+                        >
+                          {m}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {paymentTerms && <p className="leading-relaxed">{paymentTerms}</p>}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </section>
   );
 }
