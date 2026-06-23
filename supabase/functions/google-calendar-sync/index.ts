@@ -12,6 +12,7 @@ interface GoogleEvent {
   start?: { dateTime?: string; date?: string };
   end?: { dateTime?: string; date?: string };
   status?: string;
+  updated?: string;
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number } | null> {
