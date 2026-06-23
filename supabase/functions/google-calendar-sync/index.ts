@@ -467,6 +467,12 @@ Deno.serve(async (req) => {
           if (mapInsertErr || !insertedMapping) {
             console.error(`[calendar-sync] mapping-error create-from-pull google=${gEvent.id} local=${inserted.id} err=${mapInsertErr?.message || "mapping upsert failed"}`);
             pullErrors.push({ google_event_id: gEvent.id, error: mapInsertErr?.message || "mapping upsert failed" });
+            await supabase
+              .from("agency_events")
+              .delete()
+              .eq("id", inserted.id)
+              .eq("user_id", userId);
+            console.log(`[calendar-sync] pull-cleanup local=${inserted.id} reason=mapping-create-failed`);
             continue;
           }
           reverseSyncMap.set(gEvent.id, insertedMapping);
