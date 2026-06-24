@@ -472,7 +472,17 @@ Deno.serve(async (req) => {
           { method: "DELETE" }
         );
         // 200/204 = deleted, 404/410 = already gone (treat as success)
-        if (res.ok || res.status === 404 || res.status === 410) {
+        // 400/403 with eventTypeRestriction = Google-managed event (birthday, focusTime, etc.)
+        // that cannot be deleted via API. Treat as success: tombstone the mapping so we stop retrying.
+        let isEventTypeRestriction = false;
+        let restrictionBody = "";
+        if (!res.ok && (res.status === 400 || res.status === 403)) {
+          restrictionBody = await res.clone().text();
+          if (restrictionBody.includes("eventTypeRestriction")) {
+            isEventTypeRestriction = true;
+          }
+        }
+        if (res.ok || res.status === 404 || res.status === 410 || isEventTypeRestriction) {
           const tombstoneAt = new Date().toISOString();
           const { error: tombErr } = await supabase
             .from("google_calendar_sync")
@@ -488,7 +498,7 @@ Deno.serve(async (req) => {
           syncMap.set(event.id, mapping);
           reverseSyncMap.set(mapping.google_event_id, mapping);
           deletedGoogle++;
-          console.log(`[calendar-sync] delete-google-success event=${event.id} google=${mapping.google_event_id} status=${res.status}`);
+          console.log(`[calendar-sync] delete-google-success event=${event.id} google=${mapping.google_event_id} status=${res.status}${isEventTypeRestriction ? " reason=event-type-restriction-skipped" : ""}`);
         } else {
           const errText = await res.text();
           deleteErrors++;
