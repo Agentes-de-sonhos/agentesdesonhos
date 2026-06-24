@@ -13,6 +13,7 @@ interface GoogleEvent {
   end?: { dateTime?: string; date?: string };
   status?: string;
   updated?: string;
+  eventType?: string;
 }
 
 function localEventSignature(event: any): string {
