@@ -66,7 +66,30 @@ const sortOptions: { value: NoteSortOption; label: string }[] = [
 
 function getPreview(content: string) {
   if (!content) return "";
-  return content.replace(/\s+/g, " ").trim().slice(0, 140);
+  // Strip HTML to plain text for card preview, preserve meaningful line breaks
+  let text = content;
+  // Convert common block-level breaks into newlines before stripping
+  text = text
+    .replace(/<\s*(br|\/p|\/div|\/li|\/h[1-6])\s*\/?>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "• ");
+  if (typeof window !== "undefined" && /<[^>]+>/.test(text)) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = text;
+    text = tmp.textContent || tmp.innerText || "";
+  } else {
+    text = text.replace(/<[^>]+>/g, "");
+  }
+  text = text
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+  text = text.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  const limit = 180;
+  if (text.length > limit) text = text.slice(0, limit).trimEnd() + "...";
+  return text;
 }
 
 export function NotesGrid({
