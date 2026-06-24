@@ -234,6 +234,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                     {...field}
                     onChange={(e) => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value) || 0)}
                     onFocus={(e) => e.target.select()}
+                    className="h-10 rounded-lg"
                   />
                 </FormControl>
                 <FormMessage />
