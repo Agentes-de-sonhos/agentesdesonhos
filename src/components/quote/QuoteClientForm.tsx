@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, Baby, MapPin, DollarSign, Settings2, ChevronDown, Plane } from "lucide-react";
+import { CalendarIcon, Users, Baby, MapPin, DollarSign, Settings2, ChevronDown, Plane, Plus } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFormDraft } from "@/hooks/usePersistedState";
