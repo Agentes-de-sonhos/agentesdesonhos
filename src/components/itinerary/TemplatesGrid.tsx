@@ -2,11 +2,31 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, ImageIcon, Wand2, Star, Users } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  ImageIcon,
+  Wand2,
+  Star,
+  Users,
+  Trash2,
+  Loader2,
+} from "lucide-react";
 import { useItineraryTemplates, type ItineraryTemplate } from "@/hooks/useItineraryTemplates";
 import { InstantiateTemplateDialog } from "./InstantiateTemplateDialog";
 import { TRIP_PROFILE_LABELS } from "@/types/itinerary";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 const STYLE_LABELS: Record<string, string> = {
   economico: "Econômico",
@@ -20,9 +40,16 @@ interface Props {
 }
 
 export function TemplatesGrid({ emptyTitle, emptyDescription }: Props) {
-  const { templates, isLoading } = useItineraryTemplates();
+  const { templates, isLoading, deleteTemplate } = useItineraryTemplates();
   const navigate = useNavigate();
   const [instantiate, setInstantiate] = useState<ItineraryTemplate | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ItineraryTemplate | null>(null);
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    deleteTemplate.mutate(deleteTarget.id);
+    setDeleteTarget(null);
+  };
 
   if (isLoading) {
     return <div className="text-sm text-muted-foreground py-12 text-center">Carregando modelos...</div>;
@@ -50,7 +77,7 @@ export function TemplatesGrid({ emptyTitle, emptyDescription }: Props) {
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {templates.map((t) => (
-          <Card key={t.id} className="overflow-hidden hover:shadow-md transition-shadow">
+          <Card key={t.id} className="overflow-hidden hover:shadow-md transition-shadow group">
             <div className="relative aspect-[16/10] w-full bg-muted">
               {t.cover_image_url ? (
                 <img src={t.cover_image_url} alt={t.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
@@ -67,7 +94,20 @@ export function TemplatesGrid({ emptyTitle, emptyDescription }: Props) {
               </div>
             </div>
             <CardContent className="p-4 space-y-2.5">
-              <h3 className="font-display font-semibold text-base leading-tight line-clamp-1">{t.name}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-display font-semibold text-base leading-tight line-clamp-1">{t.name}</h3>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(t)}
+                  aria-label="Excluir modelo"
+                  className={cn(
+                    "inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md text-muted-foreground/80 transition-colors",
+                    "hover:bg-rose-50 hover:text-rose-600 focus-visible:bg-muted focus-visible:text-foreground"
+                  )}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
               {t.destination && (
                 <div className="flex items-center text-xs text-muted-foreground gap-1">
                   <MapPin className="h-3 w-3" />
@@ -85,7 +125,11 @@ export function TemplatesGrid({ emptyTitle, emptyDescription }: Props) {
                 )}
               </div>
               <Button className="w-full mt-2" size="sm" onClick={() => setInstantiate(t)}>
-                <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+                {deleteTemplate.isPending && deleteTarget?.id === t.id ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+                )}
                 Criar roteiro a partir deste
               </Button>
             </CardContent>
@@ -100,6 +144,28 @@ export function TemplatesGrid({ emptyTitle, emptyDescription }: Props) {
           template={instantiate}
         />
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir modelo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o modelo "{deleteTarget?.name}"? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteTarget(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteTemplate.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteTemplate.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
