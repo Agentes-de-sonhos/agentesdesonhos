@@ -567,6 +567,15 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Skip Google-managed event types that can't be modified via API
+        // (birthday, focusTime, outOfOffice, workingLocation, fromGmail).
+        // Only "default" events are user-editable and safe to mirror.
+        if (gEvent.eventType && gEvent.eventType !== "default") {
+          pulledSkipped++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=non-default-event-type type=${gEvent.eventType}`);
+          continue;
+        }
+
         if (gEvent.status === "cancelled") {
           const cancelledMapping = reverseSyncMap.get(gEvent.id);
           if (cancelledMapping && !cancelledMapping.deleted_at) {
