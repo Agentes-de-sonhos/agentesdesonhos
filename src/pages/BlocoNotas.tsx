@@ -1,10 +1,8 @@
 import { useState, useCallback } from "react";
-import { Menu, X } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { NotesList } from "@/components/notes/NotesList";
+import { NotesGrid } from "@/components/notes/NotesGrid";
 import { NoteEditor } from "@/components/notes/NoteEditor";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +16,6 @@ import {
 import { useNotes } from "@/hooks/useNotes";
 import { useToast } from "@/hooks/use-toast";
 import { Note } from "@/types/notes";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
 function BlocoNotasInner() {
@@ -33,17 +30,14 @@ function BlocoNotasInner() {
     duplicateNote,
   } = useNotes();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
 
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
-  const [mobileListOpen, setMobileListOpen] = useState(false);
 
   const handleCreateNote = useCallback(async () => {
     try {
       const newNote = await createNote({ title: "Nova Nota" });
       setSelectedNote(newNote);
-      setMobileListOpen(false);
     } catch (error) {
       console.error("Error creating note:", error);
       toast({ title: "Erro ao criar nota", description: "Tente novamente.", variant: "destructive" });
@@ -52,7 +46,6 @@ function BlocoNotasInner() {
 
   const handleSelectNote = useCallback((note: Note) => {
     setSelectedNote(note);
-    setMobileListOpen(false);
   }, []);
 
   const handleDeleteNote = useCallback(async () => {
@@ -177,60 +170,35 @@ function BlocoNotasInner() {
     });
   }, [toast]);
 
-  const NotesListComponent = (
-    <NotesList
-      notes={notes}
-      selectedNoteId={selectedNote?.id || null}
-      onSelectNote={handleSelectNote}
-      onCreateNote={handleCreateNote}
-      onDeleteNote={setDeleteNoteId}
-      onDuplicateNote={handleDuplicateNote}
-      onToggleFavorite={handleToggleFavorite}
-      onToggleTemplate={handleToggleTemplate}
-      filters={filters}
-      onFiltersChange={setFilters}
-      isLoading={isLoading}
-    />
-  );
-
   return (
     <>
-      <div className="h-[calc(100vh-4rem)] flex flex-col">
-        {/* Mobile Header */}
-        {isMobile && (
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <h1 className="text-xl font-bold">Bloco de Notas</h1>
-            <Sheet open={mobileListOpen} onOpenChange={setMobileListOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-80">
-                {NotesListComponent}
-              </SheetContent>
-            </Sheet>
-          </div>
-        )}
+      <NotesGrid
+        notes={notes}
+        onSelectNote={handleSelectNote}
+        onCreateNote={handleCreateNote}
+        onDeleteNote={setDeleteNoteId}
+        onDuplicateNote={handleDuplicateNote}
+        onToggleFavorite={handleToggleFavorite}
+        onToggleTemplate={handleToggleTemplate}
+        filters={filters}
+        onFiltersChange={setFilters}
+        isLoading={isLoading}
+      />
 
-        {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Desktop Sidebar */}
-          {!isMobile && (
-            <div className="w-72 lg:w-80 flex-shrink-0">
-              {NotesListComponent}
-            </div>
-          )}
-
-          {/* Editor */}
+      {/* Note Editor Modal */}
+      <Dialog
+        open={!!selectedNote}
+        onOpenChange={(open) => !open && setSelectedNote(null)}
+      >
+        <DialogContent className="p-0 gap-0 max-w-none w-[95vw] sm:w-[90vw] h-[95vh] sm:h-[90vh] flex flex-col overflow-hidden rounded-2xl">
           <NoteEditor
             note={selectedNote}
             updateNote={updateNote}
             onExportPDF={handleExportPDF}
             onExportTXT={handleExportTXT}
           />
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
