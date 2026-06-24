@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Users, Baby, MapPin, DollarSign, Settings2, ChevronDown, Plane } from "lucide-react";
+import { CalendarIcon, Users, Baby, MapPin, DollarSign, Settings2, ChevronDown, Plane, Plus } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useFormDraft } from "@/hooks/usePersistedState";
@@ -210,6 +210,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                     {...field}
                     onChange={(e) => field.onChange(e.target.value === "" ? 1 : parseInt(e.target.value) || 1)}
                     onFocus={(e) => e.target.select()}
+                    className="h-10 rounded-lg"
                   />
                 </FormControl>
                 <FormMessage />
@@ -233,6 +234,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                     {...field}
                     onChange={(e) => field.onChange(e.target.value === "" ? 0 : parseInt(e.target.value) || 0)}
                     onFocus={(e) => e.target.select()}
+                    className="h-10 rounded-lg"
                   />
                 </FormControl>
                 <FormMessage />
@@ -280,16 +282,29 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                       form.setValue("dateRange", { from: form.getValues("dateRange.from"), to: undefined });
                     }
                   }}
-                  className="flex gap-4"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="round_trip" id="round_trip" />
-                    <Label htmlFor="round_trip" className="font-normal cursor-pointer">Ida e volta</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="one_way" id="one_way" />
-                    <Label htmlFor="one_way" className="font-normal cursor-pointer">Somente ida</Label>
-                  </div>
+                  {[
+                    { value: "round_trip", label: "Ida e volta", description: "Ida e retorno na mesma reserva" },
+                    { value: "one_way", label: "Somente ida", description: "Apenas o trecho de ida" },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      htmlFor={opt.value}
+                      className={cn(
+                        "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-all",
+                        field.value === opt.value
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                          : "border-border hover:border-border/80 hover:bg-muted/30"
+                      )}
+                    >
+                      <RadioGroupItem value={opt.value} id={opt.value} className="mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{opt.label}</p>
+                        <p className="text-xs text-muted-foreground">{opt.description}</p>
+                      </div>
+                    </label>
+                  ))}
                 </RadioGroup>
               </FormControl>
             </FormItem>
@@ -310,7 +325,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full h-10 pl-3 text-left font-normal rounded-lg",
                           !field.value?.from && "text-muted-foreground"
                         )}
                       >
@@ -344,7 +359,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full h-10 pl-3 text-left font-normal rounded-lg",
                           !field.value?.from && "text-muted-foreground"
                         )}
                       >
@@ -499,8 +514,15 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
           </CollapsibleContent>
         </Collapsible>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Criando..." : "Criar Orçamento"}
+        <Button type="submit" className="w-full h-11 rounded-lg shadow-sm" disabled={isLoading}>
+          {isLoading ? (
+            <>Criando...</>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Criar Orçamento
+            </>
+          )}
         </Button>
       </form>
     </Form>

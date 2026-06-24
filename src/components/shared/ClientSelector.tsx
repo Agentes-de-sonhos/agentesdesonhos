@@ -101,7 +101,7 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
               setIsOpen(true);
             }}
             onClick={() => setIsOpen(true)}
-            className={`pl-9 ${error ? "border-destructive" : ""}`}
+            className={`pl-9 h-10 rounded-lg ${error ? "border-destructive" : ""}`}
           />
           {value && (
             <button
