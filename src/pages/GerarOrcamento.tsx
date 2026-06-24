@@ -175,7 +175,7 @@ function QuoteHistoryRow({
   return (
     <div className="group grid grid-cols-1 md:grid-cols-[1fr_140px_160px] gap-3 md:gap-6 items-start md:items-center px-4 md:px-5 py-3.5 transition-colors hover:bg-muted/40">
       <div className="flex items-start gap-3 min-w-0">
-        <QuoteAvatar name={q.client_name} />
+        <ClientAvatar name={q.client_name} className="h-10 w-10" />
         <div className="min-w-0">
           <p className="font-medium text-foreground truncate text-[14px] leading-5">{q.client_name}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
