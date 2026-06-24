@@ -726,7 +726,7 @@ export default function MeusProjetos() {
               <TemplatesGrid />
             </TabsContent>
             {!isStartPlan && (
-              <TabsContent value="bloco-notas" className="mt-5 h-[calc(100vh-14rem)]">
+              <TabsContent value="bloco-notas" className="mt-5">
                 <BlocoNotasContent />
               </TabsContent>
             )}
