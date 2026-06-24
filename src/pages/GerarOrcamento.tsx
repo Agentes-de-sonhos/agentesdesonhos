@@ -836,13 +836,7 @@ export default function GerarOrcamento() {
               <QuotesListSection
                 quotes={quotes}
                 isLoading={quotesLoading}
-                onView={(q) => {
-                  if (q.status === "published" && q.share_token) {
-                    window.open(buildOrcamentoLink(q.share_token), "_blank", "noopener,noreferrer");
-                  } else {
-                    navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`);
-                  }
-                }}
+                onView={(q) => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
                 onEdit={(q) => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
                 onDuplicate={(q) => handleDuplicate(q.id)}
                 onDelete={(q) => setDeleteConfirmId(q.id)}
