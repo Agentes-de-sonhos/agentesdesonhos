@@ -21,7 +21,7 @@ import { Note } from "@/types/notes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
-function BlocoNotasContent() {
+function BlocoNotasInner() {
   const {
     notes,
     isLoading,
