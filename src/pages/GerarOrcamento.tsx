@@ -18,6 +18,8 @@ import {
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
   Pencil, MoreHorizontal, Play,
 } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -106,32 +108,141 @@ const PAYMENT_MODE_OPTIONS_BOTH: { value: PaymentDisplayMode; label: string; des
 const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
 const PAYMENT_METHOD_SELECT_OPTIONS = PAYMENT_METHOD_OPTIONS.map((m) => ({ value: m, label: m }));
 
+function getInitials(name: string): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+const AVATAR_PALETTE = [
+  { bg: "bg-blue-100", text: "text-blue-700" },
+  { bg: "bg-violet-100", text: "text-violet-700" },
+  { bg: "bg-emerald-100", text: "text-emerald-700" },
+  { bg: "bg-amber-100", text: "text-amber-700" },
+  { bg: "bg-pink-100", text: "text-pink-700" },
+  { bg: "bg-cyan-100", text: "text-cyan-700" },
+  { bg: "bg-rose-100", text: "text-rose-700" },
+  { bg: "bg-indigo-100", text: "text-indigo-700" },
+  { bg: "bg-teal-100", text: "text-teal-700" },
+];
+
+function getAvatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+
+function QuoteAvatar({ name }: { name: string }) {
+  const initials = getInitials(name);
+  const color = getAvatarColor(name || "?");
+  return (
+    <div
+      className={cn(
+        "h-11 w-11 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold tracking-wide",
+        color.bg,
+        color.text,
+      )}
+      aria-hidden
+    >
+      {initials}
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: Quote["status"] }) {
+  if (status === "published") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200/70">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        Publicado
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border/60">
+      Rascunho
+    </span>
+  );
+}
+
+function IconAction({
+  label,
+  onClick,
+  children,
+  destructive,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  destructive?: boolean;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={label}
+          className={cn(
+            "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-background text-muted-foreground transition-colors",
+            "hover:bg-muted hover:text-foreground",
+            destructive && "text-rose-500 hover:bg-rose-50 hover:text-rose-600 border-rose-100",
+          )}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 function QuoteHistoryRow({
   q,
+  onView,
   onEdit,
   onDuplicate,
   onDelete,
 }: {
   q: Quote;
+  onView: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
-      <div className="min-w-0 flex-1">
-        <p className="font-medium truncate">{q.client_name}</p>
-        <p className="text-sm text-muted-foreground truncate">
-          {q.destination} • {formatDateShort(q.start_date)} — {formatDateShort(q.end_date)}
-        </p>
+    <div className="group grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3 md:gap-6 items-start md:items-center px-4 md:px-6 py-4 transition-colors hover:bg-muted/40">
+      <div className="flex items-start gap-3 min-w-0">
+        <QuoteAvatar name={q.client_name} />
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground truncate">{q.client_name}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            {q.destination && (
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="truncate max-w-[200px]">{q.destination}</span>
+              </span>
+            )}
+            {q.start_date && q.end_date && (
+              <span className="inline-flex items-center gap-1">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {formatDateShort(q.start_date)} — {formatDateShort(q.end_date)}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <Badge variant={q.status === "published" ? "default" : "secondary"} className="capitalize">
-          {q.status === "published" ? "Publicado" : "Rascunho"}
-        </Badge>
-        <Button variant="ghost" size="sm" onClick={onEdit}>Editar</Button>
-        <Button variant="ghost" size="sm" onClick={onDuplicate}>Duplicar</Button>
-        <Button variant="ghost" size="sm" onClick={onDelete}>Excluir</Button>
+
+      <div className="md:justify-self-center">
+        <StatusBadge status={q.status} />
+      </div>
+
+      <div className="flex items-center gap-1.5 md:justify-self-end">
+        <IconAction label="Visualizar" onClick={onView}><Eye className="h-4 w-4" /></IconAction>
+        <IconAction label="Editar" onClick={onEdit}><Pencil className="h-4 w-4" /></IconAction>
+        <IconAction label="Duplicar" onClick={onDuplicate}><Copy className="h-4 w-4" /></IconAction>
+        <IconAction label="Excluir" onClick={onDelete} destructive><Trash2 className="h-4 w-4" /></IconAction>
       </div>
     </div>
   );
