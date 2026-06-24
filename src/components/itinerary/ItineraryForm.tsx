@@ -654,7 +654,7 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button type="submit" className="w-full h-11 rounded-lg" disabled={isLoading}>
         {isLoading ? (
           <>
             <Sparkles className="mr-2 h-4 w-4 animate-pulse" />

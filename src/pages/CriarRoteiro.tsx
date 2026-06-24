@@ -520,15 +520,43 @@ export default function CriarRoteiro() {
 
         {!currentItinerary ? (
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list" | "templates")}>
-            <TabsList className="grid w-full max-w-xl grid-cols-3">
-              <TabsTrigger value="create">Novo Roteiro</TabsTrigger>
-              <TabsTrigger value="list">Meus Roteiros</TabsTrigger>
-              <TabsTrigger value="templates">Meus Modelos</TabsTrigger>
-            </TabsList>
+            <div className="flex items-end justify-between gap-4 border-b border-border/60">
+              <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start">
+                <TabsTrigger
+                  value="create"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  Novo Roteiro
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  Meus Roteiros
+                </TabsTrigger>
+                <TabsTrigger
+                  value="templates"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  Meus Modelos
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="create" className="mt-6 space-y-4">
+              {activeTab === "list" && (
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab("create")}
+                  className="mb-2 h-9 rounded-lg px-3.5 text-sm shadow-sm"
+                >
+                  <Wand2 className="h-4 w-4" />
+                  Novo Roteiro
+                </Button>
+              )}
+            </div>
+
+            <TabsContent value="create" className="mt-5 space-y-4">
               {hasLimit && (
-                <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateItinerary ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
+                <div className={`max-w-3xl mx-auto p-3 rounded-xl border text-sm flex items-center gap-2 ${canCreateItinerary ? 'bg-muted/40 border-border/60 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
                   {canCreateItinerary ? (
                     <><Wand2 className="h-4 w-4" /> Você pode criar mais {itinerariesRemaining} roteiro(s) hoje.</>
                   ) : (
@@ -537,22 +565,27 @@ export default function CriarRoteiro() {
                 </div>
               )}
               {generationError ? (
-                <CriticalErrorState
-                  title="Não foi possível gerar o roteiro"
-                  description="A geração foi interrompida. Você pode tentar novamente. Se o erro persistir, resete sua sessão para limpar dados temporários do navegador."
-                  errorMessage={generationError}
-                  onRetry={lastFormData ? handleRetryGeneration : undefined}
-                  retryLabel="Tentar novamente"
-                />
+                <div className="max-w-3xl mx-auto">
+                  <CriticalErrorState
+                    title="Não foi possível gerar o roteiro"
+                    description="A geração foi interrompida. Você pode tentar novamente. Se o erro persistir, resete sua sessão para limpar dados temporários do navegador."
+                    errorMessage={generationError}
+                    onRetry={lastFormData ? handleRetryGeneration : undefined}
+                    retryLabel="Tentar novamente"
+                  />
+                </div>
               ) : null}
-              <Card className="max-w-lg">
-                <CardHeader>
-                  <CardTitle>Novo Roteiro de Viagem</CardTitle>
-                  <CardDescription>
-                    Preencha os dados e deixe a IA criar um roteiro personalizado
-                  </CardDescription>
+              <Card className="max-w-3xl mx-auto rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+                <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
+                  <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Novo Roteiro de Viagem
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Preencha os dados e deixe a IA criar um roteiro personalizado.
+                  </p>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <ItineraryForm
                     onSubmit={handleCreateItinerary}
                     isLoading={isGenerating}
@@ -561,7 +594,7 @@ export default function CriarRoteiro() {
                 </CardContent>
               </Card>
 
-              <Card className="max-w-lg border-dashed">
+              <Card className="max-w-3xl mx-auto rounded-2xl border-dashed border-border/70 bg-muted/10">
                 <CardContent className="p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 font-medium text-sm">
@@ -576,7 +609,7 @@ export default function CriarRoteiro() {
                     variant="outline"
                     size="sm"
                     onClick={() => setImportWizardOpen(true)}
-                    className="shrink-0"
+                    className="shrink-0 h-9 rounded-lg"
                   >
                     <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                     Importar roteiro
@@ -585,7 +618,7 @@ export default function CriarRoteiro() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="list" className="mt-6">
+            <TabsContent value="list" className="mt-5">
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -624,7 +657,7 @@ export default function CriarRoteiro() {
                 </div>
               )}
             </TabsContent>
-            <TabsContent value="templates" className="mt-6">
+            <TabsContent value="templates" className="mt-5">
               <TemplatesGrid />
             </TabsContent>
           </Tabs>
