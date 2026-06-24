@@ -256,7 +256,7 @@ export default function MeusProjetos() {
     return (
       <div className="space-y-2">
         {items.map((item) => (
-          <Card key={item.id} className="group hover:shadow-md transition-shadow">
+          <Card key={item.id} className="group rounded-2xl border-border/60 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center gap-4">
                 <div className="hidden sm:flex h-10 w-10 rounded-xl bg-primary/10 items-center justify-center flex-shrink-0">
