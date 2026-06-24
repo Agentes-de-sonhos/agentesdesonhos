@@ -108,26 +108,8 @@ const PAYMENT_MODE_OPTIONS_BOTH: { value: PaymentDisplayMode; label: string; des
 const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
 const PAYMENT_METHOD_SELECT_OPTIONS = PAYMENT_METHOD_OPTIONS.map((m) => ({ value: m, label: m }));
 
-function getInitials(name: string): string {
-  if (!name) return "?";
-  const firstName = name.trim().split(/\s+/)[0];
-  return firstName.slice(0, 2).toUpperCase();
-}
+import { ClientAvatar } from "@/components/shared/ClientAvatar";
 
-function QuoteAvatar({ name }: { name: string }) {
-  const initials = getInitials(name);
-  return (
-    <div
-      className={cn(
-        "h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold tracking-wide",
-        "bg-blue-100 text-blue-700",
-      )}
-      aria-hidden
-    >
-      {initials}
-    </div>
-  );
-}
 
 function StatusBadge({ status }: { status: Quote["status"] }) {
   if (status === "published") {
