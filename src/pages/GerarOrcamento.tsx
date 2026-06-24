@@ -719,10 +719,27 @@ export default function GerarOrcamento() {
 
   /* ═══════════════════  INITIAL SCREEN (no id) ═══════════════════ */
   if (!id) {
+    const activeTab = (location.hash === "#list" ? "list" : "create") as "create" | "list";
+    const setActiveTab = (val: "create" | "list") => {
+      navigate({ pathname: location.pathname, hash: val === "list" ? "#list" : "" }, { replace: true });
+    };
+
     return (
       <DashboardLayout>
+        <TooltipProvider delayDuration={150}>
         <div className="space-y-6 animate-fade-in">
-          <PageHeader pageKey="gerar-orcamento" title="Gerar Orçamento" subtitle="Crie um orçamento profissional para seu cliente" icon={FileText} />
+          <PageHeader pageKey="gerar-orcamento" title="Gerar Orçamento" subtitle="Crie um orçamento profissional para seu cliente" icon={FileText}>
+            <div className="flex-1 flex justify-end w-full">
+              <Button
+                size="lg"
+                onClick={() => setActiveTab("create")}
+                className="h-11 rounded-xl px-5 shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
+                Novo Orçamento
+              </Button>
+            </div>
+          </PageHeader>
 
           {hasLimit && (
             <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateQuote ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
@@ -767,14 +784,26 @@ export default function GerarOrcamento() {
             </div>
           )}
 
-          <Tabs defaultValue="create" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="create">Novo Orçamento</TabsTrigger>
-              <TabsTrigger value="list">
-                Meus Orçamentos
-                {quotes.length > 0 && (
-                  <Badge variant="secondary" className="text-xs ml-2">{quotes.length}</Badge>
-                )}
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")} className="w-full">
+            <TabsList className="h-auto bg-transparent p-0 gap-6 border-b border-border/60 rounded-none w-full justify-start">
+              <TabsTrigger
+                value="create"
+                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+              >
+                Novo Orçamento
+              </TabsTrigger>
+              <TabsTrigger
+                value="list"
+                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+              >
+                <span className="flex items-center gap-2">
+                  Meus Orçamentos
+                  {quotes.length > 0 && (
+                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                      {quotes.length}
+                    </span>
+                  )}
+                </span>
               </TabsTrigger>
             </TabsList>
 
@@ -804,40 +833,21 @@ export default function GerarOrcamento() {
             </TabsContent>
 
             <TabsContent value="list" className="mt-6">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <FileText className="h-4 w-4" />
-                    Meus Orçamentos
-                    {quotes.length > 0 && (
-                      <Badge variant="secondary" className="text-xs ml-1">{quotes.length}</Badge>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {quotesLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : quotes.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      Nenhum orçamento criado ainda. Volte à aba "Novo Orçamento" para criar o primeiro.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {quotes.map((q) => (
-                        <QuoteHistoryRow
-                          key={q.id}
-                          q={q}
-                          onEdit={() => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
-                          onDuplicate={() => handleDuplicate(q.id)}
-                          onDelete={() => setDeleteConfirmId(q.id)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <QuotesListSection
+                quotes={quotes}
+                isLoading={quotesLoading}
+                onView={(q) => {
+                  if (q.status === "published" && q.share_token) {
+                    window.open(buildOrcamentoLink(q.share_token), "_blank", "noopener,noreferrer");
+                  } else {
+                    navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`);
+                  }
+                }}
+                onEdit={(q) => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
+                onDuplicate={(q) => handleDuplicate(q.id)}
+                onDelete={(q) => setDeleteConfirmId(q.id)}
+                onCreate={() => setActiveTab("create")}
+              />
             </TabsContent>
           </Tabs>
 
@@ -859,6 +869,7 @@ export default function GerarOrcamento() {
             </AlertDialogContent>
           </AlertDialog>
         </div>
+        </TooltipProvider>
       </DashboardLayout>
     );
   }
