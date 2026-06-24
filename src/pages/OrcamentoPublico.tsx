@@ -410,12 +410,12 @@ function HotelBody({ data }: { data: any }) {
         )}
       </div>
       <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 flex items-center gap-4">
-        <StayRow icon={<PlaneLanding className="h-3 w-3 mr-1" />} label="Check-in" value={formatDateShort(data.check_in)} />
+        <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label="Check-in" value={formatDateShort(data.check_in)} />
         <div className="flex flex-col items-center text-muted-foreground">
           <ArrowRight className="h-4 w-4" />
           {nights && <span className="text-[10px] font-semibold mt-0.5">{nights} {nights === 1 ? "noite" : "noites"}</span>}
         </div>
-        <StayRow icon={<PlaneTakeoff className="h-3 w-3 mr-1" />} label="Check-out" value={formatDateShort(data.check_out)} />
+        <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label="Check-out" value={formatDateShort(data.check_out)} />
       </div>
       <div className="flex flex-wrap gap-3 text-sm">
         {data.room_type && (
