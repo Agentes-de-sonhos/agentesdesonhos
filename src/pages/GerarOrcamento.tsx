@@ -285,66 +285,92 @@ function QuotesListSection({
     );
   });
 
+  const publishedCount = quotes.filter((q) => q.status === "published").length;
+  const draftCount = quotes.length - publishedCount;
+
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold text-foreground">Meus Orçamentos</h2>
-          {quotes.length > 0 && (
-            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-semibold text-muted-foreground">
-              {quotes.length}
-            </span>
-          )}
+      {/* Métricas compactas */}
+      {quotes.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {[
+            { label: "Total", value: quotes.length, dot: "bg-foreground/40" },
+            { label: "Publicados", value: publishedCount, dot: "bg-emerald-500" },
+            { label: "Rascunhos", value: draftCount, dot: "bg-muted-foreground/50" },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="rounded-xl border border-border/60 bg-card px-4 py-3 flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={cn("h-1.5 w-1.5 rounded-full", m.dot)} />
+                <span className="text-xs font-medium text-muted-foreground truncate">{m.label}</span>
+              </div>
+              <span className="text-lg font-semibold text-foreground tabular-nums">{m.value}</span>
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-none sm:w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar orçamentos..."
-              className="pl-9 h-10 rounded-lg bg-background"
-            />
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10 rounded-lg gap-2">
-                <SlidersHorizontal className="h-4 w-4" />
+      )}
+
+      {/* Toolbar: busca em destaque + filtros sutis */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="relative flex-1 sm:max-w-[380px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por cliente ou destino..."
+            className="pl-9 h-10 rounded-lg bg-background"
+          />
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-10 rounded-lg gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="text-sm">
                 Filtros
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-56 p-2">
-              <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
-              {([
-                { v: "all", label: "Todos" },
-                { v: "published", label: "Publicado" },
-                { v: "draft", label: "Rascunho" },
-              ] as { v: StatusFilter; label: string }[]).map((opt) => (
-                <button
-                  key={opt.v}
-                  type="button"
-                  onClick={() => setStatusFilter(opt.v)}
-                  className={cn(
-                    "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
-                    statusFilter === opt.v ? "bg-muted text-foreground font-medium" : "hover:bg-muted/60",
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </PopoverContent>
-          </Popover>
-        </div>
+                {statusFilter !== "all" && (
+                  <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-semibold text-primary">
+                    1
+                  </span>
+                )}
+              </span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56 p-2">
+            <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
+            {([
+              { v: "all", label: "Todos" },
+              { v: "published", label: "Publicado" },
+              { v: "draft", label: "Rascunho" },
+            ] as { v: StatusFilter; label: string }[]).map((opt) => (
+              <button
+                key={opt.v}
+                type="button"
+                onClick={() => setStatusFilter(opt.v)}
+                className={cn(
+                  "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
+                  statusFilter === opt.v ? "bg-muted text-foreground font-medium" : "hover:bg-muted/60",
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Card container */}
-      <div className="rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
         {/* Header row (desktop) */}
         {filtered.length > 0 && (
-          <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-6 items-center px-6 py-3 border-b border-border/60 bg-muted/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="hidden md:grid grid-cols-[1fr_140px_160px] gap-6 items-center px-5 py-2.5 border-b border-border/60 bg-muted/20 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <div>Cliente</div>
-            <div className="justify-self-center">Status</div>
+            <div>Status</div>
             <div className="justify-self-end pr-1">Ações</div>
           </div>
         )}
