@@ -162,7 +162,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full pl-3 text-left font-normal",
+                        "w-full h-10 pl-3 text-left font-normal rounded-lg",
                         !field.value && "text-muted-foreground"
                       )}
                     >
