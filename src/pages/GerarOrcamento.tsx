@@ -248,6 +248,148 @@ function QuoteHistoryRow({
   );
 }
 
+type StatusFilter = "all" | "published" | "draft";
+
+function QuotesListSection({
+  quotes,
+  isLoading,
+  onView,
+  onEdit,
+  onDuplicate,
+  onDelete,
+  onCreate,
+}: {
+  quotes: Quote[];
+  isLoading: boolean;
+  onView: (q: Quote) => void;
+  onEdit: (q: Quote) => void;
+  onDuplicate: (q: Quote) => void;
+  onDelete: (q: Quote) => void;
+  onCreate: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  const filtered = quotes.filter((q) => {
+    if (statusFilter !== "all") {
+      const target = statusFilter === "published" ? "published" : "draft";
+      if (q.status !== target) return false;
+    }
+    if (!query.trim()) return true;
+    const needle = query.trim().toLowerCase();
+    return (
+      (q.client_name || "").toLowerCase().includes(needle) ||
+      (q.destination || "").toLowerCase().includes(needle)
+    );
+  });
+
+  return (
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-semibold text-foreground">Meus Orçamentos</h2>
+          {quotes.length > 0 && (
+            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-semibold text-muted-foreground">
+              {quotes.length}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none sm:w-[300px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar orçamentos..."
+              className="pl-9 h-10 rounded-lg bg-background"
+            />
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-10 rounded-lg gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                Filtros
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-56 p-2">
+              <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
+              {([
+                { v: "all", label: "Todos" },
+                { v: "published", label: "Publicado" },
+                { v: "draft", label: "Rascunho" },
+              ] as { v: StatusFilter; label: string }[]).map((opt) => (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setStatusFilter(opt.v)}
+                  className={cn(
+                    "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
+                    statusFilter === opt.v ? "bg-muted text-foreground font-medium" : "hover:bg-muted/60",
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      {/* Card container */}
+      <div className="rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden">
+        {/* Header row (desktop) */}
+        {filtered.length > 0 && (
+          <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-6 items-center px-6 py-3 border-b border-border/60 bg-muted/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div>Cliente</div>
+            <div className="justify-self-center">Status</div>
+            <div className="justify-self-end pr-1">Ações</div>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-16 px-6">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              {quotes.length === 0 ? "Nenhum orçamento ainda" : "Nenhum resultado encontrado"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+              {quotes.length === 0
+                ? "Crie seu primeiro orçamento profissional para compartilhar com seus clientes."
+                : "Ajuste sua busca ou filtros para encontrar o orçamento desejado."}
+            </p>
+            {quotes.length === 0 && (
+              <Button onClick={onCreate} className="mt-4 h-10 rounded-lg">
+                <Plus className="h-4 w-4" />
+                Novo Orçamento
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-border/50">
+            {filtered.map((q) => (
+              <QuoteHistoryRow
+                key={q.id}
+                q={q}
+                onView={() => onView(q)}
+                onEdit={() => onEdit(q)}
+                onDuplicate={() => onDuplicate(q)}
+                onDelete={() => onDelete(q)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════════════════════════ */
 export default function GerarOrcamento() {
   const [editingDestination, setEditingDestination] = useState(false);
