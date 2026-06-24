@@ -240,6 +240,7 @@ export default function MeusProjetos() {
   const { trips, isLoading: tripsLoading, deleteTrip } = useTrips();
   const { itineraries, isLoading: itinerariesLoading, deleteItinerary } = useItineraries();
   const { templates } = useItineraryTemplates();
+  const { notes } = useNotes();
 
   const normalized = useMemo(
     () => normalizeItems(quotes, trips, itineraries),
