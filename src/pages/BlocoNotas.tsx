@@ -21,7 +21,7 @@ import { Note } from "@/types/notes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
-function BlocoNotasContent() {
+function BlocoNotasInner() {
   const {
     notes,
     isLoading,
@@ -194,7 +194,7 @@ function BlocoNotasContent() {
   );
 
   return (
-    <DashboardLayout>
+    <>
       <div className="h-[calc(100vh-4rem)] flex flex-col">
         {/* Mobile Header */}
         {isMobile && (
@@ -256,14 +256,23 @@ function BlocoNotasContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </DashboardLayout>
+    </>
+  );
+}
+
+export function BlocoNotasContent() {
+  return (
+    <SubscriptionGuard feature="notepad">
+      <BlocoNotasInner />
+    </SubscriptionGuard>
   );
 }
 
 export default function BlocoNotas() {
   return (
-    <SubscriptionGuard feature="notepad">
+    <DashboardLayout>
       <BlocoNotasContent />
-    </SubscriptionGuard>
+    </DashboardLayout>
   );
 }
+

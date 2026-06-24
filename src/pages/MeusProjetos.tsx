@@ -30,6 +30,7 @@ import {
   FileText,
   Wallet,
   Route,
+  StickyNote,
   Pencil,
   Copy,
   Trash2,
@@ -43,6 +44,8 @@ import {
   Plus,
 } from "lucide-react";
 import { ClientAvatar } from "@/components/shared/ClientAvatar";
+import { useNotes } from "@/hooks/useNotes";
+import { BlocoNotasContent } from "@/pages/BlocoNotas";
 import { useQuotes } from "@/hooks/useQuotes";
 import { useTrips } from "@/hooks/useTrips";
 import { useItineraries } from "@/hooks/useItineraries";
@@ -237,6 +240,7 @@ export default function MeusProjetos() {
   const { trips, isLoading: tripsLoading, deleteTrip } = useTrips();
   const { itineraries, isLoading: itinerariesLoading, deleteItinerary } = useItineraries();
   const { templates } = useItineraryTemplates();
+  const { notes } = useNotes();
 
   const normalized = useMemo(
     () => normalizeItems(quotes, trips, itineraries),
@@ -311,6 +315,8 @@ export default function MeusProjetos() {
         return normalized.itineraries.length;
       case "modelos":
         return templates.length;
+      case "bloco-notas":
+        return notes.length;
       default:
         return 0;
     }
@@ -601,6 +607,18 @@ export default function MeusProjetos() {
                     {getTabCount("modelos")}
                   </Badge>
                 </TabsTrigger>
+                {!isStartPlan && (
+                  <TabsTrigger
+                    value="bloco-notas"
+                    className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                  >
+                    <StickyNote className="h-4 w-4" />
+                    <span className="hidden sm:inline">Bloco de Notas</span>
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                      {getTabCount("bloco-notas")}
+                    </Badge>
+                  </TabsTrigger>
+                )}
               </TabsList>
             </div>
 
@@ -707,6 +725,11 @@ export default function MeusProjetos() {
             <TabsContent value="modelos" className="mt-5">
               <TemplatesGrid />
             </TabsContent>
+            {!isStartPlan && (
+              <TabsContent value="bloco-notas" className="mt-5 h-[calc(100vh-14rem)]">
+                <BlocoNotasContent />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
 
