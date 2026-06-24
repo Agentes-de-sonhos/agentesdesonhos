@@ -555,7 +555,8 @@ export default function MeusProjetos() {
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="border-b border-border/60">
-              <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start overflow-x-auto">
+              <TabsList className="h-auto w-full sm:w-auto bg-transparent p-0 gap-4 sm:gap-6 rounded-none justify-start overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+
                 {!isStartPlan && (
                   <TabsTrigger
                     value="orcamentos"
