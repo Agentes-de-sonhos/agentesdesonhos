@@ -852,7 +852,7 @@ function TripWalletContent() {
             </div>
 
             <TabsContent value="create" className="mt-5">
-              <Card className="max-w-3xl mx-auto rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+              <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
                   <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
                     <Wallet className="h-5 w-5 text-primary" />
