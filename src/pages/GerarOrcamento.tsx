@@ -116,15 +116,16 @@ function getInitials(name: string): string {
 }
 
 const AVATAR_PALETTE = [
-  { bg: "bg-blue-100", text: "text-blue-700" },
-  { bg: "bg-violet-100", text: "text-violet-700" },
-  { bg: "bg-emerald-100", text: "text-emerald-700" },
-  { bg: "bg-amber-100", text: "text-amber-700" },
-  { bg: "bg-pink-100", text: "text-pink-700" },
-  { bg: "bg-cyan-100", text: "text-cyan-700" },
-  { bg: "bg-rose-100", text: "text-rose-700" },
-  { bg: "bg-indigo-100", text: "text-indigo-700" },
-  { bg: "bg-teal-100", text: "text-teal-700" },
+  // Suaves, inspirados em Linear/Notion/Slack
+  { bg: "bg-blue-50",    text: "text-blue-600",    ring: "ring-blue-100" },
+  { bg: "bg-violet-50",  text: "text-violet-600",  ring: "ring-violet-100" },
+  { bg: "bg-emerald-50", text: "text-emerald-600", ring: "ring-emerald-100" },
+  { bg: "bg-amber-50",   text: "text-amber-600",   ring: "ring-amber-100" },
+  { bg: "bg-rose-50",    text: "text-rose-500",    ring: "ring-rose-100" },
+  { bg: "bg-cyan-50",    text: "text-cyan-600",    ring: "ring-cyan-100" },
+  { bg: "bg-teal-50",    text: "text-teal-600",    ring: "ring-teal-100" },
+  { bg: "bg-indigo-50",  text: "text-indigo-600",  ring: "ring-indigo-100" },
+  { bg: "bg-orange-50",  text: "text-orange-500",  ring: "ring-orange-100" },
 ];
 
 function getAvatarColor(name: string) {
@@ -139,9 +140,10 @@ function QuoteAvatar({ name }: { name: string }) {
   return (
     <div
       className={cn(
-        "h-11 w-11 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold tracking-wide",
+        "h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold tracking-wide ring-1 ring-inset",
         color.bg,
         color.text,
+        color.ring,
       )}
       aria-hidden
     >
@@ -185,9 +187,9 @@ function IconAction({
           onClick={onClick}
           aria-label={label}
           className={cn(
-            "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-background text-muted-foreground transition-colors",
-            "hover:bg-muted hover:text-foreground",
-            destructive && "text-rose-500 hover:bg-rose-50 hover:text-rose-600 border-rose-100",
+            "inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-muted-foreground/80 transition-colors",
+            "hover:bg-muted/70 hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground",
+            destructive && "hover:bg-rose-50 hover:text-rose-600",
           )}
         >
           {children}
@@ -212,12 +214,12 @@ function QuoteHistoryRow({
   onDelete: () => void;
 }) {
   return (
-    <div className="group grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3 md:gap-6 items-start md:items-center px-4 md:px-6 py-4 transition-colors hover:bg-muted/40">
+    <div className="group grid grid-cols-1 md:grid-cols-[1fr_140px_160px] gap-3 md:gap-6 items-start md:items-center px-4 md:px-5 py-3.5 transition-colors hover:bg-muted/40">
       <div className="flex items-start gap-3 min-w-0">
         <QuoteAvatar name={q.client_name} />
         <div className="min-w-0">
-          <p className="font-semibold text-foreground truncate">{q.client_name}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <p className="font-medium text-foreground truncate text-[14px] leading-5">{q.client_name}</p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
             {q.destination && (
               <span className="inline-flex items-center gap-1">
                 <MapPin className="h-3.5 w-3.5" />
@@ -234,11 +236,11 @@ function QuoteHistoryRow({
         </div>
       </div>
 
-      <div className="md:justify-self-center">
+      <div className="md:justify-self-start">
         <StatusBadge status={q.status} />
       </div>
 
-      <div className="flex items-center gap-1.5 md:justify-self-end">
+      <div className="flex items-center gap-0.5 md:justify-self-end opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity">
         <IconAction label="Visualizar" onClick={onView}><Eye className="h-4 w-4" /></IconAction>
         <IconAction label="Editar" onClick={onEdit}><Pencil className="h-4 w-4" /></IconAction>
         <IconAction label="Duplicar" onClick={onDuplicate}><Copy className="h-4 w-4" /></IconAction>
@@ -283,66 +285,92 @@ function QuotesListSection({
     );
   });
 
+  const publishedCount = quotes.filter((q) => q.status === "published").length;
+  const draftCount = quotes.length - publishedCount;
+
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold text-foreground">Meus Orçamentos</h2>
-          {quotes.length > 0 && (
-            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-semibold text-muted-foreground">
-              {quotes.length}
-            </span>
-          )}
+      {/* Métricas compactas */}
+      {quotes.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {[
+            { label: "Total", value: quotes.length, dot: "bg-foreground/40" },
+            { label: "Publicados", value: publishedCount, dot: "bg-emerald-500" },
+            { label: "Rascunhos", value: draftCount, dot: "bg-muted-foreground/50" },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="rounded-xl border border-border/60 bg-card px-4 py-3 flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={cn("h-1.5 w-1.5 rounded-full", m.dot)} />
+                <span className="text-xs font-medium text-muted-foreground truncate">{m.label}</span>
+              </div>
+              <span className="text-lg font-semibold text-foreground tabular-nums">{m.value}</span>
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-none sm:w-[300px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar orçamentos..."
-              className="pl-9 h-10 rounded-lg bg-background"
-            />
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10 rounded-lg gap-2">
-                <SlidersHorizontal className="h-4 w-4" />
+      )}
+
+      {/* Toolbar: busca em destaque + filtros sutis */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="relative flex-1 sm:max-w-[380px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por cliente ou destino..."
+            className="pl-9 h-10 rounded-lg bg-background"
+          />
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-10 rounded-lg gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="text-sm">
                 Filtros
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-56 p-2">
-              <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
-              {([
-                { v: "all", label: "Todos" },
-                { v: "published", label: "Publicado" },
-                { v: "draft", label: "Rascunho" },
-              ] as { v: StatusFilter; label: string }[]).map((opt) => (
-                <button
-                  key={opt.v}
-                  type="button"
-                  onClick={() => setStatusFilter(opt.v)}
-                  className={cn(
-                    "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
-                    statusFilter === opt.v ? "bg-muted text-foreground font-medium" : "hover:bg-muted/60",
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </PopoverContent>
-          </Popover>
-        </div>
+                {statusFilter !== "all" && (
+                  <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-semibold text-primary">
+                    1
+                  </span>
+                )}
+              </span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56 p-2">
+            <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
+            {([
+              { v: "all", label: "Todos" },
+              { v: "published", label: "Publicado" },
+              { v: "draft", label: "Rascunho" },
+            ] as { v: StatusFilter; label: string }[]).map((opt) => (
+              <button
+                key={opt.v}
+                type="button"
+                onClick={() => setStatusFilter(opt.v)}
+                className={cn(
+                  "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
+                  statusFilter === opt.v ? "bg-muted text-foreground font-medium" : "hover:bg-muted/60",
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Card container */}
-      <div className="rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
         {/* Header row (desktop) */}
         {filtered.length > 0 && (
-          <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-6 items-center px-6 py-3 border-b border-border/60 bg-muted/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="hidden md:grid grid-cols-[1fr_140px_160px] gap-6 items-center px-5 py-2.5 border-b border-border/60 bg-muted/20 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             <div>Cliente</div>
-            <div className="justify-self-center">Status</div>
+            <div>Status</div>
             <div className="justify-self-end pr-1">Ações</div>
           </div>
         )}
@@ -869,19 +897,13 @@ export default function GerarOrcamento() {
     return (
       <DashboardLayout>
         <TooltipProvider delayDuration={150}>
-        <div className="space-y-6 animate-fade-in">
-          <PageHeader pageKey="gerar-orcamento" title="Gerar Orçamento" subtitle="Crie um orçamento profissional para seu cliente" icon={FileText}>
-            <div className="flex-1 flex justify-end w-full">
-              <Button
-                size="lg"
-                onClick={() => setActiveTab("create")}
-                className="h-11 rounded-xl px-5 shadow-sm"
-              >
-                <Plus className="h-4 w-4" />
-                Novo Orçamento
-              </Button>
-            </div>
-          </PageHeader>
+        <div className="mx-auto w-full max-w-[1280px] space-y-3 animate-fade-in">
+          <PageHeader
+            pageKey="gerar-orcamento"
+            title="Gerar Orçamento"
+            subtitle="Crie um orçamento profissional para seu cliente"
+            icon={FileText}
+          />
 
           {hasLimit && (
             <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateQuote ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
@@ -927,29 +949,42 @@ export default function GerarOrcamento() {
           )}
 
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")} className="w-full">
-            <TabsList className="h-auto bg-transparent p-0 gap-6 border-b border-border/60 rounded-none w-full justify-start">
-              <TabsTrigger
-                value="create"
-                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
-              >
-                Novo Orçamento
-              </TabsTrigger>
-              <TabsTrigger
-                value="list"
-                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
-              >
-                <span className="flex items-center gap-2">
-                  Meus Orçamentos
-                  {quotes.length > 0 && (
-                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
-                      {quotes.length}
-                    </span>
-                  )}
-                </span>
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-end justify-between gap-4 border-b border-border/60">
+              <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start">
+                <TabsTrigger
+                  value="create"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  Novo Orçamento
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  <span className="flex items-center gap-2">
+                    Meus Orçamentos
+                    {quotes.length > 0 && (
+                      <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-semibold text-muted-foreground">
+                        {quotes.length}
+                      </span>
+                    )}
+                  </span>
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="create" className="mt-6">
+              {activeTab === "list" && quotes.length > 0 && (
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab("create")}
+                  className="mb-2 h-9 rounded-lg px-3.5 text-sm shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Orçamento
+                </Button>
+              )}
+            </div>
+
+            <TabsContent value="create" className="mt-5">
               <Card className="max-w-3xl">
                 <CardHeader><CardTitle>Novo Orçamento</CardTitle></CardHeader>
                 <CardContent>
@@ -974,7 +1009,7 @@ export default function GerarOrcamento() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="list" className="mt-6">
+            <TabsContent value="list" className="mt-5">
               <QuotesListSection
                 quotes={quotes}
                 isLoading={quotesLoading}
