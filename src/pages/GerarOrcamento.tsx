@@ -116,15 +116,16 @@ function getInitials(name: string): string {
 }
 
 const AVATAR_PALETTE = [
-  { bg: "bg-blue-100", text: "text-blue-700" },
-  { bg: "bg-violet-100", text: "text-violet-700" },
-  { bg: "bg-emerald-100", text: "text-emerald-700" },
-  { bg: "bg-amber-100", text: "text-amber-700" },
-  { bg: "bg-pink-100", text: "text-pink-700" },
-  { bg: "bg-cyan-100", text: "text-cyan-700" },
-  { bg: "bg-rose-100", text: "text-rose-700" },
-  { bg: "bg-indigo-100", text: "text-indigo-700" },
-  { bg: "bg-teal-100", text: "text-teal-700" },
+  // Suaves, inspirados em Linear/Notion/Slack
+  { bg: "bg-blue-50",    text: "text-blue-600",    ring: "ring-blue-100" },
+  { bg: "bg-violet-50",  text: "text-violet-600",  ring: "ring-violet-100" },
+  { bg: "bg-emerald-50", text: "text-emerald-600", ring: "ring-emerald-100" },
+  { bg: "bg-amber-50",   text: "text-amber-600",   ring: "ring-amber-100" },
+  { bg: "bg-rose-50",    text: "text-rose-500",    ring: "ring-rose-100" },
+  { bg: "bg-cyan-50",    text: "text-cyan-600",    ring: "ring-cyan-100" },
+  { bg: "bg-teal-50",    text: "text-teal-600",    ring: "ring-teal-100" },
+  { bg: "bg-indigo-50",  text: "text-indigo-600",  ring: "ring-indigo-100" },
+  { bg: "bg-orange-50",  text: "text-orange-500",  ring: "ring-orange-100" },
 ];
 
 function getAvatarColor(name: string) {
@@ -139,9 +140,10 @@ function QuoteAvatar({ name }: { name: string }) {
   return (
     <div
       className={cn(
-        "h-11 w-11 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold tracking-wide",
+        "h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold tracking-wide ring-1 ring-inset",
         color.bg,
         color.text,
+        color.ring,
       )}
       aria-hidden
     >
@@ -185,9 +187,9 @@ function IconAction({
           onClick={onClick}
           aria-label={label}
           className={cn(
-            "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-background text-muted-foreground transition-colors",
-            "hover:bg-muted hover:text-foreground",
-            destructive && "text-rose-500 hover:bg-rose-50 hover:text-rose-600 border-rose-100",
+            "inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-muted-foreground/80 transition-colors",
+            "hover:bg-muted/70 hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground",
+            destructive && "hover:bg-rose-50 hover:text-rose-600",
           )}
         >
           {children}
@@ -212,12 +214,12 @@ function QuoteHistoryRow({
   onDelete: () => void;
 }) {
   return (
-    <div className="group grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3 md:gap-6 items-start md:items-center px-4 md:px-6 py-4 transition-colors hover:bg-muted/40">
+    <div className="group grid grid-cols-1 md:grid-cols-[1fr_140px_160px] gap-3 md:gap-6 items-start md:items-center px-4 md:px-5 py-3.5 transition-colors hover:bg-muted/40">
       <div className="flex items-start gap-3 min-w-0">
         <QuoteAvatar name={q.client_name} />
         <div className="min-w-0">
-          <p className="font-semibold text-foreground truncate">{q.client_name}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <p className="font-medium text-foreground truncate text-[14px] leading-5">{q.client_name}</p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
             {q.destination && (
               <span className="inline-flex items-center gap-1">
                 <MapPin className="h-3.5 w-3.5" />
@@ -234,11 +236,11 @@ function QuoteHistoryRow({
         </div>
       </div>
 
-      <div className="md:justify-self-center">
+      <div className="md:justify-self-start">
         <StatusBadge status={q.status} />
       </div>
 
-      <div className="flex items-center gap-1.5 md:justify-self-end">
+      <div className="flex items-center gap-0.5 md:justify-self-end opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity">
         <IconAction label="Visualizar" onClick={onView}><Eye className="h-4 w-4" /></IconAction>
         <IconAction label="Editar" onClick={onEdit}><Pencil className="h-4 w-4" /></IconAction>
         <IconAction label="Duplicar" onClick={onDuplicate}><Copy className="h-4 w-4" /></IconAction>
