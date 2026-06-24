@@ -657,7 +657,7 @@ export default function CriarRoteiro() {
                 </div>
               )}
             </TabsContent>
-            <TabsContent value="templates" className="mt-6">
+            <TabsContent value="templates" className="mt-5">
               <TemplatesGrid />
             </TabsContent>
           </Tabs>
