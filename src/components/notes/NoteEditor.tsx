@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -81,6 +81,17 @@ export function NoteEditor({
     content,
     updateNote
   );
+
+  // Flush save when the editor unmounts (e.g. modal closes)
+  const saveNowRef = useRef(saveNow);
+  useEffect(() => {
+    saveNowRef.current = saveNow;
+  }, [saveNow]);
+  useEffect(() => {
+    return () => {
+      saveNowRef.current?.();
+    };
+  }, []);
 
   // Sync state when note changes
   useEffect(() => {
