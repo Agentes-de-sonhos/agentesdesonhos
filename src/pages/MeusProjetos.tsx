@@ -417,12 +417,12 @@ export default function MeusProjetos() {
               placeholder="Buscar por nome, cliente ou destino..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 h-10 rounded-lg"
             />
           </div>
           <div className="flex gap-2">
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[140px] h-10 rounded-lg">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -432,7 +432,7 @@ export default function MeusProjetos() {
               </SelectContent>
             </Select>
             <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as SortOrder)}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-[150px] h-10 rounded-lg">
                 <SelectValue placeholder="Ordenar" />
               </SelectTrigger>
               <SelectContent>
@@ -445,55 +445,69 @@ export default function MeusProjetos() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={cn("w-full grid", isStartPlan ? "grid-cols-2" : "grid-cols-4")}>
-            {!isStartPlan && (
-              <TabsTrigger value="orcamentos" className="gap-2">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Orçamentos</span>
+          <div className="border-b border-border/60">
+            <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start overflow-x-auto">
+              {!isStartPlan && (
+                <TabsTrigger
+                  value="orcamentos"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span className="hidden sm:inline">Orçamentos</span>
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                    {getTabCount("orcamentos")}
+                  </Badge>
+                </TabsTrigger>
+              )}
+              {!isStartPlan && (
+                <TabsTrigger
+                  value="carteiras"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  <Wallet className="h-4 w-4" />
+                  <span className="hidden sm:inline">Carteiras</span>
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                    {getTabCount("carteiras")}
+                  </Badge>
+                </TabsTrigger>
+              )}
+              <TabsTrigger
+                value="roteiros"
+                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+              >
+                <Route className="h-4 w-4" />
+                <span className={cn(isStartPlan ? "inline" : "hidden sm:inline")}>Roteiros</span>
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
-                  {getTabCount("orcamentos")}
+                  {getTabCount("roteiros")}
                 </Badge>
               </TabsTrigger>
-            )}
-            {!isStartPlan && (
-              <TabsTrigger value="carteiras" className="gap-2">
-                <Wallet className="h-4 w-4" />
-                <span className="hidden sm:inline">Carteiras</span>
+              <TabsTrigger
+                value="modelos"
+                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+              >
+                <Star className="h-4 w-4" />
+                <span className={cn(isStartPlan ? "inline" : "hidden sm:inline")}>Modelos</span>
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
-                  {getTabCount("carteiras")}
+                  {getTabCount("modelos")}
                 </Badge>
               </TabsTrigger>
-            )}
-            <TabsTrigger value="roteiros" className="gap-2">
-              <Route className="h-4 w-4" />
-              <span className={cn(isStartPlan ? "inline" : "hidden sm:inline")}>Roteiros</span>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
-                {getTabCount("roteiros")}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value="modelos" className="gap-2">
-              <Star className="h-4 w-4" />
-              <span className={cn(isStartPlan ? "inline" : "hidden sm:inline")}>Modelos</span>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
-                {getTabCount("modelos")}
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
+            </TabsList>
+          </div>
 
           {!isStartPlan && (
-            <TabsContent value="orcamentos" className="mt-4">
+            <TabsContent value="orcamentos" className="mt-5">
               {renderList(filteredQuotes, quotesLoading)}
             </TabsContent>
           )}
           {!isStartPlan && (
-            <TabsContent value="carteiras" className="mt-4">
+            <TabsContent value="carteiras" className="mt-5">
               {renderList(filteredTrips, tripsLoading)}
             </TabsContent>
           )}
-          <TabsContent value="roteiros" className="mt-4">
+          <TabsContent value="roteiros" className="mt-5">
             {renderList(filteredItineraries, itinerariesLoading)}
           </TabsContent>
-          <TabsContent value="modelos" className="mt-4">
+          <TabsContent value="modelos" className="mt-5">
             <TemplatesGrid />
           </TabsContent>
         </Tabs>
