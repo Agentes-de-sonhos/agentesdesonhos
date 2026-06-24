@@ -30,6 +30,7 @@ import {
   FileText,
   Wallet,
   Route,
+  StickyNote,
   Pencil,
   Copy,
   Trash2,
@@ -43,6 +44,8 @@ import {
   Plus,
 } from "lucide-react";
 import { ClientAvatar } from "@/components/shared/ClientAvatar";
+import { useNotes } from "@/hooks/useNotes";
+import { BlocoNotasContent } from "@/pages/BlocoNotas";
 import { useQuotes } from "@/hooks/useQuotes";
 import { useTrips } from "@/hooks/useTrips";
 import { useItineraries } from "@/hooks/useItineraries";
