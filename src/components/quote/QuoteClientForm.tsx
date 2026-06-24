@@ -282,16 +282,29 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                       form.setValue("dateRange", { from: form.getValues("dateRange.from"), to: undefined });
                     }
                   }}
-                  className="flex gap-4"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="round_trip" id="round_trip" />
-                    <Label htmlFor="round_trip" className="font-normal cursor-pointer">Ida e volta</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="one_way" id="one_way" />
-                    <Label htmlFor="one_way" className="font-normal cursor-pointer">Somente ida</Label>
-                  </div>
+                  {[
+                    { value: "round_trip", label: "Ida e volta", description: "Ida e retorno na mesma reserva" },
+                    { value: "one_way", label: "Somente ida", description: "Apenas o trecho de ida" },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      htmlFor={opt.value}
+                      className={cn(
+                        "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-all",
+                        field.value === opt.value
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                          : "border-border hover:border-border/80 hover:bg-muted/30"
+                      )}
+                    >
+                      <RadioGroupItem value={opt.value} id={opt.value} className="mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{opt.label}</p>
+                        <p className="text-xs text-muted-foreground">{opt.description}</p>
+                      </div>
+                    </label>
+                  ))}
                 </RadioGroup>
               </FormControl>
             </FormItem>
