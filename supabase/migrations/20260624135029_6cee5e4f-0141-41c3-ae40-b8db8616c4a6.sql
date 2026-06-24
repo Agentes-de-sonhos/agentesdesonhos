@@ -1,0 +1,1 @@
+UPDATE public.google_calendar_sync SET deleted_at = now(), last_synced_at = now() WHERE id = 'd9cd01a3-7524-43da-94c3-35aa20a81016' AND deleted_at IS NULL;
