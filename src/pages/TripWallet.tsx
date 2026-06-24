@@ -806,6 +806,11 @@ function TripWalletContent() {
 
   // Listing view
   if (!id) {
+    const activeTab = (location.hash === "#list" ? "list" : "create") as "create" | "list";
+    const setActiveTab = (val: "create" | "list") => {
+      navigate({ pathname: location.pathname, hash: val === "list" ? "#list" : "" }, { replace: true });
+    };
+
     return (
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
@@ -815,21 +820,49 @@ function TripWalletContent() {
             subtitle="Organize vouchers, documentos e serviços das viagens"
             icon={Wallet}
           />
-          <Tabs defaultValue="create" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="create">Nova Carteira</TabsTrigger>
-              <TabsTrigger value="list">Minhas Carteiras</TabsTrigger>
-            </TabsList>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")} className="w-full">
+            <div className="flex items-end justify-between gap-4 border-b border-border/60">
+              <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start">
+                <TabsTrigger
+                  value="create"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  Nova Carteira
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  <span className="flex items-center gap-2">
+                    Minhas Carteiras
+                  </span>
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="create" className="mt-6">
-              <Card className="max-w-2xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+              {activeTab === "list" && (
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab("create")}
+                  className="mb-2 h-9 rounded-lg px-3.5 text-sm shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  Nova Carteira
+                </Button>
+              )}
+            </div>
+
+            <TabsContent value="create" className="mt-5">
+              <Card className="max-w-3xl mx-auto rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+                <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
+                  <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
                     <Wallet className="h-5 w-5 text-primary" />
                     Informações da Viagem
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Preencha os dados iniciais para criar uma carteira digital.
+                  </p>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <TripForm
                     onSubmit={handleCreateTrip}
                     isLoading={isCreating}
@@ -853,12 +886,12 @@ function TripWalletContent() {
                       };
                     })()}
                   />
-                  <div className="mt-4 pt-4 border-t flex flex-col items-center gap-2">
+                  <div className="mt-6 pt-6 border-t flex flex-col items-center gap-2">
                     <p className="text-xs text-muted-foreground">ou aproveite informações já cadastradas</p>
                     <Button
                       type="button"
                       variant="secondary"
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      className="w-full h-10 rounded-lg"
                       onClick={() => setShowImportQuoteAsNew(true)}
                     >
                       <FileTextIcon className="h-4 w-4 mr-2" />
@@ -869,7 +902,7 @@ function TripWalletContent() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="list" className="mt-6">
+            <TabsContent value="list" className="mt-5">
               <TripWalletList agencyName={agentProfile?.agency_name || undefined} />
             </TabsContent>
           </Tabs>

@@ -29,6 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { ServiceList } from "@/components/quote/ServiceCard";
@@ -108,26 +109,7 @@ const PAYMENT_MODE_OPTIONS_BOTH: { value: PaymentDisplayMode; label: string; des
 const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
 const PAYMENT_METHOD_SELECT_OPTIONS = PAYMENT_METHOD_OPTIONS.map((m) => ({ value: m, label: m }));
 
-function getInitials(name: string): string {
-  if (!name) return "?";
-  const firstName = name.trim().split(/\s+/)[0];
-  return firstName.slice(0, 2).toUpperCase();
-}
 
-function QuoteAvatar({ name }: { name: string }) {
-  const initials = getInitials(name);
-  return (
-    <div
-      className={cn(
-        "h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold tracking-wide",
-        "bg-blue-100 text-blue-700",
-      )}
-      aria-hidden
-    >
-      {initials}
-    </div>
-  );
-}
 
 function StatusBadge({ status }: { status: Quote["status"] }) {
   if (status === "published") {
@@ -193,7 +175,7 @@ function QuoteHistoryRow({
   return (
     <div className="group grid grid-cols-1 md:grid-cols-[1fr_140px_160px] gap-3 md:gap-6 items-start md:items-center px-4 md:px-5 py-3.5 transition-colors hover:bg-muted/40">
       <div className="flex items-start gap-3 min-w-0">
-        <QuoteAvatar name={q.client_name} />
+        <ClientAvatar name={q.client_name} className="h-10 w-10" />
         <div className="min-w-0">
           <p className="font-medium text-foreground truncate text-[14px] leading-5">{q.client_name}</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">

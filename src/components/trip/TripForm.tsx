@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, MapPin } from "lucide-react";
+import { CalendarIcon, MapPin, Plus } from "lucide-react";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,7 +162,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full pl-3 text-left font-normal",
+                        "w-full h-10 pl-3 text-left font-normal rounded-lg",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -227,8 +227,15 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Criando..." : "Criar Carteira"}
+        <Button type="submit" className="w-full h-11 rounded-lg shadow-sm" disabled={isLoading}>
+          {isLoading ? (
+            <>Criando...</>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Criar Carteira
+            </>
+          )}
         </Button>
       </form>
     </Form>
