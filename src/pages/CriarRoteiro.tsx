@@ -556,7 +556,7 @@ export default function CriarRoteiro() {
 
             <TabsContent value="create" className="mt-5 space-y-4">
               {hasLimit && (
-                <div className={`max-w-3xl mx-auto p-3 rounded-xl border text-sm flex items-center gap-2 ${canCreateItinerary ? 'bg-muted/40 border-border/60 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
+                <div className={`max-w-3xl p-3 rounded-xl border text-sm flex items-center gap-2 ${canCreateItinerary ? 'bg-muted/40 border-border/60 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
                   {canCreateItinerary ? (
                     <><Wand2 className="h-4 w-4" /> Você pode criar mais {itinerariesRemaining} roteiro(s) hoje.</>
                   ) : (
@@ -565,7 +565,7 @@ export default function CriarRoteiro() {
                 </div>
               )}
               {generationError ? (
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-3xl">
                   <CriticalErrorState
                     title="Não foi possível gerar o roteiro"
                     description="A geração foi interrompida. Você pode tentar novamente. Se o erro persistir, resete sua sessão para limpar dados temporários do navegador."
@@ -575,7 +575,7 @@ export default function CriarRoteiro() {
                   />
                 </div>
               ) : null}
-              <Card className="max-w-3xl mx-auto rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+              <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
                   <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />
@@ -594,7 +594,7 @@ export default function CriarRoteiro() {
                 </CardContent>
               </Card>
 
-              <Card className="max-w-3xl mx-auto rounded-2xl border-dashed border-border/70 bg-muted/10">
+              <Card className="max-w-3xl rounded-2xl border-dashed border-border/70 bg-muted/10">
                 <CardContent className="p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 font-medium text-sm">
