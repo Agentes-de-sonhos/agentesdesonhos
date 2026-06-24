@@ -110,40 +110,17 @@ const PAYMENT_METHOD_SELECT_OPTIONS = PAYMENT_METHOD_OPTIONS.map((m) => ({ value
 
 function getInitials(name: string): string {
   if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-const AVATAR_PALETTE = [
-  // Suaves, inspirados em Linear/Notion/Slack
-  { bg: "bg-blue-50",    text: "text-blue-600",    ring: "ring-blue-100" },
-  { bg: "bg-violet-50",  text: "text-violet-600",  ring: "ring-violet-100" },
-  { bg: "bg-emerald-50", text: "text-emerald-600", ring: "ring-emerald-100" },
-  { bg: "bg-amber-50",   text: "text-amber-600",   ring: "ring-amber-100" },
-  { bg: "bg-rose-50",    text: "text-rose-500",    ring: "ring-rose-100" },
-  { bg: "bg-cyan-50",    text: "text-cyan-600",    ring: "ring-cyan-100" },
-  { bg: "bg-teal-50",    text: "text-teal-600",    ring: "ring-teal-100" },
-  { bg: "bg-indigo-50",  text: "text-indigo-600",  ring: "ring-indigo-100" },
-  { bg: "bg-orange-50",  text: "text-orange-500",  ring: "ring-orange-100" },
-];
-
-function getAvatarColor(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+  const firstName = name.trim().split(/\s+/)[0];
+  return firstName.slice(0, 2).toUpperCase();
 }
 
 function QuoteAvatar({ name }: { name: string }) {
   const initials = getInitials(name);
-  const color = getAvatarColor(name || "?");
   return (
     <div
       className={cn(
-        "h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold tracking-wide ring-1 ring-inset",
-        color.bg,
-        color.text,
-        color.ring,
+        "h-10 w-10 shrink-0 rounded-full flex items-center justify-center text-[13px] font-semibold tracking-wide",
+        "bg-blue-100 text-blue-700",
       )}
       aria-hidden
     >
