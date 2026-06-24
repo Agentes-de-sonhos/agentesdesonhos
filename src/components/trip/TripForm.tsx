@@ -227,8 +227,15 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Criando..." : "Criar Carteira"}
+        <Button type="submit" className="w-full h-11 rounded-lg shadow-sm" disabled={isLoading}>
+          {isLoading ? (
+            <>Criando...</>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Criar Carteira
+            </>
+          )}
         </Button>
       </form>
     </Form>
