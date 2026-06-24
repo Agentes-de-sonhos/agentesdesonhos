@@ -315,6 +315,8 @@ export default function MeusProjetos() {
         return normalized.itineraries.length;
       case "modelos":
         return templates.length;
+      case "bloco-notas":
+        return notes.length;
       default:
         return 0;
     }
