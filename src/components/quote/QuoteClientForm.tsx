@@ -514,8 +514,15 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
           </CollapsibleContent>
         </Collapsible>
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Criando..." : "Criar Orçamento"}
+        <Button type="submit" className="w-full h-11 rounded-lg shadow-sm" disabled={isLoading}>
+          {isLoading ? (
+            <>Criando...</>
+          ) : (
+            <>
+              <Plus className="h-4 w-4 mr-2" />
+              Criar Orçamento
+            </>
+          )}
         </Button>
       </form>
     </Form>
