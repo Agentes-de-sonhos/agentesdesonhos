@@ -18,6 +18,8 @@ import {
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
   Pencil, MoreHorizontal, Play,
 } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -106,32 +108,283 @@ const PAYMENT_MODE_OPTIONS_BOTH: { value: PaymentDisplayMode; label: string; des
 const PAYMENT_METHOD_OPTIONS = ["Cartão de Crédito", "Pix", "Boleto", "Transferência Bancária"];
 const PAYMENT_METHOD_SELECT_OPTIONS = PAYMENT_METHOD_OPTIONS.map((m) => ({ value: m, label: m }));
 
+function getInitials(name: string): string {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+const AVATAR_PALETTE = [
+  { bg: "bg-blue-100", text: "text-blue-700" },
+  { bg: "bg-violet-100", text: "text-violet-700" },
+  { bg: "bg-emerald-100", text: "text-emerald-700" },
+  { bg: "bg-amber-100", text: "text-amber-700" },
+  { bg: "bg-pink-100", text: "text-pink-700" },
+  { bg: "bg-cyan-100", text: "text-cyan-700" },
+  { bg: "bg-rose-100", text: "text-rose-700" },
+  { bg: "bg-indigo-100", text: "text-indigo-700" },
+  { bg: "bg-teal-100", text: "text-teal-700" },
+];
+
+function getAvatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+
+function QuoteAvatar({ name }: { name: string }) {
+  const initials = getInitials(name);
+  const color = getAvatarColor(name || "?");
+  return (
+    <div
+      className={cn(
+        "h-11 w-11 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold tracking-wide",
+        color.bg,
+        color.text,
+      )}
+      aria-hidden
+    >
+      {initials}
+    </div>
+  );
+}
+
+function StatusBadge({ status }: { status: Quote["status"] }) {
+  if (status === "published") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200/70">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        Publicado
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border/60">
+      Rascunho
+    </span>
+  );
+}
+
+function IconAction({
+  label,
+  onClick,
+  children,
+  destructive,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  destructive?: boolean;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={label}
+          className={cn(
+            "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-background text-muted-foreground transition-colors",
+            "hover:bg-muted hover:text-foreground",
+            destructive && "text-rose-500 hover:bg-rose-50 hover:text-rose-600 border-rose-100",
+          )}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
 function QuoteHistoryRow({
   q,
+  onView,
   onEdit,
   onDuplicate,
   onDelete,
 }: {
   q: Quote;
+  onView: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
-      <div className="min-w-0 flex-1">
-        <p className="font-medium truncate">{q.client_name}</p>
-        <p className="text-sm text-muted-foreground truncate">
-          {q.destination} • {formatDateShort(q.start_date)} — {formatDateShort(q.end_date)}
-        </p>
+    <div className="group grid grid-cols-1 md:grid-cols-[1fr_auto_auto] gap-3 md:gap-6 items-start md:items-center px-4 md:px-6 py-4 transition-colors hover:bg-muted/40">
+      <div className="flex items-start gap-3 min-w-0">
+        <QuoteAvatar name={q.client_name} />
+        <div className="min-w-0">
+          <p className="font-semibold text-foreground truncate">{q.client_name}</p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            {q.destination && (
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="truncate max-w-[200px]">{q.destination}</span>
+              </span>
+            )}
+            {q.start_date && q.end_date && (
+              <span className="inline-flex items-center gap-1">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                {formatDateShort(q.start_date)} — {formatDateShort(q.end_date)}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <Badge variant={q.status === "published" ? "default" : "secondary"} className="capitalize">
-          {q.status === "published" ? "Publicado" : "Rascunho"}
-        </Badge>
-        <Button variant="ghost" size="sm" onClick={onEdit}>Editar</Button>
-        <Button variant="ghost" size="sm" onClick={onDuplicate}>Duplicar</Button>
-        <Button variant="ghost" size="sm" onClick={onDelete}>Excluir</Button>
+
+      <div className="md:justify-self-center">
+        <StatusBadge status={q.status} />
+      </div>
+
+      <div className="flex items-center gap-1.5 md:justify-self-end">
+        <IconAction label="Visualizar" onClick={onView}><Eye className="h-4 w-4" /></IconAction>
+        <IconAction label="Editar" onClick={onEdit}><Pencil className="h-4 w-4" /></IconAction>
+        <IconAction label="Duplicar" onClick={onDuplicate}><Copy className="h-4 w-4" /></IconAction>
+        <IconAction label="Excluir" onClick={onDelete} destructive><Trash2 className="h-4 w-4" /></IconAction>
+      </div>
+    </div>
+  );
+}
+
+type StatusFilter = "all" | "published" | "draft";
+
+function QuotesListSection({
+  quotes,
+  isLoading,
+  onView,
+  onEdit,
+  onDuplicate,
+  onDelete,
+  onCreate,
+}: {
+  quotes: Quote[];
+  isLoading: boolean;
+  onView: (q: Quote) => void;
+  onEdit: (q: Quote) => void;
+  onDuplicate: (q: Quote) => void;
+  onDelete: (q: Quote) => void;
+  onCreate: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+
+  const filtered = quotes.filter((q) => {
+    if (statusFilter !== "all") {
+      const target = statusFilter === "published" ? "published" : "draft";
+      if (q.status !== target) return false;
+    }
+    if (!query.trim()) return true;
+    const needle = query.trim().toLowerCase();
+    return (
+      (q.client_name || "").toLowerCase().includes(needle) ||
+      (q.destination || "").toLowerCase().includes(needle)
+    );
+  });
+
+  return (
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-semibold text-foreground">Meus Orçamentos</h2>
+          {quotes.length > 0 && (
+            <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-semibold text-muted-foreground">
+              {quotes.length}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none sm:w-[300px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar orçamentos..."
+              className="pl-9 h-10 rounded-lg bg-background"
+            />
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-10 rounded-lg gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                Filtros
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-56 p-2">
+              <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
+              {([
+                { v: "all", label: "Todos" },
+                { v: "published", label: "Publicado" },
+                { v: "draft", label: "Rascunho" },
+              ] as { v: StatusFilter; label: string }[]).map((opt) => (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setStatusFilter(opt.v)}
+                  className={cn(
+                    "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
+                    statusFilter === opt.v ? "bg-muted text-foreground font-medium" : "hover:bg-muted/60",
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      {/* Card container */}
+      <div className="rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden">
+        {/* Header row (desktop) */}
+        {filtered.length > 0 && (
+          <div className="hidden md:grid grid-cols-[1fr_auto_auto] gap-6 items-center px-6 py-3 border-b border-border/60 bg-muted/30 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div>Cliente</div>
+            <div className="justify-self-center">Status</div>
+            <div className="justify-self-end pr-1">Ações</div>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-16 px-6">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              {quotes.length === 0 ? "Nenhum orçamento ainda" : "Nenhum resultado encontrado"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+              {quotes.length === 0
+                ? "Crie seu primeiro orçamento profissional para compartilhar com seus clientes."
+                : "Ajuste sua busca ou filtros para encontrar o orçamento desejado."}
+            </p>
+            {quotes.length === 0 && (
+              <Button onClick={onCreate} className="mt-4 h-10 rounded-lg">
+                <Plus className="h-4 w-4" />
+                Novo Orçamento
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-border/50">
+            {filtered.map((q) => (
+              <QuoteHistoryRow
+                key={q.id}
+                q={q}
+                onView={() => onView(q)}
+                onEdit={() => onEdit(q)}
+                onDuplicate={() => onDuplicate(q)}
+                onDelete={() => onDelete(q)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -608,10 +861,27 @@ export default function GerarOrcamento() {
 
   /* ═══════════════════  INITIAL SCREEN (no id) ═══════════════════ */
   if (!id) {
+    const activeTab = (location.hash === "#list" ? "list" : "create") as "create" | "list";
+    const setActiveTab = (val: "create" | "list") => {
+      navigate({ pathname: location.pathname, hash: val === "list" ? "#list" : "" }, { replace: true });
+    };
+
     return (
       <DashboardLayout>
+        <TooltipProvider delayDuration={150}>
         <div className="space-y-6 animate-fade-in">
-          <PageHeader pageKey="gerar-orcamento" title="Gerar Orçamento" subtitle="Crie um orçamento profissional para seu cliente" icon={FileText} />
+          <PageHeader pageKey="gerar-orcamento" title="Gerar Orçamento" subtitle="Crie um orçamento profissional para seu cliente" icon={FileText}>
+            <div className="flex-1 flex justify-end w-full">
+              <Button
+                size="lg"
+                onClick={() => setActiveTab("create")}
+                className="h-11 rounded-xl px-5 shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
+                Novo Orçamento
+              </Button>
+            </div>
+          </PageHeader>
 
           {hasLimit && (
             <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateQuote ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
@@ -656,14 +926,26 @@ export default function GerarOrcamento() {
             </div>
           )}
 
-          <Tabs defaultValue="create" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="create">Novo Orçamento</TabsTrigger>
-              <TabsTrigger value="list">
-                Meus Orçamentos
-                {quotes.length > 0 && (
-                  <Badge variant="secondary" className="text-xs ml-2">{quotes.length}</Badge>
-                )}
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")} className="w-full">
+            <TabsList className="h-auto bg-transparent p-0 gap-6 border-b border-border/60 rounded-none w-full justify-start">
+              <TabsTrigger
+                value="create"
+                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+              >
+                Novo Orçamento
+              </TabsTrigger>
+              <TabsTrigger
+                value="list"
+                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+              >
+                <span className="flex items-center gap-2">
+                  Meus Orçamentos
+                  {quotes.length > 0 && (
+                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                      {quotes.length}
+                    </span>
+                  )}
+                </span>
               </TabsTrigger>
             </TabsList>
 
@@ -693,40 +975,15 @@ export default function GerarOrcamento() {
             </TabsContent>
 
             <TabsContent value="list" className="mt-6">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <FileText className="h-4 w-4" />
-                    Meus Orçamentos
-                    {quotes.length > 0 && (
-                      <Badge variant="secondary" className="text-xs ml-1">{quotes.length}</Badge>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {quotesLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : quotes.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      Nenhum orçamento criado ainda. Volte à aba "Novo Orçamento" para criar o primeiro.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {quotes.map((q) => (
-                        <QuoteHistoryRow
-                          key={q.id}
-                          q={q}
-                          onEdit={() => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
-                          onDuplicate={() => handleDuplicate(q.id)}
-                          onDelete={() => setDeleteConfirmId(q.id)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <QuotesListSection
+                quotes={quotes}
+                isLoading={quotesLoading}
+                onView={(q) => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
+                onEdit={(q) => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
+                onDuplicate={(q) => handleDuplicate(q.id)}
+                onDelete={(q) => setDeleteConfirmId(q.id)}
+                onCreate={() => setActiveTab("create")}
+              />
             </TabsContent>
           </Tabs>
 
@@ -748,6 +1005,7 @@ export default function GerarOrcamento() {
             </AlertDialogContent>
           </AlertDialog>
         </div>
+        </TooltipProvider>
       </DashboardLayout>
     );
   }
