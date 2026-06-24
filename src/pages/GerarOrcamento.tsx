@@ -897,19 +897,13 @@ export default function GerarOrcamento() {
     return (
       <DashboardLayout>
         <TooltipProvider delayDuration={150}>
-        <div className="space-y-6 animate-fade-in">
-          <PageHeader pageKey="gerar-orcamento" title="Gerar Orçamento" subtitle="Crie um orçamento profissional para seu cliente" icon={FileText}>
-            <div className="flex-1 flex justify-end w-full">
-              <Button
-                size="lg"
-                onClick={() => setActiveTab("create")}
-                className="h-11 rounded-xl px-5 shadow-sm"
-              >
-                <Plus className="h-4 w-4" />
-                Novo Orçamento
-              </Button>
-            </div>
-          </PageHeader>
+        <div className="mx-auto w-full max-w-[1280px] space-y-3 animate-fade-in">
+          <PageHeader
+            pageKey="gerar-orcamento"
+            title="Gerar Orçamento"
+            subtitle="Crie um orçamento profissional para seu cliente"
+            icon={FileText}
+          />
 
           {hasLimit && (
             <div className={`p-3 rounded-lg border text-sm flex items-center gap-2 ${canCreateQuote ? 'bg-muted/50 text-muted-foreground' : 'bg-destructive/10 border-destructive/30 text-destructive'}`}>
@@ -955,29 +949,42 @@ export default function GerarOrcamento() {
           )}
 
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")} className="w-full">
-            <TabsList className="h-auto bg-transparent p-0 gap-6 border-b border-border/60 rounded-none w-full justify-start">
-              <TabsTrigger
-                value="create"
-                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
-              >
-                Novo Orçamento
-              </TabsTrigger>
-              <TabsTrigger
-                value="list"
-                className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
-              >
-                <span className="flex items-center gap-2">
-                  Meus Orçamentos
-                  {quotes.length > 0 && (
-                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
-                      {quotes.length}
-                    </span>
-                  )}
-                </span>
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-end justify-between gap-4 border-b border-border/60">
+              <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start">
+                <TabsTrigger
+                  value="create"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  Novo Orçamento
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  <span className="flex items-center gap-2">
+                    Meus Orçamentos
+                    {quotes.length > 0 && (
+                      <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-muted px-1.5 text-[11px] font-semibold text-muted-foreground">
+                        {quotes.length}
+                      </span>
+                    )}
+                  </span>
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="create" className="mt-6">
+              {activeTab === "list" && quotes.length > 0 && (
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab("create")}
+                  className="mb-2 h-9 rounded-lg px-3.5 text-sm shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Orçamento
+                </Button>
+              )}
+            </div>
+
+            <TabsContent value="create" className="mt-5">
               <Card className="max-w-3xl">
                 <CardHeader><CardTitle>Novo Orçamento</CardTitle></CardHeader>
                 <CardContent>
@@ -1002,7 +1009,7 @@ export default function GerarOrcamento() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="list" className="mt-6">
+            <TabsContent value="list" className="mt-5">
               <QuotesListSection
                 quotes={quotes}
                 isLoading={quotesLoading}
