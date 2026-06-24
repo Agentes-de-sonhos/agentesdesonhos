@@ -325,7 +325,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full h-10 pl-3 text-left font-normal rounded-lg",
                           !field.value?.from && "text-muted-foreground"
                         )}
                       >
@@ -359,7 +359,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full h-10 pl-3 text-left font-normal rounded-lg",
                           !field.value?.from && "text-muted-foreground"
                         )}
                       >
