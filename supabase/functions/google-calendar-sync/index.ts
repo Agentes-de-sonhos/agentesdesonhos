@@ -13,6 +13,7 @@ interface GoogleEvent {
   end?: { dateTime?: string; date?: string };
   status?: string;
   updated?: string;
+  eventType?: string;
 }
 
 function localEventSignature(event: any): string {
@@ -471,7 +472,17 @@ Deno.serve(async (req) => {
           { method: "DELETE" }
         );
         // 200/204 = deleted, 404/410 = already gone (treat as success)
-        if (res.ok || res.status === 404 || res.status === 410) {
+        // 400/403 with eventTypeRestriction = Google-managed event (birthday, focusTime, etc.)
+        // that cannot be deleted via API. Treat as success: tombstone the mapping so we stop retrying.
+        let isEventTypeRestriction = false;
+        let restrictionBody = "";
+        if (!res.ok && (res.status === 400 || res.status === 403)) {
+          restrictionBody = await res.clone().text();
+          if (restrictionBody.includes("eventTypeRestriction")) {
+            isEventTypeRestriction = true;
+          }
+        }
+        if (res.ok || res.status === 404 || res.status === 410 || isEventTypeRestriction) {
           const tombstoneAt = new Date().toISOString();
           const { error: tombErr } = await supabase
             .from("google_calendar_sync")
@@ -487,7 +498,7 @@ Deno.serve(async (req) => {
           syncMap.set(event.id, mapping);
           reverseSyncMap.set(mapping.google_event_id, mapping);
           deletedGoogle++;
-          console.log(`[calendar-sync] delete-google-success event=${event.id} google=${mapping.google_event_id} status=${res.status}`);
+          console.log(`[calendar-sync] delete-google-success event=${event.id} google=${mapping.google_event_id} status=${res.status}${isEventTypeRestriction ? " reason=event-type-restriction-skipped" : ""}`);
         } else {
           const errText = await res.text();
           deleteErrors++;
@@ -553,6 +564,15 @@ Deno.serve(async (req) => {
         if (justPushedGoogleIds.has(gEvent.id)) {
           pulledSkipped++; skipJustPushed++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=created-during-current-push mapped_local=${reverseSyncMap.get(gEvent.id)?.agency_event_id || "unknown"}`);
+          continue;
+        }
+
+        // Skip Google-managed event types that can't be modified via API
+        // (birthday, focusTime, outOfOffice, workingLocation, fromGmail).
+        // Only "default" events are user-editable and safe to mirror.
+        if (gEvent.eventType && gEvent.eventType !== "default") {
+          pulledSkipped++;
+          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=non-default-event-type type=${gEvent.eventType}`);
           continue;
         }
 
