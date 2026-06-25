@@ -203,6 +203,7 @@ const App = () => (
             <Route path="/mapa-turismo/:id" element={<ProtectedRoute><SupplierDetail /></ProtectedRoute>} />
             <Route path="/noticias" element={<ProtectedRoute><Noticias /></ProtectedRoute>} />
             <Route path="/materiais" element={<ProtectedRoute><Materiais /></ProtectedRoute>} />
+            <Route path="/meus-materiais" element={<ProtectedRoute><MeusMateriais /></ProtectedRoute>} />
             <Route path="/bloqueios-aereos" element={<ProtectedRoute><BloqueiosAereos /></ProtectedRoute>} />
             <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
             <Route path="/bloco-notas" element={<ProtectedRoute><BlocoNotas /></ProtectedRoute>} />
