@@ -1,23 +1,18 @@
-import { useState, useCallback } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Home,
   Building2,
   Megaphone,
-  Heart,
-  CalendarDays,
   Newspaper,
   GraduationCap,
   Map,
   ChevronLeft,
-  LogOut,
-  User,
   Headset,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/hooks/useAuth";
 import {
   Tooltip,
   TooltipContent,
@@ -34,32 +29,19 @@ interface SupplierMenuItem {
 const items: SupplierMenuItem[] = [
   { title: "Início", url: "/dashboard-fornecedor", icon: Home },
   { title: "Perfil do Parceiro", url: "/meu-perfil-empresa", icon: Building2 },
-  { title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone },
-  { title: "Comunidade", url: "/comunidade", icon: Heart },
-  { title: "Agenda do Trade", url: "/agenda-trade", icon: CalendarDays },
+  { title: "Materiais de Divulgação", url: "/meus-materiais", icon: Megaphone },
   { title: "Radar do Turismo", url: "/noticias", icon: Newspaper },
   { title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
   { title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map },
-];
-
-const accountItems: SupplierMenuItem[] = [
-  { title: "Perfil", url: "/perfil", icon: User },
   { title: "Suporte", url: "/suporte", icon: Headset },
 ];
 
 export function SupplierSidebar() {
   const [collapsed, setCollapsed] = useState(true);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
 
   const isActive = (url: string) =>
     location.pathname === url || location.pathname.startsWith(url + "/");
-
-  const handleLogout = useCallback(async () => {
-    await signOut();
-    navigate("/auth");
-  }, [signOut, navigate]);
 
   const renderItem = (item: SupplierMenuItem) => {
     const active = isActive(item.url);
@@ -126,19 +108,6 @@ export function SupplierSidebar() {
       <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-3">
         {items.map(renderItem)}
       </nav>
-      <Separator />
-      <div className="space-y-1 px-2 py-3">
-        {accountItems.map(renderItem)}
-        <button
-          onClick={handleLogout}
-          className={cn(
-            "group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-destructive transition-all hover:bg-destructive/10"
-          )}
-        >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
-          {!collapsed && <span>Sair</span>}
-        </button>
-      </div>
     </aside>
   );
 }

@@ -14,6 +14,7 @@ import {
   Eye, Users, FileText, TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { SupplierMaterialUploadDialog } from "@/components/supplier/SupplierMaterialUploadDialog";
 
 function calcCompletude(op: any): number {
   if (!op) return 0;
@@ -31,6 +32,7 @@ export function SupplierProfileHeroCard() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [copied, setCopied] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const { data: operator, isLoading } = useQuery({
     queryKey: ["supplier-own-operator", user?.id],
@@ -155,7 +157,7 @@ export function SupplierProfileHeroCard() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => navigate("/materiais")}
+                  onClick={() => setUploadOpen(true)}
                   className="gap-2"
                 >
                   <Megaphone className="h-4 w-4" /> Inserir Materiais
@@ -215,6 +217,7 @@ export function SupplierProfileHeroCard() {
           ))}
         </div>
       </CardContent>
+      <SupplierMaterialUploadDialog open={uploadOpen} onOpenChange={setUploadOpen} />
     </Card>
   );
 }
