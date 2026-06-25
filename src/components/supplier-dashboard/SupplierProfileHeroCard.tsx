@@ -95,6 +95,7 @@ export function SupplierProfileHeroCard() {
   };
 
   return (
+    <>
     <Card className="border-0 shadow-card overflow-hidden">
       <div className="bg-gradient-to-br from-primary/10 via-background to-background border-b border-border/40">
         <CardContent className="p-6 md:p-8">
@@ -145,8 +146,6 @@ export function SupplierProfileHeroCard() {
             </div>
           </div>
         </CardContent>
-      </div>
-
       </div>
     </Card>
 
