@@ -88,15 +88,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const supplierAllowed = [
       "/dashboard-fornecedor",
       "/meu-perfil-empresa",
-      "/materiais",
-      "/comunidade",
-      "/agenda-trade",
-      "/agenda",
+      "/meus-materiais",
       "/noticias",
       "/educa-academy",
       "/mapa-turismo",
-      "/perfil",
-      "/minha-conta",
       "/suporte",
     ];
     const isAllowed = supplierAllowed.some(
