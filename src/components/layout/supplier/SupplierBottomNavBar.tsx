@@ -1,13 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Building2, Megaphone, Heart, CalendarDays } from "lucide-react";
+import { Home, Building2, Megaphone, Map, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { title: "Início", url: "/dashboard-fornecedor", icon: Home },
-  { title: "Perfil", url: "/meu-perfil-empresa", icon: Building2 },
-  { title: "Materiais", url: "/materiais", icon: Megaphone },
-  { title: "Agenda", url: "/agenda-trade", icon: CalendarDays },
-  { title: "Comunidade", url: "/comunidade", icon: Heart },
+  { title: "Parceiro", url: "/meu-perfil-empresa", icon: Building2 },
+  { title: "Materiais", url: "/meus-materiais", icon: Megaphone },
+  { title: "Academy", url: "/educa-academy", icon: GraduationCap },
+  { title: "Mapa", url: "/mapa-turismo", icon: Map },
 ];
 
 export function SupplierBottomNavBar() {
