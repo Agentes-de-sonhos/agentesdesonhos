@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PdfThumbnail } from "@/components/materials/PdfThumbnail";
 import { 
   FileText, 
   Image, 
@@ -25,6 +27,7 @@ const typeIcons: Record<string, React.ElementType> = {
 
 export function GalleryCard({ gallery, variant = "default", onOpen }: GalleryCardProps) {
   const isLarge = variant === "large";
+  const [pdfPreviewFailed, setPdfPreviewFailed] = useState(false);
   
   // Determine primary type for icon
   const getPrimaryType = () => {
@@ -56,6 +59,16 @@ export function GalleryCard({ gallery, variant = "default", onOpen }: GalleryCar
 
   const thumbnail = getThumbnail();
 
+  // When there's no image/video thumbnail, try to render the first PDF page
+  const pdfUrlForPreview = !thumbnail && !pdfPreviewFailed
+    ? gallery.materials.find(
+        (m) =>
+          (m.material_type === "PDF" || m.material_type === "Lâmina") &&
+          !!m.file_url &&
+          /\.pdf($|\?)/i.test(m.file_url)
+      )?.file_url ?? null
+    : null;
+
   return (
     <Card 
       className={`group border-0 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden bg-card hover:scale-[1.02] w-full ${
@@ -78,6 +91,17 @@ export function GalleryCard({ gallery, variant = "default", onOpen }: GalleryCar
               decoding="async"
               className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
             />
+          </div>
+        ) : pdfUrlForPreview ? (
+          <div className="w-full h-full flex items-center justify-center bg-muted/30">
+            <PdfThumbnail
+              url={pdfUrlForPreview}
+              alt={gallery.title}
+              className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
+              onError={() => setPdfPreviewFailed(true)}
+            />
+            {/* Fallback icon shown until canvas finishes (or if it fails) */}
+            <Icon className={`absolute ${isLarge ? "h-16 w-16" : "h-12 w-12"} text-muted-foreground/30 -z-0`} />
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center">

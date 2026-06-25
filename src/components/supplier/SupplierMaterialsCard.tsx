@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { startOfDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { ArrowRight, FolderOpen } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import { GalleryCard } from "@/components/materials/GalleryCard";
 import { GalleryModal } from "@/components/materials/GalleryModal";
 import type { Material, MaterialGallery } from "@/types/materials";
@@ -17,8 +15,7 @@ interface SupplierMaterialsCardProps {
   supplierName: string;
 }
 
-export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMaterialsCardProps) {
-  const navigate = useNavigate();
+export function SupplierMaterialsCard({ supplierId }: SupplierMaterialsCardProps) {
   const [selectedGallery, setSelectedGallery] = useState<MaterialGallery | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -106,10 +103,6 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
     setSelectedGallery(null);
   };
 
-  const handleViewAll = () => {
-    navigate(`/materiais?operadora=${encodeURIComponent(supplierName)}`);
-  };
-
   if (isLoading) {
     return (
       <Card className="shadow-card">
@@ -180,15 +173,6 @@ export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMate
                 ))}
               </div>
 
-              {/* View All Button */}
-              <Button 
-                onClick={handleViewAll} 
-                className="w-full h-12 text-base font-medium"
-                variant="default"
-              >
-                Ver todos os materiais
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
             </div>
           )}
         </CardContent>
