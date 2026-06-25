@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { startOfDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +15,7 @@ interface SupplierMaterialsCardProps {
   supplierName: string;
 }
 
-export function SupplierMaterialsCard({ supplierId, supplierName }: SupplierMaterialsCardProps) {
+export function SupplierMaterialsCard({ supplierId }: SupplierMaterialsCardProps) {
   const [selectedGallery, setSelectedGallery] = useState<MaterialGallery | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
