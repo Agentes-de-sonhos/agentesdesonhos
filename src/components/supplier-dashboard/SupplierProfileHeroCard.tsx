@@ -27,6 +27,7 @@ export function SupplierProfileHeroCard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [isTogglingPublic, setIsTogglingPublic] = useState(false);
 
   const { data: operator, isLoading } = useQuery({
     queryKey: ["supplier-own-operator", user?.id],
@@ -64,34 +65,41 @@ export function SupplierProfileHeroCard() {
     rejected: { label: "Rejeitado", className: "bg-rose-100 text-rose-700 border-rose-200" },
   }[operator.approval_status as string] || { label: operator.approval_status, className: "" };
 
-  const publicUrl = operator.public_slug
-    ? `https://vitrine.tur.br/${operator.public_slug}`
+  const publicSlug = operator.public_slug?.trim();
+  const publicUrl = publicSlug
+    ? `https://vitrine.tur.br/${publicSlug}`
     : `${window.location.origin}/mapa-turismo/operadora/${operator.id}`;
 
   const togglePublic = async (next: boolean) => {
+    setIsTogglingPublic(true);
+
     // Optimistic update so the switch reflects the new state immediately
     qc.setQueryData(["supplier-own-operator", user?.id], (prev: any) =>
       prev ? { ...prev, is_public_visible: next } : prev
     );
 
-    const { data, error } = await supabase
-      .from("tour_operators")
-      .update({ is_public_visible: next })
-      .eq("id", operator.id)
-      .select("id, is_public_visible")
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from("tour_operators")
+        .update({ is_public_visible: next })
+        .eq("id", operator.id)
+        .select("*")
+        .maybeSingle();
 
-    if (error || !data) {
+      if (error || !data) throw error || new Error("Perfil não encontrado");
+
+      qc.setQueryData(["supplier-own-operator", user?.id], data);
+      await qc.invalidateQueries({ queryKey: ["supplier-own-operator", user?.id] });
+      toast.success(next ? "Perfil público ativado" : "Perfil público desativado");
+    } catch {
       // Revert optimistic update on failure
       qc.setQueryData(["supplier-own-operator", user?.id], (prev: any) =>
         prev ? { ...prev, is_public_visible: !next } : prev
       );
       toast.error("Não foi possível atualizar a visibilidade");
-      return;
+    } finally {
+      setIsTogglingPublic(false);
     }
-
-    await qc.invalidateQueries({ queryKey: ["supplier-own-operator", user?.id] });
-    toast.success(next ? "Perfil público ativado" : "Perfil público desativado");
   };
 
   return (
@@ -178,6 +186,7 @@ export function SupplierProfileHeroCard() {
           <Switch
             checked={!!operator.is_public_visible}
             onCheckedChange={togglePublic}
+              disabled={isTogglingPublic}
           />
         </div>
       </CardContent>
