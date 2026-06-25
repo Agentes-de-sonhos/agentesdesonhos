@@ -80,7 +80,7 @@ export function SupplierSidebar() {
       onMouseEnter={() => setCollapsed(false)}
       onMouseLeave={() => setCollapsed(true)}
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 lg:flex",
+        "fixed left-0 top-0 z-[60] hidden h-screen flex-col border-r border-sidebar-border bg-sidebar shadow-xl transition-all duration-300 lg:flex",
         collapsed ? "w-16" : "w-72"
       )}
     >
