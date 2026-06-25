@@ -49,6 +49,7 @@ const ConfiguracoesCarteira = lazy(() => import("./pages/ConfiguracoesCarteira")
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Materiais = lazy(() => import("./pages/Materiais"));
+const MeusMateriais = lazy(() => import("./pages/MeusMateriais"));
 const BloqueiosAereos = lazy(() => import("./pages/BloqueiosAereos"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
 const Agenda = lazy(() => import("./pages/Agenda"));
