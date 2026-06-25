@@ -69,15 +69,28 @@ export function SupplierProfileHeroCard() {
     : `${window.location.origin}/mapa-turismo/operadora/${operator.id}`;
 
   const togglePublic = async (next: boolean) => {
-    const { error } = await supabase
+    // Optimistic update so the switch reflects the new state immediately
+    qc.setQueryData(["supplier-own-operator", user?.id], (prev: any) =>
+      prev ? { ...prev, is_public_visible: next } : prev
+    );
+
+    const { data, error } = await supabase
       .from("tour_operators")
       .update({ is_public_visible: next })
-      .eq("id", operator.id);
-    if (error) {
+      .eq("id", operator.id)
+      .select("id, is_public_visible")
+      .maybeSingle();
+
+    if (error || !data) {
+      // Revert optimistic update on failure
+      qc.setQueryData(["supplier-own-operator", user?.id], (prev: any) =>
+        prev ? { ...prev, is_public_visible: !next } : prev
+      );
       toast.error("Não foi possível atualizar a visibilidade");
       return;
     }
-    qc.invalidateQueries({ queryKey: ["supplier-own-operator", user?.id] });
+
+    await qc.invalidateQueries({ queryKey: ["supplier-own-operator", user?.id] });
     toast.success(next ? "Perfil público ativado" : "Perfil público desativado");
   };
 
@@ -134,37 +147,42 @@ export function SupplierProfileHeroCard() {
         </CardContent>
       </div>
 
-      <CardContent className="p-6 md:p-8 space-y-6">
-        {/* Public URL */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-muted-foreground mb-1">URL Pública do Parceiro</p>
-              <code className="text-sm font-mono break-all text-foreground">{publicUrl}</code>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => window.open(publicUrl, "_blank")} className="gap-1.5">
-                <ExternalLink className="h-3.5 w-3.5" /> Abrir
-              </Button>
-            </div>
-          </div>
+      </div>
+    </Card>
 
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 px-4 py-3">
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">
-                Perfil público {operator.is_public_visible ? "ativado" : "desativado"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Seu perfil comercial pode ser divulgado livremente para agentes de viagens e parceiros do mercado.
-              </p>
-            </div>
-            <Switch
-              checked={!!operator.is_public_visible}
-              onCheckedChange={togglePublic}
-            />
+    {/* Standalone Public URL card */}
+    <Card className="border-0 shadow-card mt-4 sm:mt-6 rounded-2xl overflow-hidden">
+      <CardContent className="p-6 md:p-8 space-y-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-muted-foreground mb-1">URL Pública do Parceiro</p>
+            <code className="text-sm font-mono break-all text-foreground">{publicUrl}</code>
           </div>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <a href={publicUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3.5 w-3.5" /> Abrir
+              </a>
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 px-4 py-3">
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">
+              Perfil público {operator.is_public_visible ? "ativado" : "desativado"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Seu perfil comercial pode ser divulgado livremente para agentes de viagens e parceiros do mercado.
+            </p>
+          </div>
+          <Switch
+            checked={!!operator.is_public_visible}
+            onCheckedChange={togglePublic}
+          />
         </div>
       </CardContent>
     </Card>
+    </>
   );
 }
