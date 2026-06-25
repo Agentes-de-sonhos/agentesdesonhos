@@ -7,7 +7,6 @@ import { SupplierDashboardLayout } from "@/components/layout/supplier/SupplierDa
 import { SupplierProfileHeroCard } from "@/components/supplier-dashboard/SupplierProfileHeroCard";
 import { SupplierMaterialsCard } from "@/components/supplier-dashboard/SupplierMaterialsCard";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
-import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { AcademyCollapsibleCard } from "@/components/dashboard/AcademyCollapsibleCard";
 
 const CuratedNewsFeed = lazy(() =>
@@ -67,9 +66,6 @@ export default function DashboardFornecedor() {
             <p className="text-sm text-muted-foreground">{phrase}</p>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <ExchangeRateCard />
-          </div>
         </div>
 
         {/* 1. Hero do perfil */}
