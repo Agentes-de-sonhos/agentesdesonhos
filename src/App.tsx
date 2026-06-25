@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingScreen } from "./components/auth/LoadingScreen";
 import { NewLeadAlertProvider } from "./components/leads/NewLeadAlertProvider";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -173,7 +174,7 @@ const App = () => (
             <Route path="/desconto30off" element={<Desconto30Off />} />
             <Route path="/cadastro-fornecedor" element={<CadastroFornecedor />} />
             <Route path="/cadastro-guia" element={<CadastroGuia />} />
-            <Route path="/meu-perfil-empresa" element={<ProtectedRoute><SupplierProfileEdit /></ProtectedRoute>} />
+            <Route path="/meu-perfil-empresa" element={<ProtectedRoute><DashboardLayout><SupplierProfileEdit /></DashboardLayout></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/dashboard-start" element={<ProtectedRoute><StartDashboard /></ProtectedRoute>} />
             <Route path="/dashboard-fornecedor" element={<ProtectedRoute><DashboardFornecedor /></ProtectedRoute>} />

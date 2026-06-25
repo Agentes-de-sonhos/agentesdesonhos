@@ -9,12 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Building2, Pencil, ExternalLink, Megaphone, Copy, Check,
-  Eye, Users, FileText, TrendingUp,
-} from "lucide-react";
+import { Building2, Pencil, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { SupplierMaterialUploadDialog } from "@/components/supplier/SupplierMaterialUploadDialog";
 
 function calcCompletude(op: any): number {
   if (!op) return 0;
@@ -31,8 +27,6 @@ export function SupplierProfileHeroCard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [copied, setCopied] = useState(false);
-  const [uploadOpen, setUploadOpen] = useState(false);
 
   const { data: operator, isLoading } = useQuery({
     queryKey: ["supplier-own-operator", user?.id],
@@ -74,13 +68,6 @@ export function SupplierProfileHeroCard() {
     ? `https://vitrine.tur.br/${operator.public_slug}`
     : `${window.location.origin}/mapa-turismo/operadora/${operator.id}`;
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(publicUrl);
-    setCopied(true);
-    toast.success("URL copiada");
-    setTimeout(() => setCopied(false), 1800);
-  };
-
   const togglePublic = async (next: boolean) => {
     const { error } = await supabase
       .from("tour_operators")
@@ -93,13 +80,6 @@ export function SupplierProfileHeroCard() {
     qc.invalidateQueries({ queryKey: ["supplier-own-operator", user?.id] });
     toast.success(next ? "Perfil público ativado" : "Perfil público desativado");
   };
-
-  const indicators = [
-    { icon: Eye, label: "Visualizações", value: "—" },
-    { icon: FileText, label: "Materiais publicados", value: Array.isArray(operator.materials) ? operator.materials.length : 0 },
-    { icon: Users, label: "Agentes alcançados", value: "—" },
-    { icon: TrendingUp, label: "Contatos recebidos", value: "—" },
-  ];
 
   return (
     <Card className="border-0 shadow-card overflow-hidden">
@@ -148,20 +128,6 @@ export function SupplierProfileHeroCard() {
                 <Button onClick={() => navigate("/meu-perfil-empresa")} className="gap-2">
                   <Pencil className="h-4 w-4" /> Editar Perfil Comercial
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(publicUrl, "_blank")}
-                  className="gap-2"
-                >
-                  <ExternalLink className="h-4 w-4" /> Visualizar Perfil Público
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setUploadOpen(true)}
-                  className="gap-2"
-                >
-                  <Megaphone className="h-4 w-4" /> Inserir Materiais
-                </Button>
               </div>
             </div>
           </div>
@@ -177,10 +143,6 @@ export function SupplierProfileHeroCard() {
               <code className="text-sm font-mono break-all text-foreground">{publicUrl}</code>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
-                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                {copied ? "Copiado" : "Copiar"}
-              </Button>
               <Button variant="outline" size="sm" onClick={() => window.open(publicUrl, "_blank")} className="gap-1.5">
                 <ExternalLink className="h-3.5 w-3.5" /> Abrir
               </Button>
@@ -202,22 +164,7 @@ export function SupplierProfileHeroCard() {
             />
           </div>
         </div>
-
-        {/* Indicators */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {indicators.map((ind) => (
-            <div
-              key={ind.label}
-              className="rounded-xl border border-border/60 bg-background p-4 hover:border-primary/40 transition-colors"
-            >
-              <ind.icon className="h-4 w-4 text-primary mb-2" />
-              <p className="text-xs text-muted-foreground">{ind.label}</p>
-              <p className="text-lg font-semibold text-foreground mt-0.5">{ind.value}</p>
-            </div>
-          ))}
-        </div>
       </CardContent>
-      <SupplierMaterialUploadDialog open={uploadOpen} onOpenChange={setUploadOpen} />
     </Card>
   );
 }

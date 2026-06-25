@@ -6,7 +6,6 @@ import { Loader2 } from "lucide-react";
 import { SupplierDashboardLayout } from "@/components/layout/supplier/SupplierDashboardLayout";
 import { SupplierProfileHeroCard } from "@/components/supplier-dashboard/SupplierProfileHeroCard";
 import { SupplierMaterialsCard } from "@/components/supplier-dashboard/SupplierMaterialsCard";
-import { SupplierMetricsStrip } from "@/components/supplier-dashboard/SupplierMetricsStrip";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { AcademyCollapsibleCard } from "@/components/dashboard/AcademyCollapsibleCard";
@@ -77,25 +76,22 @@ export default function DashboardFornecedor() {
         <SupplierProfileHeroCard />
 
         <Suspense fallback={<div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>}>
-          {/* 2. Mapa do Turismo (full width) */}
+          {/* 2. Materiais de Divulgação */}
+          <section>
+            <div className="min-w-0"><SupplierMaterialsCard /></div>
+          </section>
+
+          {/* 3. Mapa do Turismo (full width) */}
           <section>
             <div className="min-w-0"><MapaTurismoCard alwaysExpanded /></div>
           </section>
 
-          {/* 3. Radar + Academy */}
+          {/* 4. Radar + Academy */}
           <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch">
             <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><CuratedNewsFeed /></div>
             <div className="flex flex-col min-w-0 h-full [&>*]:h-full"><AcademyCollapsibleCard limit={3} /></div>
           </section>
-
-          {/* 4. Materiais */}
-          <section>
-            <div className="min-w-0"><SupplierMaterialsCard /></div>
-          </section>
         </Suspense>
-
-        {/* Indicadores premium */}
-        <SupplierMetricsStrip />
       </div>
     </SupplierDashboardLayout>
   );
