@@ -21,6 +21,7 @@ import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { shouldApplyPremiumFundadorFilter } from "@/lib/sidebarVisibility";
+import { useIsTeamMember } from "@/contexts/TeamSessionContext";
 
 // Lazy load heavy dashboard cards to reduce initial bundle
 const CuratedNewsFeed = lazy(() => import("@/components/dashboard/CuratedNewsFeed").then(m => ({ default: m.CuratedNewsFeed })));
@@ -68,6 +69,7 @@ export default function Dashboard() {
   const { signOut, user } = useAuth();
   const { isAdmin } = useUserRole();
   const { plan } = useSubscription();
+  const isTeamMember = useIsTeamMember();
   const isSimplifiedDashboard = shouldApplyPremiumFundadorFilter(isAdmin, plan);
 
   // Register daily login for gamification
@@ -192,7 +194,15 @@ export default function Dashboard() {
             {/* 1. Banner Rotativo */}
             <DashboardBanner />
 
-            {isSimplifiedDashboard ? (
+            {isTeamMember ? (
+              <>
+                {/* Minha Agenda & Próximas Viagens (apenas estas seções para subusuários) */}
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
+                  <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
+                  <div className="flex flex-col flex-1 min-w-0 [&>*]:h-full"><TripRemindersCard /></div>
+                </section>
+              </>
+            ) : isSimplifiedDashboard ? (
               <>
                 {/* 2b. Leads aguardando atendimento */}
                 <section className="order-[2.5]">
