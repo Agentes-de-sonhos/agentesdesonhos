@@ -283,6 +283,14 @@ export function AppSidebar() {
   // Filtra itens por permissão de equipe (master bypassa)
   const isPermittedForTeam = useCallback((item: MenuItem) => {
     if (!isTeamMember) return true;
+    // Itens adicionais sempre liberados para subusuários da equipe
+    // (Criar: carteira digital, orçamento, roteiros)
+    const TEAM_ALLOWED_KEYS = new Set([
+      "carteira_digital",
+      "orcamento",
+      "roteiros",
+    ]);
+    if (item.key && TEAM_ALLOWED_KEYS.has(item.key)) return true;
     // Para team member: só mostra itens com requiredPermission liberado
     if (!item.requiredPermission) return false;
     return canPerm(item.requiredPermission);
@@ -678,17 +686,15 @@ export function AppSidebar() {
         <div className={cn("flex-1 py-2", collapsed ? "overflow-hidden space-y-[2px]" : "overflow-y-auto space-y-0.5")}>
           {/* Início */}
           <nav className={cn("flex flex-col", collapsed ? "gap-[2px] px-3" : "gap-0.5 px-3")}>
-            {!isTeamMember && renderSingleItem(meusProjetosItem)}
-            {!isTeamMember && renderSingleItem(minhaAgendaItem)}
-            {!isTeamMember && renderSingleItem(meuPerfilItem)}
+            {renderSingleItem(meusProjetosItem)}
+            {renderSingleItem(minhaAgendaItem)}
+            {renderSingleItem(meuPerfilItem)}
             {!isTeamMember && renderSingleItem(comunidadeItem)}
           </nav>
 
-          {!isTeamMember && (
-            <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
-              <Separator className="bg-sidebar-border" />
-            </div>
-          )}
+          <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
+            <Separator className="bg-sidebar-border" />
+          </div>
 
           {/* Dynamic menu entries ordered by DB */}
           {orderedEntries.map((entry) => {
