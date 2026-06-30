@@ -24,6 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLoginProtection } from "@/hooks/useLoginProtection";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useTeamSession } from "@/contexts/TeamSessionContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,6 +89,7 @@ export default function Auth() {
   const { sendOtp, signIn, user, loading: authLoading, isNewUser } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { plan, loading: subLoading } = useSubscription();
+  const { member, loading: teamLoading } = useTeamSession();
   const { toast } = useToast();
 
   const { checkCanAttempt, recordFailedAttempt, recordSuccess } = useLoginProtection();
@@ -110,7 +112,14 @@ export default function Auth() {
   // Redirect authenticated users away from auth page
   useEffect(() => {
     if (!user) return;
-    if (roleLoading || subLoading) return;
+    if (roleLoading || subLoading || teamLoading) return;
+
+    // Subusuários de equipe sempre vão para o dashboard padrão (não para /dashboard-start),
+    // independentemente do plano da agência.
+    if (member) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
 
     if (isNewUser && plan !== "educa_pass" && plan !== "cartao_digital") {
       navigate("/onboarding", { replace: true });
@@ -141,7 +150,7 @@ export default function Auth() {
       destination = "/dashboard";
     }
     navigate(destination, { replace: true });
-  }, [user, role, roleLoading, isNewUser, navigate, plan, subLoading]);
+  }, [user, role, roleLoading, isNewUser, navigate, plan, subLoading, member, teamLoading]);
 
   // Show loading while checking auth state
   if (authLoading) {
