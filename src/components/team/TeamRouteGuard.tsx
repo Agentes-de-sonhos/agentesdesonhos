@@ -7,6 +7,15 @@ const TEAM_ALLOWED_PREFIXES = [
   '/gestao-clientes',
   '/financeiro',
   '/auth',
+  '/dashboard',
+  '/agenda',
+  '/meus-projetos',
+  '/perfil',
+  '/minha-conta',
+  '/ferramentas-ia/criar-roteiro',
+  '/ferramentas-ia/gerar-orcamento',
+  '/ferramentas-ia/trip-wallet',
+  '/ferramentas-ia/modelos-roteiros',
 ]
 
 const TEAM_PUBLIC_PREFIXES = [
@@ -17,6 +26,7 @@ const TEAM_PUBLIC_PREFIXES = [
 
 function isAllowedForTeam(path: string) {
   if (TEAM_PUBLIC_PREFIXES.some(p => path.startsWith(p))) return true
+  if (path === '/dashboard') return true
   return TEAM_ALLOWED_PREFIXES.some(p => path === p || path.startsWith(p + '/') || path === p)
 }
 
@@ -31,11 +41,7 @@ export function TeamRouteGuard() {
 
   useEffect(() => {
     if (loading || !member) return
-    const landing = hasModule('clients')
-      ? '/gestao-clientes/clientes'
-      : hasModule('financial')
-        ? '/financeiro'
-        : '/auth'
+    const landing = '/dashboard'
     if (!isAllowedForTeam(location.pathname)) {
       navigate(landing, { replace: true })
     }
