@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useTeamSession } from "@/contexts/TeamSessionContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LoadingScreen } from "./LoadingScreen";
@@ -16,6 +17,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading, signOut } = useAuth();
   const { plan, loading: subLoading } = useSubscription();
   const { role, loading: roleLoading, isFornecedor, isAdmin } = useUserRole();
+  const { member: teamMember, loading: teamLoading } = useTeamSession();
   const location = useLocation();
   const checkInterval = useRef<ReturnType<typeof setInterval>>();
   useSessionTracker();
@@ -70,7 +72,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // show the friendly loader instead of risking a wrong redirect. After
   // `safetyElapsed`, we proceed with whatever defaults we have so the user
   // is never stuck on a blank/loading screen.
-  if ((subLoading || roleLoading) && !safetyElapsed) {
+  if ((subLoading || roleLoading || teamLoading) && !safetyElapsed) {
     return <LoadingScreen />;
   }
 
@@ -140,7 +142,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Start (free) plan users must NEVER access /dashboard (the full dashboard
   // for paid plans) or any other plan-restricted dashboard. They are always
   // redirected to /dashboard-start. Admins are exempt (role === "admin").
-  if (plan === "start" && role !== "admin") {
+  // Subusuários de equipe usam sempre o dashboard padrão, mesmo que a agência
+  // esteja em plano Start.
+  if (plan === "start" && role !== "admin" && !teamMember) {
     if (
       location.pathname === "/dashboard" ||
       location.pathname.startsWith("/dashboard/")
