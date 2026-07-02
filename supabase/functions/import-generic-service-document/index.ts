@@ -188,6 +188,54 @@ const SCHEMAS: Record<ServiceKey, { fnName: string; description: string; propert
     },
     promptExtras: "Documento de SERVIÇO DIVERSO de viagem (chip, estacionamento, pocket wifi, ingresso avulso, transfer privado, etc). Identifique título, empresa, descrição e valor.",
   },
+  rail_transport: {
+    fnName: "extract_rail_transport_document",
+    description: "Extract structured rail/train ticket, voucher or reservation data (SNCF, Trenitalia, Eurostar, Renfe, Deutsche Bahn, Italo, Amtrak, Rail Europe, etc).",
+    properties: {
+      operadora: { type: "string", description: "Operadora ferroviária (SNCF, Trenitalia, Eurostar, Renfe, DB, Italo, Amtrak, Rail Europe...)." },
+      tipo_transporte: { type: "string", description: "Um de: high_speed | regional | night | panoramic | other" },
+      classe: { type: "string", description: "Um de: economy | second | first | executive | sleeper" },
+      cidade_origem: { type: "string" },
+      estacao_origem: { type: "string", description: "Ex: Paris Gare du Nord, Roma Termini, London St Pancras" },
+      cidade_destino: { type: "string" },
+      estacao_destino: { type: "string" },
+      data_viagem: { type: "string", description: "YYYY-MM-DD" },
+      horario_saida: { type: "string", description: "HH:mm (24h)" },
+      horario_chegada: { type: "string", description: "HH:mm (24h)" },
+      adultos: { type: ["integer", "null"] },
+      criancas: { type: ["integer", "null"] },
+      valor_adulto: { type: ["number", "null"] },
+      valor_crianca: { type: ["number", "null"] },
+      wifi: { type: ["boolean", "null"], description: "true se o documento indicar Wi-Fi a bordo" },
+      tomadas: { type: ["boolean", "null"], description: "true se indicar tomadas/power outlets" },
+      refeicao_inclusa: { type: ["boolean", "null"], description: "true se indicar refeição inclusa" },
+      assento_marcado: { type: ["boolean", "null"], description: "true se indicar assento marcado/reservado" },
+      cabine_privativa: { type: ["boolean", "null"], description: "true se indicar cabine privativa (trens-leito)" },
+      vista_panoramica: { type: ["boolean", "null"], description: "true se indicar carro/vista panorâmica (Glacier Express, Bernina...)" },
+      descricao_cliente: { type: "string", description: "Descrição amigável para o cliente" },
+      inclusos: { type: "array", items: { type: "string" }, description: "Itens inclusos (bagagem, refeição, lounge...)" },
+      ...COMMON_META,
+    },
+    promptExtras:
+      "Documento de TRANSPORTE FERROVIÁRIO / TREM (bilhete, e-ticket, voucher, reserva ou confirmação). " +
+      "Operadoras comuns: SNCF, Trenitalia, Eurostar, Renfe, Deutsche Bahn, Italo, Amtrak, Rail Europe. " +
+      "Identifique operadora, cidades e estações de origem/destino (não confunda cidade com estação), data, horários de saída e chegada, " +
+      "classe/categoria, quantidade de adultos/crianças e valores por passageiro. " +
+      "Marque as características (wifi, tomadas, refeição, assento marcado, cabine, vista panorâmica) APENAS quando estiverem explícitas no documento. " +
+      "Mapeie tipo_transporte: TGV/AVE/Frecciarossa/Eurostar/ICE = high_speed; regionais/IC = regional; noturnos/night train/couchette = night; panorâmicos (Glacier, Bernina, Bernina Express) = panoramic. " +
+      "Mapeie classe: Standard/2ª = second/economy; Premier/1ª = first; Business/Executive = executive; couchette/sleeper/cabine = sleeper.",
+  },
+  __placeholder_remove__: {
+    description: "Extract structured data from any other travel service (chip, parking, mobile, etc).",
+    properties: {
+      titulo: { type: "string", description: "Título curto do serviço (Chip Internacional, Estacionamento, Wi-Fi pocket...)" },
+      empresa: { type: "string" },
+      descricao: { type: "string", description: "Descrição completa do serviço" },
+      data: { type: "string", description: "YYYY-MM-DD se houver" },
+      ...COMMON_META,
+    },
+    promptExtras: "Documento de SERVIÇO DIVERSO de viagem (chip, estacionamento, pocket wifi, ingresso avulso, transfer privado, etc). Identifique título, empresa, descrição e valor.",
+  },
 };
 
 function buildSystemPrompt(key: ServiceKey): string {
