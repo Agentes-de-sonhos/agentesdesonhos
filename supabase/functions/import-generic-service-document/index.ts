@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 /* ─────────── Per-service prompt + tool schema ─────────── */
-type ServiceKey = "transfer" | "attraction" | "insurance" | "cruise" | "circuit" | "other";
+type ServiceKey = "transfer" | "attraction" | "insurance" | "cruise" | "circuit" | "rail_transport" | "other";
 
 const SHARED_RULES = `
 REGRA #1 — POSTURA DE EXTRAÇÃO.
