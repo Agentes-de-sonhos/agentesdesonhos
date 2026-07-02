@@ -376,4 +376,95 @@ export const SERVICE_IMPORT_CONFIGS: Record<GenericServiceKey, ServiceImportConf
       };
     },
   },
+
+  rail_transport: {
+    serviceLabel: "transporte ferroviário",
+    fields: [
+      { key: "operadora", label: "Operadora ferroviária", placeholder: "SNCF, Trenitalia, Eurostar, Renfe..." },
+      { key: "tipo_transporte", label: "Tipo (high_speed | regional | night | panoramic | other)", placeholder: "high_speed" },
+      { key: "classe", label: "Classe (economy | second | first | executive | sleeper)", placeholder: "second" },
+      { key: "cidade_origem", label: "Cidade de origem" },
+      { key: "estacao_origem", label: "Estação de origem", placeholder: "Ex: Paris Gare du Nord" },
+      { key: "cidade_destino", label: "Cidade de destino" },
+      { key: "estacao_destino", label: "Estação de destino" },
+      { key: "data_viagem", label: "Data da viagem", type: "date" },
+      { key: "horario_saida", label: "Horário de saída", type: "time" },
+      { key: "horario_chegada", label: "Horário de chegada", type: "time" },
+      { key: "adultos", label: "Adultos", type: "number" },
+      { key: "criancas", label: "Crianças", type: "number" },
+      { key: "valor_adulto", label: "Valor adulto", type: "number" },
+      { key: "valor_crianca", label: "Valor criança", type: "number" },
+      { key: "moeda", label: "Moeda" },
+      { key: "valor_total", label: "Valor total (moeda original)", type: "number" },
+      { key: "valor_total_brl", label: "Valor total em R$", type: "number" },
+      { key: "descricao_cliente", label: "Descrição para o cliente", type: "textarea", full: true },
+      { key: "inclusos", label: "O que está incluso (1 por linha)", type: "list", full: true },
+    ],
+    mapToInitialData: (p) => {
+      const adults = typeof p.adultos === "number" ? p.adultos : num(p.adultos) || 1;
+      const kids = typeof p.criancas === "number" ? p.criancas : num(p.criancas) || 0;
+      const adult_price = num(p.valor_adulto);
+      const child_price = num(p.valor_crianca);
+      const totalFromAi = typeof p.valor_total_brl === "number" ? p.valor_total_brl : num(p.valor_total);
+      const computed = adults * adult_price + kids * child_price;
+      const total = totalFromAi || computed;
+
+      const rawType = String(p.tipo_transporte || "").toLowerCase();
+      let rail_type: "high_speed" | "regional" | "night" | "panoramic" | "other" = "high_speed";
+      if (rawType.includes("region")) rail_type = "regional";
+      else if (rawType.includes("night") || rawType.includes("notur") || rawType.includes("sleep") || rawType.includes("couch")) rail_type = "night";
+      else if (rawType.includes("panor") || rawType.includes("glacier") || rawType.includes("bernina")) rail_type = "panoramic";
+      else if (rawType.includes("other") || rawType.includes("outr")) rail_type = "other";
+      else if (rawType.includes("high") || rawType.includes("alta") || rawType.includes("tgv") || rawType.includes("ave") || rawType.includes("frecc") || rawType.includes("eurostar") || rawType.includes("ice") || rawType.includes("italo")) rail_type = "high_speed";
+
+      const rawClass = String(p.classe || "").toLowerCase();
+      let travel_class: "economy" | "second" | "first" | "executive" | "sleeper" = "economy";
+      if (rawClass.includes("sleep") || rawClass.includes("couch") || rawClass.includes("cabine") || rawClass.includes("leito")) travel_class = "sleeper";
+      else if (rawClass.includes("exec") || rawClass.includes("business")) travel_class = "executive";
+      else if (rawClass.includes("first") || rawClass.includes("1") || rawClass.includes("primeir") || rawClass.includes("premier")) travel_class = "first";
+      else if (rawClass.includes("second") || rawClass.includes("2") || rawClass.includes("segund") || rawClass.includes("standard")) travel_class = "second";
+      else if (rawClass.includes("econ")) travel_class = "economy";
+
+      const inclusos = Array.isArray(p.inclusos) ? p.inclusos.filter(Boolean) : [];
+      const whats_included = inclusos.length ? inclusos.map((i: string) => `• ${i}`).join("\n") : "";
+
+      const extraNotes: string[] = [];
+      if (p.moeda && typeof p.valor_total === "number") {
+        extraNotes.push(`Total em ${p.moeda}: ${p.valor_total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      }
+      const notes = joinMeta(p, extraNotes);
+
+      return {
+        service_data: {
+          operator: p.operadora || "",
+          rail_type,
+          travel_class,
+          origin_city: p.cidade_origem || "",
+          origin_station: p.estacao_origem || "",
+          destination_city: p.cidade_destino || "",
+          destination_station: p.estacao_destino || "",
+          travel_date: normalizeDate(p.data_viagem),
+          departure_time: p.horario_saida || "",
+          arrival_time: p.horario_chegada || "",
+          adults_count: adults,
+          children_count: kids,
+          adult_price,
+          child_price,
+          price: total,
+          description: p.descricao_cliente || "",
+          whats_included,
+          notes,
+          features: {
+            wifi: p.wifi === true,
+            power_outlets: p.tomadas === true,
+            meal_included: p.refeicao_inclusa === true,
+            assigned_seat: p.assento_marcado === true,
+            private_cabin: p.cabine_privativa === true,
+            panoramic_view: p.vista_panoramica === true,
+          },
+        },
+        amount: total,
+      };
+    },
+  },
 };
