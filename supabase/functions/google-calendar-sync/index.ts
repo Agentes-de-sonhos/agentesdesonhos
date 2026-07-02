@@ -247,16 +247,8 @@ Deno.serve(async (req) => {
     const windowStartDay = windowStartDate.toISOString().slice(0, 10);
     const windowEndDay = windowEndDate.toISOString().slice(0, 10);
 
-    // Resolve agency_id for context (best-effort, never blocks sync)
-    let agencyId: string | null = null;
-    try {
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("agency_id")
-        .eq("id", userId)
-        .maybeSingle();
-      agencyId = prof?.agency_id ?? null;
-    } catch (_) { /* ignore */ }
+    // Agency context is not required for sync; kept as n/a in logs.
+    const agencyId: string | null = null;
 
     const calendarId = "primary";
     console.log(
