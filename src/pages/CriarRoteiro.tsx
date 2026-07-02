@@ -144,6 +144,16 @@ export default function CriarRoteiro() {
     }
   }, [id]);
 
+  // Recompute the public link once the agency profile finishes loading, so
+  // we always prefer seuroteiro.tur.br/{agencia}/{code} over the legacy
+  // vitrine.tur.br/roteiro/{token} fallback.
+  useEffect(() => {
+    if (!currentItinerary) return;
+    if (currentItinerary.status !== "published" || !currentItinerary.shareToken) return;
+    setGeneratedLinkUrl(buildItineraryUrl(currentItinerary));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentProfile?.agency_name, currentItinerary?.id, currentItinerary?.publicAccessCode, currentItinerary?.shareToken, currentItinerary?.status]);
+
   const loadItinerary = async (itineraryId: string) => {
     try {
       const data = await getItineraryWithDetails(itineraryId);
