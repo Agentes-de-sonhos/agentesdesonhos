@@ -126,16 +126,10 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             .eq("day_id", day.id)
             .order("order_index", { ascending: true });
 
-          // Also try trip_itinerary_activities for documents & maps
-          const { data: tripActivities } = await supabase
-            .from("trip_itinerary_activities" as any)
-            .select("title, document_urls, maps_url")
-            .eq("day_id", day.id) as { data: any[] | null };
-
+          // Legacy trip_itinerary_activities fallback removed — this page
+          // renders itinerary_activities directly; documents/maps come from
+          // the same row via (a as any).document_urls / maps_url.
           const tripActMap = new Map<string, any>();
-          (tripActivities || []).forEach((ta: any) => {
-            tripActMap.set(ta.title, ta);
-          });
 
           return {
             id: day.id as string,
