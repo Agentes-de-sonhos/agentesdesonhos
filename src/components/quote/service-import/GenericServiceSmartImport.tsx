@@ -12,7 +12,7 @@ import { extractPdfText } from "@/lib/pdfText";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export type GenericServiceKey = "transfer" | "attraction" | "insurance" | "cruise" | "circuit" | "other";
+export type GenericServiceKey = "transfer" | "attraction" | "insurance" | "cruise" | "circuit" | "rail_transport" | "other";
 
 export interface SmartImportField {
   /** Key returned by the edge function (Portuguese) */
