@@ -225,17 +225,6 @@ const SCHEMAS: Record<ServiceKey, { fnName: string; description: string; propert
       "Mapeie tipo_transporte: TGV/AVE/Frecciarossa/Eurostar/ICE = high_speed; regionais/IC = regional; noturnos/night train/couchette = night; panorâmicos (Glacier, Bernina, Bernina Express) = panoramic. " +
       "Mapeie classe: Standard/2ª = second/economy; Premier/1ª = first; Business/Executive = executive; couchette/sleeper/cabine = sleeper.",
   },
-  __placeholder_remove__: {
-    description: "Extract structured data from any other travel service (chip, parking, mobile, etc).",
-    properties: {
-      titulo: { type: "string", description: "Título curto do serviço (Chip Internacional, Estacionamento, Wi-Fi pocket...)" },
-      empresa: { type: "string" },
-      descricao: { type: "string", description: "Descrição completa do serviço" },
-      data: { type: "string", description: "YYYY-MM-DD se houver" },
-      ...COMMON_META,
-    },
-    promptExtras: "Documento de SERVIÇO DIVERSO de viagem (chip, estacionamento, pocket wifi, ingresso avulso, transfer privado, etc). Identifique título, empresa, descrição e valor.",
-  },
 };
 
 function buildSystemPrompt(key: ServiceKey): string {
