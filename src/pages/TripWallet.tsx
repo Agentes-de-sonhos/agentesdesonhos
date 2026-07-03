@@ -30,7 +30,7 @@ import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
-import { Sparkles, FileText as FileTextIcon } from "lucide-react";
+import { FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
 import { ImportQuoteAsNewWalletDialog } from "@/components/trip/ImportQuoteAsNewWalletDialog";
 import { ClientSelector } from "@/components/shared/ClientSelector";
@@ -78,12 +78,10 @@ function TripServiceCategoryGrid({
   services,
   onSelect,
   onImportQuote,
-  onAIImport,
 }: {
   services: TripService[];
   onSelect: (type: TripServiceType) => void;
   onImportQuote: () => void;
-  onAIImport: () => void;
 }) {
   const countByType = services.reduce<Record<string, number>>((acc, s) => {
     acc[s.service_type] = (acc[s.service_type] || 0) + 1;
@@ -1027,7 +1025,6 @@ function TripWalletContent() {
               services={trip.services || []}
               onSelect={(type) => setSelectedServiceType(type)}
               onImportQuote={() => setShowImportQuote(true)}
-              onAIImport={() => setShowAIImport(true)}
             />
           </CardContent>
         </Card>
