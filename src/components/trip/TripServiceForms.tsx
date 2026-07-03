@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check } from "lucide-react";
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
+import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -891,7 +892,7 @@ interface HotelGuestInput {
 
 const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
-function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [guests, setGuests] = useState<HotelGuestInput[]>(
@@ -1032,10 +1033,84 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state — mirrors the Flight wizard ───
+  const hotelStepTitles = [
+    "Informações principais",
+    "Check-in e Check-out",
+    "Acomodação e Alimentação",
+    "Hóspedes",
+    "Financeiro e Políticas",
+    "Observações e Documentos",
+  ];
+  const hotelStepGroups: string[][] = [
+    ["🏨 Informações Principais", "📍 Localização e Contato"],
+    ["📅 Detalhes do Check-in", "🧳 Detalhes do Check-out"],
+    ["🛏️ Detalhes da Acomodação", "🍽️ Alimentação"],
+    ["👨‍👩‍👧 Hóspedes"],
+    ["💰 O que está incluso", "🧾 Políticas do Hotel"],
+    ["📝 Observações"],
+  ];
+  const sectionToStep = new Map<string, number>();
+  hotelStepGroups.forEach((titles, i) => titles.forEach((t) => sectionToStep.set(t, i)));
+  const totalHotelSteps = hotelStepTitles.length;
+  const [hotelStepIndex, setHotelStepIndex] = useState(0);
+
+  const HotelStepSection = ({ title, defaultOpen, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = sectionToStep.get(title);
+    if (idx === undefined || idx !== hotelStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstHotelStep = hotelStepIndex === 0;
+  const isLastHotelStep = hotelStepIndex === totalHotelSteps - 1;
+  const goHotelBack = () => setHotelStepIndex((s) => Math.max(0, s - 1));
+  const goHotelNext = () => setHotelStepIndex((s) => Math.min(totalHotelSteps - 1, s + 1));
+  const saveHotelNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🏨 Informações Principais">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "245 158 11" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-600 shrink-0">
+                  <HotelIcon className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {hotelStepTitles[hotelStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {hotelStepIndex + 1} de {totalHotelSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-amber-500 transition-all duration-300"
+                style={{ width: `${((hotelStepIndex + 1) / totalHotelSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <HotelStepSection title="🏨 Informações Principais">
         {imageSlot}
         {googlePhotoSlot}
 
@@ -1212,9 +1287,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="📅 Detalhes do Check-in">
+        <HotelStepSection title="📅 Detalhes do Check-in">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_time" render={({ field }) => (
@@ -1257,9 +1332,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🧳 Detalhes do Check-out">
+        <HotelStepSection title="🧳 Detalhes do Check-out">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkout_time" render={({ field }) => (
@@ -1303,9 +1378,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🛏️ Detalhes da Acomodação">
+        <HotelStepSection title="🛏️ Detalhes da Acomodação">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="guest_count" render={({ field }) => (
@@ -1343,9 +1418,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="📍 Localização e Contato">
+        <HotelStepSection title="📍 Localização e Contato">
 
         <FormField control={form.control} name="address" render={({ field }) => (
           <FormItem>
@@ -1382,9 +1457,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🍽️ Alimentação">
+        <HotelStepSection title="🍽️ Alimentação">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="breakfast_hours" render={({ field }) => (
@@ -1413,9 +1488,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="💰 O que está incluso">
+        <HotelStepSection title="💰 O que está incluso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="breakfast_included" render={({ field }) => (
@@ -1495,9 +1570,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🧾 Políticas do Hotel">
+        <HotelStepSection title="🧾 Políticas do Hotel">
 
         <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
           <FormItem>
@@ -1534,9 +1609,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Hóspedes">
+        <HotelStepSection title="👨‍👩‍👧 Hóspedes">
 
         {guests.map((g, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -1572,9 +1647,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="📝 Observações">
+        <HotelStepSection title="📝 Observações">
 
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
@@ -1589,16 +1664,55 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
+        {(!wizardMode || hotelStepIndex === totalHotelSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstHotelStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goHotelBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastHotelStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goHotelNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveHotelNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastHotelStep ? (
+                <Button type="button" size="sm" onClick={goHotelNext} className="bg-amber-500 hover:bg-amber-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveHotelNow} className="bg-amber-500 hover:bg-amber-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar hospedagem
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5130,7 +5244,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
   const placesProps = { placeId, onPlaceIdChange, googlePhotoSlot };
   switch (serviceType) {
     case "flight": return <FlightEntry {...props} />;
-    case "hotel": return <HotelForm {...props} {...placesProps} />;
+    case "hotel": return <HotelEntry {...props} {...placesProps} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} />;
     case "transfer": return <TransferForm {...props} {...placesProps} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} />;
@@ -5291,4 +5405,89 @@ function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
     ? { ...props, defaultValues: { ...(props.defaultValues || {}), ...importedDefaults } }
     : props;
   return <FlightForm {...merged} hideInlineImport wizardMode={!isEditing} />;
+}
+
+/* ───────── Hotel entry: chooser → AI import (modal) or step-by-step manual form ─────────
+   Mirrors the Orçamento (Quote) hotel entry pattern and the Flight (Carteira Digital)
+   assisted form. Editing existing services skips the chooser and opens the form
+   directly (no regression). */
+
+function HotelModeChooserTrip({ onChoose }: { onChoose: (mode: "import" | "manual") => void }) {
+  return (
+    <ServiceModeChooser
+      serviceType="hotel"
+      importDescription="A IA lê a reserva (PDF, imagem ou texto), extrai hotel, datas, regime, valores e taxas para você revisar."
+      secondaryMode="manual"
+      secondaryLabel="Preencher passo a passo"
+      secondaryTitle="Cadastro assistido em etapas"
+      secondaryDescription="Responda em etapas simples, pule o que ainda não souber e complete depois."
+      onChoose={(m) => onChoose(m === "import" ? "import" : "manual")}
+    />
+  );
+}
+
+/** Convert HotelSmartImport result → HotelForm `defaultValues` shape (Carteira Digital). */
+function mapHotelImportToDefaults(mapped: any, raw?: ParsedHotel) {
+  const defaults: Record<string, any> = {};
+  if (mapped?.hotel_name) defaults.hotel_name = mapped.hotel_name;
+  if (mapped?.city) {
+    // parsedHotelToHotelData joins "cidade, pais" — split back into city/country when possible.
+    const parts = String(mapped.city).split(",").map((s: string) => s.trim()).filter(Boolean);
+    defaults.city = parts[0] || mapped.city;
+    if (parts.length > 1) defaults.country = parts.slice(1).join(", ");
+  }
+  if (mapped?.check_in) defaults.check_in = mapped.check_in; // "YYYY-MM-DD"
+  if (mapped?.check_out) defaults.check_out = mapped.check_out;
+  if (mapped?.room_type) defaults.room_type = mapped.room_type;
+  if (mapped?.meal_plan) defaults.meal_plan = mapped.meal_plan;
+  if (mapped?.notes) defaults.notes = mapped.notes;
+  // Enrich with raw fields when available (kept optional to preserve existing behavior).
+  if (raw?.endereco) defaults.address = raw.endereco;
+  if (raw?.horario_check_in) defaults.checkin_time = raw.horario_check_in;
+  if (raw?.horario_check_out) defaults.checkout_time = raw.horario_check_out;
+  if (raw?.codigo_reserva) defaults.reservation_code = raw.codigo_reserva;
+  if (raw?.politica_cancelamento) defaults.cancellation_policy = raw.politica_cancelamento;
+  return defaults;
+}
+
+function HotelEntry(props: Omit<TripServiceFormProps, "serviceType">) {
+  const isEditing = !!props.defaultValues;
+  const [mode, setMode] = useState<"chooser" | "import" | "manual">(isEditing ? "manual" : "chooser");
+  const [importedDefaults, setImportedDefaults] = useState<any | null>(null);
+
+  if (mode === "chooser") {
+    return <HotelModeChooserTrip onChoose={(m) => setMode(m)} />;
+  }
+
+  if (mode === "import") {
+    return (
+      <>
+        <HotelModeChooserTrip onChoose={(m) => setMode(m)} />
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] sm:max-h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Importar hospedagem com IA</DialogTitle>
+              <DialogDescription>
+                Envie um PDF, imagem ou cole o texto da reserva. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <HotelSmartImport
+                onCancel={() => setMode("chooser")}
+                onConfirm={(mapped, raw) => {
+                  setImportedDefaults(mapHotelImportToDefaults(mapped, raw));
+                  setMode("manual");
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  const merged = importedDefaults
+    ? { ...props, defaultValues: { ...(props.defaultValues || {}), ...importedDefaults } }
+    : props;
+  return <HotelForm {...merged} wizardMode={!isEditing} />;
 }
