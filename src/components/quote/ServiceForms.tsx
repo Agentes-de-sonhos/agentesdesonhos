@@ -2433,6 +2433,10 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
     onImageUrlsChange([...imageUrls, ...urls.slice(0, remaining)]);
   };
 
+  const handleGooglePhotoRemoved = (url: string) => {
+    onImageUrlsChange(imageUrls.filter((u) => u !== url));
+  };
+
   const statusColor = uploadStatus.includes("Erro") || uploadStatus.includes("Máximo") || uploadStatus.includes("Formato")
     ? "text-destructive"
     : uploadStatus.includes("✓")
