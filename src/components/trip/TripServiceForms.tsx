@@ -1090,7 +1090,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
             <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-600 shrink-0">
-                  <Hotel className="h-3.5 w-3.5" />
+                  <HotelIcon className="h-3.5 w-3.5" />
                 </span>
                 <h3 className="text-base font-semibold text-slate-900 truncate">
                   {hotelStepTitles[hotelStepIndex]}
