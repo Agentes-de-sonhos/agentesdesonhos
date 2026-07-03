@@ -9,7 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check } from "lucide-react";
+import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -154,7 +155,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 });
 
 
-function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean }) {
+function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean; wizardMode?: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
@@ -164,6 +165,17 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   );
   const [newPax, setNewPax] = useState<FlightPassengerInput>(emptyPassenger());
   const [isEditingPax, setIsEditingPax] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const STEP_TITLES = [
+    "Informações Principais",
+    "Trechos de Voo",
+    "Passageiros",
+    "Bagagem",
+    "Check-in Online",
+    "Orientações de Embarque",
+    "Documentos",
+  ];
+  const totalSteps = STEP_TITLES.length;
 
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
@@ -396,12 +408,61 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     }
   };
 
+  /* StepSection: in classic mode renders a <CollapsibleFormSection>;
+     in wizard mode renders only when it matches the current step, using a
+     plain shell (no accordion), preserving all inner form fields untouched. */
+  const StepSection = ({ index, title, defaultOpen, children }: { index: number; title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    if (stepIndex !== index) return null;
+    return (
+      <div className="rounded-xl border border-sky-200 bg-sky-50/40 px-4 py-4 sm:px-5 sm:py-5 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-sky-700">{title}</h4>
+          <span className="text-[11px] text-sky-700/70 tabular-nums">Passo {index + 1} de {totalSteps}</span>
+        </div>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstStep = stepIndex === 0;
+  const isLastStep = stepIndex === totalSteps - 1;
+  const goBack = () => setStepIndex((s) => Math.max(0, s - 1));
+  const goNext = () => setStepIndex((s) => Math.min(totalSteps - 1, s + 1));
+  const saveNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {!hideInlineImport && <FlightAutoImport onImport={handleFlightImport} />}
+        {!hideInlineImport && !wizardMode && <FlightAutoImport onImport={handleFlightImport} />}
 
-        <CollapsibleFormSection title="✈️ Informações Principais">
+        {wizardMode && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-sky-700 min-w-0">
+                <Plane className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Modo Assistido — Passagem Aérea</span>
+              </div>
+              <span className="text-xs font-medium text-muted-foreground tabular-nums shrink-0">
+                {stepIndex + 1}/{totalSteps}
+              </span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-sky-100 overflow-hidden">
+              <div
+                className="h-full bg-sky-500 transition-all duration-300"
+                style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <StepSection index={0} title="✈️ Informações Principais" defaultOpen>
         {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -469,9 +530,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="🛫 Trechos de Voo">
+        <StepSection index={1} title="🛫 Trechos de Voo">
 
         {segments.map((seg, i) => (
           <CollapsibleFormSection key={i} title={`Trecho ${i + 1}${seg.origin_airport && seg.destination_airport ? ` — ${seg.origin_airport} → ${seg.destination_airport}` : ''}`} defaultOpen={i === 0}>
@@ -553,9 +614,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           <Plus className="h-4 w-4 mr-2" /> Adicionar Trecho de Voo
         </Button>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="👤 Passageiros">
+        <StepSection index={2} title="👤 Passageiros">
 
         {passengers.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -595,9 +656,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="🧳 Bagagem">
+        <StepSection index={3} title="🧳 Bagagem">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="carry_on" render={({ field }) => (
@@ -626,9 +687,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="✅ Check-in Online">
+        <StepSection index={4} title="✅ Check-in Online">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="checkin_url" render={({ field }) => (
@@ -665,9 +726,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="⚠️ Orientações de Embarque">
+        <StepSection index={5} title="⚠️ Orientações de Embarque">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="recommended_arrival" render={({ field }) => (
@@ -702,16 +763,53 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="E-ticket / Cartão de Embarque" />
+        <StepSection index={6} title="📎 Documentos">
+          <MultiFileUpload files={files} setFiles={setFiles} label="E-ticket / Cartão de Embarque" />
+        </StepSection>
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstStep ? (
+                <Button type="button" variant="outline" size="sm" onClick={goBack}>
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+                  <ArrowLeft className="h-4 w-4 mr-1" /> Cancelar
+                </Button>
+              )}
+              {!isLastStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastStep ? (
+                <Button type="button" size="sm" onClick={goNext} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveNow} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar passagem aérea
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5037,44 +5135,15 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
 
 function FlightModeChooserTrip({ onChoose }: { onChoose: (mode: "import" | "manual") => void }) {
   return (
-    <div className="space-y-4">
-      <div className="text-center space-y-1">
-        <h3 className="text-lg font-semibold">Como você prefere preencher a passagem aérea?</h3>
-        <p className="text-sm text-muted-foreground">
-          Escolha o modo que for mais confortável agora. Você pode trocar a qualquer momento.
-        </p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => onChoose("import")}
-          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">Importar com IA</span>
-          </div>
-          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
-          <p className="text-sm text-muted-foreground">
-            A IA identifica as informações da passagem aérea e preenche os campos automaticamente.
-          </p>
-        </button>
-        <button
-          type="button"
-          onClick={() => onChoose("manual")}
-          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Plane className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-semibold text-muted-foreground">Preencher passo a passo</span>
-          </div>
-          <p className="font-semibold mb-1">Responder em etapas</p>
-          <p className="text-sm text-muted-foreground">
-            Responda passo a passo, pule o que ainda não souber e complete depois.
-          </p>
-        </button>
-      </div>
-    </div>
+    <ServiceModeChooser
+      serviceType="flight"
+      importDescription="A IA lê a passagem aérea (PDF, imagem ou texto), extrai voos, bagagens e tarifas para você revisar."
+      secondaryMode="manual"
+      secondaryLabel="Preencher passo a passo"
+      secondaryTitle="Cadastro assistido em etapas"
+      secondaryDescription="Responda em etapas simples, pule o que ainda não souber e complete depois."
+      onChoose={(m) => onChoose(m === "import" ? "import" : "manual")}
+    />
   );
 }
 
@@ -5203,9 +5272,10 @@ function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
     );
   }
 
-  // manual
+  // manual — cadastro assistido em etapas (mesmo padrão do módulo Orçamentos).
+  // Ao editar um serviço já existente, mantém o formulário clássico (sem regressão).
   const merged = importedDefaults
     ? { ...props, defaultValues: { ...(props.defaultValues || {}), ...importedDefaults } }
     : props;
-  return <FlightForm {...merged} hideInlineImport />;
+  return <FlightForm {...merged} hideInlineImport wizardMode={!isEditing} />;
 }
