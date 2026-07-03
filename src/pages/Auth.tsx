@@ -114,6 +114,13 @@ export default function Auth() {
     if (!user) return;
     if (roleLoading || subLoading || teamLoading) return;
 
+    // Honor a same-origin ?next=/path so OAuth consent (and similar) can return here.
+    const rawNext = new URLSearchParams(window.location.search).get("next");
+    if (rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")) {
+      navigate(rawNext, { replace: true });
+      return;
+    }
+
     // Subusuários de equipe sempre vão para o dashboard padrão (não para /dashboard-start),
     // independentemente do plano da agência.
     if (member) {
