@@ -1055,7 +1055,10 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const totalHotelSteps = hotelStepTitles.length;
   const [hotelStepIndex, setHotelStepIndex] = useState(0);
 
-  const HotelStepSection = ({ title, defaultOpen, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
+  // Render as a plain function (not a component) to avoid remounting inputs
+  // — a nested component identity would change every render and cause the
+  // Google Places autocomplete input to lose focus while typing.
+  const renderHotelStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
     if (!wizardMode) {
       return (
         <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
