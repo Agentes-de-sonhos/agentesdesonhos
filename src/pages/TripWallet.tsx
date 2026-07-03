@@ -1026,42 +1026,60 @@ function TripWalletContent() {
           </Card>
         )}
 
+        {/* Adicionar Serviços — botões sempre visíveis (padrão Orçamentos) */}
+        <Card className="shadow-card">
+          <CardContent className="pt-5 pb-5 space-y-4">
+            <div className="w-fit">
+              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                <Plus className="h-5 w-5 text-sky-500" />
+                Adicionar Serviços
+              </h2>
+              <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
+            </div>
+            <TripServiceCategoryGrid
+              services={trip.services || []}
+              onSelect={(type) => setSelectedServiceType(type)}
+              onImportQuote={() => setShowImportQuote(true)}
+              onAIImport={() => setShowAIImport(true)}
+            />
+          </CardContent>
+        </Card>
+
         <Accordion type="multiple" className="grid gap-4 sm:gap-6" value={accordionValue} onValueChange={(v) => setAccordionValue(v as string[])}>
-          {/* 1. Serviços da Viagem */}
+          {/* 1. Serviços Incluídos — apenas listagem/edição */}
           <AccordionItem value="services" id="trip-services-section" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
             <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
               <div className="w-fit">
                 <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <Plus className="h-5 w-5 text-sky-500" />
-                  Serviços da Viagem
+                  <FileText className="h-5 w-5 text-emerald-500" />
+                  Serviços Incluídos
                   {trip.services && trip.services.length > 0 && (
                     <Badge variant="secondary" className="text-xs ml-1">{trip.services.length}</Badge>
                   )}
                 </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
+                <div className="mt-2 h-1 w-full rounded-full bg-emerald-500" />
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              <TripServiceCategoryGrid
-                services={trip.services || []}
-                onSelect={(type) => setSelectedServiceType(type)}
-                onImportQuote={() => setShowImportQuote(true)}
-                onAIImport={() => setShowAIImport(true)}
-              />
-              <div className="h-4" />
-              <TripServiceList
-                services={trip.services || []}
-                onDeleteService={deleteService}
-                onEditService={handleEditService}
-                onReplaceVoucher={handleReplaceVoucher}
-                onRemoveVoucher={removeVoucher}
-                onAddAttachment={handleAddAttachment}
-                onRemoveAttachment={handleRemoveAttachment}
-                onUploadServiceImage={handleUploadServiceImage}
-                onRemoveServiceImage={handleRemoveServiceImage}
-                groupByType={false}
-                onReorder={(orderedIds) => reorderServices(orderedIds)}
-              />
+              {(!trip.services || trip.services.length === 0) ? (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  Nenhum serviço adicionado ainda. Use a área acima para adicionar.
+                </p>
+              ) : (
+                <TripServiceList
+                  services={trip.services || []}
+                  onDeleteService={deleteService}
+                  onEditService={handleEditService}
+                  onReplaceVoucher={handleReplaceVoucher}
+                  onRemoveVoucher={removeVoucher}
+                  onAddAttachment={handleAddAttachment}
+                  onRemoveAttachment={handleRemoveAttachment}
+                  onUploadServiceImage={handleUploadServiceImage}
+                  onRemoveServiceImage={handleRemoveServiceImage}
+                  groupByType={false}
+                  onReorder={(orderedIds) => reorderServices(orderedIds)}
+                />
+              )}
             </AccordionContent>
           </AccordionItem>
 
