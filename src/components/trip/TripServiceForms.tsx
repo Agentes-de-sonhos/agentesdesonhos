@@ -5244,7 +5244,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
   const placesProps = { placeId, onPlaceIdChange, googlePhotoSlot };
   switch (serviceType) {
     case "flight": return <FlightEntry {...props} />;
-    case "hotel": return <HotelForm {...props} {...placesProps} />;
+    case "hotel": return <HotelEntry {...props} {...placesProps} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} />;
     case "transfer": return <TransferForm {...props} {...placesProps} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} />;
