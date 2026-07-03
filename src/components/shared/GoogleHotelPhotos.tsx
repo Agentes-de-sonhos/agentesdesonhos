@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, ImageIcon, Loader2, Camera } from "lucide-react";
+import { Check, Loader2, Camera } from "lucide-react";
 
 interface GooglePhoto {
   url: string;
@@ -14,6 +14,8 @@ interface GooglePhoto {
 interface GoogleHotelPhotosProps {
   placeId: string | null;
   onPhotosSelected: (urls: string[]) => void;
+  /** Called when a photo is deselected. If omitted, deselection only updates local state. */
+  onPhotoRemoved?: (url: string) => void;
   existingUrls?: string[];
   autoShow?: boolean;
   /** Loading message. Default "Buscando fotos do hotel..." */
@@ -30,6 +32,7 @@ const photoCache = new Map<string, GooglePhoto[]>();
 export function GoogleHotelPhotos({
   placeId,
   onPhotosSelected,
+  onPhotoRemoved,
   existingUrls = [],
   autoShow = false,
   loadingLabel = "Buscando fotos do hotel...",
@@ -39,7 +42,6 @@ export function GoogleHotelPhotos({
   const [photos, setPhotos] = useState<GooglePhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
-  const [selected, setSelected] = useState<Set<number>>(new Set());
   const fetchedRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -49,7 +51,6 @@ export function GoogleHotelPhotos({
     if (cached) {
       setPhotos(cached);
       fetchedRef.current = placeId;
-      setSelected(new Set());
       if (autoShow && cached.length > 0) setShowGallery(true);
       else setShowGallery(false);
       return;
@@ -58,7 +59,6 @@ export function GoogleHotelPhotos({
     fetchedRef.current = placeId;
     setLoading(true);
     setPhotos([]);
-    setSelected(new Set());
     setShowGallery(false);
 
     supabase.functions.invoke("hotel-photos", { body: { place_id: placeId } })
@@ -73,28 +73,17 @@ export function GoogleHotelPhotos({
   }, [placeId]);
 
   const togglePhoto = useCallback((index: number) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(index)) next.delete(index);
-      else next.add(index);
-      return next;
-    });
-  }, []);
-
-  const selectAll = useCallback(() => {
-    setSelected(new Set(photos.map((_, i) => i)));
-  }, [photos]);
-
-  const handleAdd = useCallback(() => {
-    const urls = Array.from(selected).sort().map(i => photos[i].url);
-    // Filter out already existing URLs
-    const newUrls = urls.filter(u => !existingUrls.includes(u));
-    if (newUrls.length > 0) {
-      onPhotosSelected(newUrls);
+    const photo = photos[index];
+    if (!photo) return;
+    const isSelected = existingUrls.includes(photo.url);
+    if (isSelected) {
+      onPhotoRemoved?.(photo.url);
+    } else {
+      onPhotosSelected([photo.url]);
     }
-    setShowGallery(false);
-    setSelected(new Set());
-  }, [selected, photos, existingUrls, onPhotosSelected]);
+  }, [photos, existingUrls, onPhotosSelected, onPhotoRemoved]);
+
+  const selectedCount = photos.filter(p => existingUrls.includes(p.url)).length;
 
   if (!placeId || (!loading && photos.length === 0)) return null;
 
@@ -125,34 +114,30 @@ export function GoogleHotelPhotos({
   return (
     <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium flex items-center gap-1.5">
-          <Camera className="h-4 w-4 text-primary" />
-          {headingLabel}
-        </p>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="ghost" size="sm" onClick={selectAll} className="text-xs h-7">
-            Selecionar todas
-          </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={() => setShowGallery(false)} className="text-xs h-7">
-            Fechar
-          </Button>
+        <div className="min-w-0">
+          <p className="text-sm font-medium flex items-center gap-1.5">
+            <Camera className="h-4 w-4 text-primary" />
+            {headingLabel}
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Selecione as fotos que deseja utilizar. As fotos são adicionadas automaticamente conforme forem selecionadas.
+          </p>
         </div>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setShowGallery(false)} className="text-xs h-7 shrink-0">
+          Fechar
+        </Button>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
         {photos.map((photo, i) => {
-          const isSelected = selected.has(i);
-          const alreadyAdded = existingUrls.includes(photo.url);
+          const isSelected = existingUrls.includes(photo.url);
           return (
             <button
               key={i}
               type="button"
-              disabled={alreadyAdded}
               onClick={() => togglePhoto(i)}
               className={`relative shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
-                alreadyAdded
-                  ? "border-muted opacity-50 cursor-not-allowed"
-                  : isSelected
+                isSelected
                   ? "border-primary ring-2 ring-primary/30"
                   : "border-transparent hover:border-primary/40"
               }`}
@@ -169,27 +154,16 @@ export function GoogleHotelPhotos({
                   <Check className="h-3 w-3 text-primary-foreground" />
                 </div>
               )}
-              {alreadyAdded && (
-                <Badge className="absolute bottom-1 left-1 text-[9px] bg-muted text-muted-foreground">
-                  Adicionada
-                </Badge>
-              )}
             </button>
           );
         })}
       </div>
 
-      {selected.size > 0 && (
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            {selected.size} foto{selected.size > 1 ? "s" : ""} selecionada{selected.size > 1 ? "s" : ""}
-          </span>
-          <Button type="button" size="sm" onClick={handleAdd} className="text-xs h-7 gap-1">
-            <ImageIcon className="h-3 w-3" />
-            Adicionar selecionadas
-          </Button>
-        </div>
-      )}
+      <div className="flex items-center justify-end">
+        <span className="text-xs text-muted-foreground">
+          {selectedCount} foto{selectedCount === 1 ? "" : "s"} selecionada{selectedCount === 1 ? "" : "s"}
+        </span>
+      </div>
     </div>
   );
 }
