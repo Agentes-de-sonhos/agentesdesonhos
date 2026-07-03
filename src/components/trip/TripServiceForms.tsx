@@ -1035,7 +1035,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🏨 Informações Principais">
+        <HotelStepSection title="🏨 Informações Principais">
         {imageSlot}
         {googlePhotoSlot}
 
@@ -1212,9 +1212,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="📅 Detalhes do Check-in">
+        <HotelStepSection title="📅 Detalhes do Check-in">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_time" render={({ field }) => (
@@ -1257,9 +1257,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🧳 Detalhes do Check-out">
+        <HotelStepSection title="🧳 Detalhes do Check-out">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkout_time" render={({ field }) => (
@@ -1303,9 +1303,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🛏️ Detalhes da Acomodação">
+        <HotelStepSection title="🛏️ Detalhes da Acomodação">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="guest_count" render={({ field }) => (
@@ -1343,9 +1343,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="📍 Localização e Contato">
+        <HotelStepSection title="📍 Localização e Contato">
 
         <FormField control={form.control} name="address" render={({ field }) => (
           <FormItem>
@@ -1382,9 +1382,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🍽️ Alimentação">
+        <HotelStepSection title="🍽️ Alimentação">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="breakfast_hours" render={({ field }) => (
@@ -1413,9 +1413,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="💰 O que está incluso">
+        <HotelStepSection title="💰 O que está incluso">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="breakfast_included" render={({ field }) => (
@@ -1495,9 +1495,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="🧾 Políticas do Hotel">
+        <HotelStepSection title="🧾 Políticas do Hotel">
 
         <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
           <FormItem>
@@ -1534,9 +1534,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Hóspedes">
+        <HotelStepSection title="👨‍👩‍👧 Hóspedes">
 
         {guests.map((g, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -1572,9 +1572,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
-        <CollapsibleFormSection title="📝 Observações">
+        <HotelStepSection title="📝 Observações">
 
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
@@ -1589,7 +1589,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </HotelStepSection>
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
 
