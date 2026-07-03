@@ -155,7 +155,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 });
 
 
-function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean }) {
+function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean; wizardMode?: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
@@ -165,6 +165,17 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   );
   const [newPax, setNewPax] = useState<FlightPassengerInput>(emptyPassenger());
   const [isEditingPax, setIsEditingPax] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const STEP_TITLES = [
+    "Informações Principais",
+    "Trechos de Voo",
+    "Passageiros",
+    "Bagagem",
+    "Check-in Online",
+    "Orientações de Embarque",
+    "Documentos",
+  ];
+  const totalSteps = STEP_TITLES.length;
 
   const form = useForm<z.infer<typeof flightSchema>>({
     resolver: zodResolver(flightSchema),
