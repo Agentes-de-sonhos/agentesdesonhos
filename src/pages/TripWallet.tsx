@@ -1161,6 +1161,7 @@ function TripWalletContent() {
                       imageSlot={
                         <div className="space-y-2">
                           {(() => {
+                            if (editPlaceId) return null;
                             const gallery = (editingService.image_urls && editingService.image_urls.length > 0)
                               ? editingService.image_urls
                               : (editingService.image_url ? [editingService.image_url] : []);
