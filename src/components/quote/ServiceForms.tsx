@@ -2487,6 +2487,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
               <GoogleHotelPhotos
                 placeId={placeId}
                 onPhotosSelected={handleGooglePhotosSelected}
+                onPhotoRemoved={handleGooglePhotoRemoved}
                 existingUrls={imageUrls}
                 autoShow
               />
@@ -2553,6 +2554,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
         <GoogleHotelPhotos
           placeId={placeId}
           onPhotosSelected={handleGooglePhotosSelected}
+                onPhotoRemoved={handleGooglePhotoRemoved}
           existingUrls={imageUrls}
           autoShow={placeKind === 'attraction'}
           {...(placeKind === 'attraction' ? { loadingLabel: 'Buscando fotos do local...', buttonLabel: undefined } : {})}
