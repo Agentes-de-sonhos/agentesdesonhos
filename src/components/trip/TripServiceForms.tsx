@@ -5272,9 +5272,9 @@ function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
     );
   }
 
-  // manual
+  // manual — cadastro assistido em etapas (mesmo padrão do módulo Orçamentos)
   const merged = importedDefaults
     ? { ...props, defaultValues: { ...(props.defaultValues || {}), ...importedDefaults } }
     : props;
-  return <FlightForm {...merged} hideInlineImport />;
+  return <FlightForm {...merged} hideInlineImport wizardMode />;
 }
