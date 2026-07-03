@@ -445,7 +445,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "flight-wizard")}
+      >
         {!hideInlineImport && !wizardMode && <FlightAutoImport onImport={handleFlightImport} />}
 
         {wizardMode && (
