@@ -49,6 +49,7 @@ const AssinaturasComerciais = lazy(() => import("./pages/AssinaturasComerciais")
 const ConfiguracoesCarteira = lazy(() => import("./pages/ConfiguracoesCarteira"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const Auth = lazy(() => import("./pages/Auth"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const Materiais = lazy(() => import("./pages/Materiais"));
 const MeusMateriais = lazy(() => import("./pages/MeusMateriais"));
 const BloqueiosAereos = lazy(() => import("./pages/BloqueiosAereos"));
@@ -157,6 +158,7 @@ const App = () => (
                 <Auth />
               )
             } />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route
               path="/"
               element={
