@@ -5272,9 +5272,10 @@ function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
     );
   }
 
-  // manual — cadastro assistido em etapas (mesmo padrão do módulo Orçamentos)
+  // manual — cadastro assistido em etapas (mesmo padrão do módulo Orçamentos).
+  // Ao editar um serviço já existente, mantém o formulário clássico (sem regressão).
   const merged = importedDefaults
     ? { ...props, defaultValues: { ...(props.defaultValues || {}), ...importedDefaults } }
     : props;
-  return <FlightForm {...merged} hideInlineImport wizardMode />;
+  return <FlightForm {...merged} hideInlineImport wizardMode={!isEditing} />;
 }
