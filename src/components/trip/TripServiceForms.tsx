@@ -891,7 +891,7 @@ interface HotelGuestInput {
 
 const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
-function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [guests, setGuests] = useState<HotelGuestInput[]>(
