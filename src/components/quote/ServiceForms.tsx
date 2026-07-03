@@ -2480,7 +2480,6 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
   if (hotelMode) {
     return (
       <div className="space-y-2">
-        {imageGrid}
         <div className="flex items-center gap-2">
           {placeId && (
             <div className="flex-1">
