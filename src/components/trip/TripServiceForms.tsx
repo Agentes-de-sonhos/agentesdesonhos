@@ -1034,10 +1034,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("space-y-5", wizardMode && "flight-wizard")}
-      >
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <CollapsibleFormSection title="🏨 Informações Principais">
         {imageSlot}
         {googlePhotoSlot}
