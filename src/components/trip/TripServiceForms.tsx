@@ -530,9 +530,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="🛫 Trechos de Voo">
+        <StepSection index={1} title="🛫 Trechos de Voo">
 
         {segments.map((seg, i) => (
           <CollapsibleFormSection key={i} title={`Trecho ${i + 1}${seg.origin_airport && seg.destination_airport ? ` — ${seg.origin_airport} → ${seg.destination_airport}` : ''}`} defaultOpen={i === 0}>
@@ -614,9 +614,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           <Plus className="h-4 w-4 mr-2" /> Adicionar Trecho de Voo
         </Button>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="👤 Passageiros">
+        <StepSection index={2} title="👤 Passageiros">
 
         {passengers.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -656,9 +656,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="🧳 Bagagem">
+        <StepSection index={3} title="🧳 Bagagem">
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="carry_on" render={({ field }) => (
@@ -687,9 +687,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="✅ Check-in Online">
+        <StepSection index={4} title="✅ Check-in Online">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="checkin_url" render={({ field }) => (
@@ -726,9 +726,9 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <CollapsibleFormSection title="⚠️ Orientações de Embarque">
+        <StepSection index={5} title="⚠️ Orientações de Embarque">
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="recommended_arrival" render={({ field }) => (
@@ -763,16 +763,53 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </StepSection>
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="E-ticket / Cartão de Embarque" />
+        <StepSection index={6} title="📎 Documentos">
+          <MultiFileUpload files={files} setFiles={setFiles} label="E-ticket / Cartão de Embarque" />
+        </StepSection>
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstStep ? (
+                <Button type="button" variant="outline" size="sm" onClick={goBack}>
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+                  <ArrowLeft className="h-4 w-4 mr-1" /> Cancelar
+                </Button>
+              )}
+              {!isLastStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastStep ? (
+                <Button type="button" size="sm" onClick={goNext} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveNow} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar passagem aérea
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
