@@ -207,8 +207,18 @@ img {
   }
 }
 
-/* Wizard – Passagem Aérea (Carteira Digital)
-   Neutral inputs with the category color reserved for the focus state. */
+/* Wizard – Cadastro assistido por etapas (Carteira Digital)
+   Neutral inputs with the category color reserved for the focus state.
+   The category color is provided via the --wizard-accent CSS variable
+   (rgb triple, e.g. "14 165 233" for sky-500, "245 158 11" for amber-500). */
+.service-wizard,
+.flight-wizard {
+  --wizard-accent: 14 165 233; /* default sky-500 (flight) */
+}
+.service-wizard input:not([type="checkbox"]):not([type="radio"]),
+.service-wizard textarea,
+.service-wizard select,
+.service-wizard [role="combobox"],
 .flight-wizard input:not([type="checkbox"]):not([type="radio"]),
 .flight-wizard textarea,
 .flight-wizard select,
@@ -216,6 +226,14 @@ img {
   background-color: #ffffff;
   border-color: rgb(226 232 240); /* slate-200 */
 }
+.service-wizard input:not([type="checkbox"]):not([type="radio"]):focus,
+.service-wizard input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+.service-wizard textarea:focus,
+.service-wizard textarea:focus-visible,
+.service-wizard select:focus,
+.service-wizard select:focus-visible,
+.service-wizard [role="combobox"]:focus,
+.service-wizard [role="combobox"]:focus-visible,
 .flight-wizard input:not([type="checkbox"]):not([type="radio"]):focus,
 .flight-wizard input:not([type="checkbox"]):not([type="radio"]):focus-visible,
 .flight-wizard textarea:focus,
@@ -224,8 +242,8 @@ img {
 .flight-wizard select:focus-visible,
 .flight-wizard [role="combobox"]:focus,
 .flight-wizard [role="combobox"]:focus-visible {
-  border-color: rgb(14 165 233); /* sky-500 */
-  box-shadow: 0 0 0 1px rgb(14 165 233);
+  border-color: rgb(var(--wizard-accent));
+  box-shadow: 0 0 0 1px rgb(var(--wizard-accent));
   outline: none;
 }
 
