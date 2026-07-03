@@ -1055,7 +1055,10 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const totalHotelSteps = hotelStepTitles.length;
   const [hotelStepIndex, setHotelStepIndex] = useState(0);
 
-  const HotelStepSection = ({ title, defaultOpen, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
+  // Render as a plain function (not a component) to avoid remounting inputs
+  // — a nested component identity would change every render and cause the
+  // Google Places autocomplete input to lose focus while typing.
+  const renderHotelStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
     if (!wizardMode) {
       return (
         <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
@@ -1110,7 +1113,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </div>
         )}
 
-        <HotelStepSection title="🏨 Informações Principais">
+        {renderHotelStep("🏨 Informações Principais", <>
         {imageSlot}
         {googlePhotoSlot}
 
@@ -1287,9 +1290,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="📅 Detalhes do Check-in">
+        {renderHotelStep("📅 Detalhes do Check-in", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_time" render={({ field }) => (
@@ -1332,9 +1335,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="🧳 Detalhes do Check-out">
+        {renderHotelStep("🧳 Detalhes do Check-out", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkout_time" render={({ field }) => (
@@ -1378,9 +1381,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="🛏️ Detalhes da Acomodação">
+        {renderHotelStep("🛏️ Detalhes da Acomodação", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="guest_count" render={({ field }) => (
@@ -1418,9 +1421,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="📍 Localização e Contato">
+        {renderHotelStep("📍 Localização e Contato", <>
 
         <FormField control={form.control} name="address" render={({ field }) => (
           <FormItem>
@@ -1457,9 +1460,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="🍽️ Alimentação">
+        {renderHotelStep("🍽️ Alimentação", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="breakfast_hours" render={({ field }) => (
@@ -1488,9 +1491,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="💰 O que está incluso">
+        {renderHotelStep("💰 O que está incluso", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="breakfast_included" render={({ field }) => (
@@ -1570,9 +1573,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="🧾 Políticas do Hotel">
+        {renderHotelStep("🧾 Políticas do Hotel", <>
 
         <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
           <FormItem>
@@ -1609,9 +1612,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="👨‍👩‍👧 Hóspedes">
+        {renderHotelStep("👨‍👩‍👧 Hóspedes", <>
 
         {guests.map((g, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -1647,9 +1650,9 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </HotelStepSection>
+        </>)}
 
-        <HotelStepSection title="📝 Observações">
+        {renderHotelStep("📝 Observações", <>
 
         <FormField control={form.control} name="agency_notes" render={({ field }) => (
           <FormItem>
@@ -1664,7 +1667,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </HotelStepSection>
+        </>)}
 
         {(!wizardMode || hotelStepIndex === totalHotelSteps - 1) && (
           <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
