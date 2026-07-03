@@ -30,7 +30,7 @@ import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
-import { Sparkles, FileText as FileTextIcon } from "lucide-react";
+import { FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
 import { ImportQuoteAsNewWalletDialog } from "@/components/trip/ImportQuoteAsNewWalletDialog";
 import { ClientSelector } from "@/components/shared/ClientSelector";
@@ -78,12 +78,10 @@ function TripServiceCategoryGrid({
   services,
   onSelect,
   onImportQuote,
-  onAIImport,
 }: {
   services: TripService[];
   onSelect: (type: TripServiceType) => void;
   onImportQuote: () => void;
-  onAIImport: () => void;
 }) {
   const countByType = services.reduce<Record<string, number>>((acc, s) => {
     acc[s.service_type] = (acc[s.service_type] || 0) + 1;
@@ -91,19 +89,6 @@ function TripServiceCategoryGrid({
   }, {});
   return (
     <div className="grid gap-3 w-full" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))" }}>
-      <button
-        type="button"
-        onClick={onAIImport}
-        aria-label="Importar com IA"
-        className={cn(
-          "relative flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
-          "bg-gradient-to-br from-primary/15 to-primary/5 text-primary",
-          "border-primary/20 hover:scale-[1.02] hover:shadow-md hover:border-primary/40",
-        )}
-      >
-        <Sparkles className="h-6 w-6 text-primary" />
-        <span className="text-center leading-tight px-1">Importar com IA</span>
-      </button>
       {TRIP_CATEGORIES.map((cat) => {
         const Icon = cat.icon;
         const count = countByType[cat.type] || 0;
@@ -1040,7 +1025,6 @@ function TripWalletContent() {
               services={trip.services || []}
               onSelect={(type) => setSelectedServiceType(type)}
               onImportQuote={() => setShowImportQuote(true)}
-              onAIImport={() => setShowAIImport(true)}
             />
           </CardContent>
         </Card>
