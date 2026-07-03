@@ -207,6 +207,28 @@ img {
   }
 }
 
+/* Wizard – Passagem Aérea (Carteira Digital)
+   Neutral inputs with the category color reserved for the focus state. */
+.flight-wizard input:not([type="checkbox"]):not([type="radio"]),
+.flight-wizard textarea,
+.flight-wizard select,
+.flight-wizard [role="combobox"] {
+  background-color: #ffffff;
+  border-color: rgb(226 232 240); /* slate-200 */
+}
+.flight-wizard input:not([type="checkbox"]):not([type="radio"]):focus,
+.flight-wizard input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+.flight-wizard textarea:focus,
+.flight-wizard textarea:focus-visible,
+.flight-wizard select:focus,
+.flight-wizard select:focus-visible,
+.flight-wizard [role="combobox"]:focus,
+.flight-wizard [role="combobox"]:focus-visible {
+  border-color: rgb(14 165 233); /* sky-500 */
+  box-shadow: 0 0 0 1px rgb(14 165 233);
+  outline: none;
+}
+
 /* Tiptap editor styles */
 /* Shared rich-text styles for BOTH editor and read-only view */
 .tiptap,
