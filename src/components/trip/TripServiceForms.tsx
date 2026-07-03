@@ -408,9 +408,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     }
   };
 
+  const stepTitles = [
+    "Informações Principais",
+    "Trechos de Voo",
+    "Passageiros",
+    "Bagagem",
+    "Check-in Online",
+    "Orientações de Embarque",
+    "Documentos",
+  ];
+
   /* StepSection: in classic mode renders a <CollapsibleFormSection>;
      in wizard mode renders only when it matches the current step, using a
-     plain shell (no accordion), preserving all inner form fields untouched. */
+     clean white card with subtle border (title lives in the wizard header). */
   const StepSection = ({ index, title, defaultOpen, children }: { index: number; title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
     if (!wizardMode) {
       return (
@@ -421,11 +431,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     }
     if (stepIndex !== index) return null;
     return (
-      <div className="rounded-xl border border-sky-200 bg-sky-50/40 px-4 py-4 sm:px-5 sm:py-5 space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <h4 className="text-sm font-semibold uppercase tracking-wide text-sky-700">{title}</h4>
-          <span className="text-[11px] text-sky-700/70 tabular-nums">Passo {index + 1} de {totalSteps}</span>
-        </div>
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
         <div className="space-y-4">{children}</div>
       </div>
     );
@@ -443,17 +449,21 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         {!hideInlineImport && !wizardMode && <FlightAutoImport onImport={handleFlightImport} />}
 
         {wizardMode && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs text-sky-700 min-w-0">
-                <Plane className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">Modo Assistido — Passagem Aérea</span>
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-50 text-sky-600 shrink-0">
+                  <Plane className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {stepTitles[stepIndex]}
+                </h3>
               </div>
-              <span className="text-xs font-medium text-muted-foreground tabular-nums shrink-0">
-                {stepIndex + 1}/{totalSteps}
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {stepIndex + 1} de {totalSteps}
               </span>
             </div>
-            <div className="h-1.5 w-full rounded-full bg-sky-100 overflow-hidden">
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
                 className="h-full bg-sky-500 transition-all duration-300"
                 style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
@@ -1021,7 +1031,10 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-5", wizardMode && "flight-wizard")}
+      >
         <CollapsibleFormSection title="🏨 Informações Principais">
         {imageSlot}
         {googlePhotoSlot}
