@@ -5135,44 +5135,15 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
 
 function FlightModeChooserTrip({ onChoose }: { onChoose: (mode: "import" | "manual") => void }) {
   return (
-    <div className="space-y-4">
-      <div className="text-center space-y-1">
-        <h3 className="text-lg font-semibold">Como você prefere preencher a passagem aérea?</h3>
-        <p className="text-sm text-muted-foreground">
-          Escolha o modo que for mais confortável agora. Você pode trocar a qualquer momento.
-        </p>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => onChoose("import")}
-          className="text-left rounded-lg border-2 border-primary/60 bg-primary/5 p-4 hover:bg-primary/10 transition-colors"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-primary">Importar com IA</span>
-          </div>
-          <p className="font-semibold mb-1">Enviar PDF, imagem ou texto</p>
-          <p className="text-sm text-muted-foreground">
-            A IA identifica as informações da passagem aérea e preenche os campos automaticamente.
-          </p>
-        </button>
-        <button
-          type="button"
-          onClick={() => onChoose("manual")}
-          className="group text-left rounded-lg border border-border p-4 hover:border-foreground/40 hover:bg-muted/30 transition-colors"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Plane className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-semibold text-muted-foreground">Preencher passo a passo</span>
-          </div>
-          <p className="font-semibold mb-1">Responder em etapas</p>
-          <p className="text-sm text-muted-foreground">
-            Responda passo a passo, pule o que ainda não souber e complete depois.
-          </p>
-        </button>
-      </div>
-    </div>
+    <ServiceModeChooser
+      serviceType="flight"
+      importDescription="A IA lê a passagem aérea (PDF, imagem ou texto), extrai voos, bagagens e tarifas para você revisar."
+      secondaryMode="manual"
+      secondaryLabel="Preencher passo a passo"
+      secondaryTitle="Cadastro assistido em etapas"
+      secondaryDescription="Responda em etapas simples, pule o que ainda não souber e complete depois."
+      onChoose={(m) => onChoose(m === "import" ? "import" : "manual")}
+    />
   );
 }
 
