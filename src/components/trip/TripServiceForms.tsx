@@ -5406,3 +5406,88 @@ function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
     : props;
   return <FlightForm {...merged} hideInlineImport wizardMode={!isEditing} />;
 }
+
+/* ───────── Hotel entry: chooser → AI import (modal) or step-by-step manual form ─────────
+   Mirrors the Orçamento (Quote) hotel entry pattern and the Flight (Carteira Digital)
+   assisted form. Editing existing services skips the chooser and opens the form
+   directly (no regression). */
+
+function HotelModeChooserTrip({ onChoose }: { onChoose: (mode: "import" | "manual") => void }) {
+  return (
+    <ServiceModeChooser
+      serviceType="hotel"
+      importDescription="A IA lê a reserva (PDF, imagem ou texto), extrai hotel, datas, regime, valores e taxas para você revisar."
+      secondaryMode="manual"
+      secondaryLabel="Preencher passo a passo"
+      secondaryTitle="Cadastro assistido em etapas"
+      secondaryDescription="Responda em etapas simples, pule o que ainda não souber e complete depois."
+      onChoose={(m) => onChoose(m === "import" ? "import" : "manual")}
+    />
+  );
+}
+
+/** Convert HotelSmartImport result → HotelForm `defaultValues` shape (Carteira Digital). */
+function mapHotelImportToDefaults(mapped: any, raw?: ParsedHotel) {
+  const defaults: Record<string, any> = {};
+  if (mapped?.hotel_name) defaults.hotel_name = mapped.hotel_name;
+  if (mapped?.city) {
+    // parsedHotelToHotelData joins "cidade, pais" — split back into city/country when possible.
+    const parts = String(mapped.city).split(",").map((s: string) => s.trim()).filter(Boolean);
+    defaults.city = parts[0] || mapped.city;
+    if (parts.length > 1) defaults.country = parts.slice(1).join(", ");
+  }
+  if (mapped?.check_in) defaults.check_in = mapped.check_in; // "YYYY-MM-DD"
+  if (mapped?.check_out) defaults.check_out = mapped.check_out;
+  if (mapped?.room_type) defaults.room_type = mapped.room_type;
+  if (mapped?.meal_plan) defaults.meal_plan = mapped.meal_plan;
+  if (mapped?.notes) defaults.notes = mapped.notes;
+  // Enrich with raw fields when available (kept optional to preserve existing behavior).
+  if (raw?.endereco) defaults.address = raw.endereco;
+  if (raw?.horario_check_in) defaults.checkin_time = raw.horario_check_in;
+  if (raw?.horario_check_out) defaults.checkout_time = raw.horario_check_out;
+  if (raw?.codigo_reserva) defaults.reservation_code = raw.codigo_reserva;
+  if (raw?.politica_cancelamento) defaults.cancellation_policy = raw.politica_cancelamento;
+  return defaults;
+}
+
+function HotelEntry(props: Omit<TripServiceFormProps, "serviceType">) {
+  const isEditing = !!props.defaultValues;
+  const [mode, setMode] = useState<"chooser" | "import" | "manual">(isEditing ? "manual" : "chooser");
+  const [importedDefaults, setImportedDefaults] = useState<any | null>(null);
+
+  if (mode === "chooser") {
+    return <HotelModeChooserTrip onChoose={(m) => setMode(m)} />;
+  }
+
+  if (mode === "import") {
+    return (
+      <>
+        <HotelModeChooserTrip onChoose={(m) => setMode(m)} />
+        <Dialog open onOpenChange={(open) => { if (!open) setMode("chooser"); }}>
+          <DialogContent className="max-w-3xl w-[95vw] max-h-[92vh] sm:max-h-[88vh] p-0 gap-0 flex flex-col overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b shrink-0">
+              <DialogTitle>Importar hospedagem com IA</DialogTitle>
+              <DialogDescription>
+                Envie um PDF, imagem ou cole o texto da reserva. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <HotelSmartImport
+                onCancel={() => setMode("chooser")}
+                onConfirm={(mapped, raw) => {
+                  setImportedDefaults(mapHotelImportToDefaults(mapped, raw));
+                  setMode("manual");
+                }}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  const merged = importedDefaults
+    ? { ...props, defaultValues: { ...(props.defaultValues || {}), ...importedDefaults } }
+    : props;
+  return <HotelForm {...merged} wizardMode={!isEditing} />;
+}
