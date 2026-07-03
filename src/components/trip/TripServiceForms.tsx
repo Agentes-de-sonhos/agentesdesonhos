@@ -408,12 +408,61 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     }
   };
 
+  /* StepSection: in classic mode renders a <CollapsibleFormSection>;
+     in wizard mode renders only when it matches the current step, using a
+     plain shell (no accordion), preserving all inner form fields untouched. */
+  const StepSection = ({ index, title, defaultOpen, children }: { index: number; title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    if (stepIndex !== index) return null;
+    return (
+      <div className="rounded-xl border border-sky-200 bg-sky-50/40 px-4 py-4 sm:px-5 sm:py-5 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-sky-700">{title}</h4>
+          <span className="text-[11px] text-sky-700/70 tabular-nums">Passo {index + 1} de {totalSteps}</span>
+        </div>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstStep = stepIndex === 0;
+  const isLastStep = stepIndex === totalSteps - 1;
+  const goBack = () => setStepIndex((s) => Math.max(0, s - 1));
+  const goNext = () => setStepIndex((s) => Math.min(totalSteps - 1, s + 1));
+  const saveNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {!hideInlineImport && <FlightAutoImport onImport={handleFlightImport} />}
+        {!hideInlineImport && !wizardMode && <FlightAutoImport onImport={handleFlightImport} />}
 
-        <CollapsibleFormSection title="✈️ Informações Principais">
+        {wizardMode && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-sky-700 min-w-0">
+                <Plane className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Modo Assistido — Passagem Aérea</span>
+              </div>
+              <span className="text-xs font-medium text-muted-foreground tabular-nums shrink-0">
+                {stepIndex + 1}/{totalSteps}
+              </span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-sky-100 overflow-hidden">
+              <div
+                className="h-full bg-sky-500 transition-all duration-300"
+                style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <StepSection index={0} title="✈️ Informações Principais" defaultOpen>
         {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
