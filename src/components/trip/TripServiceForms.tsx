@@ -1665,14 +1665,53 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
 
         </HotelStepSection>
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
+        {(!wizardMode || hotelStepIndex === totalHotelSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Hotel" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstHotelStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goHotelBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastHotelStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goHotelNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveHotelNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastHotelStep ? (
+                <Button type="button" size="sm" onClick={goHotelNext} className="bg-amber-500 hover:bg-amber-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveHotelNow} className="bg-amber-500 hover:bg-amber-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar hospedagem
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
