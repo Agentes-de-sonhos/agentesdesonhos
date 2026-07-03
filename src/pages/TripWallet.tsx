@@ -1126,6 +1126,7 @@ function TripWalletContent() {
                               headingLabel="Fotos do Google"
                               autoShow
                               onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
+                              onPhotoRemoved={(url) => setAddImageUrls(prev => prev.filter(u => u !== url))}
                             />
                           </div>
                         ) : null
@@ -1166,6 +1167,11 @@ function TripWalletContent() {
                             headingLabel="Fotos do Google"
                             autoShow
                             onPhotosSelected={(urls) => handleAddServiceImageUrls(editingService.id, urls)}
+                            onPhotoRemoved={async (url) => {
+                              const current = editingService.image_urls || [];
+                              const idx = current.indexOf(url);
+                              if (idx >= 0) await handleRemoveServiceImageAt(editingService.id, idx);
+                            }}
                           />
                         ) : null
                       }
