@@ -2518,7 +2518,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
     <div className="space-y-2">
       <p className="text-sm font-medium">Fotos do serviço <span className="text-muted-foreground font-normal">(opcional — máx. {MAX_IMAGES_PER_SERVICE})</span></p>
       <div className="flex flex-wrap gap-2">
-        {imageUrls.map((url, i) => (
+        {!placeId && imageUrls.map((url, i) => (
           <div key={i} className="relative inline-block">
             <img
               src={url}
