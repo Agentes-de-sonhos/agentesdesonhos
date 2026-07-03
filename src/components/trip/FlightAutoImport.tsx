@@ -338,12 +338,9 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
         </div>
 
         <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="upload" className="text-xs">
               <Upload className="h-3 w-3 mr-1" /> PDF / Imagem
-            </TabsTrigger>
-            <TabsTrigger value="search" className="text-xs">
-              <Search className="h-3 w-3 mr-1" /> Nº do Voo
             </TabsTrigger>
             <TabsTrigger value="paste" className="text-xs">
               <FileText className="h-3 w-3 mr-1" /> Colar Texto
@@ -372,41 +369,6 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
               {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
               Extrair com IA
             </Button>
-          </TabsContent>
-
-          <TabsContent value="search" className="space-y-3 mt-3">
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Nº do Voo *</label>
-                <Input
-                  className="mt-1"
-                  placeholder="LA3001"
-                  value={flightNumber}
-                  onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Data do Voo</label>
-                <Input
-                  className="mt-1"
-                  type="date"
-                  value={flightDate}
-                  onChange={(e) => setFlightDate(e.target.value)}
-                />
-              </div>
-              <div className="flex items-end">
-                <Button
-                  type="button"
-                  onClick={handleFlightLookup}
-                  disabled={isSearching}
-                  className="w-full"
-                  size="sm"
-                >
-                  {isSearching ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Search className="h-4 w-4 mr-1" />}
-                  Buscar Dados
-                </Button>
-              </div>
-            </div>
           </TabsContent>
 
           <TabsContent value="paste" className="space-y-3 mt-3">
