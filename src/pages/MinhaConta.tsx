@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -21,19 +22,44 @@ import {
   CreditCard,
   ExternalLink,
   Loader2,
+  Layers,
   Receipt,
   ShieldCheck,
   Users,
   XCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
+import {
+  getWorkspacePref,
+  setWorkspacePref,
+  isWorkspaceEligible,
+} from "@/workspace/featureFlag";
 
 export default function MinhaConta() {
   const { user } = useAuth();
   const { plan, getPlanLabel, subscription, refetch } = useSubscription();
+  const { role } = useUserRole();
   const [loadingPortal, setLoadingPortal] = useState<null | "manage" | "cancel">(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  // Default ON for eligible users; only "off" disables.
+  const [tabsEnabled, setTabsEnabled] = useState<boolean>(() => getWorkspacePref() !== "off");
+  useEffect(() => {
+    setTabsEnabled(getWorkspacePref() !== "off");
+  }, []);
+  const workspaceEligible = isWorkspaceEligible(role, plan);
+
+  const handleToggleTabs = (next: boolean) => {
+    setTabsEnabled(next);
+    setWorkspacePref(next ? "on" : "off");
+    toast.success(
+      next
+        ? "Workspace com Abas ativado. Recarregando…"
+        : "Workspace com Abas desativado. Recarregando…",
+    );
+    setTimeout(() => window.location.reload(), 400);
+  };
 
   const isPaid = plan === "profissional" || plan === "premium" || plan === "fundador";
 
@@ -132,6 +158,39 @@ export default function MinhaConta() {
             )}
           </CardContent>
         </Card>
+
+        {/* Preferências de Navegação */}
+        {workspaceEligible && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-primary" />
+                Preferências de Navegação
+              </CardTitle>
+              <CardDescription>
+                Personalize como você navega entre as telas do sistema.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between gap-4 rounded-lg border p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="workspace-tabs" className="text-sm font-medium">
+                    Workspace com Abas
+                  </Label>
+                  <p className="text-xs text-muted-foreground max-w-md">
+                    Permite abrir várias telas do sistema ao mesmo tempo em abas internas,
+                    preservando o estado de cada uma. Limite de 10 abas simultâneas.
+                  </p>
+                </div>
+                <Switch
+                  id="workspace-tabs"
+                  checked={tabsEnabled}
+                  onCheckedChange={handleToggleTabs}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Gerenciar assinatura */}
         {isPaid && (
