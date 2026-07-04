@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
@@ -143,8 +143,8 @@ const App = () => (
       <LaunchOverlay />
       <Toaster />
       <Sonner />
-      <BrowserRouter>
         <ErrorBoundary>
+        <WorkspaceGate>
         <AuthProvider>
           <TeamSessionProvider>
           <ImpersonationBanner />
@@ -152,7 +152,6 @@ const App = () => (
           <NewLeadAlertProvider>
           <Suspense fallback={<LoadingScreen />}>
           <TeamRouteGuard />
-          <WorkspaceGate>
           <Routes>
             <Route path="/auth" element={
               window.location.hostname.startsWith("ativar-cartao") ? (
@@ -291,7 +290,6 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </WorkspaceGate>
           </Suspense>
           <WhatsAppSupportButton />
           <WorkspaceToggle />
@@ -299,8 +297,8 @@ const App = () => (
           </SubscriptionProvider>
           </TeamSessionProvider>
         </AuthProvider>
+        </WorkspaceGate>
         </ErrorBoundary>
-      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
