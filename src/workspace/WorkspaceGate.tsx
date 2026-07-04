@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -34,7 +34,7 @@ export function WorkspaceGate({ children }: Props) {
   if (!flagOn) {
     return (
       <BrowserRouter>
-        <EligibilitySync mountedWithTabs={false} />
+        <EligibilitySync />
         {children}
       </BrowserRouter>
     );
@@ -54,7 +54,7 @@ function EligibleWorkspace({ children }: Props) {
   if (roleLoading || subLoading) {
     return (
       <BrowserRouter>
-        <EligibilitySync mountedWithTabs={true} />
+        <EligibilitySync />
         {children}
       </BrowserRouter>
     );
@@ -63,7 +63,7 @@ function EligibleWorkspace({ children }: Props) {
   if (!isWorkspaceEligible(role, plan)) {
     return (
       <BrowserRouter>
-        <EligibilitySync mountedWithTabs={true} />
+        <EligibilitySync />
         {children}
       </BrowserRouter>
     );
@@ -74,37 +74,26 @@ function EligibleWorkspace({ children }: Props) {
 
   return (
     <WorkspaceProvider initialPath={initialPath} initialTitle={initialTitle}>
-      <EligibilitySync mountedWithTabs={true} />
+      <EligibilitySync />
       <WorkspaceShell>{children}</WorkspaceShell>
     </WorkspaceProvider>
   );
 }
 
 /**
- * Keeps the eligibility cache in sync with the user's actual role/plan, and
- * reloads the page exactly once when the cached value disagrees with what's
- * currently mounted (e.g. first login as a Premium user → cache flips from
- * "0" to "1" → we reload so the tabbed router mounts).
+ * Keeps the eligibility cache in sync with the user's actual role/plan without
+ * swapping router surfaces during the current session. The chosen router is
+ * intentionally stable until the next page load or an explicit Minha Conta toggle.
  */
-function EligibilitySync({ mountedWithTabs }: { mountedWithTabs: boolean }) {
+function EligibilitySync() {
   const { role, loading: roleLoading } = useUserRole();
   const { plan, loading: subLoading } = useSubscription();
-  const reloadedRef = useRef(false);
-
   useEffect(() => {
     if (roleLoading || subLoading) return;
     const eligible = isWorkspaceEligible(role, plan);
     const prevCache = getWorkspaceEligibleCache();
     if (prevCache !== eligible) setWorkspaceEligibleCache(eligible);
-
-    // What the flag WOULD be right now, after the cache update.
-    const shouldMountTabs = getWorkspaceFlag();
-    if (shouldMountTabs !== mountedWithTabs && !reloadedRef.current) {
-      reloadedRef.current = true;
-      // Reload once so the correct router surface takes over.
-      setTimeout(() => window.location.reload(), 50);
-    }
-  }, [role, plan, roleLoading, subLoading, mountedWithTabs]);
+  }, [role, plan, roleLoading, subLoading]);
 
   return null;
 }
