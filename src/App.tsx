@@ -9,6 +9,7 @@ import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { TeamRouteGuard } from "@/components/team/TeamRouteGuard";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ProtectedShell } from "@/components/auth/ProtectedShell";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
