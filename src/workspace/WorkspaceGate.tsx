@@ -1,124 +1,85 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import {
-  getWorkspaceFlag,
-  getWorkspaceEligibleCache,
   setWorkspaceEligibleCache,
   isWorkspaceEligible,
   getWorkspacePref,
 } from "./featureFlag";
 import { WorkspaceProvider } from "./WorkspaceProvider";
 import { WorkspaceShell } from "./WorkspaceShell";
+import { LoadingScreen } from "@/components/auth/LoadingScreen";
 
 interface Props {
   children: ReactNode;
 }
 
 /**
- * Chooses the app's router surface based on the Workspace feature flag.
- *
- * - Workspace OFF (default, every non-admin user): renders a single BrowserRouter
- *   around `children`. Identical to the app's original behavior.
- * - Workspace ON (admin + localStorage flag): renders a WorkspaceProvider +
- *   WorkspaceShell that hosts one MemoryRouter per tab. No BrowserRouter is
- *   mounted, avoiding React Router's "Router inside Router" invariant.
- *
- * The flag is captured once at mount so mid-life auth transitions never swap
- * the router underneath a mounted tree. Toggling reloads the page.
+ * Chooses the app's router surface from the real authenticated role/plan, not
+ * from the stale localStorage eligibility cache. This keeps admin, Premium and
+ * Fundador on the exact same WorkspaceShell whenever the preference is enabled.
  */
 export function WorkspaceGate({ children }: Props) {
-  // Snapshot the flag once — never swap routers mid-life.
-  const [flagOn] = useState(() => getWorkspaceFlag());
-
-  if (!flagOn) {
-    return (
-      <BrowserRouter>
-        <EligibilitySync />
-        {children}
-      </BrowserRouter>
-    );
-  }
-  return <EligibleWorkspace>{children}</EligibleWorkspace>;
-}
-
-/**
- * Renders the tabbed workspace once we've confirmed eligibility (admin, or
- * premium/fundador plan). While role/plan load, or if the user turns out to
- * be ineligible, falls back to the standard BrowserRouter.
- */
-function EligibleWorkspace({ children }: Props) {
+  const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { plan, loading: subLoading } = useSubscription();
+  const decisionUserRef = useRef<string | null | undefined>(undefined);
+  const [decision, setDecision] = useState<{
+    workspace: boolean;
+    initialPath: string;
+    initialTitle: string;
+  } | null>(null);
 
-  if (roleLoading || subLoading) {
+  useEffect(() => {
+    const currentUserId = user?.id ?? null;
+    if (decisionUserRef.current !== currentUserId) {
+      decisionUserRef.current = currentUserId;
+      setDecision(null);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (decision || authLoading) return;
+
+    const initialPath = window.location.pathname + window.location.search;
+    const initialTitle = deriveInitialTitle(window.location.pathname);
+
+    if (!user) {
+      setWorkspaceEligibleCache(false);
+      setDecision({ workspace: false, initialPath, initialTitle });
+      return;
+    }
+
+    if (roleLoading || subLoading) return;
+
+    const eligible = isWorkspaceEligible(role, plan);
+    setWorkspaceEligibleCache(eligible);
+    setDecision({
+      workspace: eligible && getWorkspacePref() !== "off",
+      initialPath,
+      initialTitle,
+    });
+  }, [authLoading, decision, plan, role, roleLoading, subLoading, user]);
+
+  if (!decision) {
+    return <LoadingScreen />;
+  }
+
+  if (!decision.workspace) {
     return (
       <BrowserRouter>
-        <EligibilitySync />
         {children}
       </BrowserRouter>
     );
   }
-
-  if (!isWorkspaceEligible(role, plan)) {
-    return (
-      <BrowserRouter>
-        <EligibilitySync />
-        {children}
-      </BrowserRouter>
-    );
-  }
-
-  const initialPath = window.location.pathname + window.location.search;
-  const initialTitle = deriveInitialTitle(window.location.pathname);
 
   return (
-    <WorkspaceProvider initialPath={initialPath} initialTitle={initialTitle}>
-      <EligibilitySync />
+    <WorkspaceProvider initialPath={decision.initialPath} initialTitle={decision.initialTitle}>
       <WorkspaceShell>{children}</WorkspaceShell>
     </WorkspaceProvider>
   );
-}
-
-/**
- * Keeps the eligibility cache in sync with the user's actual role/plan without
- * swapping router surfaces during the current session. The chosen router is
- * intentionally stable until the next page load or an explicit Minha Conta toggle.
- */
-function EligibilitySync() {
-  const { role, loading: roleLoading } = useUserRole();
-  const { plan, loading: subLoading } = useSubscription();
-  useEffect(() => {
-    if (roleLoading || subLoading) return;
-    const eligible = isWorkspaceEligible(role, plan);
-    const prevCache = getWorkspaceEligibleCache();
-    if (prevCache !== eligible) setWorkspaceEligibleCache(eligible);
-
-    // If the user just became eligible mid-session (first login for a
-    // Premium/Fundador user, or a plan upgrade), the router surface was
-    // chosen synchronously at mount as the classic BrowserRouter. Reload
-    // ONCE so the tabbed Workspace mounts. A sessionStorage guard makes
-    // this strictly one-shot per tab session, preventing any loop.
-    if (
-      eligible &&
-      !prevCache &&
-      getWorkspacePref() !== "off" &&
-      typeof window !== "undefined"
-    ) {
-      try {
-        const KEY = "workspace_tabs_activation_reloaded";
-        if (window.sessionStorage.getItem(KEY) !== "1") {
-          window.sessionStorage.setItem(KEY, "1");
-          window.location.reload();
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-  }, [role, plan, roleLoading, subLoading]);
-
-  return null;
 }
 
 function deriveInitialTitle(pathname: string): string {
