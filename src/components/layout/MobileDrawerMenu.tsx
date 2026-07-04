@@ -394,7 +394,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border flex-shrink-0">
-          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} onClick={onClose} className="flex items-center gap-3">
+          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" onClick={onClose} className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
               <Cloud className="h-5 w-5 text-primary-foreground" />
             </div>

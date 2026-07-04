@@ -666,7 +666,7 @@ export function AppSidebar() {
         onMouseLeave={handleSidebarMouseLeave}
       >
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
-          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} className="flex items-center gap-3 min-w-0">
+          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" className="flex items-center gap-3 min-w-0">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl gradient-primary">
               <Cloud className="h-5 w-5 text-primary-foreground" />
             </div>
