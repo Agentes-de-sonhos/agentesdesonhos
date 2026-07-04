@@ -22,8 +22,8 @@ export function WorkspaceGate({ children }: Props) {
 
   // Bail out fast in all non-admin / off cases (99% of users, incl. anonymous).
   if (!flagOn) return <>{children}</>;
-  // TEMP DEBUG BYPASS loading
-  // TEMP DEBUG BYPASS
+  if (loading) return <>{children}</>;
+  if (!isAdmin) return <>{children}</>;
 
   const initialPath = window.location.pathname + window.location.search;
   const initialTitle = deriveInitialTitle(window.location.pathname);
