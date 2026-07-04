@@ -123,6 +123,164 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "get_platform_metrics",
+        "title": "Admin: métricas gerais da plataforma",
+        "description": "Resumo geral: total de usuários, premium/free/ativos/inativos e status das assinaturas premium. Somente admin.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_users_count_by_plan",
+        "title": "Admin: usuários por plano",
+        "description": "Retorna a contagem de usuários agrupados por plano e status (ativo/cancelado/vencido). Somente admin.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_premium_users",
+        "title": "Admin: listar usuários Premium",
+        "description": "Lista usuários com planos pagos, com paginação, filtros por status e busca por nome/e-mail/agência. Somente admin.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Máx. de linhas (padrão 25)."
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Deslocamento para paginação (padrão 0)."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "canceled",
+                "past_due"
+              ],
+              "description": "Filtrar por status de assinatura."
+            },
+            "search": {
+              "type": "string",
+              "description": "Busca por nome, e-mail ou nome da agência."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_subscription_metrics",
+        "title": "Admin: métricas de assinaturas",
+        "description": "Retorna totais de assinaturas (ativas/canceladas/vencidas) e MRR/ticket médio estimados. Somente admin.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_new_users_by_period",
+        "title": "Admin: novos usuários por período",
+        "description": "Retorna a quantidade de novos usuários cadastrados em um intervalo, agrupados por dia, semana ou mês. Somente admin.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "start_date": {
+              "type": "string",
+              "description": "Data inicial (YYYY-MM-DD)."
+            },
+            "end_date": {
+              "type": "string",
+              "description": "Data final inclusiva (YYYY-MM-DD)."
+            },
+            "group_by": {
+              "type": "string",
+              "enum": [
+                "day",
+                "week",
+                "month"
+              ],
+              "description": "Agrupamento (padrão: day)."
+            }
+          },
+          "required": [
+            "start_date",
+            "end_date"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_active_agencies",
+        "title": "Admin: agências ativas",
+        "description": "Lista agências/contas com assinatura ativa, com plano, dono, e última atividade. Somente admin.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Máx. de linhas (padrão 50)."
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Deslocamento (padrão 0)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }

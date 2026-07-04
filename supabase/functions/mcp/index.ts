@@ -148,18 +148,371 @@ var list_itineraries_default = defineTool4({
   }
 });
 
+// src/lib/mcp/tools/admin-platform-metrics.ts
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
+
+// src/lib/mcp/tools/_admin.ts
+import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.93.3";
+function callerClient(ctx) {
+  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+function adminClient() {
+  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+function toolError(text) {
+  return { content: [{ type: "text", text }], isError: true };
+}
+var AdminAccessError = class extends Error {
+};
+async function requireAdmin(ctx, toolName, params) {
+  if (!ctx.isAuthenticated()) throw new AdminAccessError("N\xE3o autenticado.");
+  const userId = ctx.getUserId();
+  if (!userId) throw new AdminAccessError("Sess\xE3o inv\xE1lida.");
+  const caller = callerClient(ctx);
+  const { data, error } = await caller.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+  if (error) throw new AdminAccessError(`Falha ao verificar permiss\xE3o: ${error.message}`);
+  if (!data) throw new AdminAccessError("Acesso negado. Esta ferramenta \xE9 restrita a administradores da plataforma.");
+  const admin = adminClient();
+  try {
+    await admin.from("admin_action_logs").insert({
+      admin_user_id: userId,
+      target_user_id: userId,
+      action: `mcp:${toolName}`,
+      details: { params: params ?? {}, at: (/* @__PURE__ */ new Date()).toISOString() }
+    });
+  } catch {
+  }
+  return { userId, admin };
+}
+function withAdmin(toolName, fn) {
+  return async (input, mcpCtx) => {
+    try {
+      const guard = await requireAdmin(mcpCtx, toolName, input);
+      return await fn(input, guard, mcpCtx);
+    } catch (e) {
+      const msg = e instanceof AdminAccessError ? e.message : e instanceof Error ? e.message : "Erro desconhecido.";
+      return toolError(msg);
+    }
+  };
+}
+var PREMIUM_PLANS = ["premium", "profissional", "fundador", "essencial", "cartao_digital"];
+var FREE_PLANS = ["start"];
+
+// src/lib/mcp/tools/admin-platform-metrics.ts
+var admin_platform_metrics_default = defineTool5({
+  name: "get_platform_metrics",
+  title: "Admin: m\xE9tricas gerais da plataforma",
+  description: "Resumo geral: total de usu\xE1rios, premium/free/ativos/inativos e status das assinaturas premium. Somente admin.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: withAdmin("get_platform_metrics", async (_input, { admin }) => {
+    const [{ count: total_users }, subsRes, activeRes] = await Promise.all([
+      admin.from("profiles").select("id", { count: "exact", head: true }),
+      admin.from("subscriptions").select("plan, is_active, expires_at"),
+      admin.from("user_presence").select("user_id", { count: "exact", head: true }).gte("last_active_at", new Date(Date.now() - 30 * 24 * 3600 * 1e3).toISOString())
+    ]);
+    if (subsRes.error) return toolError(subsRes.error.message);
+    const subs = subsRes.data ?? [];
+    const now = Date.now();
+    const isPremium = (p) => PREMIUM_PLANS.includes(p);
+    const isFree = (p) => FREE_PLANS.includes(p);
+    const premium_users = subs.filter((s) => isPremium(s.plan)).length;
+    const free_users = subs.filter((s) => isFree(s.plan)).length;
+    const active_premium_users = subs.filter((s) => isPremium(s.plan) && s.is_active && (!s.expires_at || new Date(s.expires_at).getTime() > now)).length;
+    const canceled_premium_users = subs.filter((s) => isPremium(s.plan) && !s.is_active).length;
+    const past_due_premium_users = subs.filter((s) => isPremium(s.plan) && s.is_active && s.expires_at && new Date(s.expires_at).getTime() <= now).length;
+    const metrics = {
+      total_users: total_users ?? 0,
+      premium_users,
+      free_users,
+      trial_users: 0,
+      active_users: activeRes.count ?? 0,
+      inactive_users: Math.max(0, (total_users ?? 0) - (activeRes.count ?? 0)),
+      active_premium_users,
+      canceled_premium_users,
+      past_due_premium_users
+    };
+    return {
+      content: [{ type: "text", text: JSON.stringify(metrics, null, 2) }],
+      structuredContent: metrics
+    };
+  })
+});
+
+// src/lib/mcp/tools/admin-users-count-by-plan.ts
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.20.0";
+var admin_users_count_by_plan_default = defineTool6({
+  name: "get_users_count_by_plan",
+  title: "Admin: usu\xE1rios por plano",
+  description: "Retorna a contagem de usu\xE1rios agrupados por plano e status (ativo/cancelado/vencido). Somente admin.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: withAdmin("get_users_count_by_plan", async (_input, { admin }) => {
+    const { data, error } = await admin.from("subscriptions").select("plan, is_active, expires_at");
+    if (error) return toolError(error.message);
+    const now = Date.now();
+    const byPlan = {};
+    for (const s of data ?? []) {
+      const p = s.plan;
+      const bucket = byPlan[p] ?? (byPlan[p] = { active: 0, canceled: 0, past_due: 0, total: 0 });
+      bucket.total++;
+      if (!s.is_active) bucket.canceled++;
+      else if (s.expires_at && new Date(s.expires_at).getTime() <= now) bucket.past_due++;
+      else bucket.active++;
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(byPlan, null, 2) }],
+      structuredContent: { by_plan: byPlan }
+    };
+  })
+});
+
+// src/lib/mcp/tools/admin-list-premium-users.ts
+import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z5 } from "npm:zod@^3.23.8";
+var admin_list_premium_users_default = defineTool7({
+  name: "list_premium_users",
+  title: "Admin: listar usu\xE1rios Premium",
+  description: "Lista usu\xE1rios com planos pagos, com pagina\xE7\xE3o, filtros por status e busca por nome/e-mail/ag\xEAncia. Somente admin.",
+  inputSchema: {
+    limit: z5.number().int().min(1).max(200).optional().describe("M\xE1x. de linhas (padr\xE3o 25)."),
+    offset: z5.number().int().min(0).optional().describe("Deslocamento para pagina\xE7\xE3o (padr\xE3o 0)."),
+    status: z5.enum(["active", "canceled", "past_due"]).optional().describe("Filtrar por status de assinatura."),
+    search: z5.string().optional().describe("Busca por nome, e-mail ou nome da ag\xEAncia.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: withAdmin("list_premium_users", async ({ limit, offset, status, search }, { admin }) => {
+    const lim = limit ?? 25;
+    const off = offset ?? 0;
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    let q = admin.from("subscriptions").select("user_id, plan, is_active, started_at, expires_at, stripe_subscription_id").in("plan", PREMIUM_PLANS).order("started_at", { ascending: false });
+    if (status === "active") q = q.eq("is_active", true).or(`expires_at.is.null,expires_at.gt.${now}`);
+    else if (status === "canceled") q = q.eq("is_active", false);
+    else if (status === "past_due") q = q.eq("is_active", true).lte("expires_at", now);
+    const { data: subs, error } = await q.range(off, off + lim - 1);
+    if (error) return toolError(error.message);
+    const userIds = (subs ?? []).map((s) => s.user_id);
+    if (userIds.length === 0) {
+      return { content: [{ type: "text", text: "[]" }], structuredContent: { users: [], count: 0 } };
+    }
+    let profQ = admin.from("profiles").select("user_id, name, agency_name").in("user_id", userIds);
+    if (search && search.trim()) {
+      const s = search.trim().replace(/[%,]/g, "");
+      profQ = profQ.or(`name.ilike.%${s}%,agency_name.ilike.%${s}%`);
+    }
+    const { data: profiles, error: pErr } = await profQ;
+    if (pErr) return toolError(pErr.message);
+    const profMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+    const emailMap = /* @__PURE__ */ new Map();
+    await Promise.all(
+      userIds.map(async (id) => {
+        const { data } = await admin.auth.admin.getUserById(id);
+        emailMap.set(id, data?.user?.email ?? null);
+      })
+    );
+    const { data: presence } = await admin.from("user_presence").select("user_id, last_active_at").in("user_id", userIds);
+    const presenceMap = new Map((presence ?? []).map((p) => [p.user_id, p.last_active_at]));
+    const users = (subs ?? []).filter((s) => !search || profMap.has(s.user_id) || emailMap.get(s.user_id)?.toLowerCase().includes(search.toLowerCase())).map((s) => {
+      const prof = profMap.get(s.user_id);
+      const derivedStatus = !s.is_active ? "canceled" : s.expires_at && new Date(s.expires_at).getTime() <= Date.now() ? "past_due" : "active";
+      return {
+        user_id: s.user_id,
+        name: prof?.name ?? null,
+        email: emailMap.get(s.user_id) ?? null,
+        agency_name: prof?.agency_name ?? null,
+        plan: s.plan,
+        subscription_status: derivedStatus,
+        subscription_started_at: s.started_at,
+        subscription_expires_at: s.expires_at,
+        last_active_at: presenceMap.get(s.user_id) ?? null
+      };
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(users, null, 2) }],
+      structuredContent: { users, count: users.length, limit: lim, offset: off }
+    };
+  })
+});
+
+// src/lib/mcp/tools/admin-subscription-metrics.ts
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.20.0";
+var PLAN_PRICE_BRL = {
+  essencial: 0,
+  profissional: 97,
+  premium: 197,
+  educa_pass: 47,
+  cartao_digital: 29,
+  fundador: 47,
+  fornecedor_parceiro: 0,
+  start: 0
+};
+var admin_subscription_metrics_default = defineTool8({
+  name: "get_subscription_metrics",
+  title: "Admin: m\xE9tricas de assinaturas",
+  description: "Retorna totais de assinaturas (ativas/canceladas/vencidas) e MRR/ticket m\xE9dio estimados. Somente admin.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: withAdmin("get_subscription_metrics", async (_input, { admin }) => {
+    const { data, error } = await admin.from("subscriptions").select("plan, is_active, expires_at");
+    if (error) return toolError(error.message);
+    const now = Date.now();
+    const subs = data ?? [];
+    let active = 0, canceled = 0, past_due = 0, mrr = 0, paying = 0;
+    for (const s of subs) {
+      if (!s.is_active) canceled++;
+      else if (s.expires_at && new Date(s.expires_at).getTime() <= now) past_due++;
+      else {
+        active++;
+        const price = PLAN_PRICE_BRL[s.plan] ?? 0;
+        if (price > 0) {
+          mrr += price;
+          paying++;
+        }
+      }
+    }
+    const metrics = {
+      total_subscriptions: subs.length,
+      active_subscriptions: active,
+      canceled_subscriptions: canceled,
+      past_due_subscriptions: past_due,
+      trialing_subscriptions: 0,
+      monthly_recurring_revenue_brl: mrr,
+      average_ticket_brl: paying > 0 ? Math.round(mrr / paying * 100) / 100 : 0,
+      note: "MRR e ticket m\xE9dio s\xE3o estimados a partir de uma tabela de pre\xE7os interna por plano."
+    };
+    return {
+      content: [{ type: "text", text: JSON.stringify(metrics, null, 2) }],
+      structuredContent: metrics
+    };
+  })
+});
+
+// src/lib/mcp/tools/admin-new-users-by-period.ts
+import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z6 } from "npm:zod@^3.23.8";
+function bucketKey(d, group) {
+  if (group === "day") return d.toISOString().slice(0, 10);
+  if (group === "month") return d.toISOString().slice(0, 7);
+  const tmp = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  const day = tmp.getUTCDay() || 7;
+  tmp.setUTCDate(tmp.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((tmp.getTime() - yearStart.getTime()) / 864e5 + 1) / 7);
+  return `${tmp.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+var admin_new_users_by_period_default = defineTool9({
+  name: "get_new_users_by_period",
+  title: "Admin: novos usu\xE1rios por per\xEDodo",
+  description: "Retorna a quantidade de novos usu\xE1rios cadastrados em um intervalo, agrupados por dia, semana ou m\xEAs. Somente admin.",
+  inputSchema: {
+    start_date: z6.string().describe("Data inicial (YYYY-MM-DD)."),
+    end_date: z6.string().describe("Data final inclusiva (YYYY-MM-DD)."),
+    group_by: z6.enum(["day", "week", "month"]).optional().describe("Agrupamento (padr\xE3o: day).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: withAdmin("get_new_users_by_period", async ({ start_date, end_date, group_by }, { admin }) => {
+    const group = group_by ?? "day";
+    const startISO = (/* @__PURE__ */ new Date(`${start_date}T00:00:00Z`)).toISOString();
+    const endISO = (/* @__PURE__ */ new Date(`${end_date}T23:59:59Z`)).toISOString();
+    const { data, error, count } = await admin.from("profiles").select("created_at", { count: "exact" }).gte("created_at", startISO).lte("created_at", endISO);
+    if (error) return toolError(error.message);
+    const buckets = {};
+    for (const row of data ?? []) {
+      const k = bucketKey(new Date(row.created_at), group);
+      buckets[k] = (buckets[k] ?? 0) + 1;
+    }
+    const series = Object.entries(buckets).sort(([a], [b]) => a < b ? -1 : 1).map(([period, new_users]) => ({ period, new_users }));
+    const out = { start_date, end_date, group_by: group, total_new_users: count ?? series.reduce((a, b) => a + b.new_users, 0), series };
+    return {
+      content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
+      structuredContent: out
+    };
+  })
+});
+
+// src/lib/mcp/tools/admin-active-agencies.ts
+import { defineTool as defineTool10 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z7 } from "npm:zod@^3.23.8";
+var admin_active_agencies_default = defineTool10({
+  name: "get_active_agencies",
+  title: "Admin: ag\xEAncias ativas",
+  description: "Lista ag\xEAncias/contas com assinatura ativa, com plano, dono, e \xFAltima atividade. Somente admin.",
+  inputSchema: {
+    limit: z7.number().int().min(1).max(200).optional().describe("M\xE1x. de linhas (padr\xE3o 50)."),
+    offset: z7.number().int().min(0).optional().describe("Deslocamento (padr\xE3o 0).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: withAdmin("get_active_agencies", async ({ limit, offset }, { admin }) => {
+    const lim = limit ?? 50;
+    const off = offset ?? 0;
+    const nowISO = (/* @__PURE__ */ new Date()).toISOString();
+    const { data: subs, error } = await admin.from("subscriptions").select("user_id, plan, is_active, started_at, expires_at").eq("is_active", true).or(`expires_at.is.null,expires_at.gt.${nowISO}`).order("started_at", { ascending: false }).range(off, off + lim - 1);
+    if (error) return toolError(error.message);
+    const userIds = (subs ?? []).map((s) => s.user_id);
+    if (userIds.length === 0) {
+      return { content: [{ type: "text", text: "[]" }], structuredContent: { agencies: [], count: 0 } };
+    }
+    const [{ data: profiles }, { data: presence }] = await Promise.all([
+      admin.from("profiles").select("user_id, name, agency_name, created_at").in("user_id", userIds),
+      admin.from("user_presence").select("user_id, last_active_at").in("user_id", userIds)
+    ]);
+    const profMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+    const presenceMap = new Map((presence ?? []).map((p) => [p.user_id, p.last_active_at]));
+    const emailMap = /* @__PURE__ */ new Map();
+    await Promise.all(
+      userIds.map(async (id) => {
+        const { data } = await admin.auth.admin.getUserById(id);
+        emailMap.set(id, data?.user?.email ?? null);
+      })
+    );
+    const agencies = (subs ?? []).map((s) => {
+      const p = profMap.get(s.user_id);
+      return {
+        agency_id: s.user_id,
+        agency_name: p?.agency_name ?? null,
+        owner_name: p?.name ?? null,
+        owner_email: emailMap.get(s.user_id) ?? null,
+        plan: s.plan,
+        status: "active",
+        created_at: p?.created_at ?? s.started_at,
+        last_activity_at: presenceMap.get(s.user_id) ?? null
+      };
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(agencies, null, 2) }],
+      structuredContent: { agencies, count: agencies.length, limit: lim, offset: off }
+    };
+  })
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "mlwwpckahhfsixplxwif";
 var mcp_default = defineMcp({
   name: "agentes-de-sonhos-mcp",
   title: "Agentes de Sonhos",
   version: "0.1.0",
-  instructions: "Ferramentas do agente de viagens Agentes de Sonhos. Use list_clients para consultar clientes do CRM, list_quotes para or\xE7amentos, list_trips para viagens/carteiras digitais e list_itineraries para roteiros. Todas as ferramentas retornam apenas dados do usu\xE1rio autenticado.",
+  instructions: "Ferramentas do agente de viagens Agentes de Sonhos. Use list_clients, list_quotes, list_trips e list_itineraries para dados do pr\xF3prio usu\xE1rio. Ferramentas administrativas (prefixo get_/list_ com sufixo platform/premium/subscription/agencies) s\xE3o restritas a administradores e retornam m\xE9tricas gerais da plataforma.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [list_clients_default, list_quotes_default, list_trips_default, list_itineraries_default]
+  tools: [
+    list_clients_default,
+    list_quotes_default,
+    list_trips_default,
+    list_itineraries_default,
+    admin_platform_metrics_default,
+    admin_users_count_by_plan_default,
+    admin_list_premium_users_default,
+    admin_subscription_metrics_default,
+    admin_new_users_by_period_default,
+    admin_active_agencies_default
+  ]
 });
 
 // lovable-mcp-supabase-entry.ts
