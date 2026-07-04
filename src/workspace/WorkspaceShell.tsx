@@ -70,6 +70,7 @@ export function WorkspaceShell({ children }: Props) {
       }
 
       const label =
+        anchor.getAttribute("data-workspace-title") ||
         anchor.getAttribute("aria-label") ||
         anchor.textContent?.trim() ||
         href.split("/").filter(Boolean).pop() ||
