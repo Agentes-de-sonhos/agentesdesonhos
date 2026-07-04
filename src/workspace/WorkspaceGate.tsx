@@ -1,7 +1,13 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
-import { getWorkspaceFlag } from "./featureFlag";
+import { useSubscription } from "@/hooks/useSubscription";
+import {
+  getWorkspaceFlag,
+  getWorkspaceEligibleCache,
+  setWorkspaceEligibleCache,
+  isWorkspaceEligible,
+} from "./featureFlag";
 import { WorkspaceProvider } from "./WorkspaceProvider";
 import { WorkspaceShell } from "./WorkspaceShell";
 
@@ -26,21 +32,41 @@ export function WorkspaceGate({ children }: Props) {
   const [flagOn] = useState(() => getWorkspaceFlag());
 
   if (!flagOn) {
-    return <BrowserRouter>{children}</BrowserRouter>;
+    return (
+      <BrowserRouter>
+        <EligibilitySync mountedWithTabs={false} />
+        {children}
+      </BrowserRouter>
+    );
   }
-  return <AdminWorkspace>{children}</AdminWorkspace>;
+  return <EligibleWorkspace>{children}</EligibleWorkspace>;
 }
 
 /**
- * Only renders the tabbed workspace once we know the user is actually an admin.
- * While the role is loading, or if the role check fails, falls back to the
- * standard BrowserRouter so the app is never left without a router.
+ * Renders the tabbed workspace once we've confirmed eligibility (admin, or
+ * premium/fundador plan). While role/plan load, or if the user turns out to
+ * be ineligible, falls back to the standard BrowserRouter.
  */
-function AdminWorkspace({ children }: Props) {
-  const { isAdmin, loading } = useUserRole();
+function EligibleWorkspace({ children }: Props) {
+  const { role, loading: roleLoading } = useUserRole();
+  const { plan, loading: subLoading } = useSubscription();
 
-  if (loading || !isAdmin) {
-    return <BrowserRouter>{children}</BrowserRouter>;
+  if (roleLoading || subLoading) {
+    return (
+      <BrowserRouter>
+        <EligibilitySync mountedWithTabs={true} />
+        {children}
+      </BrowserRouter>
+    );
+  }
+
+  if (!isWorkspaceEligible(role, plan)) {
+    return (
+      <BrowserRouter>
+        <EligibilitySync mountedWithTabs={true} />
+        {children}
+      </BrowserRouter>
+    );
   }
 
   const initialPath = window.location.pathname + window.location.search;
@@ -48,9 +74,39 @@ function AdminWorkspace({ children }: Props) {
 
   return (
     <WorkspaceProvider initialPath={initialPath} initialTitle={initialTitle}>
+      <EligibilitySync mountedWithTabs={true} />
       <WorkspaceShell>{children}</WorkspaceShell>
     </WorkspaceProvider>
   );
+}
+
+/**
+ * Keeps the eligibility cache in sync with the user's actual role/plan, and
+ * reloads the page exactly once when the cached value disagrees with what's
+ * currently mounted (e.g. first login as a Premium user → cache flips from
+ * "0" to "1" → we reload so the tabbed router mounts).
+ */
+function EligibilitySync({ mountedWithTabs }: { mountedWithTabs: boolean }) {
+  const { role, loading: roleLoading } = useUserRole();
+  const { plan, loading: subLoading } = useSubscription();
+  const reloadedRef = useRef(false);
+
+  useEffect(() => {
+    if (roleLoading || subLoading) return;
+    const eligible = isWorkspaceEligible(role, plan);
+    const prevCache = getWorkspaceEligibleCache();
+    if (prevCache !== eligible) setWorkspaceEligibleCache(eligible);
+
+    // What the flag WOULD be right now, after the cache update.
+    const shouldMountTabs = getWorkspaceFlag();
+    if (shouldMountTabs !== mountedWithTabs && !reloadedRef.current) {
+      reloadedRef.current = true;
+      // Reload once so the correct router surface takes over.
+      setTimeout(() => window.location.reload(), 50);
+    }
+  }, [role, plan, roleLoading, subLoading, mountedWithTabs]);
+
+  return null;
 }
 
 function deriveInitialTitle(pathname: string): string {
