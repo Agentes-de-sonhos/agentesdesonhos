@@ -15,6 +15,9 @@ import { parseDestinationParts } from "@/lib/destination-parts";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ServiceFormHeader } from "@/components/quote/ServiceModeChooser";
+import type { ServiceType as QuoteServiceType } from "@/types/quote";
+const toQuoteServiceType = (t: string): QuoteServiceType =>
+  (t === "train" ? "rail_transport" : t) as QuoteServiceType;
 import { TripItineraryV2 } from "@/components/wallet/TripItineraryV2";
 import { LegacyItinerarySection } from "@/components/wallet/LegacyItinerarySection";
 import { TripForm } from "@/components/trip/TripForm";
@@ -1077,7 +1080,7 @@ function TripWalletContent() {
                 </DialogTitle>
               </DialogHeader>
               {selectedServiceType && !editingService && (
-                <ServiceFormHeader serviceType={selectedServiceType} />
+                <ServiceFormHeader serviceType={toQuoteServiceType(selectedServiceType)} />
               )}
               {selectedServiceType && !editingService && (
                 <div className="space-y-4">
@@ -1119,7 +1122,7 @@ function TripWalletContent() {
               </DialogHeader>
               {editingService && selectedServiceType && (
                 <ServiceFormHeader
-                  serviceType={selectedServiceType}
+                  serviceType={toQuoteServiceType(selectedServiceType)}
                   subtitle={`Edite os dados de ${SERVICE_TYPE_LABELS[selectedServiceType].toLowerCase()}.`}
                 />
               )}
