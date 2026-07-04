@@ -3,10 +3,8 @@
  * Available to: admin role, "premium" plan and "fundador" plan.
  * Default when eligible: ON. The user can opt out in Minha Conta.
  *
- * Because plan/role are fetched async but the router surface must be chosen
- * synchronously at mount, we cache eligibility in localStorage. The initial
- * gate reads the cached value; a small effect keeps the cache in sync and
- * reloads once if it flips so the correct router mounts.
+ * WorkspaceGate now decides from the real loaded role/plan. The eligibility
+ * cache is kept only as non-authoritative compatibility/debug state.
  */
 const PREF_KEY = "workspace_tabs_pref";            // "on" | "off"
 const ELIGIBLE_KEY = "workspace_tabs_eligible";    // "1"  | "0"
