@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { toast } from "sonner";
 import { TabBar } from "./TabBar";
@@ -26,7 +26,9 @@ export function WorkspaceShell({ children }: Props) {
   openTabRef.current = ws?.openTab;
   canOpenRef.current = ws?.canOpenMore;
 
-  // Sync browser URL with active tab (visual only — no BrowserRouter navigation).
+  // Reflect the active tab's initial path in the browser URL bar (cosmetic only).
+  // Since each tab uses its own MemoryRouter, in-tab navigations do not update
+  // window.location; we mirror only the tab's starting path on switch.
   useEffect(() => {
     if (!ws) return;
     const active = ws.tabs.find((t) => t.id === ws.activeId);
