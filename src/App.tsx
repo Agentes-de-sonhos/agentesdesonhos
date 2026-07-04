@@ -18,6 +18,8 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingScreen } from "./components/auth/LoadingScreen";
 import { NewLeadAlertProvider } from "./components/leads/NewLeadAlertProvider";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
+import { WorkspaceGate } from "@/workspace/WorkspaceGate";
+import { WorkspaceToggle } from "@/workspace/WorkspaceToggle";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -150,6 +152,7 @@ const App = () => (
           <NewLeadAlertProvider>
           <Suspense fallback={<LoadingScreen />}>
           <TeamRouteGuard />
+          <WorkspaceGate>
           <Routes>
             <Route path="/auth" element={
               window.location.hostname.startsWith("ativar-cartao") ? (
@@ -288,8 +291,10 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </WorkspaceGate>
           </Suspense>
           <WhatsAppSupportButton />
+          <WorkspaceToggle />
           </NewLeadAlertProvider>
           </SubscriptionProvider>
           </TeamSessionProvider>
