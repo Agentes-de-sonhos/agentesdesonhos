@@ -39,7 +39,7 @@ export function WorkspaceGate({ children }: Props) {
 function AdminWorkspace({ children }: Props) {
   const { isAdmin, loading } = useUserRole();
 
-  if (false) {
+  if (loading || !isAdmin) {
     return <BrowserRouter>{children}</BrowserRouter>;
   }
 
