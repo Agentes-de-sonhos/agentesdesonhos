@@ -54,7 +54,9 @@ function AdminWorkspace({ children }: Props) {
 }
 
 function deriveInitialTitle(pathname: string): string {
-  const last = pathname.split("/").filter(Boolean).pop();
-  if (!last) return "Início";
+  const normalized = pathname.replace(/\/$/, "");
+  if (normalized === "" || normalized === "/dashboard") return "Inicial";
+  const last = normalized.split("/").filter(Boolean).pop();
+  if (!last) return "Inicial";
   return last.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
 }
