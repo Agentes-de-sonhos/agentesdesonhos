@@ -16,23 +16,26 @@ export function adminClient(): SupabaseClient {
   });
 }
 
-export type AdminGuardResult =
-  | { ok: true; userId: string; admin: SupabaseClient }
-  | { ok: false; response: { content: { type: "text"; text: string }[]; isError: true } };
-
-function deny(text: string): AdminGuardResult {
-  return { ok: false, response: { content: [{ type: "text", text }], isError: true } };
+export type ToolErrorResponse = { content: { type: "text"; text: string }[]; isError: true };
+export function toolError(text: string): ToolErrorResponse {
+  return { content: [{ type: "text", text }], isError: true };
 }
+
+export class AdminAccessError extends Error {}
 
 /**
  * Ensures the caller is authenticated AND holds the `admin` role in user_roles.
  * Uses the caller's JWT to read their own role (allowed by RLS), then returns
  * a service-role client for the actual admin query.
  */
-export async function requireAdmin(ctx: ToolContext, toolName: string, params: unknown): Promise<AdminGuardResult> {
-  if (!ctx.isAuthenticated()) return deny("Não autenticado.");
+export async function requireAdmin(
+  ctx: ToolContext,
+  toolName: string,
+  params: unknown,
+): Promise<{ userId: string; admin: SupabaseClient }> {
+  if (!ctx.isAuthenticated()) throw new AdminAccessError("Não autenticado.");
   const userId = ctx.getUserId();
-  if (!userId) return deny("Sessão inválida.");
+  if (!userId) throw new AdminAccessError("Sessão inválida.");
 
   const caller = callerClient(ctx);
   const { data, error } = await caller
@@ -42,8 +45,8 @@ export async function requireAdmin(ctx: ToolContext, toolName: string, params: u
     .eq("role", "admin")
     .maybeSingle();
 
-  if (error) return deny(`Falha ao verificar permissão: ${error.message}`);
-  if (!data) return deny("Acesso negado. Esta ferramenta é restrita a administradores da plataforma.");
+  if (error) throw new AdminAccessError(`Falha ao verificar permissão: ${error.message}`);
+  if (!data) throw new AdminAccessError("Acesso negado. Esta ferramenta é restrita a administradores da plataforma.");
 
   const admin = adminClient();
   // Fire-and-forget audit log
@@ -58,7 +61,23 @@ export async function requireAdmin(ctx: ToolContext, toolName: string, params: u
     // never block the tool
   }
 
-  return { ok: true, userId, admin };
+  return { userId, admin };
+}
+
+/** Wraps an admin tool handler with role check + error handling. */
+export function withAdmin<TInput, TOutput>(
+  toolName: string,
+  fn: (input: TInput, ctx: { userId: string; admin: SupabaseClient }, mcpCtx: ToolContext) => Promise<TOutput>,
+) {
+  return async (input: TInput, mcpCtx: ToolContext): Promise<TOutput | ToolErrorResponse> => {
+    try {
+      const guard = await requireAdmin(mcpCtx, toolName, input);
+      return await fn(input, guard, mcpCtx);
+    } catch (e) {
+      const msg = e instanceof AdminAccessError ? e.message : e instanceof Error ? e.message : "Erro desconhecido.";
+      return toolError(msg);
+    }
+  };
 }
 
 /** Plans considered "premium" (paid) tiers. */
