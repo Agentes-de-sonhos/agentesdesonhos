@@ -11,7 +11,7 @@ export default defineTool({
     const [{ count: total_users }, subsRes, activeRes] = await Promise.all([
       admin.from("profiles").select("id", { count: "exact", head: true }),
       admin.from("subscriptions").select("plan, is_active, expires_at"),
-      admin.from("user_presence").select("user_id", { count: "exact", head: true }).gte("last_seen_at", new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()),
+      admin.from("user_presence").select("user_id", { count: "exact", head: true }).gte("last_active_at", new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()),
     ]);
 
     if (subsRes.error) return toolError(subsRes.error.message);
