@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -89,21 +89,11 @@ function EligibleWorkspace({ children }: Props) {
 function EligibilitySync({ mountedWithTabs }: { mountedWithTabs: boolean }) {
   const { role, loading: roleLoading } = useUserRole();
   const { plan, loading: subLoading } = useSubscription();
-  const reloadedRef = useRef(false);
-
   useEffect(() => {
     if (roleLoading || subLoading) return;
     const eligible = isWorkspaceEligible(role, plan);
     const prevCache = getWorkspaceEligibleCache();
     if (prevCache !== eligible) setWorkspaceEligibleCache(eligible);
-
-    // What the flag WOULD be right now, after the cache update.
-    const shouldMountTabs = getWorkspaceFlag();
-    if (shouldMountTabs !== mountedWithTabs && !reloadedRef.current) {
-      reloadedRef.current = true;
-      // Reload once so the correct router surface takes over.
-      setTimeout(() => window.location.reload(), 50);
-    }
   }, [role, plan, roleLoading, subLoading, mountedWithTabs]);
 
   return null;
