@@ -20,7 +20,6 @@ import { LoadingScreen } from "./components/auth/LoadingScreen";
 import { NewLeadAlertProvider } from "./components/leads/NewLeadAlertProvider";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { WorkspaceGate } from "@/workspace/WorkspaceGate";
-import { WorkspaceToggle } from "@/workspace/WorkspaceToggle";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -297,7 +296,6 @@ const App = () => (
 </Routes>
           </Suspense>
           <WhatsAppSupportButton />
-          <WorkspaceToggle />
           </NewLeadAlertProvider>
           </WorkspaceGate>
           </SubscriptionProvider>
