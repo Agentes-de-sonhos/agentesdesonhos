@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
+import { BrowserRouter } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { getWorkspaceFlag } from "./featureFlag";
 import { WorkspaceProvider } from "./WorkspaceProvider";
@@ -9,21 +10,38 @@ interface Props {
 }
 
 /**
- * Renders `children` (the app's <Routes/>) as-is when the Workspace is disabled.
- * When enabled AND the user is an admin, wraps them in a tabbed MDI shell.
+ * Chooses the app's router surface based on the Workspace feature flag.
  *
- * The flag is a local (localStorage) toggle read at mount. The floating toggle
- * button reloads the page after switching, so this gate is evaluated once per
- * page load — no runtime router mutation.
+ * - Workspace OFF (default, every non-admin user): renders a single BrowserRouter
+ *   around `children`. Identical to the app's original behavior.
+ * - Workspace ON (admin + localStorage flag): renders a WorkspaceProvider +
+ *   WorkspaceShell that hosts one MemoryRouter per tab. No BrowserRouter is
+ *   mounted, avoiding React Router's "Router inside Router" invariant.
+ *
+ * The flag is captured once at mount so mid-life auth transitions never swap
+ * the router underneath a mounted tree. Toggling reloads the page.
  */
 export function WorkspaceGate({ children }: Props) {
-  const { isAdmin, loading } = useUserRole();
-  const flagOn = getWorkspaceFlag();
+  // Snapshot the flag once — never swap routers mid-life.
+  const [flagOn] = useState(() => getWorkspaceFlag());
 
-  // Bail out fast in all non-admin / off cases (99% of users, incl. anonymous).
-  if (!flagOn) return <>{children}</>;
-  if (loading) return <>{children}</>;
-  if (!isAdmin) return <>{children}</>;
+  if (!flagOn) {
+    return <BrowserRouter>{children}</BrowserRouter>;
+  }
+  return <AdminWorkspace>{children}</AdminWorkspace>;
+}
+
+/**
+ * Only renders the tabbed workspace once we know the user is actually an admin.
+ * While the role is loading, or if the role check fails, falls back to the
+ * standard BrowserRouter so the app is never left without a router.
+ */
+function AdminWorkspace({ children }: Props) {
+  const { isAdmin, loading } = useUserRole();
+
+  if (loading || !isAdmin) {
+    return <BrowserRouter>{children}</BrowserRouter>;
+  }
 
   const initialPath = window.location.pathname + window.location.search;
   const initialTitle = deriveInitialTitle(window.location.pathname);
