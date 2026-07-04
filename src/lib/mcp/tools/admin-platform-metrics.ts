@@ -9,8 +9,8 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {
     const guard = await requireAdmin(ctx, "get_platform_metrics", {});
-    if (!guard.ok) return guard.response;
-    const { admin } = guard;
+    if (guard.ok !== true) return guard.response;
+    const admin = guard.admin;
 
     const [{ count: total_users }, subsRes, activeRes] = await Promise.all([
       admin.from("profiles").select("id", { count: "exact", head: true }),
