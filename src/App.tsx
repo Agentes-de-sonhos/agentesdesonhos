@@ -153,6 +153,7 @@ const App = () => (
           <Suspense fallback={<LoadingScreen />}>
           <TeamRouteGuard />
           <Routes>
+
             <Route path="/auth" element={
               window.location.hostname.startsWith("ativar-cartao") ? (
                 <AtivarCartao />
@@ -178,99 +179,26 @@ const App = () => (
             <Route path="/desconto30off" element={<Desconto30Off />} />
             <Route path="/cadastro-fornecedor" element={<CadastroFornecedor />} />
             <Route path="/cadastro-guia" element={<CadastroGuia />} />
-            <Route path="/meu-perfil-empresa" element={<ProtectedRoute><DashboardLayout><SupplierProfileEdit /></DashboardLayout></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard-start" element={<ProtectedRoute><StartDashboard /></ProtectedRoute>} />
-            <Route path="/dashboard-fornecedor" element={<ProtectedRoute><DashboardFornecedor /></ProtectedRoute>} />
-            <Route path="/agenda-trade" element={<ProtectedRoute><AgendaTrade /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             <Route path="/admin/crm" element={<AdminRoute><AdminCRM /></AdminRoute>} />
-            <Route path="/ferramentas-ia" element={<ProtectedRoute><FerramentasIA /></ProtectedRoute>} />
-            <Route path="/meus-projetos" element={<ProtectedRoute><MeusProjetos /></ProtectedRoute>} />
-            <Route path="/sorteador" element={<ProtectedRoute><Sorteador /></ProtectedRoute>} />
-            <Route path="/ferramentas-ia/criar-roteiro" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
-            <Route path="/ferramentas-ia/criar-roteiro/:id" element={<ProtectedRoute><CriarRoteiro /></ProtectedRoute>} />
-            <Route path="/ferramentas-ia/modelos-roteiros" element={<ProtectedRoute><ModelosRoteiros /></ProtectedRoute>} />
-            <Route path="/ferramentas-ia/criar-conteudo" element={<ProtectedRoute><CriarConteudo /></ProtectedRoute>} />
-            <Route path="/ferramentas-ia/gerar-orcamento" element={<ProtectedRoute><GerarOrcamento /></ProtectedRoute>} />
-            <Route path="/ferramentas-ia/gerar-orcamento/:id" element={<ProtectedRoute><GerarOrcamento /></ProtectedRoute>} />
             <Route path="/roteiro/:token" element={<RoteiroPublico />} />
-            <Route path="/ferramentas-ia/trip-wallet" element={<ProtectedRoute><TripWallet /></ProtectedRoute>} />
-            <Route path="/ferramentas-ia/trip-wallet/:id" element={<ProtectedRoute><TripWallet /></ProtectedRoute>} />
             <Route path="/viagem/:token" element={<ViagemPublica />} />
             <Route path="/c/:slug" element={<CarteiraPublica />} />
             <Route path="/v/:code" element={<ShortCodeRedirect />} />
-            <Route path="/mapa-turismo" element={<ProtectedRoute><MapaTurismo /></ProtectedRoute>} />
-            <Route path="/mapa-turismo/cruzeiros" element={<ProtectedRoute><CruisesPage /></ProtectedRoute>} />
-            <Route path="/mapa-turismo/cruzeiros/:id" element={<ProtectedRoute><CruiseDetailPage /></ProtectedRoute>} />
-            <Route path="/mapa-turismo/operadora/:id" element={<ProtectedRoute><OperadoraDetail /></ProtectedRoute>} />
-            <Route path="/mapa-turismo/guia/:id" element={<ProtectedRoute><GuideDetail /></ProtectedRoute>} />
-            <Route path="/mapa-turismo/:id" element={<ProtectedRoute><SupplierDetail /></ProtectedRoute>} />
-            <Route path="/noticias" element={<ProtectedRoute><Noticias /></ProtectedRoute>} />
-            <Route path="/materiais" element={<ProtectedRoute><Materiais /></ProtectedRoute>} />
-            <Route path="/meus-materiais" element={<ProtectedRoute><MeusMateriais /></ProtectedRoute>} />
-            <Route path="/bloqueios-aereos" element={<ProtectedRoute><BloqueiosAereos /></ProtectedRoute>} />
-            <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
-            <Route path="/bloco-notas" element={<ProtectedRoute><BlocoNotas /></ProtectedRoute>} />
-            <Route path="/calculadora" element={<ProtectedRoute><Calculadora /></ProtectedRoute>} />
-            <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-            <Route path="/minha-conta" element={<ProtectedRoute><MinhaConta /></ProtectedRoute>} />
-            <Route path="/assinaturas-comerciais" element={<ProtectedRoute><AssinaturasComerciais /></ProtectedRoute>} />
-            <Route path="/configuracoes/carteira" element={<ProtectedRoute><ConfiguracoesCarteira /></ProtectedRoute>} />
-            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-            <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
-            <Route path="/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />
             
-            <Route path="/hotel-raio-x" element={<ProtectedRoute><HotelRaioX /></ProtectedRoute>} />
-            <Route path="/requisitos-viagem" element={<ProtectedRoute><RequisitosViagem /></ProtectedRoute>} />
-            <Route path="/campanha-indicacao" element={<ProtectedRoute><CampanhaIndicacao /></ProtectedRoute>} />
-            <Route path="/gestao-clientes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
-            <Route path="/gestao-clientes/dashboard" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
-            <Route path="/gestao-clientes/clientes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
-            <Route path="/gestao-clientes/funil" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
-            <Route path="/gestao-clientes/metas" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
-            <Route path="/gestao-clientes/operacoes" element={<ProtectedRoute><GestaoClientes /></ProtectedRoute>} />
-            <Route path="/educa-academy" element={<ProtectedRoute><EducaAcademy /></ProtectedRoute>} />
-            <Route path="/comunidade" element={<ProtectedRoute><TradeConnectHub /></ProtectedRoute>} />
-            <Route path="/comunidade/chat" element={<ProtectedRoute><Community /></ProtectedRoute>} />
-            <Route path="/comunidade/perfil" element={<ProtectedRoute><TradeConnectProfile /></ProtectedRoute>} />
-            <Route path="/comunidade/comunidades" element={<ProtectedRoute><TradeConnectCommunities /></ProtectedRoute>} />
-            <Route path="/comunidade/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
             {/* Redirects from old routes */}
             <Route path="/trade-connect" element={<Navigate to="/comunidade" replace />} />
             <Route path="/trade-connect/perfil" element={<Navigate to="/comunidade/perfil" replace />} />
             <Route path="/trade-connect/comunidades" element={<Navigate to="/comunidade/comunidades" replace />} />
-            <Route path="/trade-connect/agente/:userId" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
-            <Route path="/beneficios" element={<ProtectedRoute><Beneficios /></ProtectedRoute>} />
-            <Route path="/mentorias" element={<ProtectedRoute><Mentorias /></ProtectedRoute>} />
-            <Route path="/mentorias/:id" element={<ProtectedRoute><MentoriaDetail /></ProtectedRoute>} />
-            <Route path="/cursos" element={<ProtectedRoute><CursosMarketplace /></ProtectedRoute>} />
-            <Route path="/cursos/:id" element={<ProtectedRoute><CursoDetalhe /></ProtectedRoute>} />
-            <Route path="/cursos/:id/editar" element={<ProtectedRoute><CursoEditar /></ProtectedRoute>} />
-            <Route path="/playbook/:slug" element={<ProtectedRoute><PlaybookViewer /></ProtectedRoute>} />
-            <Route path="/perguntas-respostas" element={<ProtectedRoute><PerguntasRespostas /></ProtectedRoute>} />
-            <Route path="/dream-advisor" element={<ProtectedRoute><DreamAdvisor /></ProtectedRoute>} />
-            <Route path="/minha-vitrine" element={<ProtectedRoute><MinhaVitrine /></ProtectedRoute>} />
-            <Route path="/meu-cartao" element={<ProtectedRoute><MeuCartao /></ProtectedRoute>} />
-            <Route path="/meu-cartao/:id" element={<ProtectedRoute><MeuCartaoEditor /></ProtectedRoute>} />
-            <Route path="/gamificacao" element={<ProtectedRoute><Gamificacao /></ProtectedRoute>} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
-            <Route path="/personalizador-laminas" element={<ProtectedRoute><PersonalizadorLaminas /></ProtectedRoute>} />
-            <Route path="/atualizacoes" element={<ProtectedRoute><Atualizacoes /></ProtectedRoute>} />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/fatura/:agencySlug/:code" element={<FaturaPublica />} />
             <Route path="/cadastro/:token" element={<CadastroLink />} />
             <Route path="/formulario/:token" element={<LeadFormPublic />} />
-            <Route path="/meus-leads" element={<ProtectedRoute><CaptacaoLeads /></ProtectedRoute>} />
-            <Route path="/meus-leads/conversacional" element={<ProtectedRoute><MeusLeads /></ProtectedRoute>} />
-            <Route path="/meus-leads/landings" element={<ProtectedRoute><SalesLandings /></ProtectedRoute>} />
-            <Route path="/meus-leads/landings/nova" element={<ProtectedRoute><SalesLandingEditor /></ProtectedRoute>} />
-            <Route path="/meus-leads/landings/:id/editar" element={<ProtectedRoute><SalesLandingEditor /></ProtectedRoute>} />
             <Route path="/lp/:slug" element={<SalesLandingPublic />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
-            <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/captura-cartao/:token" element={<CardCaptureQuickAccess />} />
@@ -288,8 +216,84 @@ const App = () => (
               }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route element={<ProtectedShell />}>
+              <Route path="/meu-perfil-empresa" element={<DashboardLayout><SupplierProfileEdit /></DashboardLayout>} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard-start" element={<StartDashboard />} />
+              <Route path="/dashboard-fornecedor" element={<DashboardFornecedor />} />
+              <Route path="/agenda-trade" element={<AgendaTrade />} />
+              <Route path="/ferramentas-ia" element={<FerramentasIA />} />
+              <Route path="/meus-projetos" element={<MeusProjetos />} />
+              <Route path="/sorteador" element={<Sorteador />} />
+              <Route path="/ferramentas-ia/criar-roteiro" element={<CriarRoteiro />} />
+              <Route path="/ferramentas-ia/criar-roteiro/:id" element={<CriarRoteiro />} />
+              <Route path="/ferramentas-ia/modelos-roteiros" element={<ModelosRoteiros />} />
+              <Route path="/ferramentas-ia/criar-conteudo" element={<CriarConteudo />} />
+              <Route path="/ferramentas-ia/gerar-orcamento" element={<GerarOrcamento />} />
+              <Route path="/ferramentas-ia/gerar-orcamento/:id" element={<GerarOrcamento />} />
+              <Route path="/ferramentas-ia/trip-wallet" element={<TripWallet />} />
+              <Route path="/ferramentas-ia/trip-wallet/:id" element={<TripWallet />} />
+              <Route path="/mapa-turismo" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/cruzeiros" element={<CruisesPage />} />
+              <Route path="/mapa-turismo/cruzeiros/:id" element={<CruiseDetailPage />} />
+              <Route path="/mapa-turismo/operadora/:id" element={<OperadoraDetail />} />
+              <Route path="/mapa-turismo/guia/:id" element={<GuideDetail />} />
+              <Route path="/mapa-turismo/:id" element={<SupplierDetail />} />
+              <Route path="/noticias" element={<Noticias />} />
+              <Route path="/materiais" element={<Materiais />} />
+              <Route path="/meus-materiais" element={<MeusMateriais />} />
+              <Route path="/bloqueios-aereos" element={<BloqueiosAereos />} />
+              <Route path="/agenda" element={<Agenda />} />
+              <Route path="/bloco-notas" element={<BlocoNotas />} />
+              <Route path="/calculadora" element={<Calculadora />} />
+              <Route path="/perfil" element={<Perfil />} />
+              <Route path="/minha-conta" element={<MinhaConta />} />
+              <Route path="/assinaturas-comerciais" element={<AssinaturasComerciais />} />
+              <Route path="/configuracoes/carteira" element={<ConfiguracoesCarteira />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/crm" element={<CRM />} />
+              <Route path="/financeiro" element={<Financeiro />} />
+              <Route path="/hotel-raio-x" element={<HotelRaioX />} />
+              <Route path="/requisitos-viagem" element={<RequisitosViagem />} />
+              <Route path="/campanha-indicacao" element={<CampanhaIndicacao />} />
+              <Route path="/gestao-clientes" element={<GestaoClientes />} />
+              <Route path="/gestao-clientes/dashboard" element={<GestaoClientes />} />
+              <Route path="/gestao-clientes/clientes" element={<GestaoClientes />} />
+              <Route path="/gestao-clientes/funil" element={<GestaoClientes />} />
+              <Route path="/gestao-clientes/metas" element={<GestaoClientes />} />
+              <Route path="/gestao-clientes/operacoes" element={<GestaoClientes />} />
+              <Route path="/educa-academy" element={<EducaAcademy />} />
+              <Route path="/comunidade" element={<TradeConnectHub />} />
+              <Route path="/comunidade/chat" element={<Community />} />
+              <Route path="/comunidade/perfil" element={<TradeConnectProfile />} />
+              <Route path="/comunidade/comunidades" element={<TradeConnectCommunities />} />
+              <Route path="/comunidade/agente/:userId" element={<AgentProfile />} />
+              <Route path="/trade-connect/agente/:userId" element={<AgentProfile />} />
+              <Route path="/beneficios" element={<Beneficios />} />
+              <Route path="/mentorias" element={<Mentorias />} />
+              <Route path="/mentorias/:id" element={<MentoriaDetail />} />
+              <Route path="/cursos" element={<CursosMarketplace />} />
+              <Route path="/cursos/:id" element={<CursoDetalhe />} />
+              <Route path="/cursos/:id/editar" element={<CursoEditar />} />
+              <Route path="/playbook/:slug" element={<PlaybookViewer />} />
+              <Route path="/perguntas-respostas" element={<PerguntasRespostas />} />
+              <Route path="/dream-advisor" element={<DreamAdvisor />} />
+              <Route path="/minha-vitrine" element={<MinhaVitrine />} />
+              <Route path="/meu-cartao" element={<MeuCartao />} />
+              <Route path="/meu-cartao/:id" element={<MeuCartaoEditor />} />
+              <Route path="/gamificacao" element={<Gamificacao />} />
+              <Route path="/personalizador-laminas" element={<PersonalizadorLaminas />} />
+              <Route path="/atualizacoes" element={<Atualizacoes />} />
+              <Route path="/meus-leads" element={<CaptacaoLeads />} />
+              <Route path="/meus-leads/conversacional" element={<MeusLeads />} />
+              <Route path="/meus-leads/landings" element={<SalesLandings />} />
+              <Route path="/meus-leads/landings/nova" element={<SalesLandingEditor />} />
+              <Route path="/meus-leads/landings/:id/editar" element={<SalesLandingEditor />} />
+              <Route path="/suporte" element={<Suporte />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
-          </Routes>
+          
+</Routes>
           </Suspense>
           <WhatsAppSupportButton />
           <WorkspaceToggle />
