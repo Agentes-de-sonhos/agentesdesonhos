@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, createContext, useContext } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { BottomNavBar } from "./BottomNavBar";
 import { Footer } from "./Footer";
@@ -15,7 +15,20 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * Signals to a nested <DashboardLayout> that an outer instance is already
+ * mounted (e.g. from a router layout-route). Nested instances then render
+ * their children as-is, avoiding a full sidebar/chrome remount on navigation.
+ */
+const DashboardLayoutContext = createContext(false);
+
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const alreadyMounted = useContext(DashboardLayoutContext);
+  if (alreadyMounted) {
+    // Outer shell already provides sidebar/chrome — just render page content.
+    return <>{children}</>;
+  }
+
   const { user } = useAuth();
   const { isFornecedor, loading: roleLoading } = useUserRole();
   const impersonating = isActiveImpersonatingUser(user?.id);
@@ -26,6 +39,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
   
   return (
+    <DashboardLayoutContext.Provider value={true}>
     <div className={`min-h-screen bg-background flex flex-col overflow-x-hidden ${impersonating ? "pt-10" : ""}`}>
       {/* Desktop Sidebar - hidden on mobile */}
       <AppSidebar />
@@ -53,5 +67,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <Footer />
       </main>
     </div>
+    </DashboardLayoutContext.Provider>
   );
 }
