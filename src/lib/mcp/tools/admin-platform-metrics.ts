@@ -1,5 +1,5 @@
 import { defineTool } from "@lovable.dev/mcp-js";
-import { requireAdmin, PREMIUM_PLANS, FREE_PLANS } from "./_admin";
+import { withAdmin, toolError, PREMIUM_PLANS, FREE_PLANS } from "./_admin";
 
 export default defineTool({
   name: "get_platform_metrics",
@@ -7,18 +7,14 @@ export default defineTool({
   description: "Resumo geral: total de usuários, premium/free/ativos/inativos e status das assinaturas premium. Somente admin.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async (_input, ctx) => {
-    const guard = await requireAdmin(ctx, "get_platform_metrics", {});
-    if (guard.ok !== true) return guard.response;
-    const admin = guard.admin;
-
+  handler: withAdmin("get_platform_metrics", async (_input, { admin }) => {
     const [{ count: total_users }, subsRes, activeRes] = await Promise.all([
       admin.from("profiles").select("id", { count: "exact", head: true }),
       admin.from("subscriptions").select("plan, is_active, expires_at"),
       admin.from("user_presence").select("user_id", { count: "exact", head: true }).gte("last_seen_at", new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()),
     ]);
 
-    if (subsRes.error) return { content: [{ type: "text", text: subsRes.error.message }], isError: true };
+    if (subsRes.error) return toolError(subsRes.error.message);
     const subs = subsRes.data ?? [];
     const now = Date.now();
     const isPremium = (p: string) => (PREMIUM_PLANS as readonly string[]).includes(p);
@@ -46,5 +42,5 @@ export default defineTool({
       content: [{ type: "text", text: JSON.stringify(metrics, null, 2) }],
       structuredContent: metrics,
     };
-  },
+  }),
 });
