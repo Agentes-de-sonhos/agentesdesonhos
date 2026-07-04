@@ -7,6 +7,7 @@ import {
   getWorkspaceEligibleCache,
   setWorkspaceEligibleCache,
   isWorkspaceEligible,
+  getWorkspacePref,
 } from "./featureFlag";
 import { WorkspaceProvider } from "./WorkspaceProvider";
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -93,6 +94,28 @@ function EligibilitySync() {
     const eligible = isWorkspaceEligible(role, plan);
     const prevCache = getWorkspaceEligibleCache();
     if (prevCache !== eligible) setWorkspaceEligibleCache(eligible);
+
+    // If the user just became eligible mid-session (first login for a
+    // Premium/Fundador user, or a plan upgrade), the router surface was
+    // chosen synchronously at mount as the classic BrowserRouter. Reload
+    // ONCE so the tabbed Workspace mounts. A sessionStorage guard makes
+    // this strictly one-shot per tab session, preventing any loop.
+    if (
+      eligible &&
+      !prevCache &&
+      getWorkspacePref() !== "off" &&
+      typeof window !== "undefined"
+    ) {
+      try {
+        const KEY = "workspace_tabs_activation_reloaded";
+        if (window.sessionStorage.getItem(KEY) !== "1") {
+          window.sessionStorage.setItem(KEY, "1");
+          window.location.reload();
+        }
+      } catch {
+        /* ignore */
+      }
+    }
   }, [role, plan, roleLoading, subLoading]);
 
   return null;
