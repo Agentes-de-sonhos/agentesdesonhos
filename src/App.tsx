@@ -144,11 +144,11 @@ const App = () => (
       <Toaster />
       <Sonner />
         <ErrorBoundary>
-        <WorkspaceGate>
         <AuthProvider>
           <TeamSessionProvider>
-          <ImpersonationBanner />
           <SubscriptionProvider>
+          <WorkspaceGate>
+          <ImpersonationBanner />
           <NewLeadAlertProvider>
           <Suspense fallback={<LoadingScreen />}>
           <TeamRouteGuard />
@@ -294,10 +294,10 @@ const App = () => (
           <WhatsAppSupportButton />
           <WorkspaceToggle />
           </NewLeadAlertProvider>
+          </WorkspaceGate>
           </SubscriptionProvider>
           </TeamSessionProvider>
         </AuthProvider>
-        </WorkspaceGate>
         </ErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
