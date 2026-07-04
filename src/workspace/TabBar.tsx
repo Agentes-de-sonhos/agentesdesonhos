@@ -14,7 +14,7 @@ export function TabBar() {
     <div
       role="tablist"
       aria-label="Abas do workspace"
-      className="flex items-stretch h-10 bg-muted/40 border-b border-border overflow-x-auto"
+      className="flex items-stretch h-10 bg-muted/40 border-b border-border overflow-x-auto overflow-y-hidden pl-0 lg:pl-16"
     >
       {ws.tabs.map((tab) => {
         const active = tab.id === ws.activeId;
