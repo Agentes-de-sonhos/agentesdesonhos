@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft, Shield } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft, Shield, Ship as ShipIcon } from "lucide-react";
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
