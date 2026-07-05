@@ -4433,10 +4433,88 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state — mirrors Hotel/Flight/Car wizard ───
+  const cruiseStepTitles = [
+    "Informações do Cruzeiro",
+    "Dados da Cabine",
+    "Passageiros",
+    "Roteiro do Cruzeiro",
+    "Check-in Online",
+    "Orientações de Embarque",
+    "Dados Operacionais do Navio",
+    "Documentos",
+  ];
+  const cruiseStepGroups: string[][] = [
+    ["🚢 Informações do Cruzeiro"],
+    ["🛏 Dados da Cabine"],
+    ["👥 Passageiros"],
+    ["🗺 Roteiro do Cruzeiro"],
+    ["✅ Check-in Online"],
+    ["⚠️ Orientações de Embarque"],
+    ["⚡ Dados Operacionais do Navio"],
+    [],
+  ];
+  const cruiseSectionToStep = new Map<string, number>();
+  cruiseStepGroups.forEach((titles, i) => titles.forEach((t) => cruiseSectionToStep.set(t, i)));
+  const totalCruiseSteps = cruiseStepTitles.length;
+  const [cruiseStepIndex, setCruiseStepIndex] = useState(0);
+
+  const renderCruiseStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = cruiseSectionToStep.get(title);
+    if (idx === undefined || idx !== cruiseStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstCruiseStep = cruiseStepIndex === 0;
+  const isLastCruiseStep = cruiseStepIndex === totalCruiseSteps - 1;
+  const goCruiseBack = () => setCruiseStepIndex((s) => Math.max(0, s - 1));
+  const goCruiseNext = () => setCruiseStepIndex((s) => Math.min(totalCruiseSteps - 1, s + 1));
+  const saveCruiseNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚢 Informações do Cruzeiro">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "14 165 233" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-50 text-sky-600 shrink-0">
+                  <ShipIcon className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {cruiseStepTitles[cruiseStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {cruiseStepIndex + 1} de {totalCruiseSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-sky-500 transition-all duration-300"
+                style={{ width: `${((cruiseStepIndex + 1) / totalCruiseSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderCruiseStep("🚢 Informações do Cruzeiro", <>
         {imageSlot}
         {googlePhotoSlot}
 
