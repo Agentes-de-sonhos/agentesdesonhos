@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft, Shield, Ship as ShipIcon } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft, Shield, Ship as ShipIcon, TrainFront } from "lucide-react";
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -5553,7 +5553,7 @@ const trainSchema = z.object({
   destination_maps_url: z.string().optional(),
 });
 
-function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; notes?: string }[]>(
@@ -5620,9 +5620,66 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state ───
+  const trainStepTitles = [
+    "Origem e Destino",
+    "Data, Horários e Trem",
+    "Passageiros",
+    "Orientações de Embarque",
+    "Documentos",
+  ];
+  const totalTrainSteps = trainStepTitles.length;
+  const [trainStepIndex, setTrainStepIndex] = useState(0);
+
+  const renderTrainStep = (idx: number, children: React.ReactNode) => {
+    if (!wizardMode) return <>{children}</>;
+    if (idx !== trainStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{trainStepTitles[idx]}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstTrainStep = trainStepIndex === 0;
+  const isLastTrainStep = trainStepIndex === totalTrainSteps - 1;
+  const goTrainBack = () => setTrainStepIndex((s) => Math.max(0, s - 1));
+  const goTrainNext = () => setTrainStepIndex((s) => Math.min(totalTrainSteps - 1, s + 1));
+  const saveTrainNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-4", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "217 70 239" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-fuchsia-50 text-fuchsia-600 shrink-0">
+                  <TrainFront className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {trainStepTitles[trainStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {trainStepIndex + 1} de {totalTrainSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-fuchsia-500 transition-all duration-300"
+                style={{ width: `${((trainStepIndex + 1) / totalTrainSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderTrainStep(0, <>
         {/* Origin / Destination */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="origin_city" render={({ field }) => (
@@ -5657,7 +5714,9 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
             </FormItem>
           )} />
         </div>
+        </>)}
 
+        {renderTrainStep(1, <>
         {/* Date & Times */}
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="travel_date" render={({ field }) => (
@@ -5752,7 +5811,9 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
             </FormItem>
           )} />
         </div>
+        </>)}
 
+        {renderTrainStep(2, <>
         {/* Passengers */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Passageiros</label>
@@ -5781,7 +5842,9 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
             </Button>
           </div>
         </div>
+        </>)}
 
+        {renderTrainStep(3, <>
         {/* Boarding Notes */}
         <FormField control={form.control} name="boarding_notes" render={({ field }) => (
           <FormItem>
@@ -5814,15 +5877,55 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
             </FormItem>
           )} />
         </div>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Bilhete/Voucher/QR Code" />
+        {(!wizardMode || trainStepIndex === totalTrainSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Bilhete/Voucher/QR Code" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstTrainStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goTrainBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastTrainStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goTrainNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveTrainNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastTrainStep ? (
+                <Button type="button" size="sm" onClick={goTrainNext} className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveTrainNow} className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar trem
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5840,7 +5943,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "attraction": return <AttractionForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "insurance": return <InsuranceForm {...props} wizardMode={!props.defaultValues} />;
     case "cruise": return <CruiseForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
-    case "train": return <TrainForm {...props} />;
+    case "train": return <TrainForm {...props} wizardMode={!props.defaultValues} />;
     case "other": return <OtherForm {...props} />;
     default: return null;
   }
