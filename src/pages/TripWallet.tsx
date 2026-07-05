@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, History, UserCircle2, Building2 } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, UserCircle2, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Search, Globe2 } from "lucide-react";
 import { parseDestinationParts } from "@/lib/destination-parts";
@@ -29,7 +29,7 @@ import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
 import { TripEditForm } from "@/components/trip/TripEditForm";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
-import { TripEditHistory } from "@/components/trip/TripEditHistory";
+
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
@@ -1631,21 +1631,6 @@ function TripWalletContent() {
             </AccordionContent>
           </AccordionItem>
 
-          {/* 5. Histórico de Alterações */}
-          <AccordionItem value="history" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
-            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
-              <div className="w-fit">
-                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <History className="h-5 w-5 text-slate-500" />
-                  Histórico de Alterações
-                </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-slate-500" />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              <TripEditHistory history={editHistory} />
-            </AccordionContent>
-          </AccordionItem>
         </Accordion>
 
         {/* Share Modal */}
