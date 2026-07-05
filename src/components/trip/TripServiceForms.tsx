@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft, Shield } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft, Shield, Ship as ShipIcon } from "lucide-react";
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -4322,7 +4322,7 @@ const cruiseSchema = z.object({
   ship_website: z.string().optional(),
 });
 
-function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; birth_date?: string; document?: string; notes?: string }[]>(
@@ -4433,10 +4433,88 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state — mirrors Hotel/Flight/Car wizard ───
+  const cruiseStepTitles = [
+    "Informações do Cruzeiro",
+    "Dados da Cabine",
+    "Passageiros",
+    "Roteiro do Cruzeiro",
+    "Check-in Online",
+    "Orientações de Embarque",
+    "Dados Operacionais do Navio",
+    "Documentos",
+  ];
+  const cruiseStepGroups: string[][] = [
+    ["🚢 Informações do Cruzeiro"],
+    ["🛏 Dados da Cabine"],
+    ["👥 Passageiros"],
+    ["🗺 Roteiro do Cruzeiro"],
+    ["✅ Check-in Online"],
+    ["⚠️ Orientações de Embarque"],
+    ["⚡ Dados Operacionais do Navio"],
+    [],
+  ];
+  const cruiseSectionToStep = new Map<string, number>();
+  cruiseStepGroups.forEach((titles, i) => titles.forEach((t) => cruiseSectionToStep.set(t, i)));
+  const totalCruiseSteps = cruiseStepTitles.length;
+  const [cruiseStepIndex, setCruiseStepIndex] = useState(0);
+
+  const renderCruiseStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = cruiseSectionToStep.get(title);
+    if (idx === undefined || idx !== cruiseStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstCruiseStep = cruiseStepIndex === 0;
+  const isLastCruiseStep = cruiseStepIndex === totalCruiseSteps - 1;
+  const goCruiseBack = () => setCruiseStepIndex((s) => Math.max(0, s - 1));
+  const goCruiseNext = () => setCruiseStepIndex((s) => Math.min(totalCruiseSteps - 1, s + 1));
+  const saveCruiseNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚢 Informações do Cruzeiro">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "14 165 233" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-50 text-sky-600 shrink-0">
+                  <ShipIcon className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {cruiseStepTitles[cruiseStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {cruiseStepIndex + 1} de {totalCruiseSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-sky-500 transition-all duration-300"
+                style={{ width: `${((cruiseStepIndex + 1) / totalCruiseSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderCruiseStep("🚢 Informações do Cruzeiro", <>
         {imageSlot}
         {googlePhotoSlot}
 
@@ -4544,9 +4622,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🛏 Dados da Cabine">
+        {renderCruiseStep("🛏 Dados da Cabine", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cabin_type" render={({ field }) => (
@@ -4617,9 +4695,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👥 Passageiros">
+        {renderCruiseStep("👥 Passageiros", <>
 
         <div className="space-y-2">
           {passengers.map((p, i) => (
@@ -4656,9 +4734,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🗺 Roteiro do Cruzeiro">
+        {renderCruiseStep("🗺 Roteiro do Cruzeiro", <>
 
         <div className="space-y-2">
           {itinerary.map((stop, i) => (
@@ -4698,9 +4776,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="✅ Check-in Online">
+        {renderCruiseStep("✅ Check-in Online", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_url" render={({ field }) => (
@@ -4734,9 +4812,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⚠️ Orientações de Embarque">
+        {renderCruiseStep("⚠️ Orientações de Embarque", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="boarding_terminal" render={({ field }) => (
@@ -4813,9 +4891,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⚡ Dados Operacionais do Navio">
+        {renderCruiseStep("⚡ Dados Operacionais do Navio", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="onboard_currency" render={({ field }) => (
@@ -4860,16 +4938,55 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
+        {(!wizardMode || cruiseStepIndex === totalCruiseSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstCruiseStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goCruiseBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastCruiseStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goCruiseNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveCruiseNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastCruiseStep ? (
+                <Button type="button" size="sm" onClick={goCruiseNext} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveCruiseNow} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar cruzeiro
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5722,7 +5839,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "transfer": return <TransferForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "insurance": return <InsuranceForm {...props} wizardMode={!props.defaultValues} />;
-    case "cruise": return <CruiseForm {...props} {...placesProps} />;
+    case "cruise": return <CruiseForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "train": return <TrainForm {...props} />;
     case "other": return <OtherForm {...props} />;
     default: return null;
