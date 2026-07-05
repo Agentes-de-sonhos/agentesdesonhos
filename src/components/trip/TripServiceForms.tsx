@@ -3009,7 +3009,7 @@ interface AttractionPassengerInput {
   notes: string;
 }
 
-function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
@@ -3128,10 +3128,90 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state — mirrors the Hotel/Car wizard ───
+  const attractionStepTitles = [
+    "Informações Principais",
+    "Detalhes de Uso",
+    "Códigos do Ingresso",
+    "Localização",
+    "Passageiros",
+    "Regras e Políticas",
+    "Dicas do Agente de Viagem",
+    "Contatos de Suporte",
+    "Documentos",
+  ];
+  const attractionStepGroups: string[][] = [
+    ["🎟️ Informações Principais"],
+    ["📅 Detalhes de Uso"],
+    ["📱 Códigos do Ingresso"],
+    ["📍 Localização"],
+    ["👨‍👩‍👧 Passageiros"],
+    ["📌 Regras e Políticas"],
+    ["🧠 Dicas do Agente de Viagem"],
+    ["📞 Contatos de Suporte"],
+    [],
+  ];
+  const attractionSectionToStep = new Map<string, number>();
+  attractionStepGroups.forEach((titles, i) => titles.forEach((t) => attractionSectionToStep.set(t, i)));
+  const totalAttractionSteps = attractionStepTitles.length;
+  const [attractionStepIndex, setAttractionStepIndex] = useState(0);
+
+  const renderAttractionStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = attractionSectionToStep.get(title);
+    if (idx === undefined || idx !== attractionStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstAttractionStep = attractionStepIndex === 0;
+  const isLastAttractionStep = attractionStepIndex === totalAttractionSteps - 1;
+  const goAttractionBack = () => setAttractionStepIndex((s) => Math.max(0, s - 1));
+  const goAttractionNext = () => setAttractionStepIndex((s) => Math.min(totalAttractionSteps - 1, s + 1));
+  const saveAttractionNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🎟️ Informações Principais">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "236 72 153" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-pink-50 text-pink-600 shrink-0">
+                  <Sparkles className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {attractionStepTitles[attractionStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {attractionStepIndex + 1} de {totalAttractionSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-pink-500 transition-all duration-300"
+                style={{ width: `${((attractionStepIndex + 1) / totalAttractionSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderAttractionStep("🎟️ Informações Principais", <>
         {imageSlot}
         {googlePhotoSlot}
 
@@ -3239,9 +3319,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📅 Detalhes de Uso">
+        {renderAttractionStep("📅 Detalhes de Uso", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="entry_time" render={({ field }) => (
@@ -3307,9 +3387,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📱 Códigos do Ingresso">
+        {renderAttractionStep("📱 Códigos do Ingresso", <>
 
         <p className="text-xs text-muted-foreground">
           Adicione um código por ingresso (código de confirmação ou nº do pedido). Os campos crescem automaticamente conforme a quantidade de ingressos.
@@ -3353,9 +3433,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📍 Localização">
+        {renderAttractionStep("📍 Localização", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="venue_name" render={({ field }) => (
@@ -3390,9 +3470,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Passageiros">
+        {renderAttractionStep("👨‍👩‍👧 Passageiros", <>
 
         <div className="space-y-2">
           {passengers.map((p, i) => (
@@ -3431,9 +3511,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📌 Regras e Políticas">
+        {renderAttractionStep("📌 Regras e Políticas", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
@@ -3485,9 +3565,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🧠 Dicas do Agente de Viagem">
+        {renderAttractionStep("🧠 Dicas do Agente de Viagem", <>
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
@@ -3497,9 +3577,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📞 Contatos de Suporte">
+        {renderAttractionStep("📞 Contatos de Suporte", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="attraction_contact" render={({ field }) => (
@@ -3543,16 +3623,55 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Ingresso (PDF ou Imagem)" />
+        {(!wizardMode || attractionStepIndex === totalAttractionSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Ingresso (PDF ou Imagem)" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstAttractionStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goAttractionBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastAttractionStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goAttractionNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveAttractionNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastAttractionStep ? (
+                <Button type="button" size="sm" onClick={goAttractionNext} className="bg-pink-500 hover:bg-pink-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveAttractionNow} className="bg-pink-500 hover:bg-pink-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar ingresso
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5484,7 +5603,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "hotel": return <HotelEntry {...props} {...placesProps} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "transfer": return <TransferForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
-    case "attraction": return <AttractionForm {...props} {...placesProps} />;
+    case "attraction": return <AttractionForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "insurance": return <InsuranceForm {...props} />;
     case "cruise": return <CruiseForm {...props} {...placesProps} />;
     case "train": return <TrainForm {...props} />;
