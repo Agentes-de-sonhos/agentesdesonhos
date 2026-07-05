@@ -1606,13 +1606,13 @@ function TripWalletContent() {
             </AccordionContent>
           </AccordionItem>
 
-          {/* 4.5. Assinatura Comercial */}
+          {/* 4.5. Escolha uma Assinatura */}
           <AccordionItem value="signature" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
             <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
               <div className="w-fit">
                 <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
                   <UserCircle2 className="h-5 w-5 text-sky-500" />
-                  Assinatura Comercial
+                  Escolha uma Assinatura
                 </h2>
                 <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
               </div>
