@@ -4101,9 +4101,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🆘 O que Fazer em Emergência">
+        {renderInsuranceStep("🆘 O que Fazer em Emergência", <>
 
         <FormField control={form.control} name="how_to_activate" render={({ field }) => (
           <FormItem>
