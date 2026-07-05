@@ -6005,11 +6005,11 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 <Save className="h-4 w-4 mr-1" /> Salvar rascunho
               </Button>
               {!isLastOtherStep ? (
-                <Button type="button" size="sm" onClick={goOtherNext} className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Button type="button" size="sm" onClick={goOtherNext} className="bg-slate-600 hover:bg-slate-700 text-white">
                   Continuar <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
-                <Button type="button" size="sm" disabled={isLoading} onClick={saveOtherNow} className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveOtherNow} className="bg-slate-600 hover:bg-slate-700 text-white">
                   <Check className="h-4 w-4 mr-1" /> Salvar serviço
                 </Button>
               )}
