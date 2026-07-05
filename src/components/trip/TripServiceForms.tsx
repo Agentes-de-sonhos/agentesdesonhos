@@ -5553,7 +5553,7 @@ const trainSchema = z.object({
   destination_maps_url: z.string().optional(),
 });
 
-function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<{ name: string; notes?: string }[]>(
