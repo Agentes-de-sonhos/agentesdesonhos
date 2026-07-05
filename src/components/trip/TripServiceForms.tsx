@@ -4130,9 +4130,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Segurados">
+        {renderInsuranceStep("👨‍👩‍👧 Segurados", <>
 
         {insuredPersons.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
