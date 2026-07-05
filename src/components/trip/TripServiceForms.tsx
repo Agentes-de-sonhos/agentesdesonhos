@@ -4940,14 +4940,53 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
 
         </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
+        {(!wizardMode || cruiseStepIndex === totalCruiseSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstCruiseStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goCruiseBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastCruiseStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goCruiseNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveCruiseNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastCruiseStep ? (
+                <Button type="button" size="sm" onClick={goCruiseNext} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveCruiseNow} className="bg-sky-500 hover:bg-sky-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar cruzeiro
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
