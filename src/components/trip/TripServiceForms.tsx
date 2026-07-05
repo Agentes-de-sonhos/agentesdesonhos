@@ -4622,9 +4622,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🛏 Dados da Cabine">
+        {renderCruiseStep("🛏 Dados da Cabine", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cabin_type" render={({ field }) => (
@@ -4695,9 +4695,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👥 Passageiros">
+        {renderCruiseStep("👥 Passageiros", <>
 
         <div className="space-y-2">
           {passengers.map((p, i) => (
@@ -4734,9 +4734,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🗺 Roteiro do Cruzeiro">
+        {renderCruiseStep("🗺 Roteiro do Cruzeiro", <>
 
         <div className="space-y-2">
           {itinerary.map((stop, i) => (
@@ -4776,9 +4776,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="✅ Check-in Online">
+        {renderCruiseStep("✅ Check-in Online", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="checkin_url" render={({ field }) => (
@@ -4812,9 +4812,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⚠️ Orientações de Embarque">
+        {renderCruiseStep("⚠️ Orientações de Embarque", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="boarding_terminal" render={({ field }) => (
@@ -4891,9 +4891,9 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⚡ Dados Operacionais do Navio">
+        {renderCruiseStep("⚡ Dados Operacionais do Navio", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="onboard_currency" render={({ field }) => (
@@ -4938,7 +4938,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
         <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Boarding Pass / Confirmação" />
 
