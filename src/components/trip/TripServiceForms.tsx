@@ -3009,7 +3009,7 @@ interface AttractionPassengerInput {
   notes: string;
 }
 
-function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<AttractionPassengerInput[]>(defaultValues?.passengers || []);
@@ -3128,10 +3128,90 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state — mirrors the Hotel/Car wizard ───
+  const attractionStepTitles = [
+    "Informações Principais",
+    "Detalhes de Uso",
+    "Códigos do Ingresso",
+    "Localização",
+    "Passageiros",
+    "Regras e Políticas",
+    "Dicas do Agente de Viagem",
+    "Contatos de Suporte",
+    "Documentos",
+  ];
+  const attractionStepGroups: string[][] = [
+    ["🎟️ Informações Principais"],
+    ["📅 Detalhes de Uso"],
+    ["📱 Códigos do Ingresso"],
+    ["📍 Localização"],
+    ["👨‍👩‍👧 Passageiros"],
+    ["📌 Regras e Políticas"],
+    ["🧠 Dicas do Agente de Viagem"],
+    ["📞 Contatos de Suporte"],
+    [],
+  ];
+  const attractionSectionToStep = new Map<string, number>();
+  attractionStepGroups.forEach((titles, i) => titles.forEach((t) => attractionSectionToStep.set(t, i)));
+  const totalAttractionSteps = attractionStepTitles.length;
+  const [attractionStepIndex, setAttractionStepIndex] = useState(0);
+
+  const renderAttractionStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = attractionSectionToStep.get(title);
+    if (idx === undefined || idx !== attractionStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstAttractionStep = attractionStepIndex === 0;
+  const isLastAttractionStep = attractionStepIndex === totalAttractionSteps - 1;
+  const goAttractionBack = () => setAttractionStepIndex((s) => Math.max(0, s - 1));
+  const goAttractionNext = () => setAttractionStepIndex((s) => Math.min(totalAttractionSteps - 1, s + 1));
+  const saveAttractionNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🎟️ Informações Principais">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "236 72 153" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-pink-50 text-pink-600 shrink-0">
+                  <Sparkles className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {attractionStepTitles[attractionStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {attractionStepIndex + 1} de {totalAttractionSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-pink-500 transition-all duration-300"
+                style={{ width: `${((attractionStepIndex + 1) / totalAttractionSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderAttractionStep("🎟️ Informações Principais", <>
         {imageSlot}
         {googlePhotoSlot}
 
