@@ -4028,7 +4028,28 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   const goInsuranceNext = () => setInsuranceStepIndex((s) => Math.min(totalInsuranceSteps - 1, s + 1));
   const saveInsuranceNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyInsuranceImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("provider", p.seguradora);
+    setIf("plan_name", p.plano);
+    setIf("policy_number", p.apolice);
+    setIf("destination_covered", p.destino_cobertura);
+    setIf("coverage_type", p.cobertura);
+    const s = parseLocalDate(p.data_inicio); if (s) setIf("start_date", s);
+    const e = parseLocalDate(p.data_fim); if (e) setIf("end_date", e);
+    const notes: string[] = [];
+    if (Array.isArray(p.coberturas_detalhadas) && p.coberturas_detalhadas.length) {
+      notes.push("Coberturas:"); p.coberturas_detalhadas.forEach((c: string) => notes.push(`• ${c}`));
+    }
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (typeof p.valor_por_pessoa === "number") notes.push(`Por pessoa: ${p.valor_por_pessoa.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -4046,9 +4067,12 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
                   {insuranceStepTitles[insuranceStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {insuranceStepIndex + 1} de {totalInsuranceSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="rose" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {insuranceStepIndex + 1} de {totalInsuranceSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
