@@ -14,6 +14,8 @@ import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { WizardAIImportButton, WizardHeaderPortal, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
+import { AirfareSmartImport } from "@/components/quote/flight-wizard/AirfareSmartImport";
+import { normalizeParsedAirfareToLegacy } from "@/components/trip/FlightAutoImport";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -840,8 +842,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         title="Importar passagem aérea com IA"
         description="Envie um PDF, imagem ou cole o texto. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar."
       >
-        <FlightAutoImport
-          onImport={(data) => { handleFlightImport(data); setAiImportOpen(false); }}
+        <AirfareSmartImport
+          onCancel={() => setAiImportOpen(false)}
+          onConfirm={(_mapped, raw) => {
+            const legacy = normalizeParsedAirfareToLegacy(raw);
+            handleFlightImport(legacy);
+            setAiImportOpen(false);
+          }}
         />
       </ImportDialogShell>
     )}
