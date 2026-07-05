@@ -4492,6 +4492,17 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="insurance"
+        title="Importar seguro viagem com IA"
+        description="Envie apólice/voucher (PDF, imagem ou texto). A IA identifica plano, cobertura, vigência e valores."
+        onApply={applyInsuranceImport}
+      />
+    )}
+    </>
   );
 }
 
