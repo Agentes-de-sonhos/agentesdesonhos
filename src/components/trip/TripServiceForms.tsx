@@ -3098,6 +3098,17 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="transfer"
+        title="Importar transfer com IA"
+        description="Envie voucher/PDF, imagem ou cole o texto. A IA identifica trajeto, horário, veículo e valores. Você poderá revisar antes de salvar."
+        onApply={applyTransferImport}
+      />
+    )}
+    </>
   );
 }
 
