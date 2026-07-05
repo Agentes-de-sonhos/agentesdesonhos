@@ -1241,7 +1241,7 @@ export default function GerarOrcamento() {
               )}
             </Card>
 
-            {/* Assinatura Comercial */}
+            {/* Escolha uma Assinatura */}
             <QuoteSignatureCard quote={quote} onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })} />
           </div>
         </div>
