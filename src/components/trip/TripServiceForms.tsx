@@ -445,6 +445,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const goNext = () => setStepIndex((s) => Math.min(totalSteps - 1, s + 1));
   const saveNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+
   return (
     <Form {...form}>
       <form
@@ -464,9 +466,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
                   {stepTitles[stepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {stepIndex + 1} de {totalSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {stepIndex + 1} de {totalSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
