@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft } from "lucide-react";
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -2383,7 +2383,7 @@ const emptyTransferPassenger = (): TransferPassengerInput => ({
   name: '', age: '', passenger_type: 'adulto', needs_child_seat: 'nao', notes: '',
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [passengers, setPassengers] = useState<TransferPassengerInput[]>(
     defaultValues?.passengers?.length > 0 ? defaultValues.passengers : []
@@ -2456,10 +2456,88 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state — mirrors the Hotel/Car wizard ───
+  const transferStepTitles = [
+    "Informações Principais",
+    "Detalhes do Serviço",
+    "Locais de Embarque e Desembarque",
+    "Motorista e Contato",
+    "Detalhes do Veículo",
+    "Passageiros",
+    "Orientações Importantes",
+    "Documentos",
+  ];
+  const transferStepGroups: string[][] = [
+    ["🚐 Informações Principais"],
+    ["✈️ Detalhes da Chegada (Transfer IN)", "🧳 Detalhes da Saída (Transfer OUT)"],
+    ["📍 Locais de Embarque e Desembarque"],
+    ["👤 Motorista e Contato"],
+    ["🚗 Detalhes do Veículo"],
+    ["👨‍👩‍👧 Passageiros"],
+    ["⚠️ Orientações Importantes"],
+    [],
+  ];
+  const transferSectionToStep = new Map<string, number>();
+  transferStepGroups.forEach((titles, i) => titles.forEach((t) => transferSectionToStep.set(t, i)));
+  const totalTransferSteps = transferStepTitles.length;
+  const [transferStepIndex, setTransferStepIndex] = useState(0);
+
+  const renderTransferStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = transferSectionToStep.get(title);
+    if (idx === undefined || idx !== transferStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstTransferStep = transferStepIndex === 0;
+  const isLastTransferStep = transferStepIndex === totalTransferSteps - 1;
+  const goTransferBack = () => setTransferStepIndex((s) => Math.max(0, s - 1));
+  const goTransferNext = () => setTransferStepIndex((s) => Math.min(totalTransferSteps - 1, s + 1));
+  const saveTransferNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚐 Informações Principais">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "99 102 241" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 shrink-0">
+                  <ArrowRightLeft className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {transferStepTitles[transferStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {transferStepIndex + 1} de {totalTransferSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-indigo-500 transition-all duration-300"
+                style={{ width: `${((transferStepIndex + 1) / totalTransferSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderTransferStep("🚐 Informações Principais", <>
         {imageSlot}
         {googlePhotoSlot}
 
@@ -2587,11 +2665,10 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
         {/* === TRANSFER IN (ARRIVAL) === */}
-        {(transferType === 'arrival') && (
-          <CollapsibleFormSection title="✈️ Detalhes da Chegada (Transfer IN)">
+        {(transferType === 'arrival') && renderTransferStep("✈️ Detalhes da Chegada (Transfer IN)", <>
             <div className="grid gap-4 sm:grid-cols-3">
               <FormField control={form.control} name="flight_number" render={({ field }) => (
                 <FormItem><FormLabel>Nº do Voo</FormLabel><FormControl><Input placeholder="LA8084" {...field} /></FormControl></FormItem>
@@ -2626,12 +2703,10 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
             <FormField control={form.control} name="meeting_instructions" render={({ field }) => (
               <FormItem><FormLabel>Onde encontrar o motorista *</FormLabel><FormControl><TextareaWithTemplate placeholder="Ex: Saída do desembarque, portão B, motorista com placa com seu nome" rows={3} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
             )} />
-          </CollapsibleFormSection>
-        )}
+        </>)}
 
         {/* === TRANSFER OUT (DEPARTURE) === */}
-        {(transferType === 'departure') && (
-          <CollapsibleFormSection title="🧳 Detalhes da Saída (Transfer OUT)">
+        {(transferType === 'departure') && renderTransferStep("🧳 Detalhes da Saída (Transfer OUT)", <>
             <div className="grid gap-4 sm:grid-cols-3">
               <FormField control={form.control} name="hotel_departure_time" render={({ field }) => (
                 <FormItem><FormLabel>Horário de Saída do Hotel</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
@@ -2664,10 +2739,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
             <FormField control={form.control} name="departure_alert" render={({ field }) => (
               <FormItem><FormLabel>Alerta ao Passageiro</FormLabel><FormControl><Input placeholder="Esteja no lobby com 10 minutos de antecedência" {...field} /></FormControl></FormItem>
             )} />
-          </CollapsibleFormSection>
-        )}
+        </>)}
 
-        <CollapsibleFormSection title="📍 Locais de Embarque e Desembarque">
+        {renderTransferStep("📍 Locais de Embarque e Desembarque", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_address" render={({ field }) => (
             <FormItem><FormLabel>Endereço de Embarque</FormLabel><FormControl><Input placeholder="Endereço completo" {...field} /></FormControl></FormItem>
@@ -2688,9 +2762,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <FormItem><FormLabel>Observações Logísticas</FormLabel><FormControl><TextareaWithTemplate placeholder="Ex: acesso restrito, portaria lateral..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👤 Motorista e Contato">
+        {renderTransferStep("👤 Motorista e Contato", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="driver_name" render={({ field }) => (
             <FormItem><FormLabel>Nome do Motorista</FormLabel><FormControl><Input placeholder="Carlos" {...field} /></FormControl></FormItem>
@@ -2708,9 +2782,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🚗 Detalhes do Veículo">
+        {renderTransferStep("🚗 Detalhes do Veículo", <>
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="vehicle_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Veículo</FormLabel>
@@ -2753,9 +2827,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Passageiros">
+        {renderTransferStep("👨‍👩‍👧 Passageiros", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adults_count" render={({ field }) => (
             <FormItem><FormLabel>Adultos</FormLabel><FormControl><Input placeholder="2" {...field} /></FormControl></FormItem>
@@ -2812,9 +2886,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <Plus className="h-4 w-4 mr-2" /> Adicionar Passageiro
         </Button>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⚠️ Orientações Importantes">
+        {renderTransferStep("⚠️ Orientações Importantes", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
             <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><TextareaWithTemplate placeholder="Passaporte, voucher impresso..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
@@ -2838,16 +2912,55 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><TextareaWithTemplate placeholder="Notas gerais..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Transfer" />
+        {(!wizardMode || transferStepIndex === totalTransferSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Transfer" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstTransferStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goTransferBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastTransferStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goTransferNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveTransferNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastTransferStep ? (
+                <Button type="button" size="sm" onClick={goTransferNext} className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveTransferNow} className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar transfer
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5370,7 +5483,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "flight": return <FlightEntry {...props} />;
     case "hotel": return <HotelEntry {...props} {...placesProps} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
-    case "transfer": return <TransferForm {...props} {...placesProps} />;
+    case "transfer": return <TransferForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} />;
     case "insurance": return <InsuranceForm {...props} />;
     case "cruise": return <CruiseForm {...props} {...placesProps} />;
