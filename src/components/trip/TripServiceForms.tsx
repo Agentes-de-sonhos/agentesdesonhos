@@ -1978,7 +1978,40 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   const goCarNext = () => setCarStepIndex((s) => Math.min(totalCarSteps - 1, s + 1));
   const saveCarNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyCarImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    setIf("rental_company", p.locadora);
+    setIf("reservation_code", p.codigo_reserva || p.localizador);
+    setIf("pickup_location", p.local_retirada);
+    setIf("pickup_address", p.endereco_retirada);
+    setIf("pickup_date", p.data_retirada);
+    setIf("pickup_time", p.hora_retirada);
+    setIf("dropoff_location", p.local_devolucao);
+    setIf("dropoff_address", p.endereco_devolucao);
+    setIf("dropoff_date", p.data_devolucao);
+    setIf("dropoff_time", p.hora_devolucao);
+    setIf("car_type", p.categoria_veiculo);
+    setIf("car_model", p.modelo_veiculo);
+    setIf("transmission", p.transmissao);
+    setIf("fuel_type", p.combustivel);
+    if (typeof p.portas === "number") setIf("doors", String(p.portas));
+    if (typeof p.passageiros === "number") setIf("passenger_capacity", String(p.passageiros));
+    if (typeof p.bagagens === "number") setIf("luggage_capacity", String(p.bagagens));
+    setIf("fuel_policy", p.politica_combustivel);
+    setIf("insurance_coverage", p.protecao_seguro);
+    setIf("deductible", p.franquia);
+    setIf("required_documents", p.requisitos_motorista);
+    const notes: string[] = [];
+    if (Array.isArray(p.inclusos) && p.inclusos.length) { notes.push("Inclusos:"); p.inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (Array.isArray(p.nao_inclusos) && p.nao_inclusos.length) { notes.push("", "Não inclusos:"); p.nao_inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (Array.isArray(p.observacoes) && p.observacoes.length) { notes.push("", "Observações:"); p.observacoes.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (p.politica_cancelamento) notes.push("", "Política de cancelamento:", p.politica_cancelamento);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -1996,9 +2029,12 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
                   {carStepTitles[carStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {carStepIndex + 1} de {totalCarSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="emerald" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {carStepIndex + 1} de {totalCarSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
