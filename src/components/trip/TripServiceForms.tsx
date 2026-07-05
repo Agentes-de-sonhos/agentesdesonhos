@@ -13,7 +13,7 @@ import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { WizardAIImportButton, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
+import { WizardAIImportButton, WizardHeaderPortal, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -468,7 +468,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {stepIndex + 1} de {totalSteps}
                 </span>
@@ -1149,7 +1149,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {hotelStepIndex + 1} de {totalHotelSteps}
                 </span>
@@ -2030,7 +2030,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="emerald" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="emerald" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {carStepIndex + 1} de {totalCarSteps}
                 </span>
@@ -2657,7 +2657,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="indigo" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="indigo" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {transferStepIndex + 1} de {totalTransferSteps}
                 </span>
@@ -3368,7 +3368,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="pink" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="pink" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {attractionStepIndex + 1} de {totalAttractionSteps}
                 </span>
@@ -4068,7 +4068,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="rose" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="rose" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {insuranceStepIndex + 1} de {totalInsuranceSteps}
                 </span>
@@ -4744,7 +4744,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {cruiseStepIndex + 1} de {totalCruiseSteps}
                 </span>
@@ -5471,7 +5471,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {clampedOtherIndex + 1} de {totalOtherSteps}
                 </span>
@@ -6187,7 +6187,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardAIImportButton accent="fuchsia" onClick={() => setAiImportOpen(true)} />
+                <WizardHeaderPortal><WizardAIImportButton accent="fuchsia" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {trainStepIndex + 1} de {totalTrainSteps}
                 </span>
