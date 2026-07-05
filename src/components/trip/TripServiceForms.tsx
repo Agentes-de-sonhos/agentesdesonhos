@@ -5044,7 +5044,7 @@ const OTHER_SERVICE_TYPES = [
   { value: 'personalizado', label: '⭐ Personalizado' },
 ];
 
-function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
 
