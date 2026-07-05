@@ -4701,7 +4701,31 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const goCruiseNext = () => setCruiseStepIndex((s) => Math.min(totalCruiseSteps - 1, s + 1));
   const saveCruiseNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyCruiseImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("cruise_company", p.companhia);
+    setIf("ship_name", p.nome_navio);
+    setIf("route", p.rota);
+    setIf("embarkation_port", p.porto_embarque);
+    setIf("disembarkation_port", p.porto_desembarque);
+    const s = parseLocalDate(p.data_embarque); if (s) setIf("start_date", s);
+    const e = parseLocalDate(p.data_desembarque); if (e) setIf("end_date", e);
+    setIf("cabin_type", p.tipo_cabine);
+    setIf("cabin_number", p.numero_cabine);
+    const notes: string[] = [];
+    if (p.regime) notes.push(`Regime: ${p.regime}`);
+    if (Array.isArray(p.portos_visitados) && p.portos_visitados.length) {
+      notes.push("Portos visitados:"); p.portos_visitados.forEach((c: string) => notes.push(`• ${c}`));
+    }
+    if (typeof p.taxas_portuarias === "number") notes.push(`Taxas portuárias: ${p.taxas_portuarias.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -4719,9 +4743,12 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
                   {cruiseStepTitles[cruiseStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {cruiseStepIndex + 1} de {totalCruiseSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {cruiseStepIndex + 1} de {totalCruiseSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
