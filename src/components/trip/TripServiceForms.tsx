@@ -2412,6 +2412,14 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletCarRentalImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        onApply={(mapped) => applyCarImport(mapped)}
+      />
+    )}
+    </>
   );
 }
 
