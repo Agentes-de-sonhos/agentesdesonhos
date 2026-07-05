@@ -3846,6 +3846,17 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="attraction"
+        title="Importar ingresso/atração com IA"
+        description="Envie voucher, PDF, imagem ou texto. A IA identifica atração, data, quantidade e valores. Você poderá revisar antes de salvar."
+        onApply={applyAttractionImport}
+      />
+    )}
+    </>
   );
 }
 
