@@ -1118,10 +1118,6 @@ function TripWalletContent() {
           {/* Edit Service Dialog */}
           <Dialog open={!!editingService && !!selectedServiceType} onOpenChange={(open) => { if (!open) handleCancelServiceForm(); }}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card">
-              <div
-                id="wallet-wizard-ai-slot"
-                className="absolute right-12 top-3 z-20 flex items-center gap-2"
-              />
               <DialogHeader className="sr-only">
                 <DialogTitle>
                   Editar {selectedServiceType ? SERVICE_TYPE_LABELS[selectedServiceType] : "Serviço"}
@@ -1131,6 +1127,7 @@ function TripWalletContent() {
                 <ServiceFormHeader
                   serviceType={toQuoteServiceType(selectedServiceType)}
                   subtitle={`Edite os dados de ${SERVICE_TYPE_LABELS[selectedServiceType].toLowerCase()}.`}
+                  rightSlot={<div id="wallet-wizard-ai-slot" className="flex items-center" />}
                 />
               )}
               {editingService && selectedServiceType && (
