@@ -3319,9 +3319,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📅 Detalhes de Uso">
+        {renderAttractionStep("📅 Detalhes de Uso", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="entry_time" render={({ field }) => (
@@ -3387,9 +3387,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📱 Códigos do Ingresso">
+        {renderAttractionStep("📱 Códigos do Ingresso", <>
 
         <p className="text-xs text-muted-foreground">
           Adicione um código por ingresso (código de confirmação ou nº do pedido). Os campos crescem automaticamente conforme a quantidade de ingressos.
@@ -3433,9 +3433,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📍 Localização">
+        {renderAttractionStep("📍 Localização", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="venue_name" render={({ field }) => (
@@ -3470,9 +3470,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Passageiros">
+        {renderAttractionStep("👨‍👩‍👧 Passageiros", <>
 
         <div className="space-y-2">
           {passengers.map((p, i) => (
@@ -3511,9 +3511,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📌 Regras e Políticas">
+        {renderAttractionStep("📌 Regras e Políticas", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="cancellation_policy" render={({ field }) => (
@@ -3565,9 +3565,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🧠 Dicas do Agente de Viagem">
+        {renderAttractionStep("🧠 Dicas do Agente de Viagem", <>
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
@@ -3577,9 +3577,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📞 Contatos de Suporte">
+        {renderAttractionStep("📞 Contatos de Suporte", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="attraction_contact" render={({ field }) => (
@@ -3623,16 +3623,55 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Ingresso (PDF ou Imagem)" />
+        {(!wizardMode || attractionStepIndex === totalAttractionSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Ingresso (PDF ou Imagem)" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstAttractionStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goAttractionBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastAttractionStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goAttractionNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveAttractionNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastAttractionStep ? (
+                <Button type="button" size="sm" onClick={goAttractionNext} className="bg-pink-500 hover:bg-pink-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveAttractionNow} className="bg-pink-500 hover:bg-pink-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar ingresso
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
