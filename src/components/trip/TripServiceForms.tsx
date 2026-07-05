@@ -4171,9 +4171,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🧳 Dados da Viagem">
+        {renderInsuranceStep("🧳 Dados da Viagem", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="trip_purpose" render={({ field }) => (
