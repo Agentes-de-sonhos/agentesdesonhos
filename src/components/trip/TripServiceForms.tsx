@@ -832,6 +832,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <ImportDialogShell
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        title="Importar passagem aérea com IA"
+        description="Envie um PDF, imagem ou cole o texto. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar."
+      >
+        <FlightAutoImport
+          onImport={(data) => { handleFlightImport(data); setAiImportOpen(false); }}
+        />
+      </ImportDialogShell>
+    )}
+    </>
   );
 }
 
