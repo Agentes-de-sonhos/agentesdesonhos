@@ -6451,6 +6451,17 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="rail_transport"
+        title="Importar bilhete de trem com IA"
+        description="Envie voucher/PDF, imagem ou texto. A IA identifica trajeto, horários, classe e valores."
+        onApply={applyTrainImport}
+      />
+    )}
+    </>
   );
 }
 
