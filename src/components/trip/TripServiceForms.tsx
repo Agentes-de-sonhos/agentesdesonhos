@@ -6438,11 +6438,11 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 <Save className="h-4 w-4 mr-1" /> Salvar rascunho
               </Button>
               {!isLastTrainStep ? (
-                <Button type="button" size="sm" onClick={goTrainNext} className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white">
+                <Button type="button" size="sm" onClick={goTrainNext} className="bg-teal-500 hover:bg-teal-600 text-white">
                   Continuar <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
-                <Button type="button" size="sm" disabled={isLoading} onClick={saveTrainNow} className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white">
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveTrainNow} className="bg-teal-500 hover:bg-teal-600 text-white">
                   <Check className="h-4 w-4 mr-1" /> Salvar trem
                 </Button>
               )}
