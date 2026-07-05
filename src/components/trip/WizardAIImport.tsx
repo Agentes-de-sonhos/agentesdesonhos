@@ -1,4 +1,6 @@
 import { Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { GenericServiceSmartImport, type GenericServiceKey } from "@/components/quote/service-import/GenericServiceSmartImport";
@@ -38,6 +40,30 @@ export function WizardAIImportButton({
       <span className="sm:hidden">IA</span>
     </button>
   );
+}
+
+/**
+ * Portals its children into the modal header slot rendered by the parent
+ * dialog (e.g. Carteira Digital service dialog). Falls back to rendering
+ * inline when no slot is present in the DOM.
+ *
+ * Target slot id: `wallet-wizard-ai-slot`.
+ */
+export function WizardHeaderPortal({ children }: { children: React.ReactNode }) {
+  const [target, setTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const el = document.getElementById("wallet-wizard-ai-slot");
+    setTarget(el);
+    if (!el) return;
+    // Re-check on next tick in case the slot mounts after this form
+    const t = window.setTimeout(() => {
+      setTarget(document.getElementById("wallet-wizard-ai-slot"));
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
+  if (!target) return <>{children}</>;
+  return createPortal(children, target);
 }
 
 interface DialogWrapperProps {
