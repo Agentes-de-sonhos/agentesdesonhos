@@ -95,35 +95,44 @@ export function ServiceModeChooser({
   );
 }
 
-/** Compact contextual header for the manual form modal (icon + service name). */
+/** Compact contextual header for the manual form modal (icon + service name + optional right slot). */
 export function ServiceFormHeader({
   serviceType,
   subtitle,
+  rightSlot,
 }: {
   serviceType: ServiceType;
   subtitle?: string;
+  rightSlot?: React.ReactNode;
 }) {
   const theme = getServiceTheme(serviceType);
   const Icon = theme.Icon;
   return (
-    <div className="flex items-center gap-3 pb-4 mb-4 border-b border-border">
-      <span
-        className={cn(
-          "inline-flex h-9 w-9 items-center justify-center rounded-lg border",
-          theme.bgSoft,
-          theme.borderStrong,
-        )}
-      >
-        <Icon className={cn("h-4 w-4", theme.iconStrong)} />
-      </span>
-      <div className="min-w-0">
-        <p className={cn("text-xs font-semibold uppercase tracking-wide", theme.textStrong)}>
-          {theme.label}
-        </p>
-        <p className="text-sm text-muted-foreground leading-tight">
-          {subtitle ?? `Preencha os dados de ${theme.label.toLowerCase()}.`}
-        </p>
+    <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-border">
+      <div className="flex items-center gap-3 min-w-0">
+        <span
+          className={cn(
+            "inline-flex h-9 w-9 items-center justify-center rounded-lg border shrink-0",
+            theme.bgSoft,
+            theme.borderStrong,
+          )}
+        >
+          <Icon className={cn("h-4 w-4", theme.iconStrong)} />
+        </span>
+        <div className="min-w-0">
+          <p className={cn("text-xs font-semibold uppercase tracking-wide", theme.textStrong)}>
+            {theme.label}
+          </p>
+          <p className="text-sm text-muted-foreground leading-tight">
+            {subtitle ?? `Preencha os dados de ${theme.label.toLowerCase()}.`}
+          </p>
+        </div>
       </div>
+      {rightSlot && (
+        <div className="flex items-center shrink-0 pr-8 sm:pr-10">
+          {rightSlot}
+        </div>
+      )}
     </div>
   );
 }
