@@ -5139,10 +5139,79 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state ───
+  type OtherStepKey = "info" | "schedule" | "location" | "contact" | "chip" | "guide" | "agency" | "support" | "docs";
+  const otherStepMeta: { key: OtherStepKey; title: string }[] = [
+    { key: "info", title: "Informações do Serviço" },
+    { key: "schedule", title: "Agendamento" },
+    { key: "location", title: "Localização" },
+    { key: "contact", title: "Contato do Prestador" },
+    ...(isChip ? [{ key: "chip" as OtherStepKey, title: "Chip / Internet" }] : []),
+    ...(isGuide ? [{ key: "guide" as OtherStepKey, title: "Guia Turístico" }] : []),
+    { key: "agency", title: "Orientações da Agência" },
+    { key: "support", title: "Contatos de Suporte" },
+    { key: "docs", title: "Documentos" },
+  ];
+  const totalOtherSteps = otherStepMeta.length;
+  const [otherStepIndex, setOtherStepIndex] = useState(0);
+  const clampedOtherIndex = Math.min(otherStepIndex, totalOtherSteps - 1);
+  const currentOtherKey = otherStepMeta[clampedOtherIndex]?.key;
+
+  const renderOtherStep = (key: OtherStepKey, title: string, children: React.ReactNode) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    if (currentOtherKey !== key) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstOtherStep = clampedOtherIndex === 0;
+  const isLastOtherStep = clampedOtherIndex === totalOtherSteps - 1;
+  const goOtherBack = () => setOtherStepIndex((s) => Math.max(0, s - 1));
+  const goOtherNext = () => setOtherStepIndex((s) => Math.min(totalOtherSteps - 1, s + 1));
+  const saveOtherNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🛎️ Informações do Serviço">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "245 158 11" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-600 shrink-0">
+                  <Sparkles className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {otherStepMeta[clampedOtherIndex]?.title}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {clampedOtherIndex + 1} de {totalOtherSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-amber-500 transition-all duration-300"
+                style={{ width: `${((clampedOtherIndex + 1) / totalOtherSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderOtherStep("info", "🛎️ Informações do Serviço", <>
         {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -5228,9 +5297,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📅 Agendamento">
+        {renderOtherStep("schedule", "📅 Agendamento", <>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="date" render={({ field }) => (
@@ -5268,9 +5337,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📍 Localização">
+        {renderOtherStep("location", "📍 Localização", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="location_name" render={({ field }) => (
@@ -5314,9 +5383,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👤 Contato do Prestador">
+        {renderOtherStep("contact", "👤 Contato do Prestador", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="contact_name" render={({ field }) => (
@@ -5367,15 +5436,20 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
         {/* === CHIP / INTERNET (CONDICIONAL) === */}
-        {isChip && (
+        {isChip && (!wizardMode || currentOtherKey === "chip") && (
           <>
-            <div className="space-y-1">
-              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📶 Chip / Internet</h4>
-              <div className="h-px bg-border" />
-            </div>
+            {!wizardMode && (
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">📶 Chip / Internet</h4>
+                <div className="h-px bg-border" />
+              </div>
+            )}
+            {wizardMode && (
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+                <h4 className="text-sm font-semibold text-slate-700">📶 Chip / Internet</h4>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField control={form.control} name="chip_operator" render={({ field }) => (
@@ -5424,17 +5498,72 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 </FormItem>
               )} />
             </div>
+              </div>
+            )}
+            {!wizardMode && (
+              <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="chip_operator" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Operadora</FormLabel>
+                  <FormControl><Input placeholder="T-Mobile, Airalo, Holafly..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="chip_type" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="esim">eSIM (digital)</SelectItem>
+                      <SelectItem value="fisico">Chip Físico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+            <FormField control={form.control} name="chip_activation_instructions" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Instruções de Ativação</FormLabel>
+                <FormControl><TextareaWithTemplate placeholder="Passo a passo para ativar o chip..." rows={3} {...field} onValueChange={field.onChange} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="chip_activation_url" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link de Ativação</FormLabel>
+                  <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="chip_support" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Suporte Técnico</FormLabel>
+                  <FormControl><Input placeholder="Telefone ou e-mail do suporte" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+              </>
+            )}
           </>
         )}
 
         {/* === GUIA TURÍSTICO (CONDICIONAL) === */}
-        {isGuide && (
+        {isGuide && (!wizardMode || currentOtherKey === "guide") && (
           <>
-            <div className="space-y-1">
-              <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧭 Guia Turístico</h4>
-              <div className="h-px bg-border" />
-            </div>
-
+            {!wizardMode && (
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-primary uppercase tracking-wide">🧭 Guia Turístico</h4>
+                <div className="h-px bg-border" />
+              </div>
+            )}
+            {wizardMode && (
+              <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+                <h4 className="text-sm font-semibold text-slate-700">🧭 Guia Turístico</h4>
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField control={form.control} name="guide_name" render={({ field }) => (
                 <FormItem>
@@ -5475,11 +5604,56 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 </FormItem>
               )} />
             </div>
+              </div>
+            )}
+            {!wizardMode && (
+              <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField control={form.control} name="guide_name" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome do Guia</FormLabel>
+                  <FormControl><Input placeholder="Nome completo" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="guide_language" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Idioma do Guia</FormLabel>
+                  <FormControl><Input placeholder="Português, Espanhol..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField control={form.control} name="guide_tour_time" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Horário do Tour</FormLabel>
+                  <FormControl><Input type="time" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="guide_tour_duration" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duração do Passeio</FormLabel>
+                  <FormControl><Input placeholder="3h, meio dia..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={form.control} name="guide_meeting_point" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ponto de Encontro</FormLabel>
+                  <FormControl><Input placeholder="Entrada principal, lobby..." {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+              </>
+            )}
           </>
         )}
 
 
-        <CollapsibleFormSection title="🧠 Orientações da Agência">
+        {renderOtherStep("agency", "🧠 Orientações da Agência", <>
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
@@ -5497,9 +5671,9 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📞 Contatos de Suporte">
+        {renderOtherStep("support", "📞 Contatos de Suporte", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="agency_contact" render={({ field }) => (
@@ -5518,16 +5692,55 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Comprovante / Voucher / Documento" />
+        {(!wizardMode || currentOtherKey === "docs") && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Comprovante / Voucher / Documento" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstOtherStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goOtherBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastOtherStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goOtherNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveOtherNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastOtherStep ? (
+                <Button type="button" size="sm" onClick={goOtherNext} className="bg-amber-500 hover:bg-amber-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveOtherNow} className="bg-amber-500 hover:bg-amber-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar serviço
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
