@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon } from "lucide-react";
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -1786,7 +1786,7 @@ interface CarDriverInput {
 
 const emptyDriver = (): CarDriverInput => ({ name: '', document: '', age: '', notes: '' });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const [files, setFiles] = useState<File[]>([]);
   const [drivers, setDrivers] = useState<CarDriverInput[]>(
     defaultValues?.drivers?.length > 0 ? defaultValues.drivers : [emptyDriver()]
@@ -1859,10 +1859,92 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
 
   const statusLabels: Record<string, string> = { confirmada: 'Confirmada', emitida: 'Emitida', a_retirar: 'A Retirar' };
 
+  // ─── Wizard (assisted step-by-step) state — mirrors the Hotel/Flight wizard ───
+  const carStepTitles = [
+    "Informações Principais",
+    "Dados de Retirada",
+    "Dados de Devolução",
+    "Detalhes do Veículo",
+    "Seguros da Locação",
+    "Caução e Pagamento",
+    "Condutores",
+    "Política de Combustível",
+    "Orientações Importantes",
+    "Documentos",
+  ];
+  const carStepGroups: string[][] = [
+    ["🚗 Informações Principais"],
+    ["📍 Dados de Retirada"],
+    ["🔁 Dados de Devolução"],
+    ["🚘 Detalhes do Veículo"],
+    ["🛡️ Seguros da Locação"],
+    ["💳 Caução e Pagamento"],
+    ["👤 Condutores"],
+    ["⛽ Política de Combustível"],
+    ["⚠️ Orientações Importantes"],
+    [],
+  ];
+  const carSectionToStep = new Map<string, number>();
+  carStepGroups.forEach((titles, i) => titles.forEach((t) => carSectionToStep.set(t, i)));
+  const totalCarSteps = carStepTitles.length;
+  const [carStepIndex, setCarStepIndex] = useState(0);
+
+  const renderCarStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = carSectionToStep.get(title);
+    if (idx === undefined || idx !== carStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstCarStep = carStepIndex === 0;
+  const isLastCarStep = carStepIndex === totalCarSteps - 1;
+  const goCarBack = () => setCarStepIndex((s) => Math.max(0, s - 1));
+  const goCarNext = () => setCarStepIndex((s) => Math.min(totalCarSteps - 1, s + 1));
+  const saveCarNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🚗 Informações Principais">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "16 185 129" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shrink-0">
+                  <CarIcon className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {carStepTitles[carStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {carStepIndex + 1} de {totalCarSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-300"
+                style={{ width: `${((carStepIndex + 1) / totalCarSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderCarStep("🚗 Informações Principais", <>
         {imageSlot}
         {googlePhotoSlot}
         <div className="grid gap-4 sm:grid-cols-2">
@@ -1904,9 +1986,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📍 Dados de Retirada">
+        {renderCarStep("📍 Dados de Retirada", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_location" render={({ field }) => (
             <FormItem>
@@ -1961,9 +2043,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Link Google Maps (Retirada)</FormLabel><FormControl><Input placeholder="https://maps.google.com/..." {...field} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🔁 Dados de Devolução">
+        {renderCarStep("🔁 Dados de Devolução", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="dropoff_location" render={({ field }) => (
             <FormItem><FormLabel>Local de Devolução *</FormLabel><FormControl><Input placeholder="Aeroporto CDG" {...field} /></FormControl><FormMessage /></FormItem>
@@ -1990,9 +2072,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Política de Atraso</FormLabel><FormControl><Input placeholder="Cobrança por hora adicional..." {...field} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🚘 Detalhes do Veículo">
+        {renderCarStep("🚘 Detalhes do Veículo", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="car_model" render={({ field }) => (
             <FormItem><FormLabel>Modelo</FormLabel><FormControl><Input placeholder="Corolla ou similar" {...field} /></FormControl></FormItem>
@@ -2032,9 +2114,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🛡️ Seguros da Locação">
+        {renderCarStep("🛡️ Seguros da Locação", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="basic_insurance" render={({ field }) => (
             <FormItem><FormLabel>Seguro Básico</FormLabel><FormControl><Input placeholder="Sim / Não / Incluso" {...field} /></FormControl></FormItem>
@@ -2066,9 +2148,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações do Seguro</FormLabel><FormControl><TextareaWithTemplate placeholder="Informações importantes sobre o seguro..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="💳 Caução e Pagamento">
+        {renderCarStep("💳 Caução e Pagamento", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="deposit_amount" render={({ field }) => (
             <FormItem><FormLabel>Valor da Caução</FormLabel><FormControl><Input placeholder="€ 1.200" {...field} /></FormControl></FormItem>
@@ -2086,9 +2168,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👤 Condutores">
+        {renderCarStep("👤 Condutores", <>
         {drivers.map((d, i) => (
           <div key={i} className="border rounded-lg p-3 space-y-2 bg-muted/20">
             <div className="flex items-center justify-between">
@@ -2128,9 +2210,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Taxa Condutor Adicional</FormLabel><FormControl><Input placeholder="€ 10/dia" {...field} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⛽ Política de Combustível">
+        {renderCarStep("⛽ Política de Combustível", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="fuel_policy" render={({ field }) => (
             <FormItem><FormLabel>Política</FormLabel>
@@ -2152,9 +2234,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações de Combustível</FormLabel><FormControl><TextareaWithTemplate placeholder="Posto mais próximo, tipo de combustível..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⚠️ Orientações Importantes">
+        {renderCarStep("⚠️ Orientações Importantes", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
             <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><TextareaWithTemplate placeholder="CNH válida, passaporte..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
@@ -2178,16 +2260,55 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><TextareaWithTemplate placeholder="Informações adicionais..." rows={3} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Contrato da Locação" />
+        {(!wizardMode || carStepIndex === totalCarSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Contrato da Locação" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstCarStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goCarBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastCarStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goCarNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveCarNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastCarStep ? (
+                <Button type="button" size="sm" onClick={goCarNext} className="bg-emerald-500 hover:bg-emerald-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveCarNow} className="bg-emerald-500 hover:bg-emerald-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar locação
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5248,7 +5369,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
   switch (serviceType) {
     case "flight": return <FlightEntry {...props} />;
     case "hotel": return <HotelEntry {...props} {...placesProps} />;
-    case "car_rental": return <CarRentalForm {...props} {...placesProps} />;
+    case "car_rental": return <CarRentalForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "transfer": return <TransferForm {...props} {...placesProps} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} />;
     case "insurance": return <InsuranceForm {...props} />;
