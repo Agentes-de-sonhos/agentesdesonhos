@@ -3726,7 +3726,7 @@ interface InsuredPersonInput {
 
 const emptyInsured = (): InsuredPersonInput => ({ name: '', birth_date: '', document: '', coverage_type: '', notes: '' });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [insuredPersons, setInsuredPersons] = useState<InsuredPersonInput[]>(
@@ -3795,10 +3795,88 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state ───
+  const insuranceStepTitles = [
+    "Informações Principais",
+    "Coberturas do Seguro",
+    "Contatos de Emergência",
+    "O que Fazer em Emergência",
+    "Segurados",
+    "Dados da Viagem",
+    "Dicas da Agência",
+    "Documentos",
+  ];
+  const insuranceStepGroups: string[][] = [
+    ["🛡️ Informações Principais"],
+    ["🏥 Coberturas do Seguro"],
+    ["📞 Contatos de Emergência"],
+    ["🆘 O que Fazer em Emergência"],
+    ["👨‍👩‍👧 Segurados"],
+    ["🧳 Dados da Viagem"],
+    ["🧠 Dicas da Agência"],
+    [],
+  ];
+  const insuranceSectionToStep = new Map<string, number>();
+  insuranceStepGroups.forEach((titles, i) => titles.forEach((t) => insuranceSectionToStep.set(t, i)));
+  const totalInsuranceSteps = insuranceStepTitles.length;
+  const [insuranceStepIndex, setInsuranceStepIndex] = useState(0);
+
+  const renderInsuranceStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = insuranceSectionToStep.get(title);
+    if (idx === undefined || idx !== insuranceStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstInsuranceStep = insuranceStepIndex === 0;
+  const isLastInsuranceStep = insuranceStepIndex === totalInsuranceSteps - 1;
+  const goInsuranceBack = () => setInsuranceStepIndex((s) => Math.max(0, s - 1));
+  const goInsuranceNext = () => setInsuranceStepIndex((s) => Math.min(totalInsuranceSteps - 1, s + 1));
+  const saveInsuranceNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🛡️ Informações Principais">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "244 63 94" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-rose-50 text-rose-600 shrink-0">
+                  <Shield className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {insuranceStepTitles[insuranceStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {insuranceStepIndex + 1} de {totalInsuranceSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-rose-500 transition-all duration-300"
+                style={{ width: `${((insuranceStepIndex + 1) / totalInsuranceSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderInsuranceStep("🛡️ Informações Principais", <>
         {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
