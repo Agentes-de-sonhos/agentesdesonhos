@@ -4234,16 +4234,55 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Apólice / Voucher do Seguro" />
+        {(!wizardMode || insuranceStepIndex === totalInsuranceSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Apólice / Voucher do Seguro" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstInsuranceStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goInsuranceBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastInsuranceStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goInsuranceNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveInsuranceNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastInsuranceStep ? (
+                <Button type="button" size="sm" onClick={goInsuranceNext} className="bg-rose-500 hover:bg-rose-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveInsuranceNow} className="bg-rose-500 hover:bg-rose-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar seguro
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
