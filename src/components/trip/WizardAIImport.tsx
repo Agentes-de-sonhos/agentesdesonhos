@@ -8,7 +8,7 @@ import { SERVICE_IMPORT_CONFIGS } from "@/components/quote/service-import/servic
 import { CarRentalSmartImport } from "@/components/quote/car-rental-import/CarRentalSmartImport";
 
 export type WizardAccent =
-  | "sky" | "amber" | "emerald" | "indigo" | "pink" | "rose" | "fuchsia";
+  | "sky" | "amber" | "emerald" | "indigo" | "pink" | "rose" | "fuchsia" | "teal" | "slate";
 
 const ACCENT_MAP: Record<WizardAccent, { badge: string; ring: string }> = {
   sky:     { badge: "bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100",         ring: "focus-visible:ring-sky-500" },
@@ -18,6 +18,8 @@ const ACCENT_MAP: Record<WizardAccent, { badge: string; ring: string }> = {
   pink:    { badge: "bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100",     ring: "focus-visible:ring-pink-500" },
   rose:    { badge: "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100",     ring: "focus-visible:ring-rose-500" },
   fuchsia: { badge: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 hover:bg-fuchsia-100", ring: "focus-visible:ring-fuchsia-500" },
+  teal:    { badge: "bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100",     ring: "focus-visible:ring-teal-500" },
+  slate:   { badge: "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200", ring: "focus-visible:ring-slate-500" },
 };
 
 export function WizardAIImportButton({
