@@ -448,6 +448,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const [aiImportOpen, setAiImportOpen] = useState(false);
 
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
