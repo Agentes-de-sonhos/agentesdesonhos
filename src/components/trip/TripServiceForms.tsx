@@ -2665,11 +2665,10 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
         {/* === TRANSFER IN (ARRIVAL) === */}
-        {(transferType === 'arrival') && (
-          <CollapsibleFormSection title="✈️ Detalhes da Chegada (Transfer IN)">
+        {(transferType === 'arrival') && renderTransferStep("✈️ Detalhes da Chegada (Transfer IN)", <>
             <div className="grid gap-4 sm:grid-cols-3">
               <FormField control={form.control} name="flight_number" render={({ field }) => (
                 <FormItem><FormLabel>Nº do Voo</FormLabel><FormControl><Input placeholder="LA8084" {...field} /></FormControl></FormItem>
@@ -2704,12 +2703,10 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
             <FormField control={form.control} name="meeting_instructions" render={({ field }) => (
               <FormItem><FormLabel>Onde encontrar o motorista *</FormLabel><FormControl><TextareaWithTemplate placeholder="Ex: Saída do desembarque, portão B, motorista com placa com seu nome" rows={3} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
             )} />
-          </CollapsibleFormSection>
-        )}
+        </>)}
 
         {/* === TRANSFER OUT (DEPARTURE) === */}
-        {(transferType === 'departure') && (
-          <CollapsibleFormSection title="🧳 Detalhes da Saída (Transfer OUT)">
+        {(transferType === 'departure') && renderTransferStep("🧳 Detalhes da Saída (Transfer OUT)", <>
             <div className="grid gap-4 sm:grid-cols-3">
               <FormField control={form.control} name="hotel_departure_time" render={({ field }) => (
                 <FormItem><FormLabel>Horário de Saída do Hotel</FormLabel><FormControl><Input type="time" {...field} /></FormControl></FormItem>
@@ -2742,10 +2739,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
             <FormField control={form.control} name="departure_alert" render={({ field }) => (
               <FormItem><FormLabel>Alerta ao Passageiro</FormLabel><FormControl><Input placeholder="Esteja no lobby com 10 minutos de antecedência" {...field} /></FormControl></FormItem>
             )} />
-          </CollapsibleFormSection>
-        )}
+        </>)}
 
-        <CollapsibleFormSection title="📍 Locais de Embarque e Desembarque">
+        {renderTransferStep("📍 Locais de Embarque e Desembarque", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="pickup_address" render={({ field }) => (
             <FormItem><FormLabel>Endereço de Embarque</FormLabel><FormControl><Input placeholder="Endereço completo" {...field} /></FormControl></FormItem>
@@ -2766,9 +2762,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <FormItem><FormLabel>Observações Logísticas</FormLabel><FormControl><TextareaWithTemplate placeholder="Ex: acesso restrito, portaria lateral..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👤 Motorista e Contato">
+        {renderTransferStep("👤 Motorista e Contato", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="driver_name" render={({ field }) => (
             <FormItem><FormLabel>Nome do Motorista</FormLabel><FormControl><Input placeholder="Carlos" {...field} /></FormControl></FormItem>
@@ -2786,9 +2782,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🚗 Detalhes do Veículo">
+        {renderTransferStep("🚗 Detalhes do Veículo", <>
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField control={form.control} name="vehicle_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Veículo</FormLabel>
@@ -2831,9 +2827,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Passageiros">
+        {renderTransferStep("👨‍👩‍👧 Passageiros", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adults_count" render={({ field }) => (
             <FormItem><FormLabel>Adultos</FormLabel><FormControl><Input placeholder="2" {...field} /></FormControl></FormItem>
@@ -2890,9 +2886,9 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <Plus className="h-4 w-4 mr-2" /> Adicionar Passageiro
         </Button>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="⚠️ Orientações Importantes">
+        {renderTransferStep("⚠️ Orientações Importantes", <>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="required_documents" render={({ field }) => (
             <FormItem><FormLabel>Documentos Obrigatórios</FormLabel><FormControl><TextareaWithTemplate placeholder="Passaporte, voucher impresso..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
@@ -2916,16 +2912,55 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
           <FormItem><FormLabel>Observações Gerais</FormLabel><FormControl><TextareaWithTemplate placeholder="Notas gerais..." rows={2} {...field} onValueChange={field.onChange} /></FormControl></FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Transfer" />
+        {(!wizardMode || transferStepIndex === totalTransferSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Voucher / Confirmação do Transfer" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstTransferStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goTransferBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastTransferStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goTransferNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveTransferNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastTransferStep ? (
+                <Button type="button" size="sm" onClick={goTransferNext} className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveTransferNow} className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar transfer
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
