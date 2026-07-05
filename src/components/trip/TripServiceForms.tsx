@@ -5603,7 +5603,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "hotel": return <HotelEntry {...props} {...placesProps} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "transfer": return <TransferForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
-    case "attraction": return <AttractionForm {...props} {...placesProps} />;
+    case "attraction": return <AttractionForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "insurance": return <InsuranceForm {...props} />;
     case "cruise": return <CruiseForm {...props} {...placesProps} />;
     case "train": return <TrainForm {...props} />;
