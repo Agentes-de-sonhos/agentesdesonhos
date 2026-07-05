@@ -6018,6 +6018,17 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="other"
+        title="Importar serviço com IA"
+        description="Envie voucher/PDF, imagem ou texto. A IA identifica o serviço, datas e valores."
+        onApply={applyOtherImport}
+      />
+    )}
+    </>
   );
 }
 
