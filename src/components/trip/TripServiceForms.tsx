@@ -5436,7 +5436,23 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const goOtherNext = () => setOtherStepIndex((s) => Math.min(totalOtherSteps - 1, s + 1));
   const saveOtherNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyOtherImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("service_name", p.titulo || p.empresa);
+    const d = parseLocalDate(p.data); if (d) setIf("date", d);
+    setIf("time", p.hora);
+    const notes: string[] = [];
+    if (p.empresa) notes.push(`Empresa: ${p.empresa}`);
+    if (p.descricao) notes.push(p.descricao);
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (Array.isArray(p.observacoes)) p.observacoes.forEach((o: string) => notes.push(`• ${o}`));
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -5454,9 +5470,12 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                   {otherStepMeta[clampedOtherIndex]?.title}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {clampedOtherIndex + 1} de {totalOtherSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {clampedOtherIndex + 1} de {totalOtherSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
