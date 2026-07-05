@@ -3326,7 +3326,30 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const goAttractionNext = () => setAttractionStepIndex((s) => Math.min(totalAttractionSteps - 1, s + 1));
   const saveAttractionNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyAttractionImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("name", p.nome_produto);
+    setIf("attraction_type", p.tipo_ingresso);
+    setIf("city", p.cidade);
+    const d = parseLocalDate(p.data); if (d) setIf("date", d);
+    setIf("entry_time", p.hora);
+    setIf("duration", p.duracao);
+    setIf("entry_point", p.ponto_encontro);
+    if (typeof p.quantidade_adultos === "number" || typeof p.quantidade_criancas === "number") {
+      const total = (Number(p.quantidade_adultos)||0) + (Number(p.quantidade_criancas)||0);
+      if (total > 0) form.setValue("quantity" as any, total as any);
+    }
+    const notes: string[] = [];
+    if (Array.isArray(p.inclusos) && p.inclusos.length) { notes.push("Inclusos:"); p.inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (Array.isArray(p.nao_inclusos) && p.nao_inclusos.length) { notes.push("","Não inclusos:"); p.nao_inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -3344,9 +3367,12 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
                   {attractionStepTitles[attractionStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {attractionStepIndex + 1} de {totalAttractionSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="pink" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {attractionStepIndex + 1} de {totalAttractionSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
