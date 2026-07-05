@@ -108,7 +108,7 @@ export function WalletCarRentalImportDialog({
     >
       <CarRentalSmartImport
         onCancel={() => onOpenChange(false)}
-        onConfirm={(mapped) => { onApply(mapped as any); onOpenChange(false); }}
+        onConfirm={(_mapped, raw) => { onApply(raw as any); onOpenChange(false); }}
       />
     </ImportDialogShell>
   );
