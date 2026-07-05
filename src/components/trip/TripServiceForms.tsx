@@ -1102,7 +1102,35 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const goHotelNext = () => setHotelStepIndex((s) => Math.min(totalHotelSteps - 1, s + 1));
   const saveHotelNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyHotelImport = (mapped: Partial<any>, raw?: ParsedHotel) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d: string) => { const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    if (mapped?.hotel_name) setIf("hotel_name", mapped.hotel_name);
+    if (mapped?.city) {
+      const parts = String(mapped.city).split(",").map((s) => s.trim()).filter(Boolean);
+      setIf("city", parts[0] || mapped.city);
+      if (parts.length > 1) setIf("country", parts.slice(1).join(", "));
+    }
+    if (mapped?.check_in) setIf("check_in", parseLocalDate(mapped.check_in));
+    if (mapped?.check_out) setIf("check_out", parseLocalDate(mapped.check_out));
+    setIf("room_type", mapped?.room_type);
+    setIf("meal_plan", mapped?.meal_plan);
+    setIf("notes", mapped?.notes);
+    if (raw) {
+      setIf("address", raw.endereco);
+      setIf("checkin_time", raw.horario_check_in);
+      setIf("checkout_time", raw.horario_check_out);
+      setIf("reservation_code", raw.codigo_reserva);
+      setIf("cancellation_policy", raw.politica_cancelamento);
+      setIf("hotel_phone", (raw as any).telefone);
+      setIf("hotel_email", (raw as any).email);
+      setIf("hotel_website", (raw as any).website);
+    }
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -1120,9 +1148,12 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                   {hotelStepTitles[hotelStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {hotelStepIndex + 1} de {totalHotelSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {hotelStepIndex + 1} de {totalHotelSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
