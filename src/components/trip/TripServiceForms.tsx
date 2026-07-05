@@ -13,6 +13,7 @@ import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { WizardAIImportButton, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -444,7 +445,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const goNext = () => setStepIndex((s) => Math.min(totalSteps - 1, s + 1));
   const saveNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -463,9 +467,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
                   {stepTitles[stepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {stepIndex + 1} de {totalSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {stepIndex + 1} de {totalSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -826,6 +833,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <ImportDialogShell
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        title="Importar passagem aérea com IA"
+        description="Envie um PDF, imagem ou cole o texto. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar."
+      >
+        <FlightAutoImport
+          onImport={(data) => { handleFlightImport(data); setAiImportOpen(false); }}
+        />
+      </ImportDialogShell>
+    )}
+    </>
   );
 }
 
@@ -1082,7 +1102,35 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const goHotelNext = () => setHotelStepIndex((s) => Math.min(totalHotelSteps - 1, s + 1));
   const saveHotelNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyHotelImport = (mapped: Partial<any>, raw?: ParsedHotel) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d: string) => { const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    if (mapped?.hotel_name) setIf("hotel_name", mapped.hotel_name);
+    if (mapped?.city) {
+      const parts = String(mapped.city).split(",").map((s) => s.trim()).filter(Boolean);
+      setIf("city", parts[0] || mapped.city);
+      if (parts.length > 1) setIf("country", parts.slice(1).join(", "));
+    }
+    if (mapped?.check_in) setIf("check_in", parseLocalDate(mapped.check_in));
+    if (mapped?.check_out) setIf("check_out", parseLocalDate(mapped.check_out));
+    setIf("room_type", mapped?.room_type);
+    setIf("meal_plan", mapped?.meal_plan);
+    setIf("notes", mapped?.notes);
+    if (raw) {
+      setIf("address", raw.endereco);
+      setIf("checkin_time", raw.horario_check_in);
+      setIf("checkout_time", raw.horario_check_out);
+      setIf("reservation_code", raw.codigo_reserva);
+      setIf("cancellation_policy", raw.politica_cancelamento);
+      setIf("hotel_phone", (raw as any).telefone);
+      setIf("hotel_email", (raw as any).email);
+      setIf("hotel_website", (raw as any).website);
+    }
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -1100,9 +1148,12 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                   {hotelStepTitles[hotelStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {hotelStepIndex + 1} de {totalHotelSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {hotelStepIndex + 1} de {totalHotelSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -1718,6 +1769,20 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <ImportDialogShell
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        title="Importar hospedagem com IA"
+        description="Envie um PDF, imagem ou cole o texto da reserva. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar."
+      >
+        <HotelSmartImport
+          onCancel={() => setAiImportOpen(false)}
+          onConfirm={(mapped, raw) => { applyHotelImport(mapped, raw); setAiImportOpen(false); }}
+        />
+      </ImportDialogShell>
+    )}
+    </>
   );
 }
 
@@ -1913,7 +1978,40 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   const goCarNext = () => setCarStepIndex((s) => Math.min(totalCarSteps - 1, s + 1));
   const saveCarNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyCarImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    setIf("rental_company", p.locadora);
+    setIf("reservation_code", p.codigo_reserva || p.localizador);
+    setIf("pickup_location", p.local_retirada);
+    setIf("pickup_address", p.endereco_retirada);
+    setIf("pickup_date", p.data_retirada);
+    setIf("pickup_time", p.hora_retirada);
+    setIf("dropoff_location", p.local_devolucao);
+    setIf("dropoff_address", p.endereco_devolucao);
+    setIf("dropoff_date", p.data_devolucao);
+    setIf("dropoff_time", p.hora_devolucao);
+    setIf("car_type", p.categoria_veiculo);
+    setIf("car_model", p.modelo_veiculo);
+    setIf("transmission", p.transmissao);
+    setIf("fuel_type", p.combustivel);
+    if (typeof p.portas === "number") setIf("doors", String(p.portas));
+    if (typeof p.passageiros === "number") setIf("passenger_capacity", String(p.passageiros));
+    if (typeof p.bagagens === "number") setIf("luggage_capacity", String(p.bagagens));
+    setIf("fuel_policy", p.politica_combustivel);
+    setIf("insurance_coverage", p.protecao_seguro);
+    setIf("deductible", p.franquia);
+    setIf("required_documents", p.requisitos_motorista);
+    const notes: string[] = [];
+    if (Array.isArray(p.inclusos) && p.inclusos.length) { notes.push("Inclusos:"); p.inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (Array.isArray(p.nao_inclusos) && p.nao_inclusos.length) { notes.push("", "Não inclusos:"); p.nao_inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (Array.isArray(p.observacoes) && p.observacoes.length) { notes.push("", "Observações:"); p.observacoes.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (p.politica_cancelamento) notes.push("", "Política de cancelamento:", p.politica_cancelamento);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -1931,9 +2029,12 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
                   {carStepTitles[carStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {carStepIndex + 1} de {totalCarSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="emerald" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {carStepIndex + 1} de {totalCarSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -2311,6 +2412,14 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletCarRentalImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        onApply={(mapped) => applyCarImport(mapped)}
+      />
+    )}
+    </>
   );
 }
 
@@ -2506,7 +2615,30 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
   const goTransferNext = () => setTransferStepIndex((s) => Math.min(totalTransferSteps - 1, s + 1));
   const saveTransferNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyTransferImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    const mode = String(p.tipo_transfer || "").toLowerCase();
+    if (mode.includes("depart") || mode.includes("saíd") || mode.includes("saida") || mode.includes("volta")) form.setValue("transfer_type", "departure");
+    else if (mode.includes("arrival") || mode.includes("cheg")) form.setValue("transfer_type", "arrival");
+    setIf("company_name", p.empresa);
+    setIf("origin_location", p.origem);
+    setIf("destination_location", p.destino);
+    const d = parseLocalDate(p.data); if (d) setIf("date", d);
+    setIf("time", p.hora);
+    setIf("vehicle_type", p.veiculo);
+    if (typeof p.passageiros === "number") setIf("adults_count", String(p.passageiros));
+    const notes: string[] = [];
+    if (p.trajeto) notes.push(`Trajeto: ${p.trajeto}`);
+    if (p.categoria) notes.push(`Categoria: ${p.categoria}`);
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (Array.isArray(p.observacoes)) p.observacoes.forEach((o: string) => notes.push(`• ${o}`));
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -2524,9 +2656,12 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
                   {transferStepTitles[transferStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {transferStepIndex + 1} de {totalTransferSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="indigo" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {transferStepIndex + 1} de {totalTransferSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -2963,6 +3098,17 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="transfer"
+        title="Importar transfer com IA"
+        description="Envie voucher/PDF, imagem ou cole o texto. A IA identifica trajeto, horário, veículo e valores. Você poderá revisar antes de salvar."
+        onApply={applyTransferImport}
+      />
+    )}
+    </>
   );
 }
 
@@ -3180,7 +3326,30 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const goAttractionNext = () => setAttractionStepIndex((s) => Math.min(totalAttractionSteps - 1, s + 1));
   const saveAttractionNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyAttractionImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("name", p.nome_produto);
+    setIf("attraction_type", p.tipo_ingresso);
+    setIf("city", p.cidade);
+    const d = parseLocalDate(p.data); if (d) setIf("date", d);
+    setIf("entry_time", p.hora);
+    setIf("duration", p.duracao);
+    setIf("entry_point", p.ponto_encontro);
+    if (typeof p.quantidade_adultos === "number" || typeof p.quantidade_criancas === "number") {
+      const total = (Number(p.quantidade_adultos)||0) + (Number(p.quantidade_criancas)||0);
+      if (total > 0) form.setValue("quantity" as any, total as any);
+    }
+    const notes: string[] = [];
+    if (Array.isArray(p.inclusos) && p.inclusos.length) { notes.push("Inclusos:"); p.inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (Array.isArray(p.nao_inclusos) && p.nao_inclusos.length) { notes.push("","Não inclusos:"); p.nao_inclusos.forEach((i: string) => notes.push(`• ${i}`)); }
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -3198,9 +3367,12 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
                   {attractionStepTitles[attractionStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {attractionStepIndex + 1} de {totalAttractionSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="pink" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {attractionStepIndex + 1} de {totalAttractionSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -3674,6 +3846,17 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="attraction"
+        title="Importar ingresso/atração com IA"
+        description="Envie voucher, PDF, imagem ou texto. A IA identifica atração, data, quantidade e valores. Você poderá revisar antes de salvar."
+        onApply={applyAttractionImport}
+      />
+    )}
+    </>
   );
 }
 
@@ -3845,7 +4028,28 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   const goInsuranceNext = () => setInsuranceStepIndex((s) => Math.min(totalInsuranceSteps - 1, s + 1));
   const saveInsuranceNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyInsuranceImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("provider", p.seguradora);
+    setIf("plan_name", p.plano);
+    setIf("policy_number", p.apolice);
+    setIf("destination_covered", p.destino_cobertura);
+    setIf("coverage_type", p.cobertura);
+    const s = parseLocalDate(p.data_inicio); if (s) setIf("start_date", s);
+    const e = parseLocalDate(p.data_fim); if (e) setIf("end_date", e);
+    const notes: string[] = [];
+    if (Array.isArray(p.coberturas_detalhadas) && p.coberturas_detalhadas.length) {
+      notes.push("Coberturas:"); p.coberturas_detalhadas.forEach((c: string) => notes.push(`• ${c}`));
+    }
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (typeof p.valor_por_pessoa === "number") notes.push(`Por pessoa: ${p.valor_por_pessoa.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -3863,9 +4067,12 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
                   {insuranceStepTitles[insuranceStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {insuranceStepIndex + 1} de {totalInsuranceSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="rose" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {insuranceStepIndex + 1} de {totalInsuranceSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -4285,6 +4492,17 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="insurance"
+        title="Importar seguro viagem com IA"
+        description="Envie apólice/voucher (PDF, imagem ou texto). A IA identifica plano, cobertura, vigência e valores."
+        onApply={applyInsuranceImport}
+      />
+    )}
+    </>
   );
 }
 
@@ -4483,7 +4701,31 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const goCruiseNext = () => setCruiseStepIndex((s) => Math.min(totalCruiseSteps - 1, s + 1));
   const saveCruiseNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyCruiseImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("cruise_company", p.companhia);
+    setIf("ship_name", p.nome_navio);
+    setIf("route", p.rota);
+    setIf("embarkation_port", p.porto_embarque);
+    setIf("disembarkation_port", p.porto_desembarque);
+    const s = parseLocalDate(p.data_embarque); if (s) setIf("start_date", s);
+    const e = parseLocalDate(p.data_desembarque); if (e) setIf("end_date", e);
+    setIf("cabin_type", p.tipo_cabine);
+    setIf("cabin_number", p.numero_cabine);
+    const notes: string[] = [];
+    if (p.regime) notes.push(`Regime: ${p.regime}`);
+    if (Array.isArray(p.portos_visitados) && p.portos_visitados.length) {
+      notes.push("Portos visitados:"); p.portos_visitados.forEach((c: string) => notes.push(`• ${c}`));
+    }
+    if (typeof p.taxas_portuarias === "number") notes.push(`Taxas portuárias: ${p.taxas_portuarias.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -4501,9 +4743,12 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
                   {cruiseStepTitles[cruiseStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {cruiseStepIndex + 1} de {totalCruiseSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="sky" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {cruiseStepIndex + 1} de {totalCruiseSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -4989,6 +5234,17 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="cruise"
+        title="Importar cruzeiro com IA"
+        description="Envie o voucher (PDF, imagem ou texto). A IA identifica navio, rota, datas, cabine e valores."
+        onApply={applyCruiseImport}
+      />
+    )}
+    </>
   );
 }
 
@@ -5180,7 +5436,23 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const goOtherNext = () => setOtherStepIndex((s) => Math.min(totalOtherSteps - 1, s + 1));
   const saveOtherNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyOtherImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("service_name", p.titulo || p.empresa);
+    const d = parseLocalDate(p.data); if (d) setIf("date", d);
+    setIf("time", p.hora);
+    const notes: string[] = [];
+    if (p.empresa) notes.push(`Empresa: ${p.empresa}`);
+    if (p.descricao) notes.push(p.descricao);
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (Array.isArray(p.observacoes)) p.observacoes.forEach((o: string) => notes.push(`• ${o}`));
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -5198,9 +5470,12 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                   {otherStepMeta[clampedOtherIndex]?.title}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {clampedOtherIndex + 1} de {totalOtherSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {clampedOtherIndex + 1} de {totalOtherSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -5743,6 +6018,17 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="other"
+        title="Importar serviço com IA"
+        description="Envie voucher/PDF, imagem ou texto. A IA identifica o serviço, datas e valores."
+        onApply={applyOtherImport}
+      />
+    )}
+    </>
   );
 }
 
@@ -5861,7 +6147,28 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const goTrainNext = () => setTrainStepIndex((s) => Math.min(totalTrainSteps - 1, s + 1));
   const saveTrainNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyTrainImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("origin_city", p.origem || p.cidade_origem);
+    setIf("origin_station", p.estacao_origem);
+    setIf("destination_city", p.destino || p.cidade_destino);
+    setIf("destination_station", p.estacao_destino);
+    const d = parseLocalDate(p.data); if (d) setIf("travel_date", d);
+    setIf("departure_time", p.hora_saida || p.hora);
+    setIf("arrival_time", p.hora_chegada);
+    setIf("train_company", p.operadora || p.empresa);
+    setIf("train_number", p.numero_trem);
+    setIf("travel_class", p.classe);
+    const notes: string[] = [];
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (Array.isArray(p.observacoes)) p.observacoes.forEach((o: string) => notes.push(`• ${o}`));
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -5879,9 +6186,12 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                   {trainStepTitles[trainStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {trainStepIndex + 1} de {totalTrainSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="fuchsia" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {trainStepIndex + 1} de {totalTrainSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
@@ -6141,6 +6451,17 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="rail_transport"
+        title="Importar bilhete de trem com IA"
+        description="Envie voucher/PDF, imagem ou texto. A IA identifica trajeto, horários, classe e valores."
+        onApply={applyTrainImport}
+      />
+    )}
+    </>
   );
 }
 
@@ -6149,8 +6470,8 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
   const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot };
   const placesProps = { placeId, onPlaceIdChange, googlePhotoSlot };
   switch (serviceType) {
-    case "flight": return <FlightEntry {...props} />;
-    case "hotel": return <HotelEntry {...props} {...placesProps} />;
+    case "flight": return <FlightForm {...props} wizardMode={!props.defaultValues} />;
+    case "hotel": return <HotelForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "transfer": return <TransferForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
