@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as HotelIcon, MapPin, CheckCircle2, Sparkles, ArrowLeft, ArrowRight, ChevronLeft, SkipForward, Save, Check, Car as CarIcon, ArrowRightLeft, Shield } from "lucide-react";
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -3726,7 +3726,7 @@ interface InsuredPersonInput {
 
 const emptyInsured = (): InsuredPersonInput => ({ name: '', birth_date: '', document: '', coverage_type: '', notes: '' });
 
-function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot }: Omit<TripServiceFormProps, "serviceType">) {
+function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [insuredPersons, setInsuredPersons] = useState<InsuredPersonInput[]>(
@@ -3795,10 +3795,88 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     );
   };
 
+  // ─── Wizard (assisted step-by-step) state ───
+  const insuranceStepTitles = [
+    "Informações Principais",
+    "Coberturas do Seguro",
+    "Contatos de Emergência",
+    "O que Fazer em Emergência",
+    "Segurados",
+    "Dados da Viagem",
+    "Dicas da Agência",
+    "Documentos",
+  ];
+  const insuranceStepGroups: string[][] = [
+    ["🛡️ Informações Principais"],
+    ["🏥 Coberturas do Seguro"],
+    ["📞 Contatos de Emergência"],
+    ["🆘 O que Fazer em Emergência"],
+    ["👨‍👩‍👧 Segurados"],
+    ["🧳 Dados da Viagem"],
+    ["🧠 Dicas da Agência"],
+    [],
+  ];
+  const insuranceSectionToStep = new Map<string, number>();
+  insuranceStepGroups.forEach((titles, i) => titles.forEach((t) => insuranceSectionToStep.set(t, i)));
+  const totalInsuranceSteps = insuranceStepTitles.length;
+  const [insuranceStepIndex, setInsuranceStepIndex] = useState(0);
+
+  const renderInsuranceStep = (title: string, children: React.ReactNode, defaultOpen?: boolean) => {
+    if (!wizardMode) {
+      return (
+        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+          {children}
+        </CollapsibleFormSection>
+      );
+    }
+    const idx = insuranceSectionToStep.get(title);
+    if (idx === undefined || idx !== insuranceStepIndex) return null;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+        <h4 className="text-sm font-semibold text-slate-700">{title}</h4>
+        <div className="space-y-4">{children}</div>
+      </div>
+    );
+  };
+
+  const isFirstInsuranceStep = insuranceStepIndex === 0;
+  const isLastInsuranceStep = insuranceStepIndex === totalInsuranceSteps - 1;
+  const goInsuranceBack = () => setInsuranceStepIndex((s) => Math.max(0, s - 1));
+  const goInsuranceNext = () => setInsuranceStepIndex((s) => Math.min(totalInsuranceSteps - 1, s + 1));
+  const saveInsuranceNow = () => form.handleSubmit(handleSubmit)();
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <CollapsibleFormSection title="🛡️ Informações Principais">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className={cn("space-y-6", wizardMode && "service-wizard")}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "244 63 94" } as React.CSSProperties) : undefined}
+      >
+        {wizardMode && (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-end justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-rose-50 text-rose-600 shrink-0">
+                  <Shield className="h-3.5 w-3.5" />
+                </span>
+                <h3 className="text-base font-semibold text-slate-900 truncate">
+                  {insuranceStepTitles[insuranceStepIndex]}
+                </h3>
+              </div>
+              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
+                Passo {insuranceStepIndex + 1} de {totalInsuranceSteps}
+              </span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full bg-rose-500 transition-all duration-300"
+                style={{ width: `${((insuranceStepIndex + 1) / totalInsuranceSteps) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {renderInsuranceStep("🛡️ Informações Principais", <>
         {imageSlot}
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -3903,9 +3981,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🏥 Coberturas do Seguro">
+        {renderInsuranceStep("🏥 Coberturas do Seguro", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="medical_assistance" render={({ field }) => (
@@ -3970,9 +4048,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="📞 Contatos de Emergência">
+        {renderInsuranceStep("📞 Contatos de Emergência", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="emergency_phone" render={({ field }) => (
@@ -4023,9 +4101,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           )} />
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🆘 O que Fazer em Emergência">
+        {renderInsuranceStep("🆘 O que Fazer em Emergência", <>
 
         <FormField control={form.control} name="how_to_activate" render={({ field }) => (
           <FormItem>
@@ -4052,9 +4130,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="👨‍👩‍👧 Segurados">
+        {renderInsuranceStep("👨‍👩‍👧 Segurados", <>
 
         {insuredPersons.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
@@ -4093,9 +4171,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </Button>
         </div>
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🧳 Dados da Viagem">
+        {renderInsuranceStep("🧳 Dados da Viagem", <>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="trip_purpose" render={({ field }) => (
@@ -4125,9 +4203,9 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <CollapsibleFormSection title="🧠 Dicas da Agência">
+        {renderInsuranceStep("🧠 Dicas da Agência", <>
 
         <FormField control={form.control} name="agency_tips" render={({ field }) => (
           <FormItem>
@@ -4156,16 +4234,55 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
           </FormItem>
         )} />
 
-        </CollapsibleFormSection>
+        </>)}
 
-        <MultiFileUpload files={files} setFiles={setFiles} label="Apólice / Voucher do Seguro" />
+        {(!wizardMode || insuranceStepIndex === totalInsuranceSteps - 1) && (
+          <div className={wizardMode ? "rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 shadow-sm" : undefined}>
+            <MultiFileUpload files={files} setFiles={setFiles} label="Apólice / Voucher do Seguro" />
+          </div>
+        )}
 
-        <div className="flex gap-2 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>
-            {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
-          </Button>
-        </div>
+        {!wizardMode ? (
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isEditing ? <><Pencil className="mr-2 h-4 w-4" /> Salvar</> : <><Plus className="mr-2 h-4 w-4" /> Salvar</>}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div className="flex gap-2">
+              {!isFirstInsuranceStep ? (
+                <Button type="button" variant="ghost" size="sm" onClick={goInsuranceBack} className="text-muted-foreground">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" size="sm" onClick={onCancel} className="text-muted-foreground">
+                  Cancelar
+                </Button>
+              )}
+              {!isLastInsuranceStep && (
+                <Button type="button" variant="ghost" size="sm" onClick={goInsuranceNext} className="text-muted-foreground">
+                  <SkipForward className="h-4 w-4 mr-1" /> Pular por enquanto
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" disabled={isLoading} onClick={saveInsuranceNow}>
+                <Save className="h-4 w-4 mr-1" /> Salvar rascunho
+              </Button>
+              {!isLastInsuranceStep ? (
+                <Button type="button" size="sm" onClick={goInsuranceNext} className="bg-rose-500 hover:bg-rose-600 text-white">
+                  Continuar <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveInsuranceNow} className="bg-rose-500 hover:bg-rose-600 text-white">
+                  <Check className="h-4 w-4 mr-1" /> Salvar seguro
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </form>
     </Form>
   );
@@ -5604,7 +5721,7 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
     case "car_rental": return <CarRentalForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "transfer": return <TransferForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
-    case "insurance": return <InsuranceForm {...props} />;
+    case "insurance": return <InsuranceForm {...props} wizardMode={!props.defaultValues} />;
     case "cruise": return <CruiseForm {...props} {...placesProps} />;
     case "train": return <TrainForm {...props} />;
     case "other": return <OtherForm {...props} />;
