@@ -2615,7 +2615,30 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
   const goTransferNext = () => setTransferStepIndex((s) => Math.min(totalTransferSteps - 1, s + 1));
   const saveTransferNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyTransferImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    const mode = String(p.tipo_transfer || "").toLowerCase();
+    if (mode.includes("depart") || mode.includes("saíd") || mode.includes("saida") || mode.includes("volta")) form.setValue("transfer_type", "departure");
+    else if (mode.includes("arrival") || mode.includes("cheg")) form.setValue("transfer_type", "arrival");
+    setIf("company_name", p.empresa);
+    setIf("origin_location", p.origem);
+    setIf("destination_location", p.destino);
+    const d = parseLocalDate(p.data); if (d) setIf("date", d);
+    setIf("time", p.hora);
+    setIf("vehicle_type", p.veiculo);
+    if (typeof p.passageiros === "number") setIf("adults_count", String(p.passageiros));
+    const notes: string[] = [];
+    if (p.trajeto) notes.push(`Trajeto: ${p.trajeto}`);
+    if (p.categoria) notes.push(`Categoria: ${p.categoria}`);
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (Array.isArray(p.observacoes)) p.observacoes.forEach((o: string) => notes.push(`• ${o}`));
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -2633,9 +2656,12 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
                   {transferStepTitles[transferStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {transferStepIndex + 1} de {totalTransferSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="indigo" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {transferStepIndex + 1} de {totalTransferSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
