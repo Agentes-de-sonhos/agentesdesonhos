@@ -5234,6 +5234,17 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <WalletGenericImportDialog
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        serviceKey="cruise"
+        title="Importar cruzeiro com IA"
+        description="Envie o voucher (PDF, imagem ou texto). A IA identifica navio, rota, datas, cabine e valores."
+        onApply={applyCruiseImport}
+      />
+    )}
+    </>
   );
 }
 
