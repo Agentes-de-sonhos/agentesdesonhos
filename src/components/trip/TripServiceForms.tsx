@@ -5457,13 +5457,13 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
-        style={wizardMode ? ({ ["--wizard-accent" as any]: "245 158 11" } as React.CSSProperties) : undefined}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "100 116 139" } as React.CSSProperties) : undefined}
       >
         {wizardMode && (
           <div className="space-y-3 pb-2">
             <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-50 text-amber-600 shrink-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-600 shrink-0">
                   <Sparkles className="h-3.5 w-3.5" />
                 </span>
                 <h3 className="text-base font-semibold text-slate-900 truncate">
@@ -5471,7 +5471,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardHeaderPortal><WizardAIImportButton accent="amber" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
+                <WizardHeaderPortal><WizardAIImportButton accent="slate" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {clampedOtherIndex + 1} de {totalOtherSteps}
                 </span>
@@ -5479,7 +5479,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
-                className="h-full bg-amber-500 transition-all duration-300"
+                className="h-full bg-slate-500 transition-all duration-300"
                 style={{ width: `${((clampedOtherIndex + 1) / totalOtherSteps) * 100}%` }}
               />
             </div>
@@ -6005,11 +6005,11 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 <Save className="h-4 w-4 mr-1" /> Salvar rascunho
               </Button>
               {!isLastOtherStep ? (
-                <Button type="button" size="sm" onClick={goOtherNext} className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Button type="button" size="sm" onClick={goOtherNext} className="bg-slate-600 hover:bg-slate-700 text-white">
                   Continuar <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
-                <Button type="button" size="sm" disabled={isLoading} onClick={saveOtherNow} className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveOtherNow} className="bg-slate-600 hover:bg-slate-700 text-white">
                   <Check className="h-4 w-4 mr-1" /> Salvar serviço
                 </Button>
               )}
@@ -6173,13 +6173,13 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn("space-y-4", wizardMode && "service-wizard")}
-        style={wizardMode ? ({ ["--wizard-accent" as any]: "217 70 239" } as React.CSSProperties) : undefined}
+        style={wizardMode ? ({ ["--wizard-accent" as any]: "20 184 166" } as React.CSSProperties) : undefined}
       >
         {wizardMode && (
           <div className="space-y-3 pb-2">
             <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-fuchsia-50 text-fuchsia-600 shrink-0">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-teal-50 text-teal-600 shrink-0">
                   <TrainFront className="h-3.5 w-3.5" />
                 </span>
                 <h3 className="text-base font-semibold text-slate-900 truncate">
@@ -6187,7 +6187,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 </h3>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <WizardHeaderPortal><WizardAIImportButton accent="fuchsia" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
+                <WizardHeaderPortal><WizardAIImportButton accent="teal" onClick={() => setAiImportOpen(true)} /></WizardHeaderPortal>
                 <span className="text-xs font-medium text-slate-500 tabular-nums">
                   Passo {trainStepIndex + 1} de {totalTrainSteps}
                 </span>
@@ -6195,7 +6195,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
-                className="h-full bg-fuchsia-500 transition-all duration-300"
+                className="h-full bg-teal-500 transition-all duration-300"
                 style={{ width: `${((trainStepIndex + 1) / totalTrainSteps) * 100}%` }}
               />
             </div>
@@ -6438,11 +6438,11 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                 <Save className="h-4 w-4 mr-1" /> Salvar rascunho
               </Button>
               {!isLastTrainStep ? (
-                <Button type="button" size="sm" onClick={goTrainNext} className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white">
+                <Button type="button" size="sm" onClick={goTrainNext} className="bg-teal-500 hover:bg-teal-600 text-white">
                   Continuar <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
-                <Button type="button" size="sm" disabled={isLoading} onClick={saveTrainNow} className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white">
+                <Button type="button" size="sm" disabled={isLoading} onClick={saveTrainNow} className="bg-teal-500 hover:bg-teal-600 text-white">
                   <Check className="h-4 w-4 mr-1" /> Salvar trem
                 </Button>
               )}
