@@ -1769,6 +1769,20 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         )}
       </form>
     </Form>
+    {wizardMode && (
+      <ImportDialogShell
+        open={aiImportOpen}
+        onOpenChange={setAiImportOpen}
+        title="Importar hospedagem com IA"
+        description="Envie um PDF, imagem ou cole o texto da reserva. A IA identifica as informações e preenche os campos automaticamente. Você poderá revisar e editar tudo antes de salvar."
+      >
+        <HotelSmartImport
+          onCancel={() => setAiImportOpen(false)}
+          onConfirm={(mapped, raw) => { applyHotelImport(mapped, raw); setAiImportOpen(false); }}
+        />
+      </ImportDialogShell>
+    )}
+    </>
   );
 }
 
