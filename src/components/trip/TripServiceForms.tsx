@@ -6214,8 +6214,8 @@ export function TripServiceForm({ serviceType, onSubmit, onCancel, isLoading, de
   const props = { onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot };
   const placesProps = { placeId, onPlaceIdChange, googlePhotoSlot };
   switch (serviceType) {
-    case "flight": return <FlightEntry {...props} />;
-    case "hotel": return <HotelEntry {...props} {...placesProps} />;
+    case "flight": return <FlightForm {...props} wizardMode={!props.defaultValues} />;
+    case "hotel": return <HotelForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "car_rental": return <CarRentalForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "transfer": return <TransferForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
     case "attraction": return <AttractionForm {...props} {...placesProps} wizardMode={!props.defaultValues} />;
