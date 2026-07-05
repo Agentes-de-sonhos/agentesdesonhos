@@ -6147,7 +6147,28 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const goTrainNext = () => setTrainStepIndex((s) => Math.min(totalTrainSteps - 1, s + 1));
   const saveTrainNow = () => form.handleSubmit(handleSubmit)();
 
+  const [aiImportOpen, setAiImportOpen] = useState(false);
+  const applyTrainImport = (p: any) => {
+    const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
+    const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
+    setIf("origin_city", p.origem || p.cidade_origem);
+    setIf("origin_station", p.estacao_origem);
+    setIf("destination_city", p.destino || p.cidade_destino);
+    setIf("destination_station", p.estacao_destino);
+    const d = parseLocalDate(p.data); if (d) setIf("travel_date", d);
+    setIf("departure_time", p.hora_saida || p.hora);
+    setIf("arrival_time", p.hora_chegada);
+    setIf("train_company", p.operadora || p.empresa);
+    setIf("train_number", p.numero_trem);
+    setIf("travel_class", p.classe);
+    const notes: string[] = [];
+    if (typeof p.valor_total_brl === "number") notes.push(`Total R$: ${p.valor_total_brl.toLocaleString("pt-BR",{minimumFractionDigits:2})}`);
+    if (Array.isArray(p.observacoes)) p.observacoes.forEach((o: string) => notes.push(`• ${o}`));
+    if (notes.length) setIf("notes", notes.join("\n"));
+  };
+
   return (
+    <>
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
@@ -6165,9 +6186,12 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
                   {trainStepTitles[trainStepIndex]}
                 </h3>
               </div>
-              <span className="text-xs font-medium text-slate-500 tabular-nums shrink-0">
-                Passo {trainStepIndex + 1} de {totalTrainSteps}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <WizardAIImportButton accent="fuchsia" onClick={() => setAiImportOpen(true)} />
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  Passo {trainStepIndex + 1} de {totalTrainSteps}
+                </span>
+              </div>
             </div>
             <div className="h-1 w-full rounded-full bg-slate-100 overflow-hidden">
               <div
