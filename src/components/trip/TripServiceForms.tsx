@@ -13,6 +13,7 @@ import { CalendarIcon, Plus, Upload, X, Pencil, Search, Loader2, Plane, Hotel as
 import { ServiceModeChooser } from "@/components/quote/ServiceModeChooser";
 import { HotelSmartImport, type ParsedHotel } from "@/components/quote/hotel-import/HotelSmartImport";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { WizardAIImportButton, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
