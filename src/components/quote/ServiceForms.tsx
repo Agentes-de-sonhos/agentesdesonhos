@@ -1232,13 +1232,17 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
           departure_date: departureDate,
           price: values.price,
         },
-        values.price * 2
+        values.price * 2,
+        undefined,
+        values.description || undefined
       );
     } else {
       const mappedType = values.transfer_mode === "arrival" ? "arrival" : "departure";
       await onSubmit(
         { ...base, transfer_type: mappedType, date: arrivalDate, price: values.price },
-        values.price
+        values.price,
+        undefined,
+        values.description || undefined
       );
     }
   };
