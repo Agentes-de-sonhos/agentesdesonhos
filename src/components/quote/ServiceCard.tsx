@@ -56,7 +56,7 @@ function getServiceDescription(service: QuoteService): string {
     case "flight": return `${data.origin_city} → ${data.destination_city} (${data.airline})`;
     case "hotel": return `${data.hotel_name} - ${data.city}`;
     case "car_rental": return `${data.car_type} - ${data.days} diária(s)`;
-    case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
+    case "transfer": return `${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
     case "attraction": return `${data.name} (${data.quantity || 1}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;
     case "cruise": return `${data.ship_name} - ${data.route}`;
@@ -118,7 +118,14 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
       if (data.dropoff_date) details.push(`Devolução: ${formatDate(data.dropoff_date)}${data.dropoff_time ? ` às ${data.dropoff_time}` : ''} — ${data.dropoff_location}`);
       else details.push(`Devolução: ${data.dropoff_location}`);
       break;
-    case "transfer": details.push(`Data: ${formatDate(data.date)}`); break;
+    case "transfer":
+      if (data.transfer_type === "round_trip") {
+        details.push(`Chegada: ${formatDate(data.arrival_date || data.date)}`);
+        if (data.departure_date) details.push(`Saída: ${formatDate(data.departure_date)}`);
+      } else {
+        details.push(`Data: ${formatDate(data.date)}`);
+      }
+      break;
     case "attraction":
       details.push(`Data: ${formatDate(data.date)}`);
       if (data.adult_price > 0) details.push(`Adulto: ${formatQuoteCurrency(data.adult_price, currency)}`);

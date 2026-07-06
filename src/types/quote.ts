@@ -148,10 +148,13 @@ export interface CarRentalData {
 }
 
 export interface TransferData {
-  transfer_type: 'arrival' | 'departure';
+  transfer_type: 'arrival' | 'departure' | 'round_trip';
   company_name?: string;
   location: string;
   date: string;
+  arrival_date?: string;
+  departure_date?: string;
+  service_category?: 'regular' | 'private' | null;
   price: number;
 }
 

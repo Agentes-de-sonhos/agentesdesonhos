@@ -67,7 +67,7 @@ function parseLocalDate(dateStr: string | null | undefined): Date | undefined {
 
 interface ServiceFormProps {
   serviceType: ServiceType;
-  onSubmit: (data: any, amount: number, optionLabel?: string, description?: string, imageUrl?: string, imageUrls?: string[]) => void;
+  onSubmit: (data: any, amount: number, optionLabel?: string, description?: string, imageUrl?: string, imageUrls?: string[]) => Promise<void> | void;
   onCancel: () => void;
   isLoading?: boolean;
   showOptionLabel?: boolean;
@@ -1192,7 +1192,7 @@ const transferSchema = z.object({
   service_category: z.enum(["regular", "private"]).optional(),
   location: z.string().optional(),
   arrival_date: z.date().optional().nullable(),
-  departure_date: z.date().optional(),
+  departure_date: z.date().optional().nullable(),
   price: z.number().min(0),
   description: z.string().optional(),
 });
@@ -1208,8 +1208,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
       service_category: init?.service_category || undefined,
       location: init?.location || "",
       price: init?.price || initialData?.amount || 0,
-      arrival_date: init?.date ? parseLocalDate(init.date) : tripStartDate,
-      departure_date: tripEndDate,
+      arrival_date: init?.arrival_date ? parseLocalDate(init.arrival_date) : (init?.date ? parseLocalDate(init.date) : tripStartDate),
+      departure_date: init?.departure_date ? parseLocalDate(init.departure_date) : tripEndDate,
       description: initialData?.description || "",
     },
   });
@@ -1220,22 +1220,29 @@ function TransferForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDat
 
   const handleSubmit = async (values: z.infer<typeof transferSchema>) => {
     const base = { company_name: values.company_name || "", location: values.location, service_category: values.service_category || null };
+    const arrivalDate = values.arrival_date ? format(values.arrival_date, "yyyy-MM-dd") : "";
+    const departureDate = values.departure_date ? format(values.departure_date, "yyyy-MM-dd") : "";
     if (values.transfer_mode === "round_trip") {
       await onSubmit(
-        { ...base, transfer_type: "arrival" as const, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
-        values.price
+        {
+          ...base,
+          transfer_type: "round_trip" as const,
+          date: arrivalDate,
+          arrival_date: arrivalDate,
+          departure_date: departureDate,
+          price: values.price,
+        },
+        values.price * 2,
+        undefined,
+        values.description || undefined
       );
-      if (values.departure_date) {
-        await onSubmit(
-          { ...base, transfer_type: "departure" as const, date: format(values.departure_date, "yyyy-MM-dd"), price: values.price },
-          values.price
-        );
-      }
     } else {
       const mappedType = values.transfer_mode === "arrival" ? "arrival" : "departure";
       await onSubmit(
-        { ...base, transfer_type: mappedType, date: format(values.arrival_date, "yyyy-MM-dd"), price: values.price },
-        values.price
+        { ...base, transfer_type: mappedType, date: arrivalDate, price: values.price },
+        values.price,
+        undefined,
+        values.description || undefined
       );
     }
   };

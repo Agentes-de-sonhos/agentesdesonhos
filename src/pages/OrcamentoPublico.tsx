@@ -97,7 +97,7 @@ function getServiceSummary(service: QuoteService): string {
     case "flight": return `${data.airline} | ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return `${data.hotel_name} — ${data.city}`;
     case "car_rental": return `${data.car_type} | ${data.days} diária(s)`;
-    case "transfer": return `${data.transfer_type === "arrival" ? "Chegada" : "Saída"} — ${data.location}`;
+    case "transfer": return `${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"} — ${data.location}`;
     case "attraction": return [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name;
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
@@ -188,7 +188,12 @@ function getServiceDetails(service: QuoteService): string[] {
       break;
     case "transfer":
       details.push(`Local: ${data.location}`);
-      details.push(`Data: ${formatDateShort(data.date)}`);
+      if (data.transfer_type === "round_trip") {
+        details.push(`Chegada: ${formatDateShort(data.arrival_date || data.date)}`);
+        if (data.departure_date) details.push(`Saída: ${formatDateShort(data.departure_date)}`);
+      } else {
+        details.push(`Data: ${formatDateShort(data.date)}`);
+      }
       if (data.service_category) details.push(`Tipo: ${data.service_category === "private" ? "Privativo" : "Regular"}`);
       if (data.notes) details.push(data.notes);
       break;
@@ -488,7 +493,7 @@ function TransferBody({ data }: { data: any }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-          {data.transfer_type === "arrival" ? "Chegada" : "Saída"}
+          {data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"}
         </span>
         {data.service_category && (
           <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
@@ -498,7 +503,10 @@ function TransferBody({ data }: { data: any }) {
       </div>
       <div className="text-base font-semibold text-foreground tracking-tight">{data.location}</div>
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
-        <Calendar className="h-3.5 w-3.5" />{formatDateShort(data.date)}
+        <Calendar className="h-3.5 w-3.5" />
+        {data.transfer_type === "round_trip"
+          ? `${formatDateShort(data.arrival_date || data.date)}${data.departure_date ? ` → ${formatDateShort(data.departure_date)}` : ""}`
+          : formatDateShort(data.date)}
       </div>
       {data.notes && (
         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">

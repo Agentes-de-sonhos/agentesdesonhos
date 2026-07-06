@@ -194,9 +194,14 @@ function getServiceDetails(service: QuoteService): string[] {
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
     case "transfer":
-      details.push(`Tipo: ${data.transfer_type === "arrival" ? "Chegada" : "Saída"}`);
+      details.push(`Tipo: ${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"}`);
       details.push(`Local: ${data.location}`);
-      details.push(`Data: ${formatDate(data.date)}`);
+      if (data.transfer_type === "round_trip") {
+        details.push(`Chegada: ${formatDate(data.arrival_date || data.date)}`);
+        if (data.departure_date) details.push(`Saída: ${formatDate(data.departure_date)}`);
+      } else {
+        details.push(`Data: ${formatDate(data.date)}`);
+      }
       break;
     case "attraction":
       details.push([data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name);
@@ -343,7 +348,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           case "flight": summary = `${data.airline || ""}${data.origin_city ? ` | ${data.origin_city} → ${data.destination_city}` : ""}`.trim(); break;
           case "hotel": summary = `${data.hotel_name || ""}${data.city ? ` — ${data.city}` : ""}`; break;
           case "car_rental": summary = `${data.car_type || ""}${data.days ? ` | ${data.days} diária(s)` : ""}`; break;
-          case "transfer": summary = `${data.transfer_type === "arrival" ? "Chegada" : "Saída"}${data.location ? ` — ${data.location}` : ""}`; break;
+          case "transfer": summary = `${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"}${data.location ? ` — ${data.location}` : ""}`; break;
           case "attraction": summary = [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name || ""; break;
           case "insurance": summary = data.provider || ""; break;
           case "cruise": summary = `${data.ship_name || ""}${data.route ? ` — ${data.route}` : ""}`; break;

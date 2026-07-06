@@ -93,17 +93,20 @@ export const SERVICE_IMPORT_CONFIGS: Record<GenericServiceKey, ServiceImportConf
     ],
     mapToInitialData: (p) => {
       const mode = (p.tipo_transfer || "").toLowerCase();
-      let transfer_type: "arrival" | "departure" = "arrival";
-      if (mode.includes("depart") || mode.includes("saída") || mode.includes("saida") || mode.includes("volta")) transfer_type = "departure";
+      let transfer_type: "arrival" | "departure" | "round_trip" = "arrival";
+      if (mode.includes("round") || mode.includes("ida e volta") || mode.includes("ida/volta") || mode.includes("volta")) transfer_type = "round_trip";
+      else if (mode.includes("depart") || mode.includes("saída") || mode.includes("saida")) transfer_type = "departure";
       const location = p.trajeto || [p.origem, p.destino].filter(Boolean).join(" ↔ ");
       const price = typeof p.valor_total_brl === "number" ? p.valor_total_brl : num(p.valor_total);
       return {
         service_data: {
           company_name: p.empresa || "",
-          transfer_type, // round_trip behavior handled by user editing the chooser in form
+          transfer_type,
           service_category: (p.categoria || "").toLowerCase().includes("priv") ? "private" : (p.categoria ? "regular" : null),
           location,
           date: normalizeDate(p.data),
+          arrival_date: normalizeDate(p.data),
+          departure_date: normalizeDate(p.data_volta),
           price,
         },
         amount: price,
