@@ -63,31 +63,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error("Error fetching subscription:", error);
-        // Create default subscription if none exists
-        if (error.code === "PGRST116" || !data) {
-          const { data: newSub, error: insertError } = await supabase
-            .from("subscriptions")
-            .insert({ user_id: user.id, plan: "start" })
-            .select()
-            .single();
-
-          if (!insertError && newSub) {
-            setSubscription(newSub as unknown as Subscription);
-          }
-        }
+        // Row creation is handled server-side by the handle_new_user_subscription
+        // trigger; client inserts are blocked by RLS. Leave subscription null so
+        // the app falls back to the default "start" plan derived below.
       } else if (data) {
         setSubscription(data as unknown as Subscription);
-      } else {
-        // No subscription found, create one
-        const { data: newSub, error: insertError } = await supabase
-          .from("subscriptions")
-          .insert({ user_id: user.id, plan: "start" })
-          .select()
-          .single();
-
-        if (!insertError && newSub) {
-          setSubscription(newSub as unknown as Subscription);
-        }
       }
     } catch (err) {
       console.error("Error in subscription fetch:", err);
@@ -159,17 +139,22 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const incrementAIUsage = useCallback(async (): Promise<boolean> => {
     if (!subscription || !canUseAI()) return false;
 
-    const { error } = await supabase
-      .from("subscriptions")
-      .update({ ai_usage_count: aiUsageCount + 1 })
-      .eq("id", subscription.id);
-
-    if (!error) {
-      setSubscription(prev => prev ? { ...prev, ai_usage_count: prev.ai_usage_count + 1 } : null);
+    // Delegate to the SECURITY DEFINER RPC that enforces plan limits and
+    // increments the counter server-side (client updates on subscriptions are
+    // blocked by RLS).
+    const { data, error } = await supabase.rpc("check_ai_usage", { _user_id: user!.id });
+    if (error) {
+      console.error("check_ai_usage error:", error);
+      return false;
+    }
+    if (data === true) {
+      setSubscription((prev) =>
+        prev ? { ...prev, ai_usage_count: prev.ai_usage_count + 1 } : prev,
+      );
       return true;
     }
     return false;
-  }, [subscription, canUseAI, aiUsageCount]);
+  }, [subscription, canUseAI, user]);
 
   const getRequiredPlan = useCallback((feature: Feature): SubscriptionPlan => {
     return REQUIRED_PLAN_FOR_FEATURE[feature];
