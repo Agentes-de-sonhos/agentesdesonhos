@@ -21,9 +21,11 @@ export function WorkspaceShell({ children }: Props) {
   const ws = useWorkspace();
   const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const openTabRef = useRef(ws?.openTab);
+  const openTabRef = useRef(ws?.openOrActivateTab);
+  const tabsRef = useRef(ws?.tabs);
   const canOpenRef = useRef(ws?.canOpenMore);
-  openTabRef.current = ws?.openTab;
+  openTabRef.current = ws?.openOrActivateTab;
+  tabsRef.current = ws?.tabs;
   canOpenRef.current = ws?.canOpenMore;
 
   // Reflect the active tab's initial path in the browser URL bar (cosmetic only).
@@ -64,7 +66,10 @@ export function WorkspaceShell({ children }: Props) {
       e.preventDefault();
       e.stopPropagation();
 
-      if (!canOpenRef.current) {
+      // If a tab for this path already exists, we'll just activate it and
+      // never hit the tab-limit ceiling.
+      const hasExisting = (tabsRef.current ?? []).some((t) => t.path === href);
+      if (!hasExisting && !canOpenRef.current) {
         toast.error(`Limite de ${MAX_TABS} abas atingido. Feche uma aba para abrir outra.`);
         return;
       }
