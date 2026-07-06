@@ -1052,8 +1052,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     onSubmit(
       {
         ...values,
-        check_in: format(values.check_in, "yyyy-MM-dd"),
-        check_out: format(values.check_out, "yyyy-MM-dd"),
+        check_in: values.check_in ? format(values.check_in, "yyyy-MM-dd") : undefined,
+        check_out: values.check_out ? format(values.check_out, "yyyy-MM-dd") : undefined,
         guests,
       },
       files.length > 0 ? files : undefined

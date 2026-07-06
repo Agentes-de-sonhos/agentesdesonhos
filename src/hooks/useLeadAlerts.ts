@@ -183,6 +183,21 @@ export function useLeadRealtime(onNewLead: (lead: LeadItem) => void) {
 
   useEffect(() => {
     if (!user?.id) return;
+    // Guard against multiple mounts (e.g. one NewLeadAlertProvider per open
+    // workspace tab). Only the first mounted instance opens the realtime
+    // channel and plays the chime; siblings become no-ops.
+    if (leadRealtimeOwner && leadRealtimeOwner !== user.id) {
+      // Different user (shouldn't happen), still guard.
+      return;
+    }
+    if (leadRealtimeMounts > 0) {
+      leadRealtimeMounts += 1;
+      return () => {
+        leadRealtimeMounts = Math.max(0, leadRealtimeMounts - 1);
+      };
+    }
+    leadRealtimeMounts = 1;
+    leadRealtimeOwner = user.id;
     const channel = supabase
       .channel(`leads-realtime-${user.id}`)
       .on(
@@ -238,7 +253,14 @@ export function useLeadRealtime(onNewLead: (lead: LeadItem) => void) {
       .subscribe();
 
     return () => {
+      leadRealtimeMounts = Math.max(0, leadRealtimeMounts - 1);
+      if (leadRealtimeMounts === 0) leadRealtimeOwner = null;
       supabase.removeChannel(channel);
     };
   }, [user?.id, qc]);
 }
+
+// Module-level singleton so only one useLeadRealtime instance drives the
+// realtime channel (workspace tabs mount the provider once per tab).
+let leadRealtimeMounts = 0;
+let leadRealtimeOwner: string | null = null;

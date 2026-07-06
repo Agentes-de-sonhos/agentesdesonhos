@@ -15,6 +15,7 @@ interface WorkspaceState {
 
 type Action =
   | { type: "OPEN"; path: string; title: string }
+  | { type: "OPEN_OR_ACTIVATE"; path: string; title: string }
   | { type: "CLOSE"; id: string }
   | { type: "ACTIVATE"; id: string }
   | { type: "RESET"; initial: WorkspaceTab };
@@ -22,6 +23,17 @@ type Action =
 function reducer(state: WorkspaceState, action: Action): WorkspaceState {
   switch (action.type) {
     case "OPEN": {
+      if (state.tabs.length >= MAX_TABS) return state;
+      const id = `tab_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const tab: WorkspaceTab = { id, path: action.path, title: action.title };
+      return { tabs: [...state.tabs, tab], activeId: id };
+    }
+    case "OPEN_OR_ACTIVATE": {
+      const existing = state.tabs.find((t) => t.path === action.path);
+      if (existing) {
+        if (state.activeId === existing.id) return state;
+        return { ...state, activeId: existing.id };
+      }
       if (state.tabs.length >= MAX_TABS) return state;
       const id = `tab_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       const tab: WorkspaceTab = { id, path: action.path, title: action.title };
@@ -48,6 +60,7 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
 
 interface WorkspaceContextValue extends WorkspaceState {
   openTab: (path: string, title: string) => void;
+  openOrActivateTab: (path: string, title: string) => void;
   closeTab: (id: string) => void;
   activateTab: (id: string) => void;
   canOpenMore: boolean;
@@ -75,6 +88,9 @@ export function WorkspaceProvider({ initialPath, initialTitle, children }: Props
   const openTab = useCallback((path: string, title: string) => {
     dispatch({ type: "OPEN", path, title });
   }, []);
+  const openOrActivateTab = useCallback((path: string, title: string) => {
+    dispatch({ type: "OPEN_OR_ACTIVATE", path, title });
+  }, []);
   const closeTab = useCallback((id: string) => dispatch({ type: "CLOSE", id }), []);
   const activateTab = useCallback((id: string) => dispatch({ type: "ACTIVATE", id }), []);
 
@@ -82,12 +98,13 @@ export function WorkspaceProvider({ initialPath, initialTitle, children }: Props
     () => ({
       ...state,
       openTab,
+      openOrActivateTab,
       closeTab,
       activateTab,
       canOpenMore: state.tabs.length < MAX_TABS,
       max: MAX_TABS,
     }),
-    [state, openTab, closeTab, activateTab],
+    [state, openTab, openOrActivateTab, closeTab, activateTab],
   );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
