@@ -194,9 +194,14 @@ function getServiceDetails(service: QuoteService): string[] {
       if (data.notes) details.push(`Obs: ${data.notes}`);
       break;
     case "transfer":
-      details.push(`Tipo: ${data.transfer_type === "arrival" ? "Chegada" : "Saída"}`);
+      details.push(`Tipo: ${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"}`);
       details.push(`Local: ${data.location}`);
-      details.push(`Data: ${formatDate(data.date)}`);
+      if (data.transfer_type === "round_trip") {
+        details.push(`Chegada: ${formatDate(data.arrival_date || data.date)}`);
+        if (data.departure_date) details.push(`Saída: ${formatDate(data.departure_date)}`);
+      } else {
+        details.push(`Data: ${formatDate(data.date)}`);
+      }
       break;
     case "attraction":
       details.push([data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name);
