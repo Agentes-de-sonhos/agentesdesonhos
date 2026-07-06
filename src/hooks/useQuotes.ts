@@ -260,8 +260,17 @@ export function useQuote(id: string | undefined) {
       image_urls?: string[];
     }) => {
       if (!id) throw new Error("Quote ID is required");
-      const currentServices = quote?.services || [];
-      const nextOrderIndex = currentServices.length;
+      // Read the latest order_index from the DB to avoid collisions when
+      // several services are inserted back-to-back (e.g. Transfer "round trip"
+      // creating both arrival + departure in the same submission).
+      const { data: existing } = await supabase
+        .from("quote_services")
+        .select("order_index")
+        .eq("quote_id", id)
+        .order("order_index", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const nextOrderIndex = ((existing?.order_index as number | undefined) ?? -1) + 1;
 
       const { data, error } = await supabase
         .from("quote_services")
