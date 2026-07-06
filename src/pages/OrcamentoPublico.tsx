@@ -188,7 +188,12 @@ function getServiceDetails(service: QuoteService): string[] {
       break;
     case "transfer":
       details.push(`Local: ${data.location}`);
-      details.push(`Data: ${formatDateShort(data.date)}`);
+      if (data.transfer_type === "round_trip") {
+        details.push(`Chegada: ${formatDateShort(data.arrival_date || data.date)}`);
+        if (data.departure_date) details.push(`Saída: ${formatDateShort(data.departure_date)}`);
+      } else {
+        details.push(`Data: ${formatDateShort(data.date)}`);
+      }
       if (data.service_category) details.push(`Tipo: ${data.service_category === "private" ? "Privativo" : "Regular"}`);
       if (data.notes) details.push(data.notes);
       break;
