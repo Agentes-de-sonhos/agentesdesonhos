@@ -2897,7 +2897,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-    onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
+    return onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
   const isHotel = serviceType === 'hotel';
