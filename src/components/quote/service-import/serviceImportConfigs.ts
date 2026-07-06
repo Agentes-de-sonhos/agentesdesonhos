@@ -101,7 +101,7 @@ export const SERVICE_IMPORT_CONFIGS: Record<GenericServiceKey, ServiceImportConf
       return {
         service_data: {
           company_name: p.empresa || "",
-          transfer_type, // round_trip behavior handled by user editing the chooser in form
+          transfer_type,
           service_category: (p.categoria || "").toLowerCase().includes("priv") ? "private" : (p.categoria ? "regular" : null),
           location,
           date: normalizeDate(p.data),
