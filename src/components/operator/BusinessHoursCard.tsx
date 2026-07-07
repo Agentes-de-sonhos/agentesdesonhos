@@ -1,10 +1,13 @@
 import { Clock } from "lucide-react";
 import { OperatorInfoCard } from "./OperatorInfoCard";
+import { RichContentDisplay } from "./RichContentDisplay";
 
 interface BusinessHours {
   commercial?: string;
   after_hours?: string;
   emergency?: string;
+  /** New unified format: HTML from the shared rich-text editor. */
+  html?: string;
 }
 
 interface BusinessHoursCardProps {
@@ -18,8 +21,17 @@ const sections = [
 ];
 
 export function BusinessHoursCard({ hours }: BusinessHoursCardProps) {
-  const hasData = sections.some((s) => hours[s.key]);
-  if (!hasData) return null;
+  const hasHtml = !!hours.html && hours.html.trim() !== "" && hours.html !== "<p></p>";
+  const hasLegacy = sections.some((s) => hours[s.key]);
+  if (!hasHtml && !hasLegacy) return null;
+
+  if (hasHtml) {
+    return (
+      <OperatorInfoCard icon={Clock} title="Horários de Funcionamento" iconColor="text-sky-600">
+        <RichContentDisplay content={hours.html!} />
+      </OperatorInfoCard>
+    );
+  }
 
   return (
     <OperatorInfoCard icon={Clock} title="Horários de Funcionamento" iconColor="text-sky-600">
