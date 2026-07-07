@@ -309,6 +309,11 @@ export function AdminTourOperatorsManager() {
   const [accountDialogOperator, setAccountDialogOperator] = useState<{ id: string; name: string } | null>(null);
   const [slugDialogOperator, setSlugDialogOperator] = useState<{ id: string; name: string; public_slug: string | null; is_published: boolean } | null>(null);
   const [slugDraft, setSlugDraft] = useState("");
+  const [jsonImportOpen, setJsonImportOpen] = useState(false);
+  const [jsonImportText, setJsonImportText] = useState("");
+  const [jsonImportError, setJsonImportError] = useState<string | null>(null);
+  const [jsonImportPreview, setJsonImportPreview] = useState<{ payload: Record<string, any>; existingId: string | null; existingName: string | null } | null>(null);
+  const [jsonImportSaving, setJsonImportSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
