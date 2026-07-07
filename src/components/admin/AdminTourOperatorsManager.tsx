@@ -61,7 +61,7 @@ const TEMPLATE_HEADERS = [
 const HEADER_ALIASES = {
   name: ["name", "operator name", "nome da operadora", "operator_name"],
   category: ["category", "categoria"],
-  description: ["description", "descrição", "descricao"],
+  description: ["description", "descrição", "descricao", "short description", "short_description", "sobre a operadora"],
   how_to_sell: ["how to sell", "how_to_sell", "como vender"],
   sales_channels: ["sales channels", "sales_channels", "canais de venda"],
   commercial_contacts: ["commercial contacts", "commercial_contacts", "contatos comerciais"],
