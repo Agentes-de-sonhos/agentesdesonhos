@@ -1,14 +1,14 @@
-import { RichTextWithLinks } from "./RichTextWithLinks";
+import { RichContentDisplay } from "./RichContentDisplay";
 
 interface SalesChannelCardsProps {
   salesChannels: string;
 }
 
 /**
- * Renders sales channels using the same logic as "Como Vender":
- * - Plain text lines (including emails like name@domain.com) are rendered as text.
- * - Lines containing http(s):// or mailto: URLs are rendered as action buttons.
+ * Renders sales channels using the same rich-text pipeline as "Como Vender":
+ * accepts both legacy plain-text content and the new HTML rich-text content,
+ * turning URLs / emails / phones into tappable elements.
  */
 export function SalesChannelCards({ salesChannels }: SalesChannelCardsProps) {
-  return <RichTextWithLinks text={salesChannels} />;
+  return <RichContentDisplay content={salesChannels} />;
 }

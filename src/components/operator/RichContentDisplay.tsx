@@ -24,15 +24,32 @@ export function RichContentDisplay({ content, lineClamp }: RichContentDisplayPro
     const parser = new DOMParser();
     const doc = parser.parseFromString(content, "text/html");
 
-    // Convert plain URL text nodes into <a> tags first, so they also get the button styling.
-    const urlRegex = /(https?:\/\/[^\s<]+|mailto:[^\s<]+)/gi;
+    // Convert plain URL / email / phone text nodes into <a> tags so they also
+    // get the button styling and become tappable on mobile.
+    // - URLs and mailto:/tel: schemes match verbatim.
+    // - Bare emails become mailto:.
+    // - Phone-like tokens (BR/international, at least 8 digits) become tel:.
+    const patterns: { re: RegExp; toHref: (m: string) => string }[] = [
+      { re: /(https?:\/\/[^\s<]+|mailto:[^\s<]+|tel:[^\s<]+)/i, toHref: (m) => m },
+      { re: /\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b/i, toHref: (m) => `mailto:${m}` },
+      {
+        re: /(?:\+?\d[\d().\-\s]{7,}\d)/,
+        toHref: (m) => `tel:${m.replace(/[^\d+]/g, "")}`,
+      },
+    ];
+    // Merge into a single alternation so we match in document order.
+    const combined = new RegExp(
+      patterns.map((p) => `(${p.re.source})`).join("|"),
+      "gi",
+    );
     const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null);
     const textNodes: Text[] = [];
     let n: Node | null;
     while ((n = walker.nextNode())) textNodes.push(n as Text);
     textNodes.forEach((node) => {
       const text = node.nodeValue || "";
-      if (!urlRegex.test(text)) return;
+      combined.lastIndex = 0;
+      if (!combined.test(text)) return;
       // Skip if already inside an <a>
       let parent: HTMLElement | null = node.parentElement;
       while (parent && parent !== doc.body) {
@@ -41,17 +58,23 @@ export function RichContentDisplay({ content, lineClamp }: RichContentDisplayPro
       }
       const frag = doc.createDocumentFragment();
       let lastIndex = 0;
-      text.replace(urlRegex, (match, _g, offset: number) => {
+      combined.lastIndex = 0;
+      let m: RegExpExecArray | null;
+      while ((m = combined.exec(text)) !== null) {
+        const match = m[0];
+        const offset = m.index;
         if (offset > lastIndex) {
           frag.appendChild(doc.createTextNode(text.slice(lastIndex, offset)));
         }
+        // Pick the first matching pattern to derive the href.
+        const pattern = patterns.find((p) => new RegExp(`^(?:${p.re.source})$`, "i").test(match));
+        const href = pattern ? pattern.toHref(match) : match;
         const a = doc.createElement("a");
-        a.setAttribute("href", match);
+        a.setAttribute("href", href);
         a.textContent = match;
         frag.appendChild(a);
         lastIndex = offset + match.length;
-        return match;
-      });
+      }
       if (lastIndex < text.length) {
         frag.appendChild(doc.createTextNode(text.slice(lastIndex)));
       }

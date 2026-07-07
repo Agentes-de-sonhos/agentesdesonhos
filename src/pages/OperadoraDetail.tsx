@@ -8,13 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Building2, ShoppingCart, Users, Phone, FileText, Tag, Share2 } from "lucide-react";
 import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
-import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
-import { ContactCards } from "@/components/operator/ContactCards";
 import { CompetitiveAdvantagesCard } from "@/components/operator/CompetitiveAdvantagesCard";
-import { RichTextWithLinks } from "@/components/operator/RichTextWithLinks";
 import { RichContentEditor } from "@/components/operator/RichContentEditor";
 import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
-import { BusinessHoursCard } from "@/components/operator/BusinessHoursCard";
+import { BusinessHoursCard, businessHoursToHtml } from "@/components/operator/BusinessHoursCard";
 import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
@@ -33,12 +30,12 @@ import { TextEditForm } from "@/components/edit-mode/forms/TextEditForm";
 import { TagsEditForm } from "@/components/edit-mode/forms/TagsEditForm";
 import { SocialLinksEditForm } from "@/components/edit-mode/forms/SocialLinksEditForm";
 import { CompanyInfoEditForm } from "@/components/edit-mode/forms/CompanyInfoEditForm";
-import { BusinessHoursEditForm } from "@/components/edit-mode/forms/BusinessHoursEditForm";
 
 interface BusinessHours {
   commercial?: string;
   after_hours?: string;
   emergency?: string;
+  html?: string;
 }
 
 export default function OperadoraDetail() {
@@ -138,8 +135,8 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
   const [editShortDesc, setEditShortDesc] = useState(operator.short_description || "");
   const [editAdvantages, setEditAdvantages] = useState(operator.competitive_advantages || "");
   const [editHowToSell, setEditHowToSell] = useState(operator.how_to_sell || "");
-  const [editBusinessHours, setEditBusinessHours] = useState<BusinessHours>(
-    (operator.business_hours as BusinessHours) || {}
+  const [editBusinessHoursHtml, setEditBusinessHoursHtml] = useState<string>(
+    businessHoursToHtml(operator.business_hours as BusinessHours | null)
   );
   const [editCertifications, setEditCertifications] = useState(operator.certifications || "");
   const [editSalesChannels, setEditSalesChannels] = useState(operator.sales_channels || "");
@@ -265,46 +262,46 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
             {/* 4. Canais de Venda */}
             {isAdmin ? (
               <EditableSection
-                editForm={<TextEditForm label="Canais de Venda" value={editSalesChannels} onChange={setEditSalesChannels} />}
+                editForm={<RichContentEditor label="Canais de Venda" content={editSalesChannels} onChange={setEditSalesChannels} placeholder="Liste sites, portais B2B e canais próprios. Cole uma URL em uma linha sozinha para virar um botão Acessar." />}
                 onSave={async () => { await updateMutation.mutateAsync({ sales_channels: editSalesChannels || null }); }}
                 onCancel={() => setEditSalesChannels(operator.sales_channels || "")}
               >
                 <OperatorInfoCard icon={Users} title="Canais de Venda">
-                  {operator.sales_channels ? <SalesChannelCards salesChannels={operator.sales_channels} /> : adminPlaceholder}
+                  {operator.sales_channels ? <RichContentDisplay content={operator.sales_channels} /> : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.sales_channels ? (
               <OperatorInfoCard icon={Users} title="Canais de Venda">
-                <SalesChannelCards salesChannels={operator.sales_channels} />
+                <RichContentDisplay content={operator.sales_channels} />
               </OperatorInfoCard>
             ) : null}
 
             {/* 5. Contatos Comerciais */}
             {isAdmin ? (
               <EditableSection
-                editForm={<TextEditForm label="Contatos Comerciais" value={editContacts} onChange={setEditContacts} />}
+                editForm={<RichContentEditor label="Contatos Comerciais" content={editContacts} onChange={setEditContacts} placeholder="Inclua nomes, telefones e e-mails da equipe comercial. Telefones e e-mails viram links clicáveis automaticamente." />}
                 onSave={async () => { await updateMutation.mutateAsync({ commercial_contacts: editContacts || null }); }}
                 onCancel={() => setEditContacts(operator.commercial_contacts || "")}
               >
                 <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
-                  {operator.commercial_contacts ? <ContactCards contacts={operator.commercial_contacts} /> : adminPlaceholder}
+                  {operator.commercial_contacts ? <RichContentDisplay content={operator.commercial_contacts} /> : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.commercial_contacts ? (
               <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
-                <ContactCards contacts={operator.commercial_contacts} />
+                <RichContentDisplay content={operator.commercial_contacts} />
               </OperatorInfoCard>
             ) : null}
 
             {/* 6. Horários de Funcionamento */}
             {isAdmin ? (
               <EditableSection
-                editForm={<BusinessHoursEditForm data={editBusinessHours} onChange={setEditBusinessHours} />}
+                editForm={<RichContentEditor label="Horários de Funcionamento" content={editBusinessHoursHtml} onChange={setEditBusinessHoursHtml} placeholder="Use títulos (H3) para separar Horário comercial, Plantão e Emergência." />}
                 onSave={async () => {
-                  const hasData = Object.values(editBusinessHours).some(Boolean);
-                  await updateMutation.mutateAsync({ business_hours: hasData ? editBusinessHours : null });
+                  const hasData = !!editBusinessHoursHtml && editBusinessHoursHtml.trim() !== "" && editBusinessHoursHtml !== "<p></p>";
+                  await updateMutation.mutateAsync({ business_hours: hasData ? { html: editBusinessHoursHtml } : null });
                 }}
-                onCancel={() => setEditBusinessHours((operator.business_hours as BusinessHours) || {})}
+                onCancel={() => setEditBusinessHoursHtml(businessHoursToHtml(operator.business_hours as BusinessHours | null))}
               >
                 {operator.business_hours ? (
                   <BusinessHoursCard hours={operator.business_hours as BusinessHours} />
