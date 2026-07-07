@@ -1040,6 +1040,70 @@ export function AdminTourOperatorsManager() {
       </Dialog>
     </Card>
 
+    {/* JSON (ChatGPT) Import Dialog */}
+    <Dialog open={jsonImportOpen} onOpenChange={(o) => { setJsonImportOpen(o); if (!o) { setJsonImportText(""); setJsonImportError(null); setJsonImportPreview(null); } }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><FileJson className="h-5 w-5" />Importar JSON do ChatGPT</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Cole o JSON estruturado do fornecedor</Label>
+            <Textarea
+              value={jsonImportText}
+              onChange={(e) => { setJsonImportText(e.target.value); setJsonImportError(null); setJsonImportPreview(null); }}
+              rows={12}
+              className="font-mono text-xs mt-1"
+              placeholder='{"name":"NANNAI","category":"Hospedagem", ...}'
+            />
+          </div>
+          {jsonImportError && (
+            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{jsonImportError}</span>
+            </div>
+          )}
+          {jsonImportPreview && (
+            <div className="rounded-md border bg-muted/40 p-3 space-y-2">
+              <p className="text-sm font-medium">
+                {jsonImportPreview.existingId
+                  ? `Fornecedor existente detectado: ${jsonImportPreview.existingName} — será ATUALIZADO.`
+                  : "Nenhum fornecedor com este nome. Um NOVO registro será criado."}
+              </p>
+              <p className="text-xs text-muted-foreground">Campos que serão gravados:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs max-h-52 overflow-y-auto">
+                {Object.entries(jsonImportPreview.payload)
+                  .filter(([, v]) => v !== null && v !== undefined && v !== "")
+                  .map(([k, v]) => (
+                    <div key={k} className="truncate">
+                      <span className="font-medium">{k}:</span>{" "}
+                      <span className="text-muted-foreground">
+                        {typeof v === "object" ? JSON.stringify(v) : String(v).slice(0, 80)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            {!jsonImportPreview ? (
+              <Button type="button" onClick={handleJsonPreview} disabled={!jsonImportText.trim()}>
+                Pré-visualizar
+              </Button>
+            ) : (
+              <>
+                <Button type="button" variant="outline" onClick={() => setJsonImportPreview(null)}>Voltar</Button>
+                <Button type="button" onClick={handleJsonConfirmSave} disabled={jsonImportSaving}>
+                  {jsonImportSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {jsonImportPreview.existingId ? "Atualizar fornecedor" : "Criar fornecedor"}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
     <MediaManagerModal
       open={quickLogoOpen}
       onOpenChange={(open) => { setQuickLogoOpen(open); if (!open) setQuickLogoOperatorId(null); }}
