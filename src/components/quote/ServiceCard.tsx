@@ -111,6 +111,7 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
       details.push(`Check-out: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`Alimentação: ${data.meal_plan}`);
       if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+        const hasMulti = data.rooms.length > 1;
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
           if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
@@ -120,7 +121,11 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
               : "";
             paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
           }
-          details.push(`${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
+          const qty = Number(r.quantity) || 1;
+          const unit = Number(r.unit_price) || 0;
+          const total = Number(r.total_price) || unit * qty;
+          const priceLabel = hasMulti && total > 0 ? ` — ${formatQuoteCurrency(total, currency)}` : "";
+          details.push(`${qty}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}${priceLabel}`);
         });
       } else if (data.room_type) {
         details.push(`Quarto: ${data.room_type}`);

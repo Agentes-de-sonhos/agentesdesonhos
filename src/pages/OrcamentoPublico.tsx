@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
-import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay } from "@/lib/servicePayment";
+import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
@@ -417,8 +417,12 @@ function nightsBetween(a?: string, b?: string): number | null {
   } catch { return null; }
 }
 
-function HotelBody({ data }: { data: any }) {
+function HotelBody({ data, service, quote }: { data: any; service?: QuoteService; quote?: Quote }) {
   const nights = nightsBetween(data.check_in, data.check_out);
+  const rooms: any[] = Array.isArray(data.rooms) ? data.rooms : [];
+  const hasMultipleRooms = rooms.length > 1;
+  const showPrices = quote ? (quote as any).show_detailed_prices !== false : true;
+  const fmt = (v: number) => formatQuoteCurrency(v, quoteCurrency);
   return (
     <div className="space-y-4">
       <div className="min-w-0">
@@ -438,7 +442,7 @@ function HotelBody({ data }: { data: any }) {
         <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label="Check-out" value={formatDateShort(data.check_out)} />
       </div>
       <div className="flex flex-wrap gap-3 text-sm">
-        {(!Array.isArray(data.rooms) || data.rooms.length === 0) && data.room_type && (
+        {rooms.length === 0 && data.room_type && (
           <div className="flex items-center gap-1.5 text-foreground/80">
             <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="font-medium">{formatLabel(data.room_type)}</span>
@@ -451,11 +455,11 @@ function HotelBody({ data }: { data: any }) {
           </div>
         )}
       </div>
-      {Array.isArray(data.rooms) && data.rooms.length > 0 && (
+      {rooms.length > 0 && !hasMultipleRooms && (
         <div className="rounded-xl border border-border/40 bg-muted/10 p-3 space-y-2">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acomodações</div>
           <ul className="space-y-1.5">
-            {data.rooms.map((r: any, i: number) => {
+            {rooms.map((r: any, i: number) => {
               const paxParts: string[] = [];
               if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
               if (r.children) {
@@ -476,6 +480,57 @@ function HotelBody({ data }: { data: any }) {
               );
             })}
           </ul>
+        </div>
+      )}
+      {hasMultipleRooms && (
+        <div className="space-y-3">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acomodações</div>
+          {rooms.map((r: any, i: number) => {
+            const paxParts: string[] = [];
+            if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+            if (r.children) {
+              const ages = Array.isArray(r.children_ages) && r.children_ages.length
+                ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+                : "";
+              paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+            }
+            const qty = Number(r.quantity) || 1;
+            const unit = Number(r.unit_price) || 0;
+            const total = Number(r.total_price) || unit * qty;
+            const sim = showPrices && service ? getRoomPaymentSimulation(total, service, quote) : null;
+            return (
+              <div key={i} className="rounded-xl border border-border/40 bg-muted/10 p-3 space-y-1.5">
+                <div className="flex items-start gap-2">
+                  <BedDouble className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-foreground">{qty}x {r.room_type}</div>
+                    {paxParts.length > 0 && (
+                      <div className="text-xs text-muted-foreground">{paxParts.join(" + ")}</div>
+                    )}
+                    {r.notes && <div className="text-xs text-muted-foreground italic mt-0.5">{r.notes}</div>}
+                  </div>
+                </div>
+                {sim && (
+                  <div className="pl-6 pt-1.5 border-t border-border/30 mt-1.5 space-y-0.5 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Valor</span>
+                      <span className="font-semibold text-foreground tabular-nums">{fmt(sim.total)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">À vista</span>
+                      <span className="font-medium text-foreground tabular-nums">{fmt(sim.cashValue)}</span>
+                    </div>
+                    {sim.installmentValue != null && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">ou {sim.installmentsCount}x de</span>
+                        <span className="font-medium text-primary tabular-nums">{fmt(sim.installmentValue)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
       {data.notes && (
@@ -635,11 +690,11 @@ function CruiseBody({ data }: { data: any }) {
   );
 }
 
-function ServiceBody({ service }: { service: QuoteService }) {
+function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote }) {
   const data = service.service_data as any;
   switch (service.service_type) {
     case "flight": return <FlightBody data={data} />;
-    case "hotel": return <HotelBody data={data} />;
+    case "hotel": return <HotelBody data={data} service={service} quote={quote} />;
     case "car_rental": return <CarBody data={data} />;
     case "transfer": return <TransferBody data={data} />;
     case "attraction": return <AttractionBody data={data} />;
@@ -650,9 +705,9 @@ function ServiceBody({ service }: { service: QuoteService }) {
 }
 
 function CollapsibleServiceCard({
-  service, showPrice, isOpen, onToggle, showPaymentPerService = false,
+  service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote,
 }: {
-  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean;
+  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean; quote?: Quote;
 }) {
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
@@ -682,6 +737,12 @@ function CollapsibleServiceCard({
   const freeItems = detailItems.filter(d => !d.label);
 
   const hasCustomLayout = ["flight", "hotel", "car_rental", "transfer", "attraction", "insurance", "cruise"].includes(type);
+  // Quando o hotel tem múltiplos apartamentos, os valores são exibidos por
+  // apartamento dentro do corpo do serviço. Suprimimos o preço no cabeçalho
+  // para evitar destacar o total somado do hotel como informação principal.
+  const hotelRooms = type === "hotel" ? ((service.service_data as any)?.rooms || []) : [];
+  const hotelHasMultipleRooms = type === "hotel" && Array.isArray(hotelRooms) && hotelRooms.length > 1;
+  const effectiveShowPrice = showPrice && !hotelHasMultipleRooms;
 
   return (
     <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
@@ -711,7 +772,7 @@ function CollapsibleServiceCard({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {showPrice && (
+          {effectiveShowPrice && (
             <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
           )}
           <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
@@ -738,7 +799,7 @@ function CollapsibleServiceCard({
             return <p className="text-base font-semibold text-foreground tracking-tight">{name}</p>;
           })()}
           {isOpen && hasCustomLayout && (
-            <ServiceBody service={service} />
+            <ServiceBody service={service} quote={quote} />
           )}
           {isOpen && !hasCustomLayout && chipItems.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -785,7 +846,7 @@ function CollapsibleServiceCard({
         </div>
       </div>
       {/* Per-service payment footer — always visible (open or collapsed) */}
-      {showPaymentPerService && (() => {
+      {showPaymentPerService && !hotelHasMultipleRooms && (() => {
         const payConfig = extractServicePaymentConfig(service);
         if (!payConfig.is_custom_payment) return null;
         const feeInfo = extractFlightFeeInfo(service);
@@ -1294,6 +1355,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   isOpen={openServiceIndices.has(index)}
                   onToggle={() => handleToggleService(index)}
                   showPaymentPerService={isNewLayout ? false : useServicePayment}
+                  quote={quote}
                 />
               ))}
             </div>

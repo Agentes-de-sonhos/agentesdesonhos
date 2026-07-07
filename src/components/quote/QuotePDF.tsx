@@ -3,7 +3,7 @@ import { ptBR } from "date-fns/locale";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
-import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay } from "@/lib/servicePayment";
+import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
@@ -185,7 +185,7 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`${data.hotel_name} — ${data.city}`);
       details.push(`Check-in: ${formatDate(data.check_in)} | Check-out: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`Regime: ${formatLabel(data.meal_plan)}`);
-      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+      if (Array.isArray(data.rooms) && data.rooms.length === 1) {
         details.push("Acomodações:");
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
@@ -385,10 +385,54 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         // Hotel: use a gallery grid (max 10) above the description
         const isHotel = service.service_type === "hotel";
         const hotelImages = isHotel ? allImages.slice(0, 10) : [];
+        const hotelRooms: any[] = isHotel && Array.isArray((service.service_data as any)?.rooms)
+          ? (service.service_data as any).rooms
+          : [];
+        const hotelHasMultipleRooms = hotelRooms.length > 1;
+
+        // Per-room pricing breakdown (only when hotel has multiple rooms)
+        let hotelRoomsHtml = "";
+        if (isHotel && hotelHasMultipleRooms && showDetailedPrices) {
+          const rowsHtml = hotelRooms.map((r: any) => {
+            const paxParts: string[] = [];
+            if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+            if (r.children) {
+              const ages = Array.isArray(r.children_ages) && r.children_ages.length
+                ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+                : "";
+              paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+            }
+            const qty = Number(r.quantity) || 1;
+            const unit = Number(r.unit_price) || 0;
+            const total = Number(r.total_price) || unit * qty;
+            const sim = getRoomPaymentSimulation(total, service, quote);
+            const installmentLine = sim.installmentValue != null
+              ? `<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:#64748b;">ou ${sim.installmentsCount}x de</span><span style="color:#0f766e;font-weight:700;">${formatCurrency(sim.installmentValue)}</span></div>`
+              : "";
+            return `
+              <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:6px;background:#f8fafc;">
+                <div style="font-size:13px;font-weight:700;color:#0f172a;">${qty}x ${r.room_type || ""}</div>
+                ${paxParts.length ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">${paxParts.join(" + ")}</div>` : ""}
+                ${r.notes ? `<div style="font-size:11px;color:#64748b;font-style:italic;margin-top:2px;">${r.notes}</div>` : ""}
+                <div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:6px;">
+                  <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748b;">Valor</span><span style="color:#0f172a;font-weight:700;">${formatCurrency(sim.total)}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:#64748b;">À vista</span><span style="color:#0f172a;font-weight:600;">${formatCurrency(sim.cashValue)}</span></div>
+                  ${installmentLine}
+                </div>
+              </div>
+            `;
+          }).join("");
+          hotelRoomsHtml = `
+            <div class="pdf-block pdf-hotel-rooms" style="margin-top:10px;">
+              <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0f172a;margin:0 0 6px;">Acomodações</p>
+              ${rowsHtml}
+            </div>
+          `;
+        }
 
         // Per-service payment display
         let paymentHtml = "";
-        if (useServicePayment && showDetailedPrices) {
+        if (useServicePayment && showDetailedPrices && !(isHotel && (service.service_data as any)?.rooms?.length > 1)) {
           const payConfig = extractServicePaymentConfig(service);
           if (payConfig.is_custom_payment) {
             const feeInfo = extractFlightFeeInfo(service);
@@ -483,6 +527,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           ${detailsHtml}
           ${descHtml}
           ${notesHtml}
+          ${hotelRoomsHtml}
           ${paymentHtml}
         `;
         const hotelGalleryHtml = isHotel && hotelImages.length > 0
@@ -542,7 +587,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                 ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
               </div>
             </div>
-            ${showDetailedPrices ? `<span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>` : ""}
+            ${showDetailedPrices && !hotelHasMultipleRooms ? `<span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>` : ""}
           </div>
           <div style="padding:12px 16px;">
             ${bodyHtml}
