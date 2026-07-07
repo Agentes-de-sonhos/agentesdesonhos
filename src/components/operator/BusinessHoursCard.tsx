@@ -51,3 +51,24 @@ export function BusinessHoursCard({ hours }: BusinessHoursCardProps) {
     </OperatorInfoCard>
   );
 }
+
+/**
+ * Convert legacy structured business hours into HTML seed content for the
+ * shared rich-text editor so migrating a supplier preserves the existing
+ * information.
+ */
+export function businessHoursToHtml(hours: BusinessHours | null | undefined): string {
+  if (!hours) return "";
+  if (hours.html) return hours.html;
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const parts: string[] = [];
+  for (const { key, label } of sections) {
+    const v = hours[key];
+    if (!v) continue;
+    parts.push(`<h3>${label}</h3>`);
+    v.split(/\n/).forEach((line) => {
+      parts.push(`<p>${line.trim() ? esc(line) : "<br/>"}</p>`);
+    });
+  }
+  return parts.join("");
+}
