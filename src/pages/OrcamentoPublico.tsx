@@ -846,7 +846,7 @@ function CollapsibleServiceCard({
         </div>
       </div>
       {/* Per-service payment footer — always visible (open or collapsed) */}
-      {showPaymentPerService && (() => {
+      {showPaymentPerService && !hotelHasMultipleRooms && (() => {
         const payConfig = extractServicePaymentConfig(service);
         if (!payConfig.is_custom_payment) return null;
         const feeInfo = extractFlightFeeInfo(service);
