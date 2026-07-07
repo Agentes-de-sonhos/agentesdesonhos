@@ -698,6 +698,28 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 }
 
 /* ━━━━━━━━━━━━━━━━━━━ HOTEL FORM ━━━━━━━━━━━━━━━━━━━ */
+const HOTEL_ROOM_TYPES = [
+  "Single",
+  "Duplo",
+  "Duplo com criança",
+  "Triplo",
+  "Triplo com criança",
+  "Quádruplo",
+  "Família",
+  "Suíte",
+  "Outro",
+];
+
+const hotelRoomSchema = z.object({
+  room_type: z.string().min(1, "Selecione o tipo"),
+  quantity: z.number().min(1, "≥ 1"),
+  adults: z.number().min(1, "≥ 1"),
+  children: z.number().min(0),
+  children_ages: z.array(z.number().min(0).max(17)).optional(),
+  unit_price: z.number().min(0),
+  notes: z.string().optional(),
+});
+
 const hotelSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
@@ -705,11 +727,8 @@ const hotelSchema = z.object({
   city: z.string().min(1, "Informe a cidade"),
   check_in: z.date({ required_error: "Selecione a data de check-in", invalid_type_error: "Selecione a data de check-in" }),
   check_out: z.date({ required_error: "Selecione a data de check-out", invalid_type_error: "Selecione a data de check-out" }),
-  room_type: z.string().min(1, "Selecione o tipo de quarto"),
   meal_plan: z.string().min(1, "Selecione o regime de alimentação"),
-  price: z.number().min(0),
-  adult_price: z.number().min(0).optional(),
-  child_price: z.number().min(0).optional(),
+  rooms: z.array(hotelRoomSchema).min(1, "Adicione pelo menos um apartamento"),
   notes: z.string().optional(),
 }).refine((v) => !v.check_in || !v.check_out || v.check_out >= v.check_in, {
   message: "Check-out deve ser igual ou posterior ao check-in",
@@ -719,18 +738,61 @@ const hotelSchema = z.object({
 function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
+  // Legacy migration: if there are no `rooms`, seed one from the old single-room fields.
+  const legacyLabel = (() => {
+    const raw = (init?.room_type || "").toString();
+    const map: Record<string, string> = {
+      standard: "Duplo", superior: "Duplo", deluxe: "Duplo",
+      suite: "Suíte", suite_junior: "Suíte",
+    };
+    return map[raw] || (raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : "Duplo");
+  })();
+  const initialRooms: z.infer<typeof hotelRoomSchema>[] = Array.isArray(init?.rooms) && init.rooms.length
+    ? init.rooms.map((r: any) => ({
+        room_type: r.room_type || "Duplo",
+        quantity: Number(r.quantity) || 1,
+        adults: Number(r.adults) || 2,
+        children: Number(r.children) || 0,
+        children_ages: Array.isArray(r.children_ages) ? r.children_ages.map(Number) : [],
+        unit_price: Number(r.unit_price) || 0,
+        notes: r.notes || "",
+      }))
+    : [{
+        room_type: legacyLabel,
+        quantity: 1,
+        adults: 2,
+        children: 0,
+        children_ages: [],
+        unit_price: Number(init?.price ?? initialData?.amount ?? 0) || 0,
+        notes: "",
+      }];
   const form = useForm<z.infer<typeof hotelSchema>>({
     resolver: zodResolver(hotelSchema),
     defaultValues: {
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
       hotel_name: init?.hotel_name || "", city: init?.city || "",
-      room_type: init?.room_type || "", meal_plan: init?.meal_plan || "", price: init?.price || initialData?.amount || 0,
-      adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
+      meal_plan: init?.meal_plan || "",
+      rooms: initialRooms,
       notes: init?.notes || "",
       check_in: init?.check_in ? parseLocalDate(init.check_in) : tripStartDate,
       check_out: init?.check_out ? parseLocalDate(init.check_out) : tripEndDate,
     },
   });
+
+  const roomsWatch = form.watch("rooms");
+  const totalPrice = (roomsWatch || []).reduce((sum, r) => sum + (Number(r.quantity) || 0) * (Number(r.unit_price) || 0), 0);
+
+  const addRoom = () => {
+    const current = form.getValues("rooms") || [];
+    form.setValue("rooms", [...current, {
+      room_type: "Duplo", quantity: 1, adults: 2, children: 0, children_ages: [], unit_price: 0, notes: "",
+    }], { shouldValidate: false });
+  };
+  const removeRoom = (idx: number) => {
+    const current = form.getValues("rooms") || [];
+    if (current.length <= 1) return;
+    form.setValue("rooms", current.filter((_, i) => i !== idx), { shouldValidate: true });
+  };
 
   // Hotel autocomplete state
   const [predictions, setPredictions] = useState<Array<{ place_id: string; name: string; secondary: string; is_hotel: boolean }>>([]);
@@ -797,14 +859,33 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
     try {
+      const rooms = values.rooms.map((r) => {
+        const quantity = Number(r.quantity) || 0;
+        const unit_price = Number(r.unit_price) || 0;
+        const ages = (r.children_ages || []).slice(0, r.children);
+        return {
+          room_type: r.room_type,
+          quantity,
+          adults: Number(r.adults) || 0,
+          children: Number(r.children) || 0,
+          children_ages: ages,
+          unit_price,
+          total_price: +(quantity * unit_price).toFixed(2),
+          notes: r.notes || "",
+        };
+      });
+      const total = +rooms.reduce((s, r) => s + r.total_price, 0).toFixed(2);
       const data: any = {
         hotel_name: values.hotel_name, city: values.city,
         check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
-        room_type: values.room_type, meal_plan: values.meal_plan, price: values.price, notes: values.notes || "",
+        meal_plan: values.meal_plan,
+        // Legacy field kept for backward-compat readers
+        room_type: rooms[0]?.room_type || "",
+        price: total,
+        rooms,
+        notes: values.notes || "",
       };
-      if (values.adult_price && values.adult_price > 0) data.adult_price = values.adult_price;
-      if (values.child_price && values.child_price > 0) data.child_price = values.child_price;
-      onSubmit(data, values.price, values.option_label || undefined, values.service_description || undefined);
+      onSubmit(data, total, values.option_label || undefined, values.service_description || undefined);
     } catch (err) {
       console.error("HotelForm submit failed:", err);
       toast({
@@ -896,18 +977,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
           )} />
         </div>
 
-        {/* 4. Room & Meal */}
+        {/* 4. Meal plan */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="room_type" render={({ field }) => (
-            <FormItem><FormLabel>Tipo de Quarto</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-                <SelectContent>
-                  <SelectItem value="standard">Standard</SelectItem><SelectItem value="superior">Superior</SelectItem>
-                  <SelectItem value="deluxe">Deluxe</SelectItem><SelectItem value="suite">Suíte</SelectItem>
-                  <SelectItem value="suite_junior">Suíte Júnior</SelectItem>
-                </SelectContent>
-              </Select><FormMessage /></FormItem>
-          )} />
           <FormField control={form.control} name="meal_plan" render={({ field }) => (
             <FormItem><FormLabel>Regime de Alimentação</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
@@ -920,6 +991,113 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
           )} />
         </div>
 
+        {/* 4b. Apartamentos */}
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <div className="text-sm font-semibold">Apartamentos</div>
+              <div className="text-xs text-muted-foreground">Adicione um ou mais tipos de apartamento nesta opção de hotel.</div>
+            </div>
+            <Button type="button" size="sm" variant="outline" onClick={addRoom}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> Adicionar apartamento
+            </Button>
+          </div>
+          {(roomsWatch || []).map((room, idx) => {
+            const subtotal = (Number(room.quantity) || 0) * (Number(room.unit_price) || 0);
+            return (
+              <div key={idx} className="rounded-lg border border-border bg-background p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-medium text-muted-foreground">Apartamento {idx + 1}</div>
+                  {(roomsWatch?.length || 0) > 1 && (
+                    <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => removeRoom(idx)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FormField control={form.control} name={`rooms.${idx}.room_type` as const} render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Tipo de apartamento</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          {HOTEL_ROOM_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                          {field.value && !HOTEL_ROOM_TYPES.includes(field.value) && (
+                            <SelectItem value={field.value}>{field.value}</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select><FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name={`rooms.${idx}.quantity` as const} render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Quantidade</FormLabel>
+                      <FormControl><Input type="number" min={1} step={1} {...field} value={field.value ?? 1} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <FormField control={form.control} name={`rooms.${idx}.adults` as const} render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Adultos</FormLabel>
+                      <FormControl><Input type="number" min={1} step={1} {...field} value={field.value ?? 1} onChange={(e) => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name={`rooms.${idx}.children` as const} render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Crianças</FormLabel>
+                      <FormControl><Input type="number" min={0} step={1} {...field} value={field.value ?? 0} onChange={(e) => {
+                        const n = Math.max(0, parseInt(e.target.value) || 0);
+                        field.onChange(n);
+                        const current = form.getValues(`rooms.${idx}.children_ages`) || [];
+                        const next = Array.from({ length: n }, (_, i) => current[i] ?? 0);
+                        form.setValue(`rooms.${idx}.children_ages`, next);
+                      }} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name={`rooms.${idx}.unit_price` as const} render={({ field }) => (
+                    <FormItem><FormLabel className="text-xs">Valor por apartamento (R$)</FormLabel>
+                      <FormControl><Input type="number" min={0} step="0.01" {...field} value={field.value ?? 0} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                {(Number(room.children) || 0) > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="text-xs text-muted-foreground">Idades das crianças</div>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.from({ length: Number(room.children) || 0 }).map((_, ci) => (
+                        <FormField key={ci} control={form.control} name={`rooms.${idx}.children_ages.${ci}` as const} render={({ field }) => (
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-muted-foreground">Criança {ci + 1}:</span>
+                            <Input type="number" min={0} max={17} step={1} className="w-20 h-8" {...field} value={field.value ?? 0} onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} />
+                            <span className="text-xs text-muted-foreground">anos</span>
+                          </div>
+                        )} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <FormField control={form.control} name={`rooms.${idx}.notes` as const} render={({ field }) => (
+                  <FormItem><FormLabel className="text-xs">Observações (opcional)</FormLabel>
+                    <FormControl><Input placeholder="Ex: vista mar, andar alto..." {...field} value={field.value ?? ""} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <div className="text-xs text-right text-muted-foreground">
+                  Subtotal: <span className="font-semibold text-foreground">R$ {subtotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+            );
+          })}
+          <div className="flex items-center justify-between pt-2 border-t border-border/60">
+            <span className="text-sm font-medium">Total da hospedagem</span>
+            <span className="text-base font-semibold">R$ {totalPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          </div>
+          {form.formState.errors.rooms && typeof form.formState.errors.rooms.message === "string" && (
+            <p className="text-xs text-destructive">{form.formState.errors.rooms.message}</p>
+          )}
+        </div>
+
         {/* 5. Description */}
         {showOptionLabel && (
           <FormField control={form.control} name="service_description" render={({ field }) => (
@@ -927,19 +1105,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
           )} />
         )}
 
-        {/* 6. Price */}
-        <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="adult_price" render={({ field }) => (
-            <FormItem><FormLabel>Valor Adulto (opcional)</FormLabel><FormControl><Input type="number" min={0} step="0.01" placeholder="0.00" {...field} value={field.value || ""} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-          )} />
-          <FormField control={form.control} name="child_price" render={({ field }) => (
-            <FormItem><FormLabel>Valor Criança (opcional)</FormLabel><FormControl><Input type="number" min={0} step="0.01" placeholder="0.00" {...field} value={field.value || ""} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-          )} />
-        </div>
-        {renderPaymentSlot(paymentSlot, form.watch("price"))}
+        {renderPaymentSlot(paymentSlot, totalPrice)}
 
         {/* 7. Label (optional) */}
         {showOptionLabel && (

@@ -178,7 +178,22 @@ function getServiceDetails(service: QuoteService): string[] {
       break;
     case "hotel":
       details.push(`Check-in: ${formatDateShort(data.check_in)} | Check-out: ${formatDateShort(data.check_out)}`);
-      details.push(`Quarto: ${formatLabel(data.room_type)} | Regime: ${formatLabel(data.meal_plan)}`);
+      if (data.meal_plan) details.push(`Regime: ${formatLabel(data.meal_plan)}`);
+      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+        data.rooms.forEach((r: any) => {
+          const paxParts: string[] = [];
+          if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+          if (r.children) {
+            const ages = Array.isArray(r.children_ages) && r.children_ages.length
+              ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+              : "";
+            paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+          }
+          details.push(`${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
+        });
+      } else if (data.room_type) {
+        details.push(`Quarto: ${formatLabel(data.room_type)}`);
+      }
       if (data.notes) details.push(data.notes);
       break;
     case "car_rental":
@@ -423,7 +438,7 @@ function HotelBody({ data }: { data: any }) {
         <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label="Check-out" value={formatDateShort(data.check_out)} />
       </div>
       <div className="flex flex-wrap gap-3 text-sm">
-        {data.room_type && (
+        {(!Array.isArray(data.rooms) || data.rooms.length === 0) && data.room_type && (
           <div className="flex items-center gap-1.5 text-foreground/80">
             <BedDouble className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="font-medium">{formatLabel(data.room_type)}</span>
@@ -436,6 +451,33 @@ function HotelBody({ data }: { data: any }) {
           </div>
         )}
       </div>
+      {Array.isArray(data.rooms) && data.rooms.length > 0 && (
+        <div className="rounded-xl border border-border/40 bg-muted/10 p-3 space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acomodações</div>
+          <ul className="space-y-1.5">
+            {data.rooms.map((r: any, i: number) => {
+              const paxParts: string[] = [];
+              if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+              if (r.children) {
+                const ages = Array.isArray(r.children_ages) && r.children_ages.length
+                  ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+                  : "";
+                paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+              }
+              return (
+                <li key={i} className="flex items-start gap-2 text-sm text-foreground/85">
+                  <BedDouble className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+                  <span>
+                    <span className="font-medium">{r.quantity || 1}x {r.room_type}</span>
+                    {paxParts.length ? <span className="text-muted-foreground"> — {paxParts.join(" + ")}</span> : null}
+                    {r.notes ? <span className="block text-xs text-muted-foreground mt-0.5">{r.notes}</span> : null}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
       {data.notes && (
         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
           <FormattedText>{data.notes}</FormattedText>

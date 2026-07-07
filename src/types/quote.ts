@@ -131,6 +131,26 @@ export interface HotelData {
   meal_plan: string;
   price: number;
   notes: string;
+  adult_price?: number;
+  child_price?: number;
+  /**
+   * Lista de apartamentos/quartos dessa opção de hotel.
+   * Quando presente e não-vazia, é a FONTE DA VERDADE:
+   * - `price` = soma de `total_price` de cada quarto.
+   * - Os campos legados (`room_type`) permanecem apenas para compatibilidade.
+   */
+  rooms?: HotelRoom[];
+}
+
+export interface HotelRoom {
+  room_type: string;         // "Duplo", "Triplo", "Duplo com criança", "Single", "Quádruplo", "Outro"
+  quantity: number;          // qtde de apartamentos daquele tipo
+  adults: number;
+  children: number;
+  children_ages?: number[];
+  unit_price: number;        // valor por apartamento
+  total_price: number;       // quantity * unit_price
+  notes?: string;
 }
 
 export interface CarRentalData {

@@ -109,8 +109,22 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
     case "hotel":
       details.push(`Check-in: ${formatDate(data.check_in)}`);
       details.push(`Check-out: ${formatDate(data.check_out)}`);
-      details.push(`Quarto: ${data.room_type}`);
-      details.push(`Alimentação: ${data.meal_plan}`);
+      if (data.meal_plan) details.push(`Alimentação: ${data.meal_plan}`);
+      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+        data.rooms.forEach((r: any) => {
+          const paxParts: string[] = [];
+          if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+          if (r.children) {
+            const ages = Array.isArray(r.children_ages) && r.children_ages.length
+              ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+              : "";
+            paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+          }
+          details.push(`${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
+        });
+      } else if (data.room_type) {
+        details.push(`Quarto: ${data.room_type}`);
+      }
       break;
     case "car_rental":
       if (data.pickup_date) details.push(`Retirada: ${formatDate(data.pickup_date)}${data.pickup_time ? ` às ${data.pickup_time}` : ''} — ${data.pickup_location}`);
