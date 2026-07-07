@@ -539,11 +539,26 @@ export function AdminTourOperatorsManager() {
           const normalizedName = normalizeOperatorName(name);
           if (existingNames.has(normalizedName)) { result.skipped++; continue; }
 
-          const description = appendSection("Descrição", getMappedValue(lookup, HEADER_ALIASES.description));
-          const businessHours = appendSection("Horários e suporte", getMappedValue(lookup, HEADER_ALIASES.business_hours));
-          const competitiveAdvantages = appendSection("Diferenciais competitivos", getMappedValue(lookup, HEADER_ALIASES.competitive_advantages));
-          const certifications = appendSection("Certificações", getMappedValue(lookup, HEADER_ALIASES.certifications));
-          const howToSellParts = [toText(getMappedValue(lookup, HEADER_ALIASES.how_to_sell)), description, businessHours, competitiveAdvantages, certifications].filter(Boolean);
+          const shortDescription = toText(getMappedValue(lookup, HEADER_ALIASES.description));
+          const howToSell = toText(getMappedValue(lookup, HEADER_ALIASES.how_to_sell));
+          const competitiveAdvantages = toText(getMappedValue(lookup, HEADER_ALIASES.competitive_advantages));
+          const certifications = toText(getMappedValue(lookup, HEADER_ALIASES.certifications));
+          const businessHoursRaw = toText(getMappedValue(lookup, HEADER_ALIASES.business_hours));
+          let businessHours: { commercial: string; after_hours: string; emergency: string } | null = null;
+          if (businessHoursRaw) {
+            try {
+              const parsed = JSON.parse(businessHoursRaw);
+              if (parsed && typeof parsed === "object") {
+                businessHours = {
+                  commercial: typeof parsed.commercial === "string" ? parsed.commercial : "",
+                  after_hours: typeof parsed.after_hours === "string" ? parsed.after_hours : "",
+                  emergency: typeof parsed.emergency === "string" ? parsed.emergency : "",
+                };
+              }
+            } catch {
+              businessHours = { commercial: businessHoursRaw, after_hours: "", emergency: "" };
+            }
+          }
 
           const socialLinks: Record<string, string> = {};
           for (const key of ["facebook", "linkedin", "youtube", "tiktok", "telegram"] as const) {
@@ -555,7 +570,11 @@ export function AdminTourOperatorsManager() {
             name,
             category: normalizeCategory(getMappedValue(lookup, HEADER_ALIASES.category)),
             specialties: toText(getMappedValue(lookup, HEADER_ALIASES.specialties)) || null,
-            how_to_sell: howToSellParts.join("\n\n") || null,
+            short_description: shortDescription || null,
+            how_to_sell: howToSell || null,
+            business_hours: businessHours,
+            competitive_advantages: competitiveAdvantages || null,
+            certifications: certifications || null,
             sales_channels: toText(getMappedValue(lookup, HEADER_ALIASES.sales_channels)) || null,
             commercial_contacts: toText(getMappedValue(lookup, HEADER_ALIASES.commercial_contacts)) || null,
             website: toText(getMappedValue(lookup, HEADER_ALIASES.website)) || null,
