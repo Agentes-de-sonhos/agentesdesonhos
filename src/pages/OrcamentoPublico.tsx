@@ -690,11 +690,11 @@ function CruiseBody({ data }: { data: any }) {
   );
 }
 
-function ServiceBody({ service }: { service: QuoteService }) {
+function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote }) {
   const data = service.service_data as any;
   switch (service.service_type) {
     case "flight": return <FlightBody data={data} />;
-    case "hotel": return <HotelBody data={data} service={service} />;
+    case "hotel": return <HotelBody data={data} service={service} quote={quote} />;
     case "car_rental": return <CarBody data={data} />;
     case "transfer": return <TransferBody data={data} />;
     case "attraction": return <AttractionBody data={data} />;
@@ -705,9 +705,9 @@ function ServiceBody({ service }: { service: QuoteService }) {
 }
 
 function CollapsibleServiceCard({
-  service, showPrice, isOpen, onToggle, showPaymentPerService = false,
+  service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote,
 }: {
-  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean;
+  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean; quote?: Quote;
 }) {
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
@@ -737,6 +737,12 @@ function CollapsibleServiceCard({
   const freeItems = detailItems.filter(d => !d.label);
 
   const hasCustomLayout = ["flight", "hotel", "car_rental", "transfer", "attraction", "insurance", "cruise"].includes(type);
+  // Quando o hotel tem múltiplos apartamentos, os valores são exibidos por
+  // apartamento dentro do corpo do serviço. Suprimimos o preço no cabeçalho
+  // para evitar destacar o total somado do hotel como informação principal.
+  const hotelRooms = type === "hotel" ? ((service.service_data as any)?.rooms || []) : [];
+  const hotelHasMultipleRooms = type === "hotel" && Array.isArray(hotelRooms) && hotelRooms.length > 1;
+  const effectiveShowPrice = showPrice && !hotelHasMultipleRooms;
 
   return (
     <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
@@ -766,7 +772,7 @@ function CollapsibleServiceCard({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {showPrice && (
+          {effectiveShowPrice && (
             <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
           )}
           <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
@@ -793,7 +799,7 @@ function CollapsibleServiceCard({
             return <p className="text-base font-semibold text-foreground tracking-tight">{name}</p>;
           })()}
           {isOpen && hasCustomLayout && (
-            <ServiceBody service={service} />
+            <ServiceBody service={service} quote={quote} />
           )}
           {isOpen && !hasCustomLayout && chipItems.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
