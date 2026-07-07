@@ -118,6 +118,18 @@ export function RichContentEditor({ label, content, onChange, placeholder }: Ric
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor]);
 
+  // Keep the editor in sync when the incoming content prop changes from the
+  // outside (e.g. cancel-edit or when a different section reuses the same
+  // editor instance across renders).
+  useEffect(() => {
+    if (!editor) return;
+    const current = editor.getHTML();
+    if ((content || "") !== current && (initial || "") !== current) {
+      editor.commands.setContent(initial || "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
+
   if (!editor) return null;
 
   const ToolBtn = ({ active, onClick, children, title }: { active?: boolean; onClick: () => void; children: React.ReactNode; title: string }) => (
