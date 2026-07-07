@@ -178,7 +178,22 @@ function getServiceDetails(service: QuoteService): string[] {
       break;
     case "hotel":
       details.push(`Check-in: ${formatDateShort(data.check_in)} | Check-out: ${formatDateShort(data.check_out)}`);
-      details.push(`Quarto: ${formatLabel(data.room_type)} | Regime: ${formatLabel(data.meal_plan)}`);
+      if (data.meal_plan) details.push(`Regime: ${formatLabel(data.meal_plan)}`);
+      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+        data.rooms.forEach((r: any) => {
+          const paxParts: string[] = [];
+          if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+          if (r.children) {
+            const ages = Array.isArray(r.children_ages) && r.children_ages.length
+              ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+              : "";
+            paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+          }
+          details.push(`${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
+        });
+      } else if (data.room_type) {
+        details.push(`Quarto: ${formatLabel(data.room_type)}`);
+      }
       if (data.notes) details.push(data.notes);
       break;
     case "car_rental":
