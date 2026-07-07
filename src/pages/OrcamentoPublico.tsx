@@ -1355,6 +1355,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   isOpen={openServiceIndices.has(index)}
                   onToggle={() => handleToggleService(index)}
                   showPaymentPerService={isNewLayout ? false : useServicePayment}
+                  quote={quote}
                 />
               ))}
             </div>
