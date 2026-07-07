@@ -183,84 +183,107 @@ export function useLeadRealtime(onNewLead: (lead: LeadItem) => void) {
 
   useEffect(() => {
     if (!user?.id) return;
-    // Guard against multiple mounts (e.g. one NewLeadAlertProvider per open
-    // workspace tab). Only the first mounted instance opens the realtime
-    // channel and plays the chime; siblings become no-ops.
-    if (leadRealtimeOwner && leadRealtimeOwner !== user.id) {
-      // Different user (shouldn't happen), still guard.
-      return;
-    }
-    if (leadRealtimeMounts > 0) {
-      leadRealtimeMounts += 1;
-      return () => {
-        leadRealtimeMounts = Math.max(0, leadRealtimeMounts - 1);
-      };
-    }
-    leadRealtimeMounts = 1;
-    leadRealtimeOwner = user.id;
-    const channel = supabase
-      .channel(`leads-realtime-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "lead_captures",
-          filter: `agent_user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const row: any = payload.new;
-          cbRef.current({
-            id: row.id,
-            source: "conversational",
-            source_label: SOURCE_LABEL.conversational,
-            lead_name: row.lead_name,
-            lead_phone: row.lead_phone,
-            destination: row.destination,
-            is_read: !!row.is_read,
-            attended_at: row.attended_at,
-            whatsapp_message: row.whatsapp_message,
-            created_at: row.created_at,
-          });
-          qc.invalidateQueries({ queryKey: ["leads-unified", user.id] });
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "sales_landing_leads",
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const row: any = payload.new;
-          cbRef.current({
-            id: row.id,
-            source: "sales_landing",
-            source_label: SOURCE_LABEL.sales_landing,
-            lead_name: row.lead_name,
-            lead_phone: row.lead_phone,
-            destination: null,
-            is_read: !!row.is_read,
-            attended_at: row.attended_at,
-            whatsapp_message: null,
-            created_at: row.created_at,
-          });
-          qc.invalidateQueries({ queryKey: ["leads-unified", user.id] });
-        }
-      )
-      .subscribe();
-
+    // Shared subscription across all NewLeadAlertProvider instances (one per
+    // workspace tab). The Supabase channel is opened by the first subscriber
+    // and torn down only after the last subscriber unmounts, so closing the
+    // originating tab no longer kills alerts for the remaining tabs.
+    const subscriber = (lead: LeadItem) => cbRef.current(lead);
+    subscribeLeadRealtime(user.id, subscriber, qc);
     return () => {
-      leadRealtimeMounts = Math.max(0, leadRealtimeMounts - 1);
-      if (leadRealtimeMounts === 0) leadRealtimeOwner = null;
-      supabase.removeChannel(channel);
+      unsubscribeLeadRealtime(user.id, subscriber);
     };
   }, [user?.id, qc]);
 }
 
-// Module-level singleton so only one useLeadRealtime instance drives the
-// realtime channel (workspace tabs mount the provider once per tab).
-let leadRealtimeMounts = 0;
-let leadRealtimeOwner: string | null = null;
+// Module-level shared channel: one Supabase realtime channel per user.id,
+// fanning out INSERT events to every mounted subscriber.
+type LeadSubscriber = (lead: LeadItem) => void;
+let sharedChannel: ReturnType<typeof supabase.channel> | null = null;
+let sharedOwnerId: string | null = null;
+const sharedSubscribers = new Set<LeadSubscriber>();
+
+function subscribeLeadRealtime(
+  userId: string,
+  subscriber: LeadSubscriber,
+  qc: ReturnType<typeof useQueryClient>
+) {
+  if (sharedOwnerId && sharedOwnerId !== userId) {
+    // User changed — tear the previous channel down before opening a new one.
+    if (sharedChannel) supabase.removeChannel(sharedChannel);
+    sharedChannel = null;
+    sharedOwnerId = null;
+    sharedSubscribers.clear();
+  }
+  sharedSubscribers.add(subscriber);
+  if (sharedChannel) return;
+
+  sharedOwnerId = userId;
+  sharedChannel = supabase
+    .channel(`leads-realtime-${userId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "lead_captures",
+        filter: `agent_user_id=eq.${userId}`,
+      },
+      (payload) => {
+        const row: any = payload.new;
+        const lead: LeadItem = {
+          id: row.id,
+          source: "conversational",
+          source_label: SOURCE_LABEL.conversational,
+          lead_name: row.lead_name,
+          lead_phone: row.lead_phone,
+          destination: row.destination,
+          is_read: !!row.is_read,
+          attended_at: row.attended_at,
+          whatsapp_message: row.whatsapp_message,
+          created_at: row.created_at,
+        };
+        // Only the first subscriber receives the popup/chime; the rest still
+        // exist so query invalidation runs once, keeping counters fresh.
+        const first = sharedSubscribers.values().next().value as LeadSubscriber | undefined;
+        first?.(lead);
+        qc.invalidateQueries({ queryKey: ["leads-unified", userId] });
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "sales_landing_leads",
+        filter: `user_id=eq.${userId}`,
+      },
+      (payload) => {
+        const row: any = payload.new;
+        const lead: LeadItem = {
+          id: row.id,
+          source: "sales_landing",
+          source_label: SOURCE_LABEL.sales_landing,
+          lead_name: row.lead_name,
+          lead_phone: row.lead_phone,
+          destination: null,
+          is_read: !!row.is_read,
+          attended_at: row.attended_at,
+          whatsapp_message: null,
+          created_at: row.created_at,
+        };
+        const first = sharedSubscribers.values().next().value as LeadSubscriber | undefined;
+        first?.(lead);
+        qc.invalidateQueries({ queryKey: ["leads-unified", userId] });
+      }
+    )
+    .subscribe();
+}
+
+function unsubscribeLeadRealtime(userId: string, subscriber: LeadSubscriber) {
+  sharedSubscribers.delete(subscriber);
+  if (sharedSubscribers.size === 0 && sharedChannel) {
+    supabase.removeChannel(sharedChannel);
+    sharedChannel = null;
+    sharedOwnerId = null;
+  }
+}
