@@ -416,7 +416,6 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                 ${r.notes ? `<div style="font-size:11px;color:#64748b;font-style:italic;margin-top:2px;">${r.notes}</div>` : ""}
                 <div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:6px;">
                   <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748b;">Valor</span><span style="color:#0f172a;font-weight:700;">${formatCurrency(sim.total)}</span></div>
-                  <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:#64748b;">À vista</span><span style="color:#0f172a;font-weight:600;">${formatCurrency(sim.cashValue)}</span></div>
                   ${installmentLine}
                 </div>
               </div>
