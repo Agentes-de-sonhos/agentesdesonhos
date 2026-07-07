@@ -449,10 +449,8 @@ export function AdminTourOperatorsManager() {
       name: op.name || "",
       category: op.category || "Operadoras de turismo",
       specialties: op.specialties || "",
-      short_description: op.short_description || parsed.main || "",
-      // If we consumed parsed.main into short_description because the column was
-      // empty, keep how_to_sell equal to op.how_to_sell (may be legacy blob).
-      how_to_sell: op.short_description ? (op.how_to_sell || "") : "",
+      short_description: op.short_description || "",
+      how_to_sell: op.short_description ? (op.how_to_sell || "") : (parsed.main || op.how_to_sell || ""),
       business_hours: bh.commercial || parsed.businessHours || "",
       after_hours: bh.after_hours || parsed.afterHours || "",
       emergency: bh.emergency || parsed.emergency || "",
