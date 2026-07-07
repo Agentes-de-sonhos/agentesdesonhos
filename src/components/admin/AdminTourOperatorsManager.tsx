@@ -400,7 +400,11 @@ export function AdminTourOperatorsManager() {
         name: data.name.trim(),
         category: data.category.trim() || "Operadoras de turismo",
         specialties: data.specialties.trim() || null,
+        short_description: data.short_description.trim() || null,
         how_to_sell: serializeHowToSell(data),
+        business_hours: buildBusinessHoursJson(data),
+        competitive_advantages: data.competitive_advantages.trim() || null,
+        certifications: data.certifications.trim() || null,
         sales_channels: serializeSalesChannels(data.sales_channels_list),
         commercial_contacts: serializeCommercialContacts(data),
         website: data.website.trim() || null,
@@ -433,7 +437,9 @@ export function AdminTourOperatorsManager() {
   const resetForm = () => { setFormData(initialFormData); setEditingOperator(null); setIsEditOpen(false); setActiveTab("como-vender"); };
 
   const openEdit = (op: any) => {
+    // Prefer dedicated columns; fall back to parsing legacy `how_to_sell` blob.
     const parsed = parseHowToSell(op.how_to_sell);
+    const bh = readBusinessHours(op.business_hours);
     const contacts = parseCommercialContacts(op.commercial_contacts);
     const social = (op.social_links && typeof op.social_links === "object") ? op.social_links : {};
     const mats = Array.isArray(op.materials) ? op.materials as MaterialItem[] : [];
@@ -443,12 +449,15 @@ export function AdminTourOperatorsManager() {
       name: op.name || "",
       category: op.category || "Operadoras de turismo",
       specialties: op.specialties || "",
-      how_to_sell: parsed.main,
-      business_hours: parsed.businessHours,
-      after_hours: parsed.afterHours,
-      emergency: parsed.emergency,
-      competitive_advantages: parsed.advantages,
-      certifications: parsed.certifications,
+      short_description: op.short_description || parsed.main || "",
+      // If we consumed parsed.main into short_description because the column was
+      // empty, keep how_to_sell equal to op.how_to_sell (may be legacy blob).
+      how_to_sell: op.short_description ? (op.how_to_sell || "") : "",
+      business_hours: bh.commercial || parsed.businessHours || "",
+      after_hours: bh.after_hours || parsed.afterHours || "",
+      emergency: bh.emergency || parsed.emergency || "",
+      competitive_advantages: op.competitive_advantages || parsed.advantages || "",
+      certifications: op.certifications || parsed.certifications || "",
       sales_channels_list: parseSalesChannels(op.sales_channels),
       commercial_phone: contacts.phone,
       commercial_whatsapp: contacts.whatsapp,
