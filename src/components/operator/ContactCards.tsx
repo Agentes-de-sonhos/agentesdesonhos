@@ -1,9 +1,9 @@
-import { RichTextWithLinks } from "./RichTextWithLinks";
+import { RichContentDisplay } from "./RichContentDisplay";
 
 interface ContactCardsProps {
   contacts: string;
 }
 
 export function ContactCards({ contacts }: ContactCardsProps) {
-  return <RichTextWithLinks text={contacts} />;
+  return <RichContentDisplay content={contacts} />;
 }
