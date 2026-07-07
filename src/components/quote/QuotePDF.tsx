@@ -185,7 +185,7 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`${data.hotel_name} — ${data.city}`);
       details.push(`Check-in: ${formatDate(data.check_in)} | Check-out: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`Regime: ${formatLabel(data.meal_plan)}`);
-      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+      if (Array.isArray(data.rooms) && data.rooms.length === 1) {
         details.push("Acomodações:");
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
