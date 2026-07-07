@@ -40,6 +40,7 @@ import {
   KeyRound,
   Globe,
   Copy,
+  FileJson,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { toast } from "sonner";
@@ -143,6 +144,7 @@ interface OperatorFormData {
   name: string;
   category: string;
   specialties: string;
+  short_description: string;
   how_to_sell: string;
   business_hours: string;
   after_hours: string;
@@ -171,6 +173,7 @@ interface OperatorFormData {
 
 const initialFormData: OperatorFormData = {
   name: "", category: "Operadoras de turismo", specialties: "",
+  short_description: "",
   how_to_sell: "", business_hours: "", after_hours: "", emergency: "",
   competitive_advantages: "", certifications: "",
   sales_channels_list: [{ name: "", url: "" }],
@@ -232,15 +235,37 @@ const parseHowToSell = (text: string | null) => {
   return result;
 };
 
+/**
+ * Only the pure "how to sell" narrative is stored in the `how_to_sell` column.
+ * Description, business hours, competitive advantages and certifications each
+ * live in their own dedicated columns (see saveMutation payload below).
+ */
 const serializeHowToSell = (d: OperatorFormData): string | null => {
-  const parts: string[] = [];
-  if (d.how_to_sell.trim()) parts.push(d.how_to_sell.trim());
-  if (d.business_hours.trim()) parts.push(`Horários e suporte: ${d.business_hours.trim()}`);
-  if (d.after_hours.trim()) parts.push(`Atendimento fora do horário: ${d.after_hours.trim()}`);
-  if (d.emergency.trim()) parts.push(`Emergencial: ${d.emergency.trim()}`);
-  if (d.competitive_advantages.trim()) parts.push(`Diferenciais competitivos: ${d.competitive_advantages.trim()}`);
-  if (d.certifications.trim()) parts.push(`Certificações: ${d.certifications.trim()}`);
-  return parts.length > 0 ? parts.join("\n\n") : null;
+  const txt = d.how_to_sell.trim();
+  return txt ? txt : null;
+};
+
+const buildBusinessHoursJson = (d: OperatorFormData) => {
+  const commercial = d.business_hours.trim();
+  const after_hours = d.after_hours.trim();
+  const emergency = d.emergency.trim();
+  if (!commercial && !after_hours && !emergency) return null;
+  return { commercial, after_hours, emergency };
+};
+
+const readBusinessHours = (raw: unknown): { commercial: string; after_hours: string; emergency: string } => {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>;
+    return {
+      commercial: typeof obj.commercial === "string" ? obj.commercial : "",
+      after_hours: typeof obj.after_hours === "string" ? obj.after_hours : "",
+      emergency: typeof obj.emergency === "string" ? obj.emergency : "",
+    };
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return { commercial: raw.trim(), after_hours: "", emergency: "" };
+  }
+  return { commercial: "", after_hours: "", emergency: "" };
 };
 
 const parseCommercialContacts = (text: string | null) => {
