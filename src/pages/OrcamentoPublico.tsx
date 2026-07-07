@@ -516,10 +516,6 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
                       <span className="text-muted-foreground">Valor</span>
                       <span className="font-semibold text-foreground tabular-nums">{fmt(sim.total)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">À vista</span>
-                      <span className="font-medium text-foreground tabular-nums">{fmt(sim.cashValue)}</span>
-                    </div>
                     {sim.installmentValue != null && (
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">ou {sim.installmentsCount}x de</span>
