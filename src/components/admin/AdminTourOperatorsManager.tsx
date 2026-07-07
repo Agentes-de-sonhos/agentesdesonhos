@@ -754,6 +754,10 @@ export function AdminTourOperatorsManager() {
               {/* 1. Como Vender */}
               <TabsContent value="como-vender" className="space-y-4 mt-4">
                 <div>
+                  <Label>Sobre a Operadora (descrição)</Label>
+                  <Textarea value={formData.short_description} onChange={(e) => updateField("short_description", e.target.value)} placeholder="Descrição institucional que aparece em 'Sobre a Operadora'..." rows={4} />
+                </div>
+                <div>
                   <Label>Descrição geral de vendas</Label>
                   <Textarea value={formData.how_to_sell} onChange={(e) => updateField("how_to_sell", e.target.value)} placeholder="Fluxo de venda, sistema utilizado, suporte ao agente..." rows={4} />
                 </div>
