@@ -68,6 +68,40 @@ export function RichContentEditor({ label, content, onChange, placeholder }: Ric
     content: initial,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
+      // Strip external formatting when pasting from Word/ChatGPT/web pages so
+      // only the structural markup (headings, lists, bold/italic/links) survives
+      // and the platform's own typography stays consistent.
+      transformPastedHTML(html) {
+        try {
+          const doc = new DOMParser().parseFromString(html, "text/html");
+          // Drop disallowed top-level elements outright.
+          doc.querySelectorAll("style, script, meta, link, title, xml, o\\:p, w\\:*, v\\:*").forEach((el) => el.remove());
+          // Iterate a static list — we mutate the tree as we go.
+          const all = Array.from(doc.body.querySelectorAll<HTMLElement>("*"));
+          all.forEach((el) => {
+            // Strip every attribute except <a href>.
+            Array.from(el.attributes).forEach((attr) => {
+              const keep = el.tagName === "A" && attr.name === "href";
+              if (!keep) el.removeAttribute(attr.name);
+            });
+            const tag = el.tagName;
+            if (tag === "DIV") {
+              const p = doc.createElement("p");
+              p.innerHTML = el.innerHTML;
+              el.replaceWith(p);
+            } else if (tag === "SPAN" || tag === "FONT") {
+              const parent = el.parentNode;
+              if (parent) {
+                while (el.firstChild) parent.insertBefore(el.firstChild, el);
+                el.remove();
+              }
+            }
+          });
+          return doc.body.innerHTML;
+        } catch {
+          return html;
+        }
+      },
       attributes: {
         class:
           "prose prose-sm max-w-none min-h-[160px] px-4 py-3 focus:outline-none text-foreground prose-headings:text-foreground prose-headings:font-semibold prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-li:leading-relaxed prose-a:text-primary",
