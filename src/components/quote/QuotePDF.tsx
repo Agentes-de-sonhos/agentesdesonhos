@@ -432,7 +432,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         // Per-service payment display
         let paymentHtml = "";
-        if (useServicePayment && showDetailedPrices) {
+        if (useServicePayment && showDetailedPrices && !(isHotel && (service.service_data as any)?.rooms?.length > 1)) {
           const payConfig = extractServicePaymentConfig(service);
           if (payConfig.is_custom_payment) {
             const feeInfo = extractFlightFeeInfo(service);
