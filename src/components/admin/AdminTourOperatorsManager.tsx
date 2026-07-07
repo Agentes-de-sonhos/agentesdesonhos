@@ -40,6 +40,7 @@ import {
   KeyRound,
   Globe,
   Copy,
+  FileJson,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { toast } from "sonner";
@@ -60,7 +61,7 @@ const TEMPLATE_HEADERS = [
 const HEADER_ALIASES = {
   name: ["name", "operator name", "nome da operadora", "operator_name"],
   category: ["category", "categoria"],
-  description: ["description", "descrição", "descricao"],
+  description: ["description", "descrição", "descricao", "short description", "short_description", "sobre a operadora"],
   how_to_sell: ["how to sell", "how_to_sell", "como vender"],
   sales_channels: ["sales channels", "sales_channels", "canais de venda"],
   commercial_contacts: ["commercial contacts", "commercial_contacts", "contatos comerciais"],
@@ -143,6 +144,7 @@ interface OperatorFormData {
   name: string;
   category: string;
   specialties: string;
+  short_description: string;
   how_to_sell: string;
   business_hours: string;
   after_hours: string;
@@ -171,6 +173,7 @@ interface OperatorFormData {
 
 const initialFormData: OperatorFormData = {
   name: "", category: "Operadoras de turismo", specialties: "",
+  short_description: "",
   how_to_sell: "", business_hours: "", after_hours: "", emergency: "",
   competitive_advantages: "", certifications: "",
   sales_channels_list: [{ name: "", url: "" }],
@@ -232,15 +235,37 @@ const parseHowToSell = (text: string | null) => {
   return result;
 };
 
+/**
+ * Only the pure "how to sell" narrative is stored in the `how_to_sell` column.
+ * Description, business hours, competitive advantages and certifications each
+ * live in their own dedicated columns (see saveMutation payload below).
+ */
 const serializeHowToSell = (d: OperatorFormData): string | null => {
-  const parts: string[] = [];
-  if (d.how_to_sell.trim()) parts.push(d.how_to_sell.trim());
-  if (d.business_hours.trim()) parts.push(`Horários e suporte: ${d.business_hours.trim()}`);
-  if (d.after_hours.trim()) parts.push(`Atendimento fora do horário: ${d.after_hours.trim()}`);
-  if (d.emergency.trim()) parts.push(`Emergencial: ${d.emergency.trim()}`);
-  if (d.competitive_advantages.trim()) parts.push(`Diferenciais competitivos: ${d.competitive_advantages.trim()}`);
-  if (d.certifications.trim()) parts.push(`Certificações: ${d.certifications.trim()}`);
-  return parts.length > 0 ? parts.join("\n\n") : null;
+  const txt = d.how_to_sell.trim();
+  return txt ? txt : null;
+};
+
+const buildBusinessHoursJson = (d: OperatorFormData) => {
+  const commercial = d.business_hours.trim();
+  const after_hours = d.after_hours.trim();
+  const emergency = d.emergency.trim();
+  if (!commercial && !after_hours && !emergency) return null;
+  return { commercial, after_hours, emergency };
+};
+
+const readBusinessHours = (raw: unknown): { commercial: string; after_hours: string; emergency: string } => {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>;
+    return {
+      commercial: typeof obj.commercial === "string" ? obj.commercial : "",
+      after_hours: typeof obj.after_hours === "string" ? obj.after_hours : "",
+      emergency: typeof obj.emergency === "string" ? obj.emergency : "",
+    };
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return { commercial: raw.trim(), after_hours: "", emergency: "" };
+  }
+  return { commercial: "", after_hours: "", emergency: "" };
 };
 
 const parseCommercialContacts = (text: string | null) => {
@@ -284,6 +309,11 @@ export function AdminTourOperatorsManager() {
   const [accountDialogOperator, setAccountDialogOperator] = useState<{ id: string; name: string } | null>(null);
   const [slugDialogOperator, setSlugDialogOperator] = useState<{ id: string; name: string; public_slug: string | null; is_published: boolean } | null>(null);
   const [slugDraft, setSlugDraft] = useState("");
+  const [jsonImportOpen, setJsonImportOpen] = useState(false);
+  const [jsonImportText, setJsonImportText] = useState("");
+  const [jsonImportError, setJsonImportError] = useState<string | null>(null);
+  const [jsonImportPreview, setJsonImportPreview] = useState<{ payload: Record<string, any>; existingId: string | null; existingName: string | null } | null>(null);
+  const [jsonImportSaving, setJsonImportSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -375,7 +405,11 @@ export function AdminTourOperatorsManager() {
         name: data.name.trim(),
         category: data.category.trim() || "Operadoras de turismo",
         specialties: data.specialties.trim() || null,
+        short_description: data.short_description.trim() || null,
         how_to_sell: serializeHowToSell(data),
+        business_hours: buildBusinessHoursJson(data),
+        competitive_advantages: data.competitive_advantages.trim() || null,
+        certifications: data.certifications.trim() || null,
         sales_channels: serializeSalesChannels(data.sales_channels_list),
         commercial_contacts: serializeCommercialContacts(data),
         website: data.website.trim() || null,
@@ -408,7 +442,9 @@ export function AdminTourOperatorsManager() {
   const resetForm = () => { setFormData(initialFormData); setEditingOperator(null); setIsEditOpen(false); setActiveTab("como-vender"); };
 
   const openEdit = (op: any) => {
+    // Prefer dedicated columns; fall back to parsing legacy `how_to_sell` blob.
     const parsed = parseHowToSell(op.how_to_sell);
+    const bh = readBusinessHours(op.business_hours);
     const contacts = parseCommercialContacts(op.commercial_contacts);
     const social = (op.social_links && typeof op.social_links === "object") ? op.social_links : {};
     const mats = Array.isArray(op.materials) ? op.materials as MaterialItem[] : [];
@@ -418,12 +454,13 @@ export function AdminTourOperatorsManager() {
       name: op.name || "",
       category: op.category || "Operadoras de turismo",
       specialties: op.specialties || "",
-      how_to_sell: parsed.main,
-      business_hours: parsed.businessHours,
-      after_hours: parsed.afterHours,
-      emergency: parsed.emergency,
-      competitive_advantages: parsed.advantages,
-      certifications: parsed.certifications,
+      short_description: op.short_description || "",
+      how_to_sell: op.short_description ? (op.how_to_sell || "") : (parsed.main || op.how_to_sell || ""),
+      business_hours: bh.commercial || parsed.businessHours || "",
+      after_hours: bh.after_hours || parsed.afterHours || "",
+      emergency: bh.emergency || parsed.emergency || "",
+      competitive_advantages: op.competitive_advantages || parsed.advantages || "",
+      certifications: op.certifications || parsed.certifications || "",
       sales_channels_list: parseSalesChannels(op.sales_channels),
       commercial_phone: contacts.phone,
       commercial_whatsapp: contacts.whatsapp,
@@ -507,11 +544,26 @@ export function AdminTourOperatorsManager() {
           const normalizedName = normalizeOperatorName(name);
           if (existingNames.has(normalizedName)) { result.skipped++; continue; }
 
-          const description = appendSection("Descrição", getMappedValue(lookup, HEADER_ALIASES.description));
-          const businessHours = appendSection("Horários e suporte", getMappedValue(lookup, HEADER_ALIASES.business_hours));
-          const competitiveAdvantages = appendSection("Diferenciais competitivos", getMappedValue(lookup, HEADER_ALIASES.competitive_advantages));
-          const certifications = appendSection("Certificações", getMappedValue(lookup, HEADER_ALIASES.certifications));
-          const howToSellParts = [toText(getMappedValue(lookup, HEADER_ALIASES.how_to_sell)), description, businessHours, competitiveAdvantages, certifications].filter(Boolean);
+          const shortDescription = toText(getMappedValue(lookup, HEADER_ALIASES.description));
+          const howToSell = toText(getMappedValue(lookup, HEADER_ALIASES.how_to_sell));
+          const competitiveAdvantages = toText(getMappedValue(lookup, HEADER_ALIASES.competitive_advantages));
+          const certifications = toText(getMappedValue(lookup, HEADER_ALIASES.certifications));
+          const businessHoursRaw = toText(getMappedValue(lookup, HEADER_ALIASES.business_hours));
+          let businessHours: { commercial: string; after_hours: string; emergency: string } | null = null;
+          if (businessHoursRaw) {
+            try {
+              const parsed = JSON.parse(businessHoursRaw);
+              if (parsed && typeof parsed === "object") {
+                businessHours = {
+                  commercial: typeof parsed.commercial === "string" ? parsed.commercial : "",
+                  after_hours: typeof parsed.after_hours === "string" ? parsed.after_hours : "",
+                  emergency: typeof parsed.emergency === "string" ? parsed.emergency : "",
+                };
+              }
+            } catch {
+              businessHours = { commercial: businessHoursRaw, after_hours: "", emergency: "" };
+            }
+          }
 
           const socialLinks: Record<string, string> = {};
           for (const key of ["facebook", "linkedin", "youtube", "tiktok", "telegram"] as const) {
@@ -523,7 +575,11 @@ export function AdminTourOperatorsManager() {
             name,
             category: normalizeCategory(getMappedValue(lookup, HEADER_ALIASES.category)),
             specialties: toText(getMappedValue(lookup, HEADER_ALIASES.specialties)) || null,
-            how_to_sell: howToSellParts.join("\n\n") || null,
+            short_description: shortDescription || null,
+            how_to_sell: howToSell || null,
+            business_hours: businessHours,
+            competitive_advantages: competitiveAdvantages || null,
+            certifications: certifications || null,
             sales_channels: toText(getMappedValue(lookup, HEADER_ALIASES.sales_channels)) || null,
             commercial_contacts: toText(getMappedValue(lookup, HEADER_ALIASES.commercial_contacts)) || null,
             website: toText(getMappedValue(lookup, HEADER_ALIASES.website)) || null,
@@ -562,6 +618,102 @@ export function AdminTourOperatorsManager() {
     return matchesSearch && matchesCategory;
   });
 
+  // ---- JSON (ChatGPT) import ----
+  const buildPayloadFromJson = (raw: any): Record<string, any> => {
+    if (!raw || typeof raw !== "object") throw new Error("JSON deve ser um objeto.");
+    const name = toText(raw.name);
+    if (!name) throw new Error("Campo 'name' é obrigatório.");
+    const companyInfo = (raw.company_info && typeof raw.company_info === "object") ? raw.company_info : {};
+    const social = (raw.social_links && typeof raw.social_links === "object") ? raw.social_links : {};
+    const socialLinks: Record<string, string> = {};
+    for (const key of ["facebook", "linkedin", "youtube", "tiktok", "telegram"] as const) {
+      const v = toText(social[key]);
+      if (v) socialLinks[key] = v;
+    }
+    let businessHours: any = null;
+    if (raw.business_hours && typeof raw.business_hours === "object") {
+      businessHours = {
+        commercial: toText((raw.business_hours as any).commercial),
+        after_hours: toText((raw.business_hours as any).after_hours),
+        emergency: toText((raw.business_hours as any).emergency),
+      };
+      if (!businessHours.commercial && !businessHours.after_hours && !businessHours.emergency) businessHours = null;
+    } else if (typeof raw.business_hours === "string" && raw.business_hours.trim()) {
+      businessHours = { commercial: raw.business_hours.trim(), after_hours: "", emergency: "" };
+    }
+    const founded = toInteger(raw.founded_year ?? companyInfo.founded_year);
+    const employees = toInteger(raw.employees ?? companyInfo.employees);
+    return {
+      name,
+      category: normalizeCategory(raw.category),
+      short_description: toText(raw.short_description) || null,
+      how_to_sell: toText(raw.how_to_sell) || null,
+      sales_channels: toText(raw.sales_channels) || null,
+      commercial_contacts: toText(raw.commercial_contacts) || null,
+      business_hours: businessHours,
+      specialties: toText(raw.specialties) || null,
+      competitive_advantages: toText(raw.competitive_advantages) || null,
+      certifications: toText(raw.certifications) || null,
+      website: toText(raw.website) || null,
+      instagram: toText(raw.instagram) || toText(social.instagram) || null,
+      social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+      logo_url: toText(raw.logo_url) || null,
+      founded_year: founded,
+      annual_revenue: toText(raw.annual_revenue ?? companyInfo.annual_revenue) || null,
+      employees,
+      executive_team: toText(raw.executive_team ?? companyInfo.executive_team) || null,
+    };
+  };
+
+  const handleJsonPreview = async () => {
+    setJsonImportError(null);
+    setJsonImportPreview(null);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(jsonImportText);
+    } catch (e: any) {
+      setJsonImportError("JSON inválido: " + (e?.message || "erro de sintaxe"));
+      return;
+    }
+    let payload: Record<string, any>;
+    try {
+      payload = buildPayloadFromJson(parsed);
+    } catch (e: any) {
+      setJsonImportError(e.message || "Erro ao montar payload");
+      return;
+    }
+    const normalized = normalizeOperatorName(payload.name);
+    const { data: matches, error } = await supabase.from("tour_operators").select("id, name").ilike("name", payload.name);
+    if (error) { setJsonImportError(error.message); return; }
+    const existing = (matches || []).find((m: any) => normalizeOperatorName(m.name || "") === normalized) || null;
+    setJsonImportPreview({ payload, existingId: existing?.id || null, existingName: existing?.name || null });
+  };
+
+  const handleJsonConfirmSave = async () => {
+    if (!jsonImportPreview) return;
+    setJsonImportSaving(true);
+    try {
+      const { payload, existingId } = jsonImportPreview;
+      if (existingId) {
+        const { error } = await supabase.from("tour_operators").update(payload as any).eq("id", existingId);
+        if (error) throw error;
+        toast.success("Fornecedor atualizado a partir do JSON.");
+      } else {
+        const { error } = await supabase.from("tour_operators").insert(payload as any);
+        if (error) throw error;
+        toast.success("Fornecedor criado a partir do JSON.");
+      }
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+      setJsonImportOpen(false);
+      setJsonImportText("");
+      setJsonImportPreview(null);
+    } catch (e: any) {
+      toast.error("Erro ao salvar: " + (e?.message || "desconhecido"));
+    } finally {
+      setJsonImportSaving(false);
+    }
+  };
+
   return (
     <>
     <Card className="border-0 shadow-md">
@@ -575,6 +727,9 @@ export function AdminTourOperatorsManager() {
           <Button variant="outline" size="sm" onClick={downloadTemplate}><Download className="h-4 w-4 mr-1" />Modelo</Button>
           <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing}>
             {importing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}Importar
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => { setJsonImportOpen(true); setJsonImportText(""); setJsonImportError(null); setJsonImportPreview(null); }}>
+            <FileJson className="h-4 w-4 mr-1" />Importar JSON do ChatGPT
           </Button>
           <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4 mr-1" />Adicionar</Button>
           <input ref={fileInputRef} type="file" className="hidden" accept=".csv,.xlsx,.xls" onChange={handleImport} />
@@ -702,6 +857,10 @@ export function AdminTourOperatorsManager() {
 
               {/* 1. Como Vender */}
               <TabsContent value="como-vender" className="space-y-4 mt-4">
+                <div>
+                  <Label>Sobre a Operadora (descrição)</Label>
+                  <Textarea value={formData.short_description} onChange={(e) => updateField("short_description", e.target.value)} placeholder="Descrição institucional que aparece em 'Sobre a Operadora'..." rows={4} />
+                </div>
                 <div>
                   <Label>Descrição geral de vendas</Label>
                   <Textarea value={formData.how_to_sell} onChange={(e) => updateField("how_to_sell", e.target.value)} placeholder="Fluxo de venda, sistema utilizado, suporte ao agente..." rows={4} />
@@ -880,6 +1039,70 @@ export function AdminTourOperatorsManager() {
         </DialogContent>
       </Dialog>
     </Card>
+
+    {/* JSON (ChatGPT) Import Dialog */}
+    <Dialog open={jsonImportOpen} onOpenChange={(o) => { setJsonImportOpen(o); if (!o) { setJsonImportText(""); setJsonImportError(null); setJsonImportPreview(null); } }}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><FileJson className="h-5 w-5" />Importar JSON do ChatGPT</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Cole o JSON estruturado do fornecedor</Label>
+            <Textarea
+              value={jsonImportText}
+              onChange={(e) => { setJsonImportText(e.target.value); setJsonImportError(null); setJsonImportPreview(null); }}
+              rows={12}
+              className="font-mono text-xs mt-1"
+              placeholder='{"name":"NANNAI","category":"Hospedagem", ...}'
+            />
+          </div>
+          {jsonImportError && (
+            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{jsonImportError}</span>
+            </div>
+          )}
+          {jsonImportPreview && (
+            <div className="rounded-md border bg-muted/40 p-3 space-y-2">
+              <p className="text-sm font-medium">
+                {jsonImportPreview.existingId
+                  ? `Fornecedor existente detectado: ${jsonImportPreview.existingName} — será ATUALIZADO.`
+                  : "Nenhum fornecedor com este nome. Um NOVO registro será criado."}
+              </p>
+              <p className="text-xs text-muted-foreground">Campos que serão gravados:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs max-h-52 overflow-y-auto">
+                {Object.entries(jsonImportPreview.payload)
+                  .filter(([, v]) => v !== null && v !== undefined && v !== "")
+                  .map(([k, v]) => (
+                    <div key={k} className="truncate">
+                      <span className="font-medium">{k}:</span>{" "}
+                      <span className="text-muted-foreground">
+                        {typeof v === "object" ? JSON.stringify(v) : String(v).slice(0, 80)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            {!jsonImportPreview ? (
+              <Button type="button" onClick={handleJsonPreview} disabled={!jsonImportText.trim()}>
+                Pré-visualizar
+              </Button>
+            ) : (
+              <>
+                <Button type="button" variant="outline" onClick={() => setJsonImportPreview(null)}>Voltar</Button>
+                <Button type="button" onClick={handleJsonConfirmSave} disabled={jsonImportSaving}>
+                  {jsonImportSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {jsonImportPreview.existingId ? "Atualizar fornecedor" : "Criar fornecedor"}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
 
     <MediaManagerModal
       open={quickLogoOpen}
