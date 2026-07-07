@@ -193,3 +193,59 @@ export function extractServicePaymentConfig(service: any): ServicePaymentConfig 
     payment_method: service.payment_method ?? null,
   };
 }
+
+/**
+ * Simulação de pagamento por apartamento de hotel.
+ * Usa a configuração custom do serviço quando existir; caso contrário,
+ * cai na configuração global do orçamento (payment_display_mode / installments_count / desconto à vista).
+ * NÃO cria parcelamento individual — apenas reaproveita a regra do hotel para exibir por quarto.
+ */
+export function getRoomPaymentSimulation(
+  amount: number,
+  service: any,
+  quote: any,
+): {
+  total: number;
+  cashValue: number;
+  hasCashDiscount: boolean;
+  installmentsCount: number;
+  installmentValue: number | null;
+  method: string | null;
+} {
+  const payConfig = extractServicePaymentConfig(service);
+  let installmentsCount = 0;
+  let discountPct = 0;
+  let discountFixed = 0;
+  let method: string | null = null;
+
+  if (payConfig.is_custom_payment && payConfig.payment_type) {
+    if (
+      payConfig.payment_type === 'installments' ||
+      payConfig.payment_type === 'installments_with_entry'
+    ) {
+      installmentsCount = payConfig.installments || 1;
+    } else if (payConfig.payment_type === 'full_payment') {
+      if (payConfig.discount_type === 'percentage') discountPct = payConfig.discount_value || 0;
+      if (payConfig.discount_type === 'fixed') discountFixed = payConfig.discount_value || 0;
+    }
+    method = payConfig.payment_method ?? null;
+  } else if (quote) {
+    const mode = (quote.payment_display_mode as string) || 'full_payment';
+    if (mode === 'installments' || mode === 'installments_with_entry') {
+      installmentsCount = Number(quote.installments_count) || 10;
+    } else if (mode === 'full_payment') {
+      discountPct = Number(quote.full_payment_discount_percent) || 0;
+    }
+  }
+
+  const cashBase = Math.max(amount - discountFixed, 0);
+  const cashValue = cashBase * (1 - discountPct / 100);
+  return {
+    total: amount,
+    cashValue,
+    hasCashDiscount: cashValue < amount,
+    installmentsCount,
+    installmentValue: installmentsCount > 1 ? amount / installmentsCount : null,
+    method,
+  };
+}
