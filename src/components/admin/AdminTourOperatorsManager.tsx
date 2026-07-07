@@ -618,6 +618,102 @@ export function AdminTourOperatorsManager() {
     return matchesSearch && matchesCategory;
   });
 
+  // ---- JSON (ChatGPT) import ----
+  const buildPayloadFromJson = (raw: any): Record<string, any> => {
+    if (!raw || typeof raw !== "object") throw new Error("JSON deve ser um objeto.");
+    const name = toText(raw.name);
+    if (!name) throw new Error("Campo 'name' é obrigatório.");
+    const companyInfo = (raw.company_info && typeof raw.company_info === "object") ? raw.company_info : {};
+    const social = (raw.social_links && typeof raw.social_links === "object") ? raw.social_links : {};
+    const socialLinks: Record<string, string> = {};
+    for (const key of ["facebook", "linkedin", "youtube", "tiktok", "telegram"] as const) {
+      const v = toText(social[key]);
+      if (v) socialLinks[key] = v;
+    }
+    let businessHours: any = null;
+    if (raw.business_hours && typeof raw.business_hours === "object") {
+      businessHours = {
+        commercial: toText((raw.business_hours as any).commercial),
+        after_hours: toText((raw.business_hours as any).after_hours),
+        emergency: toText((raw.business_hours as any).emergency),
+      };
+      if (!businessHours.commercial && !businessHours.after_hours && !businessHours.emergency) businessHours = null;
+    } else if (typeof raw.business_hours === "string" && raw.business_hours.trim()) {
+      businessHours = { commercial: raw.business_hours.trim(), after_hours: "", emergency: "" };
+    }
+    const founded = toInteger(raw.founded_year ?? companyInfo.founded_year);
+    const employees = toInteger(raw.employees ?? companyInfo.employees);
+    return {
+      name,
+      category: normalizeCategory(raw.category),
+      short_description: toText(raw.short_description) || null,
+      how_to_sell: toText(raw.how_to_sell) || null,
+      sales_channels: toText(raw.sales_channels) || null,
+      commercial_contacts: toText(raw.commercial_contacts) || null,
+      business_hours: businessHours,
+      specialties: toText(raw.specialties) || null,
+      competitive_advantages: toText(raw.competitive_advantages) || null,
+      certifications: toText(raw.certifications) || null,
+      website: toText(raw.website) || null,
+      instagram: toText(raw.instagram) || toText(social.instagram) || null,
+      social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+      logo_url: toText(raw.logo_url) || null,
+      founded_year: founded,
+      annual_revenue: toText(raw.annual_revenue ?? companyInfo.annual_revenue) || null,
+      employees,
+      executive_team: toText(raw.executive_team ?? companyInfo.executive_team) || null,
+    };
+  };
+
+  const handleJsonPreview = async () => {
+    setJsonImportError(null);
+    setJsonImportPreview(null);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(jsonImportText);
+    } catch (e: any) {
+      setJsonImportError("JSON inválido: " + (e?.message || "erro de sintaxe"));
+      return;
+    }
+    let payload: Record<string, any>;
+    try {
+      payload = buildPayloadFromJson(parsed);
+    } catch (e: any) {
+      setJsonImportError(e.message || "Erro ao montar payload");
+      return;
+    }
+    const normalized = normalizeOperatorName(payload.name);
+    const { data: matches, error } = await supabase.from("tour_operators").select("id, name").ilike("name", payload.name);
+    if (error) { setJsonImportError(error.message); return; }
+    const existing = (matches || []).find((m: any) => normalizeOperatorName(m.name || "") === normalized) || null;
+    setJsonImportPreview({ payload, existingId: existing?.id || null, existingName: existing?.name || null });
+  };
+
+  const handleJsonConfirmSave = async () => {
+    if (!jsonImportPreview) return;
+    setJsonImportSaving(true);
+    try {
+      const { payload, existingId } = jsonImportPreview;
+      if (existingId) {
+        const { error } = await supabase.from("tour_operators").update(payload as any).eq("id", existingId);
+        if (error) throw error;
+        toast.success("Fornecedor atualizado a partir do JSON.");
+      } else {
+        const { error } = await supabase.from("tour_operators").insert(payload as any);
+        if (error) throw error;
+        toast.success("Fornecedor criado a partir do JSON.");
+      }
+      queryClient.invalidateQueries({ queryKey: ["admin-tour-operators"] });
+      setJsonImportOpen(false);
+      setJsonImportText("");
+      setJsonImportPreview(null);
+    } catch (e: any) {
+      toast.error("Erro ao salvar: " + (e?.message || "desconhecido"));
+    } finally {
+      setJsonImportSaving(false);
+    }
+  };
+
   return (
     <>
     <Card className="border-0 shadow-md">
