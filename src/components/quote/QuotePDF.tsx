@@ -3,7 +3,7 @@ import { ptBR } from "date-fns/locale";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
-import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay } from "@/lib/servicePayment";
+import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
