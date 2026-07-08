@@ -205,18 +205,18 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
             {/* 1. Sobre a Operadora */}
             {isAdmin ? (
               <EditableSection
-                editForm={<RichContentEditor label="Sobre a Operadora" content={editShortDesc} onChange={setEditShortDesc} />}
+                editForm={<RichContentEditor label="Sobre" content={editShortDesc} onChange={setEditShortDesc} />}
                 onSave={async () => { await updateMutation.mutateAsync({ short_description: editShortDesc || null }); }}
                 onCancel={() => setEditShortDesc(operator.short_description || "")}
               >
-                <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
+                <OperatorInfoCard icon={FileText} title="Sobre" iconColor="text-sky-600">
                   {operator.short_description ? (
                     <RichContentDisplay content={operator.short_description} lineClamp={10} />
                   ) : adminPlaceholder}
                 </OperatorInfoCard>
               </EditableSection>
             ) : operator.short_description ? (
-              <OperatorInfoCard icon={FileText} title="Sobre a Operadora" iconColor="text-sky-600">
+              <OperatorInfoCard icon={FileText} title="Sobre" iconColor="text-sky-600">
                 <RichContentDisplay content={operator.short_description} lineClamp={10} />
               </OperatorInfoCard>
             ) : null}

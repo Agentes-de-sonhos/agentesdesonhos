@@ -105,7 +105,7 @@ export default function SupplierPublic({ slug, preloaded }: SupplierPublicProps)
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             {operator.short_description && (
-              <OperatorInfoCard icon={FileText} title="Sobre a Empresa" iconColor="text-sky-600">
+              <OperatorInfoCard icon={FileText} title="Sobre" iconColor="text-sky-600">
                 <RichContentDisplay content={operator.short_description} lineClamp={10} />
               </OperatorInfoCard>
             )}
