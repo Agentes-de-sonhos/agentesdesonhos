@@ -434,17 +434,32 @@ export function AdminTourOperatorsManager() {
       if (data.tiktok.trim()) socialLinks.tiktok = data.tiktok.trim();
       if (data.telegram.trim()) socialLinks.telegram = data.telegram.trim();
 
+      // Preserve raw HTML from the supplier RichContentEditor when the admin
+      // hasn't provided a structured replacement — otherwise the admin save
+      // silently mangles or wipes the supplier's content.
+      const structuredSalesChannels = serializeSalesChannels(data.sales_channels_list);
+      const structuredContacts = serializeCommercialContacts(data);
+      const structuredBusinessHours = buildBusinessHoursJson(data);
+
+      const salesChannelsOut =
+        structuredSalesChannels ?? (data._rawSalesChannelsHtml || null);
+      const commercialContactsOut =
+        structuredContacts ?? (data._rawCommercialContactsHtml || null);
+      const businessHoursOut =
+        structuredBusinessHours ??
+        (data._rawBusinessHoursHtml ? { html: data._rawBusinessHoursHtml } : null);
+
       const payload: any = {
         name: data.name.trim(),
         category: data.category.trim() || "Operadoras de turismo",
         specialties: data.specialties.trim() || null,
         short_description: data.short_description.trim() || null,
         how_to_sell: serializeHowToSell(data),
-        business_hours: buildBusinessHoursJson(data),
+        business_hours: businessHoursOut,
         competitive_advantages: data.competitive_advantages.trim() || null,
         certifications: data.certifications.trim() || null,
-        sales_channels: serializeSalesChannels(data.sales_channels_list),
-        commercial_contacts: serializeCommercialContacts(data),
+        sales_channels: salesChannelsOut,
+        commercial_contacts: commercialContactsOut,
         website: data.website.trim() || null,
         instagram: data.instagram.trim() || null,
         social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
@@ -482,6 +497,10 @@ export function AdminTourOperatorsManager() {
     const social = (op.social_links && typeof op.social_links === "object") ? op.social_links : {};
     const mats = Array.isArray(op.materials) ? op.materials as MaterialItem[] : [];
 
+    const rawSalesChannelsHtml = looksLikeHtml(op.sales_channels) ? (op.sales_channels as string) : null;
+    const rawCommercialContactsHtml = looksLikeHtml(op.commercial_contacts) ? (op.commercial_contacts as string) : null;
+    const rawBusinessHoursHtml = readBusinessHoursHtml(op.business_hours);
+
     setEditingOperator(op);
     setFormData({
       name: op.name || "",
@@ -512,6 +531,9 @@ export function AdminTourOperatorsManager() {
       executive_team: op.executive_team || "",
       logo_url: op.logo_url || null,
       materials: mats,
+      _rawSalesChannelsHtml: rawSalesChannelsHtml,
+      _rawCommercialContactsHtml: rawCommercialContactsHtml,
+      _rawBusinessHoursHtml: rawBusinessHoursHtml,
     });
     setActiveTab("como-vender");
     setIsEditOpen(true);
