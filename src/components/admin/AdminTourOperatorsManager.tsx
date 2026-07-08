@@ -169,6 +169,16 @@ interface OperatorFormData {
   executive_team: string;
   logo_url: string | null;
   materials: MaterialItem[];
+  /**
+   * Raw HTML preserved from the supplier-facing rich-text editor for fields
+   * that the admin structured form cannot faithfully represent. When present
+   * and the corresponding structured fields are untouched, the raw HTML is
+   * written back verbatim on save so the admin cannot silently clobber the
+   * supplier's content.
+   */
+  _rawSalesChannelsHtml?: string | null;
+  _rawCommercialContactsHtml?: string | null;
+  _rawBusinessHoursHtml?: string | null;
 }
 
 const initialFormData: OperatorFormData = {
@@ -181,12 +191,32 @@ const initialFormData: OperatorFormData = {
   website: "", instagram: "", tiktok: "", youtube: "", facebook: "", linkedin: "", telegram: "",
   founded_year: "", annual_revenue: "", employees: "", executive_team: "",
   logo_url: null, materials: [],
+  _rawSalesChannelsHtml: null,
+  _rawCommercialContactsHtml: null,
+  _rawBusinessHoursHtml: null,
 };
 
 /* ---- Serializers / Parsers ---- */
 
+/** Rough HTML detection: matches typical output from the supplier RichContentEditor. */
+const looksLikeHtml = (v: unknown): v is string =>
+  typeof v === "string" && /<\/?[a-z][\s\S]*>/i.test(v);
+
+/** Read `{ html }` object shape saved by SupplierProfileEdit's business_hours editor. */
+const readBusinessHoursHtml = (raw: unknown): string | null => {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const html = (raw as any).html;
+    if (typeof html === "string" && html.trim() && html !== "<p></p>") return html;
+  }
+  return null;
+};
+
 const parseSalesChannels = (text: string | null): SalesChannelItem[] => {
   if (!text) return [{ name: "", url: "" }];
+  // HTML content from the supplier RichContentEditor cannot be represented by
+  // the admin's structured name/url list — return an empty row and let the raw
+  // HTML be preserved on save.
+  if (looksLikeHtml(text)) return [{ name: "", url: "" }];
   const lines = text.split("\n").filter(Boolean);
   const items: SalesChannelItem[] = lines.map((line) => {
     const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
@@ -271,6 +301,9 @@ const readBusinessHours = (raw: unknown): { commercial: string; after_hours: str
 const parseCommercialContacts = (text: string | null) => {
   const r = { phone: "", whatsapp: "", text: "", url: "" };
   if (!text) return r;
+  // HTML from the supplier RichContentEditor: don't try to regex-scrape it —
+  // the raw value will be preserved on save.
+  if (looksLikeHtml(text)) return r;
   const phoneMatch = text.match(/(?:tel(?:efone)?)[:\s]*([\d\s()+-]+)/i);
   const whatsappMatch = text.match(/(?:whatsapp|wpp|zap)[:\s]*([\d\s()+-]+)/i);
   const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
