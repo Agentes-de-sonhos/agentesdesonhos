@@ -142,7 +142,7 @@ export default function CruiseDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* About / Description */}
             {company.descricao_curta && (
-              <OperatorInfoCard icon={Ship} title="Sobre a Companhia">
+              <OperatorInfoCard icon={Ship} title="Sobre">
                 <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{company.descricao_curta}</p>
               </OperatorInfoCard>
             )}
