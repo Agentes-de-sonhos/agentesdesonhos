@@ -169,6 +169,16 @@ interface OperatorFormData {
   executive_team: string;
   logo_url: string | null;
   materials: MaterialItem[];
+  /**
+   * Raw HTML preserved from the supplier-facing rich-text editor for fields
+   * that the admin structured form cannot faithfully represent. When present
+   * and the corresponding structured fields are untouched, the raw HTML is
+   * written back verbatim on save so the admin cannot silently clobber the
+   * supplier's content.
+   */
+  _rawSalesChannelsHtml?: string | null;
+  _rawCommercialContactsHtml?: string | null;
+  _rawBusinessHoursHtml?: string | null;
 }
 
 const initialFormData: OperatorFormData = {
@@ -181,12 +191,32 @@ const initialFormData: OperatorFormData = {
   website: "", instagram: "", tiktok: "", youtube: "", facebook: "", linkedin: "", telegram: "",
   founded_year: "", annual_revenue: "", employees: "", executive_team: "",
   logo_url: null, materials: [],
+  _rawSalesChannelsHtml: null,
+  _rawCommercialContactsHtml: null,
+  _rawBusinessHoursHtml: null,
 };
 
 /* ---- Serializers / Parsers ---- */
 
+/** Rough HTML detection: matches typical output from the supplier RichContentEditor. */
+const looksLikeHtml = (v: unknown): boolean =>
+  typeof v === "string" && /<\/?[a-z][\s\S]*>/i.test(v);
+
+/** Read `{ html }` object shape saved by SupplierProfileEdit's business_hours editor. */
+const readBusinessHoursHtml = (raw: unknown): string | null => {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const html = (raw as any).html;
+    if (typeof html === "string" && html.trim() && html !== "<p></p>") return html;
+  }
+  return null;
+};
+
 const parseSalesChannels = (text: string | null): SalesChannelItem[] => {
   if (!text) return [{ name: "", url: "" }];
+  // HTML content from the supplier RichContentEditor cannot be represented by
+  // the admin's structured name/url list — return an empty row and let the raw
+  // HTML be preserved on save.
+  if (looksLikeHtml(text)) return [{ name: "", url: "" }];
   const lines = text.split("\n").filter(Boolean);
   const items: SalesChannelItem[] = lines.map((line) => {
     const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
@@ -271,6 +301,9 @@ const readBusinessHours = (raw: unknown): { commercial: string; after_hours: str
 const parseCommercialContacts = (text: string | null) => {
   const r = { phone: "", whatsapp: "", text: "", url: "" };
   if (!text) return r;
+  // HTML from the supplier RichContentEditor: don't try to regex-scrape it —
+  // the raw value will be preserved on save.
+  if (looksLikeHtml(text)) return r;
   const phoneMatch = text.match(/(?:tel(?:efone)?)[:\s]*([\d\s()+-]+)/i);
   const whatsappMatch = text.match(/(?:whatsapp|wpp|zap)[:\s]*([\d\s()+-]+)/i);
   const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
@@ -401,17 +434,32 @@ export function AdminTourOperatorsManager() {
       if (data.tiktok.trim()) socialLinks.tiktok = data.tiktok.trim();
       if (data.telegram.trim()) socialLinks.telegram = data.telegram.trim();
 
+      // Preserve raw HTML from the supplier RichContentEditor when the admin
+      // hasn't provided a structured replacement — otherwise the admin save
+      // silently mangles or wipes the supplier's content.
+      const structuredSalesChannels = serializeSalesChannels(data.sales_channels_list);
+      const structuredContacts = serializeCommercialContacts(data);
+      const structuredBusinessHours = buildBusinessHoursJson(data);
+
+      const salesChannelsOut =
+        structuredSalesChannels ?? (data._rawSalesChannelsHtml || null);
+      const commercialContactsOut =
+        structuredContacts ?? (data._rawCommercialContactsHtml || null);
+      const businessHoursOut =
+        structuredBusinessHours ??
+        (data._rawBusinessHoursHtml ? { html: data._rawBusinessHoursHtml } : null);
+
       const payload: any = {
         name: data.name.trim(),
         category: data.category.trim() || "Operadoras de turismo",
         specialties: data.specialties.trim() || null,
         short_description: data.short_description.trim() || null,
         how_to_sell: serializeHowToSell(data),
-        business_hours: buildBusinessHoursJson(data),
+        business_hours: businessHoursOut,
         competitive_advantages: data.competitive_advantages.trim() || null,
         certifications: data.certifications.trim() || null,
-        sales_channels: serializeSalesChannels(data.sales_channels_list),
-        commercial_contacts: serializeCommercialContacts(data),
+        sales_channels: salesChannelsOut,
+        commercial_contacts: commercialContactsOut,
         website: data.website.trim() || null,
         instagram: data.instagram.trim() || null,
         social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
@@ -449,6 +497,10 @@ export function AdminTourOperatorsManager() {
     const social = (op.social_links && typeof op.social_links === "object") ? op.social_links : {};
     const mats = Array.isArray(op.materials) ? op.materials as MaterialItem[] : [];
 
+    const rawSalesChannelsHtml = looksLikeHtml(op.sales_channels) ? (op.sales_channels as string) : null;
+    const rawCommercialContactsHtml = looksLikeHtml(op.commercial_contacts) ? (op.commercial_contacts as string) : null;
+    const rawBusinessHoursHtml = readBusinessHoursHtml(op.business_hours);
+
     setEditingOperator(op);
     setFormData({
       name: op.name || "",
@@ -479,6 +531,9 @@ export function AdminTourOperatorsManager() {
       executive_team: op.executive_team || "",
       logo_url: op.logo_url || null,
       materials: mats,
+      _rawSalesChannelsHtml: rawSalesChannelsHtml,
+      _rawCommercialContactsHtml: rawCommercialContactsHtml,
+      _rawBusinessHoursHtml: rawBusinessHoursHtml,
     });
     setActiveTab("como-vender");
     setIsEditOpen(true);
