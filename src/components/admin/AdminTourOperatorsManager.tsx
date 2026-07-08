@@ -199,7 +199,7 @@ const initialFormData: OperatorFormData = {
 /* ---- Serializers / Parsers ---- */
 
 /** Rough HTML detection: matches typical output from the supplier RichContentEditor. */
-const looksLikeHtml = (v: unknown): v is string =>
+const looksLikeHtml = (v: unknown): boolean =>
   typeof v === "string" && /<\/?[a-z][\s\S]*>/i.test(v);
 
 /** Read `{ html }` object shape saved by SupplierProfileEdit's business_hours editor. */
