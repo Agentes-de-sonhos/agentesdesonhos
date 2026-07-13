@@ -19,11 +19,11 @@ export function MobileStickyCTA() {
   if (!visible) return null;
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 p-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl backdrop-blur lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-2xl backdrop-blur lg:hidden"
     >
       <Button
         onClick={scrollToForm}
-        className="h-12 w-full rounded-xl bg-blue-600 text-sm font-bold uppercase tracking-wide text-white hover:bg-blue-700"
+        className="h-[52px] w-full rounded-xl bg-blue-600 text-[14px] font-bold uppercase tracking-wide text-white hover:bg-blue-700"
       >
         VER JOGOS NAS MINHAS DATAS
       </Button>
