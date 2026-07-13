@@ -1,11 +1,11 @@
-import { HOW_IT_WORKS } from "./content";
+import { HOW_IT_WORKS, HOW_IT_WORKS_TITLE } from "./content";
 
 export function HowItWorksSection() {
   return (
     <section className="bg-slate-950 text-white">
       <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-20">
         <h2 className="text-center font-display text-[28px] font-bold leading-tight sm:text-[36px]">
-          Descubra seu jogo em três passos
+          {HOW_IT_WORKS_TITLE}
         </h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {HOW_IT_WORKS.map((s) => (
