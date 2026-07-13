@@ -1,8 +1,14 @@
 // Central content config for the Orlando Magic B2C landing page (Phase 1 — visual only).
+export const LANDING_FLAGS = {
+  showTestimonials: false,
+};
+
 export const AGENT = {
   name: "Fernando Nobre",
   agency: "Agentes de Sonhos",
   avatarInitials: "FN",
+  role: "Agente de viagens especialista em Orlando",
+  secondaryCta: "RECEBER OPÇÕES PARA MINHA VIAGEM",
 };
 
 export const HERO = {
@@ -48,14 +54,15 @@ export type TicketCategory = {
   description: string;
   color: string;
   image: "upper" | "mid" | "courtside";
+  objectPosition?: string;
 };
 
 export const TICKET_CATEGORIES: TicketCategory[] = [
-  { name: "PROMENADE", description: "Opção acessível para entrar no clima da arena e viver a experiência da NBA com ótimo custo-benefício.", color: "text-sky-500", image: "upper" },
-  { name: "CLUB", description: "Assentos mais confortáveis e uma visão privilegiada da quadra.", color: "text-blue-900", image: "mid" },
-  { name: "TERRACE A", description: "Setores localizados no anel inferior, próximos à ação e com excelente visão lateral.", color: "text-orange-500", image: "mid" },
-  { name: "TERRACE B", description: "Alternativa no anel inferior, localizada atrás das cestas.", color: "text-emerald-600", image: "mid" },
-  { name: "ULTIMATE E SUÍTES", description: "Experiências premium, próximas à quadra ou em áreas de hospitalidade, conforme disponibilidade.", color: "text-amber-500", image: "courtside" },
+  { name: "PROMENADE", description: "Opção acessível para entrar no clima da arena e viver a experiência da NBA com ótimo custo-benefício.", color: "text-sky-500", image: "upper", objectPosition: "center 30%" },
+  { name: "CLUB", description: "Assentos mais confortáveis e uma visão privilegiada da quadra.", color: "text-blue-900", image: "mid", objectPosition: "center 40%" },
+  { name: "TERRACE A", description: "Setores localizados no anel inferior, próximos à ação e com excelente visão lateral.", color: "text-orange-500", image: "mid", objectPosition: "left center" },
+  { name: "TERRACE B", description: "Alternativa no anel inferior, localizada atrás das cestas.", color: "text-emerald-600", image: "mid", objectPosition: "right center" },
+  { name: "ULTIMATE E SUÍTES", description: "Experiências premium, próximas à quadra ou em áreas de hospitalidade, conforme disponibilidade.", color: "text-amber-500", image: "courtside", objectPosition: "center 60%" },
 ];
 
 export const KIA_ITEMS = [
