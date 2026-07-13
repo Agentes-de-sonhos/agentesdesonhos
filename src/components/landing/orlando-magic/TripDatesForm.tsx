@@ -48,45 +48,45 @@ export function TripDatesForm() {
     <form
       id={FORM_ANCHOR_ID}
       onSubmit={onSubmit}
-      className="rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-slate-200 sm:p-6"
+      className="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-slate-200 sm:p-7"
     >
-      <h2 className="font-display text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
+      <h2 className="font-display text-[22px] font-bold leading-tight text-slate-900 sm:text-2xl">
         {FORM.title}
       </h2>
-      <p className="mt-1 text-sm text-slate-600">{FORM.subtitle}</p>
+      <p className="mt-2 text-[14px] leading-relaxed text-slate-600">{FORM.subtitle}</p>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-6 space-y-4">
         <div>
-          <Label htmlFor="om-name" className="text-xs font-semibold text-slate-700">Seu nome</Label>
-          <Input id="om-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como podemos chamar você?" className="mt-1" />
+          <Label htmlFor="om-name" className="text-[13px] font-semibold text-slate-700">Seu nome</Label>
+          <Input id="om-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Como podemos chamar você?" className="mt-1.5 h-11" />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <Label htmlFor="om-arr" className="text-xs font-semibold text-slate-700">Data de chegada a Orlando</Label>
-            <div className="relative mt-1">
-              <Input id="om-arr" type="date" value={arrival} onChange={(e) => setArrival(e.target.value)} />
+            <Label htmlFor="om-arr" className="text-[13px] font-semibold text-slate-700">Data de chegada</Label>
+            <div className="relative mt-1.5">
+              <Input id="om-arr" type="date" value={arrival} onChange={(e) => setArrival(e.target.value)} className="h-11" />
               <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
           <div>
-            <Label htmlFor="om-dep" className="text-xs font-semibold text-slate-700">Data de saída de Orlando</Label>
-            <div className="relative mt-1">
-              <Input id="om-dep" type="date" value={departure} onChange={(e) => setDeparture(e.target.value)} />
+            <Label htmlFor="om-dep" className="text-[13px] font-semibold text-slate-700">Data de saída</Label>
+            <div className="relative mt-1.5">
+              <Input id="om-dep" type="date" value={departure} onChange={(e) => setDeparture(e.target.value)} className="h-11" />
               <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-slate-700">Quantas pessoas vão ao jogo?</p>
-          <div className="mt-1 grid grid-cols-2 gap-3">
+          <p className="text-[13px] font-semibold text-slate-700">Quantas pessoas vão ao jogo?</p>
+          <div className="mt-1.5 grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[11px] text-slate-500">Adultos</Label>
+              <Label className="text-[12px] text-slate-500">Adultos</Label>
               <Counter value={adults} onChange={setAdults} min={1} />
             </div>
             <div>
-              <Label className="text-[11px] text-slate-500">Crianças</Label>
+              <Label className="text-[12px] text-slate-500">Crianças</Label>
               <Counter value={kids} onChange={setKids} />
             </div>
           </div>
@@ -94,30 +94,30 @@ export function TripDatesForm() {
 
         {kids > 0 && (
           <div>
-            <Label htmlFor="om-ages" className="text-xs font-semibold text-slate-700">Qual é a idade das crianças?</Label>
-            <Input id="om-ages" value={kidsAges} onChange={(e) => setKidsAges(e.target.value)} placeholder="Ex.: 5 anos, 10 anos" className="mt-1" />
+            <Label htmlFor="om-ages" className="text-[13px] font-semibold text-slate-700">Qual é a idade das crianças?</Label>
+            <Input id="om-ages" value={kidsAges} onChange={(e) => setKidsAges(e.target.value)} placeholder="Ex.: 5 anos, 10 anos" className="mt-1.5 h-11" />
           </div>
         )}
 
         <div>
-          <Label htmlFor="om-wpp" className="text-xs font-semibold text-slate-700">Seu WhatsApp</Label>
-          <Input id="om-wpp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" className="mt-1" />
+          <Label htmlFor="om-wpp" className="text-[13px] font-semibold text-slate-700">Seu WhatsApp</Label>
+          <Input id="om-wpp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" className="mt-1.5 h-11" />
         </div>
 
         <Button
           type="submit"
-          className="h-12 w-full gap-2 rounded-xl bg-emerald-500 text-sm font-bold uppercase tracking-wide text-white hover:bg-emerald-600"
+          className="h-[52px] w-full gap-2 rounded-xl bg-emerald-500 text-[14px] font-bold uppercase tracking-wide text-white hover:bg-emerald-600"
         >
           <MessageCircle className="h-4 w-4" />
           {FORM.submit}
         </Button>
 
-        <div className="pt-1 text-center">
-          <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-700">
+        <div className="pt-1.5 text-center">
+          <p className="flex items-center justify-center gap-1.5 text-[13px] font-semibold text-slate-700">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
             {FORM.noCommit}
           </p>
-          <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{FORM.privacy}</p>
+          <p className="mt-1 text-[12px] leading-relaxed text-slate-500">{FORM.privacy}</p>
         </div>
       </div>
     </form>
