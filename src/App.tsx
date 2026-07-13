@@ -23,6 +23,7 @@ import { WorkspaceGate } from "@/workspace/WorkspaceGate";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const OrlandoMagicLandingPage = lazy(() => import("./pages/OrlandoMagicLandingPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const StartDashboard = lazy(() => import("./pages/StartDashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
