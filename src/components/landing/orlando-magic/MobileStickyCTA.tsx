@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FORM_ANCHOR_ID, scrollToForm } from "./content";
+import { FORM_ANCHOR_ID, MOBILE_STICKY, scrollToForm } from "./content";
 
 export function MobileStickyCTA() {
   const [visible, setVisible] = useState(true);
@@ -23,9 +23,10 @@ export function MobileStickyCTA() {
     >
       <Button
         onClick={scrollToForm}
+        aria-label={MOBILE_STICKY.ariaLabel}
         className="h-[52px] w-full rounded-xl bg-blue-600 text-[14px] font-bold uppercase tracking-wide text-white hover:bg-blue-700"
       >
-        VER JOGOS NAS MINHAS DATAS
+        {MOBILE_STICKY.label}
       </Button>
     </div>
   );

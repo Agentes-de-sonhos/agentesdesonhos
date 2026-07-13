@@ -10,7 +10,7 @@ export function HeroSection() {
       <div className="absolute inset-0">
         <img
           src={arenaInterior}
-          alt="Interior do Kia Center durante partida do Orlando Magic"
+          alt={HERO.imageAlt}
           className="h-full w-full object-cover opacity-70"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/70 to-slate-950/30" />

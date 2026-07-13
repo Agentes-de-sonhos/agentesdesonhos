@@ -1,6 +1,6 @@
 import arenaExterior from "@/assets/orlando-magic/arena-exterior.jpg";
 import { Clock, Utensils, MapPin, HeartHandshake } from "lucide-react";
-import { KIA_ITEMS } from "./content";
+import { KIA_ITEMS, KIA_SECTION } from "./content";
 
 const ICONS = [Clock, Utensils, MapPin, HeartHandshake];
 
@@ -11,15 +11,21 @@ export function KiaCenterSection() {
         <div className="overflow-hidden rounded-2xl shadow-sm">
           <img
             src={arenaExterior}
-            alt="Fachada do Kia Center em Downtown Orlando"
+            alt={KIA_SECTION.imageAlt}
             className="aspect-[4/3] h-full w-full object-cover"
             loading="lazy"
           />
         </div>
         <div>
-          <h2 className="font-display text-[30px] font-bold leading-tight text-slate-900 sm:text-[38px]">
-            Uma noite completa no Kia Center
+          <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-blue-600">
+            {KIA_SECTION.eyebrow}
+          </p>
+          <h2 className="mt-3 font-display text-[30px] font-bold leading-tight text-slate-900 sm:text-[38px]">
+            {KIA_SECTION.title}
           </h2>
+          <p className="mt-4 max-w-xl text-[16px] leading-[1.65] text-slate-600 sm:text-[17px]">
+            {KIA_SECTION.description}
+          </p>
           <div className="mt-8 grid gap-6 sm:grid-cols-2">
             {KIA_ITEMS.map((item, i) => {
               const Icon = ICONS[i];

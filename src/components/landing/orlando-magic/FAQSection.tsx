@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { FAQ } from "./content";
+import { FAQ, FAQ_TITLE } from "./content";
 
 export function FAQSection() {
   const cols: typeof FAQ[] = [[], []];
@@ -14,7 +14,7 @@ export function FAQSection() {
     <section className="bg-slate-50">
       <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 lg:py-20">
         <h2 className="font-display text-[28px] font-bold leading-tight text-slate-900 sm:text-[36px]">
-          Perguntas frequentes
+          {FAQ_TITLE}
         </h2>
         <div className="mt-10 grid gap-x-10 gap-y-2 lg:grid-cols-2">
           {cols.map((col, i) => (

@@ -5,7 +5,7 @@ import { FINAL_CTA, scrollToForm } from "./content";
 export function FinalCTA() {
   return (
     <section className="relative overflow-hidden bg-slate-950 text-white">
-      <img src={arenaInterior} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-30" />
+      <img src={arenaInterior} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-30" />
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/60" />
       <div className="relative mx-auto grid max-w-[1200px] gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:py-20">
         <div>
