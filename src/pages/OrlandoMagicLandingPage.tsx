@@ -12,18 +12,34 @@ import { FAQSection } from "@/components/landing/orlando-magic/FAQSection";
 import { FinalCTA } from "@/components/landing/orlando-magic/FinalCTA";
 import { LandingFooter } from "@/components/landing/orlando-magic/LandingFooter";
 import { MobileStickyCTA } from "@/components/landing/orlando-magic/MobileStickyCTA";
-import { LANDING_FLAGS } from "@/components/landing/orlando-magic/content";
+import { LANDING_FLAGS, SEO } from "@/components/landing/orlando-magic/content";
+
+function upsertMeta(selector: string, attr: "name" | "property", key: string, content: string) {
+  let el = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
 
 export default function OrlandoMagicLandingPage() {
   useEffect(() => {
-    document.title = "Orlando Magic • Uma noite de NBA na sua viagem a Orlando";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute(
-        "content",
-        "Inclua uma partida do Orlando Magic no Kia Center no seu roteiro em Orlando. Opções para famílias e todos os orçamentos, com o atendimento do seu agente de viagens."
-      );
-    }
+    const prevTitle = document.title;
+    document.title = SEO.title;
+
+    upsertMeta('meta[name="description"]', "name", "description", SEO.description);
+    upsertMeta('meta[property="og:title"]', "property", "og:title", SEO.ogTitle);
+    upsertMeta('meta[property="og:description"]', "property", "og:description", SEO.ogDescription);
+    upsertMeta('meta[property="og:type"]', "property", "og:type", "website");
+    upsertMeta('meta[name="twitter:card"]', "name", "twitter:card", "summary_large_image");
+    upsertMeta('meta[name="twitter:title"]', "name", "twitter:title", SEO.twitterTitle);
+    upsertMeta('meta[name="twitter:description"]', "name", "twitter:description", SEO.twitterDescription);
+
+    return () => {
+      document.title = prevTitle;
+    };
   }, []);
 
   return (
