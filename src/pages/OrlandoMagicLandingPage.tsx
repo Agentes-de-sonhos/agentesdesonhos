@@ -12,6 +12,7 @@ import { FAQSection } from "@/components/landing/orlando-magic/FAQSection";
 import { FinalCTA } from "@/components/landing/orlando-magic/FinalCTA";
 import { LandingFooter } from "@/components/landing/orlando-magic/LandingFooter";
 import { MobileStickyCTA } from "@/components/landing/orlando-magic/MobileStickyCTA";
+import { LANDING_FLAGS } from "@/components/landing/orlando-magic/content";
 
 export default function OrlandoMagicLandingPage() {
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function OrlandoMagicLandingPage() {
       <KiaCenterSection />
       <AgentPresentationSection />
       <HowItWorksSection />
-      <TestimonialsSection />
+      {LANDING_FLAGS.showTestimonials && <TestimonialsSection />}
       <FAQSection />
       <FinalCTA />
       <LandingFooter />
