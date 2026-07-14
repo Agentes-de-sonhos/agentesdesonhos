@@ -109,8 +109,11 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
       estimated_value: data.estimated_value,
       notes: data.notes,
       // Keep the legacy single-date column in sync with the earliest follow-up,
-      // so existing card badges and queries keep working.
-      follow_up_date: firstDate,
+      // so existing card badges and queries keep working. Send null (not
+      // undefined) when all drafts were removed, otherwise the key is stripped
+      // from the JSON payload and the column keeps its stale value — causing
+      // the deleted follow-up to reappear on reopen.
+      follow_up_date: firstDate ?? null,
     };
 
     let opportunityId = opportunity?.id;
