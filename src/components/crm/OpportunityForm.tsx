@@ -55,23 +55,30 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
     useOpportunityFollowups(opportunity?.id);
 
   const [followupDrafts, setFollowupDrafts] = useState<FollowupDraft[]>([]);
+  const hydratedForIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (opportunity?.id) {
-      if (existingFollowups.length > 0) {
-        setFollowupDrafts(
-          existingFollowups.map((f) => ({
-            id: f.id,
-            follow_up_date: f.follow_up_date,
-            note: f.note || "",
-          }))
-        );
-      } else if (opportunity.follow_up_date) {
-        // Legacy single follow-up date — preload as first draft (no id, will be created)
-        setFollowupDrafts([{ follow_up_date: opportunity.follow_up_date, note: "" }]);
-      }
+    if (!opportunity?.id) return;
+    // Hydrate drafts only once per opportunity id. Otherwise, after the user
+    // deletes a follow-up locally, a refetch that returns fewer rows would
+    // re-run this effect and — via the legacy fallback below — reinsert a
+    // draft from the stale `opportunity.follow_up_date` column.
+    if (hydratedForIdRef.current === opportunity.id) return;
+    if (existingFollowups.length > 0) {
+      setFollowupDrafts(
+        existingFollowups.map((f) => ({
+          id: f.id,
+          follow_up_date: f.follow_up_date,
+          note: f.note || "",
+        }))
+      );
+      hydratedForIdRef.current = opportunity.id;
+    } else if (opportunity.follow_up_date) {
+      // Legacy single follow-up date — preload as first draft (no id, will be created)
+      setFollowupDrafts([{ follow_up_date: opportunity.follow_up_date, note: "" }]);
+      hydratedForIdRef.current = opportunity.id;
     }
-  }, [opportunity?.id, existingFollowups.length]);
+  }, [opportunity?.id, existingFollowups]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(opportunitySchema),
