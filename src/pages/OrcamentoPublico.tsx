@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
-import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation } from "@/lib/servicePayment";
+import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation, calculateServicePayment } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
@@ -701,9 +701,9 @@ function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote 
 }
 
 function CollapsibleServiceCard({
-  service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote,
+  service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote, showInvestmentInline = false,
 }: {
-  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean; quote?: Quote;
+  service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean; quote?: Quote; showInvestmentInline?: boolean;
 }) {
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
