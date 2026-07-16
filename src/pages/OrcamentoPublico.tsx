@@ -878,9 +878,10 @@ function CollapsibleServiceCard({
       </button>
       {/* Collapsible body */}
       <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out`}
-        style={{ maxHeight: isOpen ? "2000px" : "0px", opacity: isOpen ? 1 : 0 }}
+        className="grid transition-all duration-300 ease-in-out"
+        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr", opacity: isOpen ? 1 : 0 }}
       >
+        <div className="overflow-hidden">
         <div className="px-5 py-4 space-y-4">
           {isOpen && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
@@ -944,6 +945,7 @@ function CollapsibleServiceCard({
           {isOpen && showInvestmentInline && !hotelHasMultipleRooms && (
             <ServiceInvestmentInline service={service} quote={quote} />
           )}
+        </div>
         </div>
       </div>
       {/* Per-service payment footer — always visible (open or collapsed) */}
