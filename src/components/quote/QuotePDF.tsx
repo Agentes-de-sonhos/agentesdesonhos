@@ -924,6 +924,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }
 
           if (quote.show_investment_section === false) return '';
+          // Respeita a mesma regra do link público: quando o total do
+          // investimento está oculto, não renderiza o bloco de total no PDF.
+          if ((quote as any).hide_investment_total === true) return '';
 
           return `
             <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
