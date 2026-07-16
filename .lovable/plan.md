@@ -1,63 +1,63 @@
-# Múltiplos apartamentos dentro de uma opção de hotel
-
 ## Objetivo
-Permitir que uma única opção de hotel no orçamento contenha vários apartamentos (duplo, triplo, duplo com criança, etc.), sem precisar duplicar o hotel.
 
-## Escopo (somente módulo Orçamentos)
-- Cadastro/edição de serviço tipo `hotel`.
-- Card resumo do serviço.
-- PDF do orçamento.
-- Orçamento público (`OrcamentoPublico.tsx` e `OrcamentoPublicoV2.tsx`).
-- Compatibilidade retroativa com orçamentos antigos.
+No link público do orçamento, mostrar o valor de cada serviço e suas condições de pagamento **dentro do próprio card expansível**, eliminando a lista duplicada que hoje aparece em uma seção separada mais abaixo.
+
+## Escopo
+
+- Somente o **link público** de orçamento (`src/pages/OrcamentoPublico.tsx`, usado também pelo `OrcamentoPublicoV2.tsx`).
+- `src/components/quote/PublicInvestmentSummary.tsx` — remover a listagem por serviço quando os valores forem exibidos nos cards.
+- PDF **não** é alterado neste ajuste (validação pendente, conforme pedido).
 
 ## Mudanças
 
-### 1. Modelo de dados (`src/types/quote.ts`)
-Adicionar a estrutura `HotelRoom` e o array `rooms` opcional em `HotelData`:
+### 1. Novo bloco "Investimento" dentro do card (`CollapsibleServiceCard`)
+Ao expandir um serviço, quando `showDetailedPrices` estiver ativo, adicionar após a descrição um bloco separado por um divisor:
 
-```ts
-interface HotelRoom {
-  room_type: string;         // "Duplo", "Triplo", "Duplo com criança", "Single", "Quádruplo", "Outro"
-  quantity: number;          // qtde de apartamentos daquele tipo
-  adults: number;
-  children: number;
-  children_ages?: number[];
-  unit_price: number;        // valor por apartamento
-  total_price: number;       // quantity * unit_price
-  notes?: string;
-}
+```text
+────────────────────
+CONDIÇÕES DE PAGAMENTO
+10x de R$ 450,00           ← destaque (parcelado)
+Valor do serviço: R$ 4.500,00
+Forma de pagamento: Cartão de Crédito   (quando houver)
 ```
 
-`HotelData` mantém `room_type` / `meal_plan` / `price` legados (para não quebrar dados antigos) e ganha `rooms?: HotelRoom[]`. Quando `rooms` existir, ele é a fonte da verdade e `price` = soma dos `total_price`.
+Regras:
+- Se o serviço tem `is_custom_payment = true` **e** o orçamento usa pagamento por serviço → usa a condição custom (`calculateServicePayment`).
+- Caso contrário → usa a condição **global** do orçamento (mesma fórmula já usada em `PublicInvestmentSummary`), aplicada sobre `service.amount`.
+- Suporta os 4 modos: `installments`, `installments_with_entry`, `full_payment` (com desconto à vista quando existir) e `total_only` (mostra só valor).
+- Hotel com múltiplos apartamentos: mantém o comportamento atual (preços por apartamento no corpo) — o bloco "Investimento" do card mostra apenas o total do hotel + condição consolidada, sem duplicar.
+- Bloco só aparece se `showDetailedPrices` = true.
+- Vinculado pelo `service.id` (fonte da verdade), não pela posição.
 
-### 2. Formulário de hotel (`src/components/quote/ServiceForms.tsx`)
-- Nova seção "Apartamentos" com lista dinâmica (`useFieldArray`).
-- Botão "Adicionar apartamento".
-- Cada linha: tipo (select), quantidade, adultos, crianças, idades (aparece se children>0), valor unitário, observações, subtotal calculado.
-- Total da opção = soma dos subtotais, exibido em destaque, grava em `price`.
-- Migração automática ao editar: se `init.rooms` estiver vazio mas houver `init.room_type/price`, cria uma linha inicial com esses dados.
-- Validação: pelo menos 1 apartamento; `quantity >= 1`; `adults >= 1`.
-- Mantém regime de alimentação (`meal_plan`), nome do hotel, cidade, check-in/out, categoria.
+### 2. Remover a lista duplicada em `PublicInvestmentSummary`
+Adicionar prop `hideServiceList?: boolean`. Quando true:
+- Não renderiza `<ul>` de serviços.
+- Mantém: cabeçalho, card "Investimento Total da Viagem" (se `displayMode = both`) e o rodapé com forma de pagamento/termos.
+- Se `hide_investment_total` estiver ativo **e** `hideServiceList` = true, o componente não renderiza nada (evita seção vazia).
 
-### 3. Resumo (`ServiceCard.tsx`)
-Se `rooms?.length`, mostrar bullets:
-`1x Apartamento Duplo — 2 adultos`
-`1x Duplo + Criança — 2 adultos + 1 criança (6 anos)`
-Fallback para o texto antigo quando não houver `rooms`.
+Em `OrcamentoPublico.tsx`, passar `hideServiceList = showDetailedPrices` quando `useNewInvestmentLayout` estiver ativo.
 
-### 4. PDF (`QuotePDF.tsx`)
-Renderizar as mesmas linhas de acomodações dentro do bloco do hotel. Fallback legado.
+### 3. Footer de pagamento atual do card (legacy)
+O footer "Parcelamento" que já existia (fora do corpo, sempre visível) permanece **apenas no modo legacy** com `useServicePayment`. Nos layouts novos (grouped/ungrouped) ele é substituído pelo novo bloco dentro do corpo expandido para evitar redundância.
 
-### 5. Público (`OrcamentoPublico.tsx` + `OrcamentoPublicoV2.tsx`)
-Mesma renderização agrupada abaixo do hotel. Fallback legado.
+## Cenários cobertos
 
-### 6. Import IA (`service-import/serviceImportConfigs.ts`)
-Não é alterado agora: o hotel importado continua chegando como um único quarto (compatível — vira `rooms[0]` na edição).
+1. **Detalhados ON + total ON (both)** → preço em cada card + card final "Investimento Total".
+2. **Detalhados ON + total OFF** → preço em cada card, nenhum bloco de total.
+3. **Detalhados OFF** → cards sem preço; comportamento atual do `PublicInvestmentSummary` preservado (lista + total conforme configuração).
+4. **Reordenação/remoção de serviços** → valor sempre vinculado a `service.id`.
+5. **Mobile** → bloco usa a mesma tipografia dos demais chips; sem overflow.
 
 ## Compatibilidade
-- Nenhuma migração de banco: `service_data` é JSONB.
-- Orçamentos antigos continuam funcionando (leitura cai no fallback).
-- Ao editar um hotel antigo e salvar, o formulário grava `rooms` automaticamente.
+
+- Layout `legacy` e `consolidated` permanecem intactos.
+- Nenhuma mudança de schema, cálculo, moeda, desconto, taxa ou parcelamento.
+- Nenhuma mudança no editor de orçamento.
 
 ## Critério de aceite
-Criar 1 opção do "Hotel X" com 3 quartos (Duplo, Duplo+Criança, Triplo), salvar, reabrir e ver os 3 apartamentos e o total somado corretamente no editor, no card, no PDF e na página pública.
+
+Abrir um orçamento público com layout **grouped** ou **ungrouped** e `show_detailed_prices = true`:
+- Cada card expandido mostra descrição + bloco de Investimento com valor e condição de pagamento próprios.
+- A seção separada "Condições de Pagamento" não repete a lista de serviços.
+- Se `hide_investment_total = false`, o card final "Investimento Total da Viagem" continua aparecendo.
+- Se `hide_investment_total = true`, nenhum total geral aparece.
