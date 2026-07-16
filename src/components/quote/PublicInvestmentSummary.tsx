@@ -241,7 +241,9 @@ export function PublicInvestmentSummary({
 
   const discountPct = globalPayment.fullPaymentDiscountPercent || 0;
   const totalAVista = discountPct > 0 ? totalAll * (1 - discountPct / 100) : null;
-  const totalLabel = groupingMode === "grouped"
+  const totalLabel = hideServiceList
+    ? "As condições de pagamento de cada serviço estão detalhadas no card correspondente acima."
+    : groupingMode === "grouped"
     ? "Veja abaixo o investimento detalhado por tipo de serviço e as condições de pagamento da sua viagem."
     : "Veja abaixo o investimento detalhado por serviço e as condições de pagamento da sua viagem.";
 
