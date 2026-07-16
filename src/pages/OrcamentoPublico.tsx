@@ -700,6 +700,108 @@ function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote 
   }
 }
 
+/**
+ * Bloco de "Condições de pagamento" apresentado dentro do card de serviço.
+ * Reutiliza a mesma lógica global/custom por serviço já usada em
+ * PublicInvestmentSummary, aplicada sobre o valor exato do serviço.
+ */
+function ServiceInvestmentInline({ service, quote }: { service: QuoteService; quote?: Quote }) {
+  const amount = Number(service.amount) || 0;
+  if (amount <= 0) return null;
+
+  const fmt = (v: number) => formatCurrency(v);
+  const cfg = extractServicePaymentConfig(service as any);
+  const useServicePayment =
+    !!quote && (((quote as any).use_service_payment) || cfg.is_custom_payment);
+
+  type Row = { label: string; value: string; emphasis?: boolean };
+  const rows: Row[] = [];
+  let methodLabel: string | null = null;
+
+  if (useServicePayment && cfg.is_custom_payment && cfg.payment_type) {
+    const feeInfo = extractFlightFeeInfo(service as any);
+    const r = calculateServicePayment(amount, cfg, feeInfo);
+    methodLabel = cfg.payment_method ?? null;
+    if (r.type === "installments") {
+      if ("firstInstallmentValue" in r && r.firstInstallmentValue) {
+        rows.push({ label: "1ª parcela", value: fmt(r.firstInstallmentValue), emphasis: true });
+        rows.push({ label: `+ ${r.installmentCount - 1}x de`, value: fmt(r.installmentValue), emphasis: true });
+      } else {
+        rows.push({ label: `${r.installmentCount}x de`, value: fmt(r.installmentValue), emphasis: true });
+      }
+    } else if (r.type === "installments_with_entry") {
+      rows.push({ label: "Entrada", value: fmt(r.entryValue) });
+      rows.push({ label: `${r.installmentCount}x de`, value: fmt(r.installmentValue), emphasis: true });
+    } else {
+      rows.push({
+        label: r.hasDiscount ? "À vista (com desconto)" : "À vista",
+        value: fmt(r.hasDiscount ? r.discountedTotal : r.total),
+        emphasis: true,
+      });
+    }
+  } else if (quote) {
+    const mode = ((quote as any).payment_display_mode as string) || "full_payment";
+    const installments = Number((quote as any).installments_count) || 10;
+    const entryPct = Number((quote as any).entry_percentage) || 0;
+    const discountPct = Number((quote as any).full_payment_discount_percent) || 0;
+    methodLabel = formatPaymentMethodsInline((quote as any).payment_method_label) || null;
+
+    if (mode === "installments") {
+      rows.push({ label: `${installments}x de`, value: fmt(amount / (installments || 1)), emphasis: true });
+    } else if (mode === "installments_with_entry") {
+      const entry = amount * (entryPct / 100);
+      const rem = Math.max(0, amount - entry);
+      rows.push({ label: "Entrada", value: fmt(entry) });
+      rows.push({ label: `${installments}x de`, value: fmt(rem / (installments || 1)), emphasis: true });
+    } else if (mode === "full_payment") {
+      const v = amount * (1 - discountPct / 100);
+      rows.push({
+        label: discountPct > 0 ? `À vista (-${discountPct}%)` : "À vista",
+        value: fmt(v),
+        emphasis: true,
+      });
+    } else {
+      // total_only — nada além do total do serviço
+    }
+  }
+
+  return (
+    <div className="pt-4 mt-2 border-t border-border/50 space-y-2">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
+        Condições de pagamento
+      </p>
+      {rows.length > 0 && (
+        <div className="space-y-1">
+          {rows.map((r, i) => (
+            <p key={i} className="leading-snug flex flex-wrap items-baseline gap-x-1.5">
+              <span className="text-xs sm:text-sm text-muted-foreground">{r.label}:</span>
+              <span
+                className={
+                  r.emphasis
+                    ? "text-lg sm:text-xl font-bold tracking-tight text-primary tabular-nums"
+                    : "text-sm font-semibold text-foreground tabular-nums"
+                }
+              >
+                {r.value}
+              </span>
+            </p>
+          ))}
+        </div>
+      )}
+      <div className="flex flex-wrap items-baseline gap-x-1.5 text-xs sm:text-sm text-foreground/80">
+        <span className="text-muted-foreground">Valor do serviço:</span>
+        <span className="font-semibold text-foreground tabular-nums">{fmt(amount)}</span>
+      </div>
+      {methodLabel && (
+        <div className="flex flex-wrap items-baseline gap-x-1.5 text-xs sm:text-sm text-foreground/80">
+          <span className="text-muted-foreground">Forma de pagamento:</span>
+          <span className="font-medium text-foreground">{methodLabel}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CollapsibleServiceCard({
   service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote, showInvestmentInline = false,
 }: {
