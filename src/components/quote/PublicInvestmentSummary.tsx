@@ -71,6 +71,12 @@ export interface PublicInvestmentSummaryProps {
   };
   useServicePayment: boolean;
   paymentTerms: string | null;
+  /**
+   * Quando true, os cards individuais de serviço não são renderizados
+   * (usado quando as condições de pagamento já são exibidas dentro dos
+   * cards de serviço no orçamento público, evitando duplicidade).
+   */
+  hideServiceList?: boolean;
 }
 
 interface PaymentInfo {
@@ -171,6 +177,7 @@ export function PublicInvestmentSummary({
   globalPayment,
   useServicePayment,
   paymentTerms,
+  hideServiceList = false,
 }: PublicInvestmentSummaryProps) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = useMemo(() => makeFmt(currency), [currency]);
@@ -224,9 +231,19 @@ export function PublicInvestmentSummary({
   }, [services, groupingMode, globalPayment, useServicePayment, fmt]);
 
   const showTotalCard = displayMode === "both";
+
+  const methodsForFooter = parsePaymentMethods(globalPayment.methodLabel);
+  const hasFooter = methodsForFooter.length > 0 || !!paymentTerms;
+
+  // Se a lista foi ocultada, o total geral está desativado e não há rodapé,
+  // evita renderizar uma seção vazia.
+  if (hideServiceList && !showTotalCard && !hasFooter) return null;
+
   const discountPct = globalPayment.fullPaymentDiscountPercent || 0;
   const totalAVista = discountPct > 0 ? totalAll * (1 - discountPct / 100) : null;
-  const totalLabel = groupingMode === "grouped"
+  const totalLabel = hideServiceList
+    ? "As condições de pagamento de cada serviço estão detalhadas no card correspondente acima."
+    : groupingMode === "grouped"
     ? "Veja abaixo o investimento detalhado por tipo de serviço e as condições de pagamento da sua viagem."
     : "Veja abaixo o investimento detalhado por serviço e as condições de pagamento da sua viagem.";
 
@@ -265,6 +282,7 @@ export function PublicInvestmentSummary({
       </div>
 
       {/* Cards de serviço — layout unificado conforme referência visual */}
+      {!hideServiceList && (
       <ul className="space-y-4 list-none p-0">
         {items.map((item) => {
           const Icon = SERVICE_ICON[item.type] || Sparkles;
@@ -336,6 +354,7 @@ export function PublicInvestmentSummary({
           );
         })}
       </ul>
+      )}
 
       {showTotalCard && (
         <div className="mt-5 rounded-2xl border border-primary/25 bg-primary/[0.05] p-6 sm:p-7">
