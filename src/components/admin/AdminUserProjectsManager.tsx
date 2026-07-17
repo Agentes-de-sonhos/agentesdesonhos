@@ -7,13 +7,109 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Lock, ExternalLink, Copy, Eye, EyeOff, Search, ShieldAlert } from "lucide-react";
+import { Lock, ExternalLink, Copy, Eye, EyeOff, Search, ShieldAlert, TrendingUp, TrendingDown, Minus, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { buildRoteiroLink } from "@/lib/roteiro-domain";
 import { buildOrcamentoLink } from "@/lib/orcamento-domain";
 import { buildCarteiraLink } from "@/lib/carteira-domain";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, differenceInDays, addDays, addHours, addMonths, isSameHour, isSameDay, isSameMonth } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const ACCESS_PASSWORD = "@Univers44l!";
+
+type PeriodKey = "today" | "yesterday" | "7d" | "30d" | "this_month" | "last_month" | "this_year" | "custom";
+const PERIOD_OPTIONS: { key: PeriodKey; label: string }[] = [
+  { key: "today", label: "Hoje" },
+  { key: "yesterday", label: "Ontem" },
+  { key: "7d", label: "Últimos 7 dias" },
+  { key: "30d", label: "Últimos 30 dias" },
+  { key: "this_month", label: "Este mês" },
+  { key: "last_month", label: "Mês passado" },
+  { key: "this_year", label: "Este ano" },
+  { key: "custom", label: "Personalizado" },
+];
+
+function getRange(p: PeriodKey, cs?: string, ce?: string): { start: Date; end: Date } {
+  const now = new Date();
+  switch (p) {
+    case "today": return { start: startOfDay(now), end: endOfDay(now) };
+    case "yesterday": { const y = subDays(now, 1); return { start: startOfDay(y), end: endOfDay(y) }; }
+    case "7d": return { start: startOfDay(subDays(now, 6)), end: endOfDay(now) };
+    case "30d": return { start: startOfDay(subDays(now, 29)), end: endOfDay(now) };
+    case "this_month": return { start: startOfMonth(now), end: endOfDay(now) };
+    case "last_month": { const lm = subMonths(now, 1); return { start: startOfMonth(lm), end: endOfMonth(lm) }; }
+    case "this_year": return { start: startOfYear(now), end: endOfDay(now) };
+    case "custom": {
+      if (cs && ce) {
+        const [sy, sm, sd] = cs.split("-").map(Number);
+        const [ey, em, ed] = ce.split("-").map(Number);
+        return { start: new Date(sy, sm - 1, sd, 0, 0, 0, 0), end: new Date(ey, em - 1, ed, 23, 59, 59, 999) };
+      }
+      return { start: startOfDay(now), end: endOfDay(now) };
+    }
+  }
+}
+
+function previousRange(r: { start: Date; end: Date }): { start: Date; end: Date } {
+  const ms = r.end.getTime() - r.start.getTime();
+  return { start: new Date(r.start.getTime() - ms - 1), end: new Date(r.start.getTime() - 1) };
+}
+
+type Granularity = "hour" | "day" | "month";
+function pickGranularity(p: PeriodKey, r: { start: Date; end: Date }): Granularity {
+  if (p === "today" || p === "yesterday") return "hour";
+  if (p === "this_year") return "month";
+  const days = differenceInDays(r.end, r.start);
+  if (days <= 1) return "hour";
+  if (days <= 92) return "day";
+  return "month";
+}
+
+function buildBuckets(r: { start: Date; end: Date }, g: Granularity): Date[] {
+  const buckets: Date[] = [];
+  if (g === "hour") {
+    let d = new Date(r.start.getFullYear(), r.start.getMonth(), r.start.getDate(), r.start.getHours(), 0, 0, 0);
+    while (d <= r.end) { buckets.push(new Date(d)); d = addHours(d, 1); }
+  } else if (g === "day") {
+    let d = startOfDay(r.start);
+    while (d <= r.end) { buckets.push(new Date(d)); d = addDays(d, 1); }
+  } else {
+    let d = startOfMonth(r.start);
+    while (d <= r.end) { buckets.push(new Date(d)); d = addMonths(d, 1); }
+  }
+  return buckets;
+}
+
+function bucketKey(d: Date, g: Granularity): string {
+  if (g === "hour") return format(d, "yyyy-MM-dd HH");
+  if (g === "day") return format(d, "yyyy-MM-dd");
+  return format(d, "yyyy-MM");
+}
+function bucketLabel(d: Date, g: Granularity): string {
+  if (g === "hour") return format(d, "HH'h'");
+  if (g === "day") return format(d, "dd/MM");
+  return format(d, "MMM/yy", { locale: ptBR });
+}
+function inRange(iso: string, r: { start: Date; end: Date }): boolean {
+  const t = new Date(iso).getTime();
+  return t >= r.start.getTime() && t <= r.end.getTime();
+}
+
+const PAGE_SIZE = 25;
 
 type TripRow = {
   id: string; user_id: string; client_name: string; trip_title: string | null;
