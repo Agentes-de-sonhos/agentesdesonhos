@@ -110,6 +110,23 @@ function inRange(iso: string, r: { start: Date; end: Date }): boolean {
 }
 
 const PAGE_SIZE = 25;
+const RANK_PAGE_SIZES = [25, 50, 100];
+
+type AgencyRankRow = {
+  agency_id: string;
+  agency_name: string | null;
+  owner_name: string | null;
+  owner_email: string | null;
+  quotes: number;
+  trips: number;
+  itineraries: number;
+  opportunities: number;
+  operations: number;
+  sales: number;
+  clients: number;
+};
+
+type RankSortCol = "quotes" | "trips" | "itineraries" | "projects" | "opportunities" | "operations" | "sales" | "clients" | "total";
 
 type TripRow = {
   id: string; user_id: string; client_name: string; trip_title: string | null;
