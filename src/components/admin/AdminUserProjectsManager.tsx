@@ -110,6 +110,23 @@ function inRange(iso: string, r: { start: Date; end: Date }): boolean {
 }
 
 const PAGE_SIZE = 25;
+const RANK_PAGE_SIZES = [25, 50, 100];
+
+type AgencyRankRow = {
+  agency_id: string;
+  agency_name: string | null;
+  owner_name: string | null;
+  owner_email: string | null;
+  quotes: number;
+  trips: number;
+  itineraries: number;
+  opportunities: number;
+  operations: number;
+  sales: number;
+  clients: number;
+};
+
+type RankSortCol = "quotes" | "trips" | "itineraries" | "projects" | "opportunities" | "operations" | "sales" | "clients" | "total";
 
 type TripRow = {
   id: string; user_id: string; client_name: string; trip_title: string | null;
@@ -309,6 +326,79 @@ export function AdminUserProjectsManager() {
     { name: "Roteiros", value: pItins.length, color: "hsl(160 60% 45%)" },
   ]), [pQuotes.length, pTrips.length, pItins.length]);
 
+  // ============= Ranking de Agências por Atividade =============
+  const rangeStartISO = range.start.toISOString();
+  const rangeEndISO = range.end.toISOString();
+  const rankQuery = useQuery({
+    queryKey: ["admin-agency-ranking", rangeStartISO, rangeEndISO],
+    enabled: unlocked,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_agency_activity_ranking" as any, {
+        _start: rangeStartISO,
+        _end: rangeEndISO,
+      });
+      if (error) throw error;
+      return ((data as any)?.agencies || []) as AgencyRankRow[];
+    },
+  });
+  const [rankSort, setRankSort] = useState<{ col: RankSortCol; dir: "asc"|"desc" }>({ col: "projects", dir: "desc" });
+  const [rankPage, setRankPage] = useState(1);
+  const [rankPageSize, setRankPageSize] = useState(25);
+  const [rankSearch, setRankSearch] = useState("");
+
+  const rankRows = useMemo(() => {
+    const rows = (rankQuery.data || []).map((r) => ({
+      ...r,
+      projects: r.quotes + r.trips + r.itineraries,
+      total: r.quotes + r.trips + r.itineraries + r.opportunities + r.operations + r.sales + r.clients,
+    }));
+    const filtered = rankSearch
+      ? rows.filter((r) => matches(rankSearch, r.agency_name, r.owner_name, r.owner_email))
+      : rows;
+    const primary = rankSort.col;
+    const dirMul = rankSort.dir === "asc" ? 1 : -1;
+    filtered.sort((a: any, b: any) => {
+      const av = a[primary] as number;
+      const bv = b[primary] as number;
+      if (av !== bv) return (av - bv) * dirMul;
+      // Tiebreakers
+      if (primary !== "projects" && a.projects !== b.projects) return (b.projects - a.projects);
+      if (a.total !== b.total) return (b.total - a.total);
+      if (primary === "projects" && a.sales !== b.sales) return (b.sales - a.sales);
+      return (a.agency_name || "").localeCompare(b.agency_name || "", "pt-BR");
+    });
+    return filtered;
+  }, [rankQuery.data, rankSort, rankSearch]);
+
+  const rankTotals = useMemo(() => {
+    const rows = rankQuery.data || [];
+    return {
+      agencies: rows.length,
+      quotes: rows.reduce((s, r) => s + r.quotes, 0),
+      trips: rows.reduce((s, r) => s + r.trips, 0),
+      itineraries: rows.reduce((s, r) => s + r.itineraries, 0),
+      opportunities: rows.reduce((s, r) => s + r.opportunities, 0),
+      operations: rows.reduce((s, r) => s + r.operations, 0),
+      sales: rows.reduce((s, r) => s + r.sales, 0),
+      clients: rows.reduce((s, r) => s + r.clients, 0),
+    };
+  }, [rankQuery.data]);
+  const rankTotalProjects = rankTotals.quotes + rankTotals.trips + rankTotals.itineraries;
+  const rankTotalActivity = rankTotalProjects + rankTotals.opportunities + rankTotals.operations + rankTotals.sales + rankTotals.clients;
+
+  const toggleRankSort = (col: RankSortCol) => {
+    setRankSort((s) => s.col === col ? { col, dir: s.dir === "asc" ? "desc" : "asc" } : { col, dir: "desc" });
+    setRankPage(1);
+  };
+  const currentPeriodLabel = PERIOD_OPTIONS.find((p) => p.key === period)?.label
+    + (period === "custom" ? ` (${customStart} → ${customEnd})` : "");
+  const rankPageSizeInt = rankPageSize;
+  const rankTotalPages = Math.max(1, Math.ceil(rankRows.length / rankPageSizeInt));
+  const rankPageSafe = Math.min(rankPage, rankTotalPages);
+  const rankPageRows = rankRows.slice((rankPageSafe - 1) * rankPageSizeInt, rankPageSafe * rankPageSizeInt);
+
   const toggleSort = (tab: "trips"|"quotes"|"itineraries", col: string) => {
     setSort((s) => s.tab === tab && s.col === col
       ? { tab, col, dir: s.dir === "asc" ? "desc" : "asc" }
@@ -485,6 +575,158 @@ export function AdminUserProjectsManager() {
           </div>
         </Card>
       </div>
+
+      {/* Ranking de Agências por Atividade */}
+      <Card className="p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h3 className="font-display font-semibold">Ranking de Agências por Atividade</h3>
+            <p className="text-xs text-muted-foreground">
+              Período: <span className="font-medium text-foreground">{currentPeriodLabel}</span>
+              {" · "}Ordenado por{" "}
+              <span className="font-medium text-foreground">
+                {({ quotes: "Orçamentos", trips: "Carteiras", itineraries: "Roteiros", projects: "Total de Projetos", opportunities: "Oportunidades", operations: "Operações", sales: "Vendas", clients: "Clientes", total: "Total Geral" } as Record<RankSortCol,string>)[rankSort.col]}
+              </span>
+              {" "}({rankSort.dir === "asc" ? "crescente" : "decrescente"})
+            </p>
+          </div>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Filtrar agência…"
+              value={rankSearch}
+              onChange={(e) => { setRankSearch(e.target.value); setRankPage(1); }}
+              className="pl-9 h-9"
+            />
+          </div>
+        </div>
+
+        {/* Resumo consolidado */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-2 text-center">
+          {[
+            { l: "Agências ativas", v: rankTotals.agencies, c: "text-primary" },
+            { l: "Orçamentos", v: rankTotals.quotes },
+            { l: "Carteiras", v: rankTotals.trips },
+            { l: "Roteiros", v: rankTotals.itineraries },
+            { l: "Total Projetos", v: rankTotalProjects, c: "text-emerald-600" },
+            { l: "Oportunidades", v: rankTotals.opportunities },
+            { l: "Operações", v: rankTotals.operations },
+            { l: "Vendas", v: rankTotals.sales },
+            { l: "Total Geral", v: rankTotalActivity, c: "text-fuchsia-600 font-semibold" },
+          ].map((k) => (
+            <div key={k.l} className="rounded-md border bg-muted/30 py-2 px-1">
+              <div className={`text-lg font-display font-bold ${k.c || ""}`}>{k.v.toLocaleString("pt-BR")}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabela */}
+        <div className="rounded-md border overflow-x-auto max-h-[600px] overflow-y-auto">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-background z-10 border-b">
+              <tr className="text-xs text-muted-foreground">
+                <th className="text-left px-3 py-2 w-14">#</th>
+                <th className="text-left px-3 py-2 min-w-[200px]">Agência</th>
+                {([
+                  ["quotes","Orçamentos"],
+                  ["trips","Carteiras"],
+                  ["itineraries","Roteiros"],
+                  ["projects","Total Projetos"],
+                  ["opportunities","Oportunidades"],
+                  ["operations","Operações"],
+                  ["sales","Vendas"],
+                  ["clients","Clientes"],
+                  ["total","Total Geral"],
+                ] as [RankSortCol, string][]).map(([col, label]) => {
+                  const active = rankSort.col === col;
+                  return (
+                    <th key={col} className={`text-right px-3 py-2 whitespace-nowrap ${active ? "bg-muted text-foreground" : ""}`}>
+                      <button onClick={() => toggleRankSort(col)} className="inline-flex items-center gap-1 hover:text-foreground">
+                        {label}
+                        <ArrowUpDown className={`h-3 w-3 ${active ? "opacity-100" : "opacity-40"}`} />
+                        {active && <span className="text-[10px]">{rankSort.dir === "asc" ? "↑" : "↓"}</span>}
+                      </button>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {rankQuery.isLoading && (
+                <tr><td colSpan={11} className="text-center text-muted-foreground py-8">Carregando ranking…</td></tr>
+              )}
+              {rankQuery.error && !rankQuery.isLoading && (
+                <tr><td colSpan={11} className="text-center text-destructive py-8">Erro ao carregar ranking: {(rankQuery.error as Error).message}</td></tr>
+              )}
+              {!rankQuery.isLoading && !rankQuery.error && rankRows.length === 0 && (
+                <tr><td colSpan={11} className="text-center text-muted-foreground py-8">Nenhuma atividade encontrada no período selecionado.</td></tr>
+              )}
+              {!rankQuery.isLoading && rankPageRows.map((r, idx) => {
+                const absolutePos = (rankPageSafe - 1) * rankPageSizeInt + idx + 1;
+                const medal = absolutePos === 1 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300"
+                  : absolutePos === 2 ? "bg-slate-100 text-slate-800 dark:bg-slate-800/50 dark:text-slate-200"
+                  : absolutePos === 3 ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                  : "";
+                const projects = r.quotes + r.trips + r.itineraries;
+                const total = projects + r.opportunities + r.operations + r.sales + r.clients;
+                const cellCls = (col: RankSortCol) => `text-right px-3 py-2 tabular-nums ${rankSort.col === col ? "bg-muted/40 font-medium" : ""}`;
+                return (
+                  <tr key={r.agency_id} className="border-b hover:bg-muted/30">
+                    <td className="px-3 py-2">
+                      <span className={`inline-flex items-center justify-center h-6 w-6 rounded-full text-xs font-semibold ${medal || "text-muted-foreground"}`}>
+                        {absolutePos}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="font-medium">{r.agency_name || r.owner_name || "—"}</div>
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[280px]">
+                        {[r.owner_name, r.owner_email].filter(Boolean).join(" · ") || "—"}
+                      </div>
+                    </td>
+                    <td className={cellCls("quotes")}>{r.quotes}</td>
+                    <td className={cellCls("trips")}>{r.trips}</td>
+                    <td className={cellCls("itineraries")}>{r.itineraries}</td>
+                    <td className={cellCls("projects") + " text-emerald-700 dark:text-emerald-400"}>{projects}</td>
+                    <td className={cellCls("opportunities")}>{r.opportunities}</td>
+                    <td className={cellCls("operations")}>{r.operations}</td>
+                    <td className={cellCls("sales")}>{r.sales}</td>
+                    <td className={cellCls("clients")}>{r.clients}</td>
+                    <td className={cellCls("total") + " text-fuchsia-700 dark:text-fuchsia-400 font-semibold"}>{total}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Paginação */}
+        {rankRows.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span>Registros por página:</span>
+              <Select value={String(rankPageSize)} onValueChange={(v) => { setRankPageSize(Number(v)); setRankPage(1); }}>
+                <SelectTrigger className="h-7 w-20"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {RANK_PAGE_SIZES.map((s) => <SelectItem key={s} value={String(s)}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <span>
+                {rankRows.length > 0 ? (rankPageSafe - 1) * rankPageSizeInt + 1 : 0}–{Math.min(rankPageSafe * rankPageSizeInt, rankRows.length)} de {rankRows.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="ghost" className="h-7 w-7" disabled={rankPageSafe === 1} onClick={() => setRankPage(rankPageSafe - 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span>Página {rankPageSafe} de {rankTotalPages}</span>
+              <Button size="icon" variant="ghost" className="h-7 w-7" disabled={rankPageSafe === rankTotalPages} onClick={() => setRankPage(rankPageSafe + 1)}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
 
       <Tabs defaultValue="quotes">
         <TabsList>

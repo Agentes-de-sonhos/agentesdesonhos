@@ -11172,6 +11172,10 @@ export type Database = {
     }
     Functions: {
       _normalize_phone: { Args: { p: string }; Returns: string }
+      admin_agency_activity_ranking: {
+        Args: { _end: string; _start: string }
+        Returns: Json
+      }
       admin_export_users: {
         Args: never
         Returns: {
