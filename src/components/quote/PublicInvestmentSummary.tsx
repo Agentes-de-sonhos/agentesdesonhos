@@ -77,6 +77,8 @@ export interface PublicInvestmentSummaryProps {
    * cards de serviço no orçamento público, evitando duplicidade).
    */
   hideServiceList?: boolean;
+  /** Texto explicativo customizado sob o título "Condições de Pagamento". */
+  summaryDescription?: string;
 }
 
 interface PaymentInfo {
@@ -178,6 +180,7 @@ export function PublicInvestmentSummary({
   useServicePayment,
   paymentTerms,
   hideServiceList = false,
+  summaryDescription,
 }: PublicInvestmentSummaryProps) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = useMemo(() => makeFmt(currency), [currency]);
@@ -241,7 +244,9 @@ export function PublicInvestmentSummary({
 
   const discountPct = globalPayment.fullPaymentDiscountPercent || 0;
   const totalAVista = discountPct > 0 ? totalAll * (1 - discountPct / 100) : null;
-  const totalLabel = hideServiceList
+  const totalLabel = summaryDescription
+    ? summaryDescription
+    : hideServiceList
     ? "As condições de pagamento de cada serviço estão detalhadas no card correspondente acima."
     : groupingMode === "grouped"
     ? "Veja abaixo o investimento detalhado por tipo de serviço e as condições de pagamento da sua viagem."
