@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Footer } from "@/components/layout/Footer";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { formatPromoEndDateLong } from "@/lib/promoEndDate";
 import {
   GraduationCap,
   Map,
@@ -271,7 +272,7 @@ const faqs = [
   },
   {
     q: "A promoção de 50% é por tempo limitado?",
-    a: "Sim. A condição promocional de 50% de desconto é válida por tempo limitado, até 30 de junho, conforme disponibilidade da campanha vigente.",
+    a: `Sim. A condição promocional de 50% de desconto é válida por tempo limitado, até ${formatPromoEndDateLong()}, conforme disponibilidade da campanha vigente.`,
   },
 ];
 
