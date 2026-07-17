@@ -417,6 +417,11 @@ function TripWalletContent() {
 
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  // Dirty tracking + close confirmation for the EDIT service dialog
+  const [editDirty, setEditDirty] = useState(false);
+  const [confirmCloseEditOpen, setConfirmCloseEditOpen] = useState(false);
+  const editFormContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setEditDirty(false); setConfirmCloseEditOpen(false); }, [editingServiceId]);
   // Hotel autocomplete / gallery state for ADD flow
   const [addPlaceId, setAddPlaceId] = useState<string | null>(null);
   const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
@@ -1116,7 +1121,14 @@ function TripWalletContent() {
           </Dialog>
 
           {/* Edit Service Dialog */}
-          <Dialog open={!!editingService && !!selectedServiceType} onOpenChange={(open) => { if (!open) handleCancelServiceForm(); }}>
+          <Dialog
+            open={!!editingService && !!selectedServiceType}
+            onOpenChange={(open) => {
+              if (open) return;
+              if (editDirty) { setConfirmCloseEditOpen(true); return; }
+              handleCancelServiceForm();
+            }}
+          >
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card">
               <DialogHeader className="sr-only">
                 <DialogTitle>
@@ -1131,7 +1143,12 @@ function TripWalletContent() {
                 />
               )}
               {editingService && selectedServiceType && (
-                <div className="space-y-4">
+                <div
+                  ref={editFormContainerRef}
+                  className="space-y-4"
+                  onInputCapture={() => { if (!editDirty) setEditDirty(true); }}
+                  onChangeCapture={() => { if (!editDirty) setEditDirty(true); }}
+                >
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}
@@ -1226,6 +1243,51 @@ function TripWalletContent() {
               )}
             </DialogContent>
           </Dialog>
+
+          {/* Confirmação ao fechar edição com alterações não salvas */}
+          <AlertDialog open={confirmCloseEditOpen} onOpenChange={setConfirmCloseEditOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Alterações não salvas</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Existem alterações não salvas neste serviço. Deseja salvá-las antes de fechar?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setConfirmCloseEditOpen(false)}
+                  disabled={isAddingService || isUpdatingService || isUploading}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setConfirmCloseEditOpen(false);
+                    setEditDirty(false);
+                    handleCancelServiceForm();
+                  }}
+                  disabled={isAddingService || isUpdatingService || isUploading}
+                >
+                  Fechar sem salvar
+                </Button>
+                <Button
+                  onClick={() => {
+                    const formEl = editFormContainerRef.current?.querySelector("form") as HTMLFormElement | null;
+                    if (formEl) {
+                      setConfirmCloseEditOpen(false);
+                      if (typeof formEl.requestSubmit === "function") formEl.requestSubmit();
+                      else formEl.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+                    }
+                  }}
+                  disabled={isAddingService || isUpdatingService || isUploading}
+                >
+                  {isUpdatingService || isUploading ? "Salvando..." : "Salvar e fechar"}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Supplier confirmation — shown after Save when no supplier was set */}
           <AlertDialog
