@@ -8,7 +8,7 @@ import { extractFlightFeeInfo } from "@/lib/servicePayment";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SupplierSelector, type SupplierSelectorValue } from "@/components/financial/SupplierSelector";
 import {
   AlertDialog,
@@ -66,6 +66,30 @@ export function ServiceModal(props: Props) {
   const optionNumber = !editingService && isMulti
     ? (serviceCountByType[serviceType] || 0) + 1
     : null;
+
+  // Editing state must be stable for the lifetime of this modal opening — it
+  // controls whether the AI/mode chooser is ever shown. If we derived it from a
+  // transient prop check on every render, a parent re-render (e.g. autosave)
+  // could momentarily flip it and remount the whole form.
+  const isEditing = Boolean(editingService?.id);
+
+  // Freeze the initialData object identity per (service id, modal-open) so that
+  // repeated parent re-renders don't hand the form a brand new object reference
+  // — which some downstream effects/memos treat as "data changed" and remount.
+  const initialDataMemo = useMemo(() => {
+    if (!editingService) return undefined;
+    return {
+      service_data: editingService.service_data,
+      amount: editingService.amount,
+      option_label: editingService.option_label,
+      description: editingService.description,
+      image_url: editingService.image_url,
+      image_urls: editingService.image_urls || [],
+    };
+    // Intentionally keyed only on the service id + open — snapshot at open time
+    // so keystroke-driven parent re-renders never rewrite this object.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingService?.id, open]);
 
   const initialSupplier: SupplierSelectorValue = (() => {
     const sd: any = editingService?.service_data || {};
@@ -179,14 +203,8 @@ export function ServiceModal(props: Props) {
                 tripEndDate={tripEndDate}
                 adultsCount={adultsCount}
                 childrenCount={childrenCount}
-                initialData={editingService ? {
-                  service_data: editingService.service_data,
-                  amount: editingService.amount,
-                  option_label: editingService.option_label,
-                  description: editingService.description,
-                  image_url: editingService.image_url,
-                  image_urls: editingService.image_urls || [],
-                } : undefined}
+                initialData={initialDataMemo}
+                isEditing={isEditing}
                 paymentSlot={editingService ? (
                   (liveAmount: number) => (
                     <ServicePaymentForm
@@ -308,14 +326,8 @@ export function ServiceModal(props: Props) {
                 tripEndDate={tripEndDate}
                 adultsCount={adultsCount}
                 childrenCount={childrenCount}
-                initialData={editingService ? {
-                  service_data: editingService.service_data,
-                  amount: editingService.amount,
-                  option_label: editingService.option_label,
-                  description: editingService.description,
-                  image_url: editingService.image_url,
-                  image_urls: editingService.image_urls || [],
-                } : undefined}
+                initialData={initialDataMemo}
+                isEditing={isEditing}
                 paymentSlot={editingService ? (
                   (liveAmount: number) => (
                     <ServicePaymentForm
