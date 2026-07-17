@@ -577,11 +577,6 @@ export function AdminUserProjectsManager() {
       </div>
 
       <Tabs defaultValue="quotes">
-      </Tabs>
-      {/* placeholder replaced below */}
-    </div>
-  );
-}
         <TabsList>
           <TabsTrigger value="quotes">
             Orçamentos ({quotes.length})
