@@ -509,18 +509,20 @@ export function AdminUserProjectsManager() {
                   <TableHead>Datas</TableHead>
                   <TableHead>Agente</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead><SortHead label="Criado em" active={sort.tab==="trips"&&sort.col==="created_at"} dir={sort.dir} onClick={() => toggleSort("trips","created_at")} /></TableHead>
+                  <TableHead><SortHead label="Atualizado" active={sort.tab==="trips"&&sort.col==="updated_at"} dir={sort.dir} onClick={() => toggleSort("trips","updated_at")} /></TableHead>
                   <TableHead>Senha</TableHead>
                   <TableHead>Link Público</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Carregando…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Carregando…</TableCell></TableRow>
                 )}
                 {!isLoading && trips.length === 0 && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhuma carteira encontrada</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Nenhuma carteira encontrada</TableCell></TableRow>
                 )}
-                {trips.map((t) => {
+                {trips.slice((page.trips - 1) * PAGE_SIZE, page.trips * PAGE_SIZE).map((t) => {
                   const link = t.public_access_code && t.owner_agency
                     ? buildCarteiraLink(t.owner_agency, t.public_access_code)
                     : null;
@@ -542,6 +544,8 @@ export function AdminUserProjectsManager() {
                       <TableCell>
                         <Badge variant={t.is_locked ? "destructive" : "secondary"}>{t.is_locked ? "bloqueada" : t.status}</Badge>
                       </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">{fmtDateTime(t.created_at)}</TableCell>
+                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{fmtDateTime(t.updated_at)}</TableCell>
                       <TableCell>
                         {t.access_password ? (
                           <div className="flex items-center gap-1">
@@ -574,6 +578,7 @@ export function AdminUserProjectsManager() {
                 })}
               </TableBody>
             </Table>
+            <Pager page={page.trips} total={trips.length} onPage={(p) => setPage((s) => ({ ...s, trips: p }))} />
           </Card>
         </TabsContent>
 
@@ -588,17 +593,19 @@ export function AdminUserProjectsManager() {
                   <TableHead>Agente</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead><SortHead label="Criado em" active={sort.tab==="quotes"&&sort.col==="created_at"} dir={sort.dir} onClick={() => toggleSort("quotes","created_at")} /></TableHead>
+                  <TableHead><SortHead label="Atualizado" active={sort.tab==="quotes"&&sort.col==="updated_at"} dir={sort.dir} onClick={() => toggleSort("quotes","updated_at")} /></TableHead>
                   <TableHead>Link Público</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Carregando…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Carregando…</TableCell></TableRow>
                 )}
                 {!isLoading && quotes.length === 0 && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum orçamento encontrado</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Nenhum orçamento encontrado</TableCell></TableRow>
                 )}
-                {quotes.map((q) => {
+                {quotes.slice((page.quotes - 1) * PAGE_SIZE, page.quotes * PAGE_SIZE).map((q) => {
                   const link = q.public_access_code && q.owner_agency
                     ? buildOrcamentoLink(q.owner_agency, q.public_access_code)
                     : null;
@@ -617,6 +624,8 @@ export function AdminUserProjectsManager() {
                         {q.currency} {Number(q.total_amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell><Badge variant="secondary">{q.status}</Badge></TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">{fmtDateTime(q.created_at)}</TableCell>
+                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{fmtDateTime(q.updated_at)}</TableCell>
                       <TableCell>
                         {link ? (
                           <div className="flex items-center gap-1">
@@ -634,6 +643,7 @@ export function AdminUserProjectsManager() {
                 })}
               </TableBody>
             </Table>
+            <Pager page={page.quotes} total={quotes.length} onPage={(p) => setPage((s) => ({ ...s, quotes: p }))} />
           </Card>
         </TabsContent>
 
@@ -648,6 +658,8 @@ export function AdminUserProjectsManager() {
                   <TableHead>Pax</TableHead>
                   <TableHead>Agente</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead><SortHead label="Criado em" active={sort.tab==="itineraries"&&sort.col==="created_at"} dir={sort.dir} onClick={() => toggleSort("itineraries","created_at")} /></TableHead>
+                  <TableHead><SortHead label="Atualizado" active={sort.tab==="itineraries"&&sort.col==="updated_at"} dir={sort.dir} onClick={() => toggleSort("itineraries","updated_at")} /></TableHead>
                   <TableHead>Link Público</TableHead>
                 </TableRow>
               </TableHeader>
