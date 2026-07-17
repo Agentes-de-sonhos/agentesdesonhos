@@ -1532,7 +1532,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
             );
             secondaryDisplay = (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                 <span>Valor à vista:</span>
                 <span className="font-medium text-foreground/80">{formatCurrency(headlineTotal)}</span>
                 {discountPct > 0 && (
@@ -1559,8 +1559,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
             );
             secondaryDisplay = (
-              <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col items-center justify-center gap-1 text-sm text-muted-foreground">
+                <div className="flex items-center justify-center gap-2">
                   <span>Valor total:</span>
                   <span className="font-medium text-foreground/80">{formatCurrency(investimentoTotal)}</span>
                 </div>
@@ -1633,20 +1633,19 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 >
                   Investimento Total da Viagem
                 </p>
-                <div className="mt-2 space-y-2">
+                <div className="mt-4 w-full flex justify-center px-[30px]">
+                  <div className="inline-block rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Passageiros
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-primary">
+                      {buildPassengerLabel(quote)}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-col items-center gap-2 w-full">
                   {primaryDisplay}
                   {secondaryDisplay}
-                </div>
-              </div>
-
-              <div className="mt-5">
-                <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Passageiros
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-primary">
-                    {buildPassengerLabel(quote)}
-                  </p>
                 </div>
               </div>
             </section>
