@@ -338,13 +338,15 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
   );
 }
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, isEditing, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
   const hasImportedLegs =
     (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0 || (init?.internal_legs?.length ?? 0) > 0;
-  const [showFlightDetails, setShowFlightDetails] = useState(hasImportedLegs);
+  // When editing a saved item, always start the flight-details panel expanded so
+  // that a re-render triggered by the parent never visually "closes" it.
+  const [showFlightDetails, setShowFlightDetails] = useState(isEditing || hasImportedLegs);
   const [showPricing, setShowPricing] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
