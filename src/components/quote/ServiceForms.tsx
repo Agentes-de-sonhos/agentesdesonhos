@@ -203,11 +203,21 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
     onChange(legs.filter((_, i) => i !== idx));
   };
 
+  // Stable per-mount ID for each leg to avoid index-based key remounting when
+  // arrays are re-created on every keystroke.
+  const idsRef = useRef<string[]>([]);
+  if (idsRef.current.length !== legs.length) {
+    const next = [...idsRef.current];
+    while (next.length < legs.length) next.push(`leg-${Math.random().toString(36).slice(2, 10)}`);
+    if (next.length > legs.length) next.length = legs.length;
+    idsRef.current = next;
+  }
+
   return (
     <div className="space-y-3">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">✈ {label}</p>
       {legs.map((leg, idx) => (
-        <div key={idx} className="relative border border-border/30 rounded-md p-3 space-y-2">
+        <div key={idsRef.current[idx] || `leg-${idx}`} className="relative border border-border/30 rounded-md p-3 space-y-2">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-medium text-muted-foreground">Trecho {idx + 1}</span>
             {legs.length > 1 && (
