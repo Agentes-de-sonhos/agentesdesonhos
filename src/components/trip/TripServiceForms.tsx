@@ -48,6 +48,36 @@ import { Badge } from "@/components/ui/badge";
 import { useCallback, useRef } from "react";
 import { resolveAirlineDisplay } from "@/lib/airlines";
 import { getAirportsMap } from "@/lib/airports";
+
+/**
+ * StepSection: stable, module-level component to avoid remounting
+ * CollapsibleFormSection (and losing focus/expanded state) on every
+ * parent re-render — which was causing the block to "close on every
+ * keystroke" during flight editing.
+ */
+type FlightStepSectionProps = {
+  index: number;
+  title: string;
+  defaultOpen?: boolean;
+  wizardMode?: boolean;
+  currentStep: number;
+  children: React.ReactNode;
+};
+function FlightStepSection({ index, title, defaultOpen, wizardMode, currentStep, children }: FlightStepSectionProps) {
+  if (!wizardMode) {
+    return (
+      <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+        {children}
+      </CollapsibleFormSection>
+    );
+  }
+  if (currentStep !== index) return null;
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+      <div className="space-y-4">{children}</div>
+    </div>
+  );
+}
 import { PlacesAutocompleteInput, parsePlaceSecondary } from "@/components/shared/PlacesAutocompleteInput";
 
 interface TripServiceFormProps {
@@ -422,24 +452,19 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     "Documentos",
   ];
 
-  /* StepSection: in classic mode renders a <CollapsibleFormSection>;
-     in wizard mode renders only when it matches the current step, using a
-     clean white card with subtle border (title lives in the wizard header). */
-  const StepSection = ({ index, title, defaultOpen, children }: { index: number; title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
-    if (!wizardMode) {
-      return (
-        <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
-          {children}
-        </CollapsibleFormSection>
-      );
-    }
-    if (stepIndex !== index) return null;
-    return (
-      <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
-        <div className="space-y-4">{children}</div>
-      </div>
-    );
-  };
+  /* StepSection is now a stable module-level component (FlightStepSection)
+     to prevent CollapsibleFormSection from unmounting on every keystroke. */
+  const StepSection = useCallback(
+    (props: { index: number; title: string; defaultOpen?: boolean; children: React.ReactNode }) => (
+      <FlightStepSection
+        {...props}
+        wizardMode={wizardMode}
+        currentStep={stepIndex}
+      />
+    ),
+    // Intentionally re-create when wizardMode/stepIndex changes so wizard steps swap correctly.
+    [wizardMode, stepIndex]
+  );
 
   const isFirstStep = stepIndex === 0;
   const isLastStep = stepIndex === totalSteps - 1;
@@ -456,7 +481,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn("space-y-6", wizardMode && "flight-wizard")}
       >
-        {!hideInlineImport && !wizardMode && <FlightAutoImport onImport={handleFlightImport} />}
+        {!hideInlineImport && !wizardMode && !isEditing && <FlightAutoImport onImport={handleFlightImport} />}
 
         {wizardMode && (
           <div className="space-y-3 pb-2">
