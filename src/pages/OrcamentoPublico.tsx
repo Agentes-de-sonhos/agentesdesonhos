@@ -1714,6 +1714,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         {(agentProfile || (quote as any).signature_snapshot) && (
           <section className="relative overflow-hidden rounded-3xl border border-border/30 bg-white shadow-[0_12px_40px_-16px_rgba(0,0,0,0.12)] animate-fade-up">
             <div className="relative px-5 sm:px-7 py-6 sm:py-7">
+              {/* Title: centered relative to the entire white card */}
+              <p className="text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 whitespace-nowrap text-center mb-4 sm:mb-5">
+                {signatureContact.title || "Sua consultora de viagens"}
+              </p>
+
               {/* MOBILE: horizontal layout matching reference image */}
               <div className="sm:hidden flex items-center gap-4">
                 {/* Avatar */}
@@ -1733,9 +1738,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
                 {/* Info */}
                 <div className="flex-1 min-w-0 space-y-0.5 pt-0.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-primary/80 whitespace-nowrap text-center">
-                    {signatureContact.title || "Sua consultora de viagens"}
-                  </p>
                   <p className="text-lg font-bold tracking-tight text-foreground leading-tight">
                     {signatureContact.name}
                   </p>
