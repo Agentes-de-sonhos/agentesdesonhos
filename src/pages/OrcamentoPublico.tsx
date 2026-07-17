@@ -1460,7 +1460,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   onToggle={() => handleToggleService(index)}
                   showPaymentPerService={isNewLayout ? false : useServicePayment}
                   quote={quote}
-                  showInvestmentInline={useNewInvestmentLayout && showDetailedPrices}
+                  showInvestmentInline={
+                    investmentLayout === "ungrouped" && showDetailedPrices
+                  }
                 />
               ))}
             </div>
@@ -1488,7 +1490,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             }}
             useServicePayment={useServicePayment}
             paymentTerms={paymentTerms}
-            hideServiceList={showDetailedPrices}
+            hideServiceList={
+              investmentLayout === "ungrouped" && showDetailedPrices
+            }
           />
         )}
 
