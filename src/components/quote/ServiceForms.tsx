@@ -77,6 +77,11 @@ interface ServiceFormProps {
   childrenCount?: number;
   /** When editing, pass the existing service data to pre-fill the form */
   initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null; image_urls?: string[] };
+  /** Explicit flag: parent tells us if this is an edit of an already-saved service.
+   *  Preferred over `!!initialData` because `initialData` may be transiently injected
+   *  by wizards/AI import on a NEW item — we must never re-show the chooser during
+   *  editing regardless of transient initialData mutations. */
+  isEditing?: boolean;
   /** Optional slot rendered between total/notes and action buttons — receives live computed amount */
   paymentSlot?: ((liveAmount: number) => React.ReactNode) | React.ReactNode;
   /** Optional slot for photo upload */
@@ -198,11 +203,21 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
     onChange(legs.filter((_, i) => i !== idx));
   };
 
+  // Stable per-mount ID for each leg to avoid index-based key remounting when
+  // arrays are re-created on every keystroke.
+  const idsRef = useRef<string[]>([]);
+  if (idsRef.current.length !== legs.length) {
+    const next = [...idsRef.current];
+    while (next.length < legs.length) next.push(`leg-${Math.random().toString(36).slice(2, 10)}`);
+    if (next.length > legs.length) next.length = legs.length;
+    idsRef.current = next;
+  }
+
   return (
     <div className="space-y-3">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">✈ {label}</p>
       {legs.map((leg, idx) => (
-        <div key={idx} className="relative border border-border/30 rounded-md p-3 space-y-2">
+        <div key={idsRef.current[idx] || `leg-${idx}`} className="relative border border-border/30 rounded-md p-3 space-y-2">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-medium text-muted-foreground">Trecho {idx + 1}</span>
             {legs.length > 1 && (
@@ -323,13 +338,15 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
   );
 }
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, isEditing, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
   const hasImportedLegs =
     (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0 || (init?.internal_legs?.length ?? 0) > 0;
-  const [showFlightDetails, setShowFlightDetails] = useState(hasImportedLegs);
+  // When editing a saved item, always start the flight-details panel expanded so
+  // that a re-render triggered by the parent never visually "closes" it.
+  const [showFlightDetails, setShowFlightDetails] = useState(isEditing || hasImportedLegs);
   const [showPricing, setShowPricing] = useState(false);
   const [showExtras, setShowExtras] = useState(false);
   const [outboundLegs, setOutboundLegs] = useState(normalizedLegs.outbound);
@@ -2860,7 +2877,10 @@ function CarRentalModeChooser({ onChoose }: { onChoose: (mode: "manual" | "impor
 /* Flight entry: mode chooser → FlightWizard or classic FlightForm.
    Editing existing services skips chooser and opens classic form (no regression). */
 function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
-  const isEditing = !!props.initialData;
+  // Prefer the explicit prop from the parent; fall back to inferring from initialData
+  // for backwards-compat. `isEditing` must NEVER change after mount for a given
+  // service — we want to guarantee edits never show the mode chooser.
+  const isEditing = props.isEditing ?? !!props.initialData;
   const [mode, setMode] = useState<"chooser" | "wizard" | "manual" | "import">(isEditing ? "manual" : "chooser");
   const [wizardPrefill, setWizardPrefill] = useState<WizardFlightDraft | undefined>(undefined);
   const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
@@ -3062,7 +3082,7 @@ function GenericModeChooser({
   );
 }
 
-export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot }: ServiceFormProps) {
+export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, isEditing, paymentSlot }: ServiceFormProps) {
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
@@ -3086,7 +3106,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   );
   const formProps = {
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions,
-    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
+    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, isEditing, paymentSlot, photoSlot: photoSlotElement,
     ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
   };
 
