@@ -5,7 +5,7 @@ import { usePublicQuote } from "@/hooks/useQuotes";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -24,6 +24,7 @@ import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsInclude
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
+import { buildPassengerLabel } from "@/lib/quotePassengers";
 import {
   computeExtrasTotal,
   computeExtraAmount,
@@ -1615,15 +1616,38 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           }
 
           return (
-            <section className="relative overflow-hidden rounded-2xl border border-border/40 bg-white p-6 sm:p-8 shadow-sm animate-fade-up">
-              <div className="relative text-center space-y-3">
-                {primaryDisplay}
-                {secondaryDisplay}
-                {quote.services && quote.services.length > 0 && (
-                  <p className="text-[11px] text-muted-foreground/80">
-                    {quote.services.length} serviço{quote.services.length > 1 ? "s" : ""} incluído{quote.services.length > 1 ? "s" : ""}
+            <section
+              className="rounded-2xl border border-primary/25 bg-primary/[0.05] p-6 sm:p-7 animate-fade-up"
+              aria-labelledby="investimento-total-title"
+            >
+              <div className="flex flex-col items-center text-center">
+                <span
+                  className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
+                  aria-hidden="true"
+                >
+                  <Wallet className="h-5 w-5" />
+                </span>
+                <p
+                  id="investimento-total-title"
+                  className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80"
+                >
+                  Investimento Total da Viagem
+                </p>
+                <div className="mt-2 space-y-2">
+                  {primaryDisplay}
+                  {secondaryDisplay}
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Passageiros
                   </p>
-                )}
+                  <p className="mt-1 text-sm font-semibold text-primary">
+                    {buildPassengerLabel(quote)}
+                  </p>
+                </div>
               </div>
             </section>
           );
