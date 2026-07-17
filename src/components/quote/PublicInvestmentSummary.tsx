@@ -255,16 +255,19 @@ export function PublicInvestmentSummary({
   const hasAgeBreakdown = children > 0 || infants > 0;
   const totalPassengers = adults + children + infants;
 
-  const passengerLabel = useMemo(() => {
-    if (!hasAgeBreakdown) {
-      return `${totalPassengers} passageiro${totalPassengers === 1 ? "" : "s"}`;
-    }
+  const passengerComposition = useMemo(() => {
     const parts: string[] = [];
     if (adults > 0) parts.push(`${adults} adulto${adults === 1 ? "" : "s"}`);
     if (children > 0) parts.push(`${children} criança${children === 1 ? "" : "s"}`);
     if (infants > 0) parts.push(`${infants} bebê${infants === 1 ? "" : "s"}`);
-    return parts.join(" • ");
-  }, [adults, children, infants, hasAgeBreakdown, totalPassengers]);
+    if (parts.length === 0) return "";
+    if (parts.length === 1) return parts[0];
+    if (parts.length === 2) return parts.join(" e ");
+    return `${parts.slice(0, -1).join(", ")} e ${parts[parts.length - 1]}`;
+  }, [adults, children, infants]);
+  const passengerLabel = passengerComposition
+    || (totalPassengers > 0 ? `${totalPassengers} passageiro${totalPassengers === 1 ? "" : "s"}` : "");
+  const showPassengerCard = passengerComposition.length > 0;
 
   return (
     <section
@@ -376,26 +379,18 @@ export function PublicInvestmentSummary({
             )}
           </div>
 
-          <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2">
-            <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Total de serviços
-              </p>
-              <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
-                {services.length} serviço{services.length === 1 ? "" : "s"}
-              </p>
-            </div>
-            {groupingMode === "grouped" && (
-              <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
+          {showPassengerCard && (
+            <div className="mt-5 flex justify-center">
+              <div className="w-full sm:max-w-sm rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Tipos de serviço
+                  Passageiros
                 </p>
                 <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
-                  {items.length} tipo{items.length === 1 ? "" : "s"}
+                  {passengerComposition}
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
