@@ -350,21 +350,26 @@ export function PublicInvestmentSummary({
             <p className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
               Investimento Total da Viagem
             </p>
-            <div className="mt-4 w-full flex justify-center px-[30px]">
-              <div className="inline-block rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Passageiros
+            <div className="mt-4 flex flex-col items-center gap-1">
+              <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Número de passageiros
+              </p>
+              <p className={cn("text-base sm:text-lg font-semibold", VALUE_PRIMARY)}>
+                {passengerLabel}
+              </p>
+            </div>
+            <div className="mt-5 w-full flex justify-center">
+              <div className="inline-block rounded-2xl bg-white border border-primary/20 shadow-sm px-8 sm:px-14 py-5 sm:py-6 text-center">
+                <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                  Valor total
                 </p>
-                <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
-                  {passengerLabel}
+                <p className={cn("mt-1 text-[1.75rem] sm:text-[2.5rem] font-bold tracking-tight leading-tight", VALUE_PRIMARY)}>
+                  {fmt(totalAll)}
                 </p>
               </div>
             </div>
-            <p className="mt-4 text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              {fmt(totalAll)}
-            </p>
             {totalAVista !== null && (
-              <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
+              <p className="mt-4 text-xs sm:text-sm text-muted-foreground">
                 À vista com {discountPct}% de desconto:{" "}
                 <span className="font-semibold text-primary">{fmt(totalAVista)}</span>
               </p>
