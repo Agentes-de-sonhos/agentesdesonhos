@@ -350,7 +350,17 @@ export function PublicInvestmentSummary({
             <p className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
               Investimento Total da Viagem
             </p>
-            <p className="mt-2 text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+            <div className="mt-4 w-full flex justify-center px-[30px]">
+              <div className="inline-block rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Passageiros
+                </p>
+                <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
+                  {passengerLabel}
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               {fmt(totalAll)}
             </p>
             {totalAVista !== null && (
@@ -359,17 +369,6 @@ export function PublicInvestmentSummary({
                 <span className="font-semibold text-primary">{fmt(totalAVista)}</span>
               </p>
             )}
-          </div>
-
-          <div className="mt-5">
-            <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Passageiros
-              </p>
-              <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
-                {passengerLabel}
-              </p>
-            </div>
           </div>
         </div>
       )}
