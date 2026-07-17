@@ -1244,6 +1244,51 @@ function TripWalletContent() {
             </DialogContent>
           </Dialog>
 
+          {/* Confirmação ao fechar edição com alterações não salvas */}
+          <AlertDialog open={confirmCloseEditOpen} onOpenChange={setConfirmCloseEditOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Alterações não salvas</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Existem alterações não salvas neste serviço. Deseja salvá-las antes de fechar?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setConfirmCloseEditOpen(false)}
+                  disabled={isAddingService || isUpdatingService || isUploading}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setConfirmCloseEditOpen(false);
+                    setEditDirty(false);
+                    handleCancelServiceForm();
+                  }}
+                  disabled={isAddingService || isUpdatingService || isUploading}
+                >
+                  Fechar sem salvar
+                </Button>
+                <Button
+                  onClick={() => {
+                    const formEl = editFormContainerRef.current?.querySelector("form") as HTMLFormElement | null;
+                    if (formEl) {
+                      setConfirmCloseEditOpen(false);
+                      if (typeof formEl.requestSubmit === "function") formEl.requestSubmit();
+                      else formEl.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+                    }
+                  }}
+                  disabled={isAddingService || isUpdatingService || isUploading}
+                >
+                  {isUpdatingService || isUploading ? "Salvando..." : "Salvar e fechar"}
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           {/* Supplier confirmation — shown after Save when no supplier was set */}
           <AlertDialog
             open={confirmSupplierOpen}
