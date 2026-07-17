@@ -798,10 +798,21 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   const [predictions, setPredictions] = useState<Array<{ place_id: string; name: string; secondary: string; is_hotel: boolean }>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(
+    (init as any)?.place_id ?? null,
+  );
   const [searchStatus, setSearchStatus] = useState<"idle" | "empty" | "error">("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Propagate the persisted Google place_id to the parent (ServiceImageUpload)
+  // on mount / when editing a duplicated service, so the Google photo gallery
+  // is available immediately without having to re-select the hotel.
+  useEffect(() => {
+    const persisted = (init as any)?.place_id ?? null;
+    if (persisted) onPlaceIdChange?.(persisted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -884,6 +895,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         price: total,
         rooms,
         notes: values.notes || "",
+        place_id: selectedPlaceId ?? (init as any)?.place_id ?? null,
       };
       onSubmit(data, total, values.option_label || undefined, values.service_description || undefined);
     } catch (err) {
