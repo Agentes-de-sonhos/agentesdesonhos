@@ -1519,20 +1519,20 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           if (mode === "installments") {
             const installmentValue = total / (installments || 1);
             primaryDisplay = (
-              <div className="flex flex-col items-center gap-0.5">
+              <div className="flex flex-col items-center gap-1">
                 <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   A partir de
                 </span>
-                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
+                <span className="text-[1.75rem] sm:text-[2.5rem] font-bold tracking-tight text-primary leading-tight">
                   {installments}x de {formatCurrency(installmentValue)}
                 </span>
-                <span className="text-xs text-muted-foreground mt-1.5">
+                <span className="text-xs text-muted-foreground mt-1">
                   sem juros{methodLabel ? ` • ${methodLabel}` : ""}
                 </span>
               </div>
             );
             secondaryDisplay = (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-4">
                 <span>Valor à vista:</span>
                 <span className="font-medium text-foreground/80">{formatCurrency(headlineTotal)}</span>
                 {discountPct > 0 && (
@@ -1546,15 +1546,15 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             const remainder = Math.max(0, investimentoTotal - entryValue);
             const installmentValue = remainder / (installments || 1);
             primaryDisplay = (
-              <div className="flex flex-col items-center gap-0.5">
+              <div className="flex flex-col items-center gap-1">
                 <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   Condição especial
                 </span>
-                <span className="text-[1.5rem] sm:text-[2rem] font-bold tracking-tight text-foreground leading-tight text-center">
+                <span className="text-[1.5rem] sm:text-[2.25rem] font-bold tracking-tight text-primary leading-tight text-center">
                   Entrada de {formatCurrency(entryValue)} + {installments}x de {formatCurrency(installmentValue)}
                 </span>
                 {methodLabel && (
-                  <span className="text-xs text-muted-foreground mt-1.5">{methodLabel}</span>
+                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
                 )}
               </div>
             );
@@ -1598,21 +1598,21 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             );
           } else {
             primaryDisplay = (
-              <div className="flex flex-col items-center gap-0.5">
+              <div className="flex flex-col items-center gap-1">
                 <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
                   {isTotalOnly ? "Valor total da viagem" : "Investimento"}
                 </span>
-                <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
+                <span className="text-[1.75rem] sm:text-[2.5rem] font-bold tracking-tight text-primary leading-tight">
                   {formatCurrency(total)}
                 </span>
                 {!isTotalOnly && methodLabel && (
-                  <span className="text-xs text-muted-foreground mt-1.5">{methodLabel}</span>
+                  <span className="text-xs text-muted-foreground mt-1">{methodLabel}</span>
                 )}
               </div>
             );
             secondaryDisplay = isTotalOnly
               ? null
-              : <p className="text-sm text-muted-foreground">Parcelamento disponível</p>;
+              : <p className="text-sm text-muted-foreground mt-4">Parcelamento disponível</p>;
           }
 
           return (
@@ -1633,20 +1633,20 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 >
                   Investimento Total da Viagem
                 </p>
-                <div className="mt-4 w-full flex justify-center px-[30px]">
-                  <div className="inline-block rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                      Passageiros
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-primary">
-                      {buildPassengerLabel(quote)}
-                    </p>
+                <div className="mt-4 flex flex-col items-center gap-1">
+                  <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                    Número de passageiros
+                  </p>
+                  <p className="text-base sm:text-lg font-semibold text-primary">
+                    {buildPassengerLabel(quote)}
+                  </p>
+                </div>
+                <div className="mt-5 w-full flex justify-center">
+                  <div className="inline-block rounded-2xl bg-white border border-primary/20 shadow-sm px-8 sm:px-14 py-5 sm:py-6 text-center">
+                    {primaryDisplay}
                   </div>
                 </div>
-                <div className="mt-4 flex flex-col items-center gap-2 w-full">
-                  {primaryDisplay}
-                  {secondaryDisplay}
-                </div>
+                {secondaryDisplay}
               </div>
             </section>
           );
