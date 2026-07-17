@@ -665,12 +665,12 @@ export function AdminUserProjectsManager() {
               </TableHeader>
               <TableBody>
                 {isLoading && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Carregando…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Carregando…</TableCell></TableRow>
                 )}
                 {!isLoading && itineraries.length === 0 && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum roteiro encontrado</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">Nenhum roteiro encontrado</TableCell></TableRow>
                 )}
-                {itineraries.map((i) => {
+                {itineraries.slice((page.itineraries - 1) * PAGE_SIZE, page.itineraries * PAGE_SIZE).map((i) => {
                   const link = i.public_access_code && i.owner_agency
                     ? buildRoteiroLink(i.owner_agency, i.public_access_code)
                     : null;
@@ -687,6 +687,8 @@ export function AdminUserProjectsManager() {
                         <div className="text-xs text-muted-foreground">{i.owner_agency || "—"}</div>
                       </TableCell>
                       <TableCell><Badge variant="secondary">{i.status}</Badge></TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">{fmtDateTime(i.created_at)}</TableCell>
+                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">{fmtDateTime(i.updated_at)}</TableCell>
                       <TableCell>
                         {link ? (
                           <div className="flex items-center gap-1">
@@ -704,6 +706,7 @@ export function AdminUserProjectsManager() {
                 })}
               </TableBody>
             </Table>
+            <Pager page={page.itineraries} total={itineraries.length} onPage={(p) => setPage((s) => ({ ...s, itineraries: p }))} />
           </Card>
         </TabsContent>
       </Tabs>
