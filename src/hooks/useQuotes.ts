@@ -137,16 +137,20 @@ export function useQuotes() {
       const { data: services } = await supabase
         .from("quote_services").select("*").eq("quote_id", sourceId).order("order_index");
       if (services && services.length > 0) {
+        const deepClone = <T,>(v: T): T => {
+          try { return typeof structuredClone === "function" ? structuredClone(v) : JSON.parse(JSON.stringify(v ?? null)); }
+          catch { return JSON.parse(JSON.stringify(v ?? null)); }
+        };
         const newServices = services.map((s: any) => ({
           quote_id: newQuote.id,
           service_type: s.service_type,
-          service_data: s.service_data,
+          service_data: deepClone(s.service_data),
           amount: s.amount,
           order_index: s.order_index,
           option_label: s.option_label,
           description: s.description,
           image_url: s.image_url,
-          image_urls: s.image_urls || [],
+          image_urls: Array.isArray(s.image_urls) ? [...s.image_urls] : [],
           is_custom_payment: s.is_custom_payment ?? false,
           payment_type: s.payment_type ?? null,
           installments: s.installments ?? null,
