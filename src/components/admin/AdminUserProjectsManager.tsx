@@ -142,6 +142,42 @@ function fmtDate(d: string) {
   return new Date(y, m - 1, day).toLocaleDateString("pt-BR");
 }
 
+function fmtDateTime(iso: string) {
+  if (!iso) return "—";
+  try { return format(new Date(iso), "dd/MM/yy HH:mm"); } catch { return "—"; }
+}
+
+function pctDelta(now: number, prev: number): { pct: number | null; dir: "up"|"down"|"flat" } {
+  if (prev === 0) {
+    if (now === 0) return { pct: 0, dir: "flat" };
+    return { pct: null, dir: "up" };
+  }
+  const pct = ((now - prev) / prev) * 100;
+  return { pct, dir: pct > 0.5 ? "up" : pct < -0.5 ? "down" : "flat" };
+}
+
+function KpiCard({ title, value, prev, accent }: { title: string; value: number; prev: number; accent: string }) {
+  const d = pctDelta(value, prev);
+  const Icon = d.dir === "up" ? TrendingUp : d.dir === "down" ? TrendingDown : Minus;
+  const color = d.dir === "up" ? "text-emerald-600" : d.dir === "down" ? "text-red-600" : "text-muted-foreground";
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between">
+        <div className="text-xs text-muted-foreground uppercase tracking-wide">{title}</div>
+        <div className="h-2 w-2 rounded-full" style={{ background: accent }} />
+      </div>
+      <div className="mt-2 text-3xl font-display font-bold">{value.toLocaleString("pt-BR")}</div>
+      <div className={`mt-1 flex items-center gap-1 text-xs ${color}`}>
+        <Icon className="h-3.5 w-3.5" />
+        <span>
+          {d.pct === null ? "novo" : `${d.pct > 0 ? "+" : ""}${d.pct.toFixed(1)}%`}
+          <span className="text-muted-foreground"> vs período anterior ({prev})</span>
+        </span>
+      </div>
+    </Card>
+  );
+}
+
 function matches(q: string, ...fields: (string | null | undefined)[]) {
   if (!q) return true;
   const lower = q.toLowerCase();
