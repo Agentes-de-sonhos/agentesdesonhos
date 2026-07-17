@@ -178,6 +178,36 @@ function KpiCard({ title, value, prev, accent }: { title: string; value: number;
   );
 }
 
+function SortHead({ label, active, dir, onClick }: { label: string; active: boolean; dir: "asc"|"desc"; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className={`inline-flex items-center gap-1 hover:text-foreground ${active ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+      {label}
+      <ArrowUpDown className={`h-3 w-3 ${active ? "opacity-100" : "opacity-40"}`} />
+      {active && <span className="text-[10px]">{dir === "asc" ? "↑" : "↓"}</span>}
+    </button>
+  );
+}
+
+function Pager({ page, total, onPage }: { page: number; total: number; onPage: (p: number) => void }) {
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const p = Math.min(page, totalPages);
+  if (total <= PAGE_SIZE) return null;
+  return (
+    <div className="flex items-center justify-between px-4 py-3 border-t text-xs text-muted-foreground">
+      <div>Mostrando {(p - 1) * PAGE_SIZE + 1}–{Math.min(p * PAGE_SIZE, total)} de {total}</div>
+      <div className="flex items-center gap-1">
+        <Button size="icon" variant="ghost" className="h-7 w-7" disabled={p === 1} onClick={() => onPage(p - 1)}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span>Página {p} de {totalPages}</span>
+        <Button size="icon" variant="ghost" className="h-7 w-7" disabled={p === totalPages} onClick={() => onPage(p + 1)}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function matches(q: string, ...fields: (string | null | undefined)[]) {
   if (!q) return true;
   const lower = q.toLowerCase();
