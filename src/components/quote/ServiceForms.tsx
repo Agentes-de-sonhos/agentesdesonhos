@@ -2877,7 +2877,10 @@ function CarRentalModeChooser({ onChoose }: { onChoose: (mode: "manual" | "impor
 /* Flight entry: mode chooser → FlightWizard or classic FlightForm.
    Editing existing services skips chooser and opens classic form (no regression). */
 function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
-  const isEditing = !!props.initialData;
+  // Prefer the explicit prop from the parent; fall back to inferring from initialData
+  // for backwards-compat. `isEditing` must NEVER change after mount for a given
+  // service — we want to guarantee edits never show the mode chooser.
+  const isEditing = props.isEditing ?? !!props.initialData;
   const [mode, setMode] = useState<"chooser" | "wizard" | "manual" | "import">(isEditing ? "manual" : "chooser");
   const [wizardPrefill, setWizardPrefill] = useState<WizardFlightDraft | undefined>(undefined);
   const [injectedInitial, setInjectedInitial] = useState<ServiceFormProps["initialData"] | undefined>(undefined);
