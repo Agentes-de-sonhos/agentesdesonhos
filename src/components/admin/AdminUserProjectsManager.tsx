@@ -576,6 +576,158 @@ export function AdminUserProjectsManager() {
         </Card>
       </div>
 
+      {/* Ranking de Agências por Atividade */}
+      <Card className="p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h3 className="font-display font-semibold">Ranking de Agências por Atividade</h3>
+            <p className="text-xs text-muted-foreground">
+              Período: <span className="font-medium text-foreground">{currentPeriodLabel}</span>
+              {" · "}Ordenado por{" "}
+              <span className="font-medium text-foreground">
+                {({ quotes: "Orçamentos", trips: "Carteiras", itineraries: "Roteiros", projects: "Total de Projetos", opportunities: "Oportunidades", operations: "Operações", sales: "Vendas", clients: "Clientes", total: "Total Geral" } as Record<RankSortCol,string>)[rankSort.col]}
+              </span>
+              {" "}({rankSort.dir === "asc" ? "crescente" : "decrescente"})
+            </p>
+          </div>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Filtrar agência…"
+              value={rankSearch}
+              onChange={(e) => { setRankSearch(e.target.value); setRankPage(1); }}
+              className="pl-9 h-9"
+            />
+          </div>
+        </div>
+
+        {/* Resumo consolidado */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-2 text-center">
+          {[
+            { l: "Agências ativas", v: rankTotals.agencies, c: "text-primary" },
+            { l: "Orçamentos", v: rankTotals.quotes },
+            { l: "Carteiras", v: rankTotals.trips },
+            { l: "Roteiros", v: rankTotals.itineraries },
+            { l: "Total Projetos", v: rankTotalProjects, c: "text-emerald-600" },
+            { l: "Oportunidades", v: rankTotals.opportunities },
+            { l: "Operações", v: rankTotals.operations },
+            { l: "Vendas", v: rankTotals.sales },
+            { l: "Total Geral", v: rankTotalActivity, c: "text-fuchsia-600 font-semibold" },
+          ].map((k) => (
+            <div key={k.l} className="rounded-md border bg-muted/30 py-2 px-1">
+              <div className={`text-lg font-display font-bold ${k.c || ""}`}>{k.v.toLocaleString("pt-BR")}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabela */}
+        <div className="rounded-md border overflow-x-auto max-h-[600px] overflow-y-auto">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-background z-10 border-b">
+              <tr className="text-xs text-muted-foreground">
+                <th className="text-left px-3 py-2 w-14">#</th>
+                <th className="text-left px-3 py-2 min-w-[200px]">Agência</th>
+                {([
+                  ["quotes","Orçamentos"],
+                  ["trips","Carteiras"],
+                  ["itineraries","Roteiros"],
+                  ["projects","Total Projetos"],
+                  ["opportunities","Oportunidades"],
+                  ["operations","Operações"],
+                  ["sales","Vendas"],
+                  ["clients","Clientes"],
+                  ["total","Total Geral"],
+                ] as [RankSortCol, string][]).map(([col, label]) => {
+                  const active = rankSort.col === col;
+                  return (
+                    <th key={col} className={`text-right px-3 py-2 whitespace-nowrap ${active ? "bg-muted text-foreground" : ""}`}>
+                      <button onClick={() => toggleRankSort(col)} className="inline-flex items-center gap-1 hover:text-foreground">
+                        {label}
+                        <ArrowUpDown className={`h-3 w-3 ${active ? "opacity-100" : "opacity-40"}`} />
+                        {active && <span className="text-[10px]">{rankSort.dir === "asc" ? "↑" : "↓"}</span>}
+                      </button>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {rankQuery.isLoading && (
+                <tr><td colSpan={11} className="text-center text-muted-foreground py-8">Carregando ranking…</td></tr>
+              )}
+              {rankQuery.error && !rankQuery.isLoading && (
+                <tr><td colSpan={11} className="text-center text-destructive py-8">Erro ao carregar ranking: {(rankQuery.error as Error).message}</td></tr>
+              )}
+              {!rankQuery.isLoading && !rankQuery.error && rankRows.length === 0 && (
+                <tr><td colSpan={11} className="text-center text-muted-foreground py-8">Nenhuma atividade encontrada no período selecionado.</td></tr>
+              )}
+              {!rankQuery.isLoading && rankPageRows.map((r, idx) => {
+                const absolutePos = (rankPageSafe - 1) * rankPageSizeInt + idx + 1;
+                const medal = absolutePos === 1 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/40 dark:text-yellow-300"
+                  : absolutePos === 2 ? "bg-slate-100 text-slate-800 dark:bg-slate-800/50 dark:text-slate-200"
+                  : absolutePos === 3 ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                  : "";
+                const projects = r.quotes + r.trips + r.itineraries;
+                const total = projects + r.opportunities + r.operations + r.sales + r.clients;
+                const cellCls = (col: RankSortCol) => `text-right px-3 py-2 tabular-nums ${rankSort.col === col ? "bg-muted/40 font-medium" : ""}`;
+                return (
+                  <tr key={r.agency_id} className="border-b hover:bg-muted/30">
+                    <td className="px-3 py-2">
+                      <span className={`inline-flex items-center justify-center h-6 w-6 rounded-full text-xs font-semibold ${medal || "text-muted-foreground"}`}>
+                        {absolutePos}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="font-medium">{r.agency_name || r.owner_name || "—"}</div>
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[280px]">
+                        {[r.owner_name, r.owner_email].filter(Boolean).join(" · ") || "—"}
+                      </div>
+                    </td>
+                    <td className={cellCls("quotes")}>{r.quotes}</td>
+                    <td className={cellCls("trips")}>{r.trips}</td>
+                    <td className={cellCls("itineraries")}>{r.itineraries}</td>
+                    <td className={cellCls("projects") + " text-emerald-700 dark:text-emerald-400"}>{projects}</td>
+                    <td className={cellCls("opportunities")}>{r.opportunities}</td>
+                    <td className={cellCls("operations")}>{r.operations}</td>
+                    <td className={cellCls("sales")}>{r.sales}</td>
+                    <td className={cellCls("clients")}>{r.clients}</td>
+                    <td className={cellCls("total") + " text-fuchsia-700 dark:text-fuchsia-400 font-semibold"}>{total}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Paginação */}
+        {rankRows.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span>Registros por página:</span>
+              <Select value={String(rankPageSize)} onValueChange={(v) => { setRankPageSize(Number(v)); setRankPage(1); }}>
+                <SelectTrigger className="h-7 w-20"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {RANK_PAGE_SIZES.map((s) => <SelectItem key={s} value={String(s)}>{s}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <span>
+                {rankRows.length > 0 ? (rankPageSafe - 1) * rankPageSizeInt + 1 : 0}–{Math.min(rankPageSafe * rankPageSizeInt, rankRows.length)} de {rankRows.length}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="ghost" className="h-7 w-7" disabled={rankPageSafe === 1} onClick={() => setRankPage(rankPageSafe - 1)}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span>Página {rankPageSafe} de {rankTotalPages}</span>
+              <Button size="icon" variant="ghost" className="h-7 w-7" disabled={rankPageSafe === rankTotalPages} onClick={() => setRankPage(rankPageSafe + 1)}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
       <Tabs defaultValue="quotes">
         <TabsList>
           <TabsTrigger value="quotes">
