@@ -154,11 +154,18 @@ export function AdminUserProjectsManager() {
   const [showPwd, setShowPwd] = useState(false);
   const [search, setSearch] = useState("");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  const [period, setPeriod] = useState<PeriodKey>("30d");
+  const [customStart, setCustomStart] = useState<string>(format(subDays(new Date(), 7), "yyyy-MM-dd"));
+  const [customEnd, setCustomEnd] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [seriesEnabled, setSeriesEnabled] = useState({ quotes: true, trips: true, itineraries: true });
+  const [sort, setSort] = useState<{ tab: "trips"|"quotes"|"itineraries"; col: string; dir: "asc"|"desc" }>({ tab: "quotes", col: "created_at", dir: "desc" });
+  const [page, setPage] = useState<Record<string, number>>({ trips: 1, quotes: 1, itineraries: 1 });
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["admin-user-projects"],
     enabled: unlocked,
-    staleTime: 60_000,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_list_user_projects");
       if (error) throw error;
@@ -166,24 +173,81 @@ export function AdminUserProjectsManager() {
     },
   });
 
-  const trips = useMemo(
-    () => (data?.trips || []).filter((t) =>
-      matches(search, t.client_name, t.trip_title, t.destination, t.owner_name, t.owner_agency, t.public_access_code)
-    ),
-    [data, search]
-  );
-  const quotes = useMemo(
-    () => (data?.quotes || []).filter((q) =>
-      matches(search, q.client_name, q.destination, q.owner_name, q.owner_agency, q.public_access_code)
-    ),
-    [data, search]
-  );
-  const itineraries = useMemo(
-    () => (data?.itineraries || []).filter((i) =>
-      matches(search, i.destination, i.owner_name, i.owner_agency, i.public_access_code, i.trip_type)
-    ),
-    [data, search]
-  );
+  const range = useMemo(() => getRange(period, customStart, customEnd), [period, customStart, customEnd]);
+  const prevRange = useMemo(() => previousRange(range), [range]);
+  const gran = useMemo(() => pickGranularity(period, range), [period, range]);
+
+  const rawTrips = data?.trips || [];
+  const rawQuotes = data?.quotes || [];
+  const rawItins = data?.itineraries || [];
+
+  // Period-filtered
+  const pTrips = useMemo(() => rawTrips.filter((t) => inRange(t.created_at, range)), [rawTrips, range]);
+  const pQuotes = useMemo(() => rawQuotes.filter((q) => inRange(q.created_at, range)), [rawQuotes, range]);
+  const pItins = useMemo(() => rawItins.filter((i) => inRange(i.created_at, range)), [rawItins, range]);
+
+  const prevCount = {
+    quotes: rawQuotes.filter((q) => inRange(q.created_at, prevRange)).length,
+    trips: rawTrips.filter((t) => inRange(t.created_at, prevRange)).length,
+    itineraries: rawItins.filter((i) => inRange(i.created_at, prevRange)).length,
+  };
+
+  // Search + sort helpers
+  const sortRows = <T extends Record<string, any>>(rows: T[], tab: string): T[] => {
+    if (sort.tab !== tab) return [...rows].sort((a, b) => (b.created_at > a.created_at ? 1 : -1));
+    const { col, dir } = sort;
+    return [...rows].sort((a, b) => {
+      const av = a[col] ?? ""; const bv = b[col] ?? "";
+      if (av === bv) return 0;
+      const cmp = av > bv ? 1 : -1;
+      return dir === "asc" ? cmp : -cmp;
+    });
+  };
+
+  const trips = useMemo(() => sortRows(
+    pTrips.filter((t) => matches(search, t.client_name, t.trip_title, t.destination, t.owner_name, t.owner_agency, t.public_access_code)),
+    "trips"
+  ), [pTrips, search, sort]);
+  const quotes = useMemo(() => sortRows(
+    pQuotes.filter((q) => matches(search, q.client_name, q.destination, q.owner_name, q.owner_agency, q.public_access_code)),
+    "quotes"
+  ), [pQuotes, search, sort]);
+  const itineraries = useMemo(() => sortRows(
+    pItins.filter((i) => matches(search, i.destination, i.owner_name, i.owner_agency, i.public_access_code, i.trip_type)),
+    "itineraries"
+  ), [pItins, search, sort]);
+
+  // Chart series
+  const chartData = useMemo(() => {
+    const buckets = buildBuckets(range, gran);
+    const map = new Map<string, { key: string; label: string; quotes: number; trips: number; itineraries: number }>();
+    buckets.forEach((d) => {
+      const k = bucketKey(d, gran);
+      map.set(k, { key: k, label: bucketLabel(d, gran), quotes: 0, trips: 0, itineraries: 0 });
+    });
+    const bump = (iso: string, field: "quotes"|"trips"|"itineraries") => {
+      const d = new Date(iso);
+      const k = bucketKey(d, gran);
+      const entry = map.get(k);
+      if (entry) entry[field] += 1;
+    };
+    pQuotes.forEach((q) => bump(q.created_at, "quotes"));
+    pTrips.forEach((t) => bump(t.created_at, "trips"));
+    pItins.forEach((i) => bump(i.created_at, "itineraries"));
+    return Array.from(map.values());
+  }, [pQuotes, pTrips, pItins, range, gran]);
+
+  const pieData = useMemo(() => ([
+    { name: "Orçamentos", value: pQuotes.length, color: "hsl(217 91% 60%)" },
+    { name: "Carteiras Digitais", value: pTrips.length, color: "hsl(280 65% 60%)" },
+    { name: "Roteiros", value: pItins.length, color: "hsl(160 60% 45%)" },
+  ]), [pQuotes.length, pTrips.length, pItins.length]);
+
+  const toggleSort = (tab: "trips"|"quotes"|"itineraries", col: string) => {
+    setSort((s) => s.tab === tab && s.col === col
+      ? { tab, col, dir: s.dir === "asc" ? "desc" : "asc" }
+      : { tab, col, dir: "desc" });
+  };
 
   if (!unlocked) {
     return (
