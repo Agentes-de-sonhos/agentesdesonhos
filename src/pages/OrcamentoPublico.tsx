@@ -1532,7 +1532,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
             );
             secondaryDisplay = (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                 <span>Valor à vista:</span>
                 <span className="font-medium text-foreground/80">{formatCurrency(headlineTotal)}</span>
                 {discountPct > 0 && (
@@ -1559,8 +1559,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
             );
             secondaryDisplay = (
-              <div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col items-center justify-center gap-1 text-sm text-muted-foreground">
+                <div className="flex items-center justify-center gap-2">
                   <span>Valor total:</span>
                   <span className="font-medium text-foreground/80">{formatCurrency(investimentoTotal)}</span>
                 </div>
