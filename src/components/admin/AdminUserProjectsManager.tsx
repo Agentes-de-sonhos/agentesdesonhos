@@ -326,6 +326,79 @@ export function AdminUserProjectsManager() {
     { name: "Roteiros", value: pItins.length, color: "hsl(160 60% 45%)" },
   ]), [pQuotes.length, pTrips.length, pItins.length]);
 
+  // ============= Ranking de Agências por Atividade =============
+  const rangeStartISO = range.start.toISOString();
+  const rangeEndISO = range.end.toISOString();
+  const rankQuery = useQuery({
+    queryKey: ["admin-agency-ranking", rangeStartISO, rangeEndISO],
+    enabled: unlocked,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_agency_activity_ranking" as any, {
+        _start: rangeStartISO,
+        _end: rangeEndISO,
+      });
+      if (error) throw error;
+      return ((data as any)?.agencies || []) as AgencyRankRow[];
+    },
+  });
+  const [rankSort, setRankSort] = useState<{ col: RankSortCol; dir: "asc"|"desc" }>({ col: "projects", dir: "desc" });
+  const [rankPage, setRankPage] = useState(1);
+  const [rankPageSize, setRankPageSize] = useState(25);
+  const [rankSearch, setRankSearch] = useState("");
+
+  const rankRows = useMemo(() => {
+    const rows = (rankQuery.data || []).map((r) => ({
+      ...r,
+      projects: r.quotes + r.trips + r.itineraries,
+      total: r.quotes + r.trips + r.itineraries + r.opportunities + r.operations + r.sales + r.clients,
+    }));
+    const filtered = rankSearch
+      ? rows.filter((r) => matches(rankSearch, r.agency_name, r.owner_name, r.owner_email))
+      : rows;
+    const primary = rankSort.col;
+    const dirMul = rankSort.dir === "asc" ? 1 : -1;
+    filtered.sort((a: any, b: any) => {
+      const av = a[primary] as number;
+      const bv = b[primary] as number;
+      if (av !== bv) return (av - bv) * dirMul;
+      // Tiebreakers
+      if (primary !== "projects" && a.projects !== b.projects) return (b.projects - a.projects);
+      if (a.total !== b.total) return (b.total - a.total);
+      if (primary === "projects" && a.sales !== b.sales) return (b.sales - a.sales);
+      return (a.agency_name || "").localeCompare(b.agency_name || "", "pt-BR");
+    });
+    return filtered;
+  }, [rankQuery.data, rankSort, rankSearch]);
+
+  const rankTotals = useMemo(() => {
+    const rows = rankQuery.data || [];
+    return {
+      agencies: rows.length,
+      quotes: rows.reduce((s, r) => s + r.quotes, 0),
+      trips: rows.reduce((s, r) => s + r.trips, 0),
+      itineraries: rows.reduce((s, r) => s + r.itineraries, 0),
+      opportunities: rows.reduce((s, r) => s + r.opportunities, 0),
+      operations: rows.reduce((s, r) => s + r.operations, 0),
+      sales: rows.reduce((s, r) => s + r.sales, 0),
+      clients: rows.reduce((s, r) => s + r.clients, 0),
+    };
+  }, [rankQuery.data]);
+  const rankTotalProjects = rankTotals.quotes + rankTotals.trips + rankTotals.itineraries;
+  const rankTotalActivity = rankTotalProjects + rankTotals.opportunities + rankTotals.operations + rankTotals.sales + rankTotals.clients;
+
+  const toggleRankSort = (col: RankSortCol) => {
+    setRankSort((s) => s.col === col ? { col, dir: s.dir === "asc" ? "desc" : "asc" } : { col, dir: "desc" });
+    setRankPage(1);
+  };
+  const currentPeriodLabel = PERIOD_OPTIONS.find((p) => p.key === period)?.label
+    + (period === "custom" ? ` (${customStart} → ${customEnd})` : "");
+  const rankPageSizeInt = rankPageSize;
+  const rankTotalPages = Math.max(1, Math.ceil(rankRows.length / rankPageSizeInt));
+  const rankPageSafe = Math.min(rankPage, rankTotalPages);
+  const rankPageRows = rankRows.slice((rankPageSafe - 1) * rankPageSizeInt, rankPageSafe * rankPageSizeInt);
+
   const toggleSort = (tab: "trips"|"quotes"|"itineraries", col: string) => {
     setSort((s) => s.tab === tab && s.col === col
       ? { tab, col, dir: s.dir === "asc" ? "desc" : "asc" }
