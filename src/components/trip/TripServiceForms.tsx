@@ -48,6 +48,36 @@ import { Badge } from "@/components/ui/badge";
 import { useCallback, useRef } from "react";
 import { resolveAirlineDisplay } from "@/lib/airlines";
 import { getAirportsMap } from "@/lib/airports";
+
+/**
+ * StepSection: stable, module-level component to avoid remounting
+ * CollapsibleFormSection (and losing focus/expanded state) on every
+ * parent re-render — which was causing the block to "close on every
+ * keystroke" during flight editing.
+ */
+type FlightStepSectionProps = {
+  index: number;
+  title: string;
+  defaultOpen?: boolean;
+  wizardMode?: boolean;
+  currentStep: number;
+  children: React.ReactNode;
+};
+function FlightStepSection({ index, title, defaultOpen, wizardMode, currentStep, children }: FlightStepSectionProps) {
+  if (!wizardMode) {
+    return (
+      <CollapsibleFormSection title={title} defaultOpen={defaultOpen}>
+        {children}
+      </CollapsibleFormSection>
+    );
+  }
+  if (currentStep !== index) return null;
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-5 sm:px-6 sm:py-6 space-y-4 shadow-sm">
+      <div className="space-y-4">{children}</div>
+    </div>
+  );
+}
 import { PlacesAutocompleteInput, parsePlaceSecondary } from "@/components/shared/PlacesAutocompleteInput";
 
 interface TripServiceFormProps {
