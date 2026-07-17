@@ -1121,7 +1121,14 @@ function TripWalletContent() {
           </Dialog>
 
           {/* Edit Service Dialog */}
-          <Dialog open={!!editingService && !!selectedServiceType} onOpenChange={(open) => { if (!open) handleCancelServiceForm(); }}>
+          <Dialog
+            open={!!editingService && !!selectedServiceType}
+            onOpenChange={(open) => {
+              if (open) return;
+              if (editDirty) { setConfirmCloseEditOpen(true); return; }
+              handleCancelServiceForm();
+            }}
+          >
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card">
               <DialogHeader className="sr-only">
                 <DialogTitle>
@@ -1136,7 +1143,12 @@ function TripWalletContent() {
                 />
               )}
               {editingService && selectedServiceType && (
-                <div className="space-y-4">
+                <div
+                  ref={editFormContainerRef}
+                  className="space-y-4"
+                  onInputCapture={() => { if (!editDirty) setEditDirty(true); }}
+                  onChangeCapture={() => { if (!editDirty) setEditDirty(true); }}
+                >
                   <PassengerPoolProvider services={trip.services || []}>
                     <TripServiceForm
                       serviceType={selectedServiceType}
