@@ -9,6 +9,7 @@ import { extractServicePaymentConfig, extractFlightFeeInfo, calculateServicePaym
 import { cn } from "@/lib/utils";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { parsePaymentMethods } from "@/lib/paymentMethods";
+import { buildPassengerLabel } from "@/lib/quotePassengers";
 
 /** Formatação na moeda do orçamento. */
 function makeFmt(currency: QuoteCurrency) {
@@ -247,24 +248,8 @@ export function PublicInvestmentSummary({
     ? "Veja abaixo o investimento detalhado por tipo de serviço e as condições de pagamento da sua viagem."
     : "Veja abaixo o investimento detalhado por serviço e as condições de pagamento da sua viagem.";
 
-  // Formatação da string de passageiros para contextualizar os valores
-  const adults = Number(quote.adults_count) || 0;
-  const children = Number(quote.children_count) || 0;
-  const infants = Number((quote as any).infants_count) || 0;
-
-  const hasAgeBreakdown = children > 0 || infants > 0;
-  const totalPassengers = adults + children + infants;
-
-  const passengerLabel = useMemo(() => {
-    if (!hasAgeBreakdown) {
-      return `${totalPassengers} passageiro${totalPassengers === 1 ? "" : "s"}`;
-    }
-    const parts: string[] = [];
-    if (adults > 0) parts.push(`${adults} adulto${adults === 1 ? "" : "s"}`);
-    if (children > 0) parts.push(`${children} criança${children === 1 ? "" : "s"}`);
-    if (infants > 0) parts.push(`${infants} bebê${infants === 1 ? "" : "s"}`);
-    return parts.join(" • ");
-  }, [adults, children, infants, hasAgeBreakdown, totalPassengers]);
+  // Composição de passageiros do orçamento (singular/plural correto).
+  const passengerLabel = useMemo(() => buildPassengerLabel(quote), [quote]);
 
   return (
     <section
@@ -376,25 +361,15 @@ export function PublicInvestmentSummary({
             )}
           </div>
 
-          <div className="mt-5 grid gap-3 grid-cols-1 sm:grid-cols-2">
+          <div className="mt-5">
             <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Total de serviços
+                Passageiros
               </p>
               <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
-                {services.length} serviço{services.length === 1 ? "" : "s"}
+                {passengerLabel}
               </p>
             </div>
-            {groupingMode === "grouped" && (
-              <div className="rounded-xl bg-white border border-primary/20 px-4 py-3 text-center">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Tipos de serviço
-                </p>
-                <p className={cn("mt-1 text-sm font-semibold", VALUE_PRIMARY)}>
-                  {items.length} tipo{items.length === 1 ? "" : "s"}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       )}
