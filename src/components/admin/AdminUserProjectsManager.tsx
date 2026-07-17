@@ -26,7 +26,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, startOfYear, endOfYear, subMonths, differenceInDays, addDays, addHours, addMonths, isSameHour, isSameDay, isSameMonth } from "date-fns";
+import { format, startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, startOfYear, subMonths, differenceInDays, addDays, addHours, addMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const ACCESS_PASSWORD = "@Univers44l!";
