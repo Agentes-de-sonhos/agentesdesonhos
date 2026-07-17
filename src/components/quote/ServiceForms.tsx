@@ -77,6 +77,11 @@ interface ServiceFormProps {
   childrenCount?: number;
   /** When editing, pass the existing service data to pre-fill the form */
   initialData?: { service_data: any; amount: number; option_label?: string | null; description?: string | null; image_url?: string | null; image_urls?: string[] };
+  /** Explicit flag: parent tells us if this is an edit of an already-saved service.
+   *  Preferred over `!!initialData` because `initialData` may be transiently injected
+   *  by wizards/AI import on a NEW item — we must never re-show the chooser during
+   *  editing regardless of transient initialData mutations. */
+  isEditing?: boolean;
   /** Optional slot rendered between total/notes and action buttons — receives live computed amount */
   paymentSlot?: ((liveAmount: number) => React.ReactNode) | React.ReactNode;
   /** Optional slot for photo upload */
