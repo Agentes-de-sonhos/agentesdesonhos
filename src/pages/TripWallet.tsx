@@ -417,6 +417,11 @@ function TripWalletContent() {
 
   const [selectedServiceType, setSelectedServiceType] = useState<TripServiceType | null>(null);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  // Dirty tracking + close confirmation for the EDIT service dialog
+  const [editDirty, setEditDirty] = useState(false);
+  const [confirmCloseEditOpen, setConfirmCloseEditOpen] = useState(false);
+  const editFormContainerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { setEditDirty(false); setConfirmCloseEditOpen(false); }, [editingServiceId]);
   // Hotel autocomplete / gallery state for ADD flow
   const [addPlaceId, setAddPlaceId] = useState<string | null>(null);
   const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
