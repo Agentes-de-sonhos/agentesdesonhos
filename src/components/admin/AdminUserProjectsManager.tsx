@@ -366,13 +366,103 @@ export function AdminUserProjectsManager() {
         </Card>
       )}
 
-      <Tabs defaultValue="trips">
+      {/* Period filter */}
+      <Card className="p-4 flex flex-col lg:flex-row gap-3 lg:items-center">
+        <div className="text-sm font-medium text-muted-foreground">Período:</div>
+        <div className="flex flex-wrap gap-2">
+          {PERIOD_OPTIONS.map((p) => (
+            <Button
+              key={p.key}
+              size="sm"
+              variant={period === p.key ? "default" : "outline"}
+              onClick={() => setPeriod(p.key)}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
+        {period === "custom" && (
+          <div className="flex gap-2 items-center ml-auto">
+            <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} className="w-40" />
+            <span className="text-muted-foreground">até</span>
+            <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} className="w-40" />
+          </div>
+        )}
+      </Card>
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KpiCard title="Total de Projetos" value={pQuotes.length + pTrips.length + pItins.length}
+          prev={prevCount.quotes + prevCount.trips + prevCount.itineraries} accent="hsl(217 91% 60%)" />
+        <KpiCard title="Orçamentos" value={pQuotes.length} prev={prevCount.quotes} accent="hsl(217 91% 60%)" />
+        <KpiCard title="Carteiras Digitais" value={pTrips.length} prev={prevCount.trips} accent="hsl(280 65% 60%)" />
+        <KpiCard title="Roteiros" value={pItins.length} prev={prevCount.itineraries} accent="hsl(160 60% 45%)" />
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <Card className="p-4 lg:col-span-2">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="font-display font-semibold">Evolução da criação</h3>
+              <p className="text-xs text-muted-foreground">Granularidade: {gran === "hour" ? "por hora" : gran === "day" ? "por dia" : "por mês"}</p>
+            </div>
+            <div className="flex gap-2 text-xs">
+              {(["quotes","trips","itineraries"] as const).map((k) => {
+                const label = k === "quotes" ? "Orçamentos" : k === "trips" ? "Carteiras" : "Roteiros";
+                const color = k === "quotes" ? "hsl(217 91% 60%)" : k === "trips" ? "hsl(280 65% 60%)" : "hsl(160 60% 45%)";
+                const active = seriesEnabled[k];
+                return (
+                  <button
+                    key={k}
+                    onClick={() => setSeriesEnabled((s) => ({ ...s, [k]: !s[k] }))}
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded border transition ${active ? "bg-muted" : "opacity-40"}`}
+                  >
+                    <span className="h-2 w-2 rounded-full" style={{ background: color }} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                <XAxis dataKey="label" fontSize={11} />
+                <YAxis allowDecimals={false} fontSize={11} />
+                <RTooltip />
+                {seriesEnabled.quotes && <Line type="monotone" dataKey="quotes" name="Orçamentos" stroke="hsl(217 91% 60%)" strokeWidth={2} dot={false} />}
+                {seriesEnabled.trips && <Line type="monotone" dataKey="trips" name="Carteiras" stroke="hsl(280 65% 60%)" strokeWidth={2} dot={false} />}
+                {seriesEnabled.itineraries && <Line type="monotone" dataKey="itineraries" name="Roteiros" stroke="hsl(160 60% 45%)" strokeWidth={2} dot={false} />}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <h3 className="font-display font-semibold mb-3">Distribuição por tipo</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={2}>
+                  {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                </Pie>
+                <RTooltip />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="quotes">
         <TabsList>
-          <TabsTrigger value="trips">
-            Carteiras Digitais ({trips.length})
-          </TabsTrigger>
           <TabsTrigger value="quotes">
             Orçamentos ({quotes.length})
+          </TabsTrigger>
+          <TabsTrigger value="trips">
+            Carteiras Digitais ({trips.length})
           </TabsTrigger>
           <TabsTrigger value="itineraries">
             Roteiros ({itineraries.length})
