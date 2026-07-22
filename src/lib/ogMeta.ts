@@ -8,12 +8,14 @@ export function setOgMeta(opts: {
   description: string;
   image?: string;
   url?: string;
+  /** Defaults to true — client-shared public pages should not be indexed. */
+  noindex?: boolean;
 }) {
   const defaults = {
     image: "https://www.vitrine.tur.br/favicon.png",
     url: window.location.href,
   };
-  const { title, description, image = defaults.image, url = defaults.url } = opts;
+  const { title, description, image = defaults.image, url = defaults.url, noindex = true } = opts;
 
   const setMeta = (property: string, content: string) => {
     let el = document.querySelector(`meta[property="${property}"]`) ||
@@ -42,4 +44,10 @@ export function setOgMeta(opts: {
   setMeta("twitter:title", title);
   setMeta("twitter:description", description);
   setMeta("twitter:image", image);
+
+  // Client-shared public pages (quotes, itineraries, wallets, cards, showcases)
+  // must never be indexed by search engines.
+  if (noindex) {
+    setMeta("robots", "noindex, nofollow");
+  }
 }
