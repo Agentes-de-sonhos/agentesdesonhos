@@ -1,3 +1,4 @@
+import { useNoindex } from "@/hooks/useNoindex";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
@@ -59,6 +60,7 @@ const APP_LOGIN_URL = "https://app.agentesdesonhos.com.br/auth";
 type TokenState = "loading" | "valid" | "invalid" | "expired" | "missing" | "waiting_webhook";
 
 export default function AtivarCartao() {
+  useNoindex();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const sessionId = searchParams.get("session_id");

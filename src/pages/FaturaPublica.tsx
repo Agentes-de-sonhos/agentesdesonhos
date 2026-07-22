@@ -1,3 +1,4 @@
+import { useNoindex } from "@/hooks/useNoindex";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ const fmtDate = (d?: string | null) => {
 };
 
 export default function FaturaPublica() {
+  useNoindex();
   const { agencySlug, code } = useParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);

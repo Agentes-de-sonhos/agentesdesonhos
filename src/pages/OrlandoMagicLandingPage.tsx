@@ -1,3 +1,4 @@
+import { useNoindex } from "@/hooks/useNoindex";
 import { useEffect } from "react";
 import { AgentRecommendationBar } from "@/components/landing/orlando-magic/AgentRecommendationBar";
 import { HeroSection } from "@/components/landing/orlando-magic/HeroSection";
@@ -25,6 +26,7 @@ function upsertMeta(selector: string, attr: "name" | "property", key: string, co
 }
 
 export default function OrlandoMagicLandingPage() {
+  useNoindex();
   useEffect(() => {
     const prevTitle = document.title;
     document.title = SEO.title;

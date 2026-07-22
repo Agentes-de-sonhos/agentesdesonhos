@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
+import { SEO } from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -141,6 +142,11 @@ export default function Planos() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO
+        title="Planos e preços | Agentes de Sonhos"
+        description="Escolha o plano ideal para sua agência de viagens. CRM, orçamentos, roteiros, carteira digital, IA e mais em uma única plataforma."
+        canonical="/planos"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card/70 backdrop-blur-xl">
         <div className="max-w-[1200px] mx-auto px-6 flex h-16 items-center justify-between">

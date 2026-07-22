@@ -3,12 +3,18 @@ import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/layout/Footer";
 import { ArrowLeft } from "lucide-react";
+import { SEO } from "@/components/seo/SEO";
 
 export default function PoliticasPrivacidade() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <SEO
+        title="Política de Privacidade | Agentes de Sonhos"
+        description="Política de privacidade da plataforma Agentes de Sonhos: como coletamos, usamos e protegemos seus dados."
+        canonical="/politicasdeprivacidade"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">

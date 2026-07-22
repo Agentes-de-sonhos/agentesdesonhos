@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Footer } from "@/components/layout/Footer";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { formatPromoEndDateLong } from "@/lib/promoEndDate";
+import { SEO } from "@/components/seo/SEO";
 import {
   GraduationCap,
   Map,
@@ -432,6 +433,11 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden">
+      <SEO
+        title="Agentes de Sonhos | Plataforma para Agentes de Viagens"
+        description="Sistema completo para agentes de viagens e agências de turismo: CRM, orçamentos, roteiros, carteira digital, financeiro, academy, IA e muito mais em uma única plataforma."
+        canonical="/"
+      />
       {/* ── Faixa promocional ─────────────────────────────────── */}
       <PromoBar onCtaClick={goSignup} />
       {/* ── Header ─────────────────────────────────────────────── */}

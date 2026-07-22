@@ -1,3 +1,4 @@
+import { useNoindex } from "@/hooks/useNoindex";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +34,7 @@ function getOrCreateSessionHash(): string {
 }
 
 export default function SalesLandingPublic() {
+  useNoindex();
   const { slug: paramSlug } = useParams();
   // Support both /lp/:slug and root path on lp.vitrine.tur.br
   const slug =

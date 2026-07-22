@@ -3,12 +3,18 @@ import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/layout/Footer";
 import { ArrowLeft } from "lucide-react";
+import { SEO } from "@/components/seo/SEO";
 
 export default function TermosDeUso() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <SEO
+        title="Termos de Uso | Agentes de Sonhos"
+        description="Termos de uso da plataforma Agentes de Sonhos: condições, direitos e responsabilidades no uso do sistema."
+        canonical="/termosdeuso"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-card/80 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">

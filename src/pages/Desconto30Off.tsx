@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SEO } from "@/components/seo/SEO";
 import {
   CheckCircle2,
   ArrowRight,
@@ -56,6 +57,11 @@ export default function Desconto30Off() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO
+        title="Oferta exclusiva 30% OFF | Agentes de Sonhos"
+        description="Condição especial de lançamento para agentes de viagens: acesso à plataforma completa com 30% de desconto e 7 dias de garantia."
+        canonical="/desconto30off"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-card/70 backdrop-blur-xl">
         <div className="max-w-[1100px] mx-auto px-6 flex h-16 items-center justify-between">

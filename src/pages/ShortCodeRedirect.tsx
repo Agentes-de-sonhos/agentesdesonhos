@@ -1,9 +1,11 @@
+import { useNoindex } from "@/hooks/useNoindex";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ShortCodeRedirect() {
+  useNoindex();
   const { code } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState("");

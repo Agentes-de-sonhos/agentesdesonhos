@@ -1,3 +1,4 @@
+import { useNoindex } from "@/hooks/useNoindex";
 import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { useParams, useLocation } from "react-router-dom";
@@ -1697,6 +1698,7 @@ interface ViagemPublicaProps {
 }
 
 export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoadedPassword, onInstallPrompt }: ViagemPublicaProps = {}) {
+  useNoindex();
   const { token } = useParams();
   const location = useLocation();
   const preAuth = location.state as { preAuthenticated?: boolean; tripData?: Trip; agentProfile?: AgentProfile | null } | null;
