@@ -1697,6 +1697,7 @@ interface ViagemPublicaProps {
 }
 
 export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoadedPassword, onInstallPrompt }: ViagemPublicaProps = {}) {
+  useNoindex();
   const { token } = useParams();
   const location = useLocation();
   const preAuth = location.state as { preAuthenticated?: boolean; tripData?: Trip; agentProfile?: AgentProfile | null } | null;

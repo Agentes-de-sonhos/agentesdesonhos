@@ -24,6 +24,7 @@ const fmtDate = (d?: string | null) => {
 };
 
 export default function FaturaPublica() {
+  useNoindex();
   const { agencySlug, code } = useParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);

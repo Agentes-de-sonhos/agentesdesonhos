@@ -25,6 +25,7 @@ function upsertMeta(selector: string, attr: "name" | "property", key: string, co
 }
 
 export default function OrlandoMagicLandingPage() {
+  useNoindex();
   useEffect(() => {
     const prevTitle = document.title;
     document.title = SEO.title;

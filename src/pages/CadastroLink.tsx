@@ -9,6 +9,7 @@ import { Loader2, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 
 export default function CadastroLink() {
+  useNoindex();
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);

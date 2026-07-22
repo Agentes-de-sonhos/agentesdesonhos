@@ -6,6 +6,7 @@ import { Loader2, ShieldX, CreditCard } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function CardCaptureQuickAccess() {
+  useNoindex();
   const { token } = useParams<{ token: string }>();
   const [status, setStatus] = useState<"loading" | "valid" | "invalid">("loading");
 

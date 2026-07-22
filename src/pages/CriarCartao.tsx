@@ -31,6 +31,7 @@ const SOCIAL_FIELDS = [
 ] as const;
 
 export default function CriarCartao() {
+  useNoindex();
   const [step, setStep] = useState<"form" | "success">("form");
   const [saving, setSaving] = useState(false);
   const [createdSlug, setCreatedSlug] = useState("");
