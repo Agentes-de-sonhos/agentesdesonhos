@@ -1,14 +1,72 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# https://agentedesonhos.com.br
+# Public marketing pages are indexable; authenticated app areas and
+# client-shared links (orcamento, roteiro, carteira, cartao, fatura, etc.)
+# are NOT indexable and are excluded below.
 
 User-agent: *
 Allow: /
+Allow: /planos
+Allow: /blog
+Allow: /desconto30off
+Allow: /politicasdeprivacidade
+Allow: /termosdeuso
+
+# Auth and account
+Disallow: /auth
+Disallow: /reset-password
+Disallow: /onboarding
+
+# Authenticated app modules
+Disallow: /dashboard
+Disallow: /dashboard-start
+Disallow: /admin
+Disallow: /crm
+Disallow: /clientes
+Disallow: /oportunidades
+Disallow: /vendas
+Disallow: /financeiro
+Disallow: /operacoes
+Disallow: /orcamentos
+Disallow: /roteiros
+Disallow: /agenda
+Disallow: /materiais
+Disallow: /meus-materiais
+Disallow: /meus-leads
+Disallow: /meu-cartao
+Disallow: /campanha-indicacao
+Disallow: /atualizacoes
+Disallow: /configuracoes
+Disallow: /calculadora
+Disallow: /bloco-notas
+Disallow: /comunidade
+Disallow: /gamificacao
+Disallow: /beneficios
+Disallow: /academy
+Disallow: /faturas
+Disallow: /assinaturas
+Disallow: /ferramentas-ia
+Disallow: /requisitos-viagem
+Disallow: /suporte
+Disallow: /gestao-clientes
+Disallow: /perguntas-respostas
+Disallow: /hotel-raio-x
+Disallow: /mapa-turismo
+Disallow: /bloqueios-aereos
+
+# Client-shared / tokenized public links
+Disallow: /orcamento/
+Disallow: /roteiro/
+Disallow: /viagem/
+Disallow: /c/
+Disallow: /v/
+Disallow: /fatura/
+Disallow: /cadastro/
+Disallow: /formulario/
+Disallow: /lp/
+Disallow: /captura-cartao/
+Disallow: /ativar-cartao
+Disallow: /criar-cartao
+Disallow: /pesquisa/
+Disallow: /experiencias/
+
+Sitemap: https://agentedesonhos.com.br/sitemap.xml
