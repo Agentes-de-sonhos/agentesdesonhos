@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Footer } from "@/components/layout/Footer";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { useNavigate } from "react-router-dom";
+import { SEO } from "@/components/seo/SEO";
 
 const SORO_SCRIPT_SRC = "https://app.trysoro.com/api/embed/18bb9f90-e619-4a42-b7df-c1dce0cc053a";
 
@@ -25,6 +26,11 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <SEO
+        title="Blog | Agentes de Sonhos"
+        description="Conteúdo, novidades e insights para profissionais do mercado de turismo — dicas, estratégias e tendências para agentes de viagens."
+        canonical="/blog"
+      />
       <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <button onClick={() => navigate("/")} className="flex items-center gap-2">
