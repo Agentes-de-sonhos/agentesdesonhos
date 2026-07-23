@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildRoteiroLink } from "@/lib/roteiro-domain";
+import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
+import { copyTextToClipboard } from "@/lib/public-share-message";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchAgentProfile, type AgentProfile } from "@/hooks/useAgentProfile";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -430,8 +432,9 @@ export default function CriarRoteiro() {
     // Find itinerary by shareToken to use new URL if available
     const found = itineraries.find(i => i.shareToken === shareToken);
     const url = found ? buildItineraryUrl(found) : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
-    await navigator.clipboard.writeText(url);
-    toast.success("Link copiado!");
+    const ok = await copyTextToClipboard(url);
+    if (ok) toast.success("Link copiado!");
+    else toast.error("Não foi possível copiar automaticamente. Tente novamente.");
   };
 
   const handleDelete = (itineraryId: string) => {
@@ -725,30 +728,22 @@ export default function CriarRoteiro() {
                       {generatedLinkUrl}
                     </div>
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(generatedLinkUrl, "_blank", "noopener,noreferrer")}
-                    >
-                      <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                      Abrir
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(generatedLinkUrl);
-                          toast.success("Link copiado!");
-                        } catch {
-                          toast.error("Não foi possível copiar");
-                        }
-                      }}
-                    >
-                      <Copy className="mr-1.5 h-3.5 w-3.5" />
-                      Copiar
-                    </Button>
-                  </div>
+                  <PublicLinkActions
+                    type="itinerary"
+                    publicUrl={generatedLinkUrl}
+                    message={{
+                      clientFirstName: (currentItinerary as any)?.clientName,
+                      destination: currentItinerary?.destination,
+                      startDate: currentItinerary?.startDate,
+                      endDate: currentItinerary?.endDate,
+                      highlights: (currentItinerary?.days || [])
+                        .flatMap((d) => (d.activities || []).map((a) => a.title))
+                        .filter(Boolean),
+                      agencyName: agentProfile?.agency_name,
+                    }}
+                    size="sm"
+                    className="shrink-0"
+                  />
                 </CardContent>
               </Card>
             )}

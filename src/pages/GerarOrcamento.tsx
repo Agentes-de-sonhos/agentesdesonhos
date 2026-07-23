@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, CloudOff, Cloud } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
+import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -1094,34 +1095,36 @@ export default function GerarOrcamento() {
               const publicUrl = accessCode && agencyName
                 ? buildOrcamentoLink(agencyName, accessCode)
                 : `${ORCAMENTO_DOMAIN}/orcamento/${quote.share_token}`;
+              const serviceTypes = (quote.services || []).map((s: any) => s.service_type).filter(Boolean);
               return (
-                <div className="flex items-center gap-1 rounded-md border bg-muted/40 pl-2 pr-1 py-1 max-w-full">
-                  <LinkIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <input
-                    readOnly
-                    value={publicUrl}
-                    onFocus={(e) => e.currentTarget.select()}
-                    className="bg-transparent text-xs outline-none w-[180px] sm:w-[280px] truncate"
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-2"
-                    onClick={async () => {
-                      await navigator.clipboard.writeText(publicUrl);
-                      toast({ title: "Link copiado", description: "URL pública copiada para a área de transferência." });
+                <div className="flex flex-col gap-2 rounded-md border bg-muted/40 px-2 py-2 max-w-full">
+                  <div className="flex items-center gap-1">
+                    <LinkIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <input
+                      readOnly
+                      value={publicUrl}
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="bg-transparent text-xs outline-none w-[180px] sm:w-[280px] truncate"
+                    />
+                  </div>
+                  <PublicLinkActions
+                    type="quote"
+                    publicUrl={publicUrl}
+                    message={{
+                      clientFirstName: quote.client_name,
+                      destination: quote.destination,
+                      startDate: quote.start_date,
+                      endDate: quote.end_date,
+                      travelers: {
+                        adults: (quote as any).adults_count,
+                        children: (quote as any).children_count,
+                        infants: (quote as any).infants_count,
+                      },
+                      serviceTypes,
+                      agencyName: agentProfile?.agency_name,
                     }}
-                  >
-                    Copiar
-                  </Button>
-                  <Button
                     size="sm"
-                    variant="ghost"
-                    className="h-7 px-2"
-                    onClick={() => window.open(publicUrl, "_blank", "noopener,noreferrer")}
-                  >
-                    Abrir
-                  </Button>
+                  />
                 </div>
               );
             })()

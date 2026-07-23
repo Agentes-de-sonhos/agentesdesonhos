@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildCarteiraLink } from "@/lib/carteira-domain";
-import { Copy, Check, Link, Share2, Eye, EyeOff, Send } from "lucide-react";
+import { Copy, Check, Link, Share2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import type { Trip } from "@/types/trip";
+import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
 
 interface ShareTripModalProps {
   trip: Trip & { public_access_code?: string | null };
@@ -21,7 +22,6 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [copiedAll, setCopiedAll] = useState(false);
 
   const origin = PUBLIC_DOMAIN;
   
@@ -36,7 +36,6 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
   const legacyLink = trip.share_token ? `${origin}/viagem/${trip.share_token}` : null;
 
   const primaryLink = newFormatLink || slugLink || legacyLink || "";
-  const displayShortLink = shortLink || "";
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -45,14 +44,7 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const shareMessage = `Olá, ${trip.client_name}! 👋\n\nSua carteira digital de viagem para ${trip.destination} está pronta. ✈️\n\n🔗 Acesse pelo link:\n${primaryLink}\n\n🔒 Senha de acesso:\n${trip.access_password ?? ""}\n\nQualquer dúvida, estou à disposição!`;
-
-  const handleCopyAll = () => {
-    navigator.clipboard.writeText(shareMessage);
-    setCopiedAll(true);
-    toast({ title: "Mensagem copiada!", description: "Cole no WhatsApp ou onde preferir para enviar ao cliente." });
-    setTimeout(() => setCopiedAll(false), 2500);
-  };
+  const serviceTypes = ((trip as any).services || []).map((s: any) => s.service_type).filter(Boolean);
 
   const CopyButton = ({ text, field }: { text: string; field: string }) => (
     <Button
@@ -116,27 +108,27 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
                 >
                   {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </Button>
+                <CopyButton text={trip.access_password} field="password" />
               </div>
             </div>
           )}
 
           {primaryLink && (
-            <Button
-              type="button"
-              className="w-full"
-              onClick={handleCopyAll}
-              disabled={!trip.access_password}
-            >
-              {copiedAll ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" /> Mensagem copiada!
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" /> Copiar mensagem para o cliente
-                </>
-              )}
-            </Button>
+            <PublicLinkActions
+              type="wallet"
+              publicUrl={primaryLink}
+              message={{
+                clientFirstName: trip.client_name,
+                destination: trip.destination,
+                tripName: (trip as any).trip_title || trip.destination,
+                startDate: trip.start_date,
+                endDate: trip.end_date,
+                serviceTypes,
+                agencyName,
+              }}
+              size="sm"
+              showOpen
+            />
           )}
         </div>
       </DialogContent>
