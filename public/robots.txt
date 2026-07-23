@@ -1,4 +1,4 @@
-# https://agentedesonhos.com.br
+# https://agentesdesonhos.com.br
 # Robots.txt is not a security mechanism. All authenticated, administrative
 # and client-shared pages emit <meta name="robots" content="noindex, nofollow">
 # via react-helmet-async. To honor that noindex, crawlers must be able to
@@ -14,4 +14,4 @@ Allow: /
 # Lovable internals / non-HTML endpoints (no indexable content).
 Disallow: /.lovable/
 
-Sitemap: https://agentedesonhos.com.br/sitemap.xml
+Sitemap: https://agentesdesonhos.com.br/sitemap.xml

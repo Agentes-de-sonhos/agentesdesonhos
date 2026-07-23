@@ -76,7 +76,7 @@ const sectionLinks = [
   { label: "Funcionalidades", id: "funcionalidades" },
   { label: "Benefícios", id: "beneficios" },
   { label: "Diferenciais", id: "diferenciais" },
-  { label: "Blog", href: "https://www.agentesdesonhos.com.br/blog" },
+  { label: "Blog", href: "https://agentesdesonhos.com.br/blog" },
   { label: "FAQ", id: "faq" },
 ];
 
@@ -287,7 +287,7 @@ const sectionContainer = "max-w-[1100px] mx-auto px-6";
 /* ------------------------------------------------------------------ */
 const SORO_SCRIPT_SRC = "https://app.trysoro.com/api/embed/18bb9f90-e619-4a42-b7df-c1dce0cc053a";
 
-const BLOG_BASE_URL = "https://www.agentesdesonhos.com.br/blog";
+const BLOG_BASE_URL = "https://agentesdesonhos.com.br/blog";
 
 type SoroArticle = {
   id: string;
@@ -442,34 +442,34 @@ export default function LandingPage() {
           "@graph": [
             {
               "@type": "Organization",
-              "@id": "https://agentedesonhos.com.br/#organization",
+              "@id": "https://agentesdesonhos.com.br/#organization",
               name: "Agentes de Sonhos",
-              url: "https://agentedesonhos.com.br/",
+              url: "https://agentesdesonhos.com.br/",
               logo: {
                 "@type": "ImageObject",
-                url: "https://agentedesonhos.com.br/android-chrome-512x512.png",
+                url: "https://agentesdesonhos.com.br/android-chrome-512x512.png",
               },
               description:
                 "Plataforma de gestão para agentes de viagens e agências de turismo.",
             },
             {
               "@type": "WebSite",
-              "@id": "https://agentedesonhos.com.br/#website",
-              url: "https://agentedesonhos.com.br/",
+              "@id": "https://agentesdesonhos.com.br/#website",
+              url: "https://agentesdesonhos.com.br/",
               name: "Agentes de Sonhos",
-              publisher: { "@id": "https://agentedesonhos.com.br/#organization" },
+              publisher: { "@id": "https://agentesdesonhos.com.br/#organization" },
               inLanguage: "pt-BR",
             },
             {
               "@type": "SoftwareApplication",
-              "@id": "https://agentedesonhos.com.br/#software",
+              "@id": "https://agentesdesonhos.com.br/#software",
               name: "Agentes de Sonhos",
-              url: "https://agentedesonhos.com.br/",
+              url: "https://agentesdesonhos.com.br/",
               applicationCategory: "BusinessApplication",
               operatingSystem: "Web",
               description:
                 "Sistema de gestão para agentes de viagens e agências de turismo, com CRM, orçamentos, roteiros, carteira digital, operações, vendas e financeiro.",
-              publisher: { "@id": "https://agentedesonhos.com.br/#organization" },
+              publisher: { "@id": "https://agentesdesonhos.com.br/#organization" },
               featureList: [
                 "CRM e gestão de clientes",
                 "Gestão de oportunidades",
