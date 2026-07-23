@@ -70,13 +70,18 @@ export function PublicLinkActions({
   };
 
   const handleShare = async () => {
-    const ok = await nativeShare({
+    // Share only the composed text (URL already included at the end) — do NOT
+    // pass `url` separately, otherwise WhatsApp/others would duplicate the link.
+    const result = await nativeShare({
       title: getPublicShareTitle(type),
       text: composedMessage,
-      url: publicUrl,
     });
-    if (!ok) {
-      // User cancelled or share failed silently — fall back to copying the message.
+    if (result === "cancelled") {
+      // Silent — user voluntarily dismissed the share sheet.
+      return;
+    }
+    if (result === "error" || result === "unsupported") {
+      // Fallback: copy the full message to clipboard so nothing is lost.
       await handleCopyMessage();
     }
   };
