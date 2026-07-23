@@ -14,6 +14,72 @@ interface GoogleEvent {
   status?: string;
   updated?: string;
   eventType?: string;
+  recurringEventId?: string;
+  extendedProperties?: { private?: Record<string, string>; shared?: Record<string, string> };
+}
+
+// Structured reason codes recorded for every ignored item during sync.
+type PushSkipReason =
+  | "mapping_soft_deleted"
+  | "duplicate_local_signature"
+  | "unchanged_since_last_sync"
+  | "google_created_without_id";
+
+type PullSkipReason =
+  | "created_during_current_push"
+  | "unsupported_event_type"
+  | "cancelled_event"
+  | "missing_start_date"
+  | "mapping_tombstoned"
+  | "already_synced_unchanged"
+  | "duplicate_of_mapped_local_event"
+  | "local_reference_missing";
+
+interface SkipSample {
+  reason: string;
+  google_event_id?: string;
+  agency_event_id?: string;
+  title?: string;
+  calendar_id?: string;
+  start?: string | null;
+  end?: string | null;
+  status?: string | null;
+  event_type?: string | null;
+  recurring_event_id?: string | null;
+  all_day?: boolean;
+  extended_properties?: Record<string, unknown> | null;
+  has_mapping?: boolean;
+  mapping_deleted?: boolean;
+  google_updated?: string | null;
+  last_synced_at?: string | null;
+}
+
+const SAMPLE_CAP = 30;
+
+function pushSample(bucket: SkipSample[], sample: SkipSample) {
+  if (bucket.length < SAMPLE_CAP) bucket.push(sample);
+}
+
+function sampleFromGoogleEvent(
+  gEvent: GoogleEvent,
+  reason: PullSkipReason,
+  extra: Partial<SkipSample> = {},
+): SkipSample {
+  return {
+    reason,
+    google_event_id: gEvent.id,
+    title: gEvent.summary,
+    calendar_id: "primary",
+    start: gEvent.start?.dateTime ?? gEvent.start?.date ?? null,
+    end: gEvent.end?.dateTime ?? gEvent.end?.date ?? null,
+    status: gEvent.status ?? null,
+    event_type: gEvent.eventType ?? "default",
+    recurring_event_id: gEvent.recurringEventId ?? null,
+    all_day: !!gEvent.start?.date,
+    extended_properties: gEvent.extendedProperties ?? null,
+    google_updated: gEvent.updated ?? null,
+    ...extra,
+  };
 }
 
 function localEventSignature(event: any): string {
@@ -302,6 +368,16 @@ Deno.serve(async (req) => {
     let deleteErrors = 0;
     const pushErrors: Array<{ event_id: string; status?: number; error: string }> = [];
 
+    // Structured skip diagnostics (item 1 & 2 of investigation): every ignored
+    // item is recorded with a machine-readable reason code plus a small sample
+    // of details for the first N items so the UI can show a breakdown.
+    const pushSkipReasons: Record<string, number> = {};
+    const pushSkipSamples: SkipSample[] = [];
+    const recordPushSkip = (reason: PushSkipReason, sample: SkipSample) => {
+      pushSkipReasons[reason] = (pushSkipReasons[reason] || 0) + 1;
+      pushSample(pushSkipSamples, { ...sample, reason });
+    };
+
     console.log(`[calendar-sync] push-start count=${liveLocalEvents.length}`);
 
     for (const event of liveLocalEvents) {
@@ -311,6 +387,17 @@ Deno.serve(async (req) => {
       if (existing && existing.deleted_at) {
         pushedSkipped++; deletedSkipped++;
         console.log(`[calendar-sync] skipped-deleted event=${event.id} reason=mapping-tombstone google=${existing.google_event_id}`);
+        recordPushSkip("mapping_soft_deleted", {
+          reason: "mapping_soft_deleted",
+          agency_event_id: event.id,
+          google_event_id: existing.google_event_id,
+          title: event.title,
+          start: event.event_date,
+          all_day: !event.event_time,
+          has_mapping: true,
+          mapping_deleted: true,
+          last_synced_at: existing.last_synced_at,
+        });
         continue;
       }
 
@@ -319,6 +406,14 @@ Deno.serve(async (req) => {
         if (mappedTwinId && mappedTwinId !== event.id) {
           pushedSkipped++;
           console.log(`[calendar-sync] push-skipped event=${event.id} reason=duplicate-of-mapped-local-event mapped_event=${mappedTwinId}`);
+          recordPushSkip("duplicate_local_signature", {
+            reason: "duplicate_local_signature",
+            agency_event_id: event.id,
+            title: event.title,
+            start: event.event_date,
+            all_day: !event.event_time,
+            has_mapping: false,
+          });
           continue;
         }
       }
@@ -330,6 +425,17 @@ Deno.serve(async (req) => {
         if (localUpdated <= lastSynced) {
           pushedSkipped++;
           console.log(`[calendar-sync] push-skipped event=${event.id} reason=unchanged-since-last-sync`);
+          recordPushSkip("unchanged_since_last_sync", {
+            reason: "unchanged_since_last_sync",
+            agency_event_id: event.id,
+            google_event_id: existing.google_event_id,
+            title: event.title,
+            start: event.event_date,
+            all_day: !event.event_time,
+            has_mapping: true,
+            mapping_deleted: false,
+            last_synced_at: existing.last_synced_at,
+          });
           continue;
         }
       }
@@ -435,6 +541,14 @@ Deno.serve(async (req) => {
           } else {
             pushedSkipped++;
             console.warn(`[calendar-sync] push-skipped event=${event.id} reason=no-id`);
+            recordPushSkip("google_created_without_id", {
+              reason: "google_created_without_id",
+              agency_event_id: event.id,
+              title: event.title,
+              start: event.event_date,
+              all_day: !event.event_time,
+              has_mapping: false,
+            });
           }
         }
       } catch (e: any) {
@@ -510,6 +624,12 @@ Deno.serve(async (req) => {
     let pulledUpdated = 0;
     let pulledSkipped = 0;
     const pullErrors: Array<{ google_event_id?: string; status?: number; error: string }> = [];
+    const pullSkipReasons: Record<string, number> = {};
+    const pullSkipSamples: SkipSample[] = [];
+    const recordPullSkip = (reason: PullSkipReason, gEvent: GoogleEvent, extra: Partial<SkipSample> = {}) => {
+      pullSkipReasons[reason] = (pullSkipReasons[reason] || 0) + 1;
+      pushSample(pullSkipSamples, sampleFromGoogleEvent(gEvent, reason, extra));
+    };
     let googleEvents: GoogleEvent[] = [];
     let pullPageError = false;
     {
@@ -556,6 +676,10 @@ Deno.serve(async (req) => {
         if (justPushedGoogleIds.has(gEvent.id)) {
           pulledSkipped++; skipJustPushed++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=created-during-current-push mapped_local=${reverseSyncMap.get(gEvent.id)?.agency_event_id || "unknown"}`);
+          recordPullSkip("created_during_current_push", gEvent, {
+            agency_event_id: reverseSyncMap.get(gEvent.id)?.agency_event_id,
+            has_mapping: true,
+          });
           continue;
         }
 
@@ -565,6 +689,7 @@ Deno.serve(async (req) => {
         if (gEvent.eventType && gEvent.eventType !== "default") {
           pulledSkipped++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=non-default-event-type type=${gEvent.eventType}`);
+          recordPullSkip("unsupported_event_type", gEvent);
           continue;
         }
 
@@ -602,6 +727,10 @@ Deno.serve(async (req) => {
           } else {
             pulledSkipped++; skipCancelled++;
             console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled-${cancelledMapping ? "already-tombstoned" : "unmapped"}`);
+            recordPullSkip("cancelled_event", gEvent, {
+              has_mapping: !!cancelledMapping,
+              mapping_deleted: !!cancelledMapping?.deleted_at,
+            });
           }
           continue;
         }
@@ -609,6 +738,7 @@ Deno.serve(async (req) => {
         if (!startDate) {
           pulledSkipped++; skipNoDate++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=no-start-date`);
+          recordPullSkip("missing_start_date", gEvent);
           continue;
         }
 
@@ -622,6 +752,33 @@ Deno.serve(async (req) => {
           if (mapped.deleted_at) {
             pulledSkipped++; skipTombstone++;
             console.log(`[calendar-sync] skipped-deleted google=${gEvent.id} reason=mapping-tombstone local=${mapped.agency_event_id}`);
+            recordPullSkip("mapping_tombstoned", gEvent, {
+              agency_event_id: mapped.agency_event_id,
+              has_mapping: true,
+              mapping_deleted: true,
+              last_synced_at: mapped.last_synced_at,
+            });
+            continue;
+          }
+          // Guard: mapping alive but local reference vanished (hard/soft delete
+          // without proper tombstoning). Don't silently skip — drop the stale
+          // mapping and re-import as a fresh local event.
+          if (!localIds.has(mapped.agency_event_id)) {
+            console.warn(
+              `[calendar-sync] pull-recovery google=${gEvent.id} local=${mapped.agency_event_id} reason=local-missing dropping-mapping`,
+            );
+            await supabase.from("google_calendar_sync").delete().eq("id", mapped.id);
+            reverseSyncMap.delete(gEvent.id);
+            syncMap.delete(mapped.agency_event_id);
+            recordPullSkip("local_reference_missing", gEvent, {
+              agency_event_id: mapped.agency_event_id,
+              has_mapping: true,
+              mapping_deleted: false,
+              last_synced_at: mapped.last_synced_at,
+            });
+            pulledSkipped++;
+            // Fall through to insert branch below by clearing `mapped` via continue-to-loop-after-recovery:
+            // Simplest safe path: attempt insert on the next sync run once the stale mapping is gone.
             continue;
           }
           // Already mapped: update local only if Google version is newer than last sync
@@ -630,6 +787,12 @@ Deno.serve(async (req) => {
           if (gUpdated <= lastSynced) {
             pulledSkipped++; skipAlreadyMapped++;
             console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=already-mapped-unchanged local=${mapped.agency_event_id}`);
+            recordPullSkip("already_synced_unchanged", gEvent, {
+              agency_event_id: mapped.agency_event_id,
+              has_mapping: true,
+              mapping_deleted: false,
+              last_synced_at: mapped.last_synced_at,
+            });
             continue;
           }
           try {
@@ -671,6 +834,10 @@ Deno.serve(async (req) => {
         if (duplicateMappedLocalId) {
           pulledSkipped++; skipDuplicateLocal++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=duplicate-of-mapped-local-event mapped_event=${duplicateMappedLocalId}`);
+          recordPullSkip("duplicate_of_mapped_local_event", gEvent, {
+            agency_event_id: duplicateMappedLocalId,
+            has_mapping: false,
+          });
           continue;
         }
 
@@ -761,6 +928,18 @@ Deno.serve(async (req) => {
         push_errors: pushErrors,
         pull_errors: pullErrors,
         window: { start: windowStartDay, end: windowEndDay },
+        calendar_id: calendarId,
+        skip_summary: {
+          push: pushSkipReasons,
+          pull: pullSkipReasons,
+        },
+        // Detailed samples of the first N ignored items so the UI can show a
+        // breakdown. Contains only the diagnostic fields listed in the sync
+        // investigation spec (no arbitrary payload data).
+        skip_samples: {
+          push: pushSkipSamples,
+          pull: pullSkipSamples,
+        },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

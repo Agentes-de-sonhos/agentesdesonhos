@@ -14,11 +14,49 @@ interface GoogleCalendarStatus {
   last_sync_duration_ms?: number | null;
 }
 
+export interface SyncSkipSample {
+  reason: string;
+  google_event_id?: string;
+  agency_event_id?: string;
+  title?: string;
+  calendar_id?: string;
+  start?: string | null;
+  end?: string | null;
+  status?: string | null;
+  event_type?: string | null;
+  recurring_event_id?: string | null;
+  all_day?: boolean;
+  extended_properties?: Record<string, unknown> | null;
+  has_mapping?: boolean;
+  mapping_deleted?: boolean;
+  google_updated?: string | null;
+  last_synced_at?: string | null;
+}
+
+export interface SyncReport {
+  pushed_created: number;
+  pushed_updated: number;
+  pushed_skipped: number;
+  pulled_created: number;
+  pulled_updated: number;
+  pulled_skipped: number;
+  deleted_google: number;
+  deleted_local: number;
+  delete_errors: number;
+  total_google: number;
+  calendar_id: string;
+  skip_summary: { push: Record<string, number>; pull: Record<string, number> };
+  skip_samples: { push: SyncSkipSample[]; pull: SyncSkipSample[] };
+  window: { start: string; end: string };
+  duration_ms: number;
+}
+
 export function useGoogleCalendar() {
   const { user } = useAuth();
   const [status, setStatus] = useState<GoogleCalendarStatus>({ connected: false });
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lastReport, setLastReport] = useState<SyncReport | null>(null);
 
   const checkStatus = useCallback(async () => {
     if (!user?.id) return;
@@ -111,6 +149,23 @@ export function useGoogleCalendar() {
         const lSkipped = data.pulled_skipped ?? 0;
         const dGoogle = data.deleted_google ?? 0;
         const dLocal = data.deleted_local ?? 0;
+        setLastReport({
+          pushed_created: pCreated,
+          pushed_updated: pUpdated,
+          pushed_skipped: pSkipped,
+          pulled_created: lCreated,
+          pulled_updated: lUpdated,
+          pulled_skipped: lSkipped,
+          deleted_google: dGoogle,
+          deleted_local: dLocal,
+          delete_errors: dErrors,
+          total_google: data.total_google ?? 0,
+          calendar_id: data.calendar_id ?? "primary",
+          skip_summary: data.skip_summary ?? { push: {}, pull: {} },
+          skip_samples: data.skip_samples ?? { push: [], pull: [] },
+          window: data.window ?? { start: "", end: "" },
+          duration_ms: data.duration_ms ?? 0,
+        });
         const summary =
           `Enviados: ${pCreated} criados, ${pUpdated} atualizados, ${pSkipped} ignorados · ` +
           `Importados: ${lCreated} criados, ${lUpdated} atualizados, ${lSkipped} ignorados · ` +
@@ -121,6 +176,10 @@ export function useGoogleCalendar() {
           console.error("[calendar-sync] pull_errors:", data.pull_errors);
         } else {
           toast.success(`Sincronizado! ${summary}`);
+        }
+        if (import.meta.env.DEV) {
+          console.info("[calendar-sync] skip_summary:", data.skip_summary);
+          console.info("[calendar-sync] skip_samples:", data.skip_samples);
         }
         await checkStatus();
       } else if (data?.error) {
@@ -133,5 +192,5 @@ export function useGoogleCalendar() {
     }
   }, [user?.id, checkStatus]);
 
-  return { status, isLoading, isSyncing, connect, disconnect, sync, checkStatus };
+  return { status, isLoading, isSyncing, lastReport, connect, disconnect, sync, checkStatus };
 }

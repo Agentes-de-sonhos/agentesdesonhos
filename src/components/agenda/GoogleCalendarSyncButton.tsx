@@ -1,15 +1,18 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Link2, Unlink, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { RefreshCw, Link2, Unlink, Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { SyncReportDialog } from "./SyncReportDialog";
 
 interface GoogleCalendarSyncButtonProps {
   onSyncComplete?: () => void;
 }
 
 export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncButtonProps) {
-  const { status, isLoading, isSyncing, connect, disconnect, sync } = useGoogleCalendar();
+  const { status, isLoading, isSyncing, lastReport, connect, disconnect, sync } = useGoogleCalendar();
+  const [showReport, setShowReport] = useState(false);
 
   const handleSync = async () => {
     await sync();
@@ -58,6 +61,18 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
         )}
         {statusKey === "error" ? <AlertCircle className="h-3 w-3 text-rose-500" /> : statusKey === "synced" ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : null}
       </div>
+      {lastReport && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowReport(true)}
+          className="gap-1"
+          title="Ver detalhes da última sincronização"
+        >
+          <Info className="h-4 w-4" />
+          <span className="hidden md:inline">Detalhes</span>
+        </Button>
+      )}
       <Button
         variant="outline"
         size="sm"
@@ -78,6 +93,13 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
         {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Unlink className="h-3 w-3" />}
         <span className="hidden sm:inline">Desconectar</span>
       </Button>
+      {lastReport && (
+        <SyncReportDialog
+          open={showReport}
+          onOpenChange={setShowReport}
+          report={lastReport}
+        />
+      )}
     </div>
   );
 }
