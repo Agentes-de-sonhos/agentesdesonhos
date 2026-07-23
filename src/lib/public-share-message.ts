@@ -11,31 +11,6 @@ import { parseLocalDate } from "@/lib/dateParsing";
 
 export type PublicShareType = "quote" | "itinerary" | "wallet";
 
-/**
- * Returns a share URL to embed in WhatsApp/Facebook messages so crawlers
- * scrape the public-og Edge Function response (which serves NO og:image
- * for quote/itinerary/wallet) instead of the raw white-label domain, whose
- * static HTML is auto-augmented by hosting with a fallback social image.
- *
- * Humans clicking the link are redirected immediately (meta refresh + JS)
- * to the real target URL.
- *
- * If the environment variable is missing or the raw URL is empty, returns
- * the raw URL unchanged (safe fallback).
- */
-export function getPublicShareWhatsappUrl(type: PublicShareType, rawUrl: string): string {
-  if (!rawUrl) return rawUrl;
-  try {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-    if (!supabaseUrl) return rawUrl;
-    const params = new URLSearchParams({ type, url: rawUrl });
-    return `${supabaseUrl}/functions/v1/public-og?${params.toString()}`;
-  } catch {
-    return rawUrl;
-  }
-}
-
-
 export interface PublicShareTravelers {
   adults?: number | null;
   children?: number | null;
