@@ -32,6 +32,25 @@
       content="Tudo que você precisa para sua viagem em um só lugar."
     />
 
+    <!-- Neutral, unbranded OG image shared across all domains.
+         Non-JS crawlers (WhatsApp, Facebook, LinkedIn) will use this image
+         for every link that does NOT override og:image server-side. It is
+         intentionally illustrative (no logos, no text, no institutional
+         branding) so it is safe on white-label share links AND matches the
+         neutral baseline title/description above. Institutional per-route
+         metadata on the main site is applied via react-helmet-async. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="O seu próximo destino começa aqui 🌍" />
+    <meta property="og:description" content="Tudo que você precisa para sua viagem em um só lugar." />
+    <meta property="og:image" content="https://agentesdesonhos.com.br/og-neutral.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Ilustração minimalista de viagem" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="O seu próximo destino começa aqui 🌍" />
+    <meta name="twitter:description" content="Tudo que você precisa para sua viagem em um só lugar." />
+    <meta name="twitter:image" content="https://agentesdesonhos.com.br/og-neutral.jpg" />
+
     <!-- PWA / Instalação na tela inicial: injetado dinamicamente apenas nos domínios das carteiras digitais públicas (ver src/main.tsx) -->
   </head>
 
