@@ -6,6 +6,7 @@ import {
   buildPublicShareMessage,
   canNativeShare,
   copyTextToClipboard,
+  getPublicShareWhatsappUrl,
   getPublicShareTitle,
   nativeShare,
   type PublicShareMessageInput,
@@ -42,9 +43,19 @@ export function PublicLinkActions({
   const nativeShareAvailable = useMemo(() => canNativeShare(), []);
   const btnSize = size === "sm" ? "sm" : "default";
 
+  // For WhatsApp / Facebook previews we point the shared URL at the
+  // public-og Edge Function, which serves HTML WITHOUT any og:image
+  // for quote / itinerary / wallet, and 302-redirects humans to the
+  // real white-label page. The raw URL is still used for "Copiar link"
+  // and "Abrir".
+  const whatsappUrl = useMemo(
+    () => getPublicShareWhatsappUrl(type, publicUrl),
+    [type, publicUrl],
+  );
+
   const composedMessage = useMemo(
-    () => buildPublicShareMessage({ type, publicUrl, ...message }),
-    [type, publicUrl, message],
+    () => buildPublicShareMessage({ type, publicUrl: whatsappUrl, ...message }),
+    [type, whatsappUrl, message],
   );
 
   const handleCopyMessage = async () => {
