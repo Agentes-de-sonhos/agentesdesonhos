@@ -49,7 +49,6 @@ import { AdminTelegramManager } from "@/components/admin/AdminTelegramManager";
 import { AdminTradeEventsManager } from "@/components/admin/AdminTradeEventsManager";
 import { AdminUserProjectsManager } from "@/components/admin/AdminUserProjectsManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SEO } from "@/components/seo/SEO";
 
 const TAB_LABELS: Record<string, string> = {
   users: "Usuários",
