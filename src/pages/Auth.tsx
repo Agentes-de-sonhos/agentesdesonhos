@@ -40,6 +40,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { useNoindex } from "@/hooks/useNoindex";
 
 // Schemas
 const emailSchema = z.object({
