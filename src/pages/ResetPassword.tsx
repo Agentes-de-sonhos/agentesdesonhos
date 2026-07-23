@@ -37,6 +37,7 @@ const resetSchema = z
 type ResetFormData = z.infer<typeof resetSchema>;
 
 export default function ResetPassword() {
+  useNoindex();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);

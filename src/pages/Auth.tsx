@@ -75,6 +75,7 @@ function BrandHeader() {
 }
 
 export default function Auth() {
+  useNoindex();
   const searchParams = new URLSearchParams(window.location.search);
   const initialView: AuthView = searchParams.get("signup") === "true" ? "password-signup" : "login";
   const [view, setView] = useState<AuthView>(initialView);

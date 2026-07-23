@@ -80,6 +80,7 @@ const onboardingSchema = z.object({
 type OnboardingFormData = z.infer<typeof onboardingSchema>;
 
 export default function Onboarding() {
+  useNoindex();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
