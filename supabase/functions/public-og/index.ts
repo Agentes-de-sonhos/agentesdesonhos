@@ -38,6 +38,13 @@ Deno.serve(async (req) => {
   let ogImage = OG_IMAGE;
   let twitterCard = "summary";
 
+  // White-label public share links (quote / itinerary / wallet) must NEVER
+  // expose any image in the WhatsApp/Facebook preview — not the Agentes de
+  // Sonhos institutional image, not a hosting-injected screenshot, and not
+  // a placeholder. We enforce this by simply not emitting any og:image /
+  // twitter:image tag for these types.
+  const suppressImage = type === "quote" || type === "itinerary" || type === "wallet";
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -153,15 +160,15 @@ Deno.serve(async (req) => {
   <meta property="og:type" content="website" />
   <meta property="og:title" content="${esc(ogTitle)}" />
   <meta property="og:description" content="${esc(ogDescription)}" />
-  <meta property="og:image" content="${esc(ogImage)}" />
+  ${suppressImage ? "" : `<meta property="og:image" content="${esc(ogImage)}" />
   <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
+  <meta property="og:image:height" content="630" />`}
   <meta property="og:url" content="${esc(targetUrl)}" />
 
-  <meta name="twitter:card" content="${twitterCard}" />
+  <meta name="twitter:card" content="${suppressImage ? "summary" : twitterCard}" />
   <meta name="twitter:title" content="${esc(ogTitle)}" />
   <meta name="twitter:description" content="${esc(ogDescription)}" />
-  <meta name="twitter:image" content="${esc(ogImage)}" />
+  ${suppressImage ? "" : `<meta name="twitter:image" content="${esc(ogImage)}" />`}
 
   <meta http-equiv="refresh" content="0;url=${esc(targetUrl)}" />
 </head>
