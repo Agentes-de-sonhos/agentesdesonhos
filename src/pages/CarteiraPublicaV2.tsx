@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { setOgMeta } from "@/lib/ogMeta";
+import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { Loader2, Lock, Eye, EyeOff, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Plane, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -306,10 +306,7 @@ export default function CarteiraPublicaV2() {
   const [tripStartDate, setTripStartDate] = useState<string | null>(null);
 
   useEffect(() => {
-    setOgMeta({
-      title: "Sua viagem organizada em um só lugar 🎒",
-      description: "Acesse seus vouchers, ingressos e documentos de forma simples e segura.",
-    });
+    setOgMeta(GENERIC_PUBLIC_META.wallet);
     if (!agencySlug || !accessCode) return;
     // Load agency branding for password gate (no password required)
     supabase

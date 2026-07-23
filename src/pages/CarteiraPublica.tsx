@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { setOgMeta } from "@/lib/ogMeta";
+import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { Loader2, Lock, Eye, EyeOff, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -101,10 +101,7 @@ export default function CarteiraPublica() {
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
 
   useEffect(() => {
-    setOgMeta({
-      title: "Sua viagem organizada em um só lugar 🎒",
-      description: "Acesse seus vouchers, ingressos e documentos de forma simples e segura.",
-    });
+    setOgMeta(GENERIC_PUBLIC_META.wallet);
     if (!slug) return;
     verifyTripBySlug(slug, "")
       .then((result) => {

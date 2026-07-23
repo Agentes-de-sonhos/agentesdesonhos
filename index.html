@@ -28,11 +28,11 @@
     <meta name="author" content="Agentes de Sonhos" />
     <meta name="application-name" content="Agentes de Sonhos" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://agentedesonhos.com.br/" />
 
     <!-- PWA / Instalação na tela inicial: injetado dinamicamente apenas nos domínios das carteiras digitais públicas (ver src/main.tsx) -->
 
-    <!-- Open Graph (default; per-route Helmet may override) -->
+    <!-- Open Graph fallback (per-route <SEO> overrides via react-helmet-async).
+         Canonical is emitted per-route by <SEO>, never here. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Agentes de Sonhos" />
     <meta property="og:title" content="Agentes de Sonhos | Sistema para Agências de Viagens" />
@@ -40,7 +40,6 @@
       property="og:description"
       content="Sistema completo para agências de viagens com CRM, orçamentos, roteiros, carteira digital, financeiro e gestão de vendas em uma única plataforma."
     />
-    <meta property="og:url" content="https://agentedesonhos.com.br/" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:image" content="https://agentedesonhos.com.br/og-image.png" />
 
@@ -52,55 +51,6 @@
       content="Sistema completo para agências de viagens com CRM, orçamentos, roteiros, carteira digital, financeiro e gestão de vendas em uma única plataforma."
     />
     <meta name="twitter:image" content="https://agentedesonhos.com.br/og-image.png" />
-
-    <!-- Structured data: Organization + WebSite + SoftwareApplication -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "Organization",
-            "@id": "https://agentedesonhos.com.br/#organization",
-            "name": "Agentes de Sonhos",
-            "url": "https://agentedesonhos.com.br/",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://agentedesonhos.com.br/android-chrome-512x512.png"
-            },
-            "description": "Plataforma de gestão para agentes de viagens e agências de turismo."
-          },
-          {
-            "@type": "WebSite",
-            "@id": "https://agentedesonhos.com.br/#website",
-            "url": "https://agentedesonhos.com.br/",
-            "name": "Agentes de Sonhos",
-            "publisher": { "@id": "https://agentedesonhos.com.br/#organization" },
-            "inLanguage": "pt-BR"
-          },
-          {
-            "@type": "SoftwareApplication",
-            "@id": "https://agentedesonhos.com.br/#software",
-            "name": "Agentes de Sonhos",
-            "url": "https://agentedesonhos.com.br/",
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": "Web",
-            "description": "Sistema de gestão para agentes de viagens e agências de turismo, com CRM, orçamentos, roteiros, carteira digital, operações, vendas e financeiro.",
-            "publisher": { "@id": "https://agentedesonhos.com.br/#organization" },
-            "featureList": [
-              "CRM e gestão de clientes",
-              "Gestão de oportunidades",
-              "Criação de orçamentos",
-              "Criação de roteiros",
-              "Carteira digital de viagem",
-              "Gestão de operações",
-              "Vendas e comissões",
-              "Gestão financeira",
-              "Equipe e permissões"
-            ]
-          }
-        ]
-      }
-    </script>
   </head>
 
   <body>

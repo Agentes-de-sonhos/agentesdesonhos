@@ -437,6 +437,53 @@ export default function LandingPage() {
         title="Agentes de Sonhos | Plataforma para Agentes de Viagens"
         description="Sistema completo para agentes de viagens e agências de turismo: CRM, orçamentos, roteiros, carteira digital, financeiro, academy, IA e muito mais em uma única plataforma."
         canonical="/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://agentedesonhos.com.br/#organization",
+              name: "Agentes de Sonhos",
+              url: "https://agentedesonhos.com.br/",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://agentedesonhos.com.br/android-chrome-512x512.png",
+              },
+              description:
+                "Plataforma de gestão para agentes de viagens e agências de turismo.",
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://agentedesonhos.com.br/#website",
+              url: "https://agentedesonhos.com.br/",
+              name: "Agentes de Sonhos",
+              publisher: { "@id": "https://agentedesonhos.com.br/#organization" },
+              inLanguage: "pt-BR",
+            },
+            {
+              "@type": "SoftwareApplication",
+              "@id": "https://agentedesonhos.com.br/#software",
+              name: "Agentes de Sonhos",
+              url: "https://agentedesonhos.com.br/",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              description:
+                "Sistema de gestão para agentes de viagens e agências de turismo, com CRM, orçamentos, roteiros, carteira digital, operações, vendas e financeiro.",
+              publisher: { "@id": "https://agentedesonhos.com.br/#organization" },
+              featureList: [
+                "CRM e gestão de clientes",
+                "Gestão de oportunidades",
+                "Criação de orçamentos",
+                "Criação de roteiros",
+                "Carteira digital de viagem",
+                "Gestão de operações",
+                "Vendas e comissões",
+                "Gestão financeira",
+                "Equipe e permissões",
+              ],
+            },
+          ],
+        }}
       />
       {/* ── Faixa promocional ─────────────────────────────────── */}
       <PromoBar onCtaClick={goSignup} />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { setOgMeta } from "@/lib/ogMeta";
+import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
@@ -1165,10 +1165,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   }, []);
 
   useEffect(() => {
-    setOgMeta({
-      title: "Seu orçamento de viagem chegou 💰",
-      description: "Confira todos os detalhes da sua viagem e aprove sua próxima experiência.",
-    });
+    setOgMeta(GENERIC_PUBLIC_META.quote);
   }, []);
 
   const { data: fetchedAgentProfile } = useQuery({
