@@ -14,6 +14,72 @@ interface GoogleEvent {
   status?: string;
   updated?: string;
   eventType?: string;
+  recurringEventId?: string;
+  extendedProperties?: { private?: Record<string, string>; shared?: Record<string, string> };
+}
+
+// Structured reason codes recorded for every ignored item during sync.
+type PushSkipReason =
+  | "mapping_soft_deleted"
+  | "duplicate_local_signature"
+  | "unchanged_since_last_sync"
+  | "google_created_without_id";
+
+type PullSkipReason =
+  | "created_during_current_push"
+  | "unsupported_event_type"
+  | "cancelled_event"
+  | "missing_start_date"
+  | "mapping_tombstoned"
+  | "already_synced_unchanged"
+  | "duplicate_of_mapped_local_event"
+  | "local_reference_missing";
+
+interface SkipSample {
+  reason: string;
+  google_event_id?: string;
+  agency_event_id?: string;
+  title?: string;
+  calendar_id?: string;
+  start?: string | null;
+  end?: string | null;
+  status?: string | null;
+  event_type?: string | null;
+  recurring_event_id?: string | null;
+  all_day?: boolean;
+  extended_properties?: Record<string, unknown> | null;
+  has_mapping?: boolean;
+  mapping_deleted?: boolean;
+  google_updated?: string | null;
+  last_synced_at?: string | null;
+}
+
+const SAMPLE_CAP = 30;
+
+function pushSample(bucket: SkipSample[], sample: SkipSample) {
+  if (bucket.length < SAMPLE_CAP) bucket.push(sample);
+}
+
+function sampleFromGoogleEvent(
+  gEvent: GoogleEvent,
+  reason: PullSkipReason,
+  extra: Partial<SkipSample> = {},
+): SkipSample {
+  return {
+    reason,
+    google_event_id: gEvent.id,
+    title: gEvent.summary,
+    calendar_id: "primary",
+    start: gEvent.start?.dateTime ?? gEvent.start?.date ?? null,
+    end: gEvent.end?.dateTime ?? gEvent.end?.date ?? null,
+    status: gEvent.status ?? null,
+    event_type: gEvent.eventType ?? "default",
+    recurring_event_id: gEvent.recurringEventId ?? null,
+    all_day: !!gEvent.start?.date,
+    extended_properties: gEvent.extendedProperties ?? null,
+    google_updated: gEvent.updated ?? null,
+    ...extra,
+  };
 }
 
 function localEventSignature(event: any): string {
