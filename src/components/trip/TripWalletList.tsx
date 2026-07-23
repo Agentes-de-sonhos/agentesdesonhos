@@ -31,6 +31,7 @@ import { useTrips } from "@/hooks/useTrips";
 import { useToast } from "@/hooks/use-toast";
 import type { Trip } from "@/types/trip";
 import { ClientAvatar } from "@/components/shared/ClientAvatar";
+import { copyTextToClipboard } from "@/lib/public-share-message";
 
 type FilterType = "all" | "future" | "active" | "past";
 type TripStatus = { label: string; dot: string; bg: string; text: string; ring: string };
@@ -246,8 +247,10 @@ export function TripWalletList({ agencyName }: { agencyName?: string }) {
   const handleCopyLink = (trip: Trip & { public_access_code?: string | null }) => {
     if (trip.public_access_code && agencyName) {
       const url = buildCarteiraLink(agencyName, trip.public_access_code);
-      navigator.clipboard.writeText(url);
-      toast({ title: "Link copiado!", description: "Link da carteira copiado para a área de transferência." });
+      copyTextToClipboard(url).then((ok) => {
+        if (ok) toast({ title: "Link copiado!", description: "Link da carteira copiado para a área de transferência." });
+        else toast({ title: "Não foi possível copiar automaticamente. Tente novamente.", variant: "destructive" });
+      });
       return;
     }
     const origin = PUBLIC_DOMAIN;
@@ -257,8 +260,10 @@ export function TripWalletList({ agencyName }: { agencyName?: string }) {
         ? `${origin}/viagem/${trip.share_token}`
         : '';
     if (!url) return;
-    navigator.clipboard.writeText(url);
-    toast({ title: "Link copiado!", description: "Link da carteira copiado para a área de transferência." });
+    copyTextToClipboard(url).then((ok) => {
+      if (ok) toast({ title: "Link copiado!", description: "Link da carteira copiado para a área de transferência." });
+      else toast({ title: "Não foi possível copiar automaticamente. Tente novamente.", variant: "destructive" });
+    });
   };
 
   const handleCopyPassword = (trip: Trip) => {
