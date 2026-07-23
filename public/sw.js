@@ -27,6 +27,13 @@ self.addEventListener("activate", (event) => {
   })());
 });
 
+// Allow the app-update flow to activate a waiting worker on demand.
+self.addEventListener("message", (event) => {
+  if (event && event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;

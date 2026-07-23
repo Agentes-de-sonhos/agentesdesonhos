@@ -20,6 +20,7 @@ import { LoadingScreen } from "./components/auth/LoadingScreen";
 import { NewLeadAlertProvider } from "./components/leads/NewLeadAlertProvider";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { WorkspaceGate } from "@/workspace/WorkspaceGate";
+import { AppUpdateModal } from "./components/common/AppUpdateModal";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -144,6 +145,7 @@ const App = () => (
       <LaunchOverlay />
       <Toaster />
       <Sonner />
+      <AppUpdateModal />
         <ErrorBoundary>
         <AuthProvider>
           <TeamSessionProvider>

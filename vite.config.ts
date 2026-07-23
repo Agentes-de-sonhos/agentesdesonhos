@@ -4,6 +4,27 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
+// Build-time version identifier used by the "new version available" modal.
+// Regenerated on every build so cached clients can detect a fresh deploy.
+const BUILD_ID = String(Date.now());
+
+function appVersionPlugin() {
+  return {
+    name: "app-version-json",
+    apply: "build" as const,
+    generateBundle() {
+      // Emits /version.json alongside the built assets.
+      (this as unknown as {
+        emitFile: (opts: { type: "asset"; fileName: string; source: string }) => void;
+      }).emitFile({
+        type: "asset",
+        fileName: "version.json",
+        source: JSON.stringify({ version: BUILD_ID, builtAt: new Date().toISOString() }),
+      });
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -17,7 +38,11 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     mcpPlugin(),
+    appVersionPlugin(),
   ].filter(Boolean),
+  define: {
+    __APP_VERSION__: JSON.stringify(mode === "development" ? "dev" : BUILD_ID),
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
