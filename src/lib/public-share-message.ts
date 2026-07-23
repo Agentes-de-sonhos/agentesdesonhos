@@ -346,12 +346,32 @@ export function canNativeShare(): boolean {
   return typeof navigator !== "undefined" && typeof (navigator as any).share === "function";
 }
 
-export async function nativeShare(payload: { title?: string; text?: string; url?: string }): Promise<boolean> {
-  if (!canNativeShare()) return false;
+export type NativeShareResult = "shared" | "cancelled" | "unsupported" | "error";
+
+/**
+ * Wraps navigator.share. To prevent apps like WhatsApp from duplicating the
+ * link (once from `text`, once from `url`), we share only the `text` payload —
+ * which already contains the URL at the end — and intentionally omit `url`.
+ *
+ * Returns "cancelled" when the user dismisses the share sheet (AbortError),
+ * so callers can silently ignore it without showing an error toast.
+ */
+export async function nativeShare(payload: { title?: string; text?: string; url?: string }): Promise<NativeShareResult> {
+  if (!canNativeShare()) return "unsupported";
+  // Merge url into text if missing, then drop url to avoid duplication.
+  let text = payload.text ?? "";
+  if (!text && payload.url) text = payload.url;
+  else if (text && payload.url && !text.includes(payload.url)) {
+    text = `${text}\n${payload.url}`;
+  }
   try {
-    await (navigator as any).share(payload);
-    return true;
-  } catch {
-    return false;
+    await (navigator as any).share({ title: payload.title, text });
+    return "shared";
+  } catch (err: any) {
+    const name = err?.name || "";
+    if (name === "AbortError" || /cancel|abort/i.test(String(err?.message || ""))) {
+      return "cancelled";
+    }
+    return "error";
   }
 }
