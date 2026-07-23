@@ -624,6 +624,12 @@ Deno.serve(async (req) => {
     let pulledUpdated = 0;
     let pulledSkipped = 0;
     const pullErrors: Array<{ google_event_id?: string; status?: number; error: string }> = [];
+    const pullSkipReasons: Record<string, number> = {};
+    const pullSkipSamples: SkipSample[] = [];
+    const recordPullSkip = (reason: PullSkipReason, gEvent: GoogleEvent, extra: Partial<SkipSample> = {}) => {
+      pullSkipReasons[reason] = (pullSkipReasons[reason] || 0) + 1;
+      pushSample(pullSkipSamples, sampleFromGoogleEvent(gEvent, reason, extra));
+    };
     let googleEvents: GoogleEvent[] = [];
     let pullPageError = false;
     {
@@ -670,6 +676,10 @@ Deno.serve(async (req) => {
         if (justPushedGoogleIds.has(gEvent.id)) {
           pulledSkipped++; skipJustPushed++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=created-during-current-push mapped_local=${reverseSyncMap.get(gEvent.id)?.agency_event_id || "unknown"}`);
+          recordPullSkip("created_during_current_push", gEvent, {
+            agency_event_id: reverseSyncMap.get(gEvent.id)?.agency_event_id,
+            has_mapping: true,
+          });
           continue;
         }
 
@@ -679,6 +689,7 @@ Deno.serve(async (req) => {
         if (gEvent.eventType && gEvent.eventType !== "default") {
           pulledSkipped++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=non-default-event-type type=${gEvent.eventType}`);
+          recordPullSkip("unsupported_event_type", gEvent);
           continue;
         }
 
@@ -716,6 +727,10 @@ Deno.serve(async (req) => {
           } else {
             pulledSkipped++; skipCancelled++;
             console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=cancelled-${cancelledMapping ? "already-tombstoned" : "unmapped"}`);
+            recordPullSkip("cancelled_event", gEvent, {
+              has_mapping: !!cancelledMapping,
+              mapping_deleted: !!cancelledMapping?.deleted_at,
+            });
           }
           continue;
         }
@@ -723,6 +738,7 @@ Deno.serve(async (req) => {
         if (!startDate) {
           pulledSkipped++; skipNoDate++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=no-start-date`);
+          recordPullSkip("missing_start_date", gEvent);
           continue;
         }
 
@@ -736,6 +752,33 @@ Deno.serve(async (req) => {
           if (mapped.deleted_at) {
             pulledSkipped++; skipTombstone++;
             console.log(`[calendar-sync] skipped-deleted google=${gEvent.id} reason=mapping-tombstone local=${mapped.agency_event_id}`);
+            recordPullSkip("mapping_tombstoned", gEvent, {
+              agency_event_id: mapped.agency_event_id,
+              has_mapping: true,
+              mapping_deleted: true,
+              last_synced_at: mapped.last_synced_at,
+            });
+            continue;
+          }
+          // Guard: mapping alive but local reference vanished (hard/soft delete
+          // without proper tombstoning). Don't silently skip — drop the stale
+          // mapping and re-import as a fresh local event.
+          if (!localIds.has(mapped.agency_event_id)) {
+            console.warn(
+              `[calendar-sync] pull-recovery google=${gEvent.id} local=${mapped.agency_event_id} reason=local-missing dropping-mapping`,
+            );
+            await supabase.from("google_calendar_sync").delete().eq("id", mapped.id);
+            reverseSyncMap.delete(gEvent.id);
+            syncMap.delete(mapped.agency_event_id);
+            recordPullSkip("local_reference_missing", gEvent, {
+              agency_event_id: mapped.agency_event_id,
+              has_mapping: true,
+              mapping_deleted: false,
+              last_synced_at: mapped.last_synced_at,
+            });
+            pulledSkipped++;
+            // Fall through to insert branch below by clearing `mapped` via continue-to-loop-after-recovery:
+            // Simplest safe path: attempt insert on the next sync run once the stale mapping is gone.
             continue;
           }
           // Already mapped: update local only if Google version is newer than last sync
@@ -744,6 +787,12 @@ Deno.serve(async (req) => {
           if (gUpdated <= lastSynced) {
             pulledSkipped++; skipAlreadyMapped++;
             console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=already-mapped-unchanged local=${mapped.agency_event_id}`);
+            recordPullSkip("already_synced_unchanged", gEvent, {
+              agency_event_id: mapped.agency_event_id,
+              has_mapping: true,
+              mapping_deleted: false,
+              last_synced_at: mapped.last_synced_at,
+            });
             continue;
           }
           try {
@@ -785,6 +834,10 @@ Deno.serve(async (req) => {
         if (duplicateMappedLocalId) {
           pulledSkipped++; skipDuplicateLocal++;
           console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=duplicate-of-mapped-local-event mapped_event=${duplicateMappedLocalId}`);
+          recordPullSkip("duplicate_of_mapped_local_event", gEvent, {
+            agency_event_id: duplicateMappedLocalId,
+            has_mapping: false,
+          });
           continue;
         }
 
