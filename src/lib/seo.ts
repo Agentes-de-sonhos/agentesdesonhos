@@ -2,7 +2,7 @@
  * Central SEO constants for Agentes de Sonhos.
  * Change SITE_URL/SITE_NAME/DEFAULT_OG_IMAGE here to propagate across the app.
  */
-export const SITE_URL = "https://agentedesonhos.com.br";
+export const SITE_URL = "https://agentesdesonhos.com.br";
 export const SITE_NAME = "Agentes de Sonhos";
 export const SITE_DESCRIPTION =
   "Sistema completo para agências de viagens com CRM, orçamentos, roteiros, carteira digital, financeiro e gestão de vendas em uma única plataforma.";
