@@ -368,6 +368,16 @@ Deno.serve(async (req) => {
     let deleteErrors = 0;
     const pushErrors: Array<{ event_id: string; status?: number; error: string }> = [];
 
+    // Structured skip diagnostics (item 1 & 2 of investigation): every ignored
+    // item is recorded with a machine-readable reason code plus a small sample
+    // of details for the first N items so the UI can show a breakdown.
+    const pushSkipReasons: Record<string, number> = {};
+    const pushSkipSamples: SkipSample[] = [];
+    const recordPushSkip = (reason: PushSkipReason, sample: SkipSample) => {
+      pushSkipReasons[reason] = (pushSkipReasons[reason] || 0) + 1;
+      pushSample(pushSkipSamples, { ...sample, reason });
+    };
+
     console.log(`[calendar-sync] push-start count=${liveLocalEvents.length}`);
 
     for (const event of liveLocalEvents) {
@@ -377,6 +387,17 @@ Deno.serve(async (req) => {
       if (existing && existing.deleted_at) {
         pushedSkipped++; deletedSkipped++;
         console.log(`[calendar-sync] skipped-deleted event=${event.id} reason=mapping-tombstone google=${existing.google_event_id}`);
+        recordPushSkip("mapping_soft_deleted", {
+          reason: "mapping_soft_deleted",
+          agency_event_id: event.id,
+          google_event_id: existing.google_event_id,
+          title: event.title,
+          start: event.event_date,
+          all_day: !event.event_time,
+          has_mapping: true,
+          mapping_deleted: true,
+          last_synced_at: existing.last_synced_at,
+        });
         continue;
       }
 
@@ -385,6 +406,14 @@ Deno.serve(async (req) => {
         if (mappedTwinId && mappedTwinId !== event.id) {
           pushedSkipped++;
           console.log(`[calendar-sync] push-skipped event=${event.id} reason=duplicate-of-mapped-local-event mapped_event=${mappedTwinId}`);
+          recordPushSkip("duplicate_local_signature", {
+            reason: "duplicate_local_signature",
+            agency_event_id: event.id,
+            title: event.title,
+            start: event.event_date,
+            all_day: !event.event_time,
+            has_mapping: false,
+          });
           continue;
         }
       }
@@ -396,6 +425,17 @@ Deno.serve(async (req) => {
         if (localUpdated <= lastSynced) {
           pushedSkipped++;
           console.log(`[calendar-sync] push-skipped event=${event.id} reason=unchanged-since-last-sync`);
+          recordPushSkip("unchanged_since_last_sync", {
+            reason: "unchanged_since_last_sync",
+            agency_event_id: event.id,
+            google_event_id: existing.google_event_id,
+            title: event.title,
+            start: event.event_date,
+            all_day: !event.event_time,
+            has_mapping: true,
+            mapping_deleted: false,
+            last_synced_at: existing.last_synced_at,
+          });
           continue;
         }
       }
