@@ -28,11 +28,21 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return (
+      <>
+        <SEO noindex title="Administração" />
+        <Navigate to="/auth" replace />
+      </>
+    );
   }
 
   if (!isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    return (
+      <>
+        <SEO noindex title="Administração" />
+        <Navigate to="/dashboard" replace />
+      </>
+    );
   }
 
   return (

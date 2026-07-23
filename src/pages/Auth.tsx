@@ -40,6 +40,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { useNoindex } from "@/hooks/useNoindex";
 
 // Schemas
 const emailSchema = z.object({
@@ -74,6 +75,7 @@ function BrandHeader() {
 }
 
 export default function Auth() {
+  useNoindex();
   const searchParams = new URLSearchParams(window.location.search);
   const initialView: AuthView = searchParams.get("signup") === "true" ? "password-signup" : "login";
   const [view, setView] = useState<AuthView>(initialView);

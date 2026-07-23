@@ -84,4 +84,5 @@ export function SEO({
   );
 }
 
-export { SITE_URL, SITE_NAME };
+// Note: SITE_URL, SITE_NAME and DEFAULT_OG_IMAGE are exported from
+// "@/lib/seo" — do not re-export them here (react-refresh/only-export-components).

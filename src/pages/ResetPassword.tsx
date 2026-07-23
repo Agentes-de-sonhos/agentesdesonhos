@@ -19,6 +19,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { useNoindex } from "@/hooks/useNoindex";
 
 const resetSchema = z
   .object({
@@ -36,6 +37,7 @@ const resetSchema = z
 type ResetFormData = z.infer<typeof resetSchema>;
 
 export default function ResetPassword() {
+  useNoindex();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
