@@ -541,6 +541,14 @@ Deno.serve(async (req) => {
           } else {
             pushedSkipped++;
             console.warn(`[calendar-sync] push-skipped event=${event.id} reason=no-id`);
+            recordPushSkip("google_created_without_id", {
+              reason: "google_created_without_id",
+              agency_event_id: event.id,
+              title: event.title,
+              start: event.event_date,
+              all_day: !event.event_time,
+              has_mapping: false,
+            });
           }
         }
       } catch (e: any) {
