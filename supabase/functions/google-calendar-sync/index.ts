@@ -928,6 +928,18 @@ Deno.serve(async (req) => {
         push_errors: pushErrors,
         pull_errors: pullErrors,
         window: { start: windowStartDay, end: windowEndDay },
+        calendar_id: calendarId,
+        skip_summary: {
+          push: pushSkipReasons,
+          pull: pullSkipReasons,
+        },
+        // Detailed samples of the first N ignored items so the UI can show a
+        // breakdown. Contains only the diagnostic fields listed in the sync
+        // investigation spec (no arbitrary payload data).
+        skip_samples: {
+          push: pushSkipSamples,
+          pull: pullSkipSamples,
+        },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
