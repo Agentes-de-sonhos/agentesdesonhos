@@ -70,12 +70,17 @@ export function SEO({
       <meta property="og:url" content={finalCanonical} />
       <meta property="og:locale" content="pt_BR" />
       <meta property="og:image" content={finalImage} />
+      <meta property="og:image:type" content="image/png" />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content="Agentes de Sonhos — Plataforma para agentes de viagens" />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={finalTitle} />
       <meta name="twitter:description" content={finalDescription} />
       <meta name="twitter:image" content={finalImage} />
+      <meta name="twitter:image:alt" content="Agentes de Sonhos — Plataforma para agentes de viagens" />
 
       {jsonLd ? (
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
