@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
-import { setOgMeta } from "@/lib/ogMeta";
+import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -57,10 +57,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   }, [fontScale]);
 
   useEffect(() => {
-    setOgMeta({
-      title: "Seu roteiro de viagem está pronto ✈️",
-      description: "Acesse seu roteiro completo e viaje com tudo organizado na palma da mão.",
-    });
+    setOgMeta(GENERIC_PUBLIC_META.itinerary);
     if (token) loadItinerary(token);
   }, [token]);
 

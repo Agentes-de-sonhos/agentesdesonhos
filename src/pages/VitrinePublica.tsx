@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { BrandText } from "@/components/ui/brand-text";
-import { setOgMeta } from "@/lib/ogMeta";
+import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicShowcase, type ShowcaseItem, getFeaturedLabel } from "@/hooks/useShowcase";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -23,10 +23,7 @@ export default function VitrinePublica() {
   const [tracked, setTracked] = useState(false);
 
   useEffect(() => {
-    setOgMeta({
-      title: "Conheça esta agência de viagens 🌍",
-      description: "Descubra experiências incríveis e fale com especialistas para sua próxima viagem.",
-    });
+    setOgMeta(GENERIC_PUBLIC_META.showcase);
     if (showcase && !tracked) {
       trackEvent(showcase.id, "page_view");
       setTracked(true);
