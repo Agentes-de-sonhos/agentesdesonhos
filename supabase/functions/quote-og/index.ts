@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const agencyName = profile?.agency_name || "Proposta de Viagem";
-    const agencyLogo = profile?.agency_logo_url || `${PUBLIC_DOMAIN}/og-image.png`;
+    const agencyLogo = profile?.agency_logo_url || `${PUBLIC_DOMAIN}/og-image-v2.png`;
     const ogTitle = `Orçamento personalizado | ${agencyName}`;
     const ogDescription = `Confira seu orçamento personalizado para ${quote.destination}, preparado especialmente por ${agencyName}.`;
 
