@@ -28,6 +28,8 @@ export function useItineraries() {
     destinationIntroImages: (data as any).destination_intro_images ?? [],
     showDestinationIntro: (data as any).show_destination_intro ?? true,
     headline: (data as any).headline ?? null,
+    showPricingSection: (data as any).show_pricing_section ?? false,
+    pricingContent: (data as any).pricing_content ?? null,
     passengers: ((data as any).passengers ?? []).map((p: any) => ({
       name: p?.name ?? "",
       age: p?.age ?? null,
@@ -508,6 +510,8 @@ export function useItineraries() {
         headline: string | null;
         start_date: string;
         end_date: string;
+        show_pricing_section: boolean;
+        pricing_content: string | null;
       }>;
     }) => {
       const { error } = await supabase
