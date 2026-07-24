@@ -25,6 +25,7 @@ import { AppUpdateModal } from "./components/common/AppUpdateModal";
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const OrlandoMagicLandingPage = lazy(() => import("./pages/OrlandoMagicLandingPage"));
+const ComandatubaLandingPage = lazy(() => import("./pages/ComandatubaLandingPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const StartDashboard = lazy(() => import("./pages/StartDashboard"));
 const Admin = lazy(() => import("./pages/Admin"));
@@ -180,6 +181,7 @@ const App = () => (
             <Route path="/planos" element={<Planos />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/experiencias/orlando-magic/demo" element={<OrlandoMagicLandingPage />} />
+            <Route path="/experiencias/transamerica-comandatuba/demo" element={<ComandatubaLandingPage />} />
             <Route path="/desconto30off" element={<Desconto30Off />} />
             <Route path="/cadastro-fornecedor" element={<CadastroFornecedor />} />
             <Route path="/cadastro-guia" element={<CadastroGuia />} />
