@@ -23,7 +23,6 @@ const REASON_LABELS: Record<string, string> = {
   missing_start_date: "Sem data de início",
   mapping_tombstoned: "Excluído anteriormente e mantido como removido",
   already_synced_unchanged: "Já sincronizado sem alterações",
-  duplicate_of_mapped_local_event: "Duplicado de um evento já existente na agenda",
   local_reference_missing: "Mapeamento inconsistente — será reimportado na próxima sincronização",
 };
 
