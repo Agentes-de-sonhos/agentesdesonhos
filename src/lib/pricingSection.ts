@@ -27,7 +27,16 @@ export function isPricingContentEmpty(html: string | null | undefined): boolean 
  * actually offer in the toolbar and forces safe link attributes.
  */
 export function sanitizePricingContent(html: string): string {
-  const clean = DOMPurify.sanitize(html, {
+  // Pre-normalize anchor hrefs so DOMPurify doesn't strip URLs the user
+  // typed without a protocol (e.g. "www.example.com" or "example.com").
+  // DOMPurify's ALLOWED_URI_REGEXP only accepts http(s)/mailto/tel/#//, so
+  // a bare host would otherwise lose its href and the link would render
+  // as underlined text that is not clickable in the public view/PDF.
+  const preNormalized = typeof document !== "undefined"
+    ? normalizeAnchorHrefs(html)
+    : html;
+
+  const clean = DOMPurify.sanitize(preNormalized, {
     ALLOWED_TAGS: [
       "p", "br", "strong", "b", "em", "i", "u", "s", "strike",
       "h1", "h2", "h3", "h4",
@@ -52,6 +61,46 @@ export function sanitizePricingContent(html: string): string {
     return tpl.innerHTML;
   }
   return clean;
+}
+
+/**
+ * Ensures every anchor has a safe, absolute href before sanitization.
+ * Bare hosts (`example.com`, `www.example.com`) get an `https://` prefix.
+ * Dangerous schemes (`javascript:`, `data:`, `vbscript:`) are dropped so
+ * DOMPurify strips the anchor entirely.
+ */
+function normalizeAnchorHrefs(html: string): string {
+  const tpl = document.createElement("template");
+  tpl.innerHTML = html;
+  tpl.content.querySelectorAll("a").forEach((el) => {
+    const a = el as HTMLAnchorElement;
+    const raw = (a.getAttribute("href") || "").trim();
+    if (!raw) return;
+    const normalized = normalizeUrl(raw);
+    if (normalized) {
+      a.setAttribute("href", normalized);
+    } else {
+      a.removeAttribute("href");
+    }
+  });
+  return tpl.innerHTML;
+}
+
+/**
+ * Normalize a user-provided URL to a safe absolute form. Returns null for
+ * unsafe/unsupported schemes so the caller can strip the href.
+ */
+export function normalizeUrl(input: string): string | null {
+  const raw = (input || "").trim();
+  if (!raw) return null;
+  // Allow anchors and same-origin absolute paths as-is.
+  if (raw.startsWith("#") || raw.startsWith("/")) return raw;
+  const lower = raw.toLowerCase();
+  const unsafe = ["javascript:", "data:", "vbscript:", "file:"];
+  if (unsafe.some((p) => lower.startsWith(p))) return null;
+  if (/^(https?:|mailto:|tel:)/i.test(raw)) return raw;
+  // Bare host or path — assume https.
+  return `https://${raw.replace(/^\/+/, "")}`;
 }
 
 export const PRICING_SECTION_TITLE = "Valores e Condições";
