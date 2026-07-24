@@ -262,7 +262,18 @@ export function useItineraryTemplates() {
           end_date: format(payload.endDate, "yyyy-MM-dd"),
           travelers_count: payload.travelersCount,
           trip_type: payload.tripType || template.profile,
-          budget_level: payload.budgetLevel || template.style,
+          budget_level: (() => {
+            const raw = (payload.budgetLevel || template.style || "conforto").toLowerCase();
+            // Map legacy values to allowed constraint values
+            const map: Record<string, string> = {
+              moderado: "conforto",
+              medio: "conforto",
+              standard: "conforto",
+              premium: "luxo",
+            };
+            const v = map[raw] ?? raw;
+            return ["economico", "conforto", "luxo"].includes(v) ? v : "conforto";
+          })(),
           status: "review",
           client_id: payload.clientId,
           cover_image_url: template.cover_image_url,
