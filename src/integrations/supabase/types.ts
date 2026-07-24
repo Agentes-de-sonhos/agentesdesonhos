@@ -4569,10 +4569,12 @@ export type Database = {
           headline: string | null
           id: string
           passengers: Json
+          pricing_content: string | null
           public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
           show_destination_intro: boolean
+          show_pricing_section: boolean
           signature_snapshot: Json | null
           source_itinerary_id: string | null
           start_date: string
@@ -4594,10 +4596,12 @@ export type Database = {
           headline?: string | null
           id?: string
           passengers?: Json
+          pricing_content?: string | null
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
+          show_pricing_section?: boolean
           signature_snapshot?: Json | null
           source_itinerary_id?: string | null
           start_date: string
@@ -4619,10 +4623,12 @@ export type Database = {
           headline?: string | null
           id?: string
           passengers?: Json
+          pricing_content?: string | null
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
+          show_pricing_section?: boolean
           signature_snapshot?: Json | null
           source_itinerary_id?: string | null
           start_date?: string
