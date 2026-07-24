@@ -101,7 +101,7 @@ export function ActivityAIActions({
           context: buildContext(),
           current: {
             title: activity.title,
-            description: activity.description ?? "",
+            description: descriptionToPlainText(activity.description),
             location: activity.location ?? "",
           },
           instruction: finalInstruction,
@@ -140,7 +140,7 @@ export function ActivityAIActions({
           context: buildContext(),
           current: {
             title: activity.title,
-            description: activity.description ?? "",
+            description: descriptionToPlainText(activity.description),
           },
         },
       });
