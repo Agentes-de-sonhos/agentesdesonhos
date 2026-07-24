@@ -58,9 +58,13 @@ async function uploadPastedImage(blob: Blob): Promise<string | null> {
 interface PopupRichTextEditorProps {
   content: string;
   onChange: (html: string) => void;
+  /** Placeholder shown when editor is empty (visual only, via CSS). */
+  placeholder?: string;
+  /** Tailwind class(es) applied to the editable area — used to bump min-height for the activity description. */
+  editorClassName?: string;
 }
 
-export function PopupRichTextEditor({ content, onChange }: PopupRichTextEditorProps) {
+export function PopupRichTextEditor({ content, onChange, editorClassName }: PopupRichTextEditorProps) {
   const [linkUrl, setLinkUrl] = useState('');
 
   const editor = useEditor({
@@ -183,7 +187,18 @@ export function PopupRichTextEditor({ content, onChange }: PopupRichTextEditorPr
           <Redo className="h-4 w-4" />
         </ToolBtn>
       </div>
-      <EditorContent editor={editor} className="prose prose-sm max-w-none p-3 min-h-[120px] focus-within:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[100px]" />
+      <EditorContent
+        editor={editor}
+        className={cn(
+          "prose prose-sm max-w-none p-3 min-h-[120px] focus-within:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[100px] [&_img]:max-w-full [&_img]:h-auto",
+          editorClassName,
+        )}
+      />
     </div>
   );
 }
+
+// Re-exported under a neutral name so callers outside the pricing section
+// (e.g. the activity description editor) can consume the same component
+// without leaking the "popup" origin naming into unrelated screens.
+export { PopupRichTextEditor as RichContentEditor };
