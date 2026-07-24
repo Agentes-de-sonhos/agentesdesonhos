@@ -43,7 +43,11 @@ import {
   Link2,
   Plus,
 } from "lucide-react";
-import { ClientAvatar } from "@/components/shared/ClientAvatar";
+import { ClientAvatar, getPersonInitials } from "@/components/shared/ClientAvatar";
+import {
+  ItineraryListItem,
+  itineraryMatchesSearch,
+} from "@/components/itinerary/ItineraryListItem";
 import { useNotes } from "@/hooks/useNotes";
 import { BlocoNotasContent } from "@/pages/BlocoNotas";
 import { useQuotes } from "@/hooks/useQuotes";
@@ -80,6 +84,7 @@ interface ProjectItem {
   date: string;
   status: "draft" | "published";
   type: ProjectType;
+  clientName?: string | null;
 }
 
 const TYPE_LABELS: Record<ProjectType, string> = {
@@ -123,6 +128,7 @@ function normalizeItems(
       date: i.createdAt || i.created_at,
       status: i.status === "published" || i.status === "approved" ? "published" : "draft",
       type: "itinerary" as const,
+      clientName: i.clientName ?? null,
     })),
   };
 }
@@ -136,12 +142,13 @@ function filterAndSort(
   let filtered = items;
 
   if (search.trim()) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(
-      (item) =>
-        item.name.toLowerCase().includes(q) ||
-        item.destination.toLowerCase().includes(q)
-    );
+    const q = normalizeText(search);
+    filtered = filtered.filter((item) => {
+      const hay = normalizeText(
+        [item.name, item.destination, item.clientName ?? ""].join(" | "),
+      );
+      return hay.includes(q);
+    });
   }
 
   if (statusFilter !== "all") {
@@ -157,6 +164,14 @@ function filterAndSort(
   }
 
   return filtered;
+}
+
+function normalizeText(v: string): string {
+  return v
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 function formatDate(dateStr: string) {
