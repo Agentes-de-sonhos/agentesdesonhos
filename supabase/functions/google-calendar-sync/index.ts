@@ -668,7 +668,6 @@ Deno.serve(async (req) => {
       let skipAlreadyMapped = 0;
       let skipNoDate = 0;
       let skipJustPushed = 0;
-      let skipDuplicateLocal = 0;
       let skipTombstone = 0;
 
       for (const gEvent of googleEvents) {
@@ -872,7 +871,6 @@ Deno.serve(async (req) => {
           }
           reverseSyncMap.set(gEvent.id, insertedMapping);
           syncMap.set(inserted.id, insertedMapping);
-          mappedLocalSignatures.set(candidateSignature, inserted.id);
           pulledCreated++;
           console.log(`[calendar-sync] mapping-created-from-pull google=${gEvent.id} local=${inserted.id} synced_at=${syncedAt}`);
           console.log(`[calendar-sync] pull-created google=${gEvent.id} local=${inserted.id}`);
@@ -883,7 +881,7 @@ Deno.serve(async (req) => {
       }
 
       console.log(
-        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} deleted_local=${deletedLocal} skipped_cancelled=${skipCancelled} skipped_tombstone=${skipTombstone} skipped_just_pushed=${skipJustPushed} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_duplicate_local=${skipDuplicateLocal} skipped_no_date=${skipNoDate}`
+        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} deleted_local=${deletedLocal} skipped_cancelled=${skipCancelled} skipped_tombstone=${skipTombstone} skipped_just_pushed=${skipJustPushed} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_no_date=${skipNoDate}`
       );
     }
 
