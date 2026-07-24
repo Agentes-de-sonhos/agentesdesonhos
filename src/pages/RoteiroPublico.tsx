@@ -22,6 +22,11 @@ import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
+import {
+  isPricingContentEmpty,
+  sanitizePricingContent,
+  PRICING_SECTION_TITLE,
+} from "@/lib/pricingSection";
 
 const tripTypeLabels: Record<string, string> = {
   familia: "Viagem em Família", casal: "Viagem de Casal",
@@ -513,6 +518,24 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 />
               ))}
             </div>
+          </section>
+        )}
+
+        {/* ─── Valores e Condições (opcional, sempre aberto) ─── */}
+        {itinerary.showPricingSection && !isPricingContentEmpty(itinerary.pricingContent) && (
+          <section className="rounded-2xl border border-border/50 bg-card p-5 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <DollarSign className="h-4 w-4 text-primary" />
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+                {PRICING_SECTION_TITLE}
+              </h2>
+            </div>
+            <div
+              className="prose prose-sm sm:prose-base max-w-none prose-headings:font-semibold prose-a:text-primary prose-a:underline break-words"
+              dangerouslySetInnerHTML={{ __html: sanitizePricingContent(itinerary.pricingContent || "") }}
+            />
           </section>
         )}
 
