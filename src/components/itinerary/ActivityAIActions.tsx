@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Activity, ItineraryDay } from "@/types/itinerary";
 import type { ItineraryMemory } from "@/hooks/useItineraryMemory";
+import { descriptionToPlainText } from "@/lib/richDescription";
 
 export interface AIContext {
   destination?: string;
@@ -101,7 +102,7 @@ export function ActivityAIActions({
           context: buildContext(),
           current: {
             title: activity.title,
-            description: activity.description ?? "",
+            description: descriptionToPlainText(activity.description),
             location: activity.location ?? "",
           },
           instruction: finalInstruction,
@@ -140,7 +141,7 @@ export function ActivityAIActions({
           context: buildContext(),
           current: {
             title: activity.title,
-            description: activity.description ?? "",
+            description: descriptionToPlainText(activity.description),
           },
         },
       });

@@ -11,6 +11,7 @@ import type { DayWeather } from "@/hooks/useTripWeather";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import type { TripService } from "@/types/trip";
 import { SERVICE_CHIP_LABELS, SERVICE_ICONS } from "@/lib/tripServiceLabels";
+import { sanitizedDescriptionHtml } from "@/lib/richDescription";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon } as const;
 const periodLabels = { manha: "Manhã", tarde: "Tarde", noite: "Noite" } as const;
@@ -180,9 +181,10 @@ export function CollapsibleDayCard({
                         </h4>
 
                         {activity.description && (
-                          <p className="rt-body text-muted-foreground leading-relaxed whitespace-pre-line break-words">
-                            {activity.description}
-                          </p>
+                          <div
+                            className="rt-body prose prose-sm max-w-none text-muted-foreground leading-relaxed break-words [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md"
+                            dangerouslySetInnerHTML={{ __html: sanitizedDescriptionHtml(activity.description) }}
+                          />
                         )}
 
                         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-muted-foreground/90 pt-0.5">
