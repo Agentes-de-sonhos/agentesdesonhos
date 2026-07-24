@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { normalizeUrl } from '@/lib/pricingSection';
 
 /**
  * Compress a pasted image to keep storage and PDF size reasonable.
@@ -140,10 +141,25 @@ export function PopupRichTextEditor({ content, onChange, editorClassName }: Popu
   );
 
   const handleLink = () => {
-    const url = prompt('URL do link:');
-    if (url) {
-      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    const previous = (editor.getAttributes('link') as { href?: string })?.href || '';
+    const input = prompt('URL do link (use https:// para links externos):', previous);
+    if (input === null) return;
+    const trimmed = input.trim();
+    if (!trimmed) {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      return;
     }
+    const href = normalizeUrl(trimmed);
+    if (!href) {
+      toast.error('URL inválida. Use https:// ou mailto:.');
+      return;
+    }
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange('link')
+      .setLink({ href, target: '_blank', rel: 'noopener noreferrer' })
+      .run();
   };
 
   return (
