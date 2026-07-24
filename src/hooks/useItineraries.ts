@@ -616,6 +616,47 @@ export function useItineraries() {
     },
   });
 
+  const reorderDays = useMutation({
+    mutationFn: async ({
+      itineraryId,
+      orderedDayIds,
+    }: {
+      itineraryId: string;
+      orderedDayIds: string[];
+    }) => {
+      // Load itinerary start date so we can rebuild each day's date from its
+      // new chronological position.
+      const { data: itinerary, error: itErr } = await supabase
+        .from("itineraries")
+        .select("start_date")
+        .eq("id", itineraryId)
+        .single();
+      if (itErr) throw itErr;
+      const startDate = parseLocalDate(itinerary.start_date as string);
+
+      // Two-phase update to avoid violating the unique (itinerary_id, day_number)
+      // constraint while positions are swapped.
+      for (let i = 0; i < orderedDayIds.length; i++) {
+        const { error } = await supabase
+          .from("itinerary_days")
+          .update({ day_number: -(i + 1) })
+          .eq("id", orderedDayIds[i]);
+        if (error) throw error;
+      }
+      for (let i = 0; i < orderedDayIds.length; i++) {
+        const newDate = format(addDays(startDate, i), "yyyy-MM-dd");
+        const { error } = await supabase
+          .from("itinerary_days")
+          .update({ day_number: i + 1, date: newDate })
+          .eq("id", orderedDayIds[i]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+    },
+  });
+
   return {
     itineraries: itinerariesQuery.data || [],
     isLoading: itinerariesQuery.isLoading,
@@ -631,6 +672,7 @@ export function useItineraries() {
     updateItineraryStatus,
     updateItineraryDetails,
     adjustItineraryDates,
+    reorderDays,
     deleteItinerary,
   };
 }
