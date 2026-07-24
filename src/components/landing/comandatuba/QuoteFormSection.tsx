@@ -1,7 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FORM, FORM_ANCHOR_ID, type AgencyConfig } from "./content";
+import { MessageCircle } from "lucide-react";
+import {
+  FORM,
+  FORM_ANCHOR_ID,
+  whatsappFromForm,
+  whatsappUrl,
+  type AgencyConfig,
+} from "./content";
 
 function maskPhone(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 11);
@@ -112,9 +119,9 @@ export function QuoteFormSection({
         }
       }
       setSent(true);
-      toast.success(FORM.success);
+      toast.success(FORM.successTitle(name.trim().split(" ")[0] || ""));
     } catch {
-      toast.error(FORM.errorGeneric);
+      toast.error(FORM.errorTitle);
     } finally {
       submittingRef.current = false;
       setLoading(false);
@@ -132,8 +139,38 @@ export function QuoteFormSection({
         </div>
 
         {sent ? (
-          <div className="mt-8 rounded-2xl border p-6 text-center" style={{ borderColor: `${agency.primaryColor}55`, backgroundColor: `${agency.primaryColor}0d` }}>
-            <p className="font-display text-[18px] font-semibold text-slate-900">{FORM.success}</p>
+          <div
+            className="mt-8 rounded-2xl border p-6 text-center"
+            style={{
+              borderColor: `${agency.primaryColor}55`,
+              backgroundColor: `${agency.primaryColor}0d`,
+            }}
+          >
+            <p className="font-display text-[18px] font-semibold text-slate-900">
+              {FORM.successTitle(name.trim().split(" ")[0] || "")}
+            </p>
+            <p className="mt-2 text-[14px] leading-relaxed text-slate-600">
+              {FORM.successText(agency.name)}
+            </p>
+            <a
+              href={whatsappUrl(
+                agency,
+                whatsappFromForm(agency, {
+                  period,
+                  origin,
+                  adults,
+                  kids,
+                  category,
+                })
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[13.5px] font-semibold text-white shadow-sm"
+              style={{ backgroundColor: agency.primaryColor }}
+            >
+              <MessageCircle className="h-4 w-4" />
+              {FORM.successCta}
+            </a>
           </div>
         ) : (
           <form onSubmit={onSubmit} className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" noValidate>
@@ -168,33 +205,35 @@ export function QuoteFormSection({
                 autoComplete="email"
               />
             </Field>
-            <Field label="Cidade ou aeroporto de saída">
+            <Field label="Cidade ou aeroporto de saída" required>
               <input
                 type="text"
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
                 className="input"
-                placeholder="Ex.: São Paulo"
+                placeholder="Ex.: São Paulo, Belo Horizonte ou Brasília"
+                required
               />
             </Field>
-            <Field label="Mês ou período desejado">
+            <Field label="Mês ou período desejado" required>
               <input
                 type="text"
                 value={period}
                 onChange={(e) => setPeriod(e.target.value)}
                 className="input"
-                placeholder="Ex.: Janeiro de 2027"
+                placeholder="Ex.: janeiro de 2027 ou 10 a 17 de janeiro"
+                required
               />
             </Field>
-            <Field label="Categoria de interesse">
+            <Field label="Acomodação de interesse">
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
-                <option value="">Sem preferência</option>
-                <option value="Apartamentos">Apartamentos</option>
-                <option value="Suítes">Suítes</option>
-                <option value="Bangalôs">Bangalôs</option>
+                <option value="">Ainda não sei</option>
+                <option value="Apartamento">Apartamento</option>
+                <option value="Suíte">Suíte</option>
+                <option value="Bangalô">Bangalô</option>
               </select>
             </Field>
-            <Field label="Quantidade de adultos">
+            <Field label="Quantidade de adultos" required>
               <input
                 type="number"
                 min={1}
@@ -203,7 +242,7 @@ export function QuoteFormSection({
                 className="input"
               />
             </Field>
-            <Field label="Quantidade de crianças">
+            <Field label="Quantidade de crianças" required>
               <input
                 type="number"
                 min={0}
@@ -219,17 +258,18 @@ export function QuoteFormSection({
                   value={kidsAges}
                   onChange={(e) => setKidsAges(e.target.value)}
                   className="input"
-                  placeholder="Ex.: 5 e 10 anos"
+                  placeholder="Ex.: 4 e 8 anos"
                 />
               </Field>
             )}
             <div className="sm:col-span-2 lg:col-span-3">
-              <Field label="Observações">
+              <Field label="Observações (opcional)">
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="input min-h-[90px]"
                   rows={3}
+                  placeholder="Conte o que é importante para a viagem: datas flexíveis, comemoração, acessibilidade ou alguma preferência."
                 />
               </Field>
             </div>
@@ -242,7 +282,20 @@ export function QuoteFormSection({
                 className="mt-0.5 h-4 w-4"
                 required
               />
-              <span>{FORM.consent}</span>
+              <span>
+                {FORM.consent(agency.name).replace(
+                  "Política de Privacidade",
+                  ""
+                )}
+                <a
+                  href={agency.privacyUrl}
+                  className="underline"
+                  style={{ color: agency.primaryColor }}
+                >
+                  Política de Privacidade
+                </a>
+                .
+              </span>
             </label>
 
             <div className="sm:col-span-2 lg:col-span-3">
@@ -252,7 +305,7 @@ export function QuoteFormSection({
                 className="inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-[14px] font-semibold text-white shadow-sm transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
                 style={{ backgroundColor: agency.primaryColor }}
               >
-                {loading ? "Enviando..." : FORM.submit}
+                {loading ? FORM.submitLoading : FORM.submit}
               </button>
               <p className="mt-3 text-center text-[12px] text-slate-500">{FORM.privacy}</p>
             </div>
