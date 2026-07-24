@@ -4,6 +4,7 @@ import { useAuth } from "./useAuth";
 import { ItineraryFormData, Itinerary, ItineraryDay, Activity, AIGeneratedItinerary } from "@/types/itinerary";
 import { format, addDays, differenceInDays } from "date-fns";
 import { toast } from "sonner";
+import { parseLocalDate } from "@/lib/dateParsing";
 
 export function useItineraries() {
   const { user } = useAuth();
