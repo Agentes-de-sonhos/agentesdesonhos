@@ -5,6 +5,11 @@ import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 import type { DayWeather } from "@/hooks/useTripWeather";
+import {
+  isPricingContentEmpty,
+  sanitizePricingContent,
+  PRICING_SECTION_TITLE,
+} from "@/lib/pricingSection";
 
 function weatherEmoji(code: number): string {
   if (code === 0) return "☀️";
@@ -293,6 +298,18 @@ export function generatePDFContent(
         </div>
         ${daysHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum dia programado</p>'}
       </div>
+
+      ${
+        itinerary.showPricingSection && !isPricingContentEmpty(itinerary.pricingContent)
+          ? `
+      <div class="pdf-block" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:18px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <h3 style="font-size:15px;font-weight:800;color:#1e293b;margin:0 0 12px;letter-spacing:-0.01em;">${PRICING_SECTION_TITLE}</h3>
+        <div style="font-size:12.5px;color:#334155;line-height:1.65;">
+          ${sanitizePricingContent(itinerary.pricingContent || "")}
+        </div>
+      </div>`
+          : ""
+      }
 
       <!-- Agent Signature -->
       ${generateAgentSignature(profile || null)}
