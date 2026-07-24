@@ -15,6 +15,16 @@ import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
+import {
+  ItineraryListItem,
+  itineraryMatchesSearch,
+} from "@/components/itinerary/ItineraryListItem";
+import { useDebounce } from "@/hooks/useDebounce";
+import {
+  Search as SearchIcon,
+  Eye,
+  Trash2,
+} from "lucide-react";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
 import { PublishReviewDialog } from "@/components/itinerary/PublishReviewDialog";
 import { useItineraries } from "@/hooks/useItineraries";
@@ -96,6 +106,8 @@ export default function CriarRoteiro() {
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
   const [templateTargetItinerary, setTemplateTargetItinerary] = useState<Itinerary | null>(null);
   const [importWizardOpen, setImportWizardOpen] = useState(false);
+  const [listSearch, setListSearch] = useState("");
+  const debouncedListSearch = useDebounce(listSearch, 200);
 
   const {
     itineraries,
