@@ -32,7 +32,6 @@ type PullSkipReason =
   | "missing_start_date"
   | "mapping_tombstoned"
   | "already_synced_unchanged"
-  | "duplicate_of_mapped_local_event"
   | "local_reference_missing";
 
 interface SkipSample {
@@ -669,7 +668,6 @@ Deno.serve(async (req) => {
       let skipAlreadyMapped = 0;
       let skipNoDate = 0;
       let skipJustPushed = 0;
-      let skipDuplicateLocal = 0;
       let skipTombstone = 0;
 
       for (const gEvent of googleEvents) {
@@ -824,23 +822,13 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        const candidateSignature = localEventSignature({
-          title: gEvent.summary || "Sem título",
-          description: gEvent.description || null,
-          event_date: startDate,
-          event_time: startTime,
-        });
-        const duplicateMappedLocalId = mappedLocalSignatures.get(candidateSignature);
-        if (duplicateMappedLocalId) {
-          pulledSkipped++; skipDuplicateLocal++;
-          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=duplicate-of-mapped-local-event mapped_event=${duplicateMappedLocalId}`);
-          recordPullSkip("duplicate_of_mapped_local_event", gEvent, {
-            agency_event_id: duplicateMappedLocalId,
-            has_mapping: false,
-          });
-          continue;
-        }
-
+        // Deduplication rule (pull): an event is a duplicate ONLY when its
+        // google_event_id already has a mapping in google_calendar_sync
+        // (checked via reverseSyncMap above). Content-based signature
+        // matching (title+date+time+description) was removed: it wrongly
+        // blocked legit Google-side events whose title/date coincided with
+        // an existing local event but had no mapping. The DB unique
+        // constraint (user_id, google_event_id) is the source of truth.
         try {
           const { data: inserted, error: insErr } = await supabase
             .from("agency_events")
@@ -883,7 +871,6 @@ Deno.serve(async (req) => {
           }
           reverseSyncMap.set(gEvent.id, insertedMapping);
           syncMap.set(inserted.id, insertedMapping);
-          mappedLocalSignatures.set(candidateSignature, inserted.id);
           pulledCreated++;
           console.log(`[calendar-sync] mapping-created-from-pull google=${gEvent.id} local=${inserted.id} synced_at=${syncedAt}`);
           console.log(`[calendar-sync] pull-created google=${gEvent.id} local=${inserted.id}`);
@@ -894,7 +881,7 @@ Deno.serve(async (req) => {
       }
 
       console.log(
-        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} deleted_local=${deletedLocal} skipped_cancelled=${skipCancelled} skipped_tombstone=${skipTombstone} skipped_just_pushed=${skipJustPushed} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_duplicate_local=${skipDuplicateLocal} skipped_no_date=${skipNoDate}`
+        `[calendar-sync] pull-summary created=${pulledCreated} updated=${pulledUpdated} deleted_local=${deletedLocal} skipped_cancelled=${skipCancelled} skipped_tombstone=${skipTombstone} skipped_just_pushed=${skipJustPushed} skipped_already_mapped_unchanged=${skipAlreadyMapped} skipped_no_date=${skipNoDate}`
       );
     }
 
