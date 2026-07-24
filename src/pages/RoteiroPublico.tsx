@@ -523,7 +523,16 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
         {/* ─── Valores e Condições (opcional, sempre aberto) ─── */}
         {itinerary.showPricingSection && !isPricingContentEmpty(itinerary.pricingContent) && (
-          <section className="rounded-2xl border border-border/50 bg-card p-5 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <>
+            {/* Pausa visual entre o roteiro e a proposta comercial */}
+            <div
+              aria-hidden="true"
+              className="mt-8 sm:mt-10 mb-6 h-px w-full bg-border/60"
+            />
+          <section
+            className="rounded-2xl bg-card p-5 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+            style={{ border: "1px solid hsl(var(--primary) / 0.25)" }}
+          >
             <div className="flex items-center gap-3 mb-4">
               <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <DollarSign className="h-4 w-4 text-primary" />
@@ -537,6 +546,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               dangerouslySetInnerHTML={{ __html: sanitizePricingContent(itinerary.pricingContent || "") }}
             />
           </section>
+          </>
         )}
 
         {/* ─── Agent Signature (horizontal, premium) ─── */}
