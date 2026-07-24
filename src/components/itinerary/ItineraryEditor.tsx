@@ -73,6 +73,9 @@ import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItine
 import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
 import { DayReorderDialog } from "./DayReorderDialog";
+import { AddDayDialog } from "./AddDayDialog";
+import { DeleteDayDialog } from "./DeleteDayDialog";
+import type { buildAddDayPlan, buildDeleteDayPlan, DeleteDayMode } from "@/lib/itineraryDayPlan";
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
 import {
@@ -253,6 +256,16 @@ interface ItineraryEditorProps {
   onMoveActivity?: (activityId: string, dayId: string, period: "manha" | "tarde" | "noite") => void;
   onReorderActivities?: (updates: { id: string; orderIndex: number }[]) => void;
   onReorderDays?: (orderedDayIds: string[]) => Promise<void> | void;
+  onAddDay?: (
+    plan: ReturnType<typeof buildAddDayPlan>,
+  ) => Promise<void> | void;
+  onDeleteDay?: (
+    plan: ReturnType<typeof buildDeleteDayPlan>,
+    mode: DeleteDayMode,
+    day: ItineraryDay,
+  ) => Promise<void> | void;
+  itineraryStartDate?: string;
+  itineraryEndDate?: string;
   onApproveAll: () => void;
   aiContext?: AIContext;
 }
@@ -266,6 +279,10 @@ export function ItineraryEditor({
   onMoveActivity,
   onReorderActivities,
   onReorderDays,
+  onAddDay,
+  onDeleteDay,
+  itineraryStartDate,
+  itineraryEndDate,
   onApproveAll,
   aiContext,
 }: ItineraryEditorProps) {
@@ -273,6 +290,8 @@ export function ItineraryEditor({
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [reorderOpen, setReorderOpen] = useState(false);
+  const [addDayOpen, setAddDayOpen] = useState(false);
+  const [dayPendingDelete, setDayPendingDelete] = useState<ItineraryDay | null>(null);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
     useItineraryPeriodImages(itineraryId);
   const { data: linkedTrip } = useLinkedTripForItinerary(itineraryId);
