@@ -510,6 +510,8 @@ export function useItineraries() {
         headline: string | null;
         start_date: string;
         end_date: string;
+        show_pricing_section: boolean;
+        pricing_content: string | null;
       }>;
     }) => {
       const { error } = await supabase
