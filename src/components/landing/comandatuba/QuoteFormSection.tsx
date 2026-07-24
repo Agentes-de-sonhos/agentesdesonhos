@@ -283,10 +283,7 @@ export function QuoteFormSection({
                 required
               />
               <span>
-                {FORM.consent(agency.name).replace(
-                  "Política de Privacidade",
-                  ""
-                )}
+                {FORM.consent(agency.name).split("Política de Privacidade")[0]}
                 <a
                   href={agency.privacyUrl}
                   className="underline"
@@ -294,7 +291,7 @@ export function QuoteFormSection({
                 >
                   Política de Privacidade
                 </a>
-                .
+                {FORM.consent(agency.name).split("Política de Privacidade")[1] ?? ""}
               </span>
             </label>
 
