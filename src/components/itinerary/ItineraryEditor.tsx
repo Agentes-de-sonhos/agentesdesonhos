@@ -38,6 +38,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RichContentEditor } from "@/components/admin/PopupRichTextEditor";
+import { descriptionToEditorHtml, sanitizedDescriptionHtml } from "@/lib/richDescription";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import {
@@ -488,16 +490,16 @@ export function ItineraryEditor({
                           placeholder="Nome da atividade"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label>Descrição</Label>
-                        <Textarea
-                          value={newActivity.description || ""}
-                          onChange={(e) =>
-                            setNewActivity({ ...newActivity, description: e.target.value })
-                          }
-                          placeholder="Descrição detalhada"
-                        />
-                      </div>
+                       <div className="space-y-2">
+                         <Label>Descrição</Label>
+                         <RichContentEditor
+                           content={descriptionToEditorHtml(newActivity.description)}
+                           onChange={(html) =>
+                             setNewActivity({ ...newActivity, description: html })
+                           }
+                           editorClassName="min-h-[260px] [&_.ProseMirror]:min-h-[240px]"
+                         />
+                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Local</Label>
@@ -615,9 +617,10 @@ export function ItineraryEditor({
                                 )}
                               </div>
                               {activity.description && (
-                                <p className="text-sm text-muted-foreground whitespace-pre-line break-words">
-                                  {activity.description}
-                                </p>
+                                <div
+                                  className="prose prose-sm max-w-none text-sm text-muted-foreground break-words [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md"
+                                  dangerouslySetInnerHTML={{ __html: sanitizedDescriptionHtml(activity.description) }}
+                                />
                               )}
                               <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                                 {activity.location && (
