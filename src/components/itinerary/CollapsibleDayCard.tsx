@@ -11,6 +11,7 @@ import type { DayWeather } from "@/hooks/useTripWeather";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import type { TripService } from "@/types/trip";
 import { SERVICE_CHIP_LABELS, SERVICE_ICONS } from "@/lib/tripServiceLabels";
+import { sanitizedDescriptionHtml } from "@/lib/richDescription";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon } as const;
 const periodLabels = { manha: "Manhã", tarde: "Tarde", noite: "Noite" } as const;
