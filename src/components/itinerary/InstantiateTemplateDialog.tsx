@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 const STYLE_LABELS = {
   economico: "Econômico",
-  moderado: "Moderado",
+  conforto: "Conforto",
   luxo: "Premium / Luxo",
 } as const;
 const PACE_LABELS = { leve: "Leve", moderado: "Moderado", intenso: "Intenso" } as const;
@@ -35,12 +35,13 @@ export function InstantiateTemplateDialog({ open, onOpenChange, template }: Prop
   const [startStr, setStartStr] = useState(today.toISOString().slice(0, 10));
   const [endStr, setEndStr] = useState(defaultEnd.toISOString().slice(0, 10));
   const [travelers, setTravelers] = useState(2);
-  const [style, setStyle] = useState<string>(template.style);
+  const normalizeStyle = (s: string) => (s === "moderado" ? "conforto" : s);
+  const [style, setStyle] = useState<string>(normalizeStyle(template.style));
   const [profile, setProfile] = useState<string>(template.profile);
 
   useEffect(() => {
     if (open) {
-      setStyle(template.style);
+      setStyle(normalizeStyle(template.style));
       setProfile(template.profile);
     }
   }, [open, template]);
