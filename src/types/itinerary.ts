@@ -248,6 +248,8 @@ export interface Itinerary {
   passengers?: { name: string; age?: number | null }[];
   passengerInterests?: string[];
   headline?: string | null;
+  showPricingSection?: boolean;
+  pricingContent?: string | null;
 }
 
 export interface AIGeneratedDay {
