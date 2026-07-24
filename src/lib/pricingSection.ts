@@ -36,7 +36,7 @@ export function sanitizePricingContent(html: string): string {
       "blockquote", "hr",
       "img",
     ],
-    ALLOWED_ATTR: ["href", "target", "rel", "style", "src", "alt", "width", "height"],
+    ALLOWED_ATTR: ["href", "target", "rel", "style", "src", "alt", "width", "height", "data-align"],
     ALLOWED_URI_REGEXP: /^(?:https?:|mailto:|tel:|#|\/)/i,
   });
 

@@ -2,7 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
+import { ResizableImage, defaultImageAttrs } from './ResizableImageExtension';
 import { Button } from '@/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Heading1, Heading2, Heading3, Link as LinkIcon, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -70,14 +70,7 @@ export function PopupRichTextEditor({ content, onChange }: PopupRichTextEditorPr
       }),
       Underline,
       Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline' } }),
-      Image.configure({
-        inline: false,
-        allowBase64: false,
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-md my-2',
-          style: 'max-width:100%;height:auto;',
-        },
-      }),
+      ResizableImage,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -103,7 +96,7 @@ export function PopupRichTextEditor({ content, onChange }: PopupRichTextEditorPr
               return;
             }
             const { schema } = view.state;
-            const node = schema.nodes.image?.create({ src: url });
+            const node = schema.nodes.image?.create(defaultImageAttrs(url));
             if (!node) {
               toast.error('Editor não suporta imagens.', { id: toastId });
               return;
