@@ -1219,6 +1219,15 @@ export default function CriarRoteiro() {
                 onAddActivity={handleAddActivity}
                 onMoveActivity={handleMoveActivity}
                 onReorderActivities={handleReorderActivities}
+                onReorderDays={async (orderedDayIds) => {
+                  if (!currentItinerary) return;
+                  await reorderDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    orderedDayIds,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success("Ordem dos dias atualizada");
+                }}
                 onApproveAll={handleApproveAll}
                 aiContext={{
                   destination: currentItinerary.destination,
