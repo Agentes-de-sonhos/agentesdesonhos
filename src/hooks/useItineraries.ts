@@ -792,6 +792,7 @@ export function useItineraries() {
     updateItineraryDetails,
     adjustItineraryDates,
     reorderDays,
+    mutateItineraryDays,
     deleteItinerary,
   };
 }
