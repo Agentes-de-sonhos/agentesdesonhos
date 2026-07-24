@@ -302,7 +302,8 @@ export function generatePDFContent(
       ${
         itinerary.showPricingSection && !isPricingContentEmpty(itinerary.pricingContent)
           ? `
-      <div class="pdf-block" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:18px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <div style="height:1px;background:#e2e8f0;margin:32px 0 24px;"></div>
+      <div class="pdf-block" style="background:#ffffff;border:1px solid rgba(37,99,235,0.22);border-radius:16px;padding:18px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
         <h3 style="font-size:15px;font-weight:800;color:#1e293b;margin:0 0 12px;letter-spacing:-0.01em;">${PRICING_SECTION_TITLE}</h3>
         <div style="font-size:12.5px;color:#334155;line-height:1.65;">
           ${sanitizePricingContent(itinerary.pricingContent || "")}
