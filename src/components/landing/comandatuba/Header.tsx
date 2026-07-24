@@ -35,7 +35,6 @@ export function Header({ agency }: { agency: AgencyConfig }) {
           )}
           <div className="leading-tight min-w-0">
             <p className="truncate font-display text-[15px] font-bold text-slate-900 sm:text-base">{agency.name}</p>
-            <p className="hidden truncate text-[11px] text-slate-500 sm:block">viagens personalizadas</p>
           </div>
         </div>
 

@@ -54,6 +54,9 @@ export function AccommodationsSection({
             </article>
           ))}
         </div>
+        <p className="mx-auto mt-6 max-w-2xl text-center text-[12px] text-slate-400">
+          {ACCOMMODATIONS.disclaimer}
+        </p>
       </div>
     </section>
   );
