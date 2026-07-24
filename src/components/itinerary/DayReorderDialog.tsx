@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -48,18 +48,38 @@ interface DayReorderDialogProps {
   onSave: (orderedDayIds: string[]) => Promise<void> | void;
 }
 
+function addDays(base: Date, delta: number): Date {
+  const d = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+  d.setDate(d.getDate() + delta);
+  return d;
+}
+
+function daySummary(day: ItineraryDay): string {
+  const total = day.activities?.length ?? 0;
+  const first = day.activities?.find((a) => a.title && a.title.trim())?.title?.trim();
+  const count = `${total} ${total === 1 ? "atividade" : "atividades"}`;
+  if (first) return `${first} · ${count}`;
+  return count;
+}
+
 function SortableDayRow({
   day,
   index,
+  previewDate,
   count,
   onMoveUp,
   onMoveDown,
+  highlighted,
+  rowRef,
 }: {
   day: ItineraryDay;
   index: number;
+  previewDate: Date;
   count: number;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  highlighted: boolean;
+  rowRef?: (el: HTMLDivElement | null) => void;
 }) {
   const {
     attributes,
@@ -74,14 +94,17 @@ function SortableDayRow({
     transform: CSS.Translate.toString(transform),
     transition,
   };
-  const total = day.activities.length;
   return (
     <div
-      ref={setNodeRef}
+      ref={(el) => {
+        setNodeRef(el);
+        rowRef?.(el);
+      }}
       style={style}
       className={cn(
-        "flex items-center gap-2 rounded-lg border bg-card p-3 will-change-transform",
-        isDragging && "opacity-70 shadow-lg ring-2 ring-primary/40"
+        "flex items-center gap-2 rounded-lg border bg-card p-3 will-change-transform transition-all duration-300",
+        isDragging && "opacity-80 shadow-lg ring-2 ring-primary/50 z-10",
+        highlighted && !isDragging && "ring-2 ring-primary/60 bg-primary/5 shadow-sm"
       )}
     >
       <button
@@ -96,10 +119,10 @@ function SortableDayRow({
       </button>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-semibold">
-          Dia {index + 1} — {formatItineraryDayHeader(parseLocalDate(day.date))}
+          Dia {index + 1} — {formatItineraryDayHeader(previewDate)}
         </div>
-        <div className="text-xs text-muted-foreground">
-          {total} {total === 1 ? "atividade" : "atividades"}
+        <div className="truncate text-xs text-muted-foreground">
+          {daySummary(day)}
         </div>
       </div>
       <div className="flex flex-col gap-1">
@@ -110,7 +133,7 @@ function SortableDayRow({
           className="h-6 w-6"
           onClick={onMoveUp}
           disabled={index === 0}
-          aria-label="Mover para cima"
+          aria-label={`Mover Dia ${index + 1} para cima`}
         >
           <ArrowUp className="h-3.5 w-3.5" />
         </Button>
@@ -121,7 +144,7 @@ function SortableDayRow({
           className="h-6 w-6"
           onClick={onMoveDown}
           disabled={index === count - 1}
-          aria-label="Mover para baixo"
+          aria-label={`Mover Dia ${index + 1} para baixo`}
         >
           <ArrowDown className="h-3.5 w-3.5" />
         </Button>
@@ -140,10 +163,20 @@ export function DayReorderDialog({
   const [order, setOrder] = useState<string[]>(initialIds);
   const [saving, setSaving] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState<string>("");
+  const rowRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) setOrder(days.map((d) => d.id!).filter(Boolean));
   }, [open, days]);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    };
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -152,9 +185,35 @@ export function DayReorderDialog({
   );
 
   const byId = new Map(days.map((d) => [d.id!, d]));
+  // Trip start date = earliest existing day date (unchanged during reorder).
+  const baseDate = useMemo(() => {
+    const dates = days
+      .map((d) => {
+        try {
+          return parseLocalDate(d.date).getTime();
+        } catch {
+          return null;
+        }
+      })
+      .filter((n): n is number => n !== null);
+    if (!dates.length) return new Date();
+    return new Date(Math.min(...dates));
+  }, [days]);
+
   const isDirty =
     order.length !== initialIds.length ||
     order.some((id, i) => id !== initialIds[i]);
+
+  const flashHighlight = (id: string) => {
+    setHighlightedId(id);
+    if (highlightTimer.current) clearTimeout(highlightTimer.current);
+    highlightTimer.current = setTimeout(() => setHighlightedId(null), 900);
+    // scroll into view on next paint
+    requestAnimationFrame(() => {
+      const el = rowRefs.current.get(id);
+      el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -163,12 +222,17 @@ export function DayReorderDialog({
     const newIndex = order.indexOf(over.id as string);
     if (oldIndex < 0 || newIndex < 0) return;
     setOrder(arrayMove(order, oldIndex, newIndex));
+    flashHighlight(active.id as string);
+    setAnnouncement(`Dia movido para a posição ${newIndex + 1}.`);
   };
 
   const move = (index: number, delta: number) => {
     const target = index + delta;
     if (target < 0 || target >= order.length) return;
+    const id = order[index];
     setOrder(arrayMove(order, index, target));
+    flashHighlight(id);
+    setAnnouncement(`Dia movido para a posição ${target + 1}.`);
   };
 
   const attemptClose = () => {
@@ -223,15 +287,24 @@ export function DayReorderDialog({
                         key={id}
                         day={day}
                         index={index}
+                        previewDate={addDays(baseDate, index)}
                         count={order.length}
                         onMoveUp={() => move(index, -1)}
                         onMoveDown={() => move(index, 1)}
+                        highlighted={highlightedId === id}
+                        rowRef={(el) => {
+                          if (el) rowRefs.current.set(id, el);
+                          else rowRefs.current.delete(id);
+                        }}
                       />
                     );
                   })}
                 </div>
               </SortableContext>
             </DndContext>
+            <div role="status" aria-live="polite" className="sr-only">
+              {announcement}
+            </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={attemptClose} disabled={saving}>
