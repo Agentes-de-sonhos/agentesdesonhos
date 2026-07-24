@@ -459,6 +459,17 @@ export function ItineraryEditor({
             Reordenar dias
           </Button>
         )}
+        {onAddDay && itineraryStartDate && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAddDayOpen(true)}
+            className="ml-2"
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Adicionar dia
+          </Button>
+        )}
       </div>
 
       {onReorderDays && (
@@ -468,6 +479,36 @@ export function ItineraryEditor({
           days={days}
           onSave={async (ids) => {
             await onReorderDays(ids);
+          }}
+        />
+      )}
+
+      {onAddDay && itineraryStartDate && (
+        <AddDayDialog
+          open={addDayOpen}
+          onOpenChange={setAddDayOpen}
+          days={days}
+          itineraryStartDate={itineraryStartDate}
+          onConfirm={async (plan) => {
+            await onAddDay(plan);
+          }}
+        />
+      )}
+
+      {onDeleteDay && itineraryStartDate && itineraryEndDate && (
+        <DeleteDayDialog
+          open={!!dayPendingDelete}
+          onOpenChange={(o) => {
+            if (!o) setDayPendingDelete(null);
+          }}
+          day={dayPendingDelete}
+          days={days}
+          itineraryStartDate={itineraryStartDate}
+          itineraryEndDate={itineraryEndDate}
+          onConfirm={async (plan, mode) => {
+            if (!dayPendingDelete) return;
+            await onDeleteDay(plan, mode, dayPendingDelete);
+            setDayPendingDelete(null);
           }}
         />
       )}
