@@ -540,6 +540,20 @@ export function ItineraryEditor({
                       Adicionar
                     </Button>
                   </DialogTrigger>
+                <div className="ml-2 inline-flex">
+                  {onDeleteDay && days.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => setDayPendingDelete(day)}
+                      aria-label={`Excluir Dia ${day.dayNumber}`}
+                      title="Excluir este dia"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
                   <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Adicionar Atividade</DialogTitle>
