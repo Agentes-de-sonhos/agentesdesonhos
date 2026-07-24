@@ -73,6 +73,9 @@ import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItine
 import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
 import { DayReorderDialog } from "./DayReorderDialog";
+import { AddDayDialog } from "./AddDayDialog";
+import { DeleteDayDialog } from "./DeleteDayDialog";
+import type { buildAddDayPlan, buildDeleteDayPlan, DeleteDayMode } from "@/lib/itineraryDayPlan";
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
 import {
@@ -253,6 +256,16 @@ interface ItineraryEditorProps {
   onMoveActivity?: (activityId: string, dayId: string, period: "manha" | "tarde" | "noite") => void;
   onReorderActivities?: (updates: { id: string; orderIndex: number }[]) => void;
   onReorderDays?: (orderedDayIds: string[]) => Promise<void> | void;
+  onAddDay?: (
+    plan: ReturnType<typeof buildAddDayPlan>,
+  ) => Promise<void> | void;
+  onDeleteDay?: (
+    plan: ReturnType<typeof buildDeleteDayPlan>,
+    mode: DeleteDayMode,
+    day: ItineraryDay,
+  ) => Promise<void> | void;
+  itineraryStartDate?: string;
+  itineraryEndDate?: string;
   onApproveAll: () => void;
   aiContext?: AIContext;
 }
@@ -266,6 +279,10 @@ export function ItineraryEditor({
   onMoveActivity,
   onReorderActivities,
   onReorderDays,
+  onAddDay,
+  onDeleteDay,
+  itineraryStartDate,
+  itineraryEndDate,
   onApproveAll,
   aiContext,
 }: ItineraryEditorProps) {
@@ -273,6 +290,8 @@ export function ItineraryEditor({
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [reorderOpen, setReorderOpen] = useState(false);
+  const [addDayOpen, setAddDayOpen] = useState(false);
+  const [dayPendingDelete, setDayPendingDelete] = useState<ItineraryDay | null>(null);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
     useItineraryPeriodImages(itineraryId);
   const { data: linkedTrip } = useLinkedTripForItinerary(itineraryId);
@@ -440,6 +459,17 @@ export function ItineraryEditor({
             Reordenar dias
           </Button>
         )}
+        {onAddDay && itineraryStartDate && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAddDayOpen(true)}
+            className="ml-2"
+          >
+            <Plus className="mr-1 h-4 w-4" />
+            Adicionar dia
+          </Button>
+        )}
       </div>
 
       {onReorderDays && (
@@ -449,6 +479,36 @@ export function ItineraryEditor({
           days={days}
           onSave={async (ids) => {
             await onReorderDays(ids);
+          }}
+        />
+      )}
+
+      {onAddDay && itineraryStartDate && (
+        <AddDayDialog
+          open={addDayOpen}
+          onOpenChange={setAddDayOpen}
+          days={days}
+          itineraryStartDate={itineraryStartDate}
+          onConfirm={async (plan) => {
+            await onAddDay(plan);
+          }}
+        />
+      )}
+
+      {onDeleteDay && itineraryStartDate && itineraryEndDate && (
+        <DeleteDayDialog
+          open={!!dayPendingDelete}
+          onOpenChange={(o) => {
+            if (!o) setDayPendingDelete(null);
+          }}
+          day={dayPendingDelete}
+          days={days}
+          itineraryStartDate={itineraryStartDate}
+          itineraryEndDate={itineraryEndDate}
+          onConfirm={async (plan, mode) => {
+            if (!dayPendingDelete) return;
+            await onDeleteDay(plan, mode, dayPendingDelete);
+            setDayPendingDelete(null);
           }}
         />
       )}
@@ -480,6 +540,20 @@ export function ItineraryEditor({
                       Adicionar
                     </Button>
                   </DialogTrigger>
+                <div className="ml-2 inline-flex">
+                  {onDeleteDay && days.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => setDayPendingDelete(day)}
+                      aria-label={`Excluir Dia ${day.dayNumber}`}
+                      title="Excluir este dia"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
                   <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Adicionar Atividade</DialogTitle>

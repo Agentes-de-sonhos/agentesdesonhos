@@ -630,6 +630,96 @@ export function useItineraries() {
     },
   });
 
+  /**
+   * Apply an add/delete plan atomically-ish: reprice existing days to
+   * temporary negative day_numbers, drop removed days, then commit the
+   * final `day_number` and `date` for each kept day and insert any new
+   * empty days. Finally updates the itinerary's start/end dates. This
+   * mirrors the two-phase strategy used by `reorderDays` to avoid
+   * colliding with the `(itinerary_id, day_number)` unique index.
+   */
+  const mutateItineraryDays = useMutation({
+    mutationFn: async ({
+      itineraryId,
+      sequence,
+      newStartDate,
+      newEndDate,
+    }: {
+      itineraryId: string;
+      sequence: Array<{ dayId?: string }>;
+      newStartDate: string;
+      newEndDate: string;
+    }) => {
+      if (sequence.length < 1) {
+        throw new Error("O roteiro precisa possuir pelo menos um dia.");
+      }
+
+      const { data: existing, error: exErr } = await supabase
+        .from("itinerary_days")
+        .select("id, day_number")
+        .eq("itinerary_id", itineraryId);
+      if (exErr) throw exErr;
+
+      const keptIds = new Set(
+        sequence.filter((s) => s.dayId).map((s) => s.dayId as string),
+      );
+      const toDelete = (existing || []).filter((d) => !keptIds.has(d.id as string));
+
+      // Phase 1 — negative day_numbers on kept rows.
+      for (let i = 0; i < sequence.length; i++) {
+        const slot = sequence[i];
+        if (!slot.dayId) continue;
+        const { error } = await supabase
+          .from("itinerary_days")
+          .update({ day_number: -(i + 1) })
+          .eq("id", slot.dayId);
+        if (error) throw error;
+      }
+
+      // Phase 2 — delete removed days (cascade removes activities + period images).
+      if (toDelete.length > 0) {
+        const { error } = await supabase
+          .from("itinerary_days")
+          .delete()
+          .in("id", toDelete.map((d) => d.id as string));
+        if (error) throw error;
+      }
+
+      // Phase 3 — commit final day_number/date for kept + insert new empties.
+      const start = parseLocalDate(newStartDate);
+      for (let i = 0; i < sequence.length; i++) {
+        const slot = sequence[i];
+        const date = format(addDays(start, i), "yyyy-MM-dd");
+        if (slot.dayId) {
+          const { error } = await supabase
+            .from("itinerary_days")
+            .update({ day_number: i + 1, date })
+            .eq("id", slot.dayId);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("itinerary_days")
+            .insert({
+              itinerary_id: itineraryId,
+              day_number: i + 1,
+              date,
+            });
+          if (error) throw error;
+        }
+      }
+
+      // Phase 4 — sync itinerary start/end dates.
+      const { error: itErr } = await supabase
+        .from("itineraries")
+        .update({ start_date: newStartDate, end_date: newEndDate })
+        .eq("id", itineraryId);
+      if (itErr) throw itErr;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+    },
+  });
+
   const deleteItinerary = useMutation({
     mutationFn: async (itineraryId: string) => {
       const { error } = await supabase
@@ -702,6 +792,7 @@ export function useItineraries() {
     updateItineraryDetails,
     adjustItineraryDates,
     reorderDays,
+    mutateItineraryDays,
     deleteItinerary,
   };
 }
