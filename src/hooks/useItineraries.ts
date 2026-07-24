@@ -54,12 +54,35 @@ export function useItineraries() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("itineraries")
-        .select("*, clients:client_id ( name )")
+        .select("*")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data || []).map(mapItinerary);
+      const rows = data || [];
+      const clientIds = Array.from(
+        new Set(
+          rows
+            .map((r: any) => r.client_id)
+            .filter((v: unknown): v is string => typeof v === "string" && !!v),
+        ),
+      );
+      let clientMap = new Map<string, string>();
+      if (clientIds.length) {
+        const { data: clients } = await supabase
+          .from("clients")
+          .select("id, name")
+          .in("id", clientIds);
+        clientMap = new Map(
+          (clients ?? []).map((c: any) => [c.id as string, c.name as string]),
+        );
+      }
+      return rows.map((r: any) =>
+        mapItinerary({
+          ...r,
+          clients: r.client_id ? { name: clientMap.get(r.client_id) ?? null } : null,
+        }),
+      );
     },
     enabled: !!user,
   });
