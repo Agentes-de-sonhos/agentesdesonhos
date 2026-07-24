@@ -180,9 +180,10 @@ export function CollapsibleDayCard({
                         </h4>
 
                         {activity.description && (
-                          <p className="rt-body text-muted-foreground leading-relaxed whitespace-pre-line break-words">
-                            {activity.description}
-                          </p>
+                          <div
+                            className="rt-body prose prose-sm max-w-none text-muted-foreground leading-relaxed break-words [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md"
+                            dangerouslySetInnerHTML={{ __html: sanitizedDescriptionHtml(activity.description) }}
+                          />
                         )}
 
                         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-muted-foreground/90 pt-0.5">
