@@ -376,6 +376,46 @@ export default function MeusProjetos() {
   };
 
   const ProjectRow = ({ item }: { item: ProjectItem }) => {
+    if (item.type === "itinerary") {
+      const found = itineraries.find((i: any) => i.id === item.id);
+      if (found) {
+        return (
+          <ItineraryListItem
+            itinerary={found as Itinerary}
+            onTitleClick={() => handleEdit(item)}
+            actions={
+              <>
+                <IconAction label="Visualizar" onClick={() => handleEdit(item)}>
+                  <Eye className="h-4 w-4" />
+                </IconAction>
+                <IconAction label="Editar" onClick={() => handleEdit(item)}>
+                  <Pencil className="h-4 w-4" />
+                </IconAction>
+                <IconAction
+                  label="Salvar como modelo"
+                  onClick={() => setTemplateTarget(found as Itinerary)}
+                >
+                  <Star className="h-4 w-4" />
+                </IconAction>
+                <IconAction label="Publicar / Link" onClick={() => handleEdit(item)}>
+                  <Link2 className="h-4 w-4" />
+                </IconAction>
+                <IconAction label="Gerar PDF" onClick={() => handleEdit(item)}>
+                  <FileText className="h-4 w-4" />
+                </IconAction>
+                <IconAction
+                  label="Excluir"
+                  destructive
+                  onClick={() => setDeleteTarget(item)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </IconAction>
+              </>
+            }
+          />
+        );
+      }
+    }
     return (
       <div className="group grid grid-cols-1 md:grid-cols-[1fr_140px_180px] gap-3 md:gap-6 items-start md:items-center px-4 md:px-5 py-3.5 transition-colors hover:bg-muted/40">
         <div className="flex items-start gap-3 min-w-0">
