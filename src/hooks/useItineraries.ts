@@ -31,6 +31,11 @@ export function useItineraries() {
     headline: (data as any).headline ?? null,
     showPricingSection: (data as any).show_pricing_section ?? false,
     pricingContent: (data as any).pricing_content ?? null,
+    clientId: ((data as any).client_id ?? null) as string | null,
+    clientName:
+      ((data as any).clients?.name ?? (data as any).client?.name ?? null) as
+        | string
+        | null,
     passengers: ((data as any).passengers ?? []).map((p: any) => ({
       name: p?.name ?? "",
       age: p?.age ?? null,
@@ -49,7 +54,7 @@ export function useItineraries() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("itineraries")
-        .select("*")
+        .select("*, clients:client_id ( name )")
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
 
