@@ -1366,6 +1366,30 @@ export default function CriarRoteiro() {
                   await loadItinerary(currentItinerary.id);
                   toast.success("Ordem dos dias atualizada");
                 }}
+                itineraryStartDate={currentItinerary.startDate}
+                itineraryEndDate={currentItinerary.endDate}
+                onAddDay={async (plan) => {
+                  if (!currentItinerary) return;
+                  await mutateItineraryDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    sequence: plan.sequence,
+                    newStartDate: plan.newStartDate,
+                    newEndDate: plan.newEndDate,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success("Novo dia adicionado ao roteiro");
+                }}
+                onDeleteDay={async (plan, _mode, day) => {
+                  if (!currentItinerary) return;
+                  await mutateItineraryDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    sequence: plan.sequence,
+                    newStartDate: plan.newStartDate,
+                    newEndDate: plan.newEndDate,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success(`Dia ${day.dayNumber} excluído`);
+                }}
                 onApproveAll={handleApproveAll}
                 aiContext={{
                   destination: currentItinerary.destination,
