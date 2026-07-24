@@ -527,7 +527,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             {/* Pausa visual entre o roteiro e a proposta comercial */}
             <div
               aria-hidden="true"
-              className="mt-8 sm:mt-10 mb-6 h-px w-full bg-border/60"
+              className="mt-8 sm:mt-10 mb-6 h-px w-full"
+              style={{ backgroundColor: "hsl(var(--primary) / 0.25)" }}
             />
           <section
             className="rounded-2xl bg-card p-5 sm:p-7 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
