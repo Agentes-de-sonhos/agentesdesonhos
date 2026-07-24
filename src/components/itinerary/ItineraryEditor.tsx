@@ -718,7 +718,14 @@ export function ItineraryEditor({
                                   } as Partial<Activity>)
                                 }
                               />
-                              <Dialog>
+                              <Dialog
+                                open={editingActivity?.id === activity.id}
+                                onOpenChange={(next) => {
+                                  if (!next && editingActivity?.id === activity.id) {
+                                    setEditingActivity(null);
+                                  }
+                                }}
+                              >
                                 <DialogTrigger asChild>
                                   <Button
                                     variant="ghost"
@@ -879,7 +886,10 @@ export function ItineraryEditor({
                                     </div>
                                   )}
                                   <DialogFooter>
-                                    <Button onClick={handleSaveEdit}>
+                                    <Button
+                                      onClick={handleSaveEdit}
+                                      disabled={!editingActivity || editingActivity.id !== activity.id}
+                                    >
                                       Salvar
                                     </Button>
                                   </DialogFooter>
