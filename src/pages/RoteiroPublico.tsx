@@ -173,6 +173,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         destinationIntroImages: (itineraryData as any).destination_intro_images || [],
         showDestinationIntro: (itineraryData as any).show_destination_intro ?? true,
         headline: (itineraryData as any).headline ?? null,
+        showPricingSection: (itineraryData as any).show_pricing_section ?? false,
+        pricingContent: (itineraryData as any).pricing_content ?? null,
         passengers: ((itineraryData as any).passengers || []).map((p: any) => ({
           name: p?.name ?? "",
           age: p?.age ?? null,
