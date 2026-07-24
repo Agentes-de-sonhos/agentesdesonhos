@@ -126,6 +126,7 @@ export default function CriarRoteiro() {
     updateItineraryDetails,
     adjustItineraryDates,
     reorderDays,
+    mutateItineraryDays,
     deleteItinerary,
   } = useItineraries();
 
