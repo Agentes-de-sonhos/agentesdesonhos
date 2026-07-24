@@ -182,6 +182,7 @@ export function QuoteFormSection({
                 required
                 className="input"
                 autoComplete="name"
+                placeholder="Como podemos chamar você?"
               />
             </Field>
             <Field label="WhatsApp" required>
@@ -190,7 +191,7 @@ export function QuoteFormSection({
                 inputMode="tel"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(maskPhone(e.target.value))}
-                placeholder="(11) 99999-9999"
+                placeholder="(DDD) 00000-0000"
                 required
                 className="input"
                 autoComplete="tel"
@@ -203,6 +204,7 @@ export function QuoteFormSection({
                 onChange={(e) => setEmail(e.target.value)}
                 className="input"
                 autoComplete="email"
+                placeholder="voce@exemplo.com"
               />
             </Field>
             <Field label="Cidade ou aeroporto de saída" required>
