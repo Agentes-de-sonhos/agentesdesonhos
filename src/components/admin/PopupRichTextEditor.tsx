@@ -2,10 +2,58 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 import { Button } from '@/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, Heading1, Heading2, Heading3, Link as LinkIcon, Undo, Redo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+/**
+ * Compress a pasted image to keep storage and PDF size reasonable.
+ * Caps the longest edge at 1600px and re-encodes as JPEG at 0.85 quality.
+ * Falls back to the original blob when the browser can't decode it.
+ */
+async function compressPastedImage(file: File | Blob): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const MAX = 1600;
+    const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const blob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.85),
+    );
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
+async function uploadPastedImage(blob: Blob): Promise<string | null> {
+  try {
+    const { data: userData } = await supabase.auth.getUser();
+    const uid = userData.user?.id ?? 'anon';
+    const ext = blob.type === 'image/png' ? 'png' : 'jpg';
+    const path = `itinerary-pricing/${uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage
+      .from('media-files')
+      .upload(path, blob, { contentType: blob.type || 'image/jpeg', upsert: false });
+    if (error) throw error;
+    const { data } = supabase.storage.from('media-files').getPublicUrl(path);
+    return data.publicUrl;
+  } catch (err) {
+    console.error('[PopupRichTextEditor] paste image upload failed', err);
+    return null;
+  }
+}
 
 interface PopupRichTextEditorProps {
   content: string;
@@ -22,10 +70,54 @@ export function PopupRichTextEditor({ content, onChange }: PopupRichTextEditorPr
       }),
       Underline,
       Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-primary underline' } }),
+      Image.configure({
+        inline: false,
+        allowBase64: false,
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-md my-2',
+          style: 'max-width:100%;height:auto;',
+        },
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    editorProps: {
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+        const imageItem = Array.from(items).find((it) => it.type.startsWith('image/'));
+        if (!imageItem) return false;
+        const file = imageItem.getAsFile();
+        if (!file) return false;
+        event.preventDefault();
+
+        (async () => {
+          const toastId = toast.loading('Enviando imagem...');
+          try {
+            const compressed = await compressPastedImage(file);
+            const url = await uploadPastedImage(compressed);
+            if (!url) {
+              toast.error('Não foi possível enviar a imagem.', { id: toastId });
+              return;
+            }
+            const { schema } = view.state;
+            const node = schema.nodes.image?.create({ src: url });
+            if (!node) {
+              toast.error('Editor não suporta imagens.', { id: toastId });
+              return;
+            }
+            const tr = view.state.tr.replaceSelectionWith(node);
+            view.dispatch(tr);
+            toast.success('Imagem inserida!', { id: toastId });
+          } catch (err) {
+            console.error(err);
+            toast.error('Falha ao colar a imagem.', { id: toastId });
+          }
+        })();
+        return true;
+      },
     },
   });
 
