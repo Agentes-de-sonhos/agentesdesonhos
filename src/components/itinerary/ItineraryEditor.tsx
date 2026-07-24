@@ -517,7 +517,7 @@ export function ItineraryEditor({
         {days.map((day) => (
           <Card key={day.id}>
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div>
                   <CardTitle className="text-base">
                     Dia {day.dayNumber}
@@ -526,21 +526,116 @@ export function ItineraryEditor({
                     {formatItineraryDayHeader(parseLocalDate(day.date))}
                   </CardDescription>
                 </div>
-                <Dialog
-                  open={addingToDayId === day.id}
-                  onOpenChange={(open) => !open && setAddingToDayId(null)}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setAddingToDayId(day.id!)}
-                    >
-                      <Plus className="mr-1 h-3 w-3" />
-                      Adicionar
-                    </Button>
-                  </DialogTrigger>
-                <div className="ml-2 inline-flex">
+                <div className="flex items-center gap-1">
+                  <Dialog
+                    open={addingToDayId === day.id}
+                    onOpenChange={(open) => !open && setAddingToDayId(null)}
+                  >
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => setAddingToDayId(day.id!)}
+                        title="Adicionar atividade"
+                        aria-label="Adicionar atividade"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Adicionar Atividade</DialogTitle>
+                        <DialogDescription>
+                          Adicione uma nova atividade ao dia {day.dayNumber}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label>Período</Label>
+                          <Select
+                            value={newActivity.period}
+                            onValueChange={(value) =>
+                              setNewActivity({ ...newActivity, period: value as Activity["period"] })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="manha">Manhã</SelectItem>
+                              <SelectItem value="tarde">Tarde</SelectItem>
+                              <SelectItem value="noite">Noite</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Título</Label>
+                          <Input
+                            value={newActivity.title}
+                            onChange={(e) =>
+                              setNewActivity({ ...newActivity, title: e.target.value })
+                            }
+                            placeholder="Nome da atividade"
+                          />
+                        </div>
+                         <div className="space-y-2">
+                           <Label>Descrição</Label>
+                           <RichContentEditor
+                             content={descriptionToEditorHtml(newActivity.description)}
+                             onChange={(html) =>
+                               setNewActivity({ ...newActivity, description: html })
+                             }
+                             editorClassName="min-h-[260px] [&_.ProseMirror]:min-h-[240px]"
+                           />
+                         </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Local</Label>
+                            <Input
+                              value={newActivity.location || ""}
+                              onChange={(e) =>
+                                setNewActivity({ ...newActivity, location: e.target.value })
+                              }
+                              placeholder="Nome do local"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Duração</Label>
+                            <Input
+                              value={newActivity.estimatedDuration || ""}
+                              onChange={(e) =>
+                                setNewActivity({
+                                  ...newActivity,
+                                  estimatedDuration: e.target.value,
+                                })
+                              }
+                              placeholder="Ex: 2 horas"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Custo Estimado</Label>
+                          <Input
+                            value={newActivity.estimatedCost || ""}
+                            onChange={(e) =>
+                              setNewActivity({
+                                ...newActivity,
+                                estimatedCost: e.target.value,
+                              })
+                            }
+                            placeholder="Ex: R$ 50 por pessoa"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setAddingToDayId(null)}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={handleAddActivity}>Adicionar</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   {onDeleteDay && days.length > 1 && (
                     <Button
                       variant="ghost"
@@ -554,99 +649,6 @@ export function ItineraryEditor({
                     </Button>
                   )}
                 </div>
-                  <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Adicionar Atividade</DialogTitle>
-                      <DialogDescription>
-                        Adicione uma nova atividade ao dia {day.dayNumber}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>Período</Label>
-                        <Select
-                          value={newActivity.period}
-                          onValueChange={(value) =>
-                            setNewActivity({ ...newActivity, period: value as Activity["period"] })
-                          }
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="manha">Manhã</SelectItem>
-                            <SelectItem value="tarde">Tarde</SelectItem>
-                            <SelectItem value="noite">Noite</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Título</Label>
-                        <Input
-                          value={newActivity.title}
-                          onChange={(e) =>
-                            setNewActivity({ ...newActivity, title: e.target.value })
-                          }
-                          placeholder="Nome da atividade"
-                        />
-                      </div>
-                       <div className="space-y-2">
-                         <Label>Descrição</Label>
-                         <RichContentEditor
-                           content={descriptionToEditorHtml(newActivity.description)}
-                           onChange={(html) =>
-                             setNewActivity({ ...newActivity, description: html })
-                           }
-                           editorClassName="min-h-[260px] [&_.ProseMirror]:min-h-[240px]"
-                         />
-                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Local</Label>
-                          <Input
-                            value={newActivity.location || ""}
-                            onChange={(e) =>
-                              setNewActivity({ ...newActivity, location: e.target.value })
-                            }
-                            placeholder="Nome do local"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Duração</Label>
-                          <Input
-                            value={newActivity.estimatedDuration || ""}
-                            onChange={(e) =>
-                              setNewActivity({
-                                ...newActivity,
-                                estimatedDuration: e.target.value,
-                              })
-                            }
-                            placeholder="Ex: 2 horas"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Custo Estimado</Label>
-                        <Input
-                          value={newActivity.estimatedCost || ""}
-                          onChange={(e) =>
-                            setNewActivity({
-                              ...newActivity,
-                              estimatedCost: e.target.value,
-                            })
-                          }
-                          placeholder="Ex: R$ 50 por pessoa"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setAddingToDayId(null)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleAddActivity}>Adicionar</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
