@@ -32,7 +32,6 @@ type PullSkipReason =
   | "missing_start_date"
   | "mapping_tombstoned"
   | "already_synced_unchanged"
-  | "duplicate_of_mapped_local_event"
   | "local_reference_missing";
 
 interface SkipSample {
@@ -824,23 +823,13 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        const candidateSignature = localEventSignature({
-          title: gEvent.summary || "Sem título",
-          description: gEvent.description || null,
-          event_date: startDate,
-          event_time: startTime,
-        });
-        const duplicateMappedLocalId = mappedLocalSignatures.get(candidateSignature);
-        if (duplicateMappedLocalId) {
-          pulledSkipped++; skipDuplicateLocal++;
-          console.log(`[calendar-sync] pull-skipped google=${gEvent.id} reason=duplicate-of-mapped-local-event mapped_event=${duplicateMappedLocalId}`);
-          recordPullSkip("duplicate_of_mapped_local_event", gEvent, {
-            agency_event_id: duplicateMappedLocalId,
-            has_mapping: false,
-          });
-          continue;
-        }
-
+        // Deduplication rule (pull): an event is a duplicate ONLY when its
+        // google_event_id already has a mapping in google_calendar_sync
+        // (checked via reverseSyncMap above). Content-based signature
+        // matching (title+date+time+description) was removed: it wrongly
+        // blocked legit Google-side events whose title/date coincided with
+        // an existing local event but had no mapping. The DB unique
+        // constraint (user_id, google_event_id) is the source of truth.
         try {
           const { data: inserted, error: insErr } = await supabase
             .from("agency_events")
