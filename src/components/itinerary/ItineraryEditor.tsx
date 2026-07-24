@@ -35,6 +35,7 @@ import {
   X,
   GripVertical,
 } from "lucide-react";
+import { ListRestart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,6 +72,7 @@ import { cn } from "@/lib/utils";
 import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
 import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
 import { ActivityAIActions, EmptyPeriodAISlot, type AIContext } from "./ActivityAIActions";
+import { DayReorderDialog } from "./DayReorderDialog";
 import { useItineraryMemory } from "@/hooks/useItineraryMemory";
 import { ActivityPhotoThumb } from "./ActivityPhotoThumb";
 import {
@@ -250,6 +252,7 @@ interface ItineraryEditorProps {
   onAddActivity: (dayId: string, activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
   onMoveActivity?: (activityId: string, dayId: string, period: "manha" | "tarde" | "noite") => void;
   onReorderActivities?: (updates: { id: string; orderIndex: number }[]) => void;
+  onReorderDays?: (orderedDayIds: string[]) => Promise<void> | void;
   onApproveAll: () => void;
   aiContext?: AIContext;
 }
@@ -262,12 +265,14 @@ export function ItineraryEditor({
   onAddActivity,
   onMoveActivity,
   onReorderActivities,
+  onReorderDays,
   onApproveAll,
   aiContext,
 }: ItineraryEditorProps) {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [reorderOpen, setReorderOpen] = useState(false);
   const { getImageForPeriod, setPeriodImage, removePeriodImage, isUploading } =
     useItineraryPeriodImages(itineraryId);
   const { data: linkedTrip } = useLinkedTripForItinerary(itineraryId);
@@ -425,7 +430,28 @@ export function ItineraryEditor({
             Aprove, edite ou remova atividades
           </p>
         </div>
+        {onReorderDays && days.length > 1 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setReorderOpen(true)}
+          >
+            <ListRestart className="mr-1 h-4 w-4" />
+            Reordenar dias
+          </Button>
+        )}
       </div>
+
+      {onReorderDays && (
+        <DayReorderDialog
+          open={reorderOpen}
+          onOpenChange={setReorderOpen}
+          days={days}
+          onSave={async (ids) => {
+            await onReorderDays(ids);
+          }}
+        />
+      )}
 
       <div className="space-y-6">
         {days.map((day) => (
