@@ -10,6 +10,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
+import { PricingSectionCard } from "@/components/itinerary/PricingSectionCard";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
@@ -1229,6 +1230,31 @@ export default function CriarRoteiro() {
                 }}
               />
             )}
+
+            <PricingSectionCard
+              enabled={currentItinerary.showPricingSection === true}
+              content={currentItinerary.pricingContent || ""}
+              onToggle={async (checked) => {
+                const prev = currentItinerary;
+                setCurrentItinerary({ ...prev, showPricingSection: checked });
+                try {
+                  await updateItineraryDetails.mutateAsync({
+                    itineraryId: prev.id,
+                    updates: { show_pricing_section: checked },
+                  });
+                } catch {
+                  setCurrentItinerary(prev);
+                  toast.error("Não foi possível atualizar a seção comercial.");
+                }
+              }}
+              onSave={async (html) => {
+                await updateItineraryDetails.mutateAsync({
+                  itineraryId: currentItinerary.id,
+                  updates: { pricing_content: html || null },
+                });
+                setCurrentItinerary({ ...currentItinerary, pricingContent: html || null });
+              }}
+            />
 
             <DocumentSignatureCard
               table="itineraries"
