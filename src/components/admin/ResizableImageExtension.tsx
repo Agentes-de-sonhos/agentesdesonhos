@@ -1,6 +1,6 @@
 import { Node, mergeAttributes, type CommandProps } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -230,7 +230,3 @@ export const ResizableImage = Node.create({
 export function defaultImageAttrs(src: string): Partial<ImageAttrs> {
   return { src, align: 'center', width: null };
 }
-
-// Placeholder to silence unused-import warnings in the node view file when
-// tree-shaken by tests that only import the extension itself.
-export const __useEffectRef = useEffect;
