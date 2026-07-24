@@ -108,6 +108,7 @@ export default function CriarRoteiro() {
   const [importWizardOpen, setImportWizardOpen] = useState(false);
   const [listSearch, setListSearch] = useState("");
   const debouncedListSearch = useDebounce(listSearch, 200);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const {
     itineraries,
@@ -792,7 +793,7 @@ export default function CriarRoteiro() {
                                     size="icon"
                                     aria-label="Excluir"
                                     className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-rose-50"
-                                    onClick={() => handleDelete(itinerary.id)}
+                                    onClick={() => setDeleteTargetId(itinerary.id)}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
