@@ -2,6 +2,88 @@ import { useEffect, useRef, useState } from "react";
 
 const VERSION_URL = "/version.json";
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const DISMISS_KEY = "appUpdateDismissed";
+const DISMISS_DURATION_MS = 60 * 60 * 1000; // 60 minutes
+
+type DismissRecord = { version: string; until: number };
+
+function readDismiss(): DismissRecord | null {
+  try {
+    const raw = localStorage.getItem(DISMISS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as DismissRecord;
+    if (!parsed || typeof parsed.version !== "string" || typeof parsed.until !== "number") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function dismissAppUpdate(version: string) {
+  try {
+    const record: DismissRecord = { version, until: Date.now() + DISMISS_DURATION_MS };
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(record));
+  } catch {
+    /* noop */
+  }
+}
+
+/**
+ * Returns true when the modal must be suppressed entirely — public /
+ * white-label routes shown to end clients should never receive an
+ * internal "update the platform" prompt.
+ */
+export function isPublicUpdateContext(): boolean {
+  if (typeof window === "undefined") return true;
+  const host = window.location.hostname.toLowerCase();
+  const path = window.location.pathname;
+
+  // White-label / marketing hostnames.
+  if (
+    host.endsWith(".tur.br") ||
+    host === "tur.br" ||
+    host.startsWith("lp.") ||
+    host.startsWith("contato.") ||
+    host.startsWith("vitrine.") ||
+    host.startsWith("seuorcamento.") ||
+    host.startsWith("seuroteiro.") ||
+    host.startsWith("carteiradigital.") ||
+    host.startsWith("ativar-cartao.")
+  ) {
+    return true;
+  }
+
+  // Public / tokenized routes served under the main domain.
+  const publicPrefixes = [
+    "/roteiro/",
+    "/orcamento/",
+    "/c/",
+    "/v/",
+    "/viagem/",
+    "/fatura/",
+    "/formulario/",
+    "/pesquisa/",
+    "/lp/",
+    "/experiencias/",
+    "/captura-cartao/",
+    "/cadastro/",
+    "/cadastro-fornecedor",
+    "/cadastro-guia",
+    "/reset-password",
+    "/criar-cartao",
+    "/ativar-cartao",
+    "/politicasdeprivacidade",
+    "/termosdeuso",
+    "/blog",
+    "/planos",
+    "/desconto30off",
+    "/certificate-test",
+  ];
+  if (publicPrefixes.some((p) => path === p || path.startsWith(p))) return true;
+  if (/^\/[^/]+\/ofertas\/?$/.test(path)) return true;
+
+  return false;
+}
 
 async function fetchRemoteVersion(): Promise<string | null> {
   try {
@@ -24,14 +106,16 @@ async function fetchRemoteVersion(): Promise<string | null> {
  * is available. Runs at mount, on tab visibility change and on a slow
  * periodic poll.
  */
-export function useAppVersion(): { updateAvailable: boolean } {
+export function useAppVersion(): { updateAvailable: boolean; remoteVersion: string | null } {
   const currentVersion = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [remoteVersion, setRemoteVersion] = useState<string | null>(null);
   const stopRef = useRef(false);
 
   useEffect(() => {
     // Skip in development — there is no meaningful version to compare against.
     if (currentVersion === "dev") return;
+    if (isPublicUpdateContext()) return;
 
     stopRef.current = false;
 
@@ -39,9 +123,11 @@ export function useAppVersion(): { updateAvailable: boolean } {
       if (stopRef.current) return;
       const remote = await fetchRemoteVersion();
       if (!remote) return;
-      if (remote !== currentVersion) {
-        setUpdateAvailable(true);
-      }
+      if (remote === currentVersion) return;
+      setRemoteVersion(remote);
+      const dismissed = readDismiss();
+      if (dismissed && dismissed.version === remote && dismissed.until > Date.now()) return;
+      setUpdateAvailable(true);
     };
 
     check();
@@ -60,7 +146,7 @@ export function useAppVersion(): { updateAvailable: boolean } {
     };
   }, [currentVersion]);
 
-  return { updateAvailable };
+  return { updateAvailable, remoteVersion };
 }
 
 /**
