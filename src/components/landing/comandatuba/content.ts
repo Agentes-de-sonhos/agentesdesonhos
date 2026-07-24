@@ -26,12 +26,12 @@ export const DEFAULT_AGENCY: AgencyConfig = {
   primaryColor: "#0f7a5f",
   consultantName: "Fernando Nobre",
   consultantFirstName: "Fernando",
-  consultantRole: "Consultor de viagens",
+  consultantRole: "Consultor(a) de viagens",
   consultantPhotoUrl: null,
   whatsapp: "5511999999999",
   phone: "(11) 99999-9999",
   email: "contato@agentesdesonhos.com.br",
-  city: "Atendimento on-line",
+  city: "",
   hours: "Seg. a Sex., das 9h às 18h",
   privacyUrl: "/politica-de-privacidade",
 };
@@ -41,27 +41,28 @@ export const HERO = {
   titleLead: "Sua próxima história começa em uma",
   titleHighlight: "ilha na Bahia.",
   description:
-    "Natureza, all inclusive, lazer para todas as idades e o cuidado de uma agência em cada etapa da viagem.",
+    "Natureza preservada, all inclusive e lazer para diferentes idades — com a orientação da sua agência em cada etapa da viagem.",
   ctaPrimary: "Receber minha cotação",
   ctaSecondary: "Conhecer o resort",
   indicators: [
-    { title: "All inclusive", text: "Mais praticidade, mais momentos" },
-    { title: "Ilha exclusiva", text: "Belezas naturais em frente ao mar" },
-    { title: "Mais de 80 experiências", text: "Lazer, esportes e atividades para todos os estilos" },
+    { title: "All inclusive", text: "Mais praticidade para aproveitar cada dia." },
+    { title: "21 km de praia", text: "Mar, coqueiros e espaço para desacelerar." },
+    { title: "Mais de 80 opções de lazer", text: "Esporte, diversão e experiências para diferentes idades." },
   ],
-  imageAlt: "Vista aérea do Transamerica Comandatuba, na Bahia",
+  imageAlt:
+    "Vista aérea do Transamerica Comandatuba, com praia, coqueiros, piscinas e áreas do resort",
 };
 
 export const REFUGE = {
   eyebrow: "O RESORT",
   title: "Um refúgio cercado pela natureza",
   description:
-    "Localizada no leste da Costa do Cacau, no município de Una, a Ilha de Comandatuba é cercada por coqueirais e banhada por praias que convidam ao descanso e à descoberta. Perfeita para famílias, casais e amigos que desejam viver momentos únicos em um cenário de tirar o fôlego.",
+    "Na Ilha de Comandatuba, no sul da Bahia, praia, coqueirais e vegetação preservada formam o cenário para dias que podem ser tão tranquilos ou animados quanto você quiser. Um destino feito para reunir a família, desacelerar e aproveitar mais cada momento.",
   benefits: [
-    { title: "Natureza preservada", text: "Uma ilha privativa rodeada por coqueirais e praias de mar calmo e cristalino." },
-    { title: "Férias em família", text: "Estrutura completa com lazer e segurança para todas as idades." },
-    { title: "Gastronomia com identidade baiana", text: "Sabores locais e internacionais em restaurantes variados." },
-    { title: "Lazer para diversos estilos", text: "Atividades na praia, esportes e experiências exclusivas." },
+    { title: "Natureza preservada", text: "Uma ilha de paisagens tropicais, mar e vegetação nativa." },
+    { title: "Férias em família", text: "Espaços e experiências para diferentes gerações aproveitarem juntas." },
+    { title: "Gastronomia com identidade baiana", text: "Sabores regionais e variedade para tornar cada refeição parte da viagem." },
+    { title: "Lazer no seu ritmo", text: "Escolha entre esporte, diversão, natureza ou simplesmente descanso." },
   ],
 };
 
@@ -69,113 +70,198 @@ export const ALL_INCLUSIVE = {
   eyebrow: "All inclusive",
   title: "Praticidade para curtir cada momento",
   description:
-    "Refeições, bebidas, petiscos e atividades fazem parte da rotina do resort. Assim, você só precisa focar no que importa: aproveitar.",
+    "O sistema all inclusive reúne alimentação disponível ao longo do dia e bebidas servidas conforme o funcionamento dos pontos de consumo. Assim, você passa menos tempo planejando detalhes e mais tempo aproveitando a ilha.",
+  descriptionExtra:
+    "Uma experiência pensada para trazer mais comodidade às famílias e mais liberdade para cada pessoa escolher como deseja viver o dia.",
   benefits: [
-    "Como desejar, o que você se lembra",
-    "Perfeito de manhã à noite",
-    "Diversão e energia o dia todo",
-    "Mais previsão — zero surpresas na conta",
-    "Variedade para todos os gostos e idades",
+    "Alimentação disponível 24 horas",
+    "Bebidas alcoólicas e não alcoólicas selecionadas",
+    "Lanches e petiscos ao longo do dia",
+    "Sabores baianos e opções variadas",
+    "Programação esportiva e recreativa",
+    "Mais tempo para aproveitar a viagem",
   ],
   disclaimer:
-    "Alguns restaurantes, serviços e experiências premium podem exigir reserva ou ter custo adicional, conforme regras do resort.",
+    "Horários, cardápios, bebidas, pontos de atendimento, reservas e inclusões podem variar conforme a operação e as condições vigentes do resort. Alguns serviços e experiências especiais podem ter custo adicional.",
 };
 
 export const EXPERIENCES = {
   title: "Experiências e lazer para todos os ritmos",
-  subtitle: "São mais de 80 opções de lazer para você explorar ao seu ritmo.",
+  subtitle:
+    "São mais de 80 opções para preencher os dias com movimento, diversão, natureza e momentos de pausa.",
   disclaimer:
-    "Algumas experiências podem ter operação sazonal, disponibilidade limitada ou custo adicional. Confirme os detalhes com sua agência.",
+    "A programação varia conforme o período da hospedagem. Algumas atividades e experiências especiais podem ter custo adicional.",
   items: [
-    { title: "Piscinas", text: "Áreas de piscina para relaxar em família ou com amigos." },
-    { title: "Praia", text: "Faixa de areia extensa, quase deserta, para caminhar e descansar." },
-    { title: "Esportes", text: "Vôlei, futevôlei, quadras e atividades guiadas na areia." },
-    { title: "Atividades aquáticas", text: "Caiaque, stand-up paddle e passeios pelo mar calmo." },
-    { title: "Crianças", text: "Programação diária para os pequenos, com equipe dedicada." },
-    { title: "Natureza", text: "Trilhas e vivências pelo entorno preservado da ilha." },
-    { title: "Bem-estar", text: "Espaços para relaxar e cuidar do corpo e da mente." },
-    { title: "Entretenimento", text: "Noites com música, bares e programação para adultos." },
+    { title: "Piscinas", text: "Mergulhos, brincadeiras e pausas sob o sol." },
+    { title: "Praia", text: "21 km de areia para caminhar e respirar no seu ritmo." },
+    { title: "Esportes", text: "Atividades em quadras, na areia e em diferentes áreas do resort." },
+    { title: "Atividades aquáticas", text: "Experiências para aproveitar a ilha também dentro d'água." },
+    { title: "Crianças", text: "Monitoria e programação lúdica para os pequenos viverem suas próprias descobertas." },
+    { title: "Natureza", text: "Contato com os cenários e ecossistemas preservados da ilha." },
+    { title: "Bem-estar", text: "Momentos para desacelerar, descansar e se reconectar." },
+    { title: "Entretenimento", text: "Programação para compartilhar bons momentos ao longo do dia." },
   ],
 };
 
 export const ACCOMMODATIONS = {
   title: "Acomodações para diferentes momentos",
   subtitle:
-    "A categoria ideal é confirmada conforme a composição da viagem e a disponibilidade.",
+    "Da praticidade de ficar perto das áreas centrais à sensação de refúgio em meio à natureza, a sua agência ajuda a encontrar a opção mais adequada para a viagem.",
   items: [
     {
       key: "apartamento",
       name: "Apartamentos",
-      text: "Praticidade e conforto em diferentes categorias para sua escolha.",
+      text: "Conforto e praticidade, com opções próximas às principais áreas do resort.",
     },
     {
       key: "suite",
       name: "Suítes",
-      text: "Mais espaço e privacidade para momentos ainda mais especiais.",
+      text: "Mais espaço e configurações pensadas para casais, famílias e momentos especiais.",
     },
     {
       key: "bangalo",
       name: "Bangalôs",
-      text: "Experiência exclusiva e charme do contato com a natureza.",
+      text: "Mais privacidade e contato com os jardins e a atmosfera tropical da ilha.",
     },
   ],
   cta: "Consultar esta opção",
+  disclaimer:
+    "Capacidades, localização, benefícios e disponibilidade variam entre as categorias. A sua agência confirmará a opção adequada à composição da viagem.",
 };
 
 export const AUDIENCE = {
   title: "Para quem é Comandatuba?",
   items: [
-    "Famílias que valorizam momentos juntos com estrutura completa.",
-    "Casais em busca de descanso e conexão.",
-    "Viagens entre gerações com conforto e diversão para todos.",
-    "Grupos de amigos que querem compartilhar experiências inesquecíveis.",
+    {
+      title: "Famílias com crianças",
+      text: "Para quem procura estrutura, atividades e tempo de qualidade sem precisar organizar cada momento do dia.",
+    },
+    {
+      title: "Casais",
+      text: "Para quem quer combinar praia, gastronomia, natureza e espaço para desacelerar.",
+    },
+    {
+      title: "Famílias multigeracionais",
+      text: "Para viagens em que crianças, pais e avós desejam estar juntos sem abrir mão de seus próprios ritmos.",
+    },
+    {
+      title: "Grupos de amigos",
+      text: "Para quem quer compartilhar a viagem e ter liberdade para escolher experiências diferentes ao longo do dia.",
+    },
   ],
 };
 
 export const HOW_TO_GET = {
   title: "Como chegar",
   intro:
-    "Chegar a Comandatuba é parte da experiência: o acesso é feito por terra e balsa, com paisagens incríveis no percurso.",
-  items: [
-    "Aeroporto de Ilhéus — a cerca de 2h30 de transfer até a balsa.",
-    "Voos, transfers, seguros e muito mais: planejamos cada detalhe para você viajar tranquilo.",
+    "A viagem pode ser organizada por duas rotas principais. A melhor escolha depende da cidade de saída, das datas e da operação aérea disponível no período.",
+  routes: [
+    {
+      title: "Via Aeroporto de Comandatuba, em Una",
+      text: "É o acesso mais direto ao resort. O aeroporto fica no continente, próximo à ilha, permitindo uma chegada mais rápida depois do desembarque.",
+    },
+    {
+      title: "Via Aeroporto de Ilhéus",
+      text: "Ilhéus funciona como alternativa para quem encontra melhores opções de voo. A partir do aeroporto, a viagem continua em transfer até a região de Comandatuba.",
+    },
   ],
+  highlightTitle: "A melhor rota não é igual para todo mundo.",
+  highlightText:
+    "A sua agência compara voos, horários, transfers e condições para indicar a logística mais confortável para a sua viagem.",
   note:
-    "Rotas, frequências, operação aérea e logística podem sofrer alterações. Confirme com sua agência.",
+    "Rotas, companhias, frequências, transfers, horários e eventuais custos estão sujeitos a disponibilidade e confirmação.",
 };
 
 export const FORM = {
   title: "Solicite sua cotação personalizada",
-  subtitle: "Preencha os dados abaixo e receba uma proposta completa com as melhores opções para sua viagem.",
-  submit: "Receber proposta personalizada",
-  privacy: "Resposta rápida e sem compromisso. Seus dados estão seguros conosco.",
-  success: "Recebemos seus dados! Em breve seu consultor entrará em contato pelo WhatsApp.",
-  errorGeneric: "Não foi possível enviar agora. Tente novamente em instantes ou fale conosco pelo WhatsApp.",
-  consent: "Aceito os termos de uso e a política de privacidade da agência.",
+  subtitle:
+    "Conte um pouco sobre a viagem. A sua agência verificará datas, acomodação e logística para preparar uma proposta de acordo com o seu perfil.",
+  submit: "Receber minha cotação",
+  submitLoading: "Enviando sua solicitação...",
+  privacy: "Seus dados serão usados apenas para atender esta solicitação.",
+  successTitle: (firstName: string) =>
+    firstName ? `Solicitação recebida, ${firstName}!` : "Solicitação recebida!",
+  successText: (agency: string) =>
+    `Um consultor da ${agency} entrará em contato pelo WhatsApp para entender os detalhes da viagem e preparar as melhores possibilidades para você.`,
+  successCta: "Falar agora pelo WhatsApp",
+  errorTitle: "Não foi possível enviar agora",
+  errorText:
+    "Revise os campos e tente novamente. Você também pode falar diretamente com a agência pelo WhatsApp.",
+  errorCta: "Falar pelo WhatsApp",
+  consent: (agency: string) =>
+    `Concordo em receber contato da ${agency} sobre esta solicitação. Meus dados serão tratados conforme a Política de Privacidade.`,
 };
 
 export const FAQ = [
-  { q: "O que fica incluso no All Inclusive Comandatuba?", a: "Refeições, bebidas, petiscos e uma agenda de atividades diárias no resort. Alguns restaurantes de assinatura, experiências premium e serviços especiais podem exigir reserva ou custo adicional." },
-  { q: "Como funciona o traslado até a ilha?", a: "O acesso é feito por terra saindo do aeroporto de Ilhéus e, em seguida, por uma travessia rápida de balsa até a ilha. Sua agência organiza o transfer completo." },
-  { q: "Quais são as opções de acomodações?", a: "O resort oferece apartamentos, suítes e bangalôs, com diferentes categorias e vistas. A opção ideal é escolhida conforme a composição do grupo e a disponibilidade." },
-  { q: "É possível levar pets para Comandatuba?", a: "A política de pets é definida diretamente pelo resort e pode variar. Sua agência confirma as regras vigentes para a sua data." },
-  { q: "Existe recreação para crianças?", a: "Sim. A programação inclui atividades para diferentes faixas etárias, com equipe dedicada durante o dia." },
-  { q: "Quais atividades estão disponíveis?", a: "Piscinas, praia, esportes, atividades aquáticas, trilhas, bem-estar e noites temáticas fazem parte da agenda. Algumas experiências são sazonais." },
-  { q: "Como funciona o cancelamento?", a: "As regras de cancelamento e alterações seguem a política do resort e da tarifa contratada. Sua agência apresenta as condições antes da confirmação." },
-  { q: "É necessário reservar as atividades?", a: "A maior parte é por ordem de chegada. Experiências específicas, restaurantes de assinatura e serviços do spa podem exigir reserva prévia." },
+  {
+    q: "Onde fica o Transamerica Comandatuba?",
+    a: "O resort fica na Ilha de Comandatuba, no município de Una, no sul da Bahia. A região combina praia extensa, vegetação preservada e uma estrutura completa de hospedagem.",
+  },
+  {
+    q: "O que está incluído no sistema all inclusive?",
+    a: "O resort informa alimentação disponível 24 horas e bebidas servidas conforme o funcionamento de cada ponto de consumo. As inclusões, marcas, horários, reservas e eventuais serviços cobrados à parte devem ser confirmados para o período da hospedagem.",
+  },
+  {
+    q: "O resort é indicado para crianças?",
+    a: "Sim. O resort possui programação infantil, monitoria e espaços voltados às famílias. Atividades, horários, faixas etárias e serviços específicos devem ser confirmados para as datas da viagem.",
+  },
+  {
+    q: "Quais tipos de acomodação estão disponíveis?",
+    a: "O resort possui apartamentos, suítes e bangalôs, com diferentes configurações. A sua agência indicará as opções compatíveis com a quantidade de hóspedes, as preferências e a disponibilidade.",
+  },
+  {
+    q: "Como chegar à Ilha de Comandatuba?",
+    a: "O acesso mais direto é pelo Aeroporto de Comandatuba, em Una. Também é possível desembarcar em Ilhéus e seguir em transfer até a região do resort. A melhor rota depende da origem, das datas e da operação disponível.",
+  },
+  {
+    q: "Todas as atividades estão incluídas?",
+    a: "Não necessariamente. O resort oferece mais de 80 opções de esporte, lazer e atividades aquáticas, mas algumas experiências e serviços especiais podem ter custo adicional. A programação também varia conforme o período.",
+  },
+  {
+    q: "É possível viajar com animais de estimação?",
+    a: "De acordo com a política atual do resort, animais de estimação não são permitidos. A sua agência pode reconfirmar essa condição no momento da cotação.",
+  },
+  {
+    q: "Como consultar valores e disponibilidade?",
+    a: "Preencha o formulário ou fale com o consultor pelo WhatsApp. A agência verificará tarifas, acomodação, disponibilidade e logística de acordo com as datas e o perfil da viagem.",
+  },
 ];
 
 export const FINAL_CTA = {
   title: "A Bahia está te esperando. Vamos planejar?",
-  text: "Fale com um especialista e descubra como viver dias inesquecíveis na ilha de Comandatuba.",
-  primary: "Falar com meu consultor",
+  text: (agency: string) =>
+    `Conte com a ${agency} para encontrar as melhores datas, a acomodação adequada e a logística mais confortável para a sua viagem.`,
+  primary: "Receber minha cotação",
   secondary: "Falar pelo WhatsApp",
+  imageAlt: "Vista aérea da praia e da vegetação da Ilha de Comandatuba",
 };
 
 export const SEO_TEMPLATE = {
   title: (agency: string) => `Transamerica Comandatuba | ${agency}`,
   description: (agency: string) =>
     `Conheça o Transamerica Comandatuba e receba uma cotação personalizada com a orientação da ${agency}.`,
+  ogTitle: (agency: string) => `Viva a Ilha de Comandatuba com a ${agency}`,
+  ogDescription:
+    "Natureza, all inclusive, 21 km de praia e lazer para diferentes idades. Solicite uma cotação personalizada.",
+};
+
+export const FOOTER_COPY = {
+  tagline: "Viagens planejadas com atenção aos detalhes.",
+  legal:
+    "Conteúdo informativo. Tarifas, disponibilidade, acomodações, inclusões, programação, voos, transfers e condições estão sujeitos a confirmação no momento da cotação. Algumas atividades e serviços podem ter custo adicional. Transamerica Comandatuba, suas marcas e imagens pertencem aos respectivos titulares.",
+};
+
+export const CONSULTANT_COPY = {
+  title: "Sua viagem começa com orientação de verdade.",
+  benefits: [
+    "Atendimento humano e personalizado",
+    "Orientação sobre a melhor acomodação",
+    "Apoio na escolha de voos e transfers",
+    "Suporte antes e durante a viagem",
+  ],
+  cta: "Falar com meu consultor",
+  ctaNoConsultant: "Falar com a agência",
+  mobileTitle: "Planeje sua viagem com um especialista",
 };
 
 export const NAV = [
@@ -202,5 +288,34 @@ export function whatsappUrl(agency: AgencyConfig, message: string) {
 }
 
 export function whatsappDefaultMessage(agency: AgencyConfig) {
-  return `Olá, ${agency.consultantFirstName}! Vi a página do Transamerica Comandatuba e gostaria de receber uma cotação.`;
+  const first = agency.consultantFirstName?.trim();
+  return first
+    ? `Olá, ${agency.consultantName}! Vi a página do Transamerica Comandatuba e gostaria de receber uma cotação. Pode me ajudar?`
+    : `Olá! Vi a página do Transamerica Comandatuba e gostaria de receber uma cotação. Pode me ajudar?`;
+}
+
+export function whatsappFromForm(
+  agency: AgencyConfig,
+  fields: {
+    period?: string;
+    origin?: string;
+    adults?: number;
+    kids?: number;
+    category?: string;
+  }
+) {
+  const lines: string[] = [];
+  const greet = agency.consultantName
+    ? `Olá, ${agency.consultantName}!`
+    : "Olá!";
+  lines.push(
+    `${greet} Vi a página do Transamerica Comandatuba e gostaria de receber uma cotação.`
+  );
+  lines.push("");
+  if (fields.period) lines.push(`Período desejado: ${fields.period}`);
+  if (fields.origin) lines.push(`Cidade de saída: ${fields.origin}`);
+  if (typeof fields.adults === "number") lines.push(`Adultos: ${fields.adults}`);
+  if (typeof fields.kids === "number") lines.push(`Crianças: ${fields.kids}`);
+  if (fields.category) lines.push(`Acomodação de interesse: ${fields.category}`);
+  return lines.join("\n");
 }

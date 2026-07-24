@@ -1,5 +1,5 @@
 import { MessageCircle, Phone, Mail, MapPin, Clock } from "lucide-react";
-import type { AgencyConfig } from "./content";
+import { FOOTER_COPY, type AgencyConfig } from "./content";
 
 export function Footer({ agency }: { agency: AgencyConfig }) {
   const initial = agency.name.charAt(0).toUpperCase();
@@ -22,12 +22,9 @@ export function Footer({ agency }: { agency: AgencyConfig }) {
               )}
               <div className="leading-tight">
                 <p className="font-display text-[15px] font-bold text-slate-900">{agency.name}</p>
-                <p className="text-[11px] text-slate-500">viagens personalizadas</p>
+                <p className="text-[11px] text-slate-500">{FOOTER_COPY.tagline}</p>
               </div>
             </div>
-            <p className="mt-4 text-[13px] leading-relaxed text-slate-500">
-              Atendimento humanizado antes, durante e depois da sua viagem.
-            </p>
           </div>
 
           <div className="space-y-3 text-[13.5px] text-slate-600">
@@ -39,7 +36,10 @@ export function Footer({ agency }: { agency: AgencyConfig }) {
 
           <div className="space-y-3 text-[13.5px] text-slate-600">
             <p className="font-semibold text-slate-800">Atendimento</p>
-            <p className="flex items-center gap-2"><MapPin className="h-4 w-4" style={{ color: agency.primaryColor }} /> {agency.city}</p>
+            <p className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" style={{ color: agency.primaryColor }} />
+              {agency.city ? `${agency.city} • Atendimento on-line` : "Atendimento on-line"}
+            </p>
             {agency.hours ? (
               <p className="flex items-center gap-2"><Clock className="h-4 w-4" style={{ color: agency.primaryColor }} /> {agency.hours}</p>
             ) : null}
@@ -53,8 +53,9 @@ export function Footer({ agency }: { agency: AgencyConfig }) {
         </div>
       </div>
       <div className="border-t border-slate-100">
-        <div className="mx-auto max-w-[1280px] px-5 py-4 text-center text-[12px] text-slate-400 sm:px-8">
-          © {new Date().getFullYear()} {agency.name}. Todos os direitos reservados.
+        <div className="mx-auto max-w-[1280px] space-y-2 px-5 py-4 text-center text-[11.5px] text-slate-400 sm:px-8">
+          <p className="leading-relaxed">{FOOTER_COPY.legal}</p>
+          <p>© {new Date().getFullYear()} {agency.name}. Todos os direitos reservados.</p>
         </div>
       </div>
     </footer>

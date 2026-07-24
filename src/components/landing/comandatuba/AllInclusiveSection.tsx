@@ -30,6 +30,9 @@ export function AllInclusiveSection({ agency }: { agency: AgencyConfig }) {
             <p className="mt-4 text-[15px] leading-relaxed text-slate-600 sm:text-[16px]">
               {ALL_INCLUSIVE.description}
             </p>
+            <p className="mt-3 text-[14.5px] leading-relaxed text-slate-600">
+              {ALL_INCLUSIVE.descriptionExtra}
+            </p>
             <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {ALL_INCLUSIVE.benefits.map((b) => (
                 <li key={b} className="flex items-start gap-2 text-[14px] text-slate-700">

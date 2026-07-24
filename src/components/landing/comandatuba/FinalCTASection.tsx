@@ -21,7 +21,7 @@ export function FinalCTASection({ agency }: { agency: AgencyConfig }) {
               {FINAL_CTA.title}
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed text-white/85 sm:text-[16px]">
-              {FINAL_CTA.text}
+              {FINAL_CTA.text(agency.name)}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button

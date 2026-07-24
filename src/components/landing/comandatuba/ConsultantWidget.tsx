@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, X, Check } from "lucide-react";
-import { whatsappDefaultMessage, whatsappUrl, type AgencyConfig } from "./content";
+import { CONSULTANT_COPY, whatsappDefaultMessage, whatsappUrl, type AgencyConfig } from "./content";
 
 const STORAGE_KEY = "comandatuba_consultant_collapsed";
-const BENEFITS = [
-  "Atendimento humanizado e especializado",
-  "Roteiro sob medida para seu perfil",
-  "Suporte antes, durante e depois da viagem",
-  "As melhores condições e benefícios exclusivos",
-];
+const BENEFITS = CONSULTANT_COPY.benefits;
 
 export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -63,7 +58,7 @@ export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
             <div className="rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-slate-200">
               <div className="flex items-start justify-between">
                 <p className="font-display text-[15px] font-semibold text-slate-900">
-                  Sua viagem começa com<br />orientação de verdade.
+                  {CONSULTANT_COPY.title}
                 </p>
                 <button
                   type="button"
@@ -106,7 +101,7 @@ export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
                 style={{ backgroundColor: agency.primaryColor }}
               >
                 <MessageCircle className="h-4 w-4" />
-                Falar com meu consultor
+                {agency.consultantFirstName ? CONSULTANT_COPY.cta : CONSULTANT_COPY.ctaNoConsultant}
               </a>
             </div>
           )}
