@@ -15,6 +15,16 @@ import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
+import {
+  ItineraryListItem,
+  itineraryMatchesSearch,
+} from "@/components/itinerary/ItineraryListItem";
+import { useDebounce } from "@/hooks/useDebounce";
+import {
+  Search as SearchIcon,
+  Eye,
+  Trash2,
+} from "lucide-react";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
 import { PublishReviewDialog } from "@/components/itinerary/PublishReviewDialog";
 import { useItineraries } from "@/hooks/useItineraries";
@@ -96,6 +106,9 @@ export default function CriarRoteiro() {
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
   const [templateTargetItinerary, setTemplateTargetItinerary] = useState<Itinerary | null>(null);
   const [importWizardOpen, setImportWizardOpen] = useState(false);
+  const [listSearch, setListSearch] = useState("");
+  const debouncedListSearch = useDebounce(listSearch, 200);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const {
     itineraries,
@@ -634,6 +647,15 @@ export default function CriarRoteiro() {
             </TabsContent>
 
             <TabsContent value="list" className="mt-5">
+              <div className="relative mb-4 max-w-md">
+                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por roteiro, cliente ou destino..."
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  className="pl-9 h-10 rounded-lg bg-background"
+                />
+              </div>
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -651,26 +673,141 @@ export default function CriarRoteiro() {
                     Criar Roteiro
                   </Button>
                 </Card>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {itineraries.map((itinerary) => (
-                  <ItineraryCard
-                    key={itinerary.id}
-                    itinerary={itinerary}
-                    onView={loadItinerary}
-                    onEdit={loadItinerary}
-                    onDelete={handleDelete}
-                    onGeneratePDF={handleGeneratePDF}
-                    onPublish={openPublishReview}
-                    onCopyLink={handleCopyLink}
-                    onSaveTemplate={(id) => {
-                      const found = itineraries.find(i => i.id === id);
-                      if (found) setTemplateTargetItinerary(found);
-                    }}
-                  />
-                  ))}
-                </div>
-              )}
+              ) : (() => {
+                const filtered = itineraries.filter((it) =>
+                  itineraryMatchesSearch(it, debouncedListSearch),
+                );
+                if (filtered.length === 0) {
+                  return (
+                    <Card className="p-8 text-center">
+                      <h3 className="font-display text-lg font-semibold">
+                        Nenhum roteiro encontrado
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Tente buscar por outro nome de cliente, roteiro ou destino.
+                      </p>
+                      {listSearch && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-4"
+                          onClick={() => setListSearch("")}
+                        >
+                          Limpar busca
+                        </Button>
+                      )}
+                    </Card>
+                  );
+                }
+                return (
+                  <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+                    <div className="hidden md:grid grid-cols-[1fr_140px_180px] gap-6 px-5 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted/30 border-b border-border/60">
+                      <span>Roteiro e Cliente</span>
+                      <span>Status</span>
+                      <span className="justify-self-end">Ações</span>
+                    </div>
+                    <div className="divide-y divide-border/50">
+                      {filtered.map((itinerary) => (
+                        <ItineraryListItem
+                          key={itinerary.id}
+                          itinerary={itinerary}
+                          onTitleClick={() => loadItinerary(itinerary.id)}
+                          actions={
+                            <>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Visualizar"
+                                    className="h-8 w-8"
+                                    onClick={() => loadItinerary(itinerary.id)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Visualizar</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Editar"
+                                    className="h-8 w-8"
+                                    onClick={() => loadItinerary(itinerary.id)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Editar</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Publicar / Link"
+                                    className="h-8 w-8"
+                                    onClick={() => openPublishReview(itinerary.id)}
+                                  >
+                                    <Link2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Publicar / Link</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Gerar PDF"
+                                    className="h-8 w-8"
+                                    onClick={() => handleGeneratePDF(itinerary.id)}
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Gerar PDF</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Salvar como modelo"
+                                    className="h-8 w-8"
+                                    onClick={() =>
+                                      setTemplateTargetItinerary(itinerary)
+                                    }
+                                  >
+                                    <Star className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Salvar como modelo</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Excluir"
+                                    className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-rose-50"
+                                    onClick={() => setDeleteTargetId(itinerary.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Excluir</TooltipContent>
+                              </Tooltip>
+                            </>
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </TabsContent>
             <TabsContent value="templates" className="mt-5">
               <TemplatesGrid />
@@ -1393,6 +1530,32 @@ export default function CriarRoteiro() {
         open={importWizardOpen}
         onOpenChange={setImportWizardOpen}
       />
+
+      <AlertDialog
+        open={!!deleteTargetId}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir roteiro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O roteiro será removido permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteTargetId) handleDelete(deleteTargetId);
+                setDeleteTargetId(null);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }

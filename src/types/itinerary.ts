@@ -250,6 +250,8 @@ export interface Itinerary {
   headline?: string | null;
   showPricingSection?: boolean;
   pricingContent?: string | null;
+  clientId?: string | null;
+  clientName?: string | null;
 }
 
 export interface AIGeneratedDay {

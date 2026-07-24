@@ -31,6 +31,11 @@ export function useItineraries() {
     headline: (data as any).headline ?? null,
     showPricingSection: (data as any).show_pricing_section ?? false,
     pricingContent: (data as any).pricing_content ?? null,
+    clientId: ((data as any).client_id ?? null) as string | null,
+    clientName:
+      ((data as any).clients?.name ?? (data as any).client?.name ?? null) as
+        | string
+        | null,
     passengers: ((data as any).passengers ?? []).map((p: any) => ({
       name: p?.name ?? "",
       age: p?.age ?? null,
@@ -54,7 +59,30 @@ export function useItineraries() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data || []).map(mapItinerary);
+      const rows = data || [];
+      const clientIds = Array.from(
+        new Set(
+          rows
+            .map((r: any) => r.client_id)
+            .filter((v: unknown): v is string => typeof v === "string" && !!v),
+        ),
+      );
+      let clientMap = new Map<string, string>();
+      if (clientIds.length) {
+        const { data: clients } = await supabase
+          .from("clients")
+          .select("id, name")
+          .in("id", clientIds);
+        clientMap = new Map(
+          (clients ?? []).map((c: any) => [c.id as string, c.name as string]),
+        );
+      }
+      return rows.map((r: any) =>
+        mapItinerary({
+          ...r,
+          clients: r.client_id ? { name: clientMap.get(r.client_id) ?? null } : null,
+        }),
+      );
     },
     enabled: !!user,
   });

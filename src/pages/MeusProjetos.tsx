@@ -43,7 +43,11 @@ import {
   Link2,
   Plus,
 } from "lucide-react";
-import { ClientAvatar } from "@/components/shared/ClientAvatar";
+import { ClientAvatar, getPersonInitials } from "@/components/shared/ClientAvatar";
+import {
+  ItineraryListItem,
+  itineraryMatchesSearch,
+} from "@/components/itinerary/ItineraryListItem";
 import { useNotes } from "@/hooks/useNotes";
 import { BlocoNotasContent } from "@/pages/BlocoNotas";
 import { useQuotes } from "@/hooks/useQuotes";
@@ -80,6 +84,7 @@ interface ProjectItem {
   date: string;
   status: "draft" | "published";
   type: ProjectType;
+  clientName?: string | null;
 }
 
 const TYPE_LABELS: Record<ProjectType, string> = {
@@ -123,6 +128,7 @@ function normalizeItems(
       date: i.createdAt || i.created_at,
       status: i.status === "published" || i.status === "approved" ? "published" : "draft",
       type: "itinerary" as const,
+      clientName: i.clientName ?? null,
     })),
   };
 }
@@ -136,12 +142,13 @@ function filterAndSort(
   let filtered = items;
 
   if (search.trim()) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(
-      (item) =>
-        item.name.toLowerCase().includes(q) ||
-        item.destination.toLowerCase().includes(q)
-    );
+    const q = normalizeText(search);
+    filtered = filtered.filter((item) => {
+      const hay = normalizeText(
+        [item.name, item.destination, item.clientName ?? ""].join(" | "),
+      );
+      return hay.includes(q);
+    });
   }
 
   if (statusFilter !== "all") {
@@ -157,6 +164,14 @@ function filterAndSort(
   }
 
   return filtered;
+}
+
+function normalizeText(v: string): string {
+  return v
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 function formatDate(dateStr: string) {
@@ -361,6 +376,46 @@ export default function MeusProjetos() {
   };
 
   const ProjectRow = ({ item }: { item: ProjectItem }) => {
+    if (item.type === "itinerary") {
+      const found = itineraries.find((i: any) => i.id === item.id);
+      if (found) {
+        return (
+          <ItineraryListItem
+            itinerary={found as Itinerary}
+            onTitleClick={() => handleEdit(item)}
+            actions={
+              <>
+                <IconAction label="Visualizar" onClick={() => handleEdit(item)}>
+                  <Eye className="h-4 w-4" />
+                </IconAction>
+                <IconAction label="Editar" onClick={() => handleEdit(item)}>
+                  <Pencil className="h-4 w-4" />
+                </IconAction>
+                <IconAction
+                  label="Salvar como modelo"
+                  onClick={() => setTemplateTarget(found as Itinerary)}
+                >
+                  <Star className="h-4 w-4" />
+                </IconAction>
+                <IconAction label="Publicar / Link" onClick={() => handleEdit(item)}>
+                  <Link2 className="h-4 w-4" />
+                </IconAction>
+                <IconAction label="Gerar PDF" onClick={() => handleEdit(item)}>
+                  <FileText className="h-4 w-4" />
+                </IconAction>
+                <IconAction
+                  label="Excluir"
+                  destructive
+                  onClick={() => setDeleteTarget(item)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </IconAction>
+              </>
+            }
+          />
+        );
+      }
+    }
     return (
       <div className="group grid grid-cols-1 md:grid-cols-[1fr_140px_180px] gap-3 md:gap-6 items-start md:items-center px-4 md:px-5 py-3.5 transition-colors hover:bg-muted/40">
         <div className="flex items-start gap-3 min-w-0">
