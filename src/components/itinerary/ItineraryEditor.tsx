@@ -454,7 +454,7 @@ export function ItineraryEditor({
                       Adicionar
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Adicionar Atividade</DialogTitle>
                       <DialogDescription>
@@ -705,7 +705,7 @@ export function ItineraryEditor({
                                     <Pencil className="h-4 w-4" />
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
                                   <DialogHeader>
                                     <DialogTitle>Editar Atividade</DialogTitle>
                                   </DialogHeader>
@@ -725,14 +725,15 @@ export function ItineraryEditor({
                                       </div>
                                       <div className="space-y-2">
                                         <Label>Descrição</Label>
-                                        <Textarea
-                                          value={editingActivity.description || ""}
-                                          onChange={(e) =>
+                                        <RichContentEditor
+                                          content={descriptionToEditorHtml(editingActivity.description)}
+                                          onChange={(html) =>
                                             setEditingActivity({
                                               ...editingActivity,
-                                              description: e.target.value,
+                                              description: html,
                                             })
                                           }
+                                          editorClassName="min-h-[300px] [&_.ProseMirror]:min-h-[280px]"
                                         />
                                       </div>
                                       <div className="grid grid-cols-2 gap-4">
