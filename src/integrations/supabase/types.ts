@@ -919,6 +919,51 @@ export type Database = {
         }
         Relationships: []
       }
+      app_error_logs: {
+        Row: {
+          agency_id: string | null
+          component_stack: string | null
+          created_at: string
+          error_message: string
+          error_name: string | null
+          id: string
+          metadata: Json
+          phase: string
+          route: string
+          stack: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          component_stack?: string | null
+          created_at?: string
+          error_message: string
+          error_name?: string | null
+          id?: string
+          metadata?: Json
+          phase?: string
+          route: string
+          stack?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          component_stack?: string | null
+          created_at?: string
+          error_message?: string
+          error_name?: string | null
+          id?: string
+          metadata?: Json
+          phase?: string
+          route?: string
+          stack?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       attractions: {
         Row: {
           address: string | null

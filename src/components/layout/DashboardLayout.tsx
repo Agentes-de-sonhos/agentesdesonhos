@@ -24,14 +24,16 @@ const DashboardLayoutContext = createContext(false);
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const alreadyMounted = useContext(DashboardLayoutContext);
-  if (alreadyMounted) {
-    // Outer shell already provides sidebar/chrome — just render page content.
-    return <>{children}</>;
-  }
-
   const { user } = useAuth();
   const { isFornecedor, loading: roleLoading } = useUserRole();
   const impersonating = isActiveImpersonatingUser(user?.id);
+
+  if (alreadyMounted) {
+    // Outer shell already provides sidebar/chrome — just render page content.
+    // Keep hooks above this return so React hook order remains stable when the
+    // workspace mounts nested routes/tabs for fundador/premium users.
+    return <>{children}</>;
+  }
 
   // Suppliers always use the supplier-specific layout (sidebar, bottom nav, etc.)
   if (!roleLoading && isFornecedor) {

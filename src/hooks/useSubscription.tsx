@@ -137,12 +137,12 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, [plan, aiUsageCount, aiLimit, isAdmin, isPromotor]);
 
   const incrementAIUsage = useCallback(async (): Promise<boolean> => {
-    if (!subscription || !canUseAI()) return false;
+    if (!user || !subscription || !canUseAI()) return false;
 
     // Delegate to the SECURITY DEFINER RPC that enforces plan limits and
     // increments the counter server-side (client updates on subscriptions are
     // blocked by RLS).
-    const { data, error } = await supabase.rpc("check_ai_usage", { _user_id: user!.id });
+    const { data, error } = await supabase.rpc("check_ai_usage", { _user_id: user.id });
     if (error) {
       console.error("check_ai_usage error:", error);
       return false;

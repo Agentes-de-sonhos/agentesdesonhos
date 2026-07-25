@@ -1,4 +1,6 @@
-import { Component, ReactNode } from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   children: ReactNode;
@@ -21,9 +23,10 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: unknown) {
+  componentDidCatch(error: Error, info: ErrorInfo) {
     // Log useful debugging info
     console.error("[ErrorBoundary] Render error:", error, info);
+    void this.recordStructuredError(error, info);
 
     // Stale dynamic-import chunks: after a redeploy the previously loaded
     // index.html can still hold references to hashed chunks that no longer
@@ -69,6 +72,45 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.assign("/dashboard");
   };
 
+  private async recordStructuredError(error: Error, info: ErrorInfo) {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data: membership } = await (supabase as any)
+        .from("agency_membership")
+        .select("agency_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const limit = (value: unknown, max: number) => {
+        const text = String(value ?? "");
+        return text.length > max ? `${text.slice(0, max)}…` : text;
+      };
+
+      await (supabase as any).from("app_error_logs").insert({
+        user_id: user.id,
+        agency_id: membership?.agency_id ?? null,
+        route: `${window.location.pathname}${window.location.search}`,
+        phase: "react-render",
+        error_name: limit(error.name || "Error", 120),
+        error_message: limit(error.message || "Erro sem mensagem", 1000),
+        component_stack: limit(info.componentStack, 4000),
+        stack: limit(error.stack, 4000),
+        user_agent: limit(window.navigator.userAgent, 500),
+        metadata: {
+          hostname: window.location.hostname,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch (logError) {
+      console.warn("[ErrorBoundary] Structured error log failed:", logError);
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
@@ -82,20 +124,19 @@ export class ErrorBoundary extends Component<Props, State> {
               suporte.
             </p>
             <div className="flex items-center justify-center gap-2">
-              <button
+              <Button
                 type="button"
                 onClick={this.handleReload}
-                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 Atualizar página
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={this.handleGoHome}
-                className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
+                variant="outline"
               >
                 Voltar ao Dashboard
-              </button>
+              </Button>
             </div>
           </div>
         </div>
