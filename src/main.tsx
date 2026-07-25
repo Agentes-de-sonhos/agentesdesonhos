@@ -3,6 +3,23 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 
+// React can crash with DOM NotFoundError when browser translation tools mutate
+// text nodes that React later tries to remove. The platform is already PT-BR,
+// so opt the SPA root out of automatic translation before React mounts.
+(() => {
+  if (typeof document === "undefined") return;
+
+  document.documentElement.lang = "pt-BR";
+  document.documentElement.setAttribute("translate", "no");
+  document.documentElement.classList.add("notranslate");
+  document.body?.setAttribute("translate", "no");
+  document.body?.classList.add("notranslate");
+
+  const root = document.getElementById("root");
+  root?.setAttribute("translate", "no");
+  root?.classList.add("notranslate");
+})();
+
 // =============================================================================
 // Instalação / Carteira Digital
 // =============================================================================
@@ -102,8 +119,12 @@ import "./index.css";
 
 })();
 
-createRoot(document.getElementById("root")!).render(
-  <HelmetProvider>
-    <App />
-  </HelmetProvider>
-);
+const root = document.getElementById("root");
+
+if (root) {
+  createRoot(root).render(
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
+  );
+}

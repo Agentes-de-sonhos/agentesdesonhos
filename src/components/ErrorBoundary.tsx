@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  phase?: string;
+  routeOverride?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface State {
@@ -94,8 +97,8 @@ export class ErrorBoundary extends Component<Props, State> {
       await (supabase as any).from("app_error_logs").insert({
         user_id: user.id,
         agency_id: membership?.agency_id ?? null,
-        route: `${window.location.pathname}${window.location.search}`,
-        phase: "react-render",
+        route: this.props.routeOverride ?? `${window.location.pathname}${window.location.search}`,
+        phase: this.props.phase ?? "react-render",
         error_name: limit(error.name || "Error", 120),
         error_message: limit(error.message || "Erro sem mensagem", 1000),
         component_stack: limit(info.componentStack, 4000),
@@ -104,6 +107,7 @@ export class ErrorBoundary extends Component<Props, State> {
         metadata: {
           hostname: window.location.hostname,
           timestamp: new Date().toISOString(),
+          ...this.props.metadata,
         },
       });
     } catch (logError) {
