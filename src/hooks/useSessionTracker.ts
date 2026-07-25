@@ -89,6 +89,8 @@ async function startSharedSession(userId: string) {
 
   if (!error && data && sharedTracker.userId === userId && sharedTracker.refCount > 0) {
     sharedTracker.sessionId = data.id;
+  } else if (!error && data) {
+    await endSession(data.id);
   }
   sharedTracker.starting = false;
 }
