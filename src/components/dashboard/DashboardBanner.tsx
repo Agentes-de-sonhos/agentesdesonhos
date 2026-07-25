@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -23,7 +22,6 @@ interface Banner {
 }
 
 export function DashboardBanner() {
-  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -67,25 +65,24 @@ export function DashboardBanner() {
   const bgImage = slide.image_url || fallbackImages[current % fallbackImages.length];
 
   const link = slide.button_link?.trim() || "";
-  const isExternal = /^https?:\/\//i.test(link);
   const hasLink = link.length > 0;
 
   const openLink = () => {
     if (!hasLink) return;
-    if (isExternal) {
-      window.open(link, "_blank", "noopener,noreferrer");
-    } else {
-      navigate(link);
-    }
+    window.open(link, "_blank", "noopener,noreferrer");
   };
+
+  const title = slide.title?.trim() || "";
+  const description = slide.description?.trim() || "";
+  const buttonText = slide.button_text?.trim() || "";
+  const hasContent = Boolean(title || description || buttonText);
 
   return (
     <div
       className={cn(
-        "relative w-full rounded-2xl overflow-hidden group",
+        "relative w-full rounded-2xl overflow-hidden group bg-muted",
         hasLink && "cursor-pointer"
       )}
-      style={{ minHeight: 220 }}
       onClick={hasLink ? openLink : undefined}
       role={hasLink ? "link" : undefined}
       tabIndex={hasLink ? 0 : undefined}
@@ -100,48 +97,55 @@ export function DashboardBanner() {
           : undefined
       }
     >
-      {/* Background image */}
-      <div
+      {/* Image respects natural aspect ratio */}
+      <img
+        key={slide.id}
+        src={bgImage}
+        alt={title || "Banner"}
         className={cn(
-          "absolute inset-0 bg-cover bg-center transition-opacity duration-500",
+          "block w-full h-auto transition-opacity duration-500",
           isTransitioning ? "opacity-0" : "opacity-100"
         )}
-        style={{ backgroundImage: `url(${bgImage})` }}
       />
 
-      {/* Dark overlay for legibility */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+      {hasContent && (
+        <>
+          {/* Dark overlay for legibility */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 pointer-events-none" />
 
-      {/* Content */}
-      <div
-        className={cn(
-          "relative z-10 flex flex-col justify-center h-full px-6 sm:px-10 lg:px-14 py-10 sm:py-14 transition-opacity duration-300",
-          isTransitioning ? "opacity-0" : "opacity-100"
-        )}
-        style={{ minHeight: 220, maxHeight: 320 }}
-      >
-        <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-white max-w-2xl leading-tight">
-          {slide.title}
-        </h2>
-        {slide.description && (
-          <p className="mt-2 text-sm sm:text-base text-white/80 max-w-xl leading-relaxed">
-            {slide.description}
-          </p>
-        )}
-        {slide.button_text && (
-          <div className="mt-4">
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                openLink();
-              }}
-              className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg"
-            >
-              {slide.button_text}
-            </Button>
+          {/* Content */}
+          <div
+            className={cn(
+              "absolute inset-0 z-10 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-10 transition-opacity duration-300",
+              isTransitioning ? "opacity-0" : "opacity-100"
+            )}
+          >
+            {title && (
+              <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-white max-w-2xl leading-tight">
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p className="mt-2 text-sm sm:text-base text-white/80 max-w-xl leading-relaxed">
+                {description}
+              </p>
+            )}
+            {buttonText && (
+              <div className="mt-4">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openLink();
+                  }}
+                  className="bg-white text-foreground hover:bg-white/90 font-semibold shadow-lg"
+                >
+                  {buttonText}
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       {/* Arrows */}
       {items.length > 1 && (
