@@ -73,12 +73,12 @@ export function AdminDashboardBannersManager() {
   const upsert = useMutation({
     mutationFn: async () => {
       const title = form.title.trim();
-      if (!title) throw new Error("Título obrigatório");
+      if (!form.image_url?.trim()) throw new Error("Selecione uma imagem para o banner");
       if (form.button_link && !isValidLink(form.button_link)) {
         throw new Error("Link inválido. Use http(s)://… ou uma rota interna começando com /");
       }
       const payload = {
-        title,
+        title: title || "",
         description: form.description?.trim() || null,
         image_url: form.image_url?.trim() || null,
         button_text: form.button_text?.trim() || null,
@@ -179,7 +179,7 @@ export function AdminDashboardBannersManager() {
             Banners do Dashboard
           </CardTitle>
           <CardDescription>
-            Carrossel exibido no topo da página inicial. Imagem recomendada: 1920×480px.
+            Carrossel exibido no topo da página inicial. Qualquer proporção de imagem é respeitada — recomendamos banners horizontais consistentes (ex.: 1920×480px) para um visual uniforme.
           </CardDescription>
         </div>
         <Button onClick={openNew} className="gap-2">
@@ -310,15 +310,15 @@ export function AdminDashboardBannersManager() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Título *</Label>
+              <Label>Título (opcional)</Label>
               <Input
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="Título do banner"
+                placeholder="Deixe em branco para exibir apenas a imagem"
               />
             </div>
             <div className="space-y-2">
-              <Label>Descrição</Label>
+              <Label>Descrição (opcional)</Label>
               <Textarea
                 value={form.description ?? ""}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -327,7 +327,7 @@ export function AdminDashboardBannersManager() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>Texto do botão</Label>
+                <Label>Texto do botão (opcional)</Label>
                 <Input
                   value={form.button_text ?? ""}
                   onChange={(e) => setForm({ ...form, button_text: e.target.value })}
