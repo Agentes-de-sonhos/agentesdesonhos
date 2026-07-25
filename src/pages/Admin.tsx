@@ -22,6 +22,7 @@ import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelRecommendationsManager";
 import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
 import { AdminPageBannersManager } from "@/components/admin/AdminPageBannersManager";
+import { AdminDashboardBannersManager } from "@/components/admin/AdminDashboardBannersManager";
 import { AdminSurveyManager } from "@/components/admin/AdminSurveyManager";
 import { AdminBusinessCardsManager } from "@/components/admin/AdminBusinessCardsManager";
 import { AdminCommunityRoomsManager } from "@/components/admin/AdminCommunityRoomsManager";
@@ -66,6 +67,7 @@ const TAB_LABELS: Record<string, string> = {
   suppliers: "Links",
   "registration-links": "Links Cadastro",
   "page-banners": "Capas",
+  "dashboard-banners": "Banners Dashboard",
   "pending-approvals": "Aprovações",
   "trade-suppliers": "Diretório",
   hotels: "Hotéis",
@@ -158,6 +160,8 @@ function AdminContent({ tab }: { tab: string }) {
       );
     case "page-banners":
       return <AdminPageBannersManager />;
+    case "dashboard-banners":
+      return <AdminDashboardBannersManager />;
     case "surveys":
       return <AdminSurveyManager />;
     case "business-cards":
