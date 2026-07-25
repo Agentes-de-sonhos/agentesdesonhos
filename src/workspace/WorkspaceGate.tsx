@@ -43,7 +43,13 @@ export function WorkspaceGate({ children }: Props) {
   useEffect(() => {
     if (decision || authLoading) return;
 
-    const initialPath = window.location.pathname + window.location.search;
+    const initialPath = resolveInitialPath({
+      pathname: window.location.pathname,
+      search: window.location.search,
+      role,
+      plan,
+      hasUser: Boolean(user),
+    });
     const initialTitle = deriveInitialTitle(window.location.pathname);
 
     if (!user) {
@@ -88,4 +94,33 @@ function deriveInitialTitle(pathname: string): string {
   const last = normalized.split("/").filter(Boolean).pop();
   if (!last) return "Inicial";
   return last.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase());
+}
+
+function resolveInitialPath({
+  pathname,
+  search,
+  role,
+  plan,
+  hasUser,
+}: {
+  pathname: string;
+  search: string;
+  role: string | null | undefined;
+  plan: string | null | undefined;
+  hasUser: boolean;
+}): string {
+  const rawPath = `${pathname}${search}`;
+  if (!hasUser || pathname !== "/auth") return rawPath;
+
+  const next = new URLSearchParams(search).get("next");
+  if (next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/auth")) {
+    return next;
+  }
+
+  if (role === "admin") return "/admin";
+  if (role === "fornecedor") return "/dashboard-fornecedor";
+  if (plan === "educa_pass") return "/educa-academy";
+  if (plan === "cartao_digital") return "/meu-cartao";
+  if (plan === "start") return "/dashboard-start";
+  return "/dashboard";
 }

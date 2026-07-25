@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  phase?: string;
+  routeOverride?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface State {
@@ -52,11 +55,34 @@ export class ErrorBoundary extends Component<Props, State> {
         // ignore storage errors and fall through to fallback UI
       }
     }
+
+    const isDomMutationError =
+      error?.name === "NotFoundError" &&
+      /removeChild|insertBefore|node to be removed is not a child/i.test(msg);
+
+    if (isDomMutationError) {
+      try {
+        document.documentElement.setAttribute("translate", "no");
+        document.documentElement.classList.add("notranslate");
+        document.body?.setAttribute("translate", "no");
+        document.body?.classList.add("notranslate");
+
+        const key = "__dom_mutation_recover_attempted";
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, "1");
+          window.location.reload();
+          return;
+        }
+      } catch {
+        // ignore storage/DOM errors and fall through to fallback UI
+      }
+    }
   }
 
   handleReload = () => {
     try {
       sessionStorage.removeItem("__chunk_reload_attempted");
+      sessionStorage.removeItem("__dom_mutation_recover_attempted");
     } catch {
       /* noop */
     }
@@ -66,6 +92,7 @@ export class ErrorBoundary extends Component<Props, State> {
   handleGoHome = () => {
     try {
       sessionStorage.removeItem("__chunk_reload_attempted");
+      sessionStorage.removeItem("__dom_mutation_recover_attempted");
     } catch {
       /* noop */
     }
@@ -94,8 +121,8 @@ export class ErrorBoundary extends Component<Props, State> {
       await (supabase as any).from("app_error_logs").insert({
         user_id: user.id,
         agency_id: membership?.agency_id ?? null,
-        route: `${window.location.pathname}${window.location.search}`,
-        phase: "react-render",
+        route: this.props.routeOverride ?? `${window.location.pathname}${window.location.search}`,
+        phase: this.props.phase ?? "react-render",
         error_name: limit(error.name || "Error", 120),
         error_message: limit(error.message || "Erro sem mensagem", 1000),
         component_stack: limit(info.componentStack, 4000),
@@ -104,6 +131,7 @@ export class ErrorBoundary extends Component<Props, State> {
         metadata: {
           hostname: window.location.hostname,
           timestamp: new Date().toISOString(),
+          ...this.props.metadata,
         },
       });
     } catch (logError) {
