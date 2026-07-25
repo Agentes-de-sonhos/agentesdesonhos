@@ -82,6 +82,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "suppliers", label: "Links", icon: Link2 },
       { id: "registration-links", label: "Links Cadastro", icon: Link2 },
       { id: "page-banners", label: "Capas", icon: Image },
+      { id: "dashboard-banners", label: "Banners Dashboard", icon: Image },
     ],
   },
   {
