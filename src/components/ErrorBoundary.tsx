@@ -55,11 +55,34 @@ export class ErrorBoundary extends Component<Props, State> {
         // ignore storage errors and fall through to fallback UI
       }
     }
+
+    const isDomMutationError =
+      error?.name === "NotFoundError" &&
+      /removeChild|insertBefore|node to be removed is not a child/i.test(msg);
+
+    if (isDomMutationError) {
+      try {
+        document.documentElement.setAttribute("translate", "no");
+        document.documentElement.classList.add("notranslate");
+        document.body?.setAttribute("translate", "no");
+        document.body?.classList.add("notranslate");
+
+        const key = "__dom_mutation_recover_attempted";
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, "1");
+          window.location.reload();
+          return;
+        }
+      } catch {
+        // ignore storage/DOM errors and fall through to fallback UI
+      }
+    }
   }
 
   handleReload = () => {
     try {
       sessionStorage.removeItem("__chunk_reload_attempted");
+      sessionStorage.removeItem("__dom_mutation_recover_attempted");
     } catch {
       /* noop */
     }
@@ -69,6 +92,7 @@ export class ErrorBoundary extends Component<Props, State> {
   handleGoHome = () => {
     try {
       sessionStorage.removeItem("__chunk_reload_attempted");
+      sessionStorage.removeItem("__dom_mutation_recover_attempted");
     } catch {
       /* noop */
     }
