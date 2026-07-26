@@ -365,6 +365,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 onDelete={() => {
                   if (confirm("Excluir esta publicação?")) deletePost(post.id);
                 }}
+                onEdit={() => setEditingPost(post)}
                 commentsOpen={expandedComments.has(post.id)}
                 onToggleComments={() => toggleCommentsOpen(post.id)}
                 fetchComments={fetchComments}
@@ -400,6 +401,14 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
             )}
           </DialogContent>
         </Dialog>
+
+        <EditPostDialog
+          post={editingPost}
+          open={!!editingPost}
+          onOpenChange={(o) => !o && setEditingPost(null)}
+          onSave={updatePost}
+          isSaving={isUpdating}
+        />
       </CardContent>
     </Card>
   );
@@ -411,6 +420,7 @@ interface PostCardProps {
   isAdmin: boolean;
   onLike: () => void;
   onDelete: () => void;
+  onEdit: () => void;
   commentsOpen: boolean;
   onToggleComments: () => void;
   fetchComments: (postId: string) => Promise<PostComment[]>;
@@ -426,6 +436,7 @@ function PostCard({
   isAdmin,
   onLike,
   onDelete,
+  onEdit,
   commentsOpen,
   onToggleComments,
   fetchComments,
@@ -436,6 +447,9 @@ function PostCard({
 }: PostCardProps) {
   const isAuthor = currentUserId === post.user_id;
   const canDelete = isAuthor || isAdmin;
+  const canEdit = isAuthor;
+  const images = postImages(post);
+  const wasEdited = !!(post as any).edited_at;
 
   const { data: comments = [], isLoading: loadingComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
