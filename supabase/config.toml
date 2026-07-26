@@ -86,3 +86,15 @@ verify_jwt = true
 
 [functions.cancel-subscription]
 verify_jwt = false
+
+[functions.collect-panrotas]
+verify_jwt = false
+
+[functions.collect-mercado-eventos]
+verify_jwt = false
+
+[functions.collect-brasilturis]
+verify_jwt = false
+
+[functions.news-collector-orchestrator]
+verify_jwt = false
