@@ -1,989 +1,591 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import {
-  Newspaper, ExternalLink, Loader2, Star, ChevronLeft, ChevronRight,
-  TrendingUp, Trash2, FileText, Flame, Zap, Bookmark, BookmarkCheck,
-  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, ChevronDown,
-  MoreVertical, Crown, ArrowUpToLine, ArrowDownToLine, Hash,
+  Newspaper, ExternalLink, Loader2, TrendingUp, Flame, Search, Crown,
+  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Building2, Ticket,
+  DollarSign, GraduationCap, Users, Sparkles, Shield, Wrench, Filter,
+  RefreshCw, EyeOff,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 
-interface NoticiaHub {
+/* ── Types ───────────────────────────────────────────────── */
+type Noticia = {
   id: string;
   titulo_curto: string;
   resumo: string;
   categoria: string;
   fonte: string;
   url_original: string;
-  relevancia_score: number;
-  tipo_exibicao: string;
-  status: string;
   data_publicacao: string;
-  alerta_trade: boolean;
-  nivel_alerta: string;
-  is_noticia_do_dia: boolean;
-  top5_position: number | null;
-}
+  reads_count: number;
+  likes_count: number;
+  status: string;
+  hidden: boolean;
+};
+
+type RankingRow = Noticia & {
+  window_reads: number;
+  window_likes: number;
+  score: number;
+  rank_position: number;
+};
+
+/* ── Categorias ──────────────────────────────────────────── */
+const CATEGORIAS = [
+  "Aéreo",
+  "Hotelaria & Resorts",
+  "Cruzeiros",
+  "Destinos",
+  "Operadoras & Trade",
+  "Mercado & Economia",
+  "Eventos & Feiras",
+  "Ingressos & Atrações",
+  "Turismo Sustentável",
+  "Educação & Certificações",
+  "Tecnologia & Inovação",
+  "Regulamentação & Vistos",
+  "Curiosidades",
+  "Outros",
+];
 
 const CATEGORIA_ICONS: Record<string, React.ReactNode> = {
   "Aéreo": <Plane className="h-3.5 w-3.5" />,
+  "Hotelaria & Resorts": <Hotel className="h-3.5 w-3.5" />,
   "Cruzeiros": <Ship className="h-3.5 w-3.5" />,
-  "Hotel": <Hotel className="h-3.5 w-3.5" />,
   "Destinos": <Globe className="h-3.5 w-3.5" />,
+  "Operadoras & Trade": <Building2 className="h-3.5 w-3.5" />,
+  "Mercado & Economia": <DollarSign className="h-3.5 w-3.5" />,
+  "Eventos & Feiras": <Mic className="h-3.5 w-3.5" />,
+  "Ingressos & Atrações": <Ticket className="h-3.5 w-3.5" />,
+  "Turismo Sustentável": <Palmtree className="h-3.5 w-3.5" />,
+  "Educação & Certificações": <GraduationCap className="h-3.5 w-3.5" />,
+  "Tecnologia & Inovação": <Sparkles className="h-3.5 w-3.5" />,
+  "Regulamentação & Vistos": <Shield className="h-3.5 w-3.5" />,
+  "Curiosidades": <Users className="h-3.5 w-3.5" />,
+  "Outros": <Wrench className="h-3.5 w-3.5" />,
+  // Legado
+  "Hotel": <Hotel className="h-3.5 w-3.5" />,
   "Mercado": <BarChart3 className="h-3.5 w-3.5" />,
   "Eventos": <Mic className="h-3.5 w-3.5" />,
   "Turismo": <Palmtree className="h-3.5 w-3.5" />,
 };
 
-const CATEGORIAS_FILTER = [
-  "Todas",
-  "Destaques do Trade",
-  "Aéreo",
-  "Destinos",
-  "Mercado",
-  "Cruzeiros",
-  "Turismo",
-  "Eventos",
-];
-
 const CATEGORIA_COLORS: Record<string, string> = {
   "Aéreo": "bg-sky-100 text-sky-700 border-sky-200",
-  "Destinos": "bg-emerald-100 text-emerald-700 border-emerald-200",
-  "Mercado": "bg-amber-100 text-amber-700 border-amber-200",
+  "Hotelaria & Resorts": "bg-rose-100 text-rose-700 border-rose-200",
   "Cruzeiros": "bg-indigo-100 text-indigo-700 border-indigo-200",
-  "Turismo": "bg-teal-100 text-teal-700 border-teal-200",
-  "Eventos": "bg-purple-100 text-purple-700 border-purple-200",
+  "Destinos": "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "Operadoras & Trade": "bg-amber-100 text-amber-700 border-amber-200",
+  "Mercado & Economia": "bg-yellow-100 text-yellow-800 border-yellow-200",
+  "Eventos & Feiras": "bg-purple-100 text-purple-700 border-purple-200",
+  "Ingressos & Atrações": "bg-pink-100 text-pink-700 border-pink-200",
+  "Turismo Sustentável": "bg-teal-100 text-teal-700 border-teal-200",
+  "Educação & Certificações": "bg-cyan-100 text-cyan-700 border-cyan-200",
+  "Tecnologia & Inovação": "bg-violet-100 text-violet-700 border-violet-200",
+  "Regulamentação & Vistos": "bg-slate-100 text-slate-700 border-slate-200",
+  "Curiosidades": "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200",
+  "Outros": "bg-muted text-muted-foreground border-border",
 };
 
-const PAGE_SIZE = 20;
+const PORTAIS = ["PANROTAS", "Mercado & Eventos", "Brasilturis"];
 
-function formatDate(dateString: string): string {
+/* ── Helpers ─────────────────────────────────────────────── */
+function formatRelative(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffHours < 1) return "Agora";
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffMin < 1) return "Agora";
+  if (diffMin < 60) return `Há ${diffMin} min`;
   if (diffHours < 24) return `Há ${diffHours}h`;
   if (diffDays === 1) return "Ontem";
   if (diffDays < 7) return `${diffDays} dias atrás`;
-  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+}
+
+function isWeekend(): boolean {
+  const d = new Date();
+  const day = d.getDay();
+  return day === 0 || day === 6;
 }
 
 function CategoryBadge({ categoria }: { categoria: string }) {
   const colorClass = CATEGORIA_COLORS[categoria] || "bg-muted text-muted-foreground border-border";
-  const icon = CATEGORIA_ICONS[categoria];
+  const icon = CATEGORIA_ICONS[categoria] || <Newspaper className="h-3.5 w-3.5" />;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold tracking-wide ${colorClass}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${colorClass}`}>
       {icon}
       {categoria}
     </span>
   );
 }
 
-function CurationBadges({ item }: { item: NoticiaHub }) {
-  return (
-    <>
-      {item.is_noticia_do_dia && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 border border-amber-300 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-          <Crown className="h-3 w-3" /> Notícia do Dia
-        </span>
-      )}
-      {item.top5_position != null && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 text-violet-700 border border-violet-300 px-2.5 py-0.5 text-[10px] font-bold">
-          <Hash className="h-3 w-3" /> Top {item.top5_position}
-        </span>
-      )}
-    </>
-  );
-}
-
-/* ── Admin Actions Menu ──────────────────────────────────── */
-function AdminActionsMenu({
+/* ── Card (sem imagem) ───────────────────────────────────── */
+function NewsRow({
   item,
-  allNews,
-  onSetNoticiaDoDia,
-  onAddTop5,
-  onRemoveTop5,
-  onDelete,
+  onRead,
+  onLike,
+  liked,
+  likeCount,
+  featured,
+  featuredLabel,
+  rankBadge,
+  onHide,
+  isAdmin,
 }: {
-  item: NoticiaHub;
-  allNews: NoticiaHub[];
-  onSetNoticiaDoDia: (id: string) => void;
-  onAddTop5: (id: string) => void;
-  onRemoveTop5: (id: string) => void;
-  onDelete: (id: string) => void;
-}) {
-  const top5Count = allNews.filter((n) => n.top5_position != null).length;
-  const isInTop5 = item.top5_position != null;
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
-          onClick={(e) => e.preventDefault()}
-        >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        {!item.is_noticia_do_dia && (
-          <DropdownMenuItem onClick={() => onSetNoticiaDoDia(item.id)}>
-            <Crown className="h-4 w-4 mr-2 text-amber-500" />
-            Definir como Notícia do Dia
-          </DropdownMenuItem>
-        )}
-        {item.is_noticia_do_dia && (
-          <DropdownMenuItem disabled className="text-amber-600 font-medium">
-            <Crown className="h-4 w-4 mr-2" />
-            É a Notícia do Dia
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        {!isInTop5 && (
-          <DropdownMenuItem
-            onClick={() => onAddTop5(item.id)}
-            disabled={top5Count >= 5}
-          >
-            <ArrowUpToLine className="h-4 w-4 mr-2 text-violet-500" />
-            {top5Count >= 5 ? "Top 5 cheio (5/5)" : `Adicionar ao Top 5 (${top5Count}/5)`}
-          </DropdownMenuItem>
-        )}
-        {isInTop5 && (
-          <DropdownMenuItem onClick={() => onRemoveTop5(item.id)}>
-            <ArrowDownToLine className="h-4 w-4 mr-2 text-violet-500" />
-            Remover do Top 5 (#{item.top5_position})
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => onDelete(item.id)}
-          className="text-destructive focus:text-destructive"
-        >
-          <Trash2 className="h-4 w-4 mr-2" />
-          Excluir notícia
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-/* ── Top 5 Replacement Dialog ────────────────────────────── */
-function Top5ReplacementDialog({
-  open,
-  onClose,
-  currentTop5,
-  onReplace,
-}: {
-  open: boolean;
-  onClose: () => void;
-  currentTop5: NoticiaHub[];
-  onReplace: (removeId: string) => void;
+  item: Noticia;
+  onRead: (item: Noticia) => void;
+  onLike: (id: string) => void;
+  liked: boolean;
+  likeCount: number;
+  featured?: boolean;
+  featuredLabel?: string;
+  rankBadge?: string;
+  onHide?: (id: string) => void;
+  isAdmin?: boolean;
 }) {
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Top 5 lotado — substituir qual?</DialogTitle>
-        </DialogHeader>
-        <p className="text-sm text-muted-foreground mb-3">
-          O Top 5 já está com 5 notícias. Selecione uma para substituir:
-        </p>
-        <div className="space-y-2">
-          {currentTop5
-            .sort((a, b) => (a.top5_position ?? 0) - (b.top5_position ?? 0))
-            .map((n) => (
-              <button
-                key={n.id}
-                className="w-full text-left flex items-center gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                onClick={() => onReplace(n.id)}
-              >
-                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center">
-                  #{n.top5_position}
-                </span>
-                <span className="text-sm font-medium truncate">{n.titulo_curto}</span>
-              </button>
-            ))}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/* ── Hero Card (Notícia do Dia) ─────────────────────────── */
-function HeroNewsCard({ item, isAdmin, onDelete, saved, onToggleSave, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, likeCount, liked, onToggleLike }: {
-  item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
-  saved: boolean; onToggleSave: (id: string) => void;
-  allNews: NoticiaHub[];
-  onSetNoticiaDoDia: (id: string) => void;
-  onAddTop5: (id: string) => void;
-  onRemoveTop5: (id: string) => void;
-  likeCount: number; liked: boolean; onToggleLike: (id: string) => void;
-}) {
-  return (
-    <div className="relative group/card h-full">
-      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
-        <Card className="border-0 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-primary/8 via-card to-card h-full">
-          <CardContent className="p-6 md:p-8">
-            <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                <Flame className="h-3.5 w-3.5" />
-                Notícia do Dia
-              </span>
-              <CategoryBadge categoria={item.categoria} />
-              <CurationBadges item={item} />
-              <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
-                <TrendingUp className="h-3.5 w-3.5" />
-                Score {item.relevancia_score}/10
-              </span>
-            </div>
-            <h2 className="font-display text-xl md:text-2xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
-              {item.titulo_curto}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-3xl">
-              {item.resumo}
-            </p>
-            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border/50">
-              <span className="text-xs font-semibold text-foreground/70">{item.fonte}</span>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-              <div className="ml-auto flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary group-hover:underline">
-                  Ler matéria <ExternalLink className="h-3.5 w-3.5" />
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </a>
-      <div className="absolute top-3 right-3 flex items-center gap-1">
-        <NewsLikeButton noticiaId={item.id} count={likeCount} liked={liked} onToggle={onToggleLike} size="md" />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(item.id); }}
-        >
-          {saved ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4 text-muted-foreground" />}
-        </Button>
-        {isAdmin && (
-          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-            <AdminActionsMenu
-              item={item}
-              allNews={allNews}
-              onSetNoticiaDoDia={onSetNoticiaDoDia}
-              onAddTop5={onAddTop5}
-              onRemoveTop5={onRemoveTop5}
-              onDelete={onDelete!}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ── Standard News Card ──────────────────────────────────── */
-function NewsCard({ item, isAdmin, onDelete, saved, onToggleSave, trending, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, likeCount, liked, onToggleLike }: {
-  item: NoticiaHub; isAdmin: boolean; onDelete?: (id: string) => void;
-  saved: boolean; onToggleSave: (id: string) => void; trending?: boolean;
-  allNews: NoticiaHub[];
-  onSetNoticiaDoDia: (id: string) => void;
-  onAddTop5: (id: string) => void;
-  onRemoveTop5: (id: string) => void;
-  likeCount: number; liked: boolean; onToggleLike: (id: string) => void;
-}) {
-  return (
-    <div className="relative group/card h-full">
-      <a href={item.url_original} target="_blank" rel="noopener noreferrer" className="block group h-full">
-        <Card className="border-0 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 h-full">
-          <CardContent className="p-5 flex flex-col h-full">
-            <div className="flex items-center gap-1.5 mb-2.5 flex-wrap">
-              <CategoryBadge categoria={item.categoria} />
-              <CurationBadges item={item} />
-              {trending && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold">
-                  <Flame className="h-3 w-3" /> Em alta
-                </span>
-              )}
-              {item.alerta_trade && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2 py-0.5 text-[10px] font-bold">
-                  <Star className="h-3 w-3" /> Destaque
-                </span>
-              )}
-            </div>
-            <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors leading-snug flex-grow line-clamp-2">
-              {item.titulo_curto}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2 leading-relaxed">
-              {item.resumo}
-            </p>
-            <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-border/40">
-              <span className="text-[11px] font-semibold text-foreground/70">{item.fonte}</span>
-              <span className="text-[11px] text-muted-foreground">•</span>
-              <span className="text-[11px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-              <ExternalLink className="h-3 w-3 ml-auto text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </CardContent>
-        </Card>
-      </a>
-      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
-        <NewsLikeButton noticiaId={item.id} count={likeCount} liked={liked} onToggle={onToggleLike} />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(item.id); }}
-        >
-          {saved ? <BookmarkCheck className="h-3.5 w-3.5 text-primary" /> : <Bookmark className="h-3.5 w-3.5 text-muted-foreground" />}
-        </Button>
-        {isAdmin && (
-          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-            <AdminActionsMenu
-              item={item}
-              allNews={allNews}
-              onSetNoticiaDoDia={onSetNoticiaDoDia}
-              onAddTop5={onAddTop5}
-              onRemoveTop5={onRemoveTop5}
-              onDelete={onDelete!}
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ── Compact List Card (for sidebar sections) ────────────── */
-function CompactNewsItem({ item, index, isAdmin, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, onDelete }: {
-  item: NoticiaHub; index: number;
-  isAdmin: boolean; allNews: NoticiaHub[];
-  onSetNoticiaDoDia: (id: string) => void;
-  onAddTop5: (id: string) => void;
-  onRemoveTop5: (id: string) => void;
-  onDelete: (id: string) => void;
-}) {
-  const isFirst = index === 0;
-  return (
-    <div className="group/compact relative">
-      <a
-        href={item.url_original}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`group flex items-start gap-3 rounded-lg transition-colors ${
-          isFirst ? "p-3 bg-primary/5 border border-primary/10" : "p-2.5 hover:bg-muted/50"
-        }`}
-      >
-        <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center mt-0.5 ${
-          isFirst ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
-        }`}>
-          {index + 1}
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className={`font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-relaxed ${
-            isFirst ? "text-sm" : "text-xs"
-          }`}>
-            {item.titulo_curto}
-          </p>
-          <div className="flex items-center gap-1.5 mt-1">
-            <CategoryBadge categoria={item.categoria} />
-            <span className="text-[10px] text-muted-foreground">{item.fonte}</span>
-            <span className="text-[10px] text-muted-foreground">•</span>
-            <span className="text-[10px] text-muted-foreground">{formatDate(item.data_publicacao)}</span>
-          </div>
-        </div>
-      </a>
-      {isAdmin && (
-        <div className="absolute top-1.5 right-1.5 opacity-0 group-hover/compact:opacity-100 transition-opacity" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-          <AdminActionsMenu
-            item={item}
-            allNews={allNews}
-            onSetNoticiaDoDia={onSetNoticiaDoDia}
-            onAddTop5={onAddTop5}
-            onRemoveTop5={onRemoveTop5}
-            onDelete={onDelete}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Destaques Full-width Carousel with auto-advance ─────── */
-function DestaquesCarousel({ items, isAdmin, onDelete, savedIds, onToggleSave, trendingSet, allNews, onSetNoticiaDoDia, onAddTop5, onRemoveTop5, getLikeCount, isLiked, onToggleLike }: {
-  items: NoticiaHub[]; isAdmin: boolean; onDelete: (id: string) => void;
-  savedIds: Set<string>; onToggleSave: (id: string) => void; trendingSet: Set<string>;
-  allNews: NoticiaHub[];
-  onSetNoticiaDoDia: (id: string) => void;
-  onAddTop5: (id: string) => void;
-  onRemoveTop5: (id: string) => void;
-  getLikeCount: (id: string) => number; isLiked: (id: string) => boolean; onToggleLike: (id: string) => void;
-}) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const resetTimer = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % items.length);
-    }, 10000);
-  }, [items.length]);
-
-  useEffect(() => {
-    resetTimer();
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [resetTimer]);
-
-  const goTo = (dir: "prev" | "next") => {
-    setActiveIndex((prev) => dir === "next" ? (prev + 1) % items.length : (prev - 1 + items.length) % items.length);
-    resetTimer();
-  };
-
-  const current = items[activeIndex];
-  if (!current) return null;
-
-  return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
-            <Star className="h-4 w-4 text-white" />
-          </div>
-          <h2 className="text-base font-bold text-foreground">Destaques do Trade</h2>
-          <span className="text-xs text-muted-foreground">{activeIndex + 1} / {items.length}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => goTo("prev")}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => goTo("next")}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div className="relative">
-        <a href={current.url_original} target="_blank" rel="noopener noreferrer" className="block group">
-          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300 bg-gradient-to-r from-orange-50/50 to-card ring-1 ring-orange-200/30">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-                  <Star className="h-3 w-3" /> Destaque do Trade
-                </span>
-                <CategoryBadge categoria={current.categoria} />
-                <CurationBadges item={current} />
-                {trendingSet.has(current.id) && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[10px] font-bold">
-                    <Flame className="h-3 w-3" /> Em alta
-                  </span>
-                )}
-              </div>
-              <h3 className="text-lg font-bold text-foreground group-hover:text-orange-600 transition-colors leading-snug">
-                {current.titulo_curto}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
-                {current.resumo}
-              </p>
-              <div className="flex items-center gap-2 mt-4 pt-3 border-t border-orange-100">
-                <span className="text-xs font-semibold text-foreground/70">{current.fonte}</span>
-                <span className="text-xs text-muted-foreground">•</span>
-                <span className="text-xs text-muted-foreground">{formatDate(current.data_publicacao)}</span>
-                <span className="ml-auto inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 group-hover:underline">
-                  Ler matéria <ExternalLink className="h-3.5 w-3.5" />
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </a>
-        <div className="absolute top-3 right-3 flex items-center gap-1">
-          <NewsLikeButton noticiaId={current.id} count={getLikeCount(current.id)} liked={isLiked(current.id)} onToggle={onToggleLike} size="md" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 bg-background/80 backdrop-blur-sm hover:bg-background shadow-sm"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleSave(current.id); }}
-          >
-            {savedIds.has(current.id) ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4 text-muted-foreground" />}
-          </Button>
-          {isAdmin && (
-            <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-              <AdminActionsMenu
-                item={current}
-                allNews={allNews}
-                onSetNoticiaDoDia={onSetNoticiaDoDia}
-                onAddTop5={onAddTop5}
-                onRemoveTop5={onRemoveTop5}
-                onDelete={onDelete}
-              />
-            </div>
+    <Card className={`border-0 shadow-sm hover:shadow-md transition-shadow ${featured ? "bg-gradient-to-br from-primary/8 via-card to-card" : ""}`}>
+      <CardContent className={`${featured ? "p-5 md:p-6" : "p-4"} flex flex-col gap-2`}>
+        <div className="flex items-center gap-2 flex-wrap">
+          {rankBadge && (
+            <span className="inline-flex items-center rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold">
+              {rankBadge}
+            </span>
           )}
+          {featuredLabel && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+              <Crown className="h-3 w-3" /> {featuredLabel}
+            </span>
+          )}
+          <span className="text-[11px] font-semibold text-foreground/80">{item.fonte}</span>
+          <span className="text-[11px] text-muted-foreground">·</span>
+          <CategoryBadge categoria={item.categoria} />
+          <span className="text-[11px] text-muted-foreground">·</span>
+          <span className="text-[11px] text-muted-foreground">{formatRelative(item.data_publicacao)}</span>
         </div>
-      </div>
 
-      <div className="flex items-center justify-center gap-1.5">
-        {items.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => { setActiveIndex(i); resetTimer(); }}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === activeIndex ? "w-6 bg-orange-500" : "w-1.5 bg-muted-foreground/20 hover:bg-muted-foreground/40"
-            }`}
-          />
-        ))}
-      </div>
-    </section>
+        <h3 className={`${featured ? "text-lg md:text-xl" : "text-sm md:text-base"} font-bold leading-snug text-foreground`}>
+          {item.titulo_curto}
+        </h3>
+        <p className={`${featured ? "text-sm" : "text-xs"} text-muted-foreground leading-relaxed line-clamp-3`}>
+          {item.resumo}
+        </p>
+
+        <div className="flex items-center gap-3 pt-1 mt-1 border-t border-border/40">
+          <span className="text-[11px] text-muted-foreground tabular-nums">
+            {likeCount} {likeCount === 1 ? "curtida" : "curtidas"} · {item.reads_count} {item.reads_count === 1 ? "leitura" : "leituras"}
+          </span>
+          <div className="ml-auto flex items-center gap-1">
+            <NewsLikeButton
+              noticiaId={item.id}
+              count={likeCount}
+              liked={liked}
+              onToggle={onLike}
+              size={featured ? "md" : "sm"}
+            />
+            {isAdmin && onHide && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                title="Ocultar notícia"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onHide(item.id); }}
+              >
+                <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            )}
+            <Button
+              size="sm"
+              className="h-8 gap-1.5"
+              onClick={(e) => { e.preventDefault(); onRead(item); }}
+            >
+              Ler matéria <ExternalLink className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-/* ── Main Page ───────────────────────────────────────────── */
+/* ── Página ──────────────────────────────────────────────── */
 export default function Noticias() {
-  const [activeFilter, setActiveFilter] = useState("Todas");
-  const [page, setPage] = useState(1);
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
-  const [pendingTop5Id, setPendingTop5Id] = useState<string | null>(null);
   const { isAdmin } = useUserRole();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const carouselRef = useRef<HTMLDivElement>(null);
 
-  const { data: allNews, isLoading } = useQuery({
-    queryKey: ["noticias-hub"],
+  const [view, setView] = useState<"destaques" | "todas">("destaques");
+  const [search, setSearch] = useState("");
+  const [categoriaFilter, setCategoriaFilter] = useState<string>("all");
+  const [portalFilter, setPortalFilter] = useState<string>("all");
+  const [orderBy, setOrderBy] = useState<"recent" | "reads" | "likes" | "score">("recent");
+  const [visibleCount, setVisibleCount] = useState(20);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  const weekend = isWeekend();
+  const rankingWindow: "day" | "week" = weekend ? "week" : "day";
+
+  /* Feed principal — últimas notícias */
+  const feedQuery = useQuery({
+    queryKey: ["news-feed", 200],
     queryFn: async () => {
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data, error } = await supabase
-        .from("noticias_dashboard")
-        .select("*")
+      const { data, error } = await (supabase.from("noticias_dashboard") as any)
+        .select("id, titulo_curto, resumo, categoria, fonte, url_original, data_publicacao, reads_count, likes_count, status, hidden")
         .eq("status", "aprovado")
-        .gte("data_publicacao", twentyFourHoursAgo)
+        .eq("hidden", false)
         .order("data_publicacao", { ascending: false })
-        .limit(50);
+        .limit(200);
       if (error) throw error;
-      return (data as any[]).map((d) => ({
-        ...d,
-        is_noticia_do_dia: d.is_noticia_do_dia ?? false,
-        top5_position: d.top5_position ?? null,
-      })) as NoticiaHub[];
+      return (data ?? []) as Noticia[];
     },
-    refetchInterval: 5 * 60 * 1000,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
 
-  const newsIds = useMemo(() => (allNews || []).map((n) => n.id), [allNews]);
-  const { getLikeCount, isLiked, toggleLike: onToggleLike } = useNewsLikes(newsIds);
+  /* Ranking (Top 5) */
+  const rankingQuery = useQuery({
+    queryKey: ["news-ranking", rankingWindow],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("news_ranking", {
+        p_window: rankingWindow,
+        p_limit: 5,
+      });
+      if (error) throw error;
+      return (data ?? []) as RankingRow[];
+    },
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
 
-  const deleteMutation = useMutation({
+  /* Polling — sinaliza novas notícias sem trocar o scroll */
+  useEffect(() => {
+    const items = feedQuery.data ?? [];
+    if (items.length === 0) return;
+    const latestSeen = new Date(items[0].data_publicacao).getTime();
+    const intervalId = window.setInterval(async () => {
+      const { data } = await (supabase.from("noticias_dashboard") as any)
+        .select("id, data_publicacao")
+        .eq("status", "aprovado")
+        .eq("hidden", false)
+        .gt("data_publicacao", new Date(latestSeen).toISOString());
+      setPendingCount((data ?? []).length);
+    }, 60_000);
+    return () => window.clearInterval(intervalId);
+  }, [feedQuery.data]);
+
+  const news = feedQuery.data ?? [];
+  const newsIds = useMemo(() => news.map((n) => n.id), [news]);
+  const { getLikeCount, isLiked, toggleLike } = useNewsLikes(newsIds);
+
+  /* Registrar leitura */
+  const handleRead = useCallback(
+    async (item: Noticia) => {
+      window.open(item.url_original, "_blank", "noopener,noreferrer");
+      try {
+        await (supabase as any).rpc("register_news_read", { p_noticia_id: item.id });
+        queryClient.setQueryData<Noticia[]>(["news-feed", 200], (prev) =>
+          (prev ?? []).map((n) => (n.id === item.id ? { ...n, reads_count: n.reads_count + 1 } : n))
+        );
+      } catch {
+        /* silencioso — leitura já foi contabilizada em outro dia ou usuário anônimo */
+      }
+    },
+    [queryClient]
+  );
+
+  /* Ocultar (admin) */
+  const hideMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("noticias_dashboard").delete().eq("id", id);
+      const { error } = await (supabase.from("noticias_dashboard") as any)
+        .update({ hidden: true })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["noticias-hub"] });
-      queryClient.invalidateQueries({ queryKey: ["curated-news-dashboard"] });
-      toast({ title: "Notícia excluída com sucesso" });
+      toast({ title: "Notícia ocultada", description: "A notícia não aparece mais no feed dos agentes." });
+      queryClient.invalidateQueries({ queryKey: ["news-feed"] });
+      queryClient.invalidateQueries({ queryKey: ["news-ranking"] });
     },
-    onError: (error) => {
-      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
-    },
+    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
   });
 
-  const curationMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
-      const { error } = await (supabase as any).from("noticias_dashboard").update(data).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["noticias-hub"] });
-      queryClient.invalidateQueries({ queryKey: ["curated-news-dashboard"] });
-    },
-    onError: (error) => {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const handleDelete = (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir esta notícia?")) {
-      deleteMutation.mutate(id);
-    }
-  };
-
-  const handleSetNoticiaDoDia = (id: string) => {
-    curationMutation.mutate(
-      { id, data: { is_noticia_do_dia: true } },
-      { onSuccess: () => toast({ title: "✨ Notícia do Dia definida!" }) }
-    );
-  };
-
-  const handleAddTop5 = (id: string) => {
-    const currentTop5 = (allNews || []).filter((n) => n.top5_position != null);
-    if (currentTop5.length >= 5) {
-      setPendingTop5Id(id);
-      return;
-    }
-    const usedPositions = new Set(currentTop5.map((n) => n.top5_position));
-    let nextPos = 1;
-    while (usedPositions.has(nextPos) && nextPos <= 5) nextPos++;
-
-    curationMutation.mutate(
-      { id, data: { top5_position: nextPos } },
-      { onSuccess: () => toast({ title: `Adicionada ao Top 5 na posição #${nextPos}` }) }
-    );
-  };
-
-  const handleRemoveTop5 = (id: string) => {
-    curationMutation.mutate(
-      { id, data: { top5_position: null } },
-      { onSuccess: () => toast({ title: "Removida do Top 5" }) }
-    );
-  };
-
-  const handleReplaceTop5 = (removeId: string) => {
-    if (!pendingTop5Id) return;
-    const removedItem = (allNews || []).find((n) => n.id === removeId);
-    const position = removedItem?.top5_position ?? 1;
-
-    // Remove old, then add new at same position
-    curationMutation.mutate(
-      { id: removeId, data: { top5_position: null } },
-      {
-        onSuccess: () => {
-          curationMutation.mutate(
-            { id: pendingTop5Id!, data: { top5_position: position } },
-            { onSuccess: () => toast({ title: `Substituída no Top 5 posição #${position}` }) }
-          );
-        },
+  /* Filtragem + busca */
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return news.filter((n) => {
+      if (categoriaFilter !== "all" && n.categoria !== categoriaFilter) return false;
+      if (portalFilter !== "all" && n.fonte !== portalFilter) return false;
+      if (q) {
+        const hay = `${n.titulo_curto} ${n.resumo}`.toLowerCase();
+        if (!hay.includes(q)) return false;
       }
-    );
-    setPendingTop5Id(null);
-  };
-
-  const toggleSave = (id: string) => {
-    setSavedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-        toast({ title: "Notícia removida dos salvos" });
-      } else {
-        next.add(id);
-        toast({ title: "Notícia salva!" });
-      }
-      return next;
+      return true;
     });
-  };
+  }, [news, search, categoriaFilter, portalFilter]);
 
-  const scrollCarousel = (direction: "left" | "right") => {
-    if (!carouselRef.current) return;
-    const amount = 320;
-    carouselRef.current.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
-  };
+  const ordered = useMemo(() => {
+    const arr = [...filtered];
+    if (orderBy === "recent") return arr.sort((a, b) => +new Date(b.data_publicacao) - +new Date(a.data_publicacao));
+    if (orderBy === "reads") return arr.sort((a, b) => b.reads_count - a.reads_count);
+    if (orderBy === "likes") return arr.sort((a, b) => b.likes_count - a.likes_count);
+    return arr.sort((a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2));
+  }, [filtered, orderBy]);
 
-  // ── Sections ──
-  const alertas = useMemo(
-    () => (allNews || []).filter((n) => n.alerta_trade).slice(0, 6),
-    [allNews]
-  );
-  const alertaIds = useMemo(() => new Set(alertas.map((n) => n.id)), [alertas]);
-
-  // Hero: prefer manually selected "Notícia do Dia", fallback to first non-alert
-  const hero = useMemo(() => {
-    const manual = (allNews || []).find((n) => n.is_noticia_do_dia);
-    if (manual) return manual;
-    return (allNews || []).find((n) => !alertaIds.has(n.id));
-  }, [allNews, alertaIds]);
-
-  const heroAndAlertIds = useMemo(() => {
-    const s = new Set(alertaIds);
-    if (hero) s.add(hero.id);
-    return s;
-  }, [alertaIds, hero]);
-
-  const curadoria = useMemo(
-    () => (allNews || []).filter((n) => !heroAndAlertIds.has(n.id)),
-    [allNews, heroAndAlertIds]
-  );
-
-  // Top 5: prefer manually curated, fallback to highest score
-  const topHeadlines = useMemo(() => {
-    const manual = (allNews || [])
-      .filter((n) => n.top5_position != null)
-      .sort((a, b) => (a.top5_position ?? 0) - (b.top5_position ?? 0));
-    if (manual.length >= 1) {
-      // Fill remaining spots with highest score if manual < 5
-      if (manual.length < 5) {
-        const manualIds = new Set(manual.map((n) => n.id));
-        const auto = [...(allNews || [])]
-          .filter((n) => !manualIds.has(n.id))
-          .sort((a, b) => b.relevancia_score - a.relevancia_score)
-          .slice(0, 5 - manual.length);
-        return [...manual, ...auto];
-      }
-      return manual.slice(0, 5);
+  /* Notícias por categoria (destaques) */
+  const byCategory = useMemo(() => {
+    const map = new Map<string, Noticia[]>();
+    for (const n of filtered) {
+      const arr = map.get(n.categoria) ?? [];
+      arr.push(n);
+      map.set(n.categoria, arr);
     }
-    return [...(allNews || [])].sort((a, b) => b.relevancia_score - a.relevancia_score).slice(0, 5);
-  }, [allNews]);
+    return map;
+  }, [filtered]);
 
-  const trending = useMemo(
-    () => [...(allNews || [])].sort((a, b) => b.relevancia_score - a.relevancia_score).slice(0, 3).map((n) => n.id),
-    [allNews]
-  );
-  const trendingSet = useMemo(() => new Set(trending), [trending]);
+  const ranking = rankingQuery.data ?? [];
+  const topOne = ranking[0];
+  const topRest = ranking.slice(1, 5);
 
-  const filteredNews = useMemo(() => {
-    if (!allNews) return [];
-    switch (activeFilter) {
-      case "Destaques do Trade":
-        return allNews.filter((n) => n.tipo_exibicao === "destaque" || n.alerta_trade);
-      case "Todas":
-        return allNews;
-      default:
-        return allNews.filter((n) => n.categoria === activeFilter);
-    }
-  }, [allNews, activeFilter]);
+  const featuredLabel = weekend ? "Notícia da Semana" : "Notícia do Dia";
+  const top5Label = weekend ? "Top 5 da Semana" : "Top 5 do Dia";
 
-  const totalPages = Math.ceil(filteredNews.length / PAGE_SIZE);
-  const paginatedNews = filteredNews.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const handleFilterChange = (filter: string) => {
-    setActiveFilter(filter);
-    setPage(1);
+  const handleReload = () => {
+    setPendingCount(0);
+    feedQuery.refetch();
+    rankingQuery.refetch();
   };
-
-  const showSections = activeFilter === "Todas";
-
-  const currentTop5ForDialog = useMemo(
-    () => (allNews || []).filter((n) => n.top5_position != null),
-    [allNews]
-  );
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
-        <PageHeader
-          pageKey="noticias"
-          title="Notícias do Trade"
-          subtitle="Curadoria inteligente das últimas 24 horas"
-          icon={Newspaper}
-          adminTab="curadoria"
-        />
+      <PageHeader
+        pageKey="noticias"
+        icon={Newspaper}
+        title="Notícias do Trade"
+        subtitle="Todas as notícias do turismo em um só lugar, organizadas pelo interesse dos agentes de viagens."
+        adminTab="news"
+      />
 
-        {/* ── Filter Bar with Icons ── */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {CATEGORIAS_FILTER.map((cat) => {
-            const icon = CATEGORIA_ICONS[cat];
-            return (
-              <Button
-                key={cat}
-                variant={activeFilter === cat ? "default" : "outline"}
-                size="sm"
-                className={`whitespace-nowrap text-xs rounded-full px-3.5 gap-1.5 ${
-                  activeFilter === cat ? "shadow-md shadow-primary/20" : ""
-                }`}
-                onClick={() => handleFilterChange(cat)}
-              >
-                {icon}
-                {cat}
-              </Button>
-            );
-          })}
+      <div className="container max-w-7xl mx-auto px-4 pb-12 space-y-6">
+        {/* Barra meta + refresh */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs text-muted-foreground">
+            {feedQuery.isFetching ? "Atualizando…" : `${news.length} notícias · atualizado ${formatRelative(new Date().toISOString())}`}
+          </span>
+          {pendingCount > 0 && (
+            <Button size="sm" variant="secondary" onClick={handleReload} className="gap-1.5">
+              <RefreshCw className="h-3.5 w-3.5" />
+              {pendingCount} {pendingCount === 1 ? "nova notícia" : "novas notícias"}
+            </Button>
+          )}
+          <div className="ml-auto flex items-center gap-2">
+            <Button size="sm" variant="ghost" onClick={handleReload}>
+              <RefreshCw className={`h-3.5 w-3.5 ${feedQuery.isFetching ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Carregando notícias...</p>
+        {/* Tabs */}
+        <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+          <TabsList className="grid grid-cols-2 max-w-md">
+            <TabsTrigger value="destaques">Destaques do Trade</TabsTrigger>
+            <TabsTrigger value="todas">Todas as notícias</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Filtros */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar notícias"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9"
+            />
           </div>
-        ) : (
-          <>
-            {showSections && (
-              <>
-                {/* ── Hero + Top 5 side by side, same height ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
-                  <div className="lg:col-span-3 flex">
-                    {hero && (
-                      <div className="w-full flex">
-                        <HeroNewsCard
-                          item={hero}
-                          isAdmin={isAdmin}
-                          onDelete={handleDelete}
-                          saved={savedIds.has(hero.id)}
-                          onToggleSave={toggleSave}
-                          allNews={allNews || []}
-                          onSetNoticiaDoDia={handleSetNoticiaDoDia}
-                          onAddTop5={handleAddTop5}
-                          onRemoveTop5={handleRemoveTop5}
-                          likeCount={getLikeCount(hero.id)}
-                          liked={isLiked(hero.id)}
-                          onToggleLike={onToggleLike}
-                        />
-                      </div>
-                    )}
-                  </div>
+          <Select value={categoriaFilter} onValueChange={setCategoriaFilter}>
+            <SelectTrigger className="h-9 w-[190px]">
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as categorias</SelectItem>
+              {CATEGORIAS.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={portalFilter} onValueChange={setPortalFilter}>
+            <SelectTrigger className="h-9 w-[170px]">
+              <SelectValue placeholder="Portal" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os portais</SelectItem>
+              {PORTAIS.map((p) => (
+                <SelectItem key={p} value={p}>{p}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {view === "todas" && (
+            <Select value={orderBy} onValueChange={(v) => setOrderBy(v as any)}>
+              <SelectTrigger className="h-9 w-[170px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Mais recentes</SelectItem>
+                <SelectItem value="score">Mais relevantes</SelectItem>
+                <SelectItem value="reads">Mais acessadas</SelectItem>
+                <SelectItem value="likes">Mais curtidas</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        </div>
 
-                  <div className="lg:col-span-2 flex">
-                    <Card className="border-0 shadow-md w-full flex flex-col bg-gradient-to-b from-card to-muted/20">
-                      <CardContent className="p-4 flex flex-col flex-1">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-warning/15">
-                            <Zap className="h-4 w-4 text-warning" />
-                          </div>
-                          <h3 className="text-sm font-bold text-foreground">Top 5</h3>
-                        </div>
-                        <div className="flex-1 flex flex-col justify-between">
-                          {topHeadlines.map((item, i) => (
-                            <CompactNewsItem
-                              key={item.id}
-                              item={item}
-                              index={i}
-                              isAdmin={isAdmin}
-                              allNews={allNews || []}
-                              onSetNoticiaDoDia={handleSetNoticiaDoDia}
-                              onAddTop5={handleAddTop5}
-                              onRemoveTop5={handleRemoveTop5}
-                              onDelete={handleDelete}
-                            />
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
+        {/* Estados de carregamento */}
+        {feedQuery.isLoading && (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
 
-                {alertas.length > 0 && (
-                  <DestaquesCarousel
-                    items={alertas}
+        {!feedQuery.isLoading && filtered.length === 0 && (
+          <div className="text-center py-16 text-muted-foreground">
+            <Newspaper className="h-10 w-10 mx-auto mb-3 opacity-40" />
+            <p className="text-sm">Nenhuma notícia encontrada com estes filtros.</p>
+          </div>
+        )}
+
+        {/* View: Destaques do Trade */}
+        {view === "destaques" && filtered.length > 0 && (
+          <div className="space-y-8">
+            {/* Notícia do Dia/Semana + Top 5 */}
+            {topOne && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2">
+                  <NewsRow
+                    item={topOne}
+                    featured
+                    featuredLabel={featuredLabel}
+                    onRead={handleRead}
+                    onLike={toggleLike}
+                    liked={isLiked(topOne.id)}
+                    likeCount={getLikeCount(topOne.id) || topOne.likes_count}
+                    onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
                     isAdmin={isAdmin}
-                    onDelete={handleDelete}
-                    savedIds={savedIds}
-                    onToggleSave={toggleSave}
-                    trendingSet={trendingSet}
-                    allNews={allNews || []}
-                    onSetNoticiaDoDia={handleSetNoticiaDoDia}
-                    onAddTop5={handleAddTop5}
-                    onRemoveTop5={handleRemoveTop5}
-                    getLikeCount={getLikeCount}
-                    isLiked={isLiked}
-                    onToggleLike={onToggleLike}
                   />
-                )}
-
-                {curadoria.length > 0 && (
-                  <section className="space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500">
-                        <FileText className="h-4 w-4 text-white" />
-                      </div>
-                      <h2 className="text-base font-bold text-foreground">Outras Notícias</h2>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {curadoria.map((item) => (
-                        <NewsCard
-                          key={item.id}
-                          item={item}
-                          isAdmin={isAdmin}
-                          onDelete={handleDelete}
-                          saved={savedIds.has(item.id)}
-                          onToggleSave={toggleSave}
-                          trending={trendingSet.has(item.id)}
-                          allNews={allNews || []}
-                          onSetNoticiaDoDia={handleSetNoticiaDoDia}
-                          onAddTop5={handleAddTop5}
-                          onRemoveTop5={handleRemoveTop5}
-                          likeCount={getLikeCount(item.id)}
-                          liked={isLiked(item.id)}
-                          onToggleLike={onToggleLike}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </>
-            )}
-
-            {!showSections && paginatedNews.length > 0 && (
-              <section className="space-y-4">
-                <h2 className="text-base font-bold text-foreground">{activeFilter}</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {paginatedNews.map((item) => (
-                    <NewsCard
-                      key={item.id}
-                      item={item}
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                    <h3 className="text-sm font-bold">{top5Label}</h3>
+                  </div>
+                  {topRest.map((r) => (
+                    <NewsRow
+                      key={r.id}
+                      item={r}
+                      rankBadge={`#${r.rank_position}`}
+                      onRead={handleRead}
+                      onLike={toggleLike}
+                      liked={isLiked(r.id)}
+                      likeCount={getLikeCount(r.id) || r.likes_count}
+                      onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
                       isAdmin={isAdmin}
-                      onDelete={handleDelete}
-                      saved={savedIds.has(item.id)}
-                      onToggleSave={toggleSave}
-                      trending={trendingSet.has(item.id)}
-                      allNews={allNews || []}
-                      onSetNoticiaDoDia={handleSetNoticiaDoDia}
-                      onAddTop5={handleAddTop5}
-                      onRemoveTop5={handleRemoveTop5}
-                      likeCount={getLikeCount(item.id)}
-                      liked={isLiked(item.id)}
-                      onToggleLike={onToggleLike}
                     />
                   ))}
+                  {topRest.length === 0 && (
+                    <p className="text-xs text-muted-foreground py-4">Ainda não há dados suficientes para o ranking. Acesse e curta notícias para influenciar o Top 5.</p>
+                  )}
                 </div>
-
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-3 pt-4">
-                    <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="rounded-full">
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm font-medium text-muted-foreground">
-                      {page} de {totalPages}
-                    </span>
-                    <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)} className="rounded-full">
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </section>
-            )}
-
-            {filteredNews.length === 0 && (
-              <div className="text-center py-24 text-muted-foreground">
-                <Newspaper className="h-14 w-14 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">Nenhuma notícia nas últimas 24 horas</p>
-                <p className="text-sm mt-1">Novas notícias aparecerão aqui conforme forem publicadas</p>
               </div>
             )}
-          </>
+
+            {/* Notícias por categoria */}
+            {CATEGORIAS.map((cat) => {
+              const items = byCategory.get(cat) ?? [];
+              if (items.length === 0) return null;
+              const preview = items.slice(0, 6);
+              return (
+                <section key={cat} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CategoryBadge categoria={cat} />
+                    <h3 className="text-sm font-bold text-foreground">{cat}</h3>
+                    <span className="text-xs text-muted-foreground">({items.length})</span>
+                    {items.length > preview.length && (
+                      <Button
+                        size="sm"
+                        variant="link"
+                        className="ml-auto h-auto p-0 text-xs"
+                        onClick={() => {
+                          setCategoriaFilter(cat);
+                          setView("todas");
+                        }}
+                      >
+                        Ver todas
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                    {preview.map((item) => (
+                      <NewsRow
+                        key={item.id}
+                        item={item}
+                        onRead={handleRead}
+                        onLike={toggleLike}
+                        liked={isLiked(item.id)}
+                        likeCount={getLikeCount(item.id) || item.likes_count}
+                        onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
+                        isAdmin={isAdmin}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        )}
+
+        {/* View: Todas */}
+        {view === "todas" && ordered.length > 0 && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {ordered.slice(0, visibleCount).map((item) => (
+                <NewsRow
+                  key={item.id}
+                  item={item}
+                  onRead={handleRead}
+                  onLike={toggleLike}
+                  liked={isLiked(item.id)}
+                  likeCount={getLikeCount(item.id) || item.likes_count}
+                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
+                  isAdmin={isAdmin}
+                />
+              ))}
+            </div>
+            {visibleCount < ordered.length && (
+              <div className="flex justify-center pt-4">
+                <Button variant="outline" onClick={() => setVisibleCount((c) => c + 20)}>
+                  Carregar mais notícias
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       </div>
-
-      {/* Top 5 replacement dialog */}
-      <Top5ReplacementDialog
-        open={!!pendingTop5Id}
-        onClose={() => setPendingTop5Id(null)}
-        currentTop5={currentTop5ForDialog}
-        onReplace={handleReplaceTop5}
-      />
     </DashboardLayout>
   );
 }
