@@ -239,7 +239,7 @@ export interface AuthResult {
 
 export async function authorizeCollectorRequest(req: Request): Promise<AuthResult> {
   const secretHeader = req.headers.get("x-collector-secret");
-  const expectedSecret = Deno.env.get("NEWS_COLLECTOR_SECRET");
+  const expectedSecret = Deno.env.get("NEWS_COLLECTOR_SECRET") || Deno.env.get("NEWS_CRON_TOKEN");
   if (expectedSecret && secretHeader && secretHeader === expectedSecret) {
     return { ok: true, triggerSource: "cron" };
   }
