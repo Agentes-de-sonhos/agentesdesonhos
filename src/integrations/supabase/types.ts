@@ -6040,6 +6040,51 @@ export type Database = {
         }
         Relationships: []
       }
+      news_collector_runs: {
+        Row: {
+          broken_links_count: number
+          created_at: string
+          errors: Json
+          finished_at: string | null
+          found_count: number
+          id: string
+          inserted_count: number
+          portal: string
+          skipped_duplicates_count: number
+          started_at: string
+          status: string
+          trigger_source: string
+        }
+        Insert: {
+          broken_links_count?: number
+          created_at?: string
+          errors?: Json
+          finished_at?: string | null
+          found_count?: number
+          id?: string
+          inserted_count?: number
+          portal: string
+          skipped_duplicates_count?: number
+          started_at?: string
+          status?: string
+          trigger_source?: string
+        }
+        Update: {
+          broken_links_count?: number
+          created_at?: string
+          errors?: Json
+          finished_at?: string | null
+          found_count?: number
+          id?: string
+          inserted_count?: number
+          portal?: string
+          skipped_duplicates_count?: number
+          started_at?: string
+          status?: string
+          trigger_source?: string
+        }
+        Relationships: []
+      }
       news_curation_feedback: {
         Row: {
           categoria: string | null
@@ -6107,6 +6152,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "news_likes_noticia_id_fkey"
+            columns: ["noticia_id"]
+            isOneToOne: false
+            referencedRelation: "noticias_dashboard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_reads: {
+        Row: {
+          id: string
+          noticia_id: string
+          read_at: string
+          read_date: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          noticia_id: string
+          read_at?: string
+          read_date?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          noticia_id?: string
+          read_at?: string
+          read_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_reads_noticia_id_fkey"
             columns: ["noticia_id"]
             isOneToOne: false
             referencedRelation: "noticias_dashboard"
@@ -6221,13 +6298,17 @@ export type Database = {
           aprovado_em: string | null
           aprovado_por: string | null
           categoria: string
+          classification_confidence: number | null
           created_at: string
           data_publicacao: string
           fonte: string
+          hidden: boolean
           id: string
           is_noticia_do_dia: boolean
+          likes_count: number
           nivel_alerta: string
           noticia_bruta_id: string | null
+          reads_count: number
           relevancia_score: number
           resumo: string
           score_explicacao: string | null
@@ -6245,13 +6326,17 @@ export type Database = {
           aprovado_em?: string | null
           aprovado_por?: string | null
           categoria: string
+          classification_confidence?: number | null
           created_at?: string
           data_publicacao?: string
           fonte: string
+          hidden?: boolean
           id?: string
           is_noticia_do_dia?: boolean
+          likes_count?: number
           nivel_alerta?: string
           noticia_bruta_id?: string | null
+          reads_count?: number
           relevancia_score?: number
           resumo: string
           score_explicacao?: string | null
@@ -6269,13 +6354,17 @@ export type Database = {
           aprovado_em?: string | null
           aprovado_por?: string | null
           categoria?: string
+          classification_confidence?: number | null
           created_at?: string
           data_publicacao?: string
           fonte?: string
+          hidden?: boolean
           id?: string
           is_noticia_do_dia?: boolean
+          likes_count?: number
           nivel_alerta?: string
           noticia_bruta_id?: string | null
+          reads_count?: number
           relevancia_score?: number
           resumo?: string
           score_explicacao?: string | null
@@ -11546,6 +11635,25 @@ export type Database = {
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
+      news_ranking: {
+        Args: { p_limit?: number; p_window?: string }
+        Returns: {
+          categoria: string
+          data_publicacao: string
+          fonte: string
+          id: string
+          likes_count: number
+          rank_position: number
+          reads_count: number
+          resumo: string
+          score: number
+          titulo_curto: string
+          url_original: string
+          window_likes: number
+          window_reads: number
+        }[]
+      }
+      register_news_read: { Args: { p_noticia_id: string }; Returns: boolean }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
       save_card_capture_via_token: {
         Args: { _data: Json; _token: string }
