@@ -455,39 +455,62 @@ export default function Noticias() {
     rankingQuery.refetch();
   };
 
+  // Métricas do cabeçalho
+  const news24hCount = useMemo(() => {
+    const cutoff = Date.now() - 24 * 3600_000;
+    return news.filter((n) => new Date(n.data_publicacao).getTime() >= cutoff).length;
+  }, [news]);
+  const lastUpdateLabel = news[0] ? formatRelative(news[0].data_publicacao) : "—";
+  const nextCollection = getNextCollectionLabel();
+
   return (
     <DashboardLayout>
-      <PageHeader
-        pageKey="noticias"
-        icon={Newspaper}
-        title="Notícias do Trade"
-        subtitle="Todas as notícias do turismo em um só lugar, organizadas pelo interesse dos agentes de viagens."
-        adminTab="news"
-      />
-
-      <div className="container max-w-7xl mx-auto px-4 pb-12 space-y-6">
-        {/* Barra meta + refresh */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-xs text-muted-foreground">
-            {feedQuery.isFetching ? "Atualizando…" : `${news.length} notícias · atualizado ${formatRelative(new Date().toISOString())}`}
-          </span>
-          {pendingCount > 0 && (
-            <Button size="sm" variant="secondary" onClick={handleReload} className="gap-1.5">
-              <RefreshCw className="h-3.5 w-3.5" />
-              {pendingCount} {pendingCount === 1 ? "nova notícia" : "novas notícias"}
-            </Button>
-          )}
-          <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" variant="ghost" onClick={handleReload}>
-              <RefreshCw className={`h-3.5 w-3.5 ${feedQuery.isFetching ? "animate-spin" : ""}`} />
-            </Button>
+      <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8 space-y-6">
+        {/* Cabeçalho editorial compacto */}
+        <header className="space-y-3">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="min-w-0">
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+                <Newspaper className="h-6 w-6 text-primary" />
+                Notícias do Trade
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground max-w-2xl">
+                Todas as notícias do turismo em um só lugar, organizadas pelo interesse dos agentes de viagens.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {isAdmin && <AdminEditButton adminTab="news" />}
+              <Button size="sm" variant="ghost" onClick={handleReload} aria-label="Atualizar">
+                <RefreshCw className={cn("h-4 w-4", feedQuery.isFetching && "animate-spin")} />
+              </Button>
+            </div>
           </div>
-        </div>
+
+          {/* Linha de indicadores */}
+          <div className="flex items-center gap-x-4 gap-y-1 flex-wrap text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <Flame className="h-3.5 w-3.5 text-primary" />
+              <strong className="text-foreground">{news24hCount}</strong> nas últimas 24h
+            </span>
+            <span className="text-border">•</span>
+            <span><strong className="text-foreground">{PORTAIS.length}</strong> portais monitorados</span>
+            <span className="text-border">•</span>
+            <span>Última atualização <strong className="text-foreground">{lastUpdateLabel}</strong></span>
+            <span className="text-border">•</span>
+            <span>Próxima coleta às <strong className="text-foreground">{nextCollection}</strong></span>
+            {pendingCount > 0 && (
+              <Button size="sm" variant="secondary" onClick={handleReload} className="gap-1.5 h-7 ml-auto">
+                <RefreshCw className="h-3.5 w-3.5" />
+                {pendingCount} {pendingCount === 1 ? "nova" : "novas"}
+              </Button>
+            )}
+          </div>
+        </header>
 
         {/* Tabs */}
         <Tabs value={view} onValueChange={(v) => setView(v as any)}>
           <TabsList className="grid grid-cols-2 max-w-md">
-            <TabsTrigger value="destaques">Destaques do Trade</TabsTrigger>
+            <TabsTrigger value="destaques">Destaques</TabsTrigger>
             <TabsTrigger value="todas">Todas as notícias</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -556,76 +579,120 @@ export default function Noticias() {
 
         {/* View: Destaques do Trade */}
         {view === "destaques" && filtered.length > 0 && (
-          <div className="space-y-8">
-            {/* Notícia do Dia/Semana + Top 5 */}
+          <div className="space-y-10">
+            {/* Notícia do Dia/Semana (65%) + Top 5 (35%) */}
             {topOne && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                  <NewsRow
-                    item={topOne}
-                    featured
-                    featuredLabel={featuredLabel}
-                    onRead={handleRead}
-                    onLike={toggleLike}
-                    liked={isLiked(topOne.id)}
-                    likeCount={getLikeCount(topOne.id) || topOne.likes_count}
-                    onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                    isAdmin={isAdmin}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 mb-1">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-6">
+                <NewsCard
+                  item={topOne}
+                  variant="feature"
+                  featuredLabel={featuredLabel}
+                  onRead={handleRead}
+                  onLike={toggleLike}
+                  liked={isLiked(topOne.id)}
+                  likeCount={getLikeCount(topOne.id) || topOne.likes_count}
+                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
+                  isAdmin={isAdmin}
+                />
+                <aside className="rounded-lg border border-border/60 bg-card p-4 md:p-5">
+                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
                     <TrendingUp className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold">{top5Label}</h3>
+                    <h3 className="text-sm font-display font-bold text-foreground">{top5Label}</h3>
                   </div>
-                  {topRest.map((r) => (
-                    <NewsRow
-                      key={r.id}
-                      item={r}
-                      rankBadge={`#${r.rank_position}`}
+                  <div className="flex flex-col">
+                    {topRest.map((r) => (
+                      <RankingItem key={r.id} item={r} position={r.rank_position} onRead={handleRead} />
+                    ))}
+                    {topRest.length === 0 && (
+                      <p className="text-xs text-muted-foreground py-4">
+                        Ainda não há dados suficientes para o ranking. Acesse e curta notícias para influenciar o Top {top5Label.includes("Semana") ? 5 : 5}.
+                      </p>
+                    )}
+                  </div>
+                </aside>
+              </div>
+            )}
+
+            {/* Explorar por categoria */}
+            <section>
+              <h3 className="text-sm font-display font-bold text-foreground mb-2">Explorar por categoria</h3>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIAS.map((cat) => {
+                  const count = (byCategory.get(cat) ?? []).length;
+                  if (count === 0) return null;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => { setCategoriaFilter(cat); setView("todas"); }}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card hover:bg-muted hover:border-primary/40 px-3 py-1.5 text-xs transition-colors"
+                    >
+                      <span>{cat}</span>
+                      <span className="text-muted-foreground tabular-nums">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Últimas notícias — cronológico */}
+            {filtered.length > 0 && (
+              <section className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-display font-bold text-foreground">Últimas notícias</h3>
+                  <Button
+                    size="sm"
+                    variant="link"
+                    className="ml-auto h-auto p-0 text-xs"
+                    onClick={() => { setOrderBy("recent"); setView("todas"); }}
+                  >
+                    Ver todas →
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 @lg:grid-cols-2 @4xl:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {filtered.slice(0, 6).map((item) => (
+                    <NewsCard
+                      key={item.id}
+                      item={item}
                       onRead={handleRead}
                       onLike={toggleLike}
-                      liked={isLiked(r.id)}
-                      likeCount={getLikeCount(r.id) || r.likes_count}
+                      liked={isLiked(item.id)}
+                      likeCount={getLikeCount(item.id) || item.likes_count}
                       onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
                       isAdmin={isAdmin}
                     />
                   ))}
-                  {topRest.length === 0 && (
-                    <p className="text-xs text-muted-foreground py-4">Ainda não há dados suficientes para o ranking. Acesse e curta notícias para influenciar o Top 5.</p>
-                  )}
                 </div>
-              </div>
+              </section>
             )}
 
-            {/* Notícias por categoria */}
+            {/* Notícias organizadas por categoria — no máximo 4 por seção */}
             {CATEGORIAS.map((cat) => {
               const items = byCategory.get(cat) ?? [];
               if (items.length === 0) return null;
-              const preview = items.slice(0, 6);
+              const preview = [...items]
+                .sort((a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2))
+                .slice(0, 4);
               return (
                 <section key={cat} className="space-y-3">
                   <div className="flex items-center gap-2">
                     <CategoryBadge categoria={cat} />
-                    <h3 className="text-sm font-bold text-foreground">{cat}</h3>
+                    <h3 className="text-sm font-display font-bold text-foreground">{cat}</h3>
                     <span className="text-xs text-muted-foreground">({items.length})</span>
                     {items.length > preview.length && (
                       <Button
                         size="sm"
                         variant="link"
                         className="ml-auto h-auto p-0 text-xs"
-                        onClick={() => {
-                          setCategoriaFilter(cat);
-                          setView("todas");
-                        }}
+                        onClick={() => { setCategoriaFilter(cat); setView("todas"); }}
                       >
-                        Ver todas
+                        Ver todas →
                       </Button>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                     {preview.map((item) => (
-                      <NewsRow
+                      <NewsCard
                         key={item.id}
                         item={item}
                         onRead={handleRead}
@@ -645,10 +712,10 @@ export default function Noticias() {
 
         {/* View: Todas */}
         {view === "todas" && ordered.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {ordered.slice(0, visibleCount).map((item) => (
-                <NewsRow
+                <NewsCard
                   key={item.id}
                   item={item}
                   onRead={handleRead}
