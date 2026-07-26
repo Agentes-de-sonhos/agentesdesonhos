@@ -18,6 +18,7 @@ import { AdminUserManager } from "@/components/admin/AdminUserManager";
 import { AdminPopupsManager } from "@/components/admin/AdminPopupsManager";
 import { AdminPlaybookManager } from "@/components/admin/AdminPlaybookManager";
 import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationManager";
+import { AdminNewsCollectorManager } from "@/components/admin/AdminNewsCollectorManager";
 import { AdminHotelsManager } from "@/components/admin/AdminHotelsManager";
 import { AdminHotelRecommendationsManager } from "@/components/admin/AdminHotelRecommendationsManager";
 import { AdminMenuOrderManager } from "@/components/admin/AdminMenuOrderManager";
@@ -150,7 +151,16 @@ function AdminContent({ tab }: { tab: string }) {
     case "playbooks":
       return <AdminPlaybookManager />;
     case "curadoria":
-      return <AdminNewsCurationManager />;
+      return (
+        <Tabs defaultValue="collector">
+          <TabsList className="mb-4">
+            <TabsTrigger value="collector">Coleta Automática</TabsTrigger>
+            <TabsTrigger value="curation">Curadoria (Legado)</TabsTrigger>
+          </TabsList>
+          <TabsContent value="collector"><AdminNewsCollectorManager /></TabsContent>
+          <TabsContent value="curation"><AdminNewsCurationManager /></TabsContent>
+        </Tabs>
+      );
     case "hotels":
       return (
         <div className="space-y-6">
