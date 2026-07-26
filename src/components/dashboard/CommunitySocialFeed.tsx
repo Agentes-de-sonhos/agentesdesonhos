@@ -18,6 +18,7 @@ import {
   Loader2,
   MessageCircle,
   MoreHorizontal,
+  Pencil,
   Send,
   Trash2,
   Users,
@@ -32,6 +33,8 @@ import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { CommunityPost, PostComment } from "@/types/community-members";
+import { EditPostDialog } from "@/components/community/EditPostDialog";
+import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -78,6 +81,8 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     isCreating,
     toggleLike,
     deletePost,
+    updatePost,
+    isUpdating,
     fetchComments,
     addComment,
     isAddingComment,
@@ -91,6 +96,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [composerOpen, setComposerOpen] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
