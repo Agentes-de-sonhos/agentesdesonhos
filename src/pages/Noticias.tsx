@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { AdminEditButton } from "@/components/layout/AdminEditButton";
 import {
   Newspaper, ExternalLink, Loader2, TrendingUp, Flame, Search, Crown,
   Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Building2, Ticket,
   DollarSign, GraduationCap, Users, Sparkles, Shield, Wrench, Filter,
-  RefreshCw, EyeOff,
+  RefreshCw, EyeOff, Eye, ThumbsUp, X,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
+import { cn } from "@/lib/utils";
 
 /* ── Types ───────────────────────────────────────────────── */
 type Noticia = {
