@@ -374,9 +374,11 @@ export default function Noticias() {
   return (
     <DashboardLayout>
       <PageHeader
+        pageKey="noticias"
         icon={Newspaper}
         title="Notícias do Trade"
-        description="Todas as notícias do turismo em um só lugar, organizadas pelo interesse dos agentes de viagens."
+        subtitle="Todas as notícias do turismo em um só lugar, organizadas pelo interesse dos agentes de viagens."
+        adminTab="news"
       />
 
       <div className="container max-w-7xl mx-auto px-4 pb-12 space-y-6">
