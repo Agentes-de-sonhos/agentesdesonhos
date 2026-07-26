@@ -56,22 +56,56 @@ export function useCommunityFeed() {
       content,
       tags = [],
       imageUrl = null,
+      imageUrls = null,
     }: {
       content: string;
       tags?: string[];
       imageUrl?: string | null;
+      imageUrls?: string[] | null;
     }) => {
       if (!user?.id) throw new Error("Não autenticado");
       const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         content,
         tags,
-        image_url: imageUrl,
+        image_url: imageUrl ?? (imageUrls?.[0] ?? null),
+        image_urls: imageUrls ?? (imageUrl ? [imageUrl] : []),
       } as any);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["community-feed"] });
+    },
+  });
+
+  const updatePost = useMutation({
+    mutationFn: async ({
+      postId,
+      content,
+      imageUrls,
+    }: {
+      postId: string;
+      content: string;
+      imageUrls: string[];
+    }) => {
+      if (!user?.id) throw new Error("Não autenticado");
+      const { error } = await supabase
+        .from("community_posts")
+        .update({
+          content,
+          image_url: imageUrls[0] ?? null,
+          image_urls: imageUrls,
+          edited_at: new Date().toISOString(),
+        } as any)
+        .eq("id", postId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Publicação atualizada com sucesso.");
+      queryClient.invalidateQueries({ queryKey: ["community-feed"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Não foi possível atualizar a publicação.");
     },
   });
 
@@ -159,6 +193,8 @@ export function useCommunityFeed() {
     isCreating: createPost.isPending,
     toggleLike: toggleLike.mutate,
     deletePost: deletePost.mutate,
+    updatePost: updatePost.mutateAsync,
+    isUpdating: updatePost.isPending,
     fetchComments,
     addComment: addComment.mutate,
     isAddingComment: addComment.isPending,

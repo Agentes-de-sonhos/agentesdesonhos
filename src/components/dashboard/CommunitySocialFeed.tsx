@@ -18,6 +18,7 @@ import {
   Loader2,
   MessageCircle,
   MoreHorizontal,
+  Pencil,
   Send,
   Trash2,
   Users,
@@ -32,6 +33,8 @@ import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { CommunityPost, PostComment } from "@/types/community-members";
+import { EditPostDialog } from "@/components/community/EditPostDialog";
+import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -78,6 +81,8 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     isCreating,
     toggleLike,
     deletePost,
+    updatePost,
+    isUpdating,
     fetchComments,
     addComment,
     isAddingComment,
@@ -91,6 +96,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [composerOpen, setComposerOpen] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
@@ -359,6 +365,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 onDelete={() => {
                   if (confirm("Excluir esta publicação?")) deletePost(post.id);
                 }}
+                onEdit={() => setEditingPost(post)}
                 commentsOpen={expandedComments.has(post.id)}
                 onToggleComments={() => toggleCommentsOpen(post.id)}
                 fetchComments={fetchComments}
@@ -394,6 +401,14 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
             )}
           </DialogContent>
         </Dialog>
+
+        <EditPostDialog
+          post={editingPost}
+          open={!!editingPost}
+          onOpenChange={(o) => !o && setEditingPost(null)}
+          onSave={updatePost}
+          isSaving={isUpdating}
+        />
       </CardContent>
     </Card>
   );
@@ -405,6 +420,7 @@ interface PostCardProps {
   isAdmin: boolean;
   onLike: () => void;
   onDelete: () => void;
+  onEdit: () => void;
   commentsOpen: boolean;
   onToggleComments: () => void;
   fetchComments: (postId: string) => Promise<PostComment[]>;
@@ -420,6 +436,7 @@ function PostCard({
   isAdmin,
   onLike,
   onDelete,
+  onEdit,
   commentsOpen,
   onToggleComments,
   fetchComments,
@@ -430,6 +447,9 @@ function PostCard({
 }: PostCardProps) {
   const isAuthor = currentUserId === post.user_id;
   const canDelete = isAuthor || isAdmin;
+  const canEdit = isAuthor;
+  const images = postImages(post);
+  const wasEdited = !!(post as any).edited_at;
 
   const { data: comments = [], isLoading: loadingComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
@@ -465,9 +485,14 @@ function PostCard({
               <span className="text-xs text-muted-foreground truncate">· {post.profile.agency_name}</span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(post.created_at)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {timeAgo(post.created_at)}
+            {wasEdited && (
+              <span className="ml-1 italic text-muted-foreground/80">· Editado</span>
+            )}
+          </p>
         </div>
-        {canDelete && (
+        {(canDelete || canEdit) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
@@ -475,9 +500,16 @@ function PostCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
-              </DropdownMenuItem>
+              {canEdit && (
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="h-4 w-4 mr-2" /> Editar publicação
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -489,21 +521,12 @@ function PostCard({
         </div>
       )}
 
-      {post.image_url && (
-        <button
-          type="button"
-          onClick={() => onOpenImage(post.image_url!)}
-          className="w-full bg-muted/40 flex items-center justify-center overflow-hidden group"
-          aria-label="Ampliar imagem"
-        >
-          <img
-            src={post.image_url}
-            alt={`Imagem da publicação de ${post.profile?.name || "membro"}`}
-            className="max-h-[320px] w-auto max-w-full object-contain transition-transform group-hover:scale-[1.01]"
-            loading="lazy"
-            decoding="async"
-          />
-        </button>
+      {images.length > 0 && (
+        <PostImageGallery
+          images={images}
+          onOpenImage={onOpenImage}
+          authorName={post.profile?.name || undefined}
+        />
       )}
 
       {(post.likes_count > 0 || post.comments_count > 0) && (

@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { CreatePostForm } from "./CreatePostForm";
 import { PostCard } from "./PostCard";
+import { EditPostDialog } from "./EditPostDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +13,7 @@ import { MessageSquare, MapPin, Calendar, Building, ExternalLink } from "lucide-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { FamTrip, InPersonEvent } from "@/types/community";
+import type { CommunityPost } from "@/types/community-members";
 
 interface CommunityFeedSectionProps {
   famTrips?: FamTrip[];
@@ -25,11 +28,15 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
     isCreating,
     toggleLike,
     deletePost,
+    updatePost,
+    isUpdating,
     fetchComments,
     addComment,
     isAddingComment,
     deleteComment,
   } = useCommunityFeed();
+
+  const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
 
   // Paginate posts first, then build feed items
   const { paginatedItems: paginatedPosts, currentPage, totalPages, totalItems, pageSize, goToPage } = usePagination(posts, { pageSize: 10 });
@@ -91,6 +98,7 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
                   post={item.data}
                   onLike={(postId, liked) => toggleLike({ postId, liked })}
                   onDelete={deletePost}
+                  onEdit={setEditingPost}
                   onAddComment={addComment}
                   isAddingComment={isAddingComment}
                   fetchComments={fetchComments}
@@ -178,6 +186,13 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
         onPageChange={goToPage}
         totalItems={totalItems}
         pageSize={pageSize}
+      />
+      <EditPostDialog
+        post={editingPost}
+        open={!!editingPost}
+        onOpenChange={(o) => !o && setEditingPost(null)}
+        onSave={updatePost}
+        isSaving={isUpdating}
       />
     </div>
   );

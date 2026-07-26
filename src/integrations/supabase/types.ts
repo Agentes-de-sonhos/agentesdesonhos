@@ -2006,8 +2006,10 @@ export type Database = {
           comments_count: number | null
           content: string | null
           created_at: string | null
+          edited_at: string | null
           id: string
           image_url: string | null
+          image_urls: string[]
           is_pinned: boolean | null
           likes_count: number | null
           tags: string[] | null
@@ -2018,8 +2020,10 @@ export type Database = {
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           is_pinned?: boolean | null
           likes_count?: number | null
           tags?: string[] | null
@@ -2030,8 +2034,10 @@ export type Database = {
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
+          edited_at?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           is_pinned?: boolean | null
           likes_count?: number | null
           tags?: string[] | null
