@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ import {
   XCircle,
   Newspaper,
   Search,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -146,10 +148,11 @@ export function AdminNewsCollectorManager() {
 
   const [portalFilter, setPortalFilter] = useState<string>("todos");
   const [categoryFilter, setCategoryFilter] = useState<string>("todas");
-  const [statusFilter, setStatusFilter] = useState<string>("todos"); // publicado/oculto/todos
+  const [statusFilter, setStatusFilter] = useState<string>("todos"); // publicado/oculto/pendente/todos
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<DashboardNews | null>(null);
   const [editForm, setEditForm] = useState({ titulo_curto: "", resumo: "", categoria: "" });
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // ── Últimas execuções por portal
   const { data: latestByPortal, isLoading: loadingLatest } = useQuery({
@@ -198,6 +201,7 @@ export function AdminNewsCollectorManager() {
       if (categoryFilter !== "todas") q = q.eq("categoria", categoryFilter);
       if (statusFilter === "publicado") q = q.eq("hidden", false).eq("status", "aprovado");
       if (statusFilter === "oculto") q = q.eq("hidden", true);
+      if (statusFilter === "pendente") q = q.is("classification_confidence", null);
       q = q.order("created_at", { ascending: false }).limit(200);
       const { data, error } = await q;
       if (error) throw error;
@@ -319,6 +323,26 @@ export function AdminNewsCollectorManager() {
     },
   });
 
+  const reclassifyMutation = useMutation({
+    mutationFn: async (payload: { ids?: string[]; only_others?: boolean; only_pending?: boolean }) => {
+      const { data, error } = await supabase.functions.invoke("reclassify-news", { body: payload });
+      if (error) throw error;
+      return data as { total: number; reclassified: number; kept_others: number; errors: number };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-news-collector-items"] });
+      queryClient.invalidateQueries({ queryKey: ["noticias-dashboard"] });
+      setSelected(new Set());
+      toast({
+        title: "Reclassificação concluída",
+        description: `${data.reclassified} notícias reclassificadas, ${data.kept_others} permaneceram em Outros e ${data.errors} apresentaram erro.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({ title: "Falha ao reclassificar", description: error?.message ?? "Erro desconhecido.", variant: "destructive" });
+    },
+  });
+
   const handleStartEdit = (item: DashboardNews) => {
     setEditing(item);
     setEditForm({
@@ -329,6 +353,24 @@ export function AdminNewsCollectorManager() {
   };
 
   const isRunning = runCollectorMutation.isPending;
+  const isReclassifying = reclassifyMutation.isPending;
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const allVisibleSelected = filteredNews.length > 0 && filteredNews.every((n) => selected.has(n.id));
+  const toggleSelectAllVisible = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) filteredNews.forEach((n) => next.delete(n.id));
+      else filteredNews.forEach((n) => next.add(n.id));
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -554,8 +596,42 @@ export function AdminNewsCollectorManager() {
                 <SelectItem value="todos">Todas</SelectItem>
                 <SelectItem value="publicado">Publicadas</SelectItem>
                 <SelectItem value="oculto">Ocultas</SelectItem>
+                <SelectItem value="pendente">Pendente de classificação</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 pt-1 border-t pt-3">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => reclassifyMutation.mutate({ only_others: true })}
+              disabled={isReclassifying}
+            >
+              {isReclassifying ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />}
+              Reclassificar todas em "Outros"
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => reclassifyMutation.mutate({ only_pending: true })}
+              disabled={isReclassifying}
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1" />
+              Reprocessar pendentes de IA
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => reclassifyMutation.mutate({ ids: Array.from(selected) })}
+              disabled={isReclassifying || selected.size === 0}
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1" />
+              Reclassificar selecionadas ({selected.size})
+            </Button>
+            {filteredNews.length > 0 && (
+              <Button size="sm" variant="ghost" onClick={toggleSelectAllVisible}>
+                {allVisibleSelected ? "Desmarcar todas" : "Selecionar todas visíveis"}
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -574,6 +650,12 @@ export function AdminNewsCollectorManager() {
                   key={n.id}
                   className="flex items-start justify-between gap-3 p-3 rounded-lg border bg-card"
                 >
+                  <Checkbox
+                    className="mt-1"
+                    checked={selected.has(n.id)}
+                    onCheckedChange={() => toggleSelect(n.id)}
+                    aria-label="Selecionar notícia"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <Badge variant="secondary" className="text-[10px]">{n.fonte}</Badge>
@@ -582,6 +664,11 @@ export function AdminNewsCollectorManager() {
                         <Badge variant="destructive" className="text-[10px]">Oculta</Badge>
                       ) : (
                         <Badge className="bg-green-600 hover:bg-green-600 text-[10px]">Publicada</Badge>
+                      )}
+                      {n.classification_confidence == null && (
+                        <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-700">
+                          Pendente IA
+                        </Badge>
                       )}
                       <span className="text-[10px] text-muted-foreground">
                         {fmtRelative(n.created_at)}

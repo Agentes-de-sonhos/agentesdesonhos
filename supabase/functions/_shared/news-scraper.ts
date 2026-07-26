@@ -188,10 +188,26 @@ export interface AiClassification {
   confidence: number; // 0..1
 }
 
-export async function classifyItemsWithAI(items: RawItem[], portal: PortalKey): Promise<AiClassification[]> {
+export type AiErrorKind = "no_api_key" | "credits" | "rate_limit" | "timeout" | "api_error" | "invalid_response";
+
+export interface AiFailure {
+  kind: AiErrorKind;
+  message: string;
+  status?: number;
+}
+
+export interface AiClassifyResult {
+  ok: boolean;
+  items: AiClassification[]; // vazio quando ok=false
+  failure?: AiFailure;
+}
+
+const AI_TIMEOUT_MS = 45_000;
+
+export async function classifyItemsWithAI(items: RawItem[], portal: PortalKey): Promise<AiClassifyResult> {
   const KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!KEY) throw new Error("LOVABLE_API_KEY not configured");
-  if (items.length === 0) return [];
+  if (!KEY) return { ok: false, items: [], failure: { kind: "no_api_key", message: "LOVABLE_API_KEY não configurada" } };
+  if (items.length === 0) return { ok: true, items: [] };
 
   const prompt = `Você é curador de notícias do trade de turismo B2B brasileiro. Para cada notícia abaixo retorne UM objeto JSON com:
 - titulo_curto: título curto e claro (até 12 palavras)
@@ -205,28 +221,53 @@ Retorne APENAS um array JSON válido, sem markdown, sem comentários, com um obj
 Notícias (portal: ${portal}):
 ${items.map((n, i) => `${i + 1}. Título: ${n.titulo_original}\nConteúdo: ${(n.conteudo || "").substring(0, 400)}`).join("\n\n")}`;
 
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: "Curador editorial. Responda apenas com JSON válido." },
-        { role: "user", content: prompt },
-      ],
-    }),
-  });
-  if (!res.ok) throw new Error(`AI gateway ${res.status}: ${await res.text()}`);
-  const data = await res.json();
-  const raw = (data.choices?.[0]?.message?.content ?? "[]").replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  let parsed: AiClassification[] = [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+  let res: Response;
   try {
-    parsed = JSON.parse(raw);
-  } catch (_e) {
-    console.error("AI parse fail:", raw.slice(0, 500));
-    parsed = [];
+    res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: "Curador editorial. Responda apenas com JSON válido." },
+          { role: "user", content: prompt },
+        ],
+      }),
+      signal: controller.signal,
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    if ((e as Error).name === "AbortError") {
+      return { ok: false, items: [], failure: { kind: "timeout", message: `Timeout após ${AI_TIMEOUT_MS}ms` } };
+    }
+    return { ok: false, items: [], failure: { kind: "api_error", message: (e as Error).message || String(e) } };
   }
-  return parsed;
+  clearTimeout(timer);
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    let kind: AiErrorKind = "api_error";
+    if (res.status === 402) kind = "credits";
+    else if (res.status === 429) kind = "rate_limit";
+    return {
+      ok: false,
+      items: [],
+      failure: { kind, status: res.status, message: `AI gateway ${res.status}: ${text.slice(0, 200)}` },
+    };
+  }
+
+  const data = await res.json().catch(() => null);
+  const raw = (data?.choices?.[0]?.message?.content ?? "[]").replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+  try {
+    const parsed = JSON.parse(raw) as AiClassification[];
+    if (!Array.isArray(parsed)) throw new Error("not-array");
+    return { ok: true, items: parsed };
+  } catch (_e) {
+    console.error("AI parse fail:", raw.slice(0, 300));
+    return { ok: false, items: [], failure: { kind: "invalid_response", message: "JSON inválido retornado pelo modelo" } };
+  }
 }
 
 // ── Auth ────────────────────────────────────────────────────
@@ -423,36 +464,38 @@ export async function runCollectPortal(portalKey: PortalKey, trigger: "cron" | "
     return { portal: portalKey, status: "success", counters, run_id: runId };
   }
 
-  // Classify with AI (best effort — falha vira "Outros")
-  let classifications: AiClassification[] = [];
-  try {
-    classifications = await classifyItemsWithAI(
-      raws.map((r: any) => ({
-        titulo_original: r.titulo_original,
-        conteudo: r.conteudo || "",
-        url: r.url,
-        url_canonical: r.url,
-        data_publicacao: r.data_publicacao,
-        content_hash: "",
-      })),
-      portalKey,
-    );
-  } catch (e) {
-    counters.errors.push({ step: "ai_classify", message: (e as Error).message });
-  }
+  // Classify with AI (best effort — falha detalhada não marca run como parcial)
+  const aiResult = await classifyItemsWithAI(
+    raws.map((r: any) => ({
+      titulo_original: r.titulo_original,
+      conteudo: r.conteudo || "",
+      url: r.url,
+      url_canonical: r.url,
+      data_publicacao: r.data_publicacao,
+      content_hash: "",
+    })),
+    portalKey,
+  );
+  const classifications: AiClassification[] = aiResult.items;
+  const aiFailure: AiFailure | undefined = aiResult.ok ? undefined : aiResult.failure;
+  if (aiFailure) console.warn(`[news-scraper] AI classify failed for ${portalKey}:`, aiFailure);
 
   // Insert dashboard rows as APROVADO (auto-publish)
   for (let i = 0; i < raws.length; i++) {
     const raw = raws[i] as any;
     const ai = classifications[i];
-    const confidence = typeof ai?.confidence === "number" ? Math.max(0, Math.min(1, ai.confidence)) : 0.4;
-    let categoria = ai?.categoria && (CATEGORIES as readonly string[]).includes(ai.categoria) ? ai.categoria : "Outros";
-    if (confidence < 0.5) categoria = "Outros";
+    const aiWorked = !aiFailure && !!ai;
+    // classification_confidence NULL → pendente de reclassificação
+    const confidence: number | null = aiWorked && typeof ai?.confidence === "number"
+      ? Math.max(0, Math.min(1, ai.confidence))
+      : null;
+    let categoria = aiWorked && ai?.categoria && (CATEGORIES as readonly string[]).includes(ai.categoria) ? ai.categoria : "Outros";
+    if (confidence != null && confidence < 0.5) categoria = "Outros";
     if (categoria === "Outros") counters.others++;
 
-    const score = ai?.relevancia_score != null ? Math.max(0, Math.min(10, Math.round(Number(ai.relevancia_score)))) : 5;
-    const titulo_curto = (ai?.titulo_curto || raw.titulo_original || "").toString().slice(0, 160) || raw.titulo_original.slice(0, 160);
-    const resumo = (ai?.resumo || (raw.conteudo || "").substring(0, 240) || titulo_curto).toString().slice(0, 500);
+    const score = aiWorked && ai?.relevancia_score != null ? Math.max(0, Math.min(10, Math.round(Number(ai.relevancia_score)))) : 5;
+    const titulo_curto = (aiWorked && ai?.titulo_curto ? ai.titulo_curto : raw.titulo_original || "").toString().slice(0, 160) || raw.titulo_original.slice(0, 160);
+    const resumo = ((aiWorked && ai?.resumo) || (raw.conteudo || "").substring(0, 240) || titulo_curto).toString().slice(0, 500);
 
     const { error: dashErr } = await sb.from("noticias_dashboard").insert({
       noticia_bruta_id: raw.id,
@@ -477,7 +520,15 @@ export async function runCollectPortal(portalKey: PortalKey, trigger: "cron" | "
     await sb.from("noticias_brutas").update({ processado: true }).eq("id", raw.id);
   }
 
+  // partial só quando há erro de fetch/insert (falha de IA não conta como parcial)
   const finalStatus: "success" | "partial" = counters.errors.length > 0 ? "partial" : "success";
+  if (aiFailure) counters.errors.push({ step: "ai_classify", ...aiFailure });
   await finishRun(sb, runId, finalStatus, counters, started);
-  return { portal: portalKey, status: finalStatus, counters, run_id: runId };
+  return {
+    portal: portalKey,
+    status: finalStatus,
+    counters,
+    run_id: runId,
+    message: aiFailure ? `IA indisponível (${aiFailure.kind})` : undefined,
+  };
 }
