@@ -6,7 +6,7 @@ import {
   Newspaper, ExternalLink, Loader2, TrendingUp, Flame, Search, Crown,
   Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Building2, Ticket,
   DollarSign, GraduationCap, Users, Sparkles, Shield, Wrench, Filter,
-  RefreshCw, EyeOff, Eye, ThumbsUp, X,
+  RefreshCw, EyeOff, Eye, ThumbsUp, X, ChevronDown,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -321,6 +321,12 @@ export default function Noticias() {
   const [orderBy, setOrderBy] = useState<"recent" | "reads" | "likes" | "score">("recent");
   const [visibleCount, setVisibleCount] = useState(20);
   const [pendingCount, setPendingCount] = useState(0);
+  const [categoryVisibleCounts, setCategoryVisibleCounts] = useState<Record<string, number>>({});
+
+  // Reset per-category counts when filters change
+  useEffect(() => {
+    setCategoryVisibleCounts({});
+  }, [search, categoriaFilter, portalFilter, orderBy]);
 
   const weekend = isWeekend();
   const rankingWindow: "day" | "week" = weekend ? "week" : "day";
@@ -670,25 +676,19 @@ export default function Noticias() {
             {CATEGORIAS.map((cat) => {
               const items = byCategory.get(cat) ?? [];
               if (items.length === 0) return null;
-              const preview = [...items]
-                .sort((a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2))
-                .slice(0, 4);
+              const sorted = [...items].sort(
+                (a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2)
+              );
+              const visible = categoryVisibleCounts[cat] ?? 8;
+              const preview = sorted.slice(0, visible);
+              const remaining = sorted.length - preview.length;
+              const nextBatch = Math.min(4, remaining);
               return (
                 <section key={cat} className="space-y-3">
                   <div className="flex items-center gap-2">
                     <CategoryBadge categoria={cat} />
                     <h3 className="text-sm font-display font-bold text-foreground">{cat}</h3>
                     <span className="text-xs text-muted-foreground">({items.length})</span>
-                    {items.length > preview.length && (
-                      <Button
-                        size="sm"
-                        variant="link"
-                        className="ml-auto h-auto p-0 text-xs"
-                        onClick={() => { setCategoriaFilter(cat); setView("todas"); }}
-                      >
-                        Ver todas →
-                      </Button>
-                    )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                     {preview.map((item) => (
@@ -704,6 +704,25 @@ export default function Noticias() {
                       />
                     ))}
                   </div>
+                  {remaining > 0 && (
+                    <div className="flex justify-center pt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full text-xs"
+                        aria-label={`Carregar mais notícias da categoria ${cat}`}
+                        onClick={() =>
+                          setCategoryVisibleCounts((prev) => ({
+                            ...prev,
+                            [cat]: (prev[cat] ?? 8) + 4,
+                          }))
+                        }
+                      >
+                        Carregar mais {nextBatch} {nextBatch === 1 ? "notícia" : "notícias"}
+                        <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
                 </section>
               );
             })}
