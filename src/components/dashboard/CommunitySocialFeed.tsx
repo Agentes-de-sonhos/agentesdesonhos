@@ -485,9 +485,14 @@ function PostCard({
               <span className="text-xs text-muted-foreground truncate">· {post.profile.agency_name}</span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">{timeAgo(post.created_at)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {timeAgo(post.created_at)}
+            {wasEdited && (
+              <span className="ml-1 italic text-muted-foreground/80">· Editado</span>
+            )}
+          </p>
         </div>
-        {canDelete && (
+        {(canDelete || canEdit) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
@@ -495,9 +500,16 @@ function PostCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
-              </DropdownMenuItem>
+              {canEdit && (
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="h-4 w-4 mr-2" /> Editar publicação
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -509,21 +521,12 @@ function PostCard({
         </div>
       )}
 
-      {post.image_url && (
-        <button
-          type="button"
-          onClick={() => onOpenImage(post.image_url!)}
-          className="w-full bg-muted/40 flex items-center justify-center overflow-hidden group"
-          aria-label="Ampliar imagem"
-        >
-          <img
-            src={post.image_url}
-            alt={`Imagem da publicação de ${post.profile?.name || "membro"}`}
-            className="max-h-[320px] w-auto max-w-full object-contain transition-transform group-hover:scale-[1.01]"
-            loading="lazy"
-            decoding="async"
-          />
-        </button>
+      {images.length > 0 && (
+        <PostImageGallery
+          images={images}
+          onOpenImage={onOpenImage}
+          authorName={post.profile?.name || undefined}
+        />
       )}
 
       {(post.likes_count > 0 || post.comments_count > 0) && (
