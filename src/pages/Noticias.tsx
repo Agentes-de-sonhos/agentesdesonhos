@@ -146,16 +146,15 @@ function CategoryBadge({ categoria }: { categoria: string }) {
   );
 }
 
-/* ── Card (sem imagem) ───────────────────────────────────── */
-function NewsRow({
+/* ── Card editorial (sem imagem) ─────────────────────────── */
+function NewsCard({
   item,
   onRead,
   onLike,
   liked,
   likeCount,
-  featured,
+  variant = "default",
   featuredLabel,
-  rankBadge,
   onHide,
   isAdmin,
 }: {
@@ -164,51 +163,84 @@ function NewsRow({
   onLike: (id: string) => void;
   liked: boolean;
   likeCount: number;
-  featured?: boolean;
+  variant?: "default" | "feature" | "compact";
   featuredLabel?: string;
-  rankBadge?: string;
   onHide?: (id: string) => void;
   isAdmin?: boolean;
 }) {
+  const isFeature = variant === "feature";
+  const isCompact = variant === "compact";
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Só abre a matéria se não houve seleção de texto e o alvo não é um controle interativo
+    if (window.getSelection()?.toString()) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a")) return;
+    onRead(item);
+  };
+
   return (
-    <Card className={`border-0 shadow-sm hover:shadow-md transition-shadow ${featured ? "bg-gradient-to-br from-primary/8 via-card to-card" : ""}`}>
-      <CardContent className={`${featured ? "p-5 md:p-6" : "p-4"} flex flex-col gap-2`}>
+    <Card
+      className={cn(
+        "group border border-border/60 shadow-none hover:border-primary/40 hover:shadow-sm transition-all cursor-pointer bg-card",
+        isFeature && "border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card"
+      )}
+      onClick={handleCardClick}
+    >
+      <CardContent
+        className={cn(
+          "flex flex-col gap-2",
+          isFeature ? "p-6 md:p-7 gap-3" : isCompact ? "p-3" : "p-4"
+        )}
+      >
         <div className="flex items-center gap-2 flex-wrap">
-          {rankBadge && (
-            <span className="inline-flex items-center rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold">
-              {rankBadge}
-            </span>
-          )}
           {featuredLabel && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
               <Crown className="h-3 w-3" /> {featuredLabel}
             </span>
           )}
-          <span className="text-[11px] font-semibold text-foreground/80">{item.fonte}</span>
-          <span className="text-[11px] text-muted-foreground">·</span>
           <CategoryBadge categoria={item.categoria} />
+          <span className="text-[11px] font-medium text-muted-foreground">{item.fonte}</span>
           <span className="text-[11px] text-muted-foreground">·</span>
           <span className="text-[11px] text-muted-foreground">{formatRelative(item.data_publicacao)}</span>
         </div>
 
-        <h3 className={`${featured ? "text-lg md:text-xl" : "text-sm md:text-base"} font-bold leading-snug text-foreground`}>
+        <h3
+          className={cn(
+            "font-display font-bold leading-tight text-foreground group-hover:text-primary transition-colors",
+            isFeature ? "text-2xl md:text-3xl" : isCompact ? "text-sm line-clamp-2" : "text-base md:text-lg line-clamp-2"
+          )}
+        >
           {item.titulo_curto}
         </h3>
-        <p className={`${featured ? "text-sm" : "text-xs"} text-muted-foreground leading-relaxed line-clamp-3`}>
-          {item.resumo}
-        </p>
 
-        <div className="flex items-center gap-3 pt-1 mt-1 border-t border-border/40">
-          <span className="text-[11px] text-muted-foreground tabular-nums">
-            {likeCount} {likeCount === 1 ? "curtida" : "curtidas"} · {item.reads_count} {item.reads_count === 1 ? "leitura" : "leituras"}
-          </span>
+        {!isCompact && item.resumo && (
+          <p
+            className={cn(
+              "text-muted-foreground leading-relaxed",
+              isFeature ? "text-base line-clamp-3" : "text-sm line-clamp-2"
+            )}
+          >
+            {item.resumo}
+          </p>
+        )}
+
+        <div className={cn("flex items-center gap-3 pt-2 mt-auto", isCompact ? "" : "border-t border-border/40")}>
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground tabular-nums">
+            <span className="inline-flex items-center gap-1" aria-label={`${item.reads_count} leituras`}>
+              <Eye className="h-3.5 w-3.5" /> {item.reads_count}
+            </span>
+            <span className="inline-flex items-center gap-1" aria-label={`${likeCount} curtidas`}>
+              <ThumbsUp className={cn("h-3.5 w-3.5", liked && "fill-primary text-primary")} /> {likeCount}
+            </span>
+          </div>
           <div className="ml-auto flex items-center gap-1">
             <NewsLikeButton
               noticiaId={item.id}
               count={likeCount}
               liked={liked}
               onToggle={onLike}
-              size={featured ? "md" : "sm"}
+              size={isFeature ? "md" : "sm"}
             />
             {isAdmin && onHide && (
               <Button
@@ -221,17 +253,58 @@ function NewsRow({
                 <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
             )}
-            <Button
-              size="sm"
-              className="h-8 gap-1.5"
-              onClick={(e) => { e.preventDefault(); onRead(item); }}
+            <a
+              href={item.url_original}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRead(item); }}
+              className={cn(
+                "inline-flex items-center gap-1 text-primary hover:underline font-medium",
+                isFeature ? "text-sm" : "text-xs"
+              )}
             >
-              Ler matéria <ExternalLink className="h-3.5 w-3.5" />
-            </Button>
+              Ler matéria <ExternalLink className={cn(isFeature ? "h-4 w-4" : "h-3 w-3")} />
+            </a>
           </div>
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/* ── Item enxuto do Top 5 (lista com nº grande) ──────────── */
+function RankingItem({
+  item,
+  position,
+  onRead,
+}: {
+  item: RankingRow;
+  position: number;
+  onRead: (item: Noticia) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onRead(item)}
+      className="w-full text-left group flex gap-3 py-3 border-b border-border/50 last:border-b-0 hover:bg-muted/40 rounded-md px-2 -mx-2 transition-colors"
+    >
+      <span className="text-3xl md:text-4xl font-display font-bold text-primary/70 tabular-nums leading-none w-8 shrink-0">
+        {position}
+      </span>
+      <div className="flex-1 min-w-0">
+        <h4 className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
+          {item.titulo_curto}
+        </h4>
+        <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
+          <span className="font-medium">{item.fonte}</span>
+          <span>·</span>
+          <span>{item.categoria}</span>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {item.reads_count}</span>
+          <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> {item.likes_count}</span>
+        </div>
+      </div>
+    </button>
   );
 }
 
