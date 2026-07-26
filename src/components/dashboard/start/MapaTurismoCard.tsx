@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import {
   MapPin,
   Users,
   Globe,
-  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -46,70 +47,102 @@ interface MapaTurismoCardProps {
 
 export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps = {}) {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(true);
-  const isCollapsed = alwaysExpanded ? false : collapsed;
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateArrows();
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    return () => {
+      el.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [updateArrows]);
+
+  const scrollBy = (dir: "left" | "right") => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const amount = Math.max(el.clientWidth * 0.8, 200);
+    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
 
   return (
     <Card className="border-0 shadow-card">
-      <CardContent className="pt-5 pb-5 space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="w-fit">
-            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-              <Globe className="h-5 w-5 text-primary" />
-              Mapa do Turismo
-            </h2>
-            <div className="mt-2 h-1 w-full rounded-full bg-primary" />
+      <CardContent className="pt-5 pb-5 space-y-3">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="w-fit">
+              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" />
+                Mapa do Turismo
+              </h2>
+              <div className="mt-2 h-1 w-full rounded-full bg-primary" />
+            </div>
           </div>
-          {!alwaysExpanded && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 -mt-1 text-muted-foreground hover:text-foreground transition-transform flex-shrink-0"
-              onClick={() => setCollapsed((v) => !v)}
-              aria-label={isCollapsed ? "Expandir seção" : "Recolher seção"}
-              aria-expanded={!isCollapsed}
-            >
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isCollapsed ? "" : "rotate-180"}`} />
-            </Button>
-          )}
-        </div>
-
-        <div className="rounded-xl bg-primary/5 border border-primary/15 px-3 py-2 space-y-0.5 w-full">
-          <p className="text-sm font-semibold text-foreground leading-tight">🌍 Encontre seus parceiros ideais</p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Busque, filtre e conecte-se com fornecedores do turismo em poucos cliques.
+          <p className="text-sm text-muted-foreground max-w-2xl text-left">
+            Encontre seus parceiros ideais: busque, filtre e conecte-se com fornecedores do turismo em poucos cliques.
           </p>
         </div>
 
-        {!isCollapsed && (
-        <div
-          className="grid gap-3 w-full"
-          style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))",
-          }}
-        >
-          {CATEGORIES_DATA.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <button
-                key={cat.category}
-                onClick={() =>
-                  navigate(`/mapa-turismo?categoria=${encodeURIComponent(cat.category)}`)
-                }
-                aria-label={`Acessar ${cat.title}`}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
-                  cat.color,
-                  "border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/50"
-                )}
-              >
-                <Icon className={cn("h-6 w-6", cat.iconColor)} />
-                <span className="text-center leading-tight px-1">{cat.title}</span>
-              </button>
-            );
-          })}
+        <div className="relative">
+          {canScrollLeft && (
+            <button
+              type="button"
+              aria-label="Rolar para a esquerda"
+              onClick={() => scrollBy("left")}
+              className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+          {canScrollRight && (
+            <button
+              type="button"
+              aria-label="Rolar para a direita"
+              onClick={() => scrollBy("right")}
+              className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
+
+          <div
+            ref={scrollerRef}
+            className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 sm:px-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {CATEGORIES_DATA.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <button
+                  key={cat.category}
+                  onClick={() =>
+                    navigate(`/mapa-turismo?categoria=${encodeURIComponent(cat.category)}`)
+                  }
+                  aria-label={`Acessar ${cat.title}`}
+                  className={cn(
+                    "snap-start shrink-0 flex flex-col items-center justify-center gap-2 rounded-2xl w-[92px] h-[92px] sm:w-[104px] sm:h-[104px] text-xs font-medium transition-all duration-200 border border-transparent",
+                    cat.color,
+                    "hover:scale-[1.02] hover:shadow-md hover:border-border/50"
+                  )}
+                >
+                  <Icon className={cn("h-6 w-6", cat.iconColor)} />
+                  <span className="text-center leading-tight px-1">{cat.title}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        )}
       </CardContent>
     </Card>
   );
