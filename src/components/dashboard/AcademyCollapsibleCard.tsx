@@ -191,8 +191,9 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
     <>
       <Card className="border-0 shadow-card h-full">
         <CardContent className="pt-5 pb-5 space-y-4 h-full flex flex-col @container">
-          <div className="flex items-start justify-between gap-4">
-            <div>
+          <div className="space-y-3">
+            {/* Primeira linha: título à esquerda, link à direita */}
+            <div className="flex items-start justify-between gap-4">
               <div className="w-fit">
                 <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
                   <GraduationCap className="h-5 w-5 text-emerald-600" />
@@ -200,19 +201,21 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 </h2>
                 <div className="mt-2 h-1 w-full rounded-full bg-emerald-600" />
               </div>
-              <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
-                Explore trilhas rápidas sobre destinos e produtos para vender com mais segurança e transformar conhecimento em vendas.
-              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden @[28rem]:inline-flex shrink-0 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-600/5"
+                onClick={() => navigate("/educa-academy")}
+              >
+                Ver todos os treinamentos
+                <ArrowRight className="h-4 w-4 ml-1.5" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden @[28rem]:inline-flex shrink-0 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-600/5"
-              onClick={() => navigate("/educa-academy")}
-            >
-              Ver todos os treinamentos
-              <ArrowRight className="h-4 w-4 ml-1.5" />
-            </Button>
+
+            {/* Subtítulo abaixo do título, alinhado à esquerda, largura controlada */}
+            <p className="text-sm text-muted-foreground max-w-2xl text-left">
+              Explore trilhas rápidas sobre destinos e produtos para vender com mais segurança e transformar conhecimento em vendas.
+            </p>
           </div>
 
           <div className="flex-1 flex flex-col min-h-0">
