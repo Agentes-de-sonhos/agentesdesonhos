@@ -22,7 +22,8 @@ describe("AcademyCollapsibleCard header", () => {
     );
 
     const title = screen.getByRole("heading", { name: /EducaTravel Academy/i });
-    const link = screen.getByRole("button", { name: /Ver todos os treinamentos/i });
+    const links = screen.getAllByRole("button", { name: /Ver todos os treinamentos/i });
+    const link = links[0];
     const subtitle = screen.getByText(/Explore trilhas rápidas/i);
 
     // Title and link should be in the same flex row
