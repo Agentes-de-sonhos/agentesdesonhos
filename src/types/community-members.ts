@@ -29,6 +29,8 @@ export interface CommunityPost {
   tags: string[];
   is_pinned: boolean;
   image_url?: string | null;
+  image_urls?: string[] | null;
+  edited_at?: string | null;
   likes_count: number;
   comments_count: number;
   created_at: string;
