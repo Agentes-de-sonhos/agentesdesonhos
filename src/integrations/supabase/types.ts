@@ -6044,44 +6044,56 @@ export type Database = {
         Row: {
           broken_links_count: number
           created_at: string
+          duration_ms: number | null
           errors: Json
           finished_at: string | null
           found_count: number
           id: string
           inserted_count: number
+          invalid_count: number
+          others_count: number
           portal: string
           skipped_duplicates_count: number
           started_at: string
           status: string
           trigger_source: string
+          updated_count: number
         }
         Insert: {
           broken_links_count?: number
           created_at?: string
+          duration_ms?: number | null
           errors?: Json
           finished_at?: string | null
           found_count?: number
           id?: string
           inserted_count?: number
+          invalid_count?: number
+          others_count?: number
           portal: string
           skipped_duplicates_count?: number
           started_at?: string
           status?: string
           trigger_source?: string
+          updated_count?: number
         }
         Update: {
           broken_links_count?: number
           created_at?: string
+          duration_ms?: number | null
           errors?: Json
           finished_at?: string | null
           found_count?: number
           id?: string
           inserted_count?: number
+          invalid_count?: number
+          others_count?: number
           portal?: string
           skipped_duplicates_count?: number
           started_at?: string
           status?: string
           trigger_source?: string
+          updated_count?: number
         }
         Relationships: []
       }
@@ -6257,6 +6269,7 @@ export type Database = {
       }
       noticias_brutas: {
         Row: {
+          content_hash: string | null
           conteudo: string | null
           created_at: string
           data_coleta: string
@@ -6268,6 +6281,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          content_hash?: string | null
           conteudo?: string | null
           created_at?: string
           data_coleta?: string
@@ -6279,6 +6293,7 @@ export type Database = {
           url: string
         }
         Update: {
+          content_hash?: string | null
           conteudo?: string | null
           created_at?: string
           data_coleta?: string
