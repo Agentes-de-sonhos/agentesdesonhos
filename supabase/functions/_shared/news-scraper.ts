@@ -371,7 +371,7 @@ export async function runCollectPortal(portalKey: PortalKey, trigger: "cron" | "
   const { data: existingByUrl } = await sb
     .from("noticias_brutas")
     .select("url, content_hash")
-    .or(`url.in.(${canonicals.map((u) => `"${u.replace(/"/g, "")}"`).join(",")})`);
+    .in("url", canonicals);
   const knownUrls = new Set((existingByUrl ?? []).map((r: any) => r.url));
   // Dedup #2: content_hash
   const { data: existingByHash } = await sb
