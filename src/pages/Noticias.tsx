@@ -125,6 +125,16 @@ function isWeekend(): boolean {
   return day === 0 || day === 6;
 }
 
+/** Próxima janela de coleta (SP): 08, 10, 12, 14, 16, 18, 20 */
+const COLLECT_HOURS = [8, 10, 12, 14, 16, 18, 20];
+function getNextCollectionLabel(): string {
+  const nowSp = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  const h = nowSp.getHours();
+  const next = COLLECT_HOURS.find((x) => x > h);
+  if (next !== undefined) return `${String(next).padStart(2, "0")}h`;
+  return "08h de amanhã";
+}
+
 function CategoryBadge({ categoria }: { categoria: string }) {
   const colorClass = CATEGORIA_COLORS[categoria] || "bg-muted text-muted-foreground border-border";
   const icon = CATEGORIA_ICONS[categoria] || <Newspaper className="h-3.5 w-3.5" />;
