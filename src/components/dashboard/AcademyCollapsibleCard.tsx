@@ -95,9 +95,9 @@ function TrailCard({
 
   const MetaRow = () => (
     <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-      {trail.category && (
+      {trail.destination && (
         <Badge variant="secondary" className="text-[10px] font-medium">
-          {trail.category}
+          {trail.destination}
         </Badge>
       )}
       <span className="flex items-center gap-1">
