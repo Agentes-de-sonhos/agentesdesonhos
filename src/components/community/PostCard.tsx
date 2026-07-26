@@ -6,18 +6,27 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
-  Heart, MessageCircle, Trash2, Pin, CheckCircle2, Send, Loader2,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Heart, MessageCircle, Trash2, Pin, CheckCircle2, Send, Loader2, MoreHorizontal, Pencil,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { PostImageGallery, postImages } from "./PostImageGallery";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 
 interface PostCardProps {
   post: CommunityPost;
   onLike: (postId: string, liked: boolean) => void;
   onDelete: (postId: string) => void;
+  onEdit?: (post: CommunityPost) => void;
   onAddComment: (data: { postId: string; content: string }) => void;
   isAddingComment: boolean;
   fetchComments: (postId: string) => Promise<PostComment[]>;
@@ -25,7 +34,7 @@ interface PostCardProps {
 }
 
 export function PostCard({
-  post, onLike, onDelete, onAddComment, isAddingComment, fetchComments, onDeleteComment,
+  post, onLike, onDelete, onEdit, onAddComment, isAddingComment, fetchComments, onDeleteComment,
 }: PostCardProps) {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
@@ -33,11 +42,14 @@ export function PostCard({
   const [comments, setComments] = useState<PostComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const name = post.profile?.name || "Membro";
   const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   const isOwner = user?.id === post.user_id;
   const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ptBR });
+  const images = postImages(post);
+  const wasEdited = !!(post as any).edited_at;
 
   const handleToggleComments = async () => {
     if (!showComments) {
@@ -86,22 +98,40 @@ export function PostCard({
               {post.profile?.agency_name && <span>{post.profile.agency_name}</span>}
               <span>·</span>
               <span>{timeAgo}</span>
+              {wasEdited && <span className="italic">· Editado</span>}
             </div>
           </div>
           {(isOwner || isAdmin) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              onClick={() => onDelete(post.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {isOwner && onEdit && (
+                  <DropdownMenuItem onClick={() => onEdit(post)}>
+                    <Pencil className="h-4 w-4 mr-2" /> Editar publicação
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 
         {/* Content */}
-        <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{post.content}</p>
+        {post.content && (
+          <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{post.content}</p>
+        )}
+
+        {images.length > 0 && (
+          <div className="rounded-lg overflow-hidden border border-border/40">
+            <PostImageGallery images={images} onOpenImage={setLightboxUrl} authorName={name} />
+          </div>
+        )}
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
@@ -207,6 +237,18 @@ export function PostCard({
             </div>
           </div>
         )}
+
+        <Dialog open={!!lightboxUrl} onOpenChange={(o) => !o && setLightboxUrl(null)}>
+          <DialogContent className="max-w-5xl p-0 bg-transparent border-0 shadow-none">
+            {lightboxUrl && (
+              <img
+                src={lightboxUrl}
+                alt="Imagem da publicação"
+                className="w-full max-h-[85vh] object-contain rounded-lg bg-black/60"
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
