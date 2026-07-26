@@ -6,7 +6,7 @@ import {
   Newspaper, ExternalLink, Loader2, TrendingUp, Flame, Search, Crown,
   Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Building2, Ticket,
   DollarSign, GraduationCap, Users, Sparkles, Shield, Wrench, Filter,
-  RefreshCw, EyeOff, Eye, ThumbsUp, X,
+  RefreshCw, EyeOff, Eye, ThumbsUp, X, ChevronDown,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
