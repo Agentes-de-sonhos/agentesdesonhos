@@ -12,8 +12,9 @@ import { Separator } from "@/components/ui/separator";
 import {
   Building2, MapPin, Briefcase, Tag, MessageCircle,
   UserPlus, UserCheck, Clock, Loader2, ArrowLeft, User,
-  Heart, Handshake,
+  Heart, Handshake, Trophy,
 } from "lucide-react";
+import { MONTH_NAMES } from "@/types/community";
 
 export default function AgentProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -40,6 +41,24 @@ export default function AgentProfile() {
   const connectionStatus = userId ? getConnectionStatus(userId) : "none";
   const connectionId = userId ? getConnectionId(userId) : null;
   const isOwnProfile = user?.id === userId;
+
+  const { data: awardWins } = useQuery({
+    queryKey: ["agent-award-wins", userId],
+    queryFn: async () => {
+      if (!userId) return [] as Array<{ reference_month: number; reference_year: number }>;
+      const { data, error } = await supabase
+        .from("community_award_winners")
+        .select("reference_month, reference_year, published_at")
+        .eq("user_id", userId)
+        .not("published_at", "is", null)
+        .order("reference_year", { ascending: false })
+        .order("reference_month", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (isLoading) {
     return (
