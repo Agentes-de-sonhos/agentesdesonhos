@@ -7,20 +7,18 @@ import { PostCard } from "./PostCard";
 import { EditPostDialog } from "./EditPostDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, MapPin, Calendar, Building, ExternalLink } from "lucide-react";
+import { MessageSquare, Calendar, Building, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { FamTrip, InPersonEvent } from "@/types/community";
+import type { InPersonEvent } from "@/types/community";
 import type { CommunityPost } from "@/types/community-members";
 
 interface CommunityFeedSectionProps {
-  famTrips?: FamTrip[];
   events?: InPersonEvent[];
 }
 
-export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFeedSectionProps) {
+export function CommunityFeedSection({ events = [] }: CommunityFeedSectionProps) {
   const {
     posts,
     loadingPosts,
@@ -48,11 +46,6 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
   paginatedPosts.forEach((post, i) => {
     feedItems.push({ type: "post", data: post, key: post.id });
 
-    // After 2nd post on first page, inject fam trips if available
-    if (i === 1 && currentPage === 1 && famTrips.length > 0) {
-      feedItems.push({ type: "famtrips", data: famTrips.slice(0, 2), key: "famtrips-block" });
-    }
-
     // After 5th post on first page, inject upcoming events
     if (i === 4 && currentPage === 1 && events.length > 0) {
       const upcoming = events.filter((e) => new Date(e.event_date) >= new Date()).slice(0, 2);
@@ -62,10 +55,7 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
     }
   });
 
-  // If few posts on first page, still show blocks
-  if (currentPage === 1 && paginatedPosts.length <= 1 && famTrips.length > 0) {
-    feedItems.push({ type: "famtrips", data: famTrips.slice(0, 2), key: "famtrips-block" });
-  }
+  // If few posts on first page, still show upcoming events block
   if (currentPage === 1 && paginatedPosts.length <= 4 && events.length > 0) {
     const upcoming = events.filter((e) => new Date(e.event_date) >= new Date()).slice(0, 2);
     if (upcoming.length > 0 && !feedItems.find((f) => f.key === "events-block")) {
@@ -106,36 +96,6 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
                   onDeleteComment={deleteComment}
                   onVotePoll={votePoll}
                 />
-              );
-            }
-
-            if (item.type === "famtrips") {
-              return (
-                <Card key={item.key} className="border-primary/20 bg-primary/[0.02]">
-                  <CardContent className="pt-4 pb-3">
-                    <div className="flex items-center gap-2 mb-3">
-                      <MapPin className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-semibold text-foreground">Fam Trips Exclusivas</span>
-                      <Badge variant="secondary" className="text-[10px] ml-auto">Comunidade</Badge>
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {(item.data as FamTrip[]).map((trip) => (
-                        <div key={trip.id} className="flex gap-3 items-start">
-                          {trip.image_url && (
-                            <img src={trip.image_url} alt={trip.destination} loading="lazy" decoding="async" className="w-16 h-16 rounded-md object-cover shrink-0" />
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-foreground truncate">{trip.destination}</p>
-                            <p className="text-[11px] text-muted-foreground">
-                              {format(new Date(trip.trip_date), "dd MMM yyyy", { locale: ptBR })}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground">{trip.available_spots} vagas</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
               );
             }
 
