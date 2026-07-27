@@ -114,7 +114,7 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
                     <div className="flex items-center gap-2 mb-3">
                       <MapPin className="h-4 w-4 text-primary" />
                       <span className="text-sm font-semibold text-foreground">Fam Trips Exclusivas</span>
-                      <Badge variant="secondary" className="text-[10px] ml-auto">Travel Experts</Badge>
+                      <Badge variant="secondary" className="text-[10px] ml-auto">Comunidade</Badge>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {(item.data as FamTrip[]).map((trip) => (
