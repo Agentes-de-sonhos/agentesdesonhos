@@ -120,8 +120,8 @@ function CommunityContent() {
       <div className="space-y-6">
         <PageHeader
           pageKey="comunidade"
-          title="Travel Experts"
-          subtitle="Conecte-se, aprenda e cresça com a nossa comunidade"
+          title="Comunidade"
+          subtitle="A comunidade dos agentes de viagens — compartilhe dúvidas, experiências, dicas e oportunidades."
           icon={Users}
           adminTab="community"
         />
