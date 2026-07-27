@@ -1,169 +1,86 @@
+## Diagnóstico — assinatura da Daniela (daniela@paraisoviagens.com)
 
-# Auditoria — Módulo Comunidade
+**Nenhuma alteração foi feita.** Apenas leitura.
 
-Diagnóstico somente-leitura para preparar a unificação em uma única experiência baseada no Travel Experts. Nenhum arquivo, rota ou dado será alterado nesta etapa.
+### 1. O que foi encontrado no banco de produção
 
-## 1. Rotas relacionadas (src/App.tsx)
+Consulta em `card_activations`:
 
-| Rota | Componente | Papel atual |
-|---|---|---|
-| `/comunidade` | `TradeConnectHub` | Hub social (perfil, conexões) com **QAFeed** no centro |
-| `/comunidade/chat` | `Community` | Experiência **Travel Experts** completa (feed, membros, eventos, workshops, highlights) |
-| `/comunidade/perfil` | `TradeConnectProfile` | Edição do perfil Trade Connect |
-| `/comunidade/comunidades` | `TradeConnectCommunities` | Lista "Minhas comunidades" (aponta para Travel Experts) |
-| `/comunidade/agente/:userId` | `AgentProfile` | Perfil público de agente |
-| `/perguntas-respostas` | `PerguntasRespostas` | Página dedicada com **QAFeed** + `QARankingSidebar` |
-| `/trade-connect`, `/trade-connect/perfil`, `/trade-connect/comunidades`, `/trade-connect/agente/:userId` | Redirects | Redirecionam para `/comunidade/*` |
+| Campo | Valor |
+|---|---|
+| id | `a9f9048a-f628-4064-aa9f-f46d426659ce` |
+| email | `daniela@paraisoviagens.com` |
+| plan | **premium** (bate com R$ 98) |
+| payment_status | `paid` |
+| used | **false** ← chave do problema |
+| stripe_session_id | `cs_live_a1S4NMmicDWKaTT133O6kHFWKS9eWUHN9o3YiRvpfxfkv9Nd8movgsa1aG` |
+| created_at | 27/07/2026 17:07 UTC |
 
-Pontos de entrada:
-- Menu lateral ("Comunidade") → `/comunidade` (Hub).
-- Dashboard, botão **"Ver toda a comunidade"** (`CommunitySocialFeed.tsx`) → `/comunidade` (Hub, não a experiência Travel Experts).
-- Dashboard, card `CommunityQACard` "Ver todas as perguntas" → `/perguntas-respostas`.
+Ou seja: **o webhook do Stripe processou o pagamento com sucesso** e criou o registro de ativação. Não há `auth.users`, `profiles` nem `subscriptions` porque **o segundo passo do fluxo (a cliente clicar no link e criar a conta) nunca ocorreu**.
 
-## 2. Componentes React por fluxo
+### 2. Como o fluxo foi desenhado (checkout público → assinatura)
 
-**Dashboard (widgets)**
-- `src/components/dashboard/CommunitySocialFeed.tsx` (feed social resumido, usa `useCommunityFeed`, `EditPostDialog`, `PostImageGallery`)
-- `src/components/dashboard/CommunityQACard.tsx` (perguntas em destaque)
+```text
+Stripe Checkout (public)
+  → stripe-webhook (checkout.session.completed)
+      → cria card_activations (used=false) com plan/customer/subscription
+      → envia e-mail Resend com link https://app.agentesdesonhos.com.br/ativar-cartao?token=...
+  → cliente clica no link
+      → activate-card-signup
+          → cria auth.users + profiles + subscriptions (upsert)
+          → marca card_activations.used = true
+```
 
-**Hub `/comunidade` (TradeConnectHub)**
-- `src/pages/TradeConnectHub.tsx`
-- `src/components/qa/QAFeed.tsx` (coluna central)
-- `src/components/qa/QAQuestionDetail.tsx`, `QARanking.tsx`, `QARankingSidebar.tsx`
-- Hooks: `useTradeConnect` (perfil + conexões), `useCommunityMembership`
+O vínculo Stripe↔usuário só é criado no segundo passo. Enquanto `used=false`, `stripe_customer_id` e `stripe_subscription_id` ficam guardados **apenas** em `card_activations`.
 
-**Perguntas e Respostas `/perguntas-respostas`**
-- `src/pages/PerguntasRespostas.tsx`
-- Reaproveita `QAFeed` + `QARankingSidebar` (mesmos componentes do Hub)
+### 3. Causa mais provável
 
-**Travel Experts `/comunidade/chat`**
-- `src/pages/Community.tsx`
-- `src/components/community/*`: `CommunityGate`, `CommunityFeedSection`, `CommunityLeftSidebar`, `CommunityRightSidebar`, `MemberDirectory`, `MemberProfileDialog`, `MemberCard`, `CreatePostForm`, `PostCard`, `PostImageGallery`, `EditPostDialog`, `EditCommunityProfileDialog`, `FamTripsSection`, `OnlineMeetingsSection`, `InPersonEventsSection`, `WorkshopsSection`, `PaidTrainingsSection`, `WhatsAppSection`, `HighlightsSection`
-- `src/components/community-chat/*`: `ChatFloatingButton`, `ChatInput`, `ChatMessageList`, `OnlineAgentsStrip`
-- Hooks: `useCommunity`, `useCommunityFeed`, `useCommunityMembership`, `useCommunityChat`
+A Daniela **não clicou no link de ativação enviado por e-mail**. Cenários prováveis, em ordem:
 
-**Compartilhados**
-- `useTradeConnect` (conexões + perfil, usado em Hub e perfil de agente)
-- `useCommunityFeed` (usado no dashboard e em Travel Experts)
+1. **E-mail não chegou / caiu em spam.** O remetente `fernando.nobre@agentesdesonhos.com.br` via Resend pode ter sido filtrado (Paraiso Viagens é domínio próprio, filtros corporativos são comuns).
+2. **Resend falhou no envio** (rate limit, bounce, domínio não verificado no momento). O webhook não bloqueia o fluxo se o Resend falha — só loga o erro. Em `stripe-webhook`, buscar pelo `traceId` do evento e pela linha `Resend email error`.
+3. **Cliente ignorou / apagou o e-mail.** Também comum.
+4. Bug latente identificado no código do `stripe-webhook` que **não afetou este caso** (o registro foi criado), mas convém saber: as duas chamadas a `adminClient.auth.admin.listUsers()` sem paginação limitam a busca por e-mail aos primeiros ~50 usuários. Isto pode gerar problemas futuros de "usuário existente não encontrado" em outros pagamentos.
 
-## 3. Tabelas Supabase por módulo
+### 4. Logs/eventos a verificar (sem alterar nada)
 
-**Dashboard `CommunitySocialFeed`** — `community_posts`, `community_post_comments`, `community_post_likes`, `profiles_public`, `community_members` (para specialties/status)
+- **Stripe Dashboard → Payments**: recibo `2527-7991`, fatura `PNM1XPGD-0001`. Confirmar `checkout.session.completed` e capturar `customer` (`cus_…`) e `subscription` (`sub_…`).
+- **Stripe Dashboard → Developers → Webhooks**: entrega do evento `checkout.session.completed` para a URL do `stripe-webhook` com status 200. Se houve retentativa, revisar.
+- **Edge Function logs** de `stripe-webhook` para 27/07 ~17:07 UTC: procurar `[evt_...] ✅ Activation token created for daniela@paraisoviagens.com (premium)` e `📧 Activation email sent` **ou** `Resend email error`.
+- **Resend Dashboard → Logs**: procurar envio para `daniela@paraisoviagens.com` com o assunto "Bem-vindo ao Agentes de Sonhos — Ative seu Plano Premium". Status: delivered / bounced / dropped.
+- **Stripe → Subscriptions**: confirmar que `sub_…` está **active**, próximo billing date e método de pagamento salvo.
 
-**Hub `/comunidade` (TradeConnectHub)** — `profiles` (via `useTradeProfile`), `profiles_public`, `connections`, `community_members` (só p/ badge de membro), + tabelas de Q&A via `QAFeed`
+### 5. Procedimento seguro para regularizar (a executar depois, sem perder o recorrente)
 
-**Perguntas e Respostas** — `qa_questions`, `qa_answers`, `qa_answer_likes`, `qa_answer_votes`
+**Princípio:** o vínculo recorrente já existe do lado do Stripe (subscription ativa, customer com PM salvo). Não precisamos cancelar/recriar assinatura. Basta destravar o segundo passo do fluxo. O registro `card_activations` já contém `stripe_customer_id` e `stripe_subscription_id` corretos — usá-lo é o caminho mais seguro.
 
-**Travel Experts `/comunidade/chat`** — `community_members`, `community_posts`, `community_post_comments`, `community_post_likes`, `community_rooms`, `community_messages`, `community_highlights`, `community_votes`, `monthly_prizes`, `fun_trips`, `online_meetings`, `in_person_events`, `professional_workshops`, `paid_trainings`, `whatsapp_community`, `profiles_public`
+Duas opções, em ordem de preferência:
 
-**DMs (transversal)** — `direct_conversations`, `direct_messages`
+**Opção A — Reenviar o link de ativação para a cliente (recomendada)**
+1. Ler o `activation_token` do registro `a9f9048a-…` (`used=false`, ainda válido enquanto não expirar).
+2. Confirmar com a Daniela um canal alternativo (WhatsApp / e-mail pessoal) antes de reenviar, para descartar novo bloqueio de spam.
+3. Enviar manualmente a URL `https://app.agentesdesonhos.com.br/ativar-cartao?token=<token>`.
+4. Ela conclui o cadastro; `activate-card-signup` cria `auth.users` + `profiles` + `subscriptions` com `stripe_customer_id`/`stripe_subscription_id` já corretos — o vínculo recorrente é preservado.
+5. Verificar se `card_activations.used` virou `true` e se `subscriptions.stripe_subscription_id` bate com o Stripe.
+6. **Verificar `expires_at`** do registro antes: se já expirou, gerar novo token (novo insert com mesmos `stripe_customer_id`/`stripe_subscription_id` e `used=false`) e reenviar.
 
-## 4. Edge Functions / APIs
+**Opção B — Criação administrativa (se a cliente não conseguir usar o link)**
+Executar manualmente o que `activate-card-signup` faz, na mesma ordem, usando o service role:
+1. `auth.admin.createUser({ email, password_temporário, email_confirm: true })`.
+2. `INSERT` em `profiles` (`user_id`, `name`, `phone`, `has_password=true`).
+3. `INSERT` em `subscriptions` com `plan='premium'`, `is_active=true`, **`stripe_customer_id`** e **`stripe_subscription_id`** copiados de `card_activations` (imprescindível para manter o recorrente).
+4. `UPDATE card_activations SET used=true` para o registro `a9f9048a-…`.
+5. Enviar e-mail de redefinição de senha para a Daniela (`auth.admin.generateLink({ type: 'recovery' })`).
 
-Nenhuma Edge Function é chamada pelos hooks de Comunidade / Q&A / Trade Connect / Chat (verificado com `rg "functions.invoke"` em `useQA`, `useCommunity`, `useCommunityFeed`, `useCommunityMembership`, `useCommunityChat`, `useTradeConnect`). Todo o tráfego é PostgREST direto do cliente com RLS. Storage: bucket `avatars` (upload de capa/foto).
+**O que NÃO fazer**
+- Não cancelar/reembolsar a assinatura no Stripe. Isso quebraria o recorrente e disparia `customer.subscription.deleted`, que rebaixaria para `start` na primeira renovação.
+- Não criar `subscriptions` sem `stripe_customer_id`/`stripe_subscription_id`: a próxima cobrança viria pelo webhook `invoice.paid` e o handler não conseguiria casar (busca por e-mail em `listUsers`, tudo bem, mas o registro ficaria incompleto).
+- Não inserir `auth.users` direto por SQL — usar a Admin API.
 
-## 5. Tabelas compartilhadas × exclusivas
+### 6. Observações complementares (fora do escopo, apenas para registro)
 
-- **Compartilhadas por Dashboard + Travel Experts:** `community_posts`, `community_post_comments`, `community_post_likes`, `community_members`, `profiles_public`.
-- **Compartilhadas por Hub + Perfis de Agente:** `connections`, `profiles`, `profiles_public`.
-- **Exclusivas do Q&A:** `qa_questions`, `qa_answers`, `qa_answer_likes`, `qa_answer_votes` (usadas em `/perguntas-respostas` **e** também dentro do Hub via `QAFeed`).
-- **Exclusivas do Travel Experts:** `community_rooms`, `community_messages`, `community_highlights`, `community_votes`, `monthly_prizes`, `fun_trips`, `online_meetings`, `in_person_events`, `professional_workshops`, `paid_trainings`, `whatsapp_community`.
-- **Transversal (DMs, independe de comunidade):** `direct_conversations`, `direct_messages`.
+- O template do e-mail no `stripe-webhook` diz "premium = R$ 98 / profissional = R$ 49". Bate com o pagamento (R$ 98 = Premium). Sem inconsistência.
+- Recomendação futura (não fazer agora): substituir `adminClient.auth.admin.listUsers()` nos ramos `invoice.paid` / `subscription.updated` por `getUserByEmail` (ou paginar), para evitar falha silenciosa em base grande.
 
-## 6. Dados existentes só no Q&A
-
-Sim. Dados vivos exclusivos das tabelas `qa_*`:
-- `qa_questions`: **19**
-- `qa_answers`: **43**
-- `qa_answer_likes`: **9**
-- `qa_answer_votes`: **15**
-- Autores únicos em perguntas/respostas: **27**
-
-Esses dados não existem em `community_posts/comments/likes` e precisam ser tratados na unificação (migrar para posts+comentários, manter como coleção paralela dentro do Travel Experts, ou preservar a rota Q&A).
-
-## 7. Dados a considerar em migração
-
-Volumes atuais no banco:
-- `community_posts` **5**, `community_post_comments` **1**, `community_post_likes` **14**, `community_members` **13** (base do Travel Experts).
-- `community_rooms` **7**, `community_messages` **0**, `community_highlights` **0**, `community_votes` **0**.
-- `connections` **10**, `direct_conversations` **78**, `direct_messages` **94** (transversais — permanecem).
-- Q&A: ver item 6.
-
-Volume baixo em posts/comments favorece consolidação; o Q&A é o único conjunto com massa relevante que hoje NÃO vive em Travel Experts.
-
-## 8. Travel Experts já suporta o necessário?
-
-Feed social do Travel Experts (via `useCommunityFeed`/`CommunityFeedSection`/`PostCard`) já cobre:
-- Posts com texto, tags, `is_pinned`, `edited_at`.
-- Múltiplas imagens (`image_urls`) + lightbox (`PostImageGallery`).
-- Curtidas (`community_post_likes`) com toggle otimista.
-- Comentários (`community_post_comments`) com fetch on-demand.
-- Edição/remoção pelo autor (`EditPostDialog`, `updatePost`, `deletePost`).
-- Perfil enriquecido do autor (`profiles_public` + `community_members`).
-
-Ausente hoje no feed do Travel Experts: **fluxo de "Pergunta & Resposta" estruturado** (título, múltiplas respostas com voto/ranking, "melhor resposta") — hoje só existe em `qa_*`. Precisará ser ou preservado como aba, ou remodelado como tipo de post.
-
-## 9. Comportamento atual dos pontos de entrada
-
-- **Menu "Comunidade"** → `/comunidade` renderiza `TradeConnectHub`: capa + perfil no topo, coluna esquerda com progresso/nichos/parcerias, **centro com `QAFeed` (perguntas e respostas)**, direita com solicitações/conexões. Não mostra o feed social do Travel Experts.
-- **Dashboard, "Ver toda a comunidade"** → `/comunidade` (mesmo Hub acima). Ou seja, o usuário sai de um feed social no dashboard e cai em uma tela de Q&A — descontinuidade evidente.
-- **Dashboard, `CommunityQACard` "Ver todas as perguntas"** → `/perguntas-respostas` (Q&A puro).
-- **Travel Experts propriamente dito** só é acessível via `/comunidade/chat` (ou `/comunidade/comunidades` → card "Travel Experts") e é gated por `SubscriptionGuard feature="community"` + `CommunityGate` de membership.
-
-## 10. Componentes/rotas potencialmente removíveis após unificação
-
-Candidatos a descontinuação (dependem das decisões do item 12):
-- Rotas: `/comunidade/chat` (absorvida por `/comunidade`), `/comunidade/comunidades` (perde sentido com única comunidade), `/perguntas-respostas` (se Q&A virar aba/tipo de post) e todos os `/trade-connect/*` já legados.
-- Páginas: `TradeConnectHub.tsx`, `TradeConnectCommunities.tsx`, `PerguntasRespostas.tsx`.
-- Componentes: `CommunityQACard.tsx` do dashboard (se substituído pelo novo widget unificado), `QARanking.tsx`/`QARankingSidebar.tsx` (se ranking migrar para engajamento de posts).
-- Trade-Connect UI genérica: `src/components/trade-connect/TagSelector.tsx` (avaliar reuso).
-- Widget dashboard: `CommunitySocialFeed.tsx` mantém utilidade, mas o CTA "Ver toda a comunidade" deve apontar para o feed do Travel Experts.
-
-O que **não** deve ser removido: `useCommunityFeed`, `useCommunityMembership`, `useTradeConnect` (conexões), `direct_*`, `MemberDirectory`, `AgentProfile`, `PostCard`/`EditPostDialog`, todas as tabelas `community_*` (base do Travel Experts).
-
-## 11. Riscos técnicos e dependências
-
-- **Preservação do Q&A**: 19 perguntas + 43 respostas + 24 interações reais. Excluir sem plano perde histórico e reputação de autores.
-- **Gate de assinatura**: `/comunidade/chat` hoje exige `SubscriptionGuard feature="community"` + `CommunityGate` (membership `approved_unverified`/`verified`). Unificar tudo sob esse gate pode **cortar acesso** de usuários que hoje veem `/comunidade` (Hub) e `/perguntas-respostas` sem serem membros. Requer decisão de negócio antes de mover o gate.
-- **Menu e deep links**: componentes de layout (`AppSidebar`, `MobileSidebar`, `MobileDrawerMenu`) codificam `/comunidade` como URL "Start-plan-locked" — mudar rotas exige atualizar essas listas.
-- **Redirects legados**: `/trade-connect/*` já redirecionam; incluir novos redirects para `/comunidade/chat`, `/comunidade/comunidades`, `/perguntas-respostas` para não quebrar links compartilhados.
-- **RLS**: `qa_*` têm 5 policies cada e `community_*` políticas próprias. Qualquer migração de dados Q&A → `community_posts` precisa validar que autores mantêm autoria (mesmo `user_id`) para não violar policies de edit/delete.
-- **Widgets dashboard**: `CommunityQACard` faz agregações próprias sobre `qa_*`; se Q&A migrar para posts, o widget precisa ser refeito ou substituído.
-- **Realtime/chat**: `community_rooms`/`community_messages` está zerado, mas o `ChatFloatingButton` está integrado ao layout do Travel Experts — validar se será mantido.
-- **Perfil "Trade Connect" vs "Community Member"**: hoje coexistem `profiles` (com campos Trade Connect) e `community_members` (bio/segments/specialties próprios). Unificar exige reconciliar os dois modelos ou definir um como fonte de verdade.
-- **Baixo volume atual de posts (5)** reduz risco de migração, mas indica que a experiência principal hoje é o Q&A — a unificação precisa de estratégia clara para não parecer "vazia".
-
-## 12. Plano de migração proposto (sem execução)
-
-**Etapa 0 — Decisões de produto (bloqueante)**
-- Q&A vira: (a) aba dedicada dentro do Travel Experts mantendo tabelas `qa_*`, ou (b) tipo de post estruturado migrando para `community_posts` + `community_post_comments`. Recomendação técnica: (a) no curto prazo, (b) como evolução.
-- Definir se Travel Experts será obrigatoriamente gated (membership + assinatura) ou se haverá "modo leitura" público para não-membros.
-- Definir fonte de verdade do perfil (Trade Connect em `profiles` vs `community_members`).
-
-**Etapa 1 — Consolidação de rotas**
-- Fazer `/comunidade` renderizar a experiência atual de `/comunidade/chat` (Travel Experts).
-- Manter `/comunidade/chat`, `/comunidade/comunidades` e `/perguntas-respostas` como redirects temporários para `/comunidade` (com fragmentos/aba correspondente, ex.: `/comunidade?tab=qa`).
-- Ajustar `CommunitySocialFeed` (dashboard) para apontar "Ver toda a comunidade" para a nova rota unificada.
-
-**Etapa 2 — Absorção do Hub Trade Connect**
-- Reaproveitar cabeçalho de perfil, progresso, solicitações e conexões do `TradeConnectHub` como novas seções/laterais dentro do layout do Travel Experts (mantendo `CommunityLeftSidebar`/`CommunityRightSidebar`).
-- Descontinuar `TradeConnectCommunities` (única comunidade) e remover card duplicado do menu.
-
-**Etapa 3 — Integração do Q&A**
-- Cenário (a): incorporar `QAFeed` como aba "Perguntas" dentro de `Community.tsx`, preservando tabelas `qa_*` e ranking. Ajustar `CommunityQACard` do dashboard para apontar para essa aba.
-- Cenário (b) — futuro: script de migração idempotente `qa_questions → community_posts` (com tag `pergunta`) e `qa_answers → community_post_comments`, mantendo `user_id`, `created_at`, contagens e curtidas (`qa_answer_likes → community_post_likes` no comentário). Rodar em staging, validar RLS, prever rollback.
-
-**Etapa 4 — Gate & permissões**
-- Alinhar `SubscriptionGuard` e `CommunityGate` à decisão da Etapa 0. Se houver "modo leitura", refatorar `CommunityGate` para permitir visualização sem membership e bloquear apenas ações de escrita.
-- Atualizar `AppSidebar`/`MobileSidebar`/`MobileDrawerMenu` (lista `startPlanLockedUrls`) e telemetria (`user_feature_access`, `subscription`).
-
-**Etapa 5 — Limpeza**
-- Remover páginas/rotas obsoletas listadas no item 10, mantendo redirects até 1–2 releases.
-- Remover `CommunityQACard` (ou refatorar) e dependências não usadas em `src/components/trade-connect/`.
-- Atualizar documentação: `docs/base-conhecimento-agentes-de-sonhos/modulos/comunidade.md`, `perguntas-respostas.md` e memórias `mem://features/comunidade/*`.
-
-**Etapa 6 — QA e observabilidade**
-- Testes E2E cobrindo: acesso via menu, gate de assinatura, criação de post, criação de pergunta, curtidas, comentários, edição, redirects legados.
-- Monitorar `app_error_logs` e engajamento (posts, likes, comments) por 1–2 semanas antes de remover redirects.
-
-Nenhuma das etapas foi executada. Este documento é somente diagnóstico.
+### Próximo passo sugerido
+Confirmar comigo se posso: (a) verificar `expires_at` do token e o log do Resend, e depois (b) reenviar o link para a Daniela (Opção A). Só executarei alterações após sua autorização.
