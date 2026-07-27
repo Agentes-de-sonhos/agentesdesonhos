@@ -1827,6 +1827,50 @@ export type Database = {
         }
         Relationships: []
       }
+      community_award_winners: {
+        Row: {
+          award_id: string
+          created_at: string
+          id: string
+          published_at: string | null
+          reference_month: number
+          reference_year: number
+          tie_break_reason: string | null
+          user_id: string
+          votes_count: number
+        }
+        Insert: {
+          award_id: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          reference_month: number
+          reference_year: number
+          tie_break_reason?: string | null
+          user_id: string
+          votes_count?: number
+        }
+        Update: {
+          award_id?: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          reference_month?: number
+          reference_year?: number
+          tie_break_reason?: string | null
+          user_id?: string
+          votes_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_award_winners_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: true
+            referencedRelation: "community_monthly_awards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_highlights: {
         Row: {
           contribution_summary: string
@@ -2079,6 +2123,181 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "community_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_monthly_awards: {
+        Row: {
+          allow_consecutive_wins: boolean
+          created_at: string
+          description: string | null
+          extra_link: string | null
+          extra_notes: string | null
+          id: string
+          max_wins_per_year: number
+          prize_description: string | null
+          prize_image_url: string | null
+          prize_title: string | null
+          publish_date: string | null
+          published_at: string | null
+          reference_month: number
+          reference_year: number
+          rules: string | null
+          sponsor_name: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          voting_end_at: string | null
+          voting_start_at: string | null
+          winner_user_id: string | null
+          winner_votes: number | null
+        }
+        Insert: {
+          allow_consecutive_wins?: boolean
+          created_at?: string
+          description?: string | null
+          extra_link?: string | null
+          extra_notes?: string | null
+          id?: string
+          max_wins_per_year?: number
+          prize_description?: string | null
+          prize_image_url?: string | null
+          prize_title?: string | null
+          publish_date?: string | null
+          published_at?: string | null
+          reference_month: number
+          reference_year: number
+          rules?: string | null
+          sponsor_name?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          voting_end_at?: string | null
+          voting_start_at?: string | null
+          winner_user_id?: string | null
+          winner_votes?: number | null
+        }
+        Update: {
+          allow_consecutive_wins?: boolean
+          created_at?: string
+          description?: string | null
+          extra_link?: string | null
+          extra_notes?: string | null
+          id?: string
+          max_wins_per_year?: number
+          prize_description?: string | null
+          prize_image_url?: string | null
+          prize_title?: string | null
+          publish_date?: string | null
+          published_at?: string | null
+          reference_month?: number
+          reference_year?: number
+          rules?: string | null
+          sponsor_name?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          voting_end_at?: string | null
+          voting_start_at?: string | null
+          winner_user_id?: string | null
+          winner_votes?: number | null
+        }
+        Relationships: []
+      }
+      community_monthly_nominees: {
+        Row: {
+          active_days_count: number
+          answers_count: number
+          award_id: string
+          comments_count: number
+          contributions_count: number
+          created_at: string
+          eligible: boolean
+          exclusion_reason: string | null
+          first_contribution_at: string | null
+          id: string
+          last_contribution_at: string | null
+          posts_count: number
+          questions_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_days_count?: number
+          answers_count?: number
+          award_id: string
+          comments_count?: number
+          contributions_count?: number
+          created_at?: string
+          eligible?: boolean
+          exclusion_reason?: string | null
+          first_contribution_at?: string | null
+          id?: string
+          last_contribution_at?: string | null
+          posts_count?: number
+          questions_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_days_count?: number
+          answers_count?: number
+          award_id?: string
+          comments_count?: number
+          contributions_count?: number
+          created_at?: string
+          eligible?: boolean
+          exclusion_reason?: string | null
+          first_contribution_at?: string | null
+          id?: string
+          last_contribution_at?: string | null
+          posts_count?: number
+          questions_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_monthly_nominees_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: false
+            referencedRelation: "community_monthly_awards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_monthly_votes: {
+        Row: {
+          award_id: string
+          created_at: string
+          id: string
+          nominee_user_id: string
+          updated_at: string
+          voter_user_id: string
+        }
+        Insert: {
+          award_id: string
+          created_at?: string
+          id?: string
+          nominee_user_id: string
+          updated_at?: string
+          voter_user_id: string
+        }
+        Update: {
+          award_id?: string
+          created_at?: string
+          id?: string
+          nominee_user_id?: string
+          updated_at?: string
+          voter_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_monthly_votes_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: false
+            referencedRelation: "community_monthly_awards"
             referencedColumns: ["id"]
           },
         ]
@@ -11669,6 +11888,40 @@ export type Database = {
           show_whatsapp: boolean
         }[]
       }
+      get_current_month_award: {
+        Args: never
+        Returns: {
+          allow_consecutive_wins: boolean
+          created_at: string
+          description: string | null
+          extra_link: string | null
+          extra_notes: string | null
+          id: string
+          max_wins_per_year: number
+          prize_description: string | null
+          prize_image_url: string | null
+          prize_title: string | null
+          publish_date: string | null
+          published_at: string | null
+          reference_month: number
+          reference_year: number
+          rules: string | null
+          sponsor_name: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          voting_end_at: string | null
+          voting_start_at: string | null
+          winner_user_id: string | null
+          winner_votes: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_monthly_awards"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_gamification_ranking: {
         Args: { limit_count?: number }
         Returns: {
@@ -11874,6 +12127,10 @@ export type Database = {
           window_likes: number
           window_reads: number
         }[]
+      }
+      recompute_monthly_nominee: {
+        Args: { _user_id: string }
+        Returns: undefined
       }
       register_news_read: { Args: { p_noticia_id: string }; Returns: boolean }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
