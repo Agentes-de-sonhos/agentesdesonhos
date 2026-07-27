@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Gift, Search, Sparkles, Timer, CheckCircle2, Vote } from "lucide-react";
-import { useMonthlyAward, getVotingPhase } from "@/hooks/useMonthlyAward";
+import { Trophy, Gift, Search, Sparkles, Timer, CheckCircle2, Vote, Crown, Medal } from "lucide-react";
+import { useMonthlyAward, getVotingPhase, useAwardHistory } from "@/hooks/useMonthlyAward";
 import { MONTH_NAMES } from "@/types/community";
 import {
   AlertDialog,
@@ -52,10 +52,17 @@ function initialsOf(name: string | null | undefined): string {
 export function MonthlyAwardSection() {
   const { user } = useAuth();
   const { award, nominees, myVote, castVote, isVoting, isLoading } = useMonthlyAward(true);
+  const historyQuery = useAwardHistory(12, true);
   const [tick, setTick] = useState(0);
   const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(INITIAL_VISIBLE);
   const [confirmNominee, setConfirmNominee] = useState<{ id: string; name: string } | null>(null);
+  const currentWinner = (historyQuery.data ?? []).find(
+    (h) => h.award_id === award?.id,
+  );
+  const pastWinners = (historyQuery.data ?? []).filter(
+    (h) => h.award_id !== award?.id,
+  );
 
   useEffect(() => {
     const id = window.setInterval(() => setTick((n) => n + 1), 60_000);
@@ -227,12 +234,49 @@ export function MonthlyAwardSection() {
             {phase.phase === "closed" && (
               <>
                 <p className="font-semibold text-foreground">A votação foi encerrada</p>
-                <p className="text-muted-foreground">O resultado está sendo apurado.</p>
+                <p className="text-muted-foreground">
+                  {currentWinner
+                    ? "Resultado publicado. Confira o destaque do mês abaixo."
+                    : "O resultado está sendo apurado pela equipe."}
+                </p>
               </>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Winner of the current award (only after admin confirms) */}
+      {currentWinner && (
+        <Card className="border-amber-500/40 bg-gradient-to-br from-amber-500/15 via-orange-500/5 to-transparent">
+          <CardContent className="py-5 flex items-center gap-4">
+            <div className="rounded-full bg-amber-500/20 p-3">
+              <Crown className="h-6 w-6 text-amber-500" />
+            </div>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Avatar className="h-14 w-14 border-2 border-amber-500/50">
+                <AvatarImage src={currentWinner.avatar_url ?? undefined} />
+                <AvatarFallback className="bg-amber-500/10 text-amber-700 font-bold">
+                  {initialsOf(currentWinner.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-wide text-amber-700/80 font-semibold">
+                  Destaque de {MONTH_NAMES[currentWinner.reference_month - 1]}/
+                  {currentWinner.reference_year}
+                </p>
+                <p className="font-bold text-lg text-foreground truncate">
+                  {currentWinner.name ?? "Agente"}
+                </p>
+                {currentWinner.agency_name && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {currentWinner.agency_name}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Participants */}
       <div className="space-y-3">
@@ -398,17 +442,46 @@ export function MonthlyAwardSection() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Últimos destaques placeholder for Phase 1 */}
+      {/* Histórico de Destaques do Mês */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-amber-500" />
+          <Medal className="h-4 w-4 text-amber-500" />
           Últimos destaques
         </h3>
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            O primeiro Destaque do Mês será escolhido em breve. Participe da comunidade e ajude a construir essa história.
-          </CardContent>
-        </Card>
+        {pastWinners.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              Ainda não há vencedores anteriores publicados. Participe e ajude a construir essa história.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {pastWinners.map((w) => (
+              <Card key={w.award_id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <Avatar className="h-11 w-11">
+                    <AvatarImage src={w.avatar_url ?? undefined} />
+                    <AvatarFallback className="bg-amber-500/10 text-amber-700 font-semibold">
+                      {initialsOf(w.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">
+                      {MONTH_NAMES[w.reference_month - 1]}/{w.reference_year}
+                    </p>
+                    <p className="font-semibold text-sm text-foreground truncate">
+                      {w.name ?? "Agente"}
+                    </p>
+                    {w.agency_name && (
+                      <p className="text-xs text-muted-foreground truncate">{w.agency_name}</p>
+                    )}
+                  </div>
+                  <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

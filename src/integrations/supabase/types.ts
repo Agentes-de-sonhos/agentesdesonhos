@@ -1829,34 +1829,46 @@ export type Database = {
       }
       community_award_winners: {
         Row: {
+          active_days_count: number | null
           award_id: string
+          confirmed_by: string | null
+          contributions_count: number | null
           created_at: string
           id: string
           published_at: string | null
           reference_month: number
           reference_year: number
+          third_party_replies_count: number | null
           tie_break_reason: string | null
           user_id: string
           votes_count: number
         }
         Insert: {
+          active_days_count?: number | null
           award_id: string
+          confirmed_by?: string | null
+          contributions_count?: number | null
           created_at?: string
           id?: string
           published_at?: string | null
           reference_month: number
           reference_year: number
+          third_party_replies_count?: number | null
           tie_break_reason?: string | null
           user_id: string
           votes_count?: number
         }
         Update: {
+          active_days_count?: number | null
           award_id?: string
+          confirmed_by?: string | null
+          contributions_count?: number | null
           created_at?: string
           id?: string
           published_at?: string | null
           reference_month?: number
           reference_year?: number
+          third_party_replies_count?: number | null
           tie_break_reason?: string | null
           user_id?: string
           votes_count?: number
@@ -11834,6 +11846,34 @@ export type Database = {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
       }
+      confirm_award_winner: {
+        Args: {
+          _award_id: string
+          _tie_break_reason?: string
+          _winner_user_id: string
+        }
+        Returns: {
+          active_days_count: number | null
+          award_id: string
+          confirmed_by: string | null
+          contributions_count: number | null
+          created_at: string
+          id: string
+          published_at: string | null
+          reference_month: number
+          reference_year: number
+          third_party_replies_count: number | null
+          tie_break_reason: string | null
+          user_id: string
+          votes_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_award_winners"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_agency_id: { Args: never; Returns: string }
       ensure_client_and_opportunity_for_lead: {
         Args: {
@@ -11903,6 +11943,26 @@ export type Database = {
           show_signature: boolean
           show_support_tools: boolean
           show_whatsapp: boolean
+        }[]
+      }
+      get_award_tally: {
+        Args: { _award_id: string }
+        Returns: {
+          active_days_count: number
+          agency_name: string
+          avatar_url: string
+          award_id: string
+          contributions_count: number
+          disqualified_by_history: boolean
+          eligible: boolean
+          exclusion_reason: string
+          history_reason: string
+          name: string
+          third_party_replies_count: number
+          user_id: string
+          votes_count: number
+          wins_this_year: number
+          won_previous_month: boolean
         }[]
       }
       get_current_month_award: {
@@ -12116,6 +12176,24 @@ export type Database = {
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
+      list_award_history: {
+        Args: { _limit?: number }
+        Returns: {
+          active_days_count: number
+          agency_name: string
+          avatar_url: string
+          award_id: string
+          contributions_count: number
+          name: string
+          published_at: string
+          reference_month: number
+          reference_year: number
+          third_party_replies_count: number
+          tie_break_reason: string
+          user_id: string
+          votes_count: number
+        }[]
+      }
       list_community_agents: {
         Args: {
           p_limit?: number
@@ -12160,6 +12238,40 @@ export type Database = {
       }
       register_news_read: { Args: { p_noticia_id: string }; Returns: boolean }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
+      revert_award_confirmation: {
+        Args: { _award_id: string }
+        Returns: {
+          allow_consecutive_wins: boolean
+          created_at: string
+          description: string | null
+          extra_link: string | null
+          extra_notes: string | null
+          id: string
+          max_wins_per_year: number
+          prize_description: string | null
+          prize_image_url: string | null
+          prize_title: string | null
+          publish_date: string | null
+          published_at: string | null
+          reference_month: number
+          reference_year: number
+          rules: string | null
+          sponsor_name: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          voting_end_at: string | null
+          voting_start_at: string | null
+          winner_user_id: string | null
+          winner_votes: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_monthly_awards"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       save_card_capture_via_token: {
         Args: { _data: Json; _token: string }
         Returns: string
