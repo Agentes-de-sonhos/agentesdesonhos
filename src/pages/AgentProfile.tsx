@@ -101,7 +101,25 @@ export default function AgentProfile() {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl font-bold text-foreground">{profile.name}</h1>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-2xl font-bold text-foreground">{profile.name}</h1>
+                  {(awardWins?.length ?? 0) > 0 && (
+                    <Badge className="bg-amber-500 hover:bg-amber-500 text-white gap-1">
+                      <Trophy className="h-3 w-3" />
+                      Destaque do Mês
+                      {(awardWins?.length ?? 0) > 1 ? ` · ${awardWins!.length}x` : ""}
+                    </Badge>
+                  )}
+                </div>
+                {(awardWins?.length ?? 0) > 0 && (
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {awardWins!
+                      .slice(0, 3)
+                      .map((w) => `${MONTH_NAMES[w.reference_month - 1]}/${w.reference_year}`)
+                      .join(" · ")}
+                    {awardWins!.length > 3 ? ` · +${awardWins!.length - 3}` : ""}
+                  </p>
+                )}
                 <div className="flex items-center gap-2 text-muted-foreground mt-1">
                   <Building2 className="h-4 w-4" />
                   <span className="text-sm">{profile.agency_name || "Agência não informada"}</span>
