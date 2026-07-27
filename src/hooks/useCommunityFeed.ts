@@ -119,20 +119,29 @@ export function useCommunityFeed() {
       postId,
       content,
       imageUrls,
+      videoUrl,
+      documents,
     }: {
       postId: string;
       content: string;
       imageUrls: string[];
+      videoUrl?: string | null;
+      documents?: PostDocument[];
     }) => {
       if (!user?.id) throw new Error("Não autenticado");
+      const patch: Record<string, any> = {
+        content,
+        image_url: imageUrls[0] ?? null,
+        image_urls: imageUrls,
+        edited_at: new Date().toISOString(),
+      };
+      // Only touch video/documents when caller explicitly provides them,
+      // so text-only edits never wipe existing attachments.
+      if (videoUrl !== undefined) patch.video_url = videoUrl;
+      if (documents !== undefined) patch.documents = documents;
       const { error } = await supabase
         .from("community_posts")
-        .update({
-          content,
-          image_url: imageUrls[0] ?? null,
-          image_urls: imageUrls,
-          edited_at: new Date().toISOString(),
-        } as any)
+        .update(patch as any)
         .eq("id", postId);
       if (error) throw error;
     },
