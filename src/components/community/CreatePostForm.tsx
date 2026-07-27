@@ -56,8 +56,14 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
   };
 
   return (
-    <Card className="border-border/50">
+    <Card className="border-primary/30 shadow-sm ring-1 ring-primary/10">
       <CardContent className="pt-4 pb-3 space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-foreground">Compartilhe com a comunidade</p>
+          <p className="text-xs text-muted-foreground">
+            Uma dúvida, experiência, dica, oportunidade ou conteúdo — todo mundo aprende junto.
+          </p>
+        </div>
         <div className="flex gap-3">
           <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src={profile?.avatar_url || ""} />
@@ -66,11 +72,11 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
             </AvatarFallback>
           </Avatar>
           <Textarea
-            placeholder="Compartilhe algo com a comunidade..."
+            placeholder="O que você quer compartilhar hoje? Dúvida, experiência, dica, oportunidade..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={3}
-            className="resize-none"
+            className="resize-none text-sm"
           />
         </div>
 
