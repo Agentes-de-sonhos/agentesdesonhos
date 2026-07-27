@@ -126,33 +126,6 @@ export function CommunityLeftSidebar({
         </CardContent>
       </Card>
 
-      {/* Specialty Filters */}
-      <Card className="border-border/50">
-        <CardContent className="pt-4 pb-3">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2.5">
-            Filtrar por especialidade
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            <Badge
-              variant={!filterSpecialty ? "default" : "outline"}
-              className="cursor-pointer text-[10px]"
-              onClick={() => onFilterSpecialty(null)}
-            >
-              Todos
-            </Badge>
-            {allFilters.map((s) => (
-              <Badge
-                key={s}
-                variant={filterSpecialty === s ? "default" : "outline"}
-                className="cursor-pointer text-[10px]"
-                onClick={() => onFilterSpecialty(filterSpecialty === s ? null : s)}
-              >
-                {s}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
