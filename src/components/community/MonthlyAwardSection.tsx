@@ -442,17 +442,46 @@ export function MonthlyAwardSection() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Últimos destaques placeholder for Phase 1 */}
+      {/* Histórico de Destaques do Mês */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-amber-500" />
+          <Medal className="h-4 w-4 text-amber-500" />
           Últimos destaques
         </h3>
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            O primeiro Destaque do Mês será escolhido em breve. Participe da comunidade e ajude a construir essa história.
-          </CardContent>
-        </Card>
+        {pastWinners.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              Ainda não há vencedores anteriores publicados. Participe e ajude a construir essa história.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {pastWinners.map((w) => (
+              <Card key={w.award_id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <Avatar className="h-11 w-11">
+                    <AvatarImage src={w.avatar_url ?? undefined} />
+                    <AvatarFallback className="bg-amber-500/10 text-amber-700 font-semibold">
+                      {initialsOf(w.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">
+                      {MONTH_NAMES[w.reference_month - 1]}/{w.reference_year}
+                    </p>
+                    <p className="font-semibold text-sm text-foreground truncate">
+                      {w.name ?? "Agente"}
+                    </p>
+                    {w.agency_name && (
+                      <p className="text-xs text-muted-foreground truncate">{w.agency_name}</p>
+                    )}
+                  </div>
+                  <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
