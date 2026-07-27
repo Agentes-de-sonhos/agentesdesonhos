@@ -1,10 +1,8 @@
 import { useState, useCallback } from "react";
-import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useCommunityMembership } from "@/hooks/useCommunityMembership";
-import { CommunityGate } from "@/components/community/CommunityGate";
 import { CommunityFeedSection } from "@/components/community/CommunityFeedSection";
 import { CommunityLeftSidebar } from "@/components/community/CommunityLeftSidebar";
 import { MemberDirectory } from "@/components/community/MemberDirectory";
@@ -23,16 +21,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import type { CommunityMember } from "@/types/community-members";
 
 export default function Community() {
-  return (
-    <SubscriptionGuard feature="community">
-      <CommunityContent />
-    </SubscriptionGuard>
-  );
+  return <CommunityContent />;
 }
 
 function CommunityContent() {
   const isMobile = useIsMobile();
-  const { membership, isLoading: memberLoading, isMember, isBlocked, join, isJoining, updateProfile, isUpdating } =
+  const { membership, isLoading: memberLoading, isBlocked, updateProfile, isUpdating } =
     useCommunityMembership();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("feed");
@@ -74,14 +68,6 @@ function CommunityContent() {
             Seu acesso à comunidade foi revisado e não atende aos critérios atuais.
           </p>
         </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (!isMember) {
-    return (
-      <DashboardLayout>
-        <CommunityGate onJoin={join} isJoining={isJoining} />
       </DashboardLayout>
     );
   }
