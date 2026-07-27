@@ -18,12 +18,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageIcon, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ImageIcon, Loader2, X, ChevronLeft, ChevronRight, Video as VideoIcon, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import type { CommunityPost } from "@/types/community-members";
+import type { CommunityPost, PostDocument } from "@/types/community-members";
 import { postImages } from "./PostImageGallery";
+import { DOC_EXT_LABEL, formatBytes } from "@/lib/communityMedia";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -34,7 +35,13 @@ interface EditPostDialogProps {
   post: CommunityPost | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (payload: { postId: string; content: string; imageUrls: string[] }) => Promise<void> | void;
+  onSave: (payload: {
+    postId: string;
+    content: string;
+    imageUrls: string[];
+    videoUrl?: string | null;
+    documents?: PostDocument[];
+  }) => Promise<void> | void;
   isSaving?: boolean;
 }
 
@@ -46,6 +53,8 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [images, setImages] = useState<ImageItem[]>([]);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<PostDocument[]>([]);
   const [uploading, setUploading] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [initialSignature, setInitialSignature] = useState("");
@@ -56,9 +65,15 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
     if (!open || !post) return;
     const startImages: ImageItem[] = postImages(post).map((url) => ({ kind: "existing", url }));
     const startContent = post.content ?? "";
+    const startVideo = (post as any).video_url ?? null;
+    const startDocs: PostDocument[] = Array.isArray((post as any).documents)
+      ? (post as any).documents
+      : [];
     setContent(startContent);
     setImages(startImages);
-    setInitialSignature(signatureOf(startContent, startImages));
+    setVideoUrl(startVideo);
+    setDocuments(startDocs);
+    setInitialSignature(signatureOf(startContent, startImages, startVideo, startDocs));
   }, [open, post]);
 
   // Revoke object URLs on unmount / change
@@ -71,8 +86,9 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isDirty = signatureOf(content, images) !== initialSignature;
-  const hasSomething = content.trim().length > 0 || images.length > 0;
+  const isDirty = signatureOf(content, images, videoUrl, documents) !== initialSignature;
+  const hasSomething =
+    content.trim().length > 0 || images.length > 0 || !!videoUrl || documents.length > 0;
 
   const handleClose = (nextOpen: boolean) => {
     if (nextOpen) {
@@ -92,6 +108,8 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
     });
     setImages([]);
     setContent("");
+    setVideoUrl(null);
+    setDocuments([]);
     onOpenChange(false);
   };
 
@@ -140,7 +158,7 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
   const handleSave = async () => {
     if (!post || !user) return;
     const trimmed = content.trim();
-    if (!trimmed && images.length === 0) {
+    if (!trimmed && images.length === 0 && !videoUrl && documents.length === 0) {
       toast.error("A publicação não pode ficar vazia. Adicione texto ou pelo menos uma imagem.");
       return;
     }
@@ -161,7 +179,13 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
           finalUrls.push(data.publicUrl);
         }
       }
-      await onSave({ postId: post.id, content: trimmed, imageUrls: finalUrls });
+      await onSave({
+        postId: post.id,
+        content: trimmed,
+        imageUrls: finalUrls,
+        videoUrl,
+        documents,
+      });
       finalizeClose();
     } catch (err: any) {
       toast.error(err?.message || "Erro ao salvar alterações.");
@@ -240,6 +264,53 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
               </div>
             )}
 
+            {videoUrl && (
+              <div className="relative rounded-md overflow-hidden border border-border/60 bg-black">
+                <video src={videoUrl} controls preload="metadata" className="w-full max-h-72" />
+                <button
+                  type="button"
+                  onClick={() => setVideoUrl(null)}
+                  disabled={busy}
+                  className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/90 flex items-center justify-center text-destructive shadow disabled:opacity-40"
+                  aria-label="Remover vídeo"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+                <p className="text-[11px] text-muted-foreground px-2 py-1 bg-background flex items-center gap-1">
+                  <VideoIcon className="h-3 w-3" /> Vídeo anexado
+                </p>
+              </div>
+            )}
+
+            {documents.length > 0 && (
+              <div className="space-y-1.5">
+                {documents.map((d, i) => (
+                  <div
+                    key={`${d.url}-${i}`}
+                    className="flex items-center gap-2 p-2 rounded-md border border-border/50 bg-muted/30"
+                  >
+                    <FileText className="h-4 w-4 text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{d.name}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {DOC_EXT_LABEL[d.mime] || "Documento"} · {formatBytes(d.size)}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => setDocuments((prev) => prev.filter((_, idx) => idx !== i))}
+                      disabled={busy}
+                      aria-label="Remover documento"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div>
               <Button
                 type="button"
@@ -262,6 +333,11 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
               <p className="text-[11px] text-muted-foreground mt-1">
                 Máximo {MAX_IMAGES} imagens · JPG, PNG, WEBP ou GIF até 10 MB cada.
               </p>
+              {(videoUrl || documents.length > 0) && (
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Vídeo e documentos anexados podem ser mantidos ou removidos. Adicionar novos anexos deste tipo pela edição ainda não está disponível.
+                </p>
+              )}
             </div>
           </div>
 
@@ -302,7 +378,15 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
   );
 }
 
-function signatureOf(content: string, images: ImageItem[]): string {
-  const parts = images.map((i) => (i.kind === "existing" ? `E:${i.url}` : `N:${i.file.name}:${i.file.size}`));
-  return `${content}||${parts.join("|")}`;
+function signatureOf(
+  content: string,
+  images: ImageItem[],
+  videoUrl: string | null,
+  documents: PostDocument[],
+): string {
+  const parts = images.map((i) =>
+    i.kind === "existing" ? `E:${i.url}` : `N:${i.file.name}:${i.file.size}`,
+  );
+  const docs = documents.map((d) => `D:${d.url}`).join("|");
+  return `${content}||${parts.join("|")}||V:${videoUrl || ""}||${docs}`;
 }
