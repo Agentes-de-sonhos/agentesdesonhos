@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import type { CommunityPost, PostComment } from "@/types/community-members";
+import type { CommunityPost, PostComment, PostDocument, PostPoll } from "@/types/community-members";
 
 export function useCommunityFeed() {
   const { user } = useAuth();
@@ -41,11 +41,26 @@ export function useCommunityFeed() {
         userLikes = (likes || []).map((l: any) => l.post_id);
       }
 
+      const pollPostIds = data.filter((p: any) => p.poll).map((p: any) => p.id);
+      let pollVotes: any[] = [];
+      if (pollPostIds.length > 0) {
+        const { data: votes } = await (supabase as any)
+          .from("community_post_poll_votes")
+          .select("post_id, option_id, user_id")
+          .in("post_id", pollPostIds);
+        pollVotes = votes || [];
+      }
+
       return data.map((post: any) => ({
         ...post,
         profile: profiles?.find((p: any) => p.user_id === post.user_id),
         member: members?.find((m: any) => m.user_id === post.user_id),
         user_liked: userLikes.includes(post.id),
+        poll_votes: pollVotes.filter((v: any) => v.post_id === post.id),
+        user_poll_option:
+          user?.id
+            ? pollVotes.find((v: any) => v.post_id === post.id && v.user_id === user.id)?.option_id ?? null
+            : null,
       })) as CommunityPost[];
     },
     staleTime: 2 * 60 * 1000,
@@ -57,24 +72,45 @@ export function useCommunityFeed() {
       tags = [],
       imageUrl = null,
       imageUrls = null,
+      videoUrl = null,
+      documents = null,
+      poll = null,
     }: {
       content: string;
       tags?: string[];
       imageUrl?: string | null;
       imageUrls?: string[] | null;
+      videoUrl?: string | null;
+      documents?: PostDocument[] | null;
+      poll?: PostPoll | null;
     }) => {
       if (!user?.id) throw new Error("Não autenticado");
+      const cleanPoll =
+        poll && poll.question.trim() && poll.options.filter((o) => o.text.trim()).length >= 2
+          ? {
+              question: poll.question.trim(),
+              options: poll.options
+                .filter((o) => o.text.trim())
+                .map((o) => ({ id: o.id, text: o.text.trim() })),
+            }
+          : null;
       const { error } = await supabase.from("community_posts").insert({
         user_id: user.id,
         content,
         tags,
         image_url: imageUrl ?? (imageUrls?.[0] ?? null),
         image_urls: imageUrls ?? (imageUrl ? [imageUrl] : []),
+        video_url: videoUrl,
+        documents: documents ?? [],
+        poll: cleanPoll,
       } as any);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["community-feed"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Não foi possível publicar.");
     },
   });
 
@@ -186,6 +222,22 @@ export function useCommunityFeed() {
     },
   });
 
+  const votePoll = useMutation({
+    mutationFn: async ({ postId, optionId }: { postId: string; optionId: string }) => {
+      if (!user?.id) throw new Error("Não autenticado");
+      const { error } = await (supabase as any)
+        .from("community_post_poll_votes")
+        .insert({ post_id: postId, user_id: user.id, option_id: optionId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["community-feed"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Não foi possível registrar seu voto.");
+    },
+  });
+
   return {
     posts,
     loadingPosts,
@@ -199,5 +251,7 @@ export function useCommunityFeed() {
     addComment: addComment.mutate,
     isAddingComment: addComment.isPending,
     deleteComment: deleteComment.mutate,
+    votePoll: votePoll.mutate,
+    isVoting: votePoll.isPending,
   };
 }
