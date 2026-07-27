@@ -25,9 +25,9 @@ import { useAuth } from "@/hooks/useAuth";
 import type { CommunityPost } from "@/types/community-members";
 import { postImages } from "./PostImageGallery";
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_IMAGES = 6;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_IMAGES = 8;
 const MAX_CONTENT = 5000;
 
 interface EditPostDialogProps {
@@ -111,7 +111,7 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
         continue;
       }
       if (file.size > MAX_IMAGE_BYTES) {
-        toast.error("Cada imagem precisa ter até 5 MB.");
+        toast.error("Cada imagem precisa ter até 10 MB.");
         continue;
       }
       accepted.push({ kind: "new", file, previewUrl: URL.createObjectURL(file) });
@@ -254,13 +254,13 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp,image/gif"
                 multiple
                 className="hidden"
                 onChange={handlePickImages}
               />
               <p className="text-[11px] text-muted-foreground mt-1">
-                Máximo {MAX_IMAGES} imagens · JPG, PNG ou WEBP até 5 MB cada.
+                Máximo {MAX_IMAGES} imagens · JPG, PNG, WEBP ou GIF até 10 MB cada.
               </p>
             </div>
           </div>

@@ -2001,48 +2001,89 @@ export type Database = {
           },
         ]
       }
+      community_post_poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_post_poll_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_posts: {
         Row: {
           comments_count: number | null
           content: string | null
           created_at: string | null
+          documents: Json
           edited_at: string | null
           id: string
           image_url: string | null
           image_urls: string[]
           is_pinned: boolean | null
           likes_count: number | null
+          poll: Json | null
           tags: string[] | null
           updated_at: string | null
           user_id: string
+          video_url: string | null
         }
         Insert: {
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
+          documents?: Json
           edited_at?: string | null
           id?: string
           image_url?: string | null
           image_urls?: string[]
           is_pinned?: boolean | null
           likes_count?: number | null
+          poll?: Json | null
           tags?: string[] | null
           updated_at?: string | null
           user_id: string
+          video_url?: string | null
         }
         Update: {
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
+          documents?: Json
           edited_at?: string | null
           id?: string
           image_url?: string | null
           image_urls?: string[]
           is_pinned?: boolean | null
           likes_count?: number | null
+          poll?: Json | null
           tags?: string[] | null
           updated_at?: string | null
           user_id?: string
+          video_url?: string | null
         }
         Relationships: []
       }

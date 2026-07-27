@@ -34,6 +34,7 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
     addComment,
     isAddingComment,
     deleteComment,
+    votePoll,
   } = useCommunityFeed();
 
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
@@ -103,6 +104,7 @@ export function CommunityFeedSection({ famTrips = [], events = [] }: CommunityFe
                   isAddingComment={isAddingComment}
                   fetchComments={fetchComments}
                   onDeleteComment={deleteComment}
+                  onVotePoll={votePoll}
                 />
               );
             }

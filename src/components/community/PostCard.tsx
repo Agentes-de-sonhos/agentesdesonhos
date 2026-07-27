@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,14 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Heart, MessageCircle, Trash2, Pin, CheckCircle2, Send, Loader2, MoreHorizontal, Pencil,
+  FileText, Download, BarChart3, Check,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { PostImageGallery, postImages } from "./PostImageGallery";
+import { DOC_EXT_LABEL, formatBytes } from "@/lib/communityMedia";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 
 interface PostCardProps {
@@ -31,10 +33,11 @@ interface PostCardProps {
   isAddingComment: boolean;
   fetchComments: (postId: string) => Promise<PostComment[]>;
   onDeleteComment: (commentId: string) => void;
+  onVotePoll?: (data: { postId: string; optionId: string }) => void;
 }
 
 export function PostCard({
-  post, onLike, onDelete, onEdit, onAddComment, isAddingComment, fetchComments, onDeleteComment,
+  post, onLike, onDelete, onEdit, onAddComment, isAddingComment, fetchComments, onDeleteComment, onVotePoll,
 }: PostCardProps) {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
@@ -50,6 +53,20 @@ export function PostCard({
   const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ptBR });
   const images = postImages(post);
   const wasEdited = !!(post as any).edited_at;
+  const videoUrl = (post as any).video_url as string | null | undefined;
+  const documents = ((post as any).documents || []) as { name: string; url: string; size: number; mime: string }[];
+  const poll = (post as any).poll as { question: string; options: { id: string; text: string }[] } | null;
+  const pollVotes = ((post as any).poll_votes || []) as { option_id: string }[];
+  const userVote = (post as any).user_poll_option as string | null | undefined;
+
+  const pollTallies = useMemo(() => {
+    const counts: Record<string, number> = {};
+    pollVotes.forEach((v) => {
+      counts[v.option_id] = (counts[v.option_id] || 0) + 1;
+    });
+    return counts;
+  }, [pollVotes]);
+  const pollTotal = pollVotes.length;
 
   const handleToggleComments = async () => {
     if (!showComments) {
@@ -133,7 +150,84 @@ export function PostCard({
           </div>
         )}
 
-        {/* Tags */}
+        {videoUrl && (
+          <div className="rounded-lg overflow-hidden border border-border/40 bg-black">
+            <video src={videoUrl} controls preload="metadata" className="w-full max-h-[520px]" />
+          </div>
+        )}
+
+        {documents.length > 0 && (
+          <div className="space-y-1.5">
+            {documents.map((d, i) => (
+              <a
+                key={i}
+                href={d.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 rounded-md border border-border/50 bg-muted/20 hover:bg-muted/40 transition"
+              >
+                <FileText className="h-4 w-4 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{d.name}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {DOC_EXT_LABEL[d.mime] || "Documento"} · {formatBytes(d.size)}
+                  </p>
+                </div>
+                <Download className="h-3.5 w-3.5 text-muted-foreground" />
+              </a>
+            ))}
+          </div>
+        )}
+
+        {poll && poll.question && (
+          <div className="rounded-lg border border-border/50 bg-muted/20 p-3 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+              <BarChart3 className="h-3.5 w-3.5 text-primary" />
+              {poll.question}
+            </div>
+            <div className="space-y-1.5">
+              {poll.options.map((o) => {
+                const count = pollTallies[o.id] || 0;
+                const pct = pollTotal > 0 ? Math.round((count / pollTotal) * 100) : 0;
+                const hasVoted = !!userVote;
+                const isMine = userVote === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    disabled={hasVoted || !onVotePoll || !user}
+                    onClick={() => onVotePoll?.({ postId: post.id, optionId: o.id })}
+                    className="relative w-full text-left rounded-md border border-border/60 px-2.5 py-1.5 text-xs hover:border-primary/40 disabled:cursor-default overflow-hidden"
+                  >
+                    {hasVoted && (
+                      <span
+                        className={`absolute inset-y-0 left-0 ${isMine ? "bg-primary/20" : "bg-muted"}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    )}
+                    <span className="relative flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5 truncate">
+                        {isMine && <Check className="h-3 w-3 text-primary" />}
+                        {o.text}
+                      </span>
+                      {hasVoted && (
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {pct}% · {count}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              {pollTotal} {pollTotal === 1 ? "voto" : "votos"}
+              {userVote ? " · você já votou" : " · toque em uma opção para votar"}
+            </p>
+          </div>
+        )}
+
+        {/* Legacy Tags */}
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {post.tags.map((tag) => (
