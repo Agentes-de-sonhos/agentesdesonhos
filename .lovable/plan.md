@@ -1,117 +1,169 @@
-## Objetivo
-Transformar `/noticias` em hub completo, automático e colaborativo com todas as notícias de PANROTAS, Mercado & Eventos e Brasilturis, priorizadas pelos acessos e curtidas dos próprios agentes.
 
-## Aproveitamento do que já existe
-- **Mantém tabelas**: `noticias_brutas`, `noticias_dashboard`, `news_likes`, `news_curation_feedback`.
-- **Mantém**: hook `useNewsLikes`, botão `NewsLikeButton`, feedback de curadoria.
-- **Reaproveita**: função `curate-news` (IA de classificação) — reutilizada, mas agora publica direto (status `aprovado` automático).
-- **Preserva histórico**: nada é apagado.
+# Auditoria — Módulo Comunidade
 
-## Fase 1 — Banco de dados (migração única)
+Diagnóstico somente-leitura para preparar a unificação em uma única experiência baseada no Travel Experts. Nenhum arquivo, rota ou dado será alterado nesta etapa.
 
-1. **Ampliar categorias** em `noticias_dashboard`: aceitar as 14 novas categorias. Sem CHECK constraint estrita (usar `text`). Manter `Turismo` legado como sinônimo → mapeado para `Outros` no fallback do backend.
-2. **Nova tabela `news_reads`** — registro de acesso real ao portal:
-   - `noticia_id`, `user_id`, `read_at`
-   - UNIQUE (noticia_id, user_id, date_bucket) — 1 acesso válido por usuário por dia
-   - RLS: authenticated pode inserir os seus; admin lê tudo
-3. **Colunas em `noticias_dashboard`**:
-   - `reads_count int default 0` (denormalizado — atualizado via trigger)
-   - `likes_count int default 0` (denormalizado via trigger em `news_likes`)
-   - `hidden bool default false` (para admin ocultar)
-   - `classification_confidence numeric` (opcional, já existe similar)
-4. **Triggers**: incrementar/decrementar `reads_count` e `likes_count`.
-5. **View/RPC `news_ranking_top5(window text)`**: janela `day` ou `week`, retorna 5 mais pontuadas com `score = reads_count + likes_count*2` (com desempate por curtidas > acessos recentes > mais recente).
-6. **RLS `noticias_dashboard`**: authenticated pode SELECT onde `status='aprovado' AND hidden=false`; admin gerencia tudo.
-7. **Coleção `news_collector_runs`** (log de execuções): portal, iniciado_em, terminou_em, encontradas, inseridas, ignoradas_duplicadas, erros_json, status.
+## 1. Rotas relacionadas (src/App.tsx)
 
-## Fase 2 — Coleta automática (Edge Functions)
+| Rota | Componente | Papel atual |
+|---|---|---|
+| `/comunidade` | `TradeConnectHub` | Hub social (perfil, conexões) com **QAFeed** no centro |
+| `/comunidade/chat` | `Community` | Experiência **Travel Experts** completa (feed, membros, eventos, workshops, highlights) |
+| `/comunidade/perfil` | `TradeConnectProfile` | Edição do perfil Trade Connect |
+| `/comunidade/comunidades` | `TradeConnectCommunities` | Lista "Minhas comunidades" (aponta para Travel Experts) |
+| `/comunidade/agente/:userId` | `AgentProfile` | Perfil público de agente |
+| `/perguntas-respostas` | `PerguntasRespostas` | Página dedicada com **QAFeed** + `QARankingSidebar` |
+| `/trade-connect`, `/trade-connect/perfil`, `/trade-connect/comunidades`, `/trade-connect/agente/:userId` | Redirects | Redirecionam para `/comunidade/*` |
 
-Criar/atualizar edge functions:
-- `collect-panrotas` — scraper RSS/HTML de panrotas.com.br
-- `collect-mercado-eventos` — scraper de mercadoeeventos.com.br
-- `collect-brasilturis` — scraper de brasilturis.com.br
-- `process-noticias-brutas` — pega não processadas, chama Gemini (`curate-news` reaproveitada) e insere em `noticias_dashboard` já com `status='aprovado'`. Quando confiança < limite → categoria `Outros`.
-- `news-collector-orchestrator` — chama os 3 coletores + processa brutas em sequência. Registra log em `news_collector_runs`.
+Pontos de entrada:
+- Menu lateral ("Comunidade") → `/comunidade` (Hub).
+- Dashboard, botão **"Ver toda a comunidade"** (`CommunitySocialFeed.tsx`) → `/comunidade` (Hub, não a experiência Travel Experts).
+- Dashboard, card `CommunityQACard` "Ver todas as perguntas" → `/perguntas-respostas`.
 
-**Cron (pg_cron + pg_net)**: schedule chamando `news-collector-orchestrator` em `0 8,10,12,14,16,18,20 * * *` (UTC ajustado para America/Sao_Paulo = `0 11,13,15,17,19,21,23 * * *`).
+## 2. Componentes React por fluxo
 
-Cada coletor:
-- Só busca conteúdos novos (verifica `noticias_brutas.url` UNIQUE).
-- Não elimina notícias apenas por tema duplicado.
-- Ignora páginas institucionais, links quebrados e sem conteúdo.
+**Dashboard (widgets)**
+- `src/components/dashboard/CommunitySocialFeed.tsx` (feed social resumido, usa `useCommunityFeed`, `EditPostDialog`, `PostImageGallery`)
+- `src/components/dashboard/CommunityQACard.tsx` (perguntas em destaque)
 
-## Fase 3 — Reformulação da UI `/noticias`
+**Hub `/comunidade` (TradeConnectHub)**
+- `src/pages/TradeConnectHub.tsx`
+- `src/components/qa/QAFeed.tsx` (coluna central)
+- `src/components/qa/QAQuestionDetail.tsx`, `QARanking.tsx`, `QARankingSidebar.tsx`
+- Hooks: `useTradeConnect` (perfil + conexões), `useCommunityMembership`
 
-Reescrever `src/pages/Noticias.tsx` (sem imagens, sem banner NEWS):
+**Perguntas e Respostas `/perguntas-respostas`**
+- `src/pages/PerguntasRespostas.tsx`
+- Reaproveita `QAFeed` + `QARankingSidebar` (mesmos componentes do Hub)
 
-### Cabeçalho compacto
-- Título: "Notícias do Trade"
-- Subtítulo: "Todas as notícias do turismo em um só lugar, organizadas pelo interesse dos agentes de viagens."
-- Direita (admin): botão "Editar no Admin"
-- Linha meta: "Atualizado há X min · Próxima às HHh · N novas em 24h"
+**Travel Experts `/comunidade/chat`**
+- `src/pages/Community.tsx`
+- `src/components/community/*`: `CommunityGate`, `CommunityFeedSection`, `CommunityLeftSidebar`, `CommunityRightSidebar`, `MemberDirectory`, `MemberProfileDialog`, `MemberCard`, `CreatePostForm`, `PostCard`, `PostImageGallery`, `EditPostDialog`, `EditCommunityProfileDialog`, `FamTripsSection`, `OnlineMeetingsSection`, `InPersonEventsSection`, `WorkshopsSection`, `PaidTrainingsSection`, `WhatsAppSection`, `HighlightsSection`
+- `src/components/community-chat/*`: `ChatFloatingButton`, `ChatInput`, `ChatMessageList`, `OnlineAgentsStrip`
+- Hooks: `useCommunity`, `useCommunityFeed`, `useCommunityMembership`, `useCommunityChat`
 
-### Filtros (2 níveis)
-- **Nível 1**: `Destaques do Trade` (padrão) | `Todas as notícias`
-- **Nível 2**: seletor de Categoria (15 opções) + seletor de Portal (4 opções, combináveis)
-- Campo de busca "Buscar notícias"
-- Em mobile: scroll horizontal snap
+**Compartilhados**
+- `useTradeConnect` (conexões + perfil, usado em Hub e perfil de agente)
+- `useCommunityFeed` (usado no dashboard e em Travel Experts)
 
-### Aba "Destaques do Trade"
-- **Segunda a sexta**: "Notícia do Dia" (card grande, sem imagem) + "Top 5 do Dia" (posições 2–5 ao lado). Ranking = eventos do dia atual (fuso SP).
-- **Sábado e domingo**: "Notícia da Semana" + "Top 5 da Semana" (desde segunda 00h).
-- Abaixo: seções "Notícias por Categoria" (até 6 por categoria + "Ver todas").
+## 3. Tabelas Supabase por módulo
 
-### Aba "Todas as notícias"
-- Seletor de janela: 24h (padrão dias úteis) / Hoje / Esta semana (padrão fim de semana).
-- Ordenação: Mais recentes (padrão) | Mais relevantes | Mais acessadas | Mais curtidas.
-- Paginação "Carregar mais notícias".
+**Dashboard `CommunitySocialFeed`** — `community_posts`, `community_post_comments`, `community_post_likes`, `profiles_public`, `community_members` (para specialties/status)
 
-### Card de notícia (sem imagens)
-Estrutura: `Portal · Categoria · Há X min` / Título / Resumo 2–3 linhas / `N leituras · N curtidas` / Botões `[Curtir]` `[Ler matéria ↗]`.
-- Etiquetas discretas: "Notícia do Dia/Semana", "Em alta", "Nova".
+**Hub `/comunidade` (TradeConnectHub)** — `profiles` (via `useTradeProfile`), `profiles_public`, `connections`, `community_members` (só p/ badge de membro), + tabelas de Q&A via `QAFeed`
 
-### Realtime/refresh
-- Polling 60s para verificar novas notícias (24h). Se novas → banner "5 novas notícias disponíveis · Exibir".
-- Não muda o scroll até o usuário clicar.
+**Perguntas e Respostas** — `qa_questions`, `qa_answers`, `qa_answer_likes`, `qa_answer_votes`
 
-### Contagem de leitura
-Ao clicar "Ler matéria":
-1. `supabase.rpc('register_news_read', { p_noticia_id })` (idempotente por dia).
-2. Abre `window.open(url, '_blank', 'noopener,noreferrer')`.
-3. Otimista: incrementa contador local.
+**Travel Experts `/comunidade/chat`** — `community_members`, `community_posts`, `community_post_comments`, `community_post_likes`, `community_rooms`, `community_messages`, `community_highlights`, `community_votes`, `monthly_prizes`, `fun_trips`, `online_meetings`, `in_person_events`, `professional_workshops`, `paid_trainings`, `whatsapp_community`, `profiles_public`
 
-## Fase 4 — Painel administrativo
+**DMs (transversal)** — `direct_conversations`, `direct_messages`
 
-Reformar `AdminNewsManager` (ou criar novo):
-- Cards KPI: última coleta, próxima, encontrado/inserido/ignorado por portal, erros, links quebrados, notícias em "Outros".
-- Botão "Executar coleta manual agora".
-- Tabela de notícias: colunas Título, Portal, Categoria, Score, Confiança, Leituras, Curtidas, Status, Ações (editar título/resumo/categoria, ocultar, restaurar).
-- Histórico de execuções (`news_collector_runs`).
+## 4. Edge Functions / APIs
 
-## Fase 5 — Limpeza
-- Remover imports/uso do banner "NEWS" gigante e miniaturas de portal em `Noticias.tsx`.
-- Manter `NewsLikeButton` (já sem imagem).
-- SEO: `<title>Notícias do Trade | Agentes de Sonhos</title>`.
+Nenhuma Edge Function é chamada pelos hooks de Comunidade / Q&A / Trade Connect / Chat (verificado com `rg "functions.invoke"` em `useQA`, `useCommunity`, `useCommunityFeed`, `useCommunityMembership`, `useCommunityChat`, `useTradeConnect`). Todo o tráfego é PostgREST direto do cliente com RLS. Storage: bucket `avatars` (upload de capa/foto).
 
-## Fora do escopo desta rodada
-- Antibot avançado, ML customizado (reaproveita Gemini já em uso).
-- Notificações push.
-- App mobile.
+## 5. Tabelas compartilhadas × exclusivas
 
-## Ordem de execução
-1. Migração de banco (Fase 1)
-2. Edge functions e cron (Fase 2)
-3. UI /noticias (Fase 3)
-4. Painel admin (Fase 4)
-5. Limpeza + testes (Fase 5)
+- **Compartilhadas por Dashboard + Travel Experts:** `community_posts`, `community_post_comments`, `community_post_likes`, `community_members`, `profiles_public`.
+- **Compartilhadas por Hub + Perfis de Agente:** `connections`, `profiles`, `profiles_public`.
+- **Exclusivas do Q&A:** `qa_questions`, `qa_answers`, `qa_answer_likes`, `qa_answer_votes` (usadas em `/perguntas-respostas` **e** também dentro do Hub via `QAFeed`).
+- **Exclusivas do Travel Experts:** `community_rooms`, `community_messages`, `community_highlights`, `community_votes`, `monthly_prizes`, `fun_trips`, `online_meetings`, `in_person_events`, `professional_workshops`, `paid_trainings`, `whatsapp_community`.
+- **Transversal (DMs, independe de comunidade):** `direct_conversations`, `direct_messages`.
 
-## Notas técnicas
-- IA: `curate-news` já usa Lovable AI Gateway (Gemini). Reutilizar para classificação e resumo em lote.
-- Ranking em SQL para performance; nada de recalcular no cliente.
-- Registro de leitura idempotente via UNIQUE (`noticia_id`, `user_id`, `date_trunc('day', read_at)`).
-- Fuso: `AT TIME ZONE 'America/Sao_Paulo'` em todas as janelas.
+## 6. Dados existentes só no Q&A
 
-## Estimativa
-Grande — implementação em várias iterações. Recomendo começar pela Fase 1 (schema) e Fase 3 (UI reformulada usando dados atuais + novo ranking) para o usuário validar UX, e Fase 2 (scrapers) em rodada dedicada.
+Sim. Dados vivos exclusivos das tabelas `qa_*`:
+- `qa_questions`: **19**
+- `qa_answers`: **43**
+- `qa_answer_likes`: **9**
+- `qa_answer_votes`: **15**
+- Autores únicos em perguntas/respostas: **27**
 
-**Confirma para começar pela Fase 1 (migração) + Fase 3 (UI reformulada com auto-publicação) e depois seguir com scrapers?**
+Esses dados não existem em `community_posts/comments/likes` e precisam ser tratados na unificação (migrar para posts+comentários, manter como coleção paralela dentro do Travel Experts, ou preservar a rota Q&A).
+
+## 7. Dados a considerar em migração
+
+Volumes atuais no banco:
+- `community_posts` **5**, `community_post_comments` **1**, `community_post_likes` **14**, `community_members` **13** (base do Travel Experts).
+- `community_rooms` **7**, `community_messages` **0**, `community_highlights` **0**, `community_votes` **0**.
+- `connections` **10**, `direct_conversations` **78**, `direct_messages` **94** (transversais — permanecem).
+- Q&A: ver item 6.
+
+Volume baixo em posts/comments favorece consolidação; o Q&A é o único conjunto com massa relevante que hoje NÃO vive em Travel Experts.
+
+## 8. Travel Experts já suporta o necessário?
+
+Feed social do Travel Experts (via `useCommunityFeed`/`CommunityFeedSection`/`PostCard`) já cobre:
+- Posts com texto, tags, `is_pinned`, `edited_at`.
+- Múltiplas imagens (`image_urls`) + lightbox (`PostImageGallery`).
+- Curtidas (`community_post_likes`) com toggle otimista.
+- Comentários (`community_post_comments`) com fetch on-demand.
+- Edição/remoção pelo autor (`EditPostDialog`, `updatePost`, `deletePost`).
+- Perfil enriquecido do autor (`profiles_public` + `community_members`).
+
+Ausente hoje no feed do Travel Experts: **fluxo de "Pergunta & Resposta" estruturado** (título, múltiplas respostas com voto/ranking, "melhor resposta") — hoje só existe em `qa_*`. Precisará ser ou preservado como aba, ou remodelado como tipo de post.
+
+## 9. Comportamento atual dos pontos de entrada
+
+- **Menu "Comunidade"** → `/comunidade` renderiza `TradeConnectHub`: capa + perfil no topo, coluna esquerda com progresso/nichos/parcerias, **centro com `QAFeed` (perguntas e respostas)**, direita com solicitações/conexões. Não mostra o feed social do Travel Experts.
+- **Dashboard, "Ver toda a comunidade"** → `/comunidade` (mesmo Hub acima). Ou seja, o usuário sai de um feed social no dashboard e cai em uma tela de Q&A — descontinuidade evidente.
+- **Dashboard, `CommunityQACard` "Ver todas as perguntas"** → `/perguntas-respostas` (Q&A puro).
+- **Travel Experts propriamente dito** só é acessível via `/comunidade/chat` (ou `/comunidade/comunidades` → card "Travel Experts") e é gated por `SubscriptionGuard feature="community"` + `CommunityGate` de membership.
+
+## 10. Componentes/rotas potencialmente removíveis após unificação
+
+Candidatos a descontinuação (dependem das decisões do item 12):
+- Rotas: `/comunidade/chat` (absorvida por `/comunidade`), `/comunidade/comunidades` (perde sentido com única comunidade), `/perguntas-respostas` (se Q&A virar aba/tipo de post) e todos os `/trade-connect/*` já legados.
+- Páginas: `TradeConnectHub.tsx`, `TradeConnectCommunities.tsx`, `PerguntasRespostas.tsx`.
+- Componentes: `CommunityQACard.tsx` do dashboard (se substituído pelo novo widget unificado), `QARanking.tsx`/`QARankingSidebar.tsx` (se ranking migrar para engajamento de posts).
+- Trade-Connect UI genérica: `src/components/trade-connect/TagSelector.tsx` (avaliar reuso).
+- Widget dashboard: `CommunitySocialFeed.tsx` mantém utilidade, mas o CTA "Ver toda a comunidade" deve apontar para o feed do Travel Experts.
+
+O que **não** deve ser removido: `useCommunityFeed`, `useCommunityMembership`, `useTradeConnect` (conexões), `direct_*`, `MemberDirectory`, `AgentProfile`, `PostCard`/`EditPostDialog`, todas as tabelas `community_*` (base do Travel Experts).
+
+## 11. Riscos técnicos e dependências
+
+- **Preservação do Q&A**: 19 perguntas + 43 respostas + 24 interações reais. Excluir sem plano perde histórico e reputação de autores.
+- **Gate de assinatura**: `/comunidade/chat` hoje exige `SubscriptionGuard feature="community"` + `CommunityGate` (membership `approved_unverified`/`verified`). Unificar tudo sob esse gate pode **cortar acesso** de usuários que hoje veem `/comunidade` (Hub) e `/perguntas-respostas` sem serem membros. Requer decisão de negócio antes de mover o gate.
+- **Menu e deep links**: componentes de layout (`AppSidebar`, `MobileSidebar`, `MobileDrawerMenu`) codificam `/comunidade` como URL "Start-plan-locked" — mudar rotas exige atualizar essas listas.
+- **Redirects legados**: `/trade-connect/*` já redirecionam; incluir novos redirects para `/comunidade/chat`, `/comunidade/comunidades`, `/perguntas-respostas` para não quebrar links compartilhados.
+- **RLS**: `qa_*` têm 5 policies cada e `community_*` políticas próprias. Qualquer migração de dados Q&A → `community_posts` precisa validar que autores mantêm autoria (mesmo `user_id`) para não violar policies de edit/delete.
+- **Widgets dashboard**: `CommunityQACard` faz agregações próprias sobre `qa_*`; se Q&A migrar para posts, o widget precisa ser refeito ou substituído.
+- **Realtime/chat**: `community_rooms`/`community_messages` está zerado, mas o `ChatFloatingButton` está integrado ao layout do Travel Experts — validar se será mantido.
+- **Perfil "Trade Connect" vs "Community Member"**: hoje coexistem `profiles` (com campos Trade Connect) e `community_members` (bio/segments/specialties próprios). Unificar exige reconciliar os dois modelos ou definir um como fonte de verdade.
+- **Baixo volume atual de posts (5)** reduz risco de migração, mas indica que a experiência principal hoje é o Q&A — a unificação precisa de estratégia clara para não parecer "vazia".
+
+## 12. Plano de migração proposto (sem execução)
+
+**Etapa 0 — Decisões de produto (bloqueante)**
+- Q&A vira: (a) aba dedicada dentro do Travel Experts mantendo tabelas `qa_*`, ou (b) tipo de post estruturado migrando para `community_posts` + `community_post_comments`. Recomendação técnica: (a) no curto prazo, (b) como evolução.
+- Definir se Travel Experts será obrigatoriamente gated (membership + assinatura) ou se haverá "modo leitura" público para não-membros.
+- Definir fonte de verdade do perfil (Trade Connect em `profiles` vs `community_members`).
+
+**Etapa 1 — Consolidação de rotas**
+- Fazer `/comunidade` renderizar a experiência atual de `/comunidade/chat` (Travel Experts).
+- Manter `/comunidade/chat`, `/comunidade/comunidades` e `/perguntas-respostas` como redirects temporários para `/comunidade` (com fragmentos/aba correspondente, ex.: `/comunidade?tab=qa`).
+- Ajustar `CommunitySocialFeed` (dashboard) para apontar "Ver toda a comunidade" para a nova rota unificada.
+
+**Etapa 2 — Absorção do Hub Trade Connect**
+- Reaproveitar cabeçalho de perfil, progresso, solicitações e conexões do `TradeConnectHub` como novas seções/laterais dentro do layout do Travel Experts (mantendo `CommunityLeftSidebar`/`CommunityRightSidebar`).
+- Descontinuar `TradeConnectCommunities` (única comunidade) e remover card duplicado do menu.
+
+**Etapa 3 — Integração do Q&A**
+- Cenário (a): incorporar `QAFeed` como aba "Perguntas" dentro de `Community.tsx`, preservando tabelas `qa_*` e ranking. Ajustar `CommunityQACard` do dashboard para apontar para essa aba.
+- Cenário (b) — futuro: script de migração idempotente `qa_questions → community_posts` (com tag `pergunta`) e `qa_answers → community_post_comments`, mantendo `user_id`, `created_at`, contagens e curtidas (`qa_answer_likes → community_post_likes` no comentário). Rodar em staging, validar RLS, prever rollback.
+
+**Etapa 4 — Gate & permissões**
+- Alinhar `SubscriptionGuard` e `CommunityGate` à decisão da Etapa 0. Se houver "modo leitura", refatorar `CommunityGate` para permitir visualização sem membership e bloquear apenas ações de escrita.
+- Atualizar `AppSidebar`/`MobileSidebar`/`MobileDrawerMenu` (lista `startPlanLockedUrls`) e telemetria (`user_feature_access`, `subscription`).
+
+**Etapa 5 — Limpeza**
+- Remover páginas/rotas obsoletas listadas no item 10, mantendo redirects até 1–2 releases.
+- Remover `CommunityQACard` (ou refatorar) e dependências não usadas em `src/components/trade-connect/`.
+- Atualizar documentação: `docs/base-conhecimento-agentes-de-sonhos/modulos/comunidade.md`, `perguntas-respostas.md` e memórias `mem://features/comunidade/*`.
+
+**Etapa 6 — QA e observabilidade**
+- Testes E2E cobrindo: acesso via menu, gate de assinatura, criação de post, criação de pergunta, curtidas, comentários, edição, redirects legados.
+- Monitorar `app_error_logs` e engajamento (posts, likes, comments) por 1–2 semanas antes de remover redirects.
+
+Nenhuma das etapas foi executada. Este documento é somente diagnóstico.
