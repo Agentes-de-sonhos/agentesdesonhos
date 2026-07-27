@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Gift, Search, Sparkles, Timer, CheckCircle2, Vote } from "lucide-react";
-import { useMonthlyAward, getVotingPhase } from "@/hooks/useMonthlyAward";
+import { Trophy, Gift, Search, Sparkles, Timer, CheckCircle2, Vote, Crown, Medal } from "lucide-react";
+import { useMonthlyAward, getVotingPhase, useAwardHistory } from "@/hooks/useMonthlyAward";
 import { MONTH_NAMES } from "@/types/community";
 import {
   AlertDialog,
@@ -52,10 +52,17 @@ function initialsOf(name: string | null | undefined): string {
 export function MonthlyAwardSection() {
   const { user } = useAuth();
   const { award, nominees, myVote, castVote, isVoting, isLoading } = useMonthlyAward(true);
+  const historyQuery = useAwardHistory(12, true);
   const [tick, setTick] = useState(0);
   const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(INITIAL_VISIBLE);
   const [confirmNominee, setConfirmNominee] = useState<{ id: string; name: string } | null>(null);
+  const currentWinner = (historyQuery.data ?? []).find(
+    (h) => h.award_id === award?.id,
+  );
+  const pastWinners = (historyQuery.data ?? []).filter(
+    (h) => h.award_id !== award?.id,
+  );
 
   useEffect(() => {
     const id = window.setInterval(() => setTick((n) => n + 1), 60_000);
