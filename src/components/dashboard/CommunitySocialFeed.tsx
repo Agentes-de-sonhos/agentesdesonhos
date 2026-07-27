@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -14,7 +12,6 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Heart,
-  ImageIcon,
   Loader2,
   MessageCircle,
   MoreHorizontal,
@@ -22,22 +19,19 @@ import {
   Send,
   Trash2,
   Users,
-  X,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 import { EditPostDialog } from "@/components/community/EditPostDialog";
 import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
-
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+import { CreatePostForm } from "@/components/community/CreatePostForm";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 function timeAgo(date: string) {
   try {
@@ -89,108 +83,9 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     deleteComment,
   } = useCommunityFeed();
 
-  const [content, setContent] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
-  const [composerOpen, setComposerOpen] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const composerRef = useRef<HTMLTextAreaElement>(null);
-
-  // Profile of current user for composer avatar
-  const { data: myProfile } = useQuery({
-    queryKey: ["my-profile-feed", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("name, avatar_url")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  useEffect(() => {
-    if (!imageFile) {
-      setImagePreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(imageFile);
-    setImagePreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [imageFile]);
-
-  useEffect(() => {
-    if (composerOpen) {
-      // Focus textarea once expanded
-      setTimeout(() => composerRef.current?.focus(), 40);
-    }
-  }, [composerOpen]);
-
-  const handlePickImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    if (!ACCEPTED_TYPES.includes(f.type)) {
-      toast.error("Use uma imagem JPG, PNG ou WEBP.");
-      return;
-    }
-    if (f.size > MAX_IMAGE_BYTES) {
-      toast.error("A imagem precisa ter até 5 MB.");
-      return;
-    }
-    setImageFile(f);
-  };
-
-  const handlePublish = async () => {
-    if (!user) return;
-    const trimmed = content.trim();
-    if (!trimmed && !imageFile) {
-      toast.error("Escreva algo ou anexe uma imagem para publicar.");
-      return;
-    }
-    try {
-      let imageUrl: string | null = null;
-      if (imageFile) {
-        setUploading(true);
-        const ext = imageFile.name.split(".").pop()?.toLowerCase() || "jpg";
-        const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("community-feed")
-          .upload(path, imageFile, { contentType: imageFile.type });
-        if (upErr) throw upErr;
-        const { data } = supabase.storage.from("community-feed").getPublicUrl(path);
-        imageUrl = data.publicUrl;
-      }
-      createPost(
-        { content: trimmed, tags: [], imageUrl },
-        {
-          onSuccess: () => {
-            setContent("");
-            setImageFile(null);
-            setComposerOpen(false);
-            toast.success("Publicação compartilhada com a comunidade!");
-          },
-          onError: () => toast.error("Não foi possível publicar. Tente novamente."),
-        }
-      );
-    } catch (err: any) {
-      toast.error(err?.message || "Erro ao enviar imagem");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const cancelComposer = () => {
-    setContent("");
-    setImageFile(null);
-    setComposerOpen(false);
-  };
 
   const toggleCommentsOpen = (postId: string) => {
     setExpandedComments((prev) => {
@@ -230,112 +125,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
         </p>
 
         {/* Composer */}
-        <div className="rounded-2xl bg-card border border-border/60">
-          {!composerOpen ? (
-            <button
-              type="button"
-              onClick={() => setComposerOpen(true)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/40 transition-colors rounded-2xl"
-            >
-              <Avatar className="h-9 w-9 flex-shrink-0">
-                <AvatarImage src={myProfile?.avatar_url || undefined} alt={myProfile?.name || "Você"} />
-                <AvatarFallback className="bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))] text-xs">
-                  {initials(myProfile?.name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="flex-1 min-w-0 text-sm text-muted-foreground truncate">
-                Compartilhe uma dúvida ou oportunidade com a comunidade...
-              </span>
-              <span
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-                aria-hidden="true"
-              >
-                <ImageIcon className="h-4 w-4" />
-                Foto
-              </span>
-              <span className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium bg-[hsl(var(--section-community))] text-white">
-                Publicar
-              </span>
-            </button>
-          ) : (
-            <div className="p-3 sm:p-4 space-y-3">
-              <div className="flex gap-3">
-                <Avatar className="h-9 w-9 flex-shrink-0">
-                  <AvatarImage src={myProfile?.avatar_url || undefined} alt={myProfile?.name || "Você"} />
-                  <AvatarFallback className="bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))] text-xs">
-                    {initials(myProfile?.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <Textarea
-                  ref={composerRef}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Compartilhe uma dúvida ou oportunidade com a comunidade..."
-                  className="flex-1 resize-none min-h-[80px] bg-background border-border/60 focus-visible:ring-[hsl(var(--section-community))]/40"
-                  maxLength={5000}
-                />
-              </div>
-              {imagePreview && (
-                <div className="relative rounded-xl overflow-hidden border border-border/60 bg-muted/30 max-w-md">
-                  <img src={imagePreview} alt="Pré-visualização" className="w-full max-h-72 object-contain" />
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="absolute top-2 right-2 h-7 w-7 rounded-full"
-                    onClick={() => setImageFile(null)}
-                    aria-label="Remover imagem"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              )}
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-[hsl(var(--section-community))]"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading || isCreating}
-                >
-                  <ImageIcon className="h-4 w-4 mr-2" />
-                  Adicionar foto
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={handlePickImage}
-                />
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={cancelComposer}
-                    disabled={uploading || isCreating}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white"
-                    onClick={handlePublish}
-                    disabled={uploading || isCreating || (!content.trim() && !imageFile)}
-                  >
-                    {(uploading || isCreating) ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4 mr-2" />
-                    )}
-                    Publicar
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <CreatePostForm onSubmit={createPost} isCreating={isCreating} />
 
         {/* Feed preview */}
         {loadingPosts ? (
