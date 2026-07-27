@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -14,30 +12,25 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Heart,
-  ImageIcon,
   Loader2,
   MessageCircle,
   MoreHorizontal,
   Pencil,
-  Send,
   Trash2,
   Users,
-  X,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 import { EditPostDialog } from "@/components/community/EditPostDialog";
 import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
-
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+import { CreatePostForm } from "@/components/community/CreatePostForm";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 function timeAgo(date: string) {
   try {
