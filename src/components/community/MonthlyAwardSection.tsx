@@ -234,12 +234,49 @@ export function MonthlyAwardSection() {
             {phase.phase === "closed" && (
               <>
                 <p className="font-semibold text-foreground">A votação foi encerrada</p>
-                <p className="text-muted-foreground">O resultado está sendo apurado.</p>
+                <p className="text-muted-foreground">
+                  {currentWinner
+                    ? "Resultado publicado. Confira o destaque do mês abaixo."
+                    : "O resultado está sendo apurado pela equipe."}
+                </p>
               </>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Winner of the current award (only after admin confirms) */}
+      {currentWinner && (
+        <Card className="border-amber-500/40 bg-gradient-to-br from-amber-500/15 via-orange-500/5 to-transparent">
+          <CardContent className="py-5 flex items-center gap-4">
+            <div className="rounded-full bg-amber-500/20 p-3">
+              <Crown className="h-6 w-6 text-amber-500" />
+            </div>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Avatar className="h-14 w-14 border-2 border-amber-500/50">
+                <AvatarImage src={currentWinner.avatar_url ?? undefined} />
+                <AvatarFallback className="bg-amber-500/10 text-amber-700 font-bold">
+                  {initialsOf(currentWinner.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-wide text-amber-700/80 font-semibold">
+                  Destaque de {MONTH_NAMES[currentWinner.reference_month - 1]}/
+                  {currentWinner.reference_year}
+                </p>
+                <p className="font-bold text-lg text-foreground truncate">
+                  {currentWinner.name ?? "Agente"}
+                </p>
+                {currentWinner.agency_name && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {currentWinner.agency_name}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Participants */}
       <div className="space-y-3">
