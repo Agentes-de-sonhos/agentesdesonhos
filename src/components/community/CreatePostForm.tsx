@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Send, Loader2, Image as ImageIcon, Video, FileText, BarChart3, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,7 +25,7 @@ import {
   probeVideo,
   uploadCommunityFile,
 } from "@/lib/communityMedia";
-import type { PostDocument } from "@/types/community-members";
+import type { PostDocument, PostPoll } from "@/types/community-members";
 
 interface CreatePostPayload {
   content: string;
@@ -32,6 +33,7 @@ interface CreatePostPayload {
   imageUrls?: string[];
   videoUrl?: string | null;
   documents?: PostDocument[];
+  poll?: PostPoll | null;
 }
 
 interface CreatePostFormProps {
@@ -42,9 +44,21 @@ interface CreatePostFormProps {
 type PickedImage = { file: File; previewUrl: string };
 type PickedVideo = { file: File; previewUrl: string; duration: number };
 type PickedDoc = { file: File };
+type PollDraftOption = { id: string; text: string };
 
 const VIDEO_EXTS = ["mp4", "mov", "webm"];
 const DOC_EXTS = ["pdf", "docx", "xlsx", "pptx"];
+const POLL_MIN_OPTIONS = 2;
+const POLL_MAX_OPTIONS = 6;
+const POLL_QUESTION_MAX = 200;
+const POLL_OPTION_MAX = 80;
+
+const newOption = (): PollDraftOption => ({
+  id: (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    ? crypto.randomUUID()
+    : `opt_${Math.random().toString(36).slice(2, 10)}`,
+  text: "",
+});
 
 function extOf(name: string) {
   return name.split(".").pop()?.toLowerCase() || "";
@@ -59,6 +73,10 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
+
+  const [pollOpen, setPollOpen] = useState(false);
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollOptions, setPollOptions] = useState<PollDraftOption[]>([]);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -82,7 +100,69 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
   const initials = name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
 
   const hasMedia = images.length > 0 || video !== null || docs.length > 0;
-  const canSubmit = (content.trim().length > 0 || hasMedia) && !isCreating && !uploading;
+
+  const pollValidation = (() => {
+    if (!pollOpen) return { valid: false, error: null as string | null, cleaned: null as PostPoll | null };
+    const q = pollQuestion.trim();
+    if (!q) return { valid: false, error: "Escreva a pergunta da enquete.", cleaned: null };
+    if (q.length > POLL_QUESTION_MAX)
+      return { valid: false, error: `A pergunta deve ter até ${POLL_QUESTION_MAX} caracteres.`, cleaned: null };
+    const trimmed = pollOptions.map((o) => ({ ...o, text: o.text.trim() }));
+    if (trimmed.some((o) => !o.text))
+      return { valid: false, error: "Preencha todas as opções ou remova as vazias.", cleaned: null };
+    if (trimmed.some((o) => o.text.length > POLL_OPTION_MAX))
+      return { valid: false, error: `Cada opção deve ter até ${POLL_OPTION_MAX} caracteres.`, cleaned: null };
+    if (trimmed.length < POLL_MIN_OPTIONS)
+      return { valid: false, error: `Adicione pelo menos ${POLL_MIN_OPTIONS} opções.`, cleaned: null };
+    if (trimmed.length > POLL_MAX_OPTIONS)
+      return { valid: false, error: `Máximo de ${POLL_MAX_OPTIONS} opções.`, cleaned: null };
+    const seen = new Set<string>();
+    for (const o of trimmed) {
+      const key = o.text.toLowerCase();
+      if (seen.has(key)) return { valid: false, error: "Não use opções duplicadas.", cleaned: null };
+      seen.add(key);
+    }
+    return {
+      valid: true,
+      error: null,
+      cleaned: { question: q, options: trimmed.map((o) => ({ id: o.id, text: o.text })) },
+    };
+  })();
+
+  const canSubmit =
+    (content.trim().length > 0 || hasMedia || pollValidation.valid) &&
+    (!pollOpen || pollValidation.valid) &&
+    !isCreating &&
+    !uploading;
+
+  const openPoll = () => {
+    if (pollOpen) return;
+    setPollOpen(true);
+    setPollQuestion("");
+    setPollOptions([newOption(), newOption()]);
+  };
+
+  const cancelPoll = () => {
+    setPollOpen(false);
+    setPollQuestion("");
+    setPollOptions([]);
+  };
+
+  const addPollOption = () => {
+    setPollOptions((prev) =>
+      prev.length >= POLL_MAX_OPTIONS ? prev : [...prev, newOption()],
+    );
+  };
+
+  const removePollOption = (id: string) => {
+    setPollOptions((prev) =>
+      prev.length <= POLL_MIN_OPTIONS ? prev : prev.filter((o) => o.id !== id),
+    );
+  };
+
+  const updatePollOption = (id: string, text: string) => {
+    setPollOptions((prev) => prev.map((o) => (o.id === id ? { ...o, text } : o)));
+  };
 
   // ---- IMAGES ----
   const addImageFiles = (files: File[]) => {
@@ -219,6 +299,9 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
     setVideo(null);
     setDocs([]);
     setUploadProgress(0);
+    setPollOpen(false);
+    setPollQuestion("");
+    setPollOptions([]);
   };
 
   const cleanupOrphans = async (urls: string[]) => {
@@ -264,6 +347,7 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
         imageUrls: uploadedImages,
         videoUrl: uploadedVideo,
         documents: uploadedDocs,
+        poll: pollValidation.valid ? pollValidation.cleaned : null,
       });
       reset();
     } catch (err: any) {
@@ -275,10 +359,6 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
       setUploading(false);
       setUploadProgress(0);
     }
-  };
-
-  const notifyComingSoon = (feature: string) => {
-    toast.info(`${feature}: recurso sendo preparado — em breve.`);
   };
 
   return (
@@ -381,6 +461,76 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
           </div>
         )}
 
+        {pollOpen && (
+          <div className="rounded-lg border border-primary/30 bg-primary/[0.03] p-3 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                Nova enquete
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 text-[11px] text-muted-foreground"
+                onClick={cancelPoll}
+                disabled={uploading}
+              >
+                Cancelar enquete
+              </Button>
+            </div>
+            <Input
+              value={pollQuestion}
+              onChange={(e) => setPollQuestion(e.target.value.slice(0, POLL_QUESTION_MAX))}
+              placeholder="Pergunta da enquete"
+              className="text-sm h-9"
+              aria-label="Pergunta da enquete"
+              maxLength={POLL_QUESTION_MAX}
+            />
+            <div className="space-y-1.5">
+              {pollOptions.map((o, idx) => (
+                <div key={o.id} className="flex items-center gap-2">
+                  <Input
+                    value={o.text}
+                    onChange={(e) => updatePollOption(o.id, e.target.value.slice(0, POLL_OPTION_MAX))}
+                    placeholder={`Opção ${idx + 1}`}
+                    className="text-sm h-8"
+                    aria-label={`Opção ${idx + 1}`}
+                    maxLength={POLL_OPTION_MAX}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => removePollOption(o.id)}
+                    disabled={pollOptions.length <= POLL_MIN_OPTIONS || uploading}
+                    aria-label="Remover opção"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between gap-2 pt-0.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={addPollOption}
+                disabled={pollOptions.length >= POLL_MAX_OPTIONS || uploading}
+              >
+                + Adicionar opção
+              </Button>
+              <p className="text-[10px] text-muted-foreground">Um voto por pessoa</p>
+            </div>
+            {pollValidation.error && (
+              <p className="text-[11px] text-destructive">{pollValidation.error}</p>
+            )}
+          </div>
+        )}
+
         {uploading && (
           <div className="space-y-1">
             <Progress value={uploadProgress} className="h-1.5" />
@@ -428,7 +578,9 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
               variant="ghost"
               size="sm"
               className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-primary"
-              onClick={() => notifyComingSoon("Enquete")}
+              onClick={openPoll}
+              disabled={pollOpen || uploading}
+              title="Enquete — 2 a 6 opções · um voto por pessoa"
             >
               <BarChart3 className="h-4 w-4" /> Enquete
             </Button>
