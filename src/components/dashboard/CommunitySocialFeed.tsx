@@ -16,6 +16,7 @@ import {
   MessageCircle,
   MoreHorizontal,
   Pencil,
+  Send,
   Trash2,
   Users,
 } from "lucide-react";
@@ -30,7 +31,7 @@ import { EditPostDialog } from "@/components/community/EditPostDialog";
 import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { Textarea } from "@/components/ui/textarea";
 
 function timeAgo(date: string) {
   try {
