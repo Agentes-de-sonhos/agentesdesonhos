@@ -193,7 +193,7 @@ export const REQUIRED_PLAN_FOR_FEATURE: Record<Feature, SubscriptionPlan> = {
   ai_unlimited: 'premium',
   premium_group: 'premium',
   fam_tours: 'premium',
-  community: 'premium',
+  community: 'start',
 };
 
 export const DAILY_AI_LIMITS: Partial<Record<SubscriptionPlan, number>> = {

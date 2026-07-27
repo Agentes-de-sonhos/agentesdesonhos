@@ -27,7 +27,31 @@ export function useCommunityMembership() {
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) throw error;
-      return data as CommunityMember | null;
+      if (data) return data as CommunityMember;
+
+      // Community is open to every authenticated user. If the user has no
+      // membership record yet, auto-create one silently so downstream
+      // components (profile/directory) keep working. No approval flow.
+      const { data: created, error: insertError } = await supabase
+        .from("community_members")
+        .insert({
+          user_id: user.id,
+          entry_method: "experience",
+          status: "approved_unverified",
+          specialties: [],
+        })
+        .select("*")
+        .maybeSingle();
+      if (insertError) {
+        // Race: another tab created it. Re-fetch.
+        const { data: existing } = await supabase
+          .from("community_members")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        return (existing as CommunityMember | null) ?? null;
+      }
+      return (created as CommunityMember | null) ?? null;
     },
     enabled: !!user?.id,
   });
