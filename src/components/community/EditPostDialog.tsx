@@ -68,7 +68,6 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const pollLocked = !!post && ((post as any).poll_votes?.length ?? 0) > 0;
-  const startingPoll: PostPoll | null = post ? ((post as any).poll ?? null) : null;
 
   // Reset state when a new post is opened
   useEffect(() => {
