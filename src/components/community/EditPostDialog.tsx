@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageIcon, Loader2, X, ChevronLeft, ChevronRight, Video as VideoIcon, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ImageIcon, Loader2, X, ChevronLeft, ChevronRight, Video as VideoIcon, FileText, BarChart3, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import type { CommunityPost, PostDocument } from "@/types/community-members";
+import type { CommunityPost, PostDocument, PostPoll } from "@/types/community-members";
 import { postImages } from "./PostImageGallery";
 import { DOC_EXT_LABEL, formatBytes } from "@/lib/communityMedia";
 
@@ -30,6 +31,10 @@ const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_IMAGES = 8;
 const MAX_CONTENT = 5000;
+const POLL_MIN_OPTIONS = 2;
+const POLL_MAX_OPTIONS = 6;
+const POLL_QUESTION_MAX = 200;
+const POLL_OPTION_MAX = 80;
 
 interface EditPostDialogProps {
   post: CommunityPost | null;
@@ -41,6 +46,7 @@ interface EditPostDialogProps {
     imageUrls: string[];
     videoUrl?: string | null;
     documents?: PostDocument[];
+    poll?: PostPoll | null;
   }) => Promise<void> | void;
   isSaving?: boolean;
 }
@@ -55,10 +61,14 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
   const [images, setImages] = useState<ImageItem[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [documents, setDocuments] = useState<PostDocument[]>([]);
+  const [poll, setPoll] = useState<PostPoll | null>(null);
   const [uploading, setUploading] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [initialSignature, setInitialSignature] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const pollLocked = !!post && ((post as any).poll_votes?.length ?? 0) > 0;
+  const startingPoll: PostPoll | null = post ? ((post as any).poll ?? null) : null;
 
   // Reset state when a new post is opened
   useEffect(() => {
@@ -69,11 +79,13 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
     const startDocs: PostDocument[] = Array.isArray((post as any).documents)
       ? (post as any).documents
       : [];
+    const startPoll: PostPoll | null = (post as any).poll ?? null;
     setContent(startContent);
     setImages(startImages);
     setVideoUrl(startVideo);
     setDocuments(startDocs);
-    setInitialSignature(signatureOf(startContent, startImages, startVideo, startDocs));
+    setPoll(startPoll ? { question: startPoll.question, options: startPoll.options.map((o) => ({ ...o })) } : null);
+    setInitialSignature(signatureOf(startContent, startImages, startVideo, startDocs, startPoll));
   }, [open, post]);
 
   // Revoke object URLs on unmount / change
@@ -86,9 +98,29 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isDirty = signatureOf(content, images, videoUrl, documents) !== initialSignature;
+  const isDirty = signatureOf(content, images, videoUrl, documents, poll) !== initialSignature;
   const hasSomething =
-    content.trim().length > 0 || images.length > 0 || !!videoUrl || documents.length > 0;
+    content.trim().length > 0 || images.length > 0 || !!videoUrl || documents.length > 0 || !!poll;
+
+  const pollError: string | null = (() => {
+    if (!poll) return null;
+    const q = poll.question.trim();
+    if (!q) return "Escreva a pergunta da enquete.";
+    if (q.length > POLL_QUESTION_MAX) return `A pergunta deve ter até ${POLL_QUESTION_MAX} caracteres.`;
+    const trimmed = poll.options.map((o) => o.text.trim());
+    if (trimmed.some((t) => !t)) return "Preencha todas as opções ou remova as vazias.";
+    if (trimmed.some((t) => t.length > POLL_OPTION_MAX))
+      return `Cada opção deve ter até ${POLL_OPTION_MAX} caracteres.`;
+    if (trimmed.length < POLL_MIN_OPTIONS) return `Adicione pelo menos ${POLL_MIN_OPTIONS} opções.`;
+    if (trimmed.length > POLL_MAX_OPTIONS) return `Máximo de ${POLL_MAX_OPTIONS} opções.`;
+    const seen = new Set<string>();
+    for (const t of trimmed) {
+      const key = t.toLowerCase();
+      if (seen.has(key)) return "Não use opções duplicadas.";
+      seen.add(key);
+    }
+    return null;
+  })();
 
   const handleClose = (nextOpen: boolean) => {
     if (nextOpen) {
@@ -158,8 +190,12 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
   const handleSave = async () => {
     if (!post || !user) return;
     const trimmed = content.trim();
-    if (!trimmed && images.length === 0 && !videoUrl && documents.length === 0) {
+    if (!trimmed && images.length === 0 && !videoUrl && documents.length === 0 && !poll) {
       toast.error("A publicação não pode ficar vazia. Adicione texto ou pelo menos uma imagem.");
+      return;
+    }
+    if (poll && pollError) {
+      toast.error(pollError);
       return;
     }
     try {
@@ -179,12 +215,22 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
           finalUrls.push(data.publicUrl);
         }
       }
+      // Only send poll when it changed AND the DB trigger will accept it (no votes yet).
+      const pollPayload: PostPoll | null | undefined = pollLocked
+        ? undefined
+        : poll
+          ? {
+              question: poll.question.trim(),
+              options: poll.options.map((o) => ({ id: o.id, text: o.text.trim() })),
+            }
+          : null;
       await onSave({
         postId: post.id,
         content: trimmed,
         imageUrls: finalUrls,
         videoUrl,
         documents,
+        poll: pollPayload,
       });
       finalizeClose();
     } catch (err: any) {
@@ -339,13 +385,134 @@ export function EditPostDialog({ post, open, onOpenChange, onSave, isSaving }: E
                 </p>
               )}
             </div>
+
+            {poll && (
+              <div className="rounded-lg border border-primary/30 bg-primary/[0.03] p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                    <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                    Enquete
+                    {pollLocked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                  </div>
+                  {!pollLocked && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-[11px] text-muted-foreground"
+                      onClick={() => setPoll(null)}
+                      disabled={busy}
+                    >
+                      Remover enquete
+                    </Button>
+                  )}
+                </div>
+                {pollLocked && (
+                  <p className="text-[11px] text-muted-foreground">
+                    A enquete já recebeu votos e não pode mais ser alterada. Você ainda pode editar o texto da publicação.
+                  </p>
+                )}
+                <Input
+                  value={poll.question}
+                  onChange={(e) =>
+                    setPoll((p) => (p ? { ...p, question: e.target.value.slice(0, POLL_QUESTION_MAX) } : p))
+                  }
+                  placeholder="Pergunta da enquete"
+                  className="text-sm h-9"
+                  aria-label="Pergunta da enquete"
+                  disabled={pollLocked}
+                  maxLength={POLL_QUESTION_MAX}
+                />
+                <div className="space-y-1.5">
+                  {poll.options.map((o, idx) => (
+                    <div key={o.id} className="flex items-center gap-2">
+                      <Input
+                        value={o.text}
+                        onChange={(e) =>
+                          setPoll((p) =>
+                            p
+                              ? {
+                                  ...p,
+                                  options: p.options.map((x) =>
+                                    x.id === o.id ? { ...x, text: e.target.value.slice(0, POLL_OPTION_MAX) } : x,
+                                  ),
+                                }
+                              : p,
+                          )
+                        }
+                        placeholder={`Opção ${idx + 1}`}
+                        className="text-sm h-8"
+                        aria-label={`Opção ${idx + 1}`}
+                        disabled={pollLocked}
+                        maxLength={POLL_OPTION_MAX}
+                      />
+                      {!pollLocked && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() =>
+                            setPoll((p) =>
+                              p && p.options.length > POLL_MIN_OPTIONS
+                                ? { ...p, options: p.options.filter((x) => x.id !== o.id) }
+                                : p,
+                            )
+                          }
+                          disabled={poll.options.length <= POLL_MIN_OPTIONS || busy}
+                          aria-label="Remover opção"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {!pollLocked && (
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-[11px]"
+                      onClick={() =>
+                        setPoll((p) =>
+                          p && p.options.length < POLL_MAX_OPTIONS
+                            ? {
+                                ...p,
+                                options: [
+                                  ...p.options,
+                                  {
+                                    id:
+                                      typeof crypto !== "undefined" && "randomUUID" in crypto
+                                        ? crypto.randomUUID()
+                                        : `opt_${Math.random().toString(36).slice(2, 10)}`,
+                                    text: "",
+                                  },
+                                ],
+                              }
+                            : p,
+                        )
+                      }
+                      disabled={poll.options.length >= POLL_MAX_OPTIONS || busy}
+                    >
+                      + Adicionar opção
+                    </Button>
+                    <p className="text-[10px] text-muted-foreground">Um voto por pessoa</p>
+                  </div>
+                )}
+                {pollError && !pollLocked && (
+                  <p className="text-[11px] text-destructive">{pollError}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="ghost" onClick={() => handleClose(false)} disabled={busy}>
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={busy || !hasSomething || !isDirty}>
+            <Button onClick={handleSave} disabled={busy || !hasSomething || !isDirty || (!!poll && !!pollError && !pollLocked)}>
               {busy ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Salvar alterações
             </Button>
@@ -383,10 +550,14 @@ function signatureOf(
   images: ImageItem[],
   videoUrl: string | null,
   documents: PostDocument[],
+  poll: PostPoll | null,
 ): string {
   const parts = images.map((i) =>
     i.kind === "existing" ? `E:${i.url}` : `N:${i.file.name}:${i.file.size}`,
   );
   const docs = documents.map((d) => `D:${d.url}`).join("|");
-  return `${content}||${parts.join("|")}||V:${videoUrl || ""}||${docs}`;
+  const pollSig = poll
+    ? `P:${poll.question}::${poll.options.map((o) => `${o.id}:${o.text}`).join("|")}`
+    : "P:";
+  return `${content}||${parts.join("|")}||V:${videoUrl || ""}||${docs}||${pollSig}`;
 }
