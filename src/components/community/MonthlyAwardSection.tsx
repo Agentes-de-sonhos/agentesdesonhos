@@ -5,9 +5,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Gift, Search, Sparkles, Timer } from "lucide-react";
+import { Trophy, Gift, Search, Sparkles, Timer, CheckCircle2, Vote } from "lucide-react";
 import { useMonthlyAward, getVotingPhase } from "@/hooks/useMonthlyAward";
 import { MONTH_NAMES } from "@/types/community";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const INITIAL_VISIBLE = 12;
 const PAGE_SIZE = 12;
@@ -38,10 +50,12 @@ function initialsOf(name: string | null | undefined): string {
 }
 
 export function MonthlyAwardSection() {
-  const { award, nominees, isLoading } = useMonthlyAward(true);
+  const { user } = useAuth();
+  const { award, nominees, myVote, castVote, isVoting, isLoading } = useMonthlyAward(true);
   const [tick, setTick] = useState(0);
   const [search, setSearch] = useState("");
   const [visible, setVisible] = useState(INITIAL_VISIBLE);
+  const [confirmNominee, setConfirmNominee] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     const id = window.setInterval(() => setTick((n) => n + 1), 60_000);
@@ -49,6 +63,34 @@ export function MonthlyAwardSection() {
   }, []);
 
   const phase = useMemo(() => getVotingPhase(award), [award, tick]);
+  const canVote = phase.phase === "voting";
+  const myVoteId = myVote?.nominee_user_id ?? null;
+
+  const handleConfirmVote = async () => {
+    if (!confirmNominee) return;
+    try {
+      await castVote(confirmNominee.id);
+      toast({
+        title: "Voto registrado",
+        description: `Seu voto foi computado para ${confirmNominee.name}.`,
+      });
+      setConfirmNominee(null);
+    } catch (e: any) {
+      const code = e?.message || "";
+      const map: Record<string, string> = {
+        voting_closed: "A votação não está aberta no momento.",
+        cannot_vote_for_self: "Você não pode votar em si mesmo.",
+        voter_not_agent: "Somente agentes elegíveis podem votar.",
+        nominee_not_eligible: "Este participante não está elegível.",
+        not_authenticated: "Faça login para votar.",
+      };
+      toast({
+        title: "Não foi possível registrar o voto",
+        description: map[code] ?? "Tente novamente em instantes.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const monthLabel = award
     ? MONTH_NAMES[award.reference_month - 1]
@@ -170,7 +212,7 @@ export function MonthlyAwardSection() {
             )}
             {phase.phase === "voting" && (
               <>
-                <p className="font-semibold text-foreground">Votação aberta em breve</p>
+                <p className="font-semibold text-foreground">Votação aberta</p>
                 <p className="text-muted-foreground">
                   Escolha o agente que mais contribuiu, compartilhou conhecimento ou ajudou outros membros neste mês.
                 </p>
@@ -178,7 +220,7 @@ export function MonthlyAwardSection() {
                   A votação termina em {formatCountdown(phase.msUntilEnd)}
                 </p>
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  A funcionalidade de voto será liberada em breve.
+                  Você pode trocar seu voto até o encerramento. Os resultados não são exibidos durante a votação.
                 </p>
               </>
             )}
@@ -237,8 +279,15 @@ export function MonthlyAwardSection() {
               {shown.map((n) => {
                 const totalPostsAndQ = n.posts_count + n.questions_count;
                 const totalReplies = n.answers_count + n.comments_count;
+                const isMe = user?.id === n.user_id;
+                const isMyVote = myVoteId === n.user_id;
                 return (
-                  <Card key={n.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={n.id}
+                    className={`hover:shadow-md transition-shadow ${
+                      isMyVote ? "border-primary ring-2 ring-primary/30" : ""
+                    }`}
+                  >
                     <CardContent className="p-4 space-y-3">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-11 w-11">
@@ -262,13 +311,48 @@ export function MonthlyAwardSection() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="secondary" className="text-[10px]">
-                          Participante do mês
-                        </Badge>
+                        {isMyVote ? (
+                          <Badge className="text-[10px] bg-primary text-primary-foreground gap-1">
+                            <CheckCircle2 className="h-3 w-3" /> Seu voto
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-[10px]">
+                            Participante do mês
+                          </Badge>
+                        )}
                         <span className="text-[11px] text-muted-foreground">
                           {totalPostsAndQ} pub · {totalReplies} resp/com · {n.contributions_count} total
                         </span>
                       </div>
+                      {canVote && (
+                        <div className="pt-1">
+                          {isMe ? (
+                            <p className="text-[11px] text-muted-foreground italic">
+                              Você não pode votar em si mesmo.
+                            </p>
+                          ) : isMyVote ? (
+                            <Button size="sm" variant="outline" className="w-full" disabled>
+                              <CheckCircle2 className="h-4 w-4 mr-1.5" /> Voto registrado
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant={myVoteId ? "outline" : "default"}
+                              className="w-full"
+                              disabled={isVoting}
+                              onClick={() =>
+                                setConfirmNominee({
+                                  id: n.user_id,
+                                  name: n.profile?.name ?? "este agente",
+                                })
+                              }
+                            >
+                              <Vote className="h-4 w-4 mr-1.5" />
+                              {myVoteId ? "Trocar meu voto" : "Votar"}
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 );
@@ -287,6 +371,32 @@ export function MonthlyAwardSection() {
           </>
         )}
       </div>
+
+      <AlertDialog
+        open={!!confirmNominee}
+        onOpenChange={(open) => !open && !isVoting && setConfirmNominee(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {myVoteId ? "Trocar seu voto?" : "Confirmar seu voto?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {myVoteId
+                ? `Você já votou este mês. Deseja trocar seu voto para ${confirmNominee?.name}?`
+                : `Você está prestes a votar em ${confirmNominee?.name} como Destaque do Mês.`}
+              {" "}Você pode trocar seu voto novamente enquanto a votação estiver aberta.
+              Os resultados só serão divulgados após o encerramento.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isVoting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmVote} disabled={isVoting}>
+              {isVoting ? "Registrando..." : myVoteId ? "Trocar voto" : "Confirmar voto"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Últimos destaques placeholder for Phase 1 */}
       <div className="space-y-3">

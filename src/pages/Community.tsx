@@ -28,11 +28,13 @@ function CommunityContent() {
   const { membership, isLoading: memberLoading, isBlocked, updateProfile, isUpdating } =
     useCommunityMembership();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const initialSection =
-    location.pathname.includes("/destaques") || location.pathname.includes("/oportunidades")
-      ? "destaques"
-      : "feed";
-  const [activeSection, setActiveSection] = useState(initialSection);
+  const sectionFromPath = (path: string): string => {
+    if (path.includes("/destaques") || path.includes("/oportunidades")) return "destaques";
+    if (path.includes("/membros")) return "members";
+    if (path.includes("/encontros")) return "meetings";
+    return "feed";
+  };
+  const activeSection = sectionFromPath(location.pathname);
   useEffect(() => {
     if (location.pathname.includes("/oportunidades")) {
       navigate("/comunidade/destaques", { replace: true });
@@ -44,9 +46,18 @@ function CommunityContent() {
   const [filterSpecialty, setFilterSpecialty] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
 
-  const handleNavigate = useCallback((section: string) => {
-    setActiveSection(section);
-  }, []);
+  const handleNavigate = useCallback(
+    (section: string) => {
+      const map: Record<string, string> = {
+        feed: "/comunidade/feed",
+        members: "/comunidade/membros",
+        meetings: "/comunidade/encontros",
+        destaques: "/comunidade/destaques",
+      };
+      navigate(map[section] ?? "/comunidade/feed");
+    },
+    [navigate],
+  );
 
   if (memberLoading || isLoading) {
     return (

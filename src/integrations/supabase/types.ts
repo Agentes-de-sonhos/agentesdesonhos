@@ -11811,6 +11811,23 @@ export type Database = {
         Args: { _feature: string; _user_id: string }
         Returns: boolean
       }
+      cast_monthly_vote: {
+        Args: { _nominee_user_id: string }
+        Returns: {
+          award_id: string
+          created_at: string
+          id: string
+          nominee_user_id: string
+          updated_at: string
+          voter_user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "community_monthly_votes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
       clone_itinerary_for_trip: {
@@ -11968,6 +11985,15 @@ export type Database = {
           total_revenue: number
           user_id: string
           user_name: string
+        }[]
+      }
+      get_my_monthly_vote: {
+        Args: never
+        Returns: {
+          award_id: string
+          created_at: string
+          nominee_user_id: string
+          updated_at: string
         }[]
       }
       get_news_curation_stats: { Args: never; Returns: Json }

@@ -18,10 +18,10 @@ interface CommunityLeftSidebarProps {
 }
 
 const NAV_ITEMS = [
-  { id: "feed", label: "Feed", icon: MessageSquare },
-  { id: "members", label: "Membros", icon: Users },
-  { id: "meetings", label: "Encontros", icon: Video },
-  { id: "destaques", label: "Destaques do Mês", icon: Trophy },
+  { id: "feed", label: "Feed", icon: MessageSquare, path: "/comunidade/feed" },
+  { id: "members", label: "Membros", icon: Users, path: "/comunidade/membros" },
+  { id: "meetings", label: "Encontros", icon: Video, path: "/comunidade/encontros" },
+  { id: "destaques", label: "Destaques do Mês", icon: Trophy, path: "/comunidade/destaques" },
 ];
 
 export function CommunityLeftSidebar({

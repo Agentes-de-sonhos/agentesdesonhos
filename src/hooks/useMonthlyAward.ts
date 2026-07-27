@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type {
   CommunityMonthlyAward,
@@ -11,6 +11,7 @@ import type {
  * public profile data.
  */
 export function useMonthlyAward(enabled: boolean = true) {
+  const queryClient = useQueryClient();
   const awardQuery = useQuery({
     queryKey: ["monthly-award", "current"],
     queryFn: async () => {
@@ -55,13 +56,42 @@ export function useMonthlyAward(enabled: boolean = true) {
     staleTime: 60 * 1000,
   });
 
+  const myVoteQuery = useQuery({
+    queryKey: ["monthly-award-my-vote", award?.id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("get_my_monthly_vote");
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row ?? null) as { award_id: string; nominee_user_id: string } | null;
+    },
+    enabled: enabled && !!award?.id,
+    staleTime: 30 * 1000,
+  });
+
+  const castVote = useMutation({
+    mutationFn: async (nomineeUserId: string) => {
+      const { data, error } = await (supabase as any).rpc("cast_monthly_vote", {
+        _nominee_user_id: nomineeUserId,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["monthly-award-my-vote"] });
+    },
+  });
+
   return {
     award: award ?? null,
     nominees: nomineesQuery.data ?? [],
+    myVote: myVoteQuery.data ?? null,
+    castVote: (nomineeUserId: string) => castVote.mutateAsync(nomineeUserId),
+    isVoting: castVote.isPending,
     isLoading: awardQuery.isLoading || nomineesQuery.isLoading,
     refetch: async () => {
       await awardQuery.refetch();
       await nomineesQuery.refetch();
+      await myVoteQuery.refetch();
     },
   };
 }
