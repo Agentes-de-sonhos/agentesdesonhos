@@ -1863,6 +1863,149 @@ export type Database = {
         }
         Relationships: []
       }
+      community_meeting_attendees: {
+        Row: {
+          created_at: string
+          id: string
+          meeting_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meeting_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_meeting_attendees_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "community_meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_meetings: {
+        Row: {
+          address: string | null
+          agenda: Json | null
+          capacity: number | null
+          city: string | null
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_at: string | null
+          id: string
+          is_recording_available: boolean
+          location_name: string | null
+          maps_url: string | null
+          materials: Json | null
+          meeting_platform: string | null
+          meeting_type: string
+          meeting_url: string | null
+          organizer_name: string | null
+          photos: Json | null
+          published: boolean
+          published_at: string | null
+          recording_url: string | null
+          registration_url: string | null
+          related_links: Json | null
+          short_description: string | null
+          slug: string | null
+          speakers: Json | null
+          start_at: string
+          state: string | null
+          status: string
+          timezone: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          agenda?: Json | null
+          capacity?: number | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at?: string | null
+          id?: string
+          is_recording_available?: boolean
+          location_name?: string | null
+          maps_url?: string | null
+          materials?: Json | null
+          meeting_platform?: string | null
+          meeting_type?: string
+          meeting_url?: string | null
+          organizer_name?: string | null
+          photos?: Json | null
+          published?: boolean
+          published_at?: string | null
+          recording_url?: string | null
+          registration_url?: string | null
+          related_links?: Json | null
+          short_description?: string | null
+          slug?: string | null
+          speakers?: Json | null
+          start_at: string
+          state?: string | null
+          status?: string
+          timezone?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          agenda?: Json | null
+          capacity?: number | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_at?: string | null
+          id?: string
+          is_recording_available?: boolean
+          location_name?: string | null
+          maps_url?: string | null
+          materials?: Json | null
+          meeting_platform?: string | null
+          meeting_type?: string
+          meeting_url?: string | null
+          organizer_name?: string | null
+          photos?: Json | null
+          published?: boolean
+          published_at?: string | null
+          recording_url?: string | null
+          registration_url?: string | null
+          related_links?: Json | null
+          short_description?: string | null
+          slug?: string | null
+          speakers?: Json | null
+          start_at?: string
+          state?: string | null
+          status?: string
+          timezone?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       community_members: {
         Row: {
           bio: string | null
