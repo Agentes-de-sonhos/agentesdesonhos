@@ -269,8 +269,9 @@ const App = () => (
               <Route path="/gestao-clientes/metas" element={<GestaoClientes />} />
               <Route path="/gestao-clientes/operacoes" element={<GestaoClientes />} />
               <Route path="/educa-academy" element={<EducaAcademy />} />
-              <Route path="/comunidade" element={<TradeConnectHub />} />
-              <Route path="/comunidade/chat" element={<Community />} />
+              <Route path="/comunidade" element={<Community />} />
+              <Route path="/comunidade/chat" element={<Navigate to="/comunidade" replace />} />
+              <Route path="/comunidade/hub" element={<TradeConnectHub />} />
               <Route path="/comunidade/perfil" element={<TradeConnectProfile />} />
               <Route path="/comunidade/comunidades" element={<TradeConnectCommunities />} />
               <Route path="/comunidade/agente/:userId" element={<AgentProfile />} />

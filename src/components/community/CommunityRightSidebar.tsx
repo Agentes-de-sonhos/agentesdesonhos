@@ -48,47 +48,6 @@ export function CommunityRightSidebar({
 
   return (
     <div className="space-y-4">
-      {/* Featured Members */}
-      <Card className="border-border/50">
-        <CardContent className="pt-4 pb-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Users className="h-4 w-4 text-primary" />
-            <p className="text-sm font-semibold text-foreground">Membros em Destaque</p>
-          </div>
-          <div className="space-y-2.5">
-            {displayMembers.map((m) => {
-              const name = m.profile?.name || "Membro";
-              const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-              return (
-                <button
-                  key={m.id}
-                  onClick={() => onMemberClick(m)}
-                  className="w-full flex items-center gap-2.5 hover:bg-muted/50 rounded-md p-1.5 -mx-1.5 transition-colors text-left"
-                >
-                  <div className="relative">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={m.profile?.avatar_url || ""} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    {m.status === "verified" && (
-                      <CheckCircle2 className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 text-emerald-500 bg-background rounded-full" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-foreground truncate">{name}</p>
-                    {m.specialties?.[0] && (
-                      <p className="text-[10px] text-muted-foreground truncate">{m.specialties[0]}</p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Highlights */}
       {highlights.length > 0 && (
         <Card className="border-border/50">
