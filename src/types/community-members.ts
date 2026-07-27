@@ -30,6 +30,9 @@ export interface CommunityPost {
   is_pinned: boolean;
   image_url?: string | null;
   image_urls?: string[] | null;
+  video_url?: string | null;
+  documents?: PostDocument[] | null;
+  poll?: PostPoll | null;
   edited_at?: string | null;
   likes_count: number;
   comments_count: number;
@@ -45,6 +48,30 @@ export interface CommunityPost {
     status: CommunityMemberStatus;
   };
   user_liked?: boolean;
+  poll_votes?: PostPollVote[];
+  user_poll_option?: string | null;
+}
+
+export interface PostDocument {
+  name: string;
+  url: string;
+  size: number;
+  mime: string;
+}
+
+export interface PostPollOption {
+  id: string;
+  text: string;
+}
+
+export interface PostPoll {
+  question: string;
+  options: PostPollOption[];
+}
+
+export interface PostPollVote {
+  option_id: string;
+  user_id: string;
 }
 
 export interface PostComment {
