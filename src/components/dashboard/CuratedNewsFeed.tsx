@@ -125,10 +125,10 @@ function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending
   }
 
   return (
-    <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden min-w-0">
+    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 min-w-0">
       <CategoryBadge categoria={item.categoria} />
       {tags}
-      <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-auto flex-shrink-0">
+      <span className="text-[10px] text-muted-foreground sm:ml-auto">
         {item.fonte} • {formatDate(item.data_publicacao)}
         {item.relevancia_score >= 8 && (
           <span className="font-semibold text-primary ml-1">★ {item.relevancia_score}</span>
@@ -143,14 +143,12 @@ export function CuratedNewsFeed() {
   const { data: news, isLoading } = useQuery({
     queryKey: ["curated-news-dashboard"],
     queryFn: async () => {
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from("noticias_dashboard")
         .select("*")
         .eq("status", "aprovado")
-        .gte("data_publicacao", twentyFourHoursAgo)
-        .order("score_perfil", { ascending: false, nullsFirst: false })
-        .order("relevancia_score", { ascending: false })
+        .eq("hidden", false)
+        .order("created_at", { ascending: false })
         .order("data_publicacao", { ascending: false })
         .limit(5);
       if (error) throw error;
@@ -210,12 +208,17 @@ export function CuratedNewsFeed() {
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardContent className="pt-6 space-y-0.5">
-        <div className="mb-3 w-fit">
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
-            Radar do Turismo
-          </h2>
-          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+        <div className="mb-4 space-y-2">
+          <div className="w-fit">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
+              Radar do Turismo
+            </h2>
+            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Acompanhe as notícias mais recentes do trade e acesse os destaques, o Top 5 e tudo o que movimenta o turismo hoje.
+          </p>
         </div>
 
         {news.map((item, i) => {
@@ -227,7 +230,7 @@ export function CuratedNewsFeed() {
                 href={item.url_original}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group flex items-start gap-3 rounded-xl p-3 transition-all duration-200 hover:bg-[hsl(var(--section-news))]/5 ${
+                className={`group flex items-start gap-3 rounded-xl p-3 transition-all duration-200 hover:bg-[hsl(var(--section-news))]/5 h-auto ${
                   isFirst ? "bg-primary/[0.03] border border-primary/10" : ""
                 }`}
               >
@@ -240,9 +243,9 @@ export function CuratedNewsFeed() {
                   {i + 1}
                 </span>
 
-                <div className="flex-1 min-w-0 space-y-0.5">
+                <div className="flex-1 min-w-0 space-y-1">
                   <NewsMetaRow item={item} isTopTrending={trendingIds.has(item.id)} />
-                  <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors line-clamp-1 leading-snug ${
+                  <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors leading-snug whitespace-normal break-words overflow-visible line-clamp-none h-auto ${
                     isFirst ? "text-sm" : "text-[13px]"
                   }`}>
                     {item.titulo_curto}
