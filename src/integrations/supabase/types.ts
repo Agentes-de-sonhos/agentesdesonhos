@@ -1903,6 +1903,7 @@ export type Database = {
           address: string | null
           agenda: Json | null
           capacity: number | null
+          category: string | null
           city: string | null
           cover_image_url: string | null
           created_at: string
@@ -1938,6 +1939,7 @@ export type Database = {
           address?: string | null
           agenda?: Json | null
           capacity?: number | null
+          category?: string | null
           city?: string | null
           cover_image_url?: string | null
           created_at?: string
@@ -1973,6 +1975,7 @@ export type Database = {
           address?: string | null
           agenda?: Json | null
           capacity?: number | null
+          category?: string | null
           city?: string | null
           cover_image_url?: string | null
           created_at?: string
