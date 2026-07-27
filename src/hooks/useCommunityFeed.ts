@@ -121,12 +121,14 @@ export function useCommunityFeed() {
       imageUrls,
       videoUrl,
       documents,
+      poll,
     }: {
       postId: string;
       content: string;
       imageUrls: string[];
       videoUrl?: string | null;
       documents?: PostDocument[];
+      poll?: PostPoll | null;
     }) => {
       if (!user?.id) throw new Error("Não autenticado");
       const patch: Record<string, any> = {
@@ -135,10 +137,11 @@ export function useCommunityFeed() {
         image_urls: imageUrls,
         edited_at: new Date().toISOString(),
       };
-      // Only touch video/documents when caller explicitly provides them,
-      // so text-only edits never wipe existing attachments.
+      // Only touch video/documents/poll when caller explicitly provides them,
+      // so text-only edits never wipe existing attachments or the poll.
       if (videoUrl !== undefined) patch.video_url = videoUrl;
       if (documents !== undefined) patch.documents = documents;
+      if (poll !== undefined) patch.poll = poll;
       const { error } = await supabase
         .from("community_posts")
         .update(patch as any)
@@ -234,9 +237,14 @@ export function useCommunityFeed() {
   const votePoll = useMutation({
     mutationFn: async ({ postId, optionId }: { postId: string; optionId: string }) => {
       if (!user?.id) throw new Error("Não autenticado");
+      // Upsert allows a user to switch their own vote while keeping a single
+      // row per (post_id, user_id) enforced by the unique constraint at the DB level.
       const { error } = await (supabase as any)
         .from("community_post_poll_votes")
-        .insert({ post_id: postId, user_id: user.id, option_id: optionId });
+        .upsert(
+          { post_id: postId, user_id: user.id, option_id: optionId },
+          { onConflict: "post_id,user_id" },
+        );
       if (error) throw error;
     },
     onSuccess: () => {
