@@ -27,6 +27,7 @@ import { AdminDashboardBannersManager } from "@/components/admin/AdminDashboardB
 import { AdminSurveyManager } from "@/components/admin/AdminSurveyManager";
 import { AdminBusinessCardsManager } from "@/components/admin/AdminBusinessCardsManager";
 import { AdminCommunityRoomsManager } from "@/components/admin/AdminCommunityRoomsManager";
+import { AdminCommunityMeetingsManager } from "@/components/admin/AdminCommunityMeetingsManager";
 import { AdminCrmContacts } from "@/components/admin/crm/AdminCrmContacts";
 import { AdminCrmTemplates } from "@/components/admin/crm/AdminCrmTemplates";
 import { AdminCrmLogs } from "@/components/admin/crm/AdminCrmLogs";
@@ -134,6 +135,7 @@ function AdminContent({ tab }: { tab: string }) {
       return (
         <div className="space-y-6">
           <AdminCommunityRoomsManager />
+          <AdminCommunityMeetingsManager />
           <AdminCommunityManager />
         </div>
       );
