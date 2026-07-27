@@ -1,56 +1,104 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Users } from "lucide-react";
+import { Loader2, Search, Users } from "lucide-react";
 import { MemberCard } from "./MemberCard";
 import { MemberProfileDialog } from "./MemberProfileDialog";
 import { ALL_SPECIALTIES } from "@/types/community-members";
 import type { CommunityMember } from "@/types/community-members";
 
+const PAGE_SIZE = 24;
+
+type AgentRow = {
+  user_id: string;
+  name: string;
+  avatar_url: string | null;
+  agency_name: string | null;
+  city: string | null;
+  state: string | null;
+  specialties: string[] | null;
+  status: string;
+  is_verified: boolean;
+  total_count: number;
+};
+
+function toMember(row: AgentRow): CommunityMember {
+  return {
+    id: row.user_id,
+    user_id: row.user_id,
+    status: row.is_verified ? "verified" : "approved_unverified",
+    entry_method: "experience",
+    cnpj: null,
+    years_experience: null,
+    bio: null,
+    segments: null,
+    specialties: row.specialties ?? [],
+    created_at: "",
+    updated_at: "",
+    profile: {
+      name: row.name,
+      avatar_url: row.avatar_url,
+      agency_name: row.agency_name,
+      city: row.city,
+      state: row.state,
+    },
+  };
+}
+
 export function MemberDirectory() {
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterSpecialty, setFilterSpecialty] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
 
-  const { data: members = [], isLoading } = useQuery({
-    queryKey: ["community-members"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("community_members")
-        .select("*")
-        .in("status", ["approved_unverified", "verified"])
-        .order("created_at", { ascending: false });
+  // Debounce search input
+  useMemo(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 250);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["community-agents", debouncedSearch, filterSpecialty],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
+      const { data, error } = await (supabase as any).rpc("list_community_agents", {
+        p_search: debouncedSearch || null,
+        p_specialty: filterSpecialty || null,
+        p_limit: PAGE_SIZE,
+        p_offset: pageParam as number,
+      });
       if (error) throw error;
-      if (!data || data.length === 0) return [];
-
-      const userIds = data.map((m: any) => m.user_id);
-      const { data: profiles } = await supabase
-        .from("profiles_public")
-        .select("user_id, name, avatar_url, agency_name, city, state")
-        .in("user_id", userIds);
-
-      return data.map((m: any) => ({
-        ...m,
-        profile: profiles?.find((p: any) => p.user_id === m.user_id),
-      })) as CommunityMember[];
+      const rows = (data ?? []) as AgentRow[];
+      return {
+        rows,
+        nextOffset: (pageParam as number) + rows.length,
+        total: rows[0]?.total_count ?? 0,
+      };
     },
+    getNextPageParam: (last) =>
+      last.nextOffset < last.total ? last.nextOffset : undefined,
+    staleTime: 2 * 60 * 1000,
   });
 
-  const filtered = members.filter((m) => {
-    const matchesSearch =
-      !search ||
-      m.profile?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      m.profile?.agency_name?.toLowerCase().includes(search.toLowerCase());
-    const matchesSpecialty =
-      !filterSpecialty || (m.specialties && m.specialties.includes(filterSpecialty));
-    return matchesSearch && matchesSpecialty;
-  });
+  const members: CommunityMember[] = useMemo(
+    () => (data?.pages ?? []).flatMap((p) => p.rows.map(toMember)),
+    [data],
+  );
+  const total = data?.pages?.[0]?.total ?? 0;
 
-  const usedSpecialties = ALL_SPECIALTIES.filter((s) =>
-    members.some((m) => m.specialties?.includes(s))
+  const usedSpecialties = useMemo(
+    () => ALL_SPECIALTIES.filter((s) => members.some((m) => m.specialties?.includes(s))),
+    [members],
   );
 
   if (isLoading) {
@@ -77,11 +125,11 @@ export function MemberDirectory() {
         </div>
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <Users className="h-4 w-4" />
-          {filtered.length} membros
+          {total} {total === 1 ? "membro" : "membros"}
         </div>
       </div>
 
-      {usedSpecialties.length > 0 && (
+      {(usedSpecialties.length > 0 || filterSpecialty) && (
         <div className="flex flex-wrap gap-1.5">
           <Badge
             variant={!filterSpecialty ? "default" : "outline"}
@@ -90,7 +138,10 @@ export function MemberDirectory() {
           >
             Todos
           </Badge>
-          {usedSpecialties.map((s) => (
+          {(filterSpecialty && !usedSpecialties.includes(filterSpecialty)
+            ? [filterSpecialty, ...usedSpecialties]
+            : usedSpecialties
+          ).map((s) => (
             <Badge
               key={s}
               variant={filterSpecialty === s ? "default" : "outline"}
@@ -103,17 +154,38 @@ export function MemberDirectory() {
         </div>
       )}
 
-      {filtered.length === 0 ? (
+      {members.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>Nenhum membro encontrado</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {filtered.map((m) => (
-            <MemberCard key={m.id} member={m} onClick={() => setSelectedMember(m)} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {members.map((m) => (
+              <MemberCard key={m.user_id} member={m} onClick={() => setSelectedMember(m)} />
+            ))}
+          </div>
+
+          {hasNextPage && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Carregando...
+                  </>
+                ) : (
+                  "Carregar mais membros"
+                )}
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       <MemberProfileDialog
