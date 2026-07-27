@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -271,8 +271,7 @@ function MeetingFormDialog({
   const [d, setD] = useState<Draft>(draft ?? emptyDraft);
   const open = !!draft;
 
-  // Reset state when draft changes
-  useMemo(() => {
+  useEffect(() => {
     if (draft) setD(draft);
   }, [draft]);
 
