@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, MessageSquare, Users, Video, Briefcase, Pencil } from "lucide-react";
+import { CheckCircle2, MessageSquare, Users, Video, Trophy, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   { id: "feed", label: "Feed", icon: MessageSquare },
   { id: "members", label: "Membros", icon: Users },
   { id: "meetings", label: "Encontros", icon: Video },
-  { id: "opportunities", label: "Oportunidades", icon: Briefcase },
+  { id: "destaques", label: "Destaques do Mês", icon: Trophy },
 ];
 
 export function CommunityLeftSidebar({

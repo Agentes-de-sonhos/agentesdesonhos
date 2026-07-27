@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
@@ -7,10 +8,9 @@ import { CommunityFeedSection } from "@/components/community/CommunityFeedSectio
 import { CommunityLeftSidebar } from "@/components/community/CommunityLeftSidebar";
 import { MemberDirectory } from "@/components/community/MemberDirectory";
 import { MemberProfileDialog } from "@/components/community/MemberProfileDialog";
-import { FamTripsSection } from "@/components/community/FamTripsSection";
 import { WhatsAppSection } from "@/components/community/WhatsAppSection";
 import { MeetingsSection } from "@/components/community/MeetingsSection";
-import { HighlightsSection } from "@/components/community/HighlightsSection";
+import { MonthlyAwardSection } from "@/components/community/MonthlyAwardSection";
 import { EditCommunityProfileDialog } from "@/components/community/EditCommunityProfileDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, ShieldX } from "lucide-react";
@@ -23,15 +23,23 @@ export default function Community() {
 
 function CommunityContent() {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { membership, isLoading: memberLoading, isBlocked, updateProfile, isUpdating } =
     useCommunityMembership();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("feed");
+  const initialSection =
+    location.pathname.includes("/destaques") || location.pathname.includes("/oportunidades")
+      ? "destaques"
+      : "feed";
+  const [activeSection, setActiveSection] = useState(initialSection);
+  useEffect(() => {
+    if (location.pathname.includes("/oportunidades")) {
+      navigate("/comunidade/destaques", { replace: true });
+    }
+  }, [location.pathname, navigate]);
   const {
-    famTrips, upcomingMeetings, pastMeetings,
-    paidTrainings,
-    whatsappCommunity, highlights, currentPrize,
-    hasVoted, vote, isVoting, currentMonth, currentYear, isLoading,
+    whatsappCommunity, isLoading,
   } = useCommunity(activeSection);
   const [filterSpecialty, setFilterSpecialty] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
@@ -99,7 +107,7 @@ function CommunityContent() {
           {/* Central Content */}
           <main className="flex-1 min-w-0 max-w-4xl mx-auto w-full">
             {activeSection === "feed" && (
-              <CommunityFeedSection famTrips={famTrips} />
+              <CommunityFeedSection />
             )}
 
             {activeSection === "members" && (
@@ -119,20 +127,7 @@ function CommunityContent() {
               </div>
             )}
 
-            {activeSection === "opportunities" && (
-              <div className="space-y-8">
-                <FamTripsSection trips={famTrips} />
-                <HighlightsSection
-                  highlights={highlights}
-                  prize={currentPrize}
-                  currentMonth={currentMonth}
-                  currentYear={currentYear}
-                  hasVoted={hasVoted}
-                  onVote={vote}
-                  isVoting={isVoting}
-                />
-              </div>
-            )}
+            {activeSection === "destaques" && <MonthlyAwardSection />}
           </main>
         </div>
       </div>
