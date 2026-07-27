@@ -11691,6 +11691,26 @@ export type Database = {
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
+      list_community_agents: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_specialty?: string
+        }
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          city: string
+          is_verified: boolean
+          name: string
+          specialties: string[]
+          state: string
+          status: string
+          total_count: number
+          user_id: string
+        }[]
+      }
       news_ranking: {
         Args: { p_limit?: number; p_window?: string }
         Returns: {
