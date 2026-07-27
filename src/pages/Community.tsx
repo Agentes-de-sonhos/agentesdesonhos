@@ -8,11 +8,10 @@ import { CommunityLeftSidebar } from "@/components/community/CommunityLeftSideba
 import { MemberDirectory } from "@/components/community/MemberDirectory";
 import { MemberProfileDialog } from "@/components/community/MemberProfileDialog";
 import { FamTripsSection } from "@/components/community/FamTripsSection";
-import { OnlineMeetingsSection } from "@/components/community/OnlineMeetingsSection";
 import { InPersonEventsSection } from "@/components/community/InPersonEventsSection";
 import { WorkshopsSection } from "@/components/community/WorkshopsSection";
-import { PaidTrainingsSection } from "@/components/community/PaidTrainingsSection";
 import { WhatsAppSection } from "@/components/community/WhatsAppSection";
+import { MeetingsSection } from "@/components/community/MeetingsSection";
 import { HighlightsSection } from "@/components/community/HighlightsSection";
 import { EditCommunityProfileDialog } from "@/components/community/EditCommunityProfileDialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -115,10 +114,9 @@ function CommunityContent() {
               </div>
             )}
 
-            {activeSection === "content" && (
+            {activeSection === "meetings" && (
               <div className="space-y-8">
-                <OnlineMeetingsSection upcoming={upcomingMeetings} past={pastMeetings} />
-                <PaidTrainingsSection trainings={paidTrainings} />
+                <MeetingsSection />
                 <WhatsAppSection community={whatsappCommunity} />
               </div>
             )}
