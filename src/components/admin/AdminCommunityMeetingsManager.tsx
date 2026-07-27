@@ -28,6 +28,7 @@ const emptyDraft: Draft = {
   short_description: "",
   description: "",
   meeting_type: "online",
+  category: "encontro",
   status: "scheduled",
   cover_image_url: "",
   start_at: "",
@@ -307,6 +308,23 @@ function MeetingFormDialog({
                 </SelectContent>
               </Select>
             </Field>
+            <Field label="Categoria">
+              <Select value={(d.category as string) ?? "encontro"} onValueChange={(v) => set("category", v as any)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="encontro">Encontro da comunidade</SelectItem>
+                  <SelectItem value="workshop">Workshop</SelectItem>
+                  <SelectItem value="palestra">Palestra</SelectItem>
+                  <SelectItem value="networking">Networking</SelectItem>
+                  <SelectItem value="treinamento">Treinamento</SelectItem>
+                  <SelectItem value="especialista">Encontro com especialista</SelectItem>
+                  <SelectItem value="outro">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
             <Field label="Status">
               <Select value={d.status} onValueChange={(v) => set("status", v as any)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -319,6 +337,7 @@ function MeetingFormDialog({
                 </SelectContent>
               </Select>
             </Field>
+            <div />
           </div>
 
           <div className="grid sm:grid-cols-2 gap-3">

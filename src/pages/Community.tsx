@@ -8,8 +8,6 @@ import { CommunityLeftSidebar } from "@/components/community/CommunityLeftSideba
 import { MemberDirectory } from "@/components/community/MemberDirectory";
 import { MemberProfileDialog } from "@/components/community/MemberProfileDialog";
 import { FamTripsSection } from "@/components/community/FamTripsSection";
-import { InPersonEventsSection } from "@/components/community/InPersonEventsSection";
-import { WorkshopsSection } from "@/components/community/WorkshopsSection";
 import { WhatsAppSection } from "@/components/community/WhatsAppSection";
 import { MeetingsSection } from "@/components/community/MeetingsSection";
 import { HighlightsSection } from "@/components/community/HighlightsSection";
@@ -30,8 +28,8 @@ function CommunityContent() {
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("feed");
   const {
-    famTrips, upcomingMeetings, pastMeetings, inPersonEvents,
-    workshops, getWorkshopsByCategory, paidTrainings,
+    famTrips, upcomingMeetings, pastMeetings,
+    paidTrainings,
     whatsappCommunity, highlights, currentPrize,
     hasVoted, vote, isVoting, currentMonth, currentYear, isLoading,
   } = useCommunity(activeSection);
@@ -101,7 +99,7 @@ function CommunityContent() {
           {/* Central Content */}
           <main className="flex-1 min-w-0 max-w-4xl mx-auto w-full">
             {activeSection === "feed" && (
-              <CommunityFeedSection famTrips={famTrips} events={inPersonEvents} />
+              <CommunityFeedSection famTrips={famTrips} />
             )}
 
             {activeSection === "members" && (
@@ -118,13 +116,6 @@ function CommunityContent() {
               <div className="space-y-8">
                 <MeetingsSection />
                 <WhatsAppSection community={whatsappCommunity} />
-              </div>
-            )}
-
-            {activeSection === "events" && (
-              <div className="space-y-8">
-                <InPersonEventsSection events={inPersonEvents} />
-                <WorkshopsSection workshops={workshops} getWorkshopsByCategory={getWorkshopsByCategory} />
               </div>
             )}
 

@@ -88,14 +88,6 @@ export function AdminCommunityManager() {
               <Video className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">Reuniões</span>
             </TabsTrigger>
-            <TabsTrigger value="events" className="text-xs sm:text-sm">
-              <MapPin className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Eventos</span>
-            </TabsTrigger>
-            <TabsTrigger value="workshops" className="text-xs sm:text-sm">
-              <Briefcase className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Workshops</span>
-            </TabsTrigger>
             <TabsTrigger value="prizes" className="text-xs sm:text-sm">
               <Trophy className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">Prêmios</span>
@@ -110,12 +102,6 @@ export function AdminCommunityManager() {
           </TabsContent>
           <TabsContent value="online-meetings">
             <OnlineMeetingsManager />
-          </TabsContent>
-          <TabsContent value="events">
-            <InPersonEventsManager />
-          </TabsContent>
-          <TabsContent value="workshops">
-            <WorkshopsManager />
           </TabsContent>
           <TabsContent value="prizes">
             <PrizesManager />

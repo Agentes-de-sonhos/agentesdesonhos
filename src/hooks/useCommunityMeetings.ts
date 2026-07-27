@@ -5,6 +5,14 @@ import { toast } from "sonner";
 
 export type MeetingType = "online" | "presential" | "hybrid";
 export type MeetingStatus = "draft" | "scheduled" | "live" | "completed" | "cancelled";
+export type MeetingCategory =
+  | "encontro"
+  | "workshop"
+  | "palestra"
+  | "networking"
+  | "treinamento"
+  | "especialista"
+  | "outro";
 
 export interface CommunityMeeting {
   id: string;
@@ -14,6 +22,7 @@ export interface CommunityMeeting {
   description: string | null;
   meeting_type: MeetingType;
   status: MeetingStatus;
+  category: MeetingCategory | null;
   cover_image_url: string | null;
   start_at: string;
   end_at: string | null;

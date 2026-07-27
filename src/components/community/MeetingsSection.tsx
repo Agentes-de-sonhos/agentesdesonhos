@@ -23,6 +23,15 @@ const TYPE_COLOR: Record<string, string> = {
   presential: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
   hybrid: "bg-violet-500/15 text-violet-700 border-violet-500/30",
 };
+const CATEGORY_LABEL: Record<string, string> = {
+  encontro: "Encontro",
+  workshop: "Workshop",
+  palestra: "Palestra",
+  networking: "Networking",
+  treinamento: "Treinamento",
+  especialista: "Especialista",
+  outro: "Outro",
+};
 
 function TypeBadge({ type }: { type: string }) {
   return (
@@ -30,6 +39,11 @@ function TypeBadge({ type }: { type: string }) {
       {TYPE_LABEL[type] ?? type}
     </Badge>
   );
+}
+
+function CategoryBadge({ category }: { category: string | null | undefined }) {
+  if (!category || category === "encontro") return null;
+  return <Badge variant="secondary" className="text-[10px]">{CATEGORY_LABEL[category] ?? category}</Badge>;
 }
 
 function locationText(m: CommunityMeeting) {
@@ -201,6 +215,7 @@ function NextMeetingCard({
         <div className="p-5 space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
             <TypeBadge type={m.meeting_type} />
+            <CategoryBadge category={m.category} />
             <Badge variant="secondary" className="text-[10px]">
               {formatDistanceToNow(start, { locale: ptBR, addSuffix: true })}
             </Badge>
@@ -286,9 +301,12 @@ function MeetingCard({
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2">
           <TypeBadge type={m.meeting_type} />
-          <span className="text-xs font-medium text-primary">
+          <div className="flex items-center gap-1.5">
+            <CategoryBadge category={m.category} />
+            <span className="text-xs font-medium text-primary">
             {format(start, "dd/MM", { locale: ptBR })}
-          </span>
+            </span>
+          </div>
         </div>
         <CardTitle className="text-base mt-1">{m.title}</CardTitle>
       </CardHeader>
@@ -339,9 +357,12 @@ function PastMeetingCard({ meeting: m, onOpenDetail }: { meeting: CommunityMeeti
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2">
           <TypeBadge type={m.meeting_type} />
-          <span className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <CategoryBadge category={m.category} />
+            <span className="text-xs text-muted-foreground">
             {format(start, "dd 'de' MMM yyyy", { locale: ptBR })}
-          </span>
+            </span>
+          </div>
         </div>
         <CardTitle className="text-base mt-1">{m.title}</CardTitle>
       </CardHeader>
@@ -387,7 +408,10 @@ function MeetingDetailDialog({ meeting: m, onClose }: { meeting: CommunityMeetin
           <img src={m.cover_image_url} alt={m.title} className="w-full h-48 object-cover rounded-md" />
         )}
         <DialogHeader>
-          <div className="flex items-center gap-2 flex-wrap"><TypeBadge type={m.meeting_type} /></div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <TypeBadge type={m.meeting_type} />
+            <CategoryBadge category={m.category} />
+          </div>
           <DialogTitle>{m.title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 text-sm">
