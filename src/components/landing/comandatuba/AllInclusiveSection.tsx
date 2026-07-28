@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import img from "@/assets/landing/comandatuba/all-inclusive.jpg";
+import img from "@/assets/landing/comandatuba/all-inclusive-asset.jpg.asset.json";
 import { ALL_INCLUSIVE, type AgencyConfig } from "./content";
 
 export function AllInclusiveSection({ agency }: { agency: AgencyConfig }) {
@@ -9,7 +9,7 @@ export function AllInclusiveSection({ agency }: { agency: AgencyConfig }) {
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
           <div className="order-1 lg:order-none">
             <img
-              src={img}
+              src={img.url}
               alt="Gastronomia e all inclusive no Transamerica Comandatuba"
               className="h-64 w-full rounded-2xl object-cover shadow-md sm:h-[420px]"
               loading="lazy"
