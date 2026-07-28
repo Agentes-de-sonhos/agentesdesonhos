@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import img from "@/assets/landing/comandatuba/all-inclusive.jpg";
+import img from "@/assets/landing/comandatuba/all-inclusive-asset.jpg.asset.json";
 import { ALL_INCLUSIVE, type AgencyConfig } from "./content";
 
 export function AllInclusiveSection({ agency }: { agency: AgencyConfig }) {
