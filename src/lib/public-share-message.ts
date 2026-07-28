@@ -33,6 +33,8 @@ export interface PublicShareMessageInput {
   highlights?: string[] | null;
   agencyName?: string | null;
   consultantName?: string | null;
+  /** Access password for the public link (currently used by wallets). */
+  accessPassword?: string | null;
 }
 
 const MONTHS_PT = [
@@ -277,6 +279,11 @@ function buildWalletMessage(input: PublicShareMessageInput): string {
   lines.push("Acesse sua carteira pelo link:");
   lines.push("");
   lines.push(input.publicUrl);
+  const password = (input.accessPassword || "").trim();
+  if (password) {
+    lines.push("");
+    lines.push(`🔒 Senha de acesso: ${password}`);
+  }
   lines.push("");
   lines.push("Recomendo salvar este link para consultar durante toda a viagem. 😊");
 
