@@ -125,6 +125,7 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
                 endDate: trip.end_date,
                 serviceTypes,
                 agencyName,
+                accessPassword: trip.access_password,
               }}
               size="sm"
               showOpen
