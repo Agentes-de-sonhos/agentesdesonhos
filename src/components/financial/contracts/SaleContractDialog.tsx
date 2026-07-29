@@ -28,8 +28,7 @@ import {
   type ContractDraftOverrides,
 } from '@/lib/saleContractData';
 import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
-
-const SUPPORT_WHATSAPP = '5511982853937';
+import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 
 interface Props {
   sale: Sale | null;
@@ -39,6 +38,7 @@ interface Props {
 
 export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const { user } = useAuth();
+  const supportWhatsApp = useSupportWhatsApp();
   const [overrides, setOverrides] = useState<ContractDraftOverrides>({});
   const [generating, setGenerating] = useState(false);
   const [tab, setTab] = useState('dados');
@@ -59,7 +59,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           : Promise.resolve({ data: null } as { data: null }),
         supabase
           .from('profiles')
-          .select('name, agency_name, phone, city, state, avatar_url')
+          .select('name, agency_name, cnpj, phone, city, state, avatar_url')
           .eq('user_id', user!.id)
           .maybeSingle(),
       ]);
@@ -163,10 +163,15 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                 aqui — com os seus dados, sua identidade visual e o seu texto.
               </AlertDescription>
             </Alert>
-            <Button asChild className="gap-2">
+            <Button asChild className="gap-2" disabled={!supportWhatsApp}>
               <a
-                href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(
-                  'Olá! Quero cadastrar o modelo de contrato da minha agência.',
+                href={`https://wa.me/${supportWhatsApp}?text=${encodeURIComponent(
+                  [
+                    'Olá! Quero cadastrar o modelo de contrato da minha agência.',
+                    `Agência: ${saleData?.profile?.agency_name || '—'}`,
+                    `CNPJ: ${saleData?.profile?.cnpj || '—'}`,
+                    `Usuário: ${saleData?.profile?.name || '—'}`,
+                  ].join('\n'),
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
