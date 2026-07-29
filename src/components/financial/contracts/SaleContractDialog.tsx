@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Sale } from '@/types/financial';
 import type { ContractPayload } from '@/types/contracts';
@@ -33,11 +33,44 @@ import {
 } from '@/lib/saleContractData';
 import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
+import { useSaleTravelers } from './useSaleTravelers';
+import { QuickTravelerDialog } from './QuickTravelerDialog';
 
 interface Props {
   sale: Sale | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+/** Resumo legível do viajante (tipo, documento, nascimento/idade) para a lista de passageiros. */
+function passengerInfo(
+  t: {
+    nome_completo: string;
+    cpf: string | null;
+    data_nascimento: string | null;
+  },
+  tripDate: string | null,
+) {
+  // Datas "YYYY-MM-DD" são interpretadas manualmente para evitar deslocamento de fuso.
+  const parseLocal = (value: string) => {
+    const [y, m, d] = value.split('-').map(Number);
+    return y && m && d ? new Date(y, m - 1, d) : null;
+  };
+  let age: number | null = null;
+  const birth = t.data_nascimento ? parseLocal(t.data_nascimento) : null;
+  if (birth) {
+    const refDate = (tripDate ? parseLocal(tripDate) : null) ?? new Date();
+    age = refDate.getFullYear() - birth.getFullYear();
+    const m = refDate.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && refDate.getDate() < birth.getDate())) age -= 1;
+  }
+  const category = age === null ? null : age < 2 ? 'Bebê' : age < 12 ? 'Criança' : 'Adulto';
+  const parts: string[] = [];
+  parts.push(t.cpf ? maskDocument(t.cpf) : 'sem documento');
+  if (t.data_nascimento) {
+    parts.push(`${formatDateBR(t.data_nascimento)}${age !== null ? ` (${age} anos)` : ''}`);
+  }
+  return { category, details: parts.join(' • ') };
 }
 
 /** Bloco visual padrão das seções do formulário. */
@@ -102,6 +135,8 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const [docTouched, setDocTouched] = useState(false);
   const documentRef = useRef<HTMLInputElement>(null);
   const emissionCityInitialized = useRef(false);
+  const [manualClientId, setManualClientId] = useState<string | null>(null);
+  const [quickTravelerOpen, setQuickTravelerOpen] = useState(false);
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
   const { contracts, createContract, logAction } = useSaleContracts(sale?.id);
@@ -123,12 +158,6 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           .eq('user_id', user!.id)
           .maybeSingle(),
       ]);
-
-      let travelers: Record<string, unknown>[] = [];
-      if (sale!.client_id) {
-        const { data } = await supabase.from('travelers').select('*').eq('client_id', sale!.client_id);
-        travelers = data ?? [];
-      }
 
       // Operadoras / consolidadoras vinculadas aos serviços da venda
       const operatorIds = Array.from(
@@ -160,10 +189,24 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           cnpj?: string | null;
           city?: string | null;
         } | null,
-        travelers: travelers as never[],
       };
     },
   });
+
+  const {
+    clientId: resolvedClientId,
+    source: clientSource,
+    candidates: clientCandidates,
+    travelers,
+    refetch: refetchTravelers,
+  } = useSaleTravelers(sale, open, manualClientId);
+
+  useEffect(() => {
+    if (!open) {
+      setManualClientId(null);
+      setQuickTravelerOpen(false);
+    }
+  }, [open]);
 
   const nextRevision = (contracts[0]?.revision ?? 0) + 1;
 
@@ -188,7 +231,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
       products: saleData.products,
       payments: saleData.payments,
       client: saleData.client,
-      travelers: saleData.travelers,
+      travelers,
       agencyProfile: saleData.profile,
       operatorNames: saleData.operatorNames,
       template: templateData?.template ?? null,
@@ -197,7 +240,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
       contractNumber: buildContractNumber(sale.id, nextRevision),
       revision: nextRevision,
     });
-  }, [sale, saleData, templateData, overrides, nextRevision]);
+  }, [sale, saleData, travelers, templateData, overrides, nextRevision]);
 
   const docState = validateDocument(overrides.client_document ?? '');
   const docError = docState.isEmpty ? null : docState.error;
@@ -266,6 +309,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const hasTemplate = !!templateData?.template;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90dvh] max-h-[90dvh] overflow-hidden flex flex-col gap-3 bg-background p-4 sm:p-6 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <DialogHeader className="shrink-0">
@@ -389,38 +433,102 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                   title="Passageiros"
                   description="Selecione quem será incluído no contrato. A lista vem dos viajantes da ficha do cliente."
                 >
-                  {saleData?.travelers?.length ? (
-                    <div className="space-y-2">
-                      {(saleData.travelers as { id: string; nome_completo: string; cpf: string | null }[]).map((t) => {
-                        const selectedIds = overrides.passenger_ids ?? (saleData.travelers as { id: string }[]).map((x) => x.id);
-                        const checked = selectedIds.includes(t.id);
-                        return (
-                          <label
-                            key={t.id}
-                            className="flex items-center gap-3 rounded-lg border border-border bg-background p-2.5 text-sm hover:bg-muted/40 transition-colors cursor-pointer"
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={(v) => {
-                                const next = v
-                                  ? [...selectedIds, t.id]
-                                  : selectedIds.filter((id) => id !== t.id);
-                                set('passenger_ids', next);
-                              }}
-                            />
-                            <span className="font-medium">{t.nome_completo}</span>
-                            <span className="text-muted-foreground text-xs">
-                              {t.cpf ? maskDocument(t.cpf) : 'sem CPF'}
-                            </span>
-                          </label>
-                        );
-                      })}
+                  {!resolvedClientId ? (
+                    <>
+                    <div className="space-y-3">
+                      <Alert>
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Venda sem cliente vinculado</AlertTitle>
+                        <AlertDescription className="text-xs">
+                          {clientCandidates.length > 1
+                            ? 'Encontramos mais de um cliente com este nome na sua agência. Selecione o correto para carregar os viajantes.'
+                            : 'Esta venda guarda apenas o nome do cliente. Vincule-a a um cliente da sua carteira para usar os viajantes já cadastrados.'}
+                        </AlertDescription>
+                      </Alert>
+                      {clientCandidates.length > 1 && (
+                        <div className="space-y-2">
+                          {clientCandidates.map((c) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => setManualClientId(c.id)}
+                              className="flex w-full items-center justify-between rounded-lg border border-border bg-background p-2.5 text-left text-sm hover:bg-muted/40"
+                            >
+                              <span className="font-medium">{c.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {c.email || c.phone || 'sem contato'}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    </>
+                  ) : travelers.length ? (
+                    <div className="space-y-3">
+                      {clientSource !== 'sale' && (
+                        <p className="rounded-md bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+                          Viajantes carregados do cliente <strong>{(saleData?.client as { name?: string } | null)?.name ?? sale?.client_name}</strong> da sua carteira (esta venda não tinha vínculo direto).
+                        </p>
+                      )}
+                      <div className="space-y-2">
+                        {travelers.map((t) => {
+                          const selectedIds = overrides.passenger_ids ?? travelers.map((x) => x.id);
+                          const checked = selectedIds.includes(t.id);
+                          const info = passengerInfo(t, sale?.start_date ?? null);
+                          return (
+                            <label
+                              key={t.id}
+                              className="flex items-start gap-3 rounded-lg border border-border bg-background p-2.5 text-sm hover:bg-muted/40 transition-colors cursor-pointer"
+                            >
+                              <Checkbox
+                                className="mt-0.5"
+                                checked={checked}
+                                onCheckedChange={(v) => {
+                                  const next = v
+                                    ? [...selectedIds, t.id]
+                                    : selectedIds.filter((id) => id !== t.id);
+                                  set('passenger_ids', next);
+                                }}
+                              />
+                              <span className="min-w-0 flex-1">
+                                <span className="flex flex-wrap items-center gap-2">
+                                  <span className="font-medium">{t.nome_completo}</span>
+                                  {info.category && (
+                                    <Badge variant="secondary" className="text-[10px]">{info.category}</Badge>
+                                  )}
+                                  {t.is_responsavel && (
+                                    <Badge variant="outline" className="text-[10px]">Contratante</Badge>
+                                  )}
+                                </span>
+                                <span className="mt-0.5 block text-xs text-muted-foreground">
+                                  {info.details}
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => setQuickTravelerOpen(true)}
+                      >
+                        <UserPlus className="h-4 w-4" /> Adicionar passageiro
+                      </Button>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Nenhum passageiro cadastrado para este cliente. Cadastre os viajantes na ficha do cliente
-                      para incluí-los no contrato.
-                    </p>
+                    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-8 text-center">
+                      <Users className="h-8 w-8 text-muted-foreground/60" />
+                      <p className="max-w-sm text-sm text-muted-foreground">
+                        Este cliente ainda não tem viajantes cadastrados. Cadastre agora sem sair do contrato.
+                      </p>
+                      <Button type="button" size="sm" className="gap-2" onClick={() => setQuickTravelerOpen(true)}>
+                        <UserPlus className="h-4 w-4" /> Cadastrar passageiro agora
+                      </Button>
+                    </div>
                   )}
                 </FormSection>
 
@@ -861,5 +969,20 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
         )}
       </DialogContent>
     </Dialog>
+
+      {resolvedClientId && (
+        <QuickTravelerDialog
+          open={quickTravelerOpen}
+          onOpenChange={setQuickTravelerOpen}
+          clientId={resolvedClientId}
+          clientName={(saleData?.client as { name?: string } | null)?.name ?? sale?.client_name}
+          onCreated={async (travelerId) => {
+            const previous = overrides.passenger_ids ?? travelers.map((t) => t.id);
+            set('passenger_ids', [...previous, travelerId]);
+            await refetchTravelers();
+          }}
+        />
+      )}
+    </>
   );
 }
