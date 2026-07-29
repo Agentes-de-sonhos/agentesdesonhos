@@ -137,7 +137,9 @@ export async function generateSaleContractPdf(
     payload.agency.legal_name,
     payload.agency.cnpj ? `CNPJ: ${payload.agency.cnpj}` : '',
     payload.agency.address,
-    [payload.agency.phone, payload.agency.whatsapp, payload.agency.email].filter(Boolean).join('  |  '),
+    Array.from(
+      new Set([payload.agency.phone, payload.agency.whatsapp, payload.agency.email].filter(Boolean) as string[]),
+    ).join('  |  '),
     [payload.agency.website, payload.agency.cadastur ? `Cadastur: ${payload.agency.cadastur}` : '']
       .filter(Boolean)
       .join('  |  '),
@@ -380,7 +382,8 @@ export async function generateSaleContractPdf(
   y += 10;
 
   if (payload.signature_config.show_passenger_signatures) {
-    for (const p of payload.passengers) {
+    const norm = (v: string) => v.trim().toLowerCase();
+    for (const p of payload.passengers.filter((p) => norm(p.name) !== norm(payload.client.name))) {
       ensure(16);
       doc.setDrawColor(120, 120, 120);
       doc.line(M_L, y, M_L + sigW, y);
