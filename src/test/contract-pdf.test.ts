@@ -71,7 +71,12 @@ describe('contrato de venda', () => {
     expect(hashPayload(payload)).toHaveLength(16);
 
     const blob = await generateSaleContractPdf(payload);
-    const buf = Buffer.from(await blob.arrayBuffer());
+    const dataUrl = await new Promise<string>((res) => {
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result));
+      fr.readAsDataURL(blob as Blob);
+    });
+    const buf = Buffer.from(dataUrl.split(',')[1], 'base64');
     writeFileSync('/tmp/contrato-teste.pdf', buf);
     expect(buf.length).toBeGreaterThan(5000);
   });
