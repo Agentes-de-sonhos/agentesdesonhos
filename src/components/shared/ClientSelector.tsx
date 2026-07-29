@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useClients } from "@/hooks/useCRM";
+import { useClientSearch } from "@/hooks/useClientSearch";
 import type { Client } from "@/types/crm";
 
 interface SelectedClient {
@@ -25,18 +26,23 @@ interface ClientSelectorProps {
 }
 
 export function ClientSelector({ value, onChange, required, error }: ClientSelectorProps) {
-  const { clients, createClient, isCreating } = useClients();
+  const { createClient, isCreating } = useClients();
   const [query, setQuery] = useState(value?.name || "");
   const [isOpen, setIsOpen] = useState(false);
+  const [limit, setLimit] = useState(20);
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const filtered = query.length >= 1
-    ? clients.filter((c) => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
-    : clients.slice(0, 8);
+  // Don't search for the already-selected client's own name.
+  const searchTerm = value && value.name === query ? "" : query;
+  const { clients: filtered, isFetching, isSettled, hasMore } = useClientSearch(
+    searchTerm,
+    isOpen,
+    limit
+  );
 
   const showDropdown = isOpen;
 
@@ -53,6 +59,11 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  // Reset "load more" whenever the search term changes.
+  useEffect(() => {
+    setLimit(20);
+  }, [searchTerm]);
 
   const selectClient = (client: Client) => {
     onChange({ id: client.id, name: client.name });
@@ -103,6 +114,9 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
             onClick={() => setIsOpen(true)}
             className={`pl-9 h-10 rounded-lg ${error ? "border-destructive" : ""}`}
           />
+          {isFetching && (
+            <Loader2 className="absolute right-9 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+          )}
           {value && (
             <button
               type="button"
@@ -133,8 +147,22 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
                 </div>
               </button>
             ))}
-            {filtered.length === 0 && (
+            {filtered.length === 0 && isFetching && (
+              <p className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Buscando clientes...
+              </p>
+            )}
+            {filtered.length === 0 && !isFetching && isSettled && (
               <p className="px-3 py-2 text-sm text-muted-foreground">Nenhum cliente encontrado</p>
+            )}
+            {hasMore && (
+              <button
+                type="button"
+                className="w-full px-3 py-2 text-xs text-muted-foreground hover:bg-accent border-t transition-colors"
+                onClick={() => setLimit((l) => l + 20)}
+              >
+                Carregar mais resultados
+              </button>
             )}
             <button
               type="button"
