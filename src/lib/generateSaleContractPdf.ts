@@ -235,7 +235,13 @@ export async function generateSaleContractPdf(
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(35, 35, 35);
   for (const s of payload.services) {
-    const descParts = [s.description, s.supplier ? `Fornecedor: ${s.supplier}` : '', s.locator ? `Localizador: ${s.locator}` : '']
+    const descParts = [
+      s.description,
+      s.supplier ? `Fornecedor: ${s.supplier}` : '',
+      s.operator ? `Operadora/Consolidadora: ${s.operator}` : '',
+      s.refundable === 'nao' ? 'Tarifa não reembolsável' : '',
+      s.locator ? `Localizador: ${s.locator}` : '',
+    ]
       .filter(Boolean)
       .join(' — ');
     const descLines = doc.splitTextToSize(descParts || '—', colW[1] - 3);

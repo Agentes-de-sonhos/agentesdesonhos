@@ -96,12 +96,21 @@ export function mapTravelerToPassenger(t: TravelerRow, tripDate?: string | null)
   };
 }
 
-export function mapProductToService(p: SaleProduct): ContractService {
+export function mapProductToService(
+  p: SaleProduct,
+  operatorName?: string | null,
+): ContractService {
+  const supplier = p.supplier_name?.trim() || undefined;
+  const operator = operatorName?.trim() || undefined;
+  // Não duplicar quando fornecedor e operadora forem o mesmo nome.
+  const sameName =
+    !!supplier && !!operator && supplier.toLocaleLowerCase() === operator.toLocaleLowerCase();
   return {
     type: p.product_type,
     type_label: PRODUCT_TYPES[p.product_type] ?? p.product_type,
     description: p.description ?? undefined,
-    supplier: p.supplier_name ?? undefined,
+    supplier,
+    operator: sameName ? undefined : operator,
     amount: Number(p.sale_price) || 0,
     currency: 'BRL',
     refundable: 'nao_informado',
@@ -161,6 +170,8 @@ export interface BuildContractInput {
   client: ClientRow | null;
   travelers: TravelerRow[];
   agencyProfile: AgencyProfileRow | null;
+  /** operator_id -> nome da operadora/consolidadora */
+  operatorNames?: Record<string, string>;
   template: AgencyContractTemplate | null;
   sections: ContractTemplateSection[];
   overrides: ContractDraftOverrides;
@@ -184,7 +195,12 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
     : travelers;
   const passengers = selected.map((t) => mapTravelerToPassenger(t, sale.start_date));
 
-  const services = products.map(mapProductToService);
+  const services = products.map((p) =>
+    mapProductToService(
+      p,
+      p.operator_id ? input.operatorNames?.[p.operator_id] : undefined,
+    ),
+  );
   const gross = services.reduce((s, x) => s + x.amount, 0) || Number(sale.sale_amount) || 0;
   const discounts = Number(overrides.discounts) || 0;
   const taxes = Number(overrides.taxes) || 0;
@@ -250,7 +266,7 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
       balance: Math.max(0, total - downPayment),
       paid,
       pending: Math.max(0, total - paid),
-      paid_to_supplier: 0,
+      paid_to_supplier: Number(overrides.paid_to_supplier) || 0,
       payment_method: overrides.payment_method || sale.payment_method || undefined,
       installments_count: overrides.installments_count ?? null,
       installment_value: overrides.installment_value ?? null,
