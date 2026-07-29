@@ -960,6 +960,20 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           </Tabs>
         )}
       </DialogContent>
+
+      {resolvedClientId && (
+        <QuickTravelerDialog
+          open={quickTravelerOpen}
+          onOpenChange={setQuickTravelerOpen}
+          clientId={resolvedClientId}
+          clientName={saleData?.client?.name ?? sale?.client_name}
+          onCreated={async (travelerId) => {
+            const previous = overrides.passenger_ids ?? travelers.map((t) => t.id);
+            set('passenger_ids', [...previous, travelerId]);
+            await refetchTravelers();
+          }}
+        />
+      )}
     </Dialog>
   );
 }
