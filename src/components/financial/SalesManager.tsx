@@ -428,6 +428,14 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
                             <Pencil className="h-4 w-4 text-muted-foreground" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Gerar contrato"
+                            onClick={(e) => { e.stopPropagation(); setContractSale(sale); }}
+                          >
+                            <FileSignature className="h-4 w-4 text-muted-foreground" />
+                          </Button>
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteId(sale.id); }}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
