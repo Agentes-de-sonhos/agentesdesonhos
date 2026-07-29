@@ -966,7 +966,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           open={quickTravelerOpen}
           onOpenChange={setQuickTravelerOpen}
           clientId={resolvedClientId}
-          clientName={saleData?.client?.name ?? sale?.client_name}
+          clientName={(saleData?.client as { name?: string } | null)?.name ?? sale?.client_name}
           onCreated={async (travelerId) => {
             const previous = overrides.passenger_ids ?? travelers.map((t) => t.id);
             set('passenger_ids', [...previous, travelerId]);
