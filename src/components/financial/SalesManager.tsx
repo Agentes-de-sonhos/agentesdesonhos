@@ -417,7 +417,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                             <div className="text-sm text-primary">Comissão: {formatCurrency(totalCommission)}</div>
                           )}
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap justify-end">
                           <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">{products.length} produto(s)</span>
                           <Button
                             variant={products.length === 0 ? "default" : "outline"}
@@ -427,16 +427,17 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                           >
                             <Plus className="h-3 w-3 mr-1" /> Produto
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </Button>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Gerar contrato"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs"
+                            title="Revisar e gerar contrato desta venda"
                             onClick={(e) => { e.stopPropagation(); setContractSale(sale); }}
                           >
-                            <FileSignature className="h-4 w-4 text-muted-foreground" />
+                            <FileSignature className="h-3 w-3 mr-1" /> Contrato
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteId(sale.id); }}>
                             <Trash2 className="h-4 w-4 text-destructive" />
