@@ -195,6 +195,12 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
     ? travelers.filter((t) => overrides.passenger_ids!.includes(t.id))
     : travelers;
   const passengers = selected.map((t) => mapTravelerToPassenger(t, sale.start_date));
+  // Menores sempre precisam de responsável identificado: o contratante responde por eles
+  // quando o cadastro do viajante não traz um responsável próprio.
+  const contractorName = client?.name || sale.client_name || '';
+  for (const p of passengers) {
+    if (p.is_minor && !p.guardian && contractorName) p.guardian = contractorName;
+  }
 
   const services = products.map((p) =>
     mapProductToService(
