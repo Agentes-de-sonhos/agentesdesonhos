@@ -398,7 +398,31 @@ export async function generateSaleContractPdf(
       doc.text(`Página ${i} de ${pages}`, pageW - M_R, pageH - 8, { align: 'right' });
   }
 
-  const fileName = `${payload.contract_number}_${payload.client.name.replace(/\s+/g, '_')}.pdf`;
+  // ── White-label metadata (nunca expõe a plataforma) ──
+  const agencyName = payload.agency.trade_name || payload.agency.legal_name || 'Agencia';
+  doc.setProperties({
+    title: `${payload.contract_title} - ${payload.contract_number}`,
+    subject: `Contrato de prestação de serviços de viagem - ${payload.client.name}`,
+    author: agencyName,
+    creator: agencyName,
+    keywords: `contrato,${payload.contract_number}`,
+  });
+  // jsPDF grava "jsPDF x.y.z" em Producer; substituímos pela agência.
+  const internals = doc as unknown as { internal: { getEncryptor?: unknown }; };
+  try {
+    (doc as unknown as { internal: { events: { publish: (n: string) => void } } }).internal;
+  } catch {
+    /* noop */
+  }
+  void internals;
+
+  const slug = (v: string) =>
+    v
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  const fileName = `Contrato_${slug(payload.contract_number)}_${slug(payload.client.name)}.pdf`;
   if (options.download) doc.save(fileName);
   return doc.output('blob');
 }
