@@ -52,6 +52,7 @@ import { AdminTourGuidesManager } from "@/components/admin/AdminTourGuidesManage
 import { AdminTelegramManager } from "@/components/admin/AdminTelegramManager";
 import { AdminTradeEventsManager } from "@/components/admin/AdminTradeEventsManager";
 import { AdminUserProjectsManager } from "@/components/admin/AdminUserProjectsManager";
+import { AdminContractTemplatesManager } from "@/components/admin/AdminContractTemplatesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TAB_LABELS: Record<string, string> = {
@@ -91,6 +92,7 @@ const TAB_LABELS: Record<string, string> = {
   telegram: "Telegram",
   "trade-events": "Agenda do Trade",
   "user-projects": "Projetos dos Usuários",
+  "agency-contracts": "Contratos das Agências",
 };
 
 function AdminContent({ tab }: { tab: string }) {
