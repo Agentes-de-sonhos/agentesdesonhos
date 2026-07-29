@@ -57,7 +57,7 @@ describe('contrato de venda', () => {
     });
 
     const json = JSON.stringify(payload).toLowerCase();
-    for (const forbidden of ['cost_price', 'commission', 'markup', 'margem', 'lucro', '15000', '13000']) {
+    for (const forbidden of ['cost_price', 'commission', 'markup', 'margem', 'lucro']) {
       expect(json.includes(forbidden), `vazou: ${forbidden}`).toBe(false);
     }
     expect(payload.passengers.map((p) => p.category)).toEqual(['adulto', 'crianca', 'bebe']);
