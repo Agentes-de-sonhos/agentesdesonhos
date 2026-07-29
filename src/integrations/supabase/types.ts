@@ -293,6 +293,119 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_contract_template_sections: {
+        Row: {
+          body_html: string
+          conditional_rule: Json | null
+          created_at: string
+          display_order: number
+          id: string
+          is_fixed: boolean
+          section_key: string
+          template_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_html?: string
+          conditional_rule?: Json | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_fixed?: boolean
+          section_key: string
+          template_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_html?: string
+          conditional_rule?: Json | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_fixed?: boolean
+          section_key?: string
+          template_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_contract_template_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "agency_contract_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_contract_templates: {
+        Row: {
+          agency_data_snapshot: Json
+          agency_id: string
+          contract_title: string
+          created_at: string
+          created_by_admin: string | null
+          description: string | null
+          effective_from: string | null
+          effective_until: string | null
+          footer_config: Json
+          header_config: Json
+          id: string
+          legal_body_html: string
+          logo_url: string | null
+          name: string
+          signature_config: Json
+          status: string
+          updated_at: string
+          updated_by_admin: string | null
+          version: number
+        }
+        Insert: {
+          agency_data_snapshot?: Json
+          agency_id: string
+          contract_title?: string
+          created_at?: string
+          created_by_admin?: string | null
+          description?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
+          footer_config?: Json
+          header_config?: Json
+          id?: string
+          legal_body_html?: string
+          logo_url?: string | null
+          name: string
+          signature_config?: Json
+          status?: string
+          updated_at?: string
+          updated_by_admin?: string | null
+          version?: number
+        }
+        Update: {
+          agency_data_snapshot?: Json
+          agency_id?: string
+          contract_title?: string
+          created_at?: string
+          created_by_admin?: string | null
+          description?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
+          footer_config?: Json
+          header_config?: Json
+          id?: string
+          legal_body_html?: string
+          logo_url?: string | null
+          name?: string
+          signature_config?: Json
+          status?: string
+          updated_at?: string
+          updated_by_admin?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
       agency_events: {
         Row: {
           client_id: string | null
@@ -8846,6 +8959,200 @@ export type Database = {
           uses_count?: number
         }
         Relationships: []
+      }
+      sale_contract_acceptances: {
+        Row: {
+          acceptance_type: string
+          accepted_at: string
+          authentication_code: string | null
+          contract_id: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          signer_document: string | null
+          signer_email: string | null
+          signer_name: string
+          user_agent: string | null
+        }
+        Insert: {
+          acceptance_type?: string
+          accepted_at?: string
+          authentication_code?: string | null
+          contract_id: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          signer_document?: string | null
+          signer_email?: string | null
+          signer_name: string
+          user_agent?: string | null
+        }
+        Update: {
+          acceptance_type?: string
+          accepted_at?: string
+          authentication_code?: string | null
+          contract_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          signer_document?: string | null
+          signer_email?: string | null
+          signer_name?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_contract_acceptances_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "sale_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_contract_audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          agency_id: string
+          contract_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          sale_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          agency_id: string
+          contract_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          sale_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          agency_id?: string
+          contract_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          sale_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_contract_audit_logs_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "sale_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_contracts: {
+        Row: {
+          agency_id: string
+          agency_snapshot_json: Json
+          attachments_json: Json
+          client_snapshot_json: Json
+          contract_number: string
+          created_at: string
+          document_hash: string | null
+          financial_snapshot_json: Json
+          generated_at: string
+          generated_by: string | null
+          generated_html: string | null
+          generated_payload_json: Json
+          id: string
+          passengers_snapshot_json: Json
+          pdf_url: string | null
+          revision: number
+          sale_id: string
+          services_snapshot_json: Json
+          source_hash: string | null
+          status: string
+          supersedes_contract_id: string | null
+          template_id: string | null
+          template_version: number | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          agency_snapshot_json?: Json
+          attachments_json?: Json
+          client_snapshot_json?: Json
+          contract_number: string
+          created_at?: string
+          document_hash?: string | null
+          financial_snapshot_json?: Json
+          generated_at?: string
+          generated_by?: string | null
+          generated_html?: string | null
+          generated_payload_json?: Json
+          id?: string
+          passengers_snapshot_json?: Json
+          pdf_url?: string | null
+          revision?: number
+          sale_id: string
+          services_snapshot_json?: Json
+          source_hash?: string | null
+          status?: string
+          supersedes_contract_id?: string | null
+          template_id?: string | null
+          template_version?: number | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          agency_snapshot_json?: Json
+          attachments_json?: Json
+          client_snapshot_json?: Json
+          contract_number?: string
+          created_at?: string
+          document_hash?: string | null
+          financial_snapshot_json?: Json
+          generated_at?: string
+          generated_by?: string | null
+          generated_html?: string | null
+          generated_payload_json?: Json
+          id?: string
+          passengers_snapshot_json?: Json
+          pdf_url?: string | null
+          revision?: number
+          sale_id?: string
+          services_snapshot_json?: Json
+          source_hash?: string | null
+          status?: string
+          supersedes_contract_id?: string | null
+          template_id?: string | null
+          template_version?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_contracts_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_contracts_supersedes_contract_id_fkey"
+            columns: ["supersedes_contract_id"]
+            isOneToOne: false
+            referencedRelation: "sale_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_contracts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "agency_contract_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sale_products: {
         Row: {
