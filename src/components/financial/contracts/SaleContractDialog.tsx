@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Sale } from '@/types/financial';
 import type { ContractPayload } from '@/types/contracts';
@@ -33,6 +33,8 @@ import {
 } from '@/lib/saleContractData';
 import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
+import { useSaleTravelers } from './useSaleTravelers';
+import { QuickTravelerDialog } from './QuickTravelerDialog';
 
 interface Props {
   sale: Sale | null;
@@ -102,6 +104,8 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const [docTouched, setDocTouched] = useState(false);
   const documentRef = useRef<HTMLInputElement>(null);
   const emissionCityInitialized = useRef(false);
+  const [manualClientId, setManualClientId] = useState<string | null>(null);
+  const [quickTravelerOpen, setQuickTravelerOpen] = useState(false);
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
   const { contracts, createContract, logAction } = useSaleContracts(sale?.id);
@@ -123,12 +127,6 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           .eq('user_id', user!.id)
           .maybeSingle(),
       ]);
-
-      let travelers: Record<string, unknown>[] = [];
-      if (sale!.client_id) {
-        const { data } = await supabase.from('travelers').select('*').eq('client_id', sale!.client_id);
-        travelers = data ?? [];
-      }
 
       // Operadoras / consolidadoras vinculadas aos serviços da venda
       const operatorIds = Array.from(
@@ -160,10 +158,24 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           cnpj?: string | null;
           city?: string | null;
         } | null,
-        travelers: travelers as never[],
       };
     },
   });
+
+  const {
+    clientId: resolvedClientId,
+    source: clientSource,
+    candidates: clientCandidates,
+    travelers,
+    refetch: refetchTravelers,
+  } = useSaleTravelers(sale, open, manualClientId);
+
+  useEffect(() => {
+    if (!open) {
+      setManualClientId(null);
+      setQuickTravelerOpen(false);
+    }
+  }, [open]);
 
   const nextRevision = (contracts[0]?.revision ?? 0) + 1;
 
@@ -188,7 +200,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
       products: saleData.products,
       payments: saleData.payments,
       client: saleData.client,
-      travelers: saleData.travelers,
+      travelers,
       agencyProfile: saleData.profile,
       operatorNames: saleData.operatorNames,
       template: templateData?.template ?? null,
@@ -197,7 +209,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
       contractNumber: buildContractNumber(sale.id, nextRevision),
       revision: nextRevision,
     });
-  }, [sale, saleData, templateData, overrides, nextRevision]);
+  }, [sale, saleData, travelers, templateData, overrides, nextRevision]);
 
   const docState = validateDocument(overrides.client_document ?? '');
   const docError = docState.isEmpty ? null : docState.error;
