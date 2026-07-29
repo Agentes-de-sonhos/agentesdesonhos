@@ -434,6 +434,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                   description="Selecione quem será incluído no contrato. A lista vem dos viajantes da ficha do cliente."
                 >
                   {!resolvedClientId ? (
+                    <>
                     <div className="space-y-3">
                       <Alert>
                         <AlertTriangle className="h-4 w-4" />
@@ -462,8 +463,14 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                         </div>
                       )}
                     </div>
+                    </>
                   ) : travelers.length ? (
                     <div className="space-y-3">
+                      {clientSource !== 'sale' && (
+                        <p className="rounded-md bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+                          Viajantes carregados do cliente <strong>{(saleData?.client as { name?: string } | null)?.name ?? sale?.client_name}</strong> da sua carteira (esta venda não tinha vínculo direto).
+                        </p>
+                      )}
                       <div className="space-y-2">
                         {travelers.map((t) => {
                           const selectedIds = overrides.passenger_ids ?? travelers.map((x) => x.id);
