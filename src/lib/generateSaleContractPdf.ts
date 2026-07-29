@@ -404,13 +404,45 @@ export async function generateSaleContractPdf(
 
   // ── Footer on every page ──
   const pages = doc.getNumberOfPages();
+  const clientDoc = payload.client.document
+    ? `${payload.client.person_type === 'juridica' ? 'CNPJ' : 'CPF'}: ${payload.client.document}`
+    : '';
+  const saleRef = payload.sale_reference
+    ? payload.sale_reference.replace(/-/g, '').slice(-8).toUpperCase()
+    : '';
+  const stripLine1 = [
+    `CONTRATADA: ${payload.agency.trade_name || payload.agency.legal_name || ''}`,
+    payload.agency.cnpj ? `CNPJ: ${payload.agency.cnpj}` : '',
+  ]
+    .filter(Boolean)
+    .join('  •  ');
+  const stripLine2 = [
+    `CONTRATANTE: ${payload.client.name}`,
+    clientDoc,
+    saleRef ? `VENDA Nº ${saleRef}` : '',
+  ]
+    .filter(Boolean)
+    .join('  •  ');
+  const emittedAt = new Date(payload.emitted_at);
+  const footerPlaceDate = `${payload.emission_city ? `${payload.emission_city}, ` : ''}${emittedAt.toLocaleDateString('pt-BR')} ${emittedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+  const linkNote =
+    payload.footer_config.note ||
+    `Documento vinculado à venda ${saleRef}${payload.receipt_number ? ` e ao recibo ${payload.receipt_number}` : ''}.`;
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
+    if (i > 1) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(130, 130, 130);
+      doc.text(doc.splitTextToSize(stripLine1, cW)[0] ?? '', M_L, 8);
+      doc.text(doc.splitTextToSize(stripLine2, cW)[0] ?? '', M_L, 11);
+      doc.setDrawColor(215, 215, 215);
+      doc.line(M_L, 13, pageW - M_R, 13);
+    }
     doc.setFontSize(7);
     doc.setTextColor(150, 150, 150);
-    const left = payload.footer_config.note || payload.agency.trade_name || '';
-    doc.text(left, M_L, pageH - 8);
-    doc.text(`Contrato ${payload.contract_number}`, pageW / 2, pageH - 8, { align: 'center' });
+    doc.text(doc.splitTextToSize(linkNote, cW)[0] ?? '', M_L, pageH - 12);
+    doc.text(`CONTRATANTE: ${payload.client.name}`, M_L, pageH - 8);
+    doc.text(footerPlaceDate, pageW / 2, pageH - 8, { align: 'center' });
     if (payload.footer_config.show_pagination !== false)
       doc.text(`Página ${i} de ${pages}`, pageW - M_R, pageH - 8, { align: 'right' });
   }

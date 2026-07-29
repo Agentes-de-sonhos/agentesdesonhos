@@ -81,3 +81,38 @@ describe('contrato de venda', () => {
     expect(buf.length).toBeGreaterThan(5000);
   });
 });
+
+// ── Validação do modelo real cadastrado para a Travel.IN Viagens ──
+import fixture from './travelin-template.fixture.json';
+
+describe('modelo Travel.IN Viagens', () => {
+  it('gera PDF com as cláusulas 1 a 12 integrais', async () => {
+    const tpl: any = (fixture as any).template;
+    const secs: any[] = (fixture as any).sections.map((s: any, i: number) => ({
+      id: `s${i}`, template_id: tpl.id, section_key: `k${i}`,
+      title: s.title, body_html: s.body_html, display_order: i, is_fixed: true,
+    }));
+    expect(tpl.status).toBe('active');
+    expect(secs).toHaveLength(12);
+
+    const payload = buildContractPayload({
+      sale, products, payments,
+      client: { id: 'c1', name: 'Maria Aparecida de Souza', email: 'maria@ex.com', phone: '(47) 98888-1111', city: 'Indaial' },
+      travelers, agencyProfile: { agency_name: 'Travel.IN Viagens', city: 'Indaial' },
+      operatorNames: { op1: 'CVC Consolidadora', op2: 'Hilton Orlando' },
+      template: tpl, sections: secs,
+      overrides: { client_document: '123.456.789-09', down_payment: 10000, payment_method: 'Cartão de crédito 10x', insurance_contracted: false, insurance_refusal_ack: true },
+      contractNumber: buildContractNumber(sale.id, 1),
+      revision: 1,
+    });
+    expect(validateContractPayload(payload).filter((i) => i.severity === 'error')).toEqual([]);
+
+    const blob = await generateSaleContractPdf(payload);
+    const dataUrl = await new Promise<string>((res) => {
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result));
+      fr.readAsDataURL(blob as Blob);
+    });
+    writeFileSync('/tmp/contrato-travelin.pdf', Buffer.from(dataUrl.split(',')[1], 'base64'));
+  });
+});
