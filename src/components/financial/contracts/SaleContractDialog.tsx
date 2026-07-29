@@ -51,17 +51,18 @@ function passengerInfo(
   },
   tripDate: string | null,
 ) {
+  // Datas "YYYY-MM-DD" são interpretadas manualmente para evitar deslocamento de fuso.
+  const parseLocal = (value: string) => {
+    const [y, m, d] = value.split('-').map(Number);
+    return y && m && d ? new Date(y, m - 1, d) : null;
+  };
   let age: number | null = null;
-  if (t.data_nascimento) {
-    const [by, bm, bd] = t.data_nascimento.split('-').map(Number);
-    const ref = tripDate ? new Date(...(tripDate.split('-').map(Number) as [number, number, number])) : new Date();
-    const refDate = tripDate ? new Date(Number(tripDate.slice(0, 4)), Number(tripDate.slice(5, 7)) - 1, Number(tripDate.slice(8, 10))) : ref;
-    if (by && bm && bd) {
-      const birth = new Date(by, bm - 1, bd);
-      age = refDate.getFullYear() - birth.getFullYear();
-      const m = refDate.getMonth() - birth.getMonth();
-      if (m < 0 || (m === 0 && refDate.getDate() < birth.getDate())) age -= 1;
-    }
+  const birth = t.data_nascimento ? parseLocal(t.data_nascimento) : null;
+  if (birth) {
+    const refDate = (tripDate ? parseLocal(tripDate) : null) ?? new Date();
+    age = refDate.getFullYear() - birth.getFullYear();
+    const m = refDate.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && refDate.getDate() < birth.getDate())) age -= 1;
   }
   const category = age === null ? null : age < 2 ? 'Bebê' : age < 12 ? 'Criança' : 'Adulto';
   const parts: string[] = [];
