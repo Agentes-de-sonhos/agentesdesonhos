@@ -84,6 +84,7 @@ export function useClients() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-search"] });
       queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
       queryClient.invalidateQueries({ queryKey: ["clients-total"] });
       queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
@@ -132,6 +133,7 @@ export function useClients() {
     },
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-search"] });
       queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
       queryClient.invalidateQueries({ queryKey: ["clients-total"] });
       queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
@@ -155,6 +157,7 @@ export function useClients() {
     },
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-search"] });
       queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
       queryClient.invalidateQueries({ queryKey: ["clients-total"] });
       queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
@@ -481,6 +484,7 @@ export function useOpportunities() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-search"] });
       queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
       queryClient.invalidateQueries({ queryKey: ["clients-total"] });
       queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
