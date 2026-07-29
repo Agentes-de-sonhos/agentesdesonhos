@@ -163,17 +163,6 @@ export function ClientsModule() {
     },
   });
 
-  const filteredClients = clients
-    .filter((c) => {
-      const matchesSearch =
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.email?.toLowerCase().includes(search.toLowerCase()) ||
-        c.city?.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-
   const handleOpenDialog = (client?: Client) => {
     if (client) {
       setEditingClient(client);
