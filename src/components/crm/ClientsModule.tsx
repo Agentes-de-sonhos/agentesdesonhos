@@ -641,6 +641,18 @@ export function ClientsModule() {
             </tbody>
           </table>
         </div>
+        <ServerPagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={pageSize}
+          pageSizeOptions={CLIENTS_PAGE_SIZE_OPTIONS}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          itemLabel="clientes"
+          isFetching={isFetching}
+        />
+        </>
       )}
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
