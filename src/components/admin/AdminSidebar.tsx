@@ -38,6 +38,7 @@ import {
   CheckCircle2,
   Send,
   FolderLock,
+  FileSignature,
 } from "lucide-react";
 
 interface AdminMenuItem {
