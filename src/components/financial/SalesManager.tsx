@@ -3,7 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, Users, ShoppingBag, MoreHorizontal } from "lucide-react";
+import { Plus, Trash2, MapPin, User, Download, Loader2, ChevronDown, ChevronRight, Package, Pencil, FileText, FileSignature, Users, ShoppingBag, MoreHorizontal } from "lucide-react";
+import { SaleContractDialog } from "@/components/financial/contracts/SaleContractDialog";
 import { useFinancialExport } from "@/hooks/useFinancialExport";
 import { ExportModal, type ExportFormat } from "@/components/financial/ExportModal";
 import {
@@ -63,6 +64,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [expandedSales, setExpandedSales] = useState<Set<string>>(new Set());
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [contractSale, setContractSale] = useState<Sale | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
   const [selectedOpportunity, setSelectedOpportunity] = useState<string>("client");
   const [editingSaleId, setEditingSaleId] = useState<string | null>(null);
@@ -427,6 +429,14 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                           </Button>
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
                             <Pencil className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Gerar contrato"
+                            onClick={(e) => { e.stopPropagation(); setContractSale(sale); }}
+                          >
+                            <FileSignature className="h-4 w-4 text-muted-foreground" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteId(sale.id); }}>
                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -857,6 +867,12 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SaleContractDialog
+        sale={contractSale}
+        open={!!contractSale}
+        onOpenChange={(o) => !o && setContractSale(null)}
+      />
     </div>
   );
 }

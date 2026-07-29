@@ -7,6 +7,10 @@ export interface Sale {
   sale_amount: number;
   sale_date: string;
   notes: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  payment_method?: string | null;
+  client_id?: string | null;
   created_at: string;
   updated_at: string;
   products?: SaleProduct[];
