@@ -84,6 +84,9 @@ export function useClients() {
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-total"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
       toast({ title: "Cliente criado com sucesso" });
       if (result?.id) awardGamificationPoints(result.user_id, POINTS_CONFIG.create_client, "create_client", result.id);
       if (result?.id) logTeamAction({ action: 'client.create', entity_type: 'client', entity_id: result.id, details: { name: result.name } });
@@ -129,6 +132,9 @@ export function useClients() {
     },
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-total"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
       toast({ title: "Cliente atualizado" });
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["operations"] });
@@ -149,6 +155,9 @@ export function useClients() {
     },
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-total"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
       toast({ title: "Cliente excluído" });
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["operations"] });
@@ -472,6 +481,9 @@ export function useOpportunities() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-total"] });
+      queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
       queryClient.invalidateQueries({ queryKey: ["sales-stats"] });
       logTeamAction({ action: 'opportunity.stage_move', entity_type: 'opportunity', entity_id: res?.id, details: { from: res?.fromStageLabel, to: res?.toStageLabel } });
     },

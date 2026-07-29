@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,6 +60,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useClients } from "@/hooks/useCRM";
+import {
+  useClientsPaged,
+  useClientById,
+  useClientPhoneIndex,
+  useDebouncedValue,
+  CLIENTS_DEFAULT_PAGE_SIZE,
+  CLIENTS_PAGE_SIZE_OPTIONS,
+} from "@/hooks/useClientsPaged";
+import { ServerPagination } from "@/components/shared/ServerPagination";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { ClientProfile } from "./ClientProfile";
@@ -86,7 +95,7 @@ const clientSchema = z.object({
 type ClientFormData = z.infer<typeof clientSchema>;
 
 export function ClientsModule() {
-  const { clients, isLoading, createClient, updateClient, deleteClient, isCreating } = useClients();
+  const { createClient, updateClient, deleteClient, isCreating } = useClients();
   const { user } = useAuth();
   const { can } = usePermissions();
   const canCreate = can('clients.create');
@@ -95,39 +104,46 @@ export function ClientsModule() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(CLIENTS_DEFAULT_PAGE_SIZE);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  const debouncedSearch = useDebouncedValue(search);
+
+  const { clients, total, totalPages, isLoading, isFetching, isEmptyAgency } = useClientsPaged({
+    search: debouncedSearch,
+    status: statusFilter,
+    page,
+    pageSize,
+  });
+
+  // Back to page 1 whenever the result set changes shape.
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter, pageSize]);
+
+  // Never leave the user stranded on a page beyond the last one (e.g. after a delete).
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   // Auto-open a client profile when URL has ?client=<id> (e.g. from opportunity drawer "Abrir Cliente")
   const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkId = searchParams.get("client");
+  const { data: deepLinkClient } = useClientById(deepLinkId);
   useEffect(() => {
-    const target = searchParams.get("client");
-    if (!target || clients.length === 0) return;
-    const match = clients.find((c) => c.id === target);
-    if (match) {
-      setSelectedClient(match);
-      const next = new URLSearchParams(searchParams);
-      next.delete("client");
-      setSearchParams(next, { replace: true });
-    }
-  }, [searchParams, clients, setSearchParams]);
+    if (!deepLinkId || !deepLinkClient) return;
+    setSelectedClient(deepLinkClient);
+    const next = new URLSearchParams(searchParams);
+    next.delete("client");
+    setSearchParams(next, { replace: true });
+  }, [deepLinkId, deepLinkClient, searchParams, setSearchParams]);
 
-  const existingPhones = useMemo(() => {
-    const map = new Map<string, string>();
-    clients.forEach((c) => {
-      if (c.phone) {
-        const digits = c.phone.replace(/\D/g, "");
-        if (digits) {
-          const normalized = digits.length >= 10 && !digits.startsWith("55") ? "55" + digits : digits;
-          map.set(normalized, c.id);
-        }
-      }
-    });
-    return map;
-  }, [clients]);
+  const { data: existingPhones } = useClientPhoneIndex(isImportOpen);
 
 
   const form = useForm<ClientFormData>({
@@ -146,17 +162,6 @@ export function ClientsModule() {
       birthday_year: "",
     },
   });
-
-  const filteredClients = clients
-    .filter((c) => {
-      const matchesSearch =
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.email?.toLowerCase().includes(search.toLowerCase()) ||
-        c.city?.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "all" || c.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
 
   const handleOpenDialog = (client?: Client) => {
     if (client) {
@@ -526,12 +531,25 @@ export function ClientsModule() {
 
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-      ) : filteredClients.length === 0 ? (
+      ) : clients.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>Nenhum cliente encontrado</p>
+          {isEmptyAgency ? (
+            <>
+              <p className="font-medium text-foreground">Nenhum cliente cadastrado ainda</p>
+              <p className="text-sm mt-1">
+                Cadastre seu primeiro cliente ou importe seus contatos para começar.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium text-foreground">Nenhum resultado encontrado</p>
+              <p className="text-sm mt-1">Ajuste a busca ou os filtros para ver outros clientes.</p>
+            </>
+          )}
         </div>
       ) : (
+        <>
         <div className="rounded-md border overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -545,7 +563,7 @@ export function ClientsModule() {
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map((client) => (
+              {clients.map((client) => (
                 <tr
                   key={client.id}
                   className="border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
@@ -623,6 +641,18 @@ export function ClientsModule() {
             </tbody>
           </table>
         </div>
+        <ServerPagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={pageSize}
+          pageSizeOptions={CLIENTS_PAGE_SIZE_OPTIONS}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          itemLabel="clientes"
+          isFetching={isFetching}
+        />
+        </>
       )}
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
@@ -648,8 +678,13 @@ export function ClientsModule() {
       <ImportContactsDialog
         open={isImportOpen}
         onOpenChange={setIsImportOpen}
-        existingPhones={existingPhones}
-        onImportComplete={() => queryClient.invalidateQueries({ queryKey: ["clients"] })}
+        existingPhones={existingPhones ?? new Map()}
+        onImportComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ["clients"] });
+          queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
+          queryClient.invalidateQueries({ queryKey: ["clients-total"] });
+          queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
+        }}
       />
     </div>
   );
