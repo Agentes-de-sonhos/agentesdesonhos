@@ -434,8 +434,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                             title="Revisar e gerar contrato desta venda"
                             onClick={(e) => { e.stopPropagation(); setContractSale(sale); }}
                           >
-                            <FileSignature className="h-3 w-3 sm:mr-1" />
-                            <span className="hidden sm:inline">Contrato</span>
+                            <FileSignature className="h-3 w-3 mr-1" /> Contrato
                           </Button>
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
                             <Pencil className="h-4 w-4 text-muted-foreground" />
