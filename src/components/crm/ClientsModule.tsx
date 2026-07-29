@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -678,7 +678,7 @@ export function ClientsModule() {
       <ImportContactsDialog
         open={isImportOpen}
         onOpenChange={setIsImportOpen}
-        existingPhones={existingPhones}
+        existingPhones={existingPhones ?? new Map()}
         onImportComplete={() => queryClient.invalidateQueries({ queryKey: ["clients"] })}
       />
     </div>
