@@ -39,7 +39,7 @@ export function ServerPagination({
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
         <span>
           Exibindo {from}–{to} de {total} {itemLabel}
-several        </span>
+        </span>
         <div className="flex items-center gap-2">
           <span className="hidden sm:inline">Por página</span>
           <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
