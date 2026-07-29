@@ -5,6 +5,12 @@ import { formatDateBR, formatMoney } from '@/lib/saleContractData';
 const M_L = 18;
 const M_R = 18;
 
+const CATEGORY_LABELS: Record<string, string> = {
+  adulto: 'Adulto',
+  crianca: 'Criança',
+  bebe: 'Bebê',
+};
+
 function htmlToLines(html: string): string[] {
   if (!html) return [];
   const withBreaks = html
@@ -189,12 +195,14 @@ export async function generateSaleContractPdf(
     const details = [
       p.cpf ? `CPF ${p.cpf}` : '',
       p.birth_date ? `Nasc. ${formatDateBR(p.birth_date)}` : '',
-      p.age_at_trip !== null && p.age_at_trip !== undefined ? `${p.age_at_trip} anos` : '',
-      p.category ? p.category : '',
+      p.age_at_trip !== null && p.age_at_trip !== undefined
+        ? `${p.age_at_trip} ${p.age_at_trip === 1 ? 'ano' : 'anos'}`
+        : '',
+      p.category ? CATEGORY_LABELS[p.category] : '',
       p.passport ? `Passaporte ${p.passport}` : '',
       p.passport_validity ? `Validade ${formatDateBR(p.passport_validity)}` : '',
       p.nationality || '',
-      p.is_minor ? `Menor — responsável: ${p.guardian || 'não informado'}` : '',
+      p.is_minor ? (p.guardian ? `Menor — responsável: ${p.guardian}` : 'Menor de idade') : '',
     ].filter(Boolean);
     const lines = doc.splitTextToSize(details.join('  •  '), cW - 5);
     for (const line of lines) {
@@ -235,7 +243,13 @@ export async function generateSaleContractPdf(
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(35, 35, 35);
   for (const s of payload.services) {
-    const descParts = [s.description, s.supplier ? `Fornecedor: ${s.supplier}` : '', s.locator ? `Localizador: ${s.locator}` : '']
+    const descParts = [
+      s.description,
+      s.supplier ? `Fornecedor: ${s.supplier}` : '',
+      s.operator ? `Operadora/Consolidadora: ${s.operator}` : '',
+      s.refundable === 'nao' ? 'Tarifa não reembolsável' : '',
+      s.locator ? `Localizador: ${s.locator}` : '',
+    ]
       .filter(Boolean)
       .join(' — ');
     const descLines = doc.splitTextToSize(descParts || '—', colW[1] - 3);
@@ -272,6 +286,8 @@ export async function generateSaleContractPdf(
     kv('Parcelamento', `${f.installments_count}x${f.installment_value ? ` de ${formatMoney(f.installment_value, f.currency)}` : ''}`);
   kv('Vencimentos', f.due_dates);
   kv('Total já pago', formatMoney(f.paid, f.currency));
+  if (f.paid_to_supplier)
+    kv('Pago diretamente ao fornecedor', formatMoney(f.paid_to_supplier, f.currency));
   kv('Saldo pendente', formatMoney(f.pending, f.currency));
   if (f.notes) text(f.notes, 9);
 
@@ -326,6 +342,7 @@ export async function generateSaleContractPdf(
   // ── Anexos ──
   if (payload.attachments.length) {
     sectionTitle('Anexos');
+    text('Os documentos abaixo integram este contrato para todos os fins de direito:', 9);
     payload.attachments.forEach((a) => text(`•  ${a.label}`, 9, 'normal', 4));
   }
 
@@ -398,7 +415,22 @@ export async function generateSaleContractPdf(
       doc.text(`Página ${i} de ${pages}`, pageW - M_R, pageH - 8, { align: 'right' });
   }
 
-  const fileName = `${payload.contract_number}_${payload.client.name.replace(/\s+/g, '_')}.pdf`;
+  // ── White-label metadata (nunca expõe a plataforma) ──
+  const agencyName = payload.agency.trade_name || payload.agency.legal_name || 'Agencia';
+  doc.setProperties({
+    title: `${payload.contract_title} - ${payload.contract_number}`,
+    subject: `Contrato de prestação de serviços de viagem - ${payload.client.name}`,
+    author: agencyName,
+    creator: agencyName,
+    keywords: `contrato,${payload.contract_number}`,
+  });
+  const slug = (v: string) =>
+    v
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  const fileName = `Contrato_${slug(payload.contract_number)}_${slug(payload.client.name)}.pdf`;
   if (options.download) doc.save(fileName);
   return doc.output('blob');
 }

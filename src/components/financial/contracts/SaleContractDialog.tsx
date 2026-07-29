@@ -28,8 +28,7 @@ import {
   type ContractDraftOverrides,
 } from '@/lib/saleContractData';
 import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
-
-const SUPPORT_WHATSAPP = '5511982853937';
+import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 
 interface Props {
   sale: Sale | null;
@@ -39,6 +38,7 @@ interface Props {
 
 export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const { user } = useAuth();
+  const supportWhatsApp = useSupportWhatsApp();
   const [overrides, setOverrides] = useState<ContractDraftOverrides>({});
   const [generating, setGenerating] = useState(false);
   const [tab, setTab] = useState('dados');
@@ -59,7 +59,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           : Promise.resolve({ data: null } as { data: null }),
         supabase
           .from('profiles')
-          .select('name, agency_name, phone, city, state, avatar_url')
+          .select('name, agency_name, cnpj, phone, city, state, avatar_url')
           .eq('user_id', user!.id)
           .maybeSingle(),
       ]);
@@ -70,11 +70,35 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
         travelers = data ?? [];
       }
 
+      // Operadoras / consolidadoras vinculadas aos serviços da venda
+      const operatorIds = Array.from(
+        new Set(
+          ((products.data ?? []) as { operator_id?: string | null }[])
+            .map((p) => p.operator_id)
+            .filter((v): v is string => !!v),
+        ),
+      );
+      const operatorNames: Record<string, string> = {};
+      if (operatorIds.length) {
+        const { data: ops } = await supabase
+          .from('tour_operators')
+          .select('id,name')
+          .in('id', operatorIds);
+        (ops ?? []).forEach((o: { id: string; name: string }) => {
+          operatorNames[o.id] = o.name;
+        });
+      }
+
       return {
         products: (products.data ?? []) as never[],
         payments: (payments.data ?? []) as never[],
         client: (client.data ?? null) as never,
-        profile: (profile.data ?? null) as never,
+        operatorNames,
+        profile: (profile.data ?? null) as {
+          name?: string | null;
+          agency_name?: string | null;
+          cnpj?: string | null;
+        } | null,
         travelers: travelers as never[],
       };
     },
@@ -91,6 +115,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
       client: saleData.client,
       travelers: saleData.travelers,
       agencyProfile: saleData.profile,
+      operatorNames: saleData.operatorNames,
       template: templateData?.template ?? null,
       sections: templateData?.sections ?? [],
       overrides,
@@ -163,10 +188,15 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                 aqui — com os seus dados, sua identidade visual e o seu texto.
               </AlertDescription>
             </Alert>
-            <Button asChild className="gap-2">
+            <Button asChild className="gap-2" disabled={!supportWhatsApp}>
               <a
-                href={`https://wa.me/${SUPPORT_WHATSAPP}?text=${encodeURIComponent(
-                  'Olá! Quero cadastrar o modelo de contrato da minha agência.',
+                href={`https://wa.me/${supportWhatsApp}?text=${encodeURIComponent(
+                  [
+                    'Olá! Quero cadastrar o modelo de contrato da minha agência.',
+                    `Agência: ${saleData?.profile?.agency_name || '—'}`,
+                    `CNPJ: ${saleData?.profile?.cnpj || '—'}`,
+                    `Usuário: ${saleData?.profile?.name || '—'}`,
+                  ].join('\n'),
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -311,6 +341,14 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                         type="number"
                         value={overrides.down_payment ?? ''}
                         onChange={(e) => set('down_payment', Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Pago diretamente ao fornecedor</Label>
+                      <Input
+                        type="number"
+                        value={overrides.paid_to_supplier ?? ''}
+                        onChange={(e) => set('paid_to_supplier', Number(e.target.value))}
                       />
                     </div>
                     <div>
