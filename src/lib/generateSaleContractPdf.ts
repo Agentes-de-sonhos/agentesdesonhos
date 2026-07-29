@@ -286,6 +286,8 @@ export async function generateSaleContractPdf(
     kv('Parcelamento', `${f.installments_count}x${f.installment_value ? ` de ${formatMoney(f.installment_value, f.currency)}` : ''}`);
   kv('Vencimentos', f.due_dates);
   kv('Total já pago', formatMoney(f.paid, f.currency));
+  if (f.paid_to_supplier)
+    kv('Pago diretamente ao fornecedor', formatMoney(f.paid_to_supplier, f.currency));
   kv('Saldo pendente', formatMoney(f.pending, f.currency));
   if (f.notes) text(f.notes, 9);
 
@@ -340,6 +342,7 @@ export async function generateSaleContractPdf(
   // ── Anexos ──
   if (payload.attachments.length) {
     sectionTitle('Anexos');
+    text('Os documentos abaixo integram este contrato para todos os fins de direito:', 9);
     payload.attachments.forEach((a) => text(`•  ${a.label}`, 9, 'normal', 4));
   }
 
