@@ -679,7 +679,12 @@ export function ClientsModule() {
         open={isImportOpen}
         onOpenChange={setIsImportOpen}
         existingPhones={existingPhones ?? new Map()}
-        onImportComplete={() => queryClient.invalidateQueries({ queryKey: ["clients"] })}
+        onImportComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ["clients"] });
+          queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
+          queryClient.invalidateQueries({ queryKey: ["clients-total"] });
+          queryClient.invalidateQueries({ queryKey: ["clients-phone-index"] });
+        }}
       />
     </div>
   );
