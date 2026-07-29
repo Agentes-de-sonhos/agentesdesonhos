@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
@@ -162,8 +162,8 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[90dvh] max-h-[90dvh] overflow-hidden flex flex-col gap-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
             Contrato da venda
@@ -207,14 +207,14 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
             </Button>
           </div>
         ) : (
-          <Tabs value={tab} onValueChange={setTab} className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="w-full justify-start">
+          <Tabs value={tab} onValueChange={setTab} className="flex-1 min-h-0 flex flex-col">
+            <TabsList className="w-full justify-start shrink-0">
               <TabsTrigger value="dados">Dados</TabsTrigger>
               <TabsTrigger value="revisao">Revisão</TabsTrigger>
               <TabsTrigger value="versoes">Versões ({contracts.length})</TabsTrigger>
             </TabsList>
 
-            <ScrollArea className="flex-1 pr-3">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-3 pb-4">
               <TabsContent value="dados" className="space-y-6 mt-4">
                 <section className="space-y-3">
                   <h3 className="text-sm font-semibold">Contratante</h3>
@@ -566,7 +566,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                   ))
                 )}
               </TabsContent>
-            </ScrollArea>
+            </div>
           </Tabs>
         )}
       </DialogContent>

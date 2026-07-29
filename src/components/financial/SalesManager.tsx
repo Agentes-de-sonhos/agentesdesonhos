@@ -14,6 +14,7 @@ import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
 import { NewSaleWizard } from "@/components/financial/NewSaleWizard";
+import { SaleFormDialog } from "@/components/financial/SaleFormDialog";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -56,8 +57,6 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   const queryClient = useQueryClient();
   const { data: termsData } = useAgencySupplierTerms();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sellerId, setSellerId] = useState<string>("");
-  const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -66,13 +65,8 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [contractSale, setContractSale] = useState<Sale | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<string>("client");
   const [editingSaleId, setEditingSaleId] = useState<string | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<SaleFormData>({
-    client_name: "", destination: "", sale_amount: 0,
-    sale_date: new Date().toISOString().split("T")[0], notes: "",
-  });
   const defaultProductForm: SaleProductFormData = {
     product_type: "aereo", description: "", sale_price: 0,
     cost_price: 0, non_commissionable_taxes: 0, commission_type: "percentage", commission_value: 0,
@@ -81,13 +75,15 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   };
   const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
 
-  // Auto-open dialog when action=new
+  // Auto-open wizard when action=new. Depends on the primitive value so the
+  // effect cannot re-run on every searchParams object identity change.
+  const actionParam = searchParams.get("action");
   useEffect(() => {
-    if (searchParams.get("action") === "new") {
+    if (actionParam === "new") {
       setIsWizardOpen(true);
       setSearchParams({ tab: "vendas" }, { replace: true });
     }
-  }, [searchParams]);
+  }, [actionParam, setSearchParams]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -113,28 +109,9 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
     return products.reduce((sum, p) => sum + calculateProductCommission(p), 0);
   };
 
-  const resetSaleForm = () => {
-    setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
-    setEditingSaleId(null);
-    setSelectedOpportunity("client");
-    setSellerId("");
-    setSellerCommission(0);
-  };
-
   const resetProductForm = () => {
     setProductFormData({ ...defaultProductForm });
     setEditingProductId(null);
-  };
-
-  const handleOpportunitySelect = (opportunityId: string) => {
-    const opp = closedOpportunities.find(o => o.id === opportunityId);
-    if (opp) {
-      setFormData({
-        client_name: opp.client?.name || "", destination: opp.destination,
-        sale_amount: Number(opp.estimated_value), sale_date: new Date().toISOString().split("T")[0],
-        notes: opp.notes || "", opportunity_id: opp.id,
-      });
-    }
   };
 
   // Sync seller commission expense
@@ -162,7 +139,11 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
     queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (
+    formData: SaleFormData,
+    sellerId: string,
+    sellerCommission: number,
+  ) => {
     if (editingSaleId) {
       await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
       if (sellerId) {
@@ -181,7 +162,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
       }
     }
     setIsDialogOpen(false);
-    resetSaleForm();
+    setEditingSaleId(null);
   };
 
   const handleProductSubmit = async () => {
@@ -198,13 +179,6 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
 
   const openEditSale = (sale: Sale) => {
     setEditingSaleId(sale.id);
-    setFormData({
-      client_name: sale.client_name, destination: sale.destination,
-      sale_amount: Number(sale.sale_amount), sale_date: sale.sale_date,
-      notes: sale.notes || "", opportunity_id: sale.opportunity_id || undefined,
-    });
-    setSellerId((sale as any).seller_id || "");
-    setSellerCommission(Number((sale as any).seller_commission_percent) || 0);
     setIsDialogOpen(true);
   };
 
@@ -508,135 +482,19 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
         </>)}
       </div>
 
-      {/* Sale Dialog (Create/Edit) */}
-      <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetSaleForm(); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingSaleId ? "Editar Venda" : "Nova Venda"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {!editingSaleId && (
-              <div className="space-y-3">
-                <Label>Origem da Venda</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => { setSelectedOpportunity("client"); setFormData({ ...formData, opportunity_id: undefined }); }}
-                    className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${selectedOpportunity !== "opportunity" ? "border-primary bg-primary/5 text-primary" : "border-muted hover:border-muted-foreground/30"}`}
-                  >
-                    <User className="h-4 w-4" /> Selecionar Cliente
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedOpportunity("opportunity")}
-                    className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-colors ${selectedOpportunity === "opportunity" ? "border-primary bg-primary/5 text-primary" : "border-muted hover:border-muted-foreground/30"}`}
-                  >
-                    <Download className="h-4 w-4" /> Importar de Oportunidade
-                  </button>
-                </div>
-
-                {selectedOpportunity === "opportunity" && (
-                  <div className="space-y-2">
-                    <Label>Oportunidade</Label>
-                    {availableOpportunities.length === 0 ? (
-                      <p className="text-sm text-muted-foreground p-3 border rounded-lg bg-muted/30">Nenhuma oportunidade fechada disponível para importar.</p>
-                    ) : (
-                      <Select value={formData.opportunity_id || ""} onValueChange={(id) => handleOpportunitySelect(id)}>
-                        <SelectTrigger><SelectValue placeholder="Selecione uma oportunidade" /></SelectTrigger>
-                        <SelectContent>
-                          {availableOpportunities.map((opp) => (
-                            <SelectItem key={opp.id} value={opp.id}>{opp.client?.name} - {opp.destination}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Cliente *</Label>
-                <Input value={formData.client_name} onChange={(e) => setFormData({ ...formData, client_name: e.target.value })} placeholder="Nome do cliente" />
-              </div>
-              <div className="space-y-2">
-                <Label>Destino</Label>
-                <Input value={formData.destination} onChange={(e) => setFormData({ ...formData, destination: e.target.value })} placeholder="Destino da viagem" />
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Valor Total da Venda</Label>
-                <Input
-                  type="number"
-                  value={formData.sale_amount}
-                  onChange={(e) => setFormData({ ...formData, sale_amount: Number(e.target.value) })}
-                  placeholder="0,00"
-                  disabled={!!editingSaleId}
-                />
-                {editingSaleId && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Calculado automaticamente pela soma dos produtos vendidos.
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label>Data da Venda</Label>
-                <Input type="date" value={formData.sale_date} onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })} />
-              </div>
-            </div>
-            {sellers.length > 0 && (
-              <div className="space-y-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Users className="h-4 w-4 text-muted-foreground" /> Quem vendeu?
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Vendedora</Label>
-                    <Select value={sellerId} onValueChange={(v) => {
-                      setSellerId(v);
-                      const sel = sellers.find(s => s.id === v);
-                      if (sel) setSellerCommission(sel.default_commission_percent);
-                    }}>
-                      <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
-                      <SelectContent>
-                        {sellers.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>{s.name} ({s.default_commission_percent}%)</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {sellerId && (
-                    <div className="space-y-2">
-                      <Label>Comissão (%)</Label>
-                      <Input type="number" value={sellerCommission} onChange={(e) => setSellerCommission(Number(e.target.value))} min={0} max={100} step={0.5} />
-                      <p className="text-xs text-muted-foreground">
-                        {formData.sale_amount > 0 && `= ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(formData.sale_amount * sellerCommission / 100)}`}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {sellerId && (
-                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { setSellerId(""); setSellerCommission(0); }}>
-                    Remover vendedora
-                  </Button>
-                )}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label>Observações</Label>
-              <Textarea value={formData.notes || ""} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações opcionais" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setIsDialogOpen(false); resetSaleForm(); }}>Cancelar</Button>
-            <Button onClick={handleSubmit} disabled={isSaving || !formData.client_name || !formData.destination}>
-              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {editingSaleId ? "Salvar" : "Criar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Sale Dialog (Create/Edit) — isolated component with local state */}
+      {isDialogOpen && (
+        <SaleFormDialog
+          key={editingSaleId ?? "new"}
+          open={isDialogOpen}
+          onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setEditingSaleId(null); }}
+          sale={editingSaleId ? (sales.find((s) => s.id === editingSaleId) ?? null) : null}
+          sellers={sellers}
+          opportunities={availableOpportunities}
+          isSaving={isSaving}
+          onSubmit={handleSubmit}
+        />
+      )}
 
       {/* Product Dialog (Create/Edit) */}
       <Dialog open={isProductDialogOpen} onOpenChange={(open) => { setIsProductDialogOpen(open); if (!open) resetProductForm(); }}>
