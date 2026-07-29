@@ -401,38 +401,95 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                   title="Passageiros"
                   description="Selecione quem será incluído no contrato. A lista vem dos viajantes da ficha do cliente."
                 >
-                  {saleData?.travelers?.length ? (
-                    <div className="space-y-2">
-                      {(saleData.travelers as { id: string; nome_completo: string; cpf: string | null }[]).map((t) => {
-                        const selectedIds = overrides.passenger_ids ?? (saleData.travelers as { id: string }[]).map((x) => x.id);
-                        const checked = selectedIds.includes(t.id);
-                        return (
-                          <label
-                            key={t.id}
-                            className="flex items-center gap-3 rounded-lg border border-border bg-background p-2.5 text-sm hover:bg-muted/40 transition-colors cursor-pointer"
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={(v) => {
-                                const next = v
-                                  ? [...selectedIds, t.id]
-                                  : selectedIds.filter((id) => id !== t.id);
-                                set('passenger_ids', next);
-                              }}
-                            />
-                            <span className="font-medium">{t.nome_completo}</span>
-                            <span className="text-muted-foreground text-xs">
-                              {t.cpf ? maskDocument(t.cpf) : 'sem CPF'}
-                            </span>
-                          </label>
-                        );
-                      })}
+                  {!resolvedClientId ? (
+                    <div className="space-y-3">
+                      <Alert>
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Venda sem cliente vinculado</AlertTitle>
+                        <AlertDescription className="text-xs">
+                          {clientCandidates.length > 1
+                            ? 'Encontramos mais de um cliente com este nome na sua agência. Selecione o correto para carregar os viajantes.'
+                            : 'Esta venda guarda apenas o nome do cliente. Vincule-a a um cliente da sua carteira para usar os viajantes já cadastrados.'}
+                        </AlertDescription>
+                      </Alert>
+                      {clientCandidates.length > 1 && (
+                        <div className="space-y-2">
+                          {clientCandidates.map((c) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => setManualClientId(c.id)}
+                              className="flex w-full items-center justify-between rounded-lg border border-border bg-background p-2.5 text-left text-sm hover:bg-muted/40"
+                            >
+                              <span className="font-medium">{c.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {c.email || c.phone || 'sem contato'}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : travelers.length ? (
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        {travelers.map((t) => {
+                          const selectedIds = overrides.passenger_ids ?? travelers.map((x) => x.id);
+                          const checked = selectedIds.includes(t.id);
+                          const info = passengerInfo(t, sale?.start_date ?? null);
+                          return (
+                            <label
+                              key={t.id}
+                              className="flex items-start gap-3 rounded-lg border border-border bg-background p-2.5 text-sm hover:bg-muted/40 transition-colors cursor-pointer"
+                            >
+                              <Checkbox
+                                className="mt-0.5"
+                                checked={checked}
+                                onCheckedChange={(v) => {
+                                  const next = v
+                                    ? [...selectedIds, t.id]
+                                    : selectedIds.filter((id) => id !== t.id);
+                                  set('passenger_ids', next);
+                                }}
+                              />
+                              <span className="min-w-0 flex-1">
+                                <span className="flex flex-wrap items-center gap-2">
+                                  <span className="font-medium">{t.nome_completo}</span>
+                                  {info.category && (
+                                    <Badge variant="secondary" className="text-[10px]">{info.category}</Badge>
+                                  )}
+                                  {t.is_responsavel && (
+                                    <Badge variant="outline" className="text-[10px]">Contratante</Badge>
+                                  )}
+                                </span>
+                                <span className="mt-0.5 block text-xs text-muted-foreground">
+                                  {info.details}
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => setQuickTravelerOpen(true)}
+                      >
+                        <UserPlus className="h-4 w-4" /> Adicionar passageiro
+                      </Button>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Nenhum passageiro cadastrado para este cliente. Cadastre os viajantes na ficha do cliente
-                      para incluí-los no contrato.
-                    </p>
+                    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-8 text-center">
+                      <Users className="h-8 w-8 text-muted-foreground/60" />
+                      <p className="max-w-sm text-sm text-muted-foreground">
+                        Este cliente ainda não tem viajantes cadastrados. Cadastre agora sem sair do contrato.
+                      </p>
+                      <Button type="button" size="sm" className="gap-2" onClick={() => setQuickTravelerOpen(true)}>
+                        <UserPlus className="h-4 w-4" /> Cadastrar passageiro agora
+                      </Button>
+                    </div>
                   )}
                 </FormSection>
 
