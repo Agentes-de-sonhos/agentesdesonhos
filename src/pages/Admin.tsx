@@ -214,6 +214,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminTourGuidesManager />;
     case "user-projects":
       return <AdminUserProjectsManager />;
+    case "agency-contracts":
+      return <AdminContractTemplatesManager />;
     default:
       return <AdminUserManager />;
   }
