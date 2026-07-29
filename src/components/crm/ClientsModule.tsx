@@ -531,12 +531,25 @@ export function ClientsModule() {
 
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-      ) : filteredClients.length === 0 ? (
+      ) : clients.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>Nenhum cliente encontrado</p>
+          {isEmptyAgency ? (
+            <>
+              <p className="font-medium text-foreground">Nenhum cliente cadastrado ainda</p>
+              <p className="text-sm mt-1">
+                Cadastre seu primeiro cliente ou importe seus contatos para começar.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium text-foreground">Nenhum resultado encontrado</p>
+              <p className="text-sm mt-1">Ajuste a busca ou os filtros para ver outros clientes.</p>
+            </>
+          )}
         </div>
       ) : (
+        <>
         <div className="rounded-md border overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -550,7 +563,7 @@ export function ClientsModule() {
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map((client) => (
+              {clients.map((client) => (
                 <tr
                   key={client.id}
                   className="border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
