@@ -42,6 +42,36 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
+/** Resumo legível do viajante (tipo, documento, nascimento/idade) para a lista de passageiros. */
+function passengerInfo(
+  t: {
+    nome_completo: string;
+    cpf: string | null;
+    data_nascimento: string | null;
+  },
+  tripDate: string | null,
+) {
+  let age: number | null = null;
+  if (t.data_nascimento) {
+    const [by, bm, bd] = t.data_nascimento.split('-').map(Number);
+    const ref = tripDate ? new Date(...(tripDate.split('-').map(Number) as [number, number, number])) : new Date();
+    const refDate = tripDate ? new Date(Number(tripDate.slice(0, 4)), Number(tripDate.slice(5, 7)) - 1, Number(tripDate.slice(8, 10))) : ref;
+    if (by && bm && bd) {
+      const birth = new Date(by, bm - 1, bd);
+      age = refDate.getFullYear() - birth.getFullYear();
+      const m = refDate.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && refDate.getDate() < birth.getDate())) age -= 1;
+    }
+  }
+  const category = age === null ? null : age < 2 ? 'Bebê' : age < 12 ? 'Criança' : 'Adulto';
+  const parts: string[] = [];
+  parts.push(t.cpf ? maskDocument(t.cpf) : 'sem documento');
+  if (t.data_nascimento) {
+    parts.push(`${formatDateBR(t.data_nascimento)}${age !== null ? ` (${age} anos)` : ''}`);
+  }
+  return { category, details: parts.join(' • ') };
+}
+
 /** Bloco visual padrão das seções do formulário. */
 function FormSection({
   title,
