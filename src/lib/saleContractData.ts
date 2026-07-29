@@ -141,6 +141,7 @@ export interface ContractDraftOverrides {
   installment_value?: number | null;
   due_dates?: string;
   down_payment?: number;
+  paid_to_supplier?: number;
   discounts?: number;
   taxes?: number;
   service_fee?: number;
