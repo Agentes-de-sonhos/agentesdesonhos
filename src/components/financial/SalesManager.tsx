@@ -417,7 +417,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                             <div className="text-sm text-primary">Comissão: {formatCurrency(totalCommission)}</div>
                           )}
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap justify-end">
                           <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">{products.length} produto(s)</span>
                           <Button
                             variant={products.length === 0 ? "default" : "outline"}
