@@ -74,7 +74,11 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
         products: (products.data ?? []) as never[],
         payments: (payments.data ?? []) as never[],
         client: (client.data ?? null) as never,
-        profile: (profile.data ?? null) as never,
+        profile: (profile.data ?? null) as {
+          name?: string | null;
+          agency_name?: string | null;
+          cnpj?: string | null;
+        } | null,
         travelers: travelers as never[],
       };
     },
