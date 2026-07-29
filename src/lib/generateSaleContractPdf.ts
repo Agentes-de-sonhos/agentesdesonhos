@@ -331,7 +331,9 @@ export async function generateSaleContractPdf(
   }
 
   // ── Cláusulas jurídicas ──
-  if (payload.legal_body_html) {
+  // Quando o modelo possui seções, elas são a fonte de renderização;
+  // legal_body_html guarda o corpo integral e não é repetido.
+  if (payload.legal_body_html && !payload.sections.length) {
     sectionTitle('Cláusulas contratuais');
     for (const line of htmlToLines(payload.legal_body_html)) text(line, 9);
   }
