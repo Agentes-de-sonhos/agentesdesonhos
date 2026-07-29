@@ -70,10 +70,30 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
         travelers = data ?? [];
       }
 
+      // Operadoras / consolidadoras vinculadas aos serviços da venda
+      const operatorIds = Array.from(
+        new Set(
+          ((products.data ?? []) as { operator_id?: string | null }[])
+            .map((p) => p.operator_id)
+            .filter((v): v is string => !!v),
+        ),
+      );
+      const operatorNames: Record<string, string> = {};
+      if (operatorIds.length) {
+        const { data: ops } = await supabase
+          .from('tour_operators')
+          .select('id,name')
+          .in('id', operatorIds);
+        (ops ?? []).forEach((o: { id: string; name: string }) => {
+          operatorNames[o.id] = o.name;
+        });
+      }
+
       return {
         products: (products.data ?? []) as never[],
         payments: (payments.data ?? []) as never[],
         client: (client.data ?? null) as never,
+        operatorNames,
         profile: (profile.data ?? null) as {
           name?: string | null;
           agency_name?: string | null;
@@ -95,6 +115,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
       client: saleData.client,
       travelers: saleData.travelers,
       agencyProfile: saleData.profile,
+      operatorNames: saleData.operatorNames,
       template: templateData?.template ?? null,
       sections: templateData?.sections ?? [],
       overrides,
@@ -320,6 +341,14 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                         type="number"
                         value={overrides.down_payment ?? ''}
                         onChange={(e) => set('down_payment', Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Pago diretamente ao fornecedor</Label>
+                      <Input
+                        type="number"
+                        value={overrides.paid_to_supplier ?? ''}
+                        onChange={(e) => set('paid_to_supplier', Number(e.target.value))}
                       />
                     </div>
                     <div>
