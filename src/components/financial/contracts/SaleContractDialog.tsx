@@ -309,6 +309,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const hasTemplate = !!templateData?.template;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90dvh] max-h-[90dvh] overflow-hidden flex flex-col gap-3 bg-background p-4 sm:p-6 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <DialogHeader className="shrink-0">
@@ -960,6 +961,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           </Tabs>
         )}
       </DialogContent>
+    </Dialog>
 
       {resolvedClientId && (
         <QuickTravelerDialog
@@ -974,6 +976,6 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           }}
         />
       )}
-    </Dialog>
+    </>
   );
 }
