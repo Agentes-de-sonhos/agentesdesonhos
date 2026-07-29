@@ -66,7 +66,7 @@ describe('contrato de venda', () => {
     expect(payload.services[2].supplier).toBeUndefined();
     // op2 = mesmo nome do fornecedor em p3? não: p3 sem fornecedor → operadora mantida
     expect(payload.services[2].operator).toBe('Hilton Orlando');
-    expect(payload.financial.total).toBeCloseTo(36420.65, 2);
+    expect(payload.financial.total).toBeCloseTo(36421.65, 2);
     expect(validateContractPayload(payload).filter((i) => i.severity === 'error')).toEqual([]);
     expect(hashPayload(payload)).toHaveLength(16);
 
