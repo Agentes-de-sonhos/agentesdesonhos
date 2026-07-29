@@ -5,6 +5,12 @@ import { formatDateBR, formatMoney } from '@/lib/saleContractData';
 const M_L = 18;
 const M_R = 18;
 
+const CATEGORY_LABELS: Record<string, string> = {
+  adulto: 'Adulto',
+  crianca: 'Criança',
+  bebe: 'Bebê',
+};
+
 function htmlToLines(html: string): string[] {
   if (!html) return [];
   const withBreaks = html
@@ -189,12 +195,14 @@ export async function generateSaleContractPdf(
     const details = [
       p.cpf ? `CPF ${p.cpf}` : '',
       p.birth_date ? `Nasc. ${formatDateBR(p.birth_date)}` : '',
-      p.age_at_trip !== null && p.age_at_trip !== undefined ? `${p.age_at_trip} anos` : '',
-      p.category ? p.category : '',
+      p.age_at_trip !== null && p.age_at_trip !== undefined
+        ? `${p.age_at_trip} ${p.age_at_trip === 1 ? 'ano' : 'anos'}`
+        : '',
+      p.category ? CATEGORY_LABELS[p.category] : '',
       p.passport ? `Passaporte ${p.passport}` : '',
       p.passport_validity ? `Validade ${formatDateBR(p.passport_validity)}` : '',
       p.nationality || '',
-      p.is_minor ? `Menor — responsável: ${p.guardian || 'não informado'}` : '',
+      p.is_minor ? (p.guardian ? `Menor — responsável: ${p.guardian}` : 'Menor de idade') : '',
     ].filter(Boolean);
     const lines = doc.splitTextToSize(details.join('  •  '), cW - 5);
     for (const line of lines) {
