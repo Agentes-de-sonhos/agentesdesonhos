@@ -75,9 +75,7 @@ export function useSaleContracts(saleId?: string) {
       if (!saleId || !agencyOwnerId) throw new Error('Venda ou agência não identificada.');
       const p = input.payload;
 
-      const { data, error } = await supabase
-        .from('sale_contracts')
-        .insert({
+      const row = {
           agency_id: agencyOwnerId,
           sale_id: saleId,
           template_id: input.templateId,
@@ -95,7 +93,10 @@ export function useSaleContracts(saleId?: string) {
           attachments_json: p.attachments as unknown as Record<string, unknown>,
           document_hash: input.documentHash,
           supersedes_contract_id: input.supersedesId ?? null,
-        })
+      };
+
+      const { data, error } = await (supabase.from('sale_contracts') as any)
+        .insert(row)
         .select()
         .single();
       if (error) throw error;
@@ -104,7 +105,7 @@ export function useSaleContracts(saleId?: string) {
         await supabase.from('sale_contracts').update({ status: 'superseded' }).eq('id', input.supersedesId);
       }
 
-      await supabase.from('sale_contract_audit_logs').insert({
+      await (supabase.from('sale_contract_audit_logs') as any).insert({
         contract_id: data.id,
         agency_id: agencyOwnerId,
         sale_id: saleId,
@@ -124,7 +125,7 @@ export function useSaleContracts(saleId?: string) {
 
   const logAction = async (contractId: string, action: 'viewed' | 'downloaded') => {
     if (!agencyOwnerId) return;
-    await supabase.from('sale_contract_audit_logs').insert({
+    await (supabase.from('sale_contract_audit_logs') as any).insert({
       contract_id: contractId,
       agency_id: agencyOwnerId,
       sale_id: saleId ?? null,
