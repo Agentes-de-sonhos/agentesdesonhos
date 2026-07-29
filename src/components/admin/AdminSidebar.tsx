@@ -116,6 +116,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "support-mode", label: "Modo Suporte", icon: Eye },
       { id: "plan-switcher", label: "Testar Planos", icon: Eye },
       { id: "user-projects", label: "Projetos Usuários", icon: FolderLock },
+      { id: "agency-contracts", label: "Contratos Agências", icon: FileSignature },
     ],
   },
 ];
