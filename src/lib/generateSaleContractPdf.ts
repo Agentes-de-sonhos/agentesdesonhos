@@ -288,9 +288,14 @@ export async function generateSaleContractPdf(
     kv('Parcelamento', `${f.installments_count}x${f.installment_value ? ` de ${formatMoney(f.installment_value, f.currency)}` : ''}`);
   kv('Vencimentos', f.due_dates);
   kv('Total já pago', formatMoney(f.paid, f.currency));
-  if (f.paid_to_supplier)
-    kv('Pago diretamente ao fornecedor', formatMoney(f.paid_to_supplier, f.currency));
   kv('Saldo pendente', formatMoney(f.pending, f.currency));
+  if (f.paid_to_supplier) {
+    kv('Pago diretamente ao fornecedor', formatMoney(f.paid_to_supplier, f.currency));
+    text(
+      'O valor pago diretamente ao fornecedor é informativo, foi quitado pelo CONTRATANTE junto ao respectivo prestador e NÃO abate o saldo pendente devido à CONTRATADA indicado acima.',
+      8,
+    );
+  }
   if (f.notes) text(f.notes, 9);
 
   // ── Seguro ──
