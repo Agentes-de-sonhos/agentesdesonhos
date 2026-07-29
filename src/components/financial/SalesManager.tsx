@@ -14,6 +14,7 @@ import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
 import { NewSaleWizard } from "@/components/financial/NewSaleWizard";
+import { SaleFormDialog } from "@/components/financial/SaleFormDialog";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -56,8 +57,6 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   const queryClient = useQueryClient();
   const { data: termsData } = useAgencySupplierTerms();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sellerId, setSellerId] = useState<string>("");
-  const [sellerCommission, setSellerCommission] = useState<number>(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
@@ -66,13 +65,8 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [contractSale, setContractSale] = useState<Sale | null>(null);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<string>("client");
   const [editingSaleId, setEditingSaleId] = useState<string | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<SaleFormData>({
-    client_name: "", destination: "", sale_amount: 0,
-    sale_date: new Date().toISOString().split("T")[0], notes: "",
-  });
   const defaultProductForm: SaleProductFormData = {
     product_type: "aereo", description: "", sale_price: 0,
     cost_price: 0, non_commissionable_taxes: 0, commission_type: "percentage", commission_value: 0,
@@ -81,13 +75,15 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
   };
   const [productFormData, setProductFormData] = useState<SaleProductFormData>(defaultProductForm);
 
-  // Auto-open dialog when action=new
+  // Auto-open wizard when action=new. Depends on the primitive value so the
+  // effect cannot re-run on every searchParams object identity change.
+  const actionParam = searchParams.get("action");
   useEffect(() => {
-    if (searchParams.get("action") === "new") {
+    if (actionParam === "new") {
       setIsWizardOpen(true);
       setSearchParams({ tab: "vendas" }, { replace: true });
     }
-  }, [searchParams]);
+  }, [actionParam, setSearchParams]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -113,28 +109,9 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
     return products.reduce((sum, p) => sum + calculateProductCommission(p), 0);
   };
 
-  const resetSaleForm = () => {
-    setFormData({ client_name: "", destination: "", sale_amount: 0, sale_date: new Date().toISOString().split("T")[0], notes: "" });
-    setEditingSaleId(null);
-    setSelectedOpportunity("client");
-    setSellerId("");
-    setSellerCommission(0);
-  };
-
   const resetProductForm = () => {
     setProductFormData({ ...defaultProductForm });
     setEditingProductId(null);
-  };
-
-  const handleOpportunitySelect = (opportunityId: string) => {
-    const opp = closedOpportunities.find(o => o.id === opportunityId);
-    if (opp) {
-      setFormData({
-        client_name: opp.client?.name || "", destination: opp.destination,
-        sale_amount: Number(opp.estimated_value), sale_date: new Date().toISOString().split("T")[0],
-        notes: opp.notes || "", opportunity_id: opp.id,
-      });
-    }
   };
 
   // Sync seller commission expense
@@ -162,7 +139,11 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
     queryClient.invalidateQueries({ queryKey: ["expense_entries"] });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (
+    formData: SaleFormData,
+    sellerId: string,
+    sellerCommission: number,
+  ) => {
     if (editingSaleId) {
       await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
       if (sellerId) {
@@ -181,7 +162,7 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
       }
     }
     setIsDialogOpen(false);
-    resetSaleForm();
+    setEditingSaleId(null);
   };
 
   const handleProductSubmit = async () => {
@@ -198,13 +179,6 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
 
   const openEditSale = (sale: Sale) => {
     setEditingSaleId(sale.id);
-    setFormData({
-      client_name: sale.client_name, destination: sale.destination,
-      sale_amount: Number(sale.sale_amount), sale_date: sale.sale_date,
-      notes: sale.notes || "", opportunity_id: sale.opportunity_id || undefined,
-    });
-    setSellerId((sale as any).seller_id || "");
-    setSellerCommission(Number((sale as any).seller_commission_percent) || 0);
     setIsDialogOpen(true);
   };
 
