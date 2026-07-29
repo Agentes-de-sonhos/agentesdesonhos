@@ -427,16 +427,18 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
                           >
                             <Plus className="h-3 w-3 mr-1" /> Produto
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
-                            <Pencil className="h-4 w-4 text-muted-foreground" />
-                          </Button>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Gerar contrato"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs"
+                            title="Revisar e gerar contrato desta venda"
                             onClick={(e) => { e.stopPropagation(); setContractSale(sale); }}
                           >
-                            <FileSignature className="h-4 w-4 text-muted-foreground" />
+                            <FileSignature className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Contrato</span>
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditSale(sale); }}>
+                            <Pencil className="h-4 w-4 text-muted-foreground" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteId(sale.id); }}>
                             <Trash2 className="h-4 w-4 text-destructive" />
