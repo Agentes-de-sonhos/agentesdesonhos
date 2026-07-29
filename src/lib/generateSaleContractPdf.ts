@@ -407,15 +407,6 @@ export async function generateSaleContractPdf(
     creator: agencyName,
     keywords: `contrato,${payload.contract_number}`,
   });
-  // jsPDF grava "jsPDF x.y.z" em Producer; substituímos pela agência.
-  const internals = doc as unknown as { internal: { getEncryptor?: unknown }; };
-  try {
-    (doc as unknown as { internal: { events: { publish: (n: string) => void } } }).internal;
-  } catch {
-    /* noop */
-  }
-  void internals;
-
   const slug = (v: string) =>
     v
       .normalize('NFD')
