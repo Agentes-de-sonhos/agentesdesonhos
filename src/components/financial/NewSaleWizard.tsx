@@ -445,7 +445,14 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       onCreated?.(sale.id);
       onOpenChange(false);
     } catch (e: any) {
-      toast({ title: "Erro ao criar venda", description: e?.message || "Tente novamente", variant: "destructive" });
+      const duplicated = e?.code === "23505" || /duplicate key|import_fingerprint/i.test(e?.message || "");
+      toast({
+        title: duplicated ? "Operação já importada" : "Erro ao criar venda",
+        description: duplicated
+          ? "Já existe uma venda criada a partir destas mesmas fontes."
+          : e?.message || "Tente novamente",
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
