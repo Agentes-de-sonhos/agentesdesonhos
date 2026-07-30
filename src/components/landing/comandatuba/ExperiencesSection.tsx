@@ -17,7 +17,7 @@ const POSITIONS = [
   "center 40%", // atividades aquáticas
   "center 45%", // crianças
   "center 50%", // natureza
-  "center 45%", // bem-estar / spa
+  "center 25%", // bem-estar / spa
   "center 40%", // entretenimento / trapézio
 ];
 
