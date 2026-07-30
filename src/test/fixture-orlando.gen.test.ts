@@ -41,7 +41,7 @@ describe('fixture orlando', () => {
         discounts: 1000,
         taxes: 450,
         service_fee: 550,
-        financial_notes: 'Valores em reais (BRL). O saldo pendente considera apenas os pagamentos recebidos pela CONTRATADA.',
+        financial_notes: 'O valor de R$ 5.000,00 foi pago diretamente pelo CONTRATANTE ao fornecedor e não compõe os valores recebidos pela CONTRATADA.',
         insurance_contracted: true,
         insurance_insurer: 'Assist Card',
         insurance_plan: 'AC 60 Internacional',
