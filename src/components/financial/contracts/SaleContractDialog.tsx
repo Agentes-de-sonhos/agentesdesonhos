@@ -41,6 +41,15 @@ import { downloadStoredContractPdf, sha256Hex, uploadContractPdf } from '@/lib/c
 import { FIELD_LABEL, SOURCE_LABEL } from '@/lib/insuranceSources';
 import { InsuranceImportDialog } from './InsuranceImportDialog';
 import { useInsuranceSources } from './useInsuranceSources';
+import { ScopeSuggestionDialog } from './ScopeSuggestionDialog';
+import { useContractScopeSources } from './useContractScopeSources';
+import {
+  mergeScopeLines,
+  parseScopeItems,
+  type ScopeField,
+  type ScopeItem,
+  type ScopeProvenanceEntry,
+} from '@/lib/contractScope';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
@@ -154,6 +163,14 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const [insuranceImportOpen, setInsuranceImportOpen] = useState(false);
   const [insuranceLookupEnabled, setInsuranceLookupEnabled] = useState(false);
   const insuranceSources = useInsuranceSources(sale, insuranceLookupEnabled);
+
+  // Sugestão de escopo com IA (inclusos / não inclusos).
+  const [scopeLookupEnabled, setScopeLookupEnabled] = useState(false);
+  const scopeSources = useContractScopeSources(sale, scopeLookupEnabled);
+  const [scopeField, setScopeField] = useState<ScopeField | null>(null);
+  const [scopeItems, setScopeItems] = useState<ScopeItem[]>([]);
+  const [scopeLoading, setScopeLoading] = useState(false);
+  const [scopeError, setScopeError] = useState<string | null>(null);
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
   const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
