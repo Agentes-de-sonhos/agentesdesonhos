@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { isWithinOfficeHours, describeOfficeHours } from "@/lib/officeHours";
 import { scrollToForm, whatsappUrl, type AgencyConfig, type LandingContext } from "./content";
+import { useServerClock } from "./useServerClock";
 
 /**
  * Decides how a WhatsApp CTA should behave.
@@ -12,9 +13,12 @@ export function useWhatsAppCta(
   ctx: LandingContext | null,
   message: string
 ) {
+  // Server-anchored, continuously advancing reference time. Never the raw
+  // device clock, and never frozen at page-load time.
+  const referenceNow = useServerClock(ctx?.serverNowIso);
+
   return useMemo(() => {
     const hasWhatsapp = !!agency.whatsapp && agency.whatsapp.replace(/\D/g, "").length >= 10;
-    const referenceNow = ctx?.serverNowIso ? new Date(ctx.serverNowIso) : new Date();
     const open =
       !ctx || ctx.isDemo
         ? true
@@ -32,5 +36,5 @@ export function useWhatsAppCta(
         ? "Fora do horário de atendimento — deixe seus dados e retornamos no próximo horário disponível."
         : "Deixe seus dados e entraremos em contato pelo WhatsApp.",
     };
-  }, [agency, ctx, message]);
+  }, [agency, ctx, message, referenceNow]);
 }
