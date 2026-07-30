@@ -44,7 +44,8 @@ describe('contrato de venda', () => {
       overrides: {
         client_document: '123.456.789-09', client_address: 'Rua das Flores, 25 — Indaial/SC',
         discounts: 500, taxes: 320.75, service_fee: 250, down_payment: 10000, paid_to_supplier: 2000,
-        installments_count: 10, payment_method: 'Cartão de crédito 10x', due_dates: 'Todo dia 05',
+        installments_count: 7, installment_value: 3050.11, first_due_date: '2026-10-05',
+        payment_method: 'Cartão de crédito parcelado',
         included: 'Aéreo\nHospedagem', not_included: 'Refeições\nPasseios',
         conditions_penalties: 'Cancelamento sujeito a multa da operadora.',
         conditions_baggage: '1 bagagem de 23kg por passageiro.',
@@ -101,7 +102,7 @@ describe('modelo Travel.IN Viagens', () => {
       travelers, agencyProfile: { agency_name: 'Travel.IN Viagens', city: 'Indaial' },
       operatorNames: { op1: 'CVC Consolidadora', op2: 'Hilton Orlando' },
       template: tpl, sections: secs,
-      overrides: { client_document: '123.456.789-09', down_payment: 10000, payment_method: 'Cartão de crédito 10x', insurance_contracted: false, insurance_refusal_ack: true },
+      overrides: { client_document: '123.456.789-09', down_payment: 10000, payment_method: 'Cartão de crédito parcelado', installments_count: 7, installment_value: 3050.11, first_due_date: '2026-10-05', insurance_contracted: false, insurance_refusal_ack: true },
       contractNumber: buildContractNumber(sale.id, 1),
       revision: 1,
     });
