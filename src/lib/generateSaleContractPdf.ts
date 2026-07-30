@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import type { ContractPayload } from '@/types/contracts';
-import { formatDateBR, formatMoney } from '@/lib/saleContractData';
+import { formatDateBR, formatMoney, formatPaymentMethodLabel } from '@/lib/saleContractData';
 
 const M_L = 18;
 const M_R = 18;
@@ -312,41 +312,30 @@ export async function generateSaleContractPdf(
   if (f.taxes) kv('Taxas', formatMoney(f.taxes, f.currency));
   if (f.service_fee) kv('Taxa de serviço', formatMoney(f.service_fee, f.currency));
   kv('Valor total do contrato', formatMoney(f.total, f.currency));
-  if (f.down_payment) kv('Entrada', formatMoney(f.down_payment, f.currency));
-  if (f.down_payment) kv('Saldo', formatMoney(f.balance, f.currency));
+  kv('Total já recebido pela CONTRATADA', formatMoney(f.paid, f.currency));
+  kv('Saldo pendente atual', formatMoney(f.pending, f.currency));
+  if (f.paid_to_supplier > 0)
+    kv('Pago diretamente ao fornecedor', formatMoney(f.paid_to_supplier, f.currency));
+
+  // Forma de pagamento: texto da agência, exibido uma única vez e sem composição automática.
   kv('Forma de pagamento', f.payment_method);
   if (f.installments_count)
     kv('Parcelamento', `${f.installments_count}x${f.installment_value ? ` de ${formatMoney(f.installment_value, f.currency)}` : ''}`);
-  kv('Total já pago', formatMoney(f.paid, f.currency));
-  kv('Saldo pendente', formatMoney(f.pending, f.currency));
-  if (f.paid_to_supplier) {
-    kv('Pago diretamente ao fornecedor', formatMoney(f.paid_to_supplier, f.currency));
-    text(
-      'O valor pago diretamente ao fornecedor é informativo, foi quitado pelo CONTRATANTE junto ao respectivo prestador e NÃO abate o saldo pendente devido à CONTRATADA indicado acima.',
-      8,
-    );
-  }
-  if (f.notes) text(f.notes, 9);
-
-  if (f.payment_summary) {
-    y += 2;
-    text('Composição do pagamento', 9, 'bold');
-    text(f.payment_summary, 9);
-  }
 
   if (f.received.length) {
     y += 2;
     text('Pagamentos já recebidos pela CONTRATADA', 9, 'bold');
-    f.received.forEach((p) =>
+    f.received.forEach((p) => {
+      const method = formatPaymentMethodLabel(p.method);
       text(
-        `•  ${formatDateBR(p.date)} — ${formatMoney(p.amount, f.currency)}${p.method ? ` (${p.method})` : ''}${
-          p.kind === 'entrada' ? ' — entrada' : ''
+        `•  ${formatDateBR(p.date)} — ${formatMoney(p.amount, f.currency)}${method ? ` via ${method}` : ''} — ${
+          p.kind === 'entrada' ? 'entrada' : 'pagamento adicional'
         }`,
         9,
         'normal',
         4,
-      ),
-    );
+      );
+    });
   }
 
   if (f.schedule.length) {
@@ -354,7 +343,7 @@ export async function generateSaleContractPdf(
     text('Cronograma das parcelas a vencer', 9, 'bold');
     f.schedule.forEach((i) =>
       text(
-        `•  Parcela ${i.number}/${f.schedule.length} — vencimento ${formatDateBR(i.due_date)} — ${formatMoney(i.amount, f.currency)}`,
+        `•  Parcela ${i.number}/${f.schedule.length} — ${formatDateBR(i.due_date)} — ${formatMoney(i.amount, f.currency)}`,
         9,
         'normal',
         4,
@@ -362,6 +351,23 @@ export async function generateSaleContractPdf(
     );
   } else if (f.due_dates) {
     kv('Vencimentos', f.due_dates);
+  }
+
+  // Observações financeiras: texto manual da agência + nota automática do pagamento
+  // direto ao fornecedor, impressa uma única vez e apenas quando não houver menção manual.
+  const notes = (f.notes ?? '').trim();
+  const notesMentionSupplier = /pago\s+diretamente|fornecedor/i.test(
+    notes.normalize('NFD').replace(/[\u0300-\u036f]/g, ''),
+  );
+  const supplierNote =
+    f.paid_to_supplier > 0 && !notesMentionSupplier
+      ? 'Valor informativo, pago pelo CONTRATANTE diretamente ao fornecedor, sem compor os valores recebidos pela CONTRATADA e sem reduzir o saldo pendente devido à CONTRATADA.'
+      : '';
+  if (notes || supplierNote) {
+    y += 2;
+    text('Observações financeiras', 9, 'bold');
+    if (notes) text(notes, 9);
+    if (supplierNote) text(supplierNote, 8);
   }
 
   // ── Seguro ──
