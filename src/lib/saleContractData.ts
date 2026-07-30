@@ -214,6 +214,38 @@ function splitLines(value?: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Formata o método de pagamento apenas para leitura humana no documento.
+ * Nunca altera o dado persistido no banco.
+ */
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  pix: 'PIX',
+  credito: 'cartão de crédito',
+  credit: 'cartão de crédito',
+  cartao_credito: 'cartão de crédito',
+  cartao_de_credito: 'cartão de crédito',
+  debito: 'cartão de débito',
+  cartao_debito: 'cartão de débito',
+  transferencia: 'transferência bancária',
+  boleto: 'Boleto',
+  dinheiro: 'Dinheiro',
+};
+
+export function formatPaymentMethodLabel(method?: string | null): string {
+  const raw = (method ?? '').trim();
+  if (!raw) return '';
+  const key = raw
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '_');
+  if (PAYMENT_METHOD_LABELS[key]) return PAYMENT_METHOD_LABELS[key];
+  const words = key.split('_').filter(Boolean);
+  if (!words.length) return raw;
+  const pretty = raw.replace(/_/g, ' ').trim();
+  return pretty.charAt(0).toUpperCase() + pretty.slice(1);
+}
+
 export interface PaymentPlan {
   received: ContractReceivedPayment[];
   schedule: ContractInstallment[];

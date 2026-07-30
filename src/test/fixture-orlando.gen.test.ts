@@ -1,19 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { buildContractPayload, buildContractNumber, hashPayload, validateContractPayload } from '@/lib/saleContractData';
 import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
 
-const F = JSON.parse(readFileSync('/tmp/fixture-input.json', 'utf8'));
+const FIXTURE_PATH = '/tmp/fixture-input.json';
+const hasFixture = existsSync(FIXTURE_PATH);
+const F = hasFixture ? JSON.parse(readFileSync(FIXTURE_PATH, 'utf8')) : null;
 
-describe('fixture orlando', () => {
+describe.skipIf(!hasFixture)('fixture orlando', () => {
   it('gera contrato', async () => {
     const payload = buildContractPayload({
       sale: F.sale, products: F.products, payments: F.payments,
       client: F.client, travelers: F.travelers,
       agencyProfile: F.profile, operatorNames: F.operators,
       template: F.template, sections: F.sections,
-      contractNumber: buildContractNumber(F.sale.id, 1, new Date('2026-07-29T12:00:00')),
-      revision: 1,
+      contractNumber: buildContractNumber(F.sale.id, 3, new Date('2026-07-29T12:00:00')),
+      revision: 3,
       overrides: {
         client_document: '529.982.247-25',
         client_person_type: 'fisica',
@@ -41,7 +43,7 @@ describe('fixture orlando', () => {
         discounts: 1000,
         taxes: 450,
         service_fee: 550,
-        financial_notes: 'Valores em reais (BRL). O saldo pendente considera apenas os pagamentos recebidos pela CONTRATADA.',
+        financial_notes: 'O valor de R$ 5.000,00 foi pago diretamente pelo CONTRATANTE ao fornecedor e não compõe os valores recebidos pela CONTRATADA.',
         insurance_contracted: true,
         insurance_insurer: 'Assist Card',
         insurance_plan: 'AC 60 Internacional',

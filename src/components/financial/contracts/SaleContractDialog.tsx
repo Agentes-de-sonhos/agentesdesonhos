@@ -876,8 +876,11 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                               .join(', ')}
                           </p>
                         )}
-                        {payload.financial.payment_summary && (
-                          <p className="text-muted-foreground">{payload.financial.payment_summary}</p>
+                        {payload.financial.paid_to_supplier > 0 && (
+                          <p className="text-muted-foreground">
+                            Pago diretamente ao fornecedor{' '}
+                            {formatMoney(payload.financial.paid_to_supplier)} (informativo, não abate o saldo)
+                          </p>
                         )}
                       </div>
                     )}
