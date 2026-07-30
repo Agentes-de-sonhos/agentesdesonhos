@@ -32,10 +32,10 @@ describe('fixture orlando', () => {
         trip_program_note: 'Programação livre; passeios e parques conforme datas dos ingressos emitidos.',
         included: 'Passagem aérea ida e volta GRU–MCO para 4 passageiros\nHospedagem de 10 noites em apartamento familiar com café da manhã\nTransfer privativo aeroporto–hotel–aeroporto com bebê conforto\nIngressos de parques Disney (4 dias) e Universal (2 dias) para 3 pagantes\nSeguro viagem internacional para os 4 passageiros\nLocação de SUV intermediário por 10 diárias com proteção completa',
         not_included: 'Refeições não citadas neste contrato\nResort fee do hotel, pago diretamente no destino\nCombustível, pedágios e estacionamento do veículo locado\nGorjetas, despesas pessoais e passeios opcionais\nTaxas de emissão de visto e vacinas',
-        payment_method: 'Entrada de R$ 20.000,00 via PIX + saldo em 6 parcelas iguais no cartão de crédito',
+        payment_method: 'Entrada via PIX e saldo parcelado no cartão de crédito',
         installments_count: 6,
         installment_value: 5500,
-        due_dates: 'Parcelas mensais no dia 29, de 29/08/2026 a 29/01/2027.',
+        first_due_date: '2026-09-29',
         down_payment: 20000,
         paid_to_supplier: 5000,
         discounts: 1000,
@@ -58,6 +58,9 @@ describe('fixture orlando', () => {
         conditions_general: 'Alterações de itinerário solicitadas após a emissão estão sujeitas a taxas dos fornecedores e à disponibilidade. Contrato de teste beta — FIXTURE_CONTRATO_COMPLETO_ORLANDO_2026_V1.',
         attachments: 'Voucher de hospedagem do hotel em Orlando\nBilhetes aéreos eletrônicos GRU–MCO ida e volta\nVouchers de ingressos dos parques temáticos\nApólice do seguro viagem internacional\nVoucher do transfer privativo\nVoucher da locação de veículo',
         passenger_ids: F.travelers.map((t: any) => t.id),
+        signatory_ids: F.travelers
+          .filter((t: any) => t.data_nascimento && t.data_nascimento < '2008-01-01')
+          .map((t: any) => t.id),
       },
     });
     const issues = validateContractPayload(payload);
@@ -65,6 +68,9 @@ describe('fixture orlando', () => {
     console.log('ISSUES', JSON.stringify(issues));
     console.log('HASH', hashPayload(payload));
     console.log('FIN', JSON.stringify(payload.financial));
+    console.log('SIGNERS', payload.signers.map((s) => s.name).join(' | '));
+    console.log('SCHED', payload.financial.schedule.map((i) => `${i.number}:${i.due_date}:${i.amount}`).join(' | '));
+    console.log('SUMMARY', payload.financial.payment_summary);
     console.log('CATS', payload.passengers.map((p) => `${p.name}=${p.category}/${p.age_at_trip}`).join(' | '));
     expect(issues.filter((i) => i.severity === 'error')).toEqual([]);
 
