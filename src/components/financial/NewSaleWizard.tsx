@@ -28,7 +28,13 @@ import { ClientSelector } from "@/components/shared/ClientSelector";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 
-import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
+import { useFinancial } from "@/hooks/useFinancial";
+import { useOperationSearch, useOperationBundle, type OperationCandidate } from "@/hooks/useOperationSources";
+import { StepLocateOperation, StepOperationSources } from "@/components/financial/import/OperationImportSteps";
+import {
+  DEFAULT_PRECEDENCE, buildDraftFromPair, buildImportFingerprint, detectDivergences,
+  matchServices, type Precedence, type ServicePair,
+} from "@/lib/saleImport";
 import { useSellers } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgencySupplierTerms, type SupplierTerms } from "@/hooks/useAgencySupplierTerms";
@@ -40,13 +46,13 @@ import { PRODUCT_TYPES } from "@/types/financial";
 
 // ------------- types -------------
 
-type WizardStep = "origin" | "opportunity" | "source" | "confirm" | "client" | "destination" | "date" | "products" | "review";
+type WizardStep = "origin" | "locate" | "sources" | "confirm" | "client" | "destination" | "date" | "products" | "review";
 const MANUAL_STEPS: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
-const CRM_STEPS: WizardStep[] = ["origin", "opportunity", "source", "confirm", "review"];
+const CRM_STEPS: WizardStep[] = ["origin", "locate", "sources", "confirm", "review"];
 const STEP_LABELS: Record<WizardStep, string> = {
   origin: "Origem",
-  opportunity: "Oportunidade",
-  source: "Fonte",
+  locate: "Operação",
+  sources: "Fontes",
   confirm: "Confirmar",
   client: "Cliente",
   destination: "Destino",
@@ -55,7 +61,12 @@ const STEP_LABELS: Record<WizardStep, string> = {
   review: "Revisão",
 };
 
-type DraftProduct = SaleProductFormData & { _tempId: string };
+type DraftProduct = SaleProductFormData & {
+  _tempId: string;
+  source_kind?: string;
+  source_service_id?: string | null;
+  source_provenance?: Record<string, unknown>;
+};
 
 const defaultProduct = (): DraftProduct => ({
   _tempId: crypto.randomUUID(),
@@ -177,19 +188,18 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: termsData } = useAgencySupplierTerms();
-  const { closedOpportunities } = useClosedOpportunities();
-
   const [step, setStep] = useState<WizardStep>("origin");
   const [submitting, setSubmitting] = useState(false);
 
   // step 1
   const [origin, setOrigin] = useState<"manual" | "crm">("manual");
-  // CRM import state
-  const [opportunityId, setOpportunityId] = useState<string | null>(null);
-  const [sourceKind, setSourceKind] = useState<"wallet" | "quote" | null>(null);
-  const [importDetected, setImportDetected] = useState<{ tripId: string | null; quoteId: string | null }>({ tripId: null, quoteId: null });
-  const [importing, setImporting] = useState(false);
-  const [importSourceLabel, setImportSourceLabel] = useState<string>("");
+  // multi-source import state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [candidate, setCandidate] = useState<OperationCandidate | null>(null);
+  const [walletId, setWalletId] = useState<string | null>(null);
+  const [quoteId, setQuoteId] = useState<string | null>(null);
+  const [precedence, setPrecedence] = useState<Precedence>(DEFAULT_PRECEDENCE);
+  const [excluded, setExcluded] = useState<Set<string>>(new Set());
   // step 2
   const [client, setClient] = useState<{ id: string; name: string } | null>(null);
   // step 3
@@ -220,11 +230,12 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       setSellerId("");
       setSellerCommission(0);
       setSubmitting(false);
-      setOpportunityId(null);
-      setSourceKind(null);
-      setImportDetected({ tripId: null, quoteId: null });
-      setImporting(false);
-      setImportSourceLabel("");
+      setSearchTerm("");
+      setCandidate(null);
+      setWalletId(null);
+      setQuoteId(null);
+      setPrecedence(DEFAULT_PRECEDENCE);
+      setExcluded(new Set());
     }
   }, [open]);
 
@@ -239,83 +250,93 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     return { sale, taxes, base: sale - taxes, commission };
   }, [products]);
 
-  // ---------- CRM import helpers ----------
-  const opportunity = useMemo(
-    () => closedOpportunities.find((o: any) => o.id === opportunityId) || null,
-    [closedOpportunities, opportunityId],
+  // ---------- multi-source import ----------
+  const { data: searchResults = [], isFetching: searching } = useOperationSearch(searchTerm);
+  const { data: bundle = null, isFetching: bundleLoading } = useOperationBundle(candidate);
+
+  const selectedWallet = useMemo(
+    () => bundle?.wallets.find((w) => w.id === walletId) || null,
+    [bundle, walletId],
+  );
+  const selectedQuote = useMemo(
+    () => bundle?.quotes.find((q) => q.id === quoteId) || null,
+    [bundle, quoteId],
   );
 
-  // When an opportunity is selected, detect linked Wallet (trip) and Quote
+  // Auto-select the most recent source of each kind when the bundle resolves
   useEffect(() => {
-    if (!opportunity || !user) {
-      setImportDetected({ tripId: null, quoteId: null });
-      setSourceKind(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const [tripRes, quoteRes] = await Promise.all([
-        supabase.from("trips").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
-        supabase.from("quotes").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
-      ]);
-      if (cancelled) return;
-      const tripId = tripRes.data?.id || null;
-      const quoteId = quoteRes.data?.id || null;
-      setImportDetected({ tripId, quoteId });
-      // auto-select preferred source
-      if (tripId) setSourceKind("wallet");
-      else if (quoteId) setSourceKind("quote");
-      else setSourceKind(null);
-    })();
-    return () => { cancelled = true; };
-  }, [opportunity, user]);
+    if (!bundle) return;
+    setWalletId(bundle.wallets[0]?.id || null);
+    setQuoteId(bundle.quotes[0]?.id || null);
+    setExcluded(new Set());
+  }, [bundle]);
 
-  // When a source is chosen, fetch + map its services into draft products,
-  // and pre-fill client/destination/saleDate from the opportunity.
+  const pairs: ServicePair[] = useMemo(() => {
+    if (!selectedWallet && !selectedQuote) return [];
+    return matchServices(selectedWallet?.services || [], selectedQuote?.services || []);
+  }, [selectedWallet, selectedQuote]);
+
+  const divergences = useMemo(
+    () => (selectedWallet && selectedQuote ? detectDivergences(pairs) : []),
+    [pairs, selectedWallet, selectedQuote],
+  );
+
+  const importSourceLabel = useMemo(() => {
+    const parts: string[] = [];
+    if (selectedWallet) parts.push("Carteira Digital");
+    if (selectedQuote) parts.push("Orçamento");
+    if (candidate?.hasOpportunity) parts.push("CRM");
+    return parts.join(" + ");
+  }, [selectedWallet, selectedQuote, candidate]);
+
+  // Build draft products from the selected sources, honoring precedence rules.
   useEffect(() => {
-    if (origin !== "crm" || !opportunity || !sourceKind) return;
-    let cancelled = false;
-    (async () => {
-      setImporting(true);
-      try {
-        const opp: any = opportunity;
-        // Pre-fill metadata
-        setClient({ id: opp.client_id || "", name: opp.client?.name || "Cliente" });
-        if (opp.destination) setDestination(opp.destination);
-        if (opp.notes) setNotes(opp.notes);
-
-        let imported: DraftProduct[] = [];
-        if (sourceKind === "wallet" && importDetected.tripId) {
-          const { data } = await supabase
-            .from("trip_services")
-            .select("*")
-            .eq("trip_id", importDetected.tripId)
-            .order("order_index");
-          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "trip", termsData?.byOperator));
-          setImportSourceLabel("Carteira Digital");
-        } else if (sourceKind === "quote" && importDetected.quoteId) {
-          const { data } = await supabase
-            .from("quote_services")
-            .select("*")
-            .eq("quote_id", importDetected.quoteId)
-            .order("order_index");
-          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "quote", termsData?.byOperator));
-          setImportSourceLabel("Orçamento");
+    if (origin !== "crm") return;
+    const drafts = pairs
+      .filter((p) => !excluded.has(p.key))
+      .map((p) => buildDraftFromPair(p, precedence) as DraftProduct)
+      .map((d) => {
+        const terms = d.operator_id ? termsData?.byOperator.get(d.operator_id) : undefined;
+        if (!terms) return d;
+        const next = { ...d };
+        if (terms.default_commission_type) {
+          next.commission_type = terms.default_commission_type;
+          next.commission_value = terms.default_commission_type === "percentage"
+            ? Number(terms.default_commission_percent || 0)
+            : Number(terms.default_commission_fixed || 0);
         }
-        if (!cancelled) setProducts(imported);
-      } finally {
-        if (!cancelled) setImporting(false);
-      }
-    })();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [origin, opportunity, sourceKind, importDetected.tripId, importDetected.quoteId]);
+        if (terms.default_non_commissionable_fees != null) {
+          next.non_commissionable_taxes = Number(terms.default_non_commissionable_fees);
+        }
+        if (terms.payment_rule && terms.payment_rule !== "manual") next.payment_rule = terms.payment_rule;
+        if (terms.payment_days != null) next.payment_days = Number(terms.payment_days);
+        next.requires_invoice = !!terms.requires_invoice;
+        return next;
+      });
+    setProducts(drafts);
+  }, [origin, pairs, excluded, precedence, termsData]);
+
+  // Pre-fill the sale metadata from the resolved bundle
+  useEffect(() => {
+    if (origin !== "crm" || !bundle) return;
+    setClient({ id: bundle.clientId || "", name: bundle.clientName || "Cliente" });
+    if (bundle.destination) setDestination(bundle.destination);
+    if (bundle.notes) setNotes(bundle.notes);
+  }, [origin, bundle]);
+
+  const toggleExcluded = (key: string) => {
+    setExcluded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
 
   const canAdvance = (): boolean => {
     switch (step) {
       case "origin": return origin === "manual" || origin === "crm";
-      case "opportunity": return !!opportunityId;
-      case "source": return !!sourceKind && products.length > 0 && !importing;
+      case "locate": return !!candidate;
+      case "sources": return !bundleLoading && products.length > 0;
       case "confirm": return !!client && destination.trim().length > 1 && !!saleDate;
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
@@ -379,13 +400,36 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     if (!client) return;
     setSubmitting(true);
     try {
+      const isImport = origin === "crm" && !!candidate;
       const sale: any = await createSale({
         client_name: client.name,
         destination,
         sale_amount: totals.sale,
         sale_date: saleDate,
         notes: notes || undefined,
+        ...(client.id ? { client_id: client.id } : {}),
         ...(sellerId ? { seller_id: sellerId, seller_commission_percent: sellerCommission } : {}),
+        ...(isImport
+          ? {
+              opportunity_id: candidate!.opportunityId || undefined,
+              source_trip_id: walletId || undefined,
+              source_quote_id: quoteId || undefined,
+              source_operation_id: candidate!.operationId || undefined,
+              import_fingerprint: buildImportFingerprint({
+                opportunityId: candidate!.opportunityId,
+                tripId: walletId,
+                quoteId,
+                operationId: candidate!.operationId,
+              }),
+              import_provenance: {
+                imported_at: new Date().toISOString(),
+                sources: importSourceLabel,
+                precedence,
+                divergences_count: divergences.length,
+                excluded_count: excluded.size,
+              },
+            }
+          : {}),
       } as any);
       if (!sale?.id) throw new Error("Falha ao criar venda");
 
@@ -401,7 +445,14 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       onCreated?.(sale.id);
       onOpenChange(false);
     } catch (e: any) {
-      toast({ title: "Erro ao criar venda", description: e?.message || "Tente novamente", variant: "destructive" });
+      const duplicated = e?.code === "23505" || /duplicate key|import_fingerprint/i.test(e?.message || "");
+      toast({
+        title: duplicated ? "Operação já importada" : "Erro ao criar venda",
+        description: duplicated
+          ? "Já existe uma venda criada a partir destas mesmas fontes."
+          : e?.message || "Tente novamente",
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -438,25 +489,30 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
           {step === "origin" && (
             <StepOrigin value={origin} onChange={setOrigin} />
           )}
-          {step === "opportunity" && (
-            <StepOpportunity
-              opportunities={closedOpportunities}
-              selectedId={opportunityId}
-              onSelect={setOpportunityId}
+          {step === "locate" && (
+            <StepLocateOperation
+              term={searchTerm}
+              setTerm={setSearchTerm}
+              results={searchResults}
+              loading={searching}
+              selectedKey={candidate?.key || null}
+              onSelect={setCandidate}
             />
           )}
-          {step === "source" && (
-            <StepSource
-              detected={importDetected}
-              sourceKind={sourceKind}
-              setSourceKind={setSourceKind}
-              importing={importing}
-              products={products}
-              onAdd={openAddProduct}
-              onEdit={openEditProduct}
-              onRemove={removeProduct}
-              totals={totals}
-              onSwitchToManual={() => { setOrigin("manual"); setStep("client"); }}
+          {step === "sources" && (
+            <StepOperationSources
+              bundle={bundle}
+              loading={bundleLoading}
+              walletId={walletId}
+              setWalletId={setWalletId}
+              quoteId={quoteId}
+              setQuoteId={setQuoteId}
+              precedence={precedence}
+              setPrecedence={setPrecedence}
+              pairs={pairs}
+              divergences={divergences}
+              excluded={excluded}
+              toggleExcluded={toggleExcluded}
             />
           )}
           {step === "confirm" && (
@@ -580,10 +636,10 @@ function StepOrigin({ value, onChange }: { value: "manual" | "crm"; onChange: (v
           )}
         >
           <div className="flex items-center gap-2 font-medium">
-            <Download className="h-4 w-4 text-primary" /> Importar do CRM
+            <Download className="h-4 w-4 text-primary" /> Importar de uma operação
           </div>
           <p className="text-xs text-muted-foreground">
-            Transformar uma oportunidade fechada em venda financeira.
+            Buscar no CRM, Carteira Digital e Orçamentos e importar os serviços já cadastrados.
           </p>
         </button>
       </div>
@@ -1397,232 +1453,3 @@ function invoiceStatusLabel(s?: string) {
   }
 }
 
-// ------------- CRM import step components -------------
-
-function StepOpportunity({
-  opportunities, selectedId, onSelect,
-}: {
-  opportunities: any[];
-  selectedId: string | null;
-  onSelect: (id: string) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return opportunities;
-    return opportunities.filter((o) =>
-      [o.client?.name, o.destination].filter(Boolean).some((v: string) => v.toLowerCase().includes(q))
-    );
-  }, [query, opportunities]);
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-base font-semibold">Qual oportunidade deseja importar?</h3>
-        <p className="text-sm text-muted-foreground">Apenas oportunidades fechadas da sua agência são exibidas.</p>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Pesquisar por cliente ou destino"
-          className="pl-9"
-        />
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-muted-foreground">
-          <Package className="h-8 w-8 mx-auto mb-2 opacity-40" />
-          Nenhuma oportunidade fechada disponível.
-        </div>
-      ) : (
-        <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
-          {filtered.map((o) => {
-            const selected = selectedId === o.id;
-            return (
-              <button
-                key={o.id}
-                type="button"
-                onClick={() => onSelect(o.id)}
-                className={cn(
-                  "w-full text-left rounded-lg border-2 p-3 transition-colors",
-                  selected ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
-                )}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{o.client?.name || "Cliente"}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      <MapPin className="h-3 w-3 inline mr-1" />
-                      {o.destination || "—"}
-                      {o.updated_at && (
-                        <span className="ml-2">• {format(new Date(o.updated_at), "dd/MM/yyyy", { locale: ptBR })}</span>
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold">{fmtCurrency(Number(o.estimated_value) || 0)}</p>
-                    <Badge variant="outline" className="text-[10px] mt-1">{o.stage}</Badge>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function StepSource({
-  detected, sourceKind, setSourceKind, importing,
-  products, onAdd, onEdit, onRemove, totals,
-  onSwitchToManual,
-}: {
-  detected: { tripId: string | null; quoteId: string | null };
-  sourceKind: "wallet" | "quote" | null;
-  setSourceKind: (k: "wallet" | "quote" | null) => void;
-  importing: boolean;
-  products: DraftProduct[];
-  onAdd: () => void;
-  onEdit: (p: DraftProduct) => void;
-  onRemove: (id: string) => void;
-  totals: { sale: number; taxes: number; base: number; commission: number };
-  onSwitchToManual: () => void;
-}) {
-  const hasWallet = !!detected.tripId;
-  const hasQuote = !!detected.quoteId;
-  const hasBoth = hasWallet && hasQuote;
-  const hasNone = !hasWallet && !hasQuote;
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-base font-semibold">Fonte dos serviços</h3>
-        <p className="text-sm text-muted-foreground">
-          {hasBoth
-            ? "Encontramos um Orçamento e uma Carteira Digital vinculados a esta oportunidade."
-            : hasWallet
-            ? "Encontramos uma Carteira Digital vinculada a esta oportunidade."
-            : hasQuote
-            ? "Encontramos um Orçamento vinculado a esta oportunidade."
-            : "Não encontramos serviços vinculados a esta oportunidade."}
-        </p>
-      </div>
-
-      {hasNone ? (
-        <div className="rounded-lg border-2 border-dashed p-6 text-center space-y-3">
-          <p className="text-sm text-muted-foreground">Deseja criar a venda manualmente?</p>
-          <Button onClick={onSwitchToManual}>
-            <UserIcon className="h-4 w-4 mr-2" /> Sim, criar manualmente
-          </Button>
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {hasWallet && (
-            <button
-              type="button"
-              onClick={() => setSourceKind("wallet")}
-              className={cn(
-                "flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
-                sourceKind === "wallet" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
-              )}
-            >
-              <div className="flex items-center gap-2 font-medium">
-                <Wallet className="h-4 w-4 text-primary" /> Carteira Digital
-                {hasBoth && <Badge variant="secondary" className="ml-1 text-[10px]">Recomendado</Badge>}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Geralmente contém os serviços finais confirmados da viagem.
-              </p>
-            </button>
-          )}
-          {hasQuote && (
-            <button
-              type="button"
-              onClick={() => setSourceKind("quote")}
-              className={cn(
-                "flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
-                sourceKind === "quote" ? "border-primary bg-primary/5" : "border-muted hover:border-muted-foreground/30",
-              )}
-            >
-              <div className="flex items-center gap-2 font-medium">
-                <FileText className="h-4 w-4 text-primary" /> Orçamento
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Importar os serviços do orçamento criado para esta oportunidade.
-              </p>
-            </button>
-          )}
-        </div>
-      )}
-
-      {sourceKind && (
-        <>
-          <div className="border-t pt-4">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-semibold">
-                {importing ? "Importando…" : `Produtos importados (${products.length})`}
-              </h4>
-              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onAdd} disabled={importing}>
-                <Plus className="h-3 w-3 mr-1" /> Adicionar
-              </Button>
-            </div>
-
-            {importing ? (
-              <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Importando serviços…
-              </div>
-            ) : products.length === 0 ? (
-              <div className="border-2 border-dashed rounded-lg p-6 text-center text-sm text-muted-foreground">
-                Nenhum serviço foi importado.
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
-                {products.map((p) => (
-                  <div key={p._tempId} className="flex items-center gap-3 rounded-lg border p-3">
-                    <Package className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px]">{PRODUCT_TYPES[p.product_type]}</Badge>
-                        <p className="font-medium truncate text-sm">{p.description || "—"}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {p.supplier_name || "Sem fornecedor"} • {fmtCurrency(Number(p.sale_price))} • Comissão {fmtCurrency(productCommission(p))}
-                      </p>
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(p)}>
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onRemove(p._tempId)}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {products.length > 0 && (
-            <div className="grid gap-2 rounded-lg border border-dashed bg-muted/30 p-3 text-sm sm:grid-cols-3">
-              <div>
-                <p className="text-xs text-muted-foreground">Valor total</p>
-                <p className="font-semibold">{fmtCurrency(totals.sale)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Base comissionável</p>
-                <p className="font-semibold">{fmtCurrency(totals.base)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Comissão estimada</p>
-                <p className="font-semibold text-primary">{fmtCurrency(totals.commission)}</p>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
