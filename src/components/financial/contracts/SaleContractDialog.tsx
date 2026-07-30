@@ -76,7 +76,7 @@ function passengerInfo(
   if (t.data_nascimento) {
     parts.push(`${formatDateBR(t.data_nascimento)}${age !== null ? ` (${age} anos)` : ''}`);
   }
-  return { category, details: parts.join(' • ') };
+  return { category, age, details: parts.join(' • ') };
 }
 
 /** Bloco visual padrão das seções do formulário. */
