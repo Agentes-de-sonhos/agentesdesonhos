@@ -9,6 +9,17 @@ import entertainment from "@/assets/landing/comandatuba/exp-entertainment.jpg";
 import { EXPERIENCES } from "./content";
 
 const IMAGES = [pools, beach, sports, water, kids, nature, wellness, entertainment];
+// Individual crop focus to keep people / main subject visible in the short card frame
+const POSITIONS = [
+  "center 55%", // piscinas
+  "center 45%", // praia (aérea vertical)
+  "center 40%", // esportes / tênis
+  "center 40%", // atividades aquáticas
+  "center 45%", // crianças
+  "center 50%", // natureza
+  "center 45%", // bem-estar / spa
+  "center 40%", // entretenimento / trapézio
+];
 
 export function ExperiencesSection() {
   return (
@@ -33,6 +44,7 @@ export function ExperiencesSection() {
                   alt={it.title}
                   loading="lazy"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  style={{ objectPosition: POSITIONS[i] }}
                   width={800}
                   height={600}
                 />
