@@ -1179,6 +1179,39 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           }}
         />
       )}
+
+      <InsuranceImportDialog
+        open={insuranceImportOpen}
+        onOpenChange={setInsuranceImportOpen}
+        loading={insuranceSources.isLoading}
+        candidates={insuranceSources.candidates}
+        userId={user?.id ?? null}
+        current={{
+          insurer: overrides.insurance_insurer ?? '',
+          plan: overrides.insurance_plan ?? '',
+          validity: overrides.insurance_validity ?? '',
+          coverage: overrides.insurance_coverage ?? '',
+        }}
+        onApply={({ values, provenance }) => {
+          setOverrides((prev) => ({
+            ...prev,
+            ...(values.insurer !== undefined ? { insurance_insurer: values.insurer } : {}),
+            ...(values.plan !== undefined ? { insurance_plan: values.plan } : {}),
+            ...(values.validity !== undefined ? { insurance_validity: values.validity } : {}),
+            ...(values.coverage !== undefined ? { insurance_coverage: values.coverage } : {}),
+            insurance_provenance: [
+              ...(prev.insurance_provenance ?? []).filter(
+                (p) => !provenance.some((n) => n.field === p.field),
+              ),
+              ...provenance,
+            ],
+          }));
+          setInsuranceImportOpen(false);
+          toast.success(
+            `${provenance.length} campo(s) importado(s). Revise antes de gerar o contrato.`,
+          );
+        }}
+      />
     </>
   );
 }
