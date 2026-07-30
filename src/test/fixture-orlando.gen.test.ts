@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { buildContractPayload, buildContractNumber, hashPayload, validateContractPayload } from '@/lib/saleContractData';
 import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
 
-const F = JSON.parse(readFileSync('/tmp/fixture-input.json', 'utf8'));
+const FIXTURE_PATH = '/tmp/fixture-input.json';
+const hasFixture = existsSync(FIXTURE_PATH);
+const F = hasFixture ? JSON.parse(readFileSync(FIXTURE_PATH, 'utf8')) : null;
 
-describe('fixture orlando', () => {
+describe.skipIf(!hasFixture)('fixture orlando', () => {
   it('gera contrato', async () => {
     const payload = buildContractPayload({
       sale: F.sale, products: F.products, payments: F.payments,
