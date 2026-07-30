@@ -459,6 +459,9 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
       coverage: overrides.insurance_coverage,
       covered_passengers: overrides.insurance_covered,
       refusal_acknowledged: !!overrides.insurance_refusal_ack,
+      provenance: overrides.insurance_provenance?.length
+        ? overrides.insurance_provenance
+        : undefined,
     },
     attachments: splitLines(overrides.attachments).map((label) => ({ label })),
     legal_body_html: template?.legal_body_html ?? '',
