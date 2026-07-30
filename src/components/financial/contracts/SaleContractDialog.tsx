@@ -525,11 +525,15 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                           const selectedIds = overrides.passenger_ids ?? travelers.map((x) => x.id);
                           const checked = selectedIds.includes(t.id);
                           const info = passengerInfo(t, sale?.start_date ?? null);
+                          const isAdult = info.age !== null && info.age >= 18;
+                          const signatoryIds = overrides.signatory_ids ?? [];
+                          const isSignatory = signatoryIds.includes(t.id);
                           return (
-                            <label
+                            <div
                               key={t.id}
-                              className="flex items-start gap-3 rounded-lg border border-border bg-background p-2.5 text-sm hover:bg-muted/40 transition-colors cursor-pointer"
+                              className="rounded-lg border border-border bg-background p-2.5 text-sm transition-colors"
                             >
+                            <label className="flex items-start gap-3 cursor-pointer">
                               <Checkbox
                                 className="mt-0.5"
                                 checked={checked}
@@ -538,6 +542,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                                     ? [...selectedIds, t.id]
                                     : selectedIds.filter((id) => id !== t.id);
                                   set('passenger_ids', next);
+                                  if (!v) set('signatory_ids', signatoryIds.filter((id) => id !== t.id));
                                 }}
                               />
                               <span className="min-w-0 flex-1">
@@ -555,6 +560,33 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                                 </span>
                               </span>
                             </label>
+                            {checked && (
+                              <div className="mt-2 border-t border-border/60 pt-2 pl-7">
+                                {isAdult ? (
+                                  <label className="flex items-center gap-2 text-xs cursor-pointer">
+                                    <Checkbox
+                                      checked={isSignatory}
+                                      onCheckedChange={(v) =>
+                                        set(
+                                          'signatory_ids',
+                                          v
+                                            ? [...signatoryIds, t.id]
+                                            : signatoryIds.filter((id) => id !== t.id),
+                                        )
+                                      }
+                                    />
+                                    <span className="text-muted-foreground">
+                                      Incluir linha de assinatura (anuente) no contrato
+                                    </span>
+                                  </label>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">
+                                    Menor de idade — representado pelo responsável legal, sem linha de assinatura.
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            </div>
                           );
                         })}
                       </div>
