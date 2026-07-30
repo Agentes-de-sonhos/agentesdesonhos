@@ -83,6 +83,14 @@ export interface SaleContract {
   attachments_json: ContractAttachment[];
   source_hash: string | null;
   document_hash: string | null;
+  /** Hash SHA-256 dos bytes exatos do PDF entregue. */
+  pdf_sha256: string | null;
+  pdf_size_bytes: number | null;
+  pdf_generated_at: string | null;
+  pdf_generator_version: string | null;
+  pdf_storage_path: string | null;
+  pdf_mime_type: string | null;
+  pdf_file_name: string | null;
   supersedes_contract_id: string | null;
   created_at: string;
 }
