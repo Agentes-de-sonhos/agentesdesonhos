@@ -636,10 +636,10 @@ function StepOrigin({ value, onChange }: { value: "manual" | "crm"; onChange: (v
           )}
         >
           <div className="flex items-center gap-2 font-medium">
-            <Download className="h-4 w-4 text-primary" /> Importar do CRM
+            <Download className="h-4 w-4 text-primary" /> Importar de uma operação
           </div>
           <p className="text-xs text-muted-foreground">
-            Transformar uma oportunidade fechada em venda financeira.
+            Buscar no CRM, Carteira Digital e Orçamentos e importar os serviços já cadastrados.
           </p>
         </button>
       </div>
