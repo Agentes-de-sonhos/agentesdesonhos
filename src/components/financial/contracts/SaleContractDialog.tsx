@@ -110,6 +110,7 @@ function Field({
   required,
   htmlFor,
   className,
+  action,
   children,
 }: {
   label: string;
@@ -118,13 +119,17 @@ function Field({
   required?: boolean;
   htmlFor?: string;
   className?: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className={cn('space-y-1.5', className)}>
-      <Label htmlFor={htmlFor} className="text-xs font-medium text-foreground">
-        {label} {required && <span className="text-destructive">*</span>}
-      </Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={htmlFor} className="text-xs font-medium text-foreground">
+          {label} {required && <span className="text-destructive">*</span>}
+        </Label>
+        {action}
+      </div>
       {children}
       {error ? (
         <p className="text-xs font-medium text-destructive">{error}</p>
