@@ -561,7 +561,7 @@ export const CONSULTANT_COPY = {
 };
 
 export const NAV = [
-  { id: "resort", label: "O resort" },
+  { id: "resort", label: "O Resort" },
   { id: "allinclusive", label: "All inclusive" },
   { id: "experiencias", label: "Experiências" },
   { id: "acomodacoes", label: "Acomodações" },
