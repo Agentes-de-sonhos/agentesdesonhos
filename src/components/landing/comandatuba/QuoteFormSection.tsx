@@ -5,6 +5,7 @@ import { MessageCircle } from "lucide-react";
 import {
   FORM,
   FORM_ANCHOR_ID,
+  ACCOMMODATION_FORM_OPTIONS,
   whatsappFromForm,
   whatsappUrl,
   type AgencyConfig,
@@ -230,9 +231,11 @@ export function QuoteFormSection({
             <Field label="Acomodação de interesse">
               <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
                 <option value="">Ainda não sei</option>
-                <option value="Apartamento">Apartamento</option>
-                <option value="Suíte">Suíte</option>
-                <option value="Bangalô">Bangalô</option>
+                {ACCOMMODATION_FORM_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
               </select>
             </Field>
             <Field label="Quantidade de adultos" required>
