@@ -128,9 +128,9 @@ export async function generateSaleContractPdf(
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(70, 70, 70);
-    const labelText = `${label}: `;
+    const labelText = `${label}:`;
     doc.text(labelText, M_L, y);
-    const offset = doc.getTextWidth(labelText);
+    const offset = doc.getTextWidth(labelText) + 1.6;
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(30, 30, 30);
     const lines = doc.splitTextToSize(value, cW - offset);
