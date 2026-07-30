@@ -28,7 +28,13 @@ import { ClientSelector } from "@/components/shared/ClientSelector";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 
-import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
+import { useFinancial } from "@/hooks/useFinancial";
+import { useOperationSearch, useOperationBundle, type OperationCandidate } from "@/hooks/useOperationSources";
+import { StepLocateOperation, StepOperationSources } from "@/components/financial/import/OperationImportSteps";
+import {
+  DEFAULT_PRECEDENCE, buildDraftFromPair, buildImportFingerprint, detectDivergences,
+  matchServices, type Precedence, type ServicePair,
+} from "@/lib/saleImport";
 import { useSellers } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgencySupplierTerms, type SupplierTerms } from "@/hooks/useAgencySupplierTerms";
@@ -40,13 +46,13 @@ import { PRODUCT_TYPES } from "@/types/financial";
 
 // ------------- types -------------
 
-type WizardStep = "origin" | "opportunity" | "source" | "confirm" | "client" | "destination" | "date" | "products" | "review";
+type WizardStep = "origin" | "locate" | "sources" | "confirm" | "client" | "destination" | "date" | "products" | "review";
 const MANUAL_STEPS: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
-const CRM_STEPS: WizardStep[] = ["origin", "opportunity", "source", "confirm", "review"];
+const CRM_STEPS: WizardStep[] = ["origin", "locate", "sources", "confirm", "review"];
 const STEP_LABELS: Record<WizardStep, string> = {
   origin: "Origem",
-  opportunity: "Oportunidade",
-  source: "Fonte",
+  locate: "Operação",
+  sources: "Fontes",
   confirm: "Confirmar",
   client: "Cliente",
   destination: "Destino",
@@ -55,7 +61,12 @@ const STEP_LABELS: Record<WizardStep, string> = {
   review: "Revisão",
 };
 
-type DraftProduct = SaleProductFormData & { _tempId: string };
+type DraftProduct = SaleProductFormData & {
+  _tempId: string;
+  source_kind?: string;
+  source_service_id?: string | null;
+  source_provenance?: Record<string, unknown>;
+};
 
 const defaultProduct = (): DraftProduct => ({
   _tempId: crypto.randomUUID(),
