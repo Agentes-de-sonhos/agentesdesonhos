@@ -4,18 +4,21 @@ import { HERO, scrollToForm, scrollTo, type AgencyConfig } from "./content";
 
 export function HeroSection({ agency }: { agency: AgencyConfig }) {
   return (
-    <section className="relative">
-      <div className="relative h-[480px] w-full overflow-hidden sm:h-[560px] lg:h-[600px]">
+    <section className="relative isolate overflow-hidden">
+      <div className="absolute inset-0">
         <img
           src={heroImg}
           alt={HERO.imageAlt}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="h-full w-full object-cover"
           width={1920}
           height={1080}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-900/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-900/50 to-slate-900/25" />
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-950/60 to-transparent" />
+      </div>
 
-        <div className="relative mx-auto flex h-full max-w-[1280px] items-start px-5 pt-14 sm:px-8 sm:pt-20 lg:pt-24">
+      <div className="relative">
+        <div className="mx-auto flex max-w-[1280px] items-start px-5 pt-14 sm:px-8 sm:pt-20 lg:pt-24">
           <div className="max-w-xl text-white">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[12px] font-semibold text-slate-800 shadow-sm">
               <MapPin className="h-3.5 w-3.5" style={{ color: agency.primaryColor }} />
@@ -47,11 +50,10 @@ export function HeroSection({ agency }: { agency: AgencyConfig }) {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Indicators band */}
-      <div className="mx-auto mt-6 max-w-[1200px] px-5 sm:mt-8 sm:px-8">
-        <div className="grid grid-cols-1 gap-3 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-100 sm:grid-cols-3 sm:p-5">
+        {/* Indicators band — over the hero photo */}
+        <div className="mx-auto mt-10 max-w-[1200px] px-5 pb-10 sm:mt-14 sm:px-8 sm:pb-14 lg:mt-16">
+          <div className="grid grid-cols-1 gap-3 rounded-2xl bg-white/95 p-4 shadow-lg ring-1 ring-white/40 backdrop-blur sm:grid-cols-3 sm:p-5">
           {HERO.indicators.map((it) => (
             <div key={it.title} className="flex items-start gap-3 rounded-xl p-2">
               <div
@@ -67,6 +69,7 @@ export function HeroSection({ agency }: { agency: AgencyConfig }) {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </section>
