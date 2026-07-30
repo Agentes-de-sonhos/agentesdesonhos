@@ -1,6 +1,8 @@
+import { safeUuid } from "@/lib/safeUuid";
+
 const IMPERSONATION_KEY = "impersonation_data";
 const IMPERSONATION_CONTEXT_KEY = "impersonation_support_context";
-const CURRENT_SUPPORT_TAB_ID = crypto.randomUUID();
+const CURRENT_SUPPORT_TAB_ID = safeUuid();
 
 export const IMPERSONATION_EVENT = "impersonation-data-changed";
 export const IMPERSONATION_TRANSITION_MS = 60_000;

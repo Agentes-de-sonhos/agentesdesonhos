@@ -66,10 +66,21 @@ export default function ComandatubaLandingPage({
     upsertMeta('meta[property="og:description"]', "property", "og:description", SEO_TEMPLATE.description(agency.name));
     upsertMeta('meta[property="og:type"]', "property", "og:type", "website");
     upsertMeta('meta[name="twitter:card"]', "name", "twitter:card", "summary_large_image");
+    // Self-canonical: the same product layout is served under many agency
+    // slugs, so each published page must point to its own URL.
+    if (!ctx.isDemo && typeof window !== "undefined") {
+      let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+      if (!link) {
+        link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        document.head.appendChild(link);
+      }
+      link.setAttribute("href", `${window.location.origin}${window.location.pathname}`);
+    }
     return () => {
       document.title = prev;
     };
-  }, [agency.name]);
+  }, [agency.name, ctx.isDemo]);
 
   const handleAccommodation = (key: string, label: string) => {
     formRef.current?.setInterestedCategory(key, label);
