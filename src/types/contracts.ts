@@ -106,6 +106,26 @@ export interface ContractPassenger {
   notes?: string;
 }
 
+/** Linha de assinatura adicional, criada apenas com papel explícito confirmado pela agência. */
+export interface ContractSigner {
+  name: string;
+  role: 'anuente' | 'signatario';
+  document?: string;
+}
+
+export interface ContractInstallment {
+  number: number;
+  due_date: string;
+  amount: number;
+}
+
+export interface ContractReceivedPayment {
+  date: string;
+  amount: number;
+  method: string;
+  kind: 'entrada' | 'adicional';
+}
+
 export interface ContractService {
   type: string;
   type_label: string;
@@ -171,6 +191,12 @@ export interface ContractFinancialBlock {
   due_dates?: string;
   notes?: string;
   payments: { date: string; amount: number; method: string }[];
+  /** Pagamentos já recebidos pela CONTRATADA, classificados. */
+  received: ContractReceivedPayment[];
+  /** Cronograma das parcelas futuras (gerado a partir do 1º vencimento ou vazio). */
+  schedule: ContractInstallment[];
+  /** Descrição consolidada e automática da forma de pagamento. */
+  payment_summary: string;
 }
 
 export interface ContractConditionsBlock {
@@ -212,6 +238,7 @@ export interface ContractPayload {
   agency: ContractAgencyBlock;
   client: ContractClientBlock;
   passengers: ContractPassenger[];
+  signers: ContractSigner[];
   trip: ContractTripBlock;
   services: ContractService[];
   included: string[];
