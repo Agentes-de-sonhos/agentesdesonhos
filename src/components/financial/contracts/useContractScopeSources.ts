@@ -132,5 +132,6 @@ export function useContractScopeSources(sale: Sale | null, enabled: boolean) {
     services: query.data ?? [],
     isLoading: query.isLoading || query.isFetching,
     error: query.error,
+    refetch: query.refetch,
   };
 }
