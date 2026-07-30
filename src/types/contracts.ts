@@ -231,6 +231,8 @@ export interface ContractInsuranceBlock {
   coverage?: string;
   covered_passengers?: string;
   refusal_acknowledged?: boolean;
+  /** Rastro interno de importação assistida (auditoria; não aparece no PDF). */
+  provenance?: import('@/lib/insuranceSources').InsuranceFieldProvenance[];
 }
 
 export interface ContractPayload {
