@@ -14,8 +14,8 @@ describe.skipIf(!hasFixture)('fixture orlando', () => {
       client: F.client, travelers: F.travelers,
       agencyProfile: F.profile, operatorNames: F.operators,
       template: F.template, sections: F.sections,
-      contractNumber: buildContractNumber(F.sale.id, 1, new Date('2026-07-29T12:00:00')),
-      revision: 1,
+      contractNumber: buildContractNumber(F.sale.id, 3, new Date('2026-07-29T12:00:00')),
+      revision: 3,
       overrides: {
         client_document: '529.982.247-25',
         client_person_type: 'fisica',
