@@ -988,25 +988,59 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                 ) : (
                   contracts.map((c) => (
                     <Card key={c.id}>
-                      <CardContent className="py-3 flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm truncate">{c.contract_number}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Versão {c.revision} • {new Date(c.generated_at).toLocaleString('pt-BR')}
-                          </p>
+                      <CardContent className="py-3 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">{c.contract_number}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Versão {c.revision} • {new Date(c.generated_at).toLocaleString('pt-BR')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge variant={c.status === 'superseded' ? 'secondary' : 'default'}>
+                              {c.status === 'superseded' ? 'Substituído' : 'Vigente'}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                              onClick={() => handleDownloadExisting(c)}
+                            >
+                              <Download className="h-3.5 w-3.5" /> PDF
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant={c.status === 'superseded' ? 'secondary' : 'default'}>
-                            {c.status === 'superseded' ? 'Substituído' : 'Vigente'}
-                          </Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-1"
-                            onClick={() => handleDownloadExisting(c.id, c.generated_payload_json)}
-                          >
-                            <Download className="h-3.5 w-3.5" /> PDF
-                          </Button>
+                        <div className="rounded-md bg-muted/50 px-2.5 py-2 text-[11px] text-muted-foreground space-y-1">
+                          {c.pdf_sha256 ? (
+                            <>
+                              <div className="flex items-start gap-2">
+                                <span className="font-medium text-foreground/80 shrink-0">SHA-256 do PDF:</span>
+                                <code className="break-all font-mono">{c.pdf_sha256}</code>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-5 w-5 shrink-0"
+                                  onClick={() => {
+                                    void navigator.clipboard.writeText(c.pdf_sha256!);
+                                    toast.success('Hash copiado');
+                                  }}
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <p>
+                                {c.pdf_size_bytes ? `${(c.pdf_size_bytes / 1024).toFixed(1)} KB` : '—'}
+                                {c.pdf_generated_at
+                                  ? ` • gerado em ${new Date(c.pdf_generated_at).toLocaleString('pt-BR')}`
+                                  : ''}
+                                {c.pdf_generator_version ? ` • ${c.pdf_generator_version}` : ''}
+                                {c.pdf_storage_path ? ' • arquivo arquivado' : ' • arquivo não arquivado'}
+                              </p>
+                            </>
+                          ) : (
+                            <p>PDF gerado antes do registro de hash — baixe novamente para remontar o documento.</p>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
