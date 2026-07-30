@@ -407,28 +407,6 @@ export const GALLERY_COPY = {
   openPhoto: (caption: string) => `Ampliar foto: ${caption}`,
 };
 
-const HOW_TO_GET_LEGACY = {
-  title: "Como chegar",
-  intro:
-    "A viagem pode ser organizada por duas rotas principais. A melhor escolha depende da cidade de saída, das datas e da operação aérea disponível no período.",
-  routes: [
-    {
-      title: "Via Aeroporto de Comandatuba, em Una",
-      text: "É o acesso mais direto ao resort. O aeroporto fica no continente, próximo à ilha, permitindo uma chegada mais rápida depois do desembarque.",
-    },
-    {
-      title: "Via Aeroporto de Ilhéus",
-      text: "Ilhéus funciona como alternativa para quem encontra melhores opções de voo. A partir do aeroporto, a viagem continua em transfer até a região de Comandatuba.",
-    },
-  ],
-  highlightTitle: "A melhor rota não é igual para todo mundo.",
-  highlightText:
-    "A sua agência compara voos, horários, transfers e condições para indicar a logística mais confortável para a sua viagem.",
-  note:
-    "Rotas, companhias, frequências, transfers, horários e eventuais custos estão sujeitos a disponibilidade e confirmação.",
-};
-void HOW_TO_GET_LEGACY;
-
 export const FORM = {
   title: "Solicite sua cotação personalizada",
   subtitle:
