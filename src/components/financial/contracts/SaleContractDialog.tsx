@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Sale } from '@/types/financial';
-import type { ContractPayload } from '@/types/contracts';
+import type { ContractPayload, SaleContract } from '@/types/contracts';
 import { useAgencyContractTemplate, useSaleContracts } from '@/hooks/useSaleContracts';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { maskDocument, validateDocument } from '@/lib/documentMask';
