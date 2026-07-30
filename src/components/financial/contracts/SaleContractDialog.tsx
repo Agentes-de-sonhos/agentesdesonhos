@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { AlertTriangle, Copy, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Sale } from '@/types/financial';
 import type { ContractPayload, SaleContract } from '@/types/contracts';
@@ -704,6 +704,53 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                         placeholder="Ex.: 10"
                       />
                     </Field>
+                    <Field
+                      label="Valor da parcela"
+                      htmlFor="contract-installment-value"
+                      hint="Parcelas × valor deve fechar com o saldo pendente."
+                    >
+                      <CurrencyInput
+                        id="contract-installment-value"
+                        value={overrides.installment_value ?? null}
+                        onValueChange={(v) =>
+                          setOverrides((prev) => ({ ...prev, installment_value: v ?? undefined }))
+                        }
+                      />
+                    </Field>
+                    <Field
+                      label="1º vencimento"
+                      htmlFor="contract-first-due"
+                      hint="As demais parcelas são mensais a partir desta data."
+                    >
+                      <Input
+                        id="contract-first-due"
+                        type="date"
+                        value={overrides.first_due_date ?? ''}
+                        onChange={(e) => set('first_due_date', e.target.value || undefined)}
+                      />
+                    </Field>
+                    {payload && (
+                      <div className="sm:col-span-3 rounded-lg border border-border bg-muted/40 p-3 text-xs space-y-1.5">
+                        <p className="font-medium text-foreground">Resumo automático do pagamento</p>
+                        <p className="text-muted-foreground">
+                          Total {formatMoney(payload.financial.total)} • Recebido{' '}
+                          {formatMoney(payload.financial.paid)} • Saldo pendente{' '}
+                          {formatMoney(payload.financial.pending)}
+                        </p>
+                        {payload.financial.schedule.length > 0 && (
+                          <p className="text-muted-foreground">
+                            {payload.financial.schedule.length} parcela(s) de{' '}
+                            {formatMoney(payload.financial.schedule[0].amount)} — vencimentos{' '}
+                            {payload.financial.schedule
+                              .map((i) => new Date(`${i.due_date}T12:00:00`).toLocaleDateString('pt-BR'))
+                              .join(', ')}
+                          </p>
+                        )}
+                        {payload.financial.payment_summary && (
+                          <p className="text-muted-foreground">{payload.financial.payment_summary}</p>
+                        )}
+                      </div>
+                    )}
                     <Field label="Forma de pagamento" htmlFor="contract-payment-method" className="sm:col-span-3">
                       <Input
                         id="contract-payment-method"
