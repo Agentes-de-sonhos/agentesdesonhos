@@ -1,5 +1,5 @@
 import { MessageCircle } from "lucide-react";
-import bg from "@/assets/landing/comandatuba/cta-aerial.jpg";
+import bg from "@/assets/landing/comandatuba/cta-aerial-ilha.webp";
 import { FINAL_CTA, scrollToForm, whatsappDefaultMessage, whatsappUrl, type AgencyConfig } from "./content";
 
 export function FinalCTASection({ agency }: { agency: AgencyConfig }) {
@@ -8,7 +8,7 @@ export function FinalCTASection({ agency }: { agency: AgencyConfig }) {
       <div className="relative">
         <img
           src={bg}
-          alt="Panorâmica ao pôr do sol da Ilha de Comandatuba"
+          alt="Vista aérea do resort e da Ilha de Comandatuba com piscinas, coqueiros e a praia ao fundo"
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
           width={1920}

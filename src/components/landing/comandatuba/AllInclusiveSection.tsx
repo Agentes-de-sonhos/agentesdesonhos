@@ -1,6 +1,26 @@
 import { Check } from "lucide-react";
-import img from "@/assets/landing/comandatuba/all-inclusive-asset.jpg.asset.json";
-import { ALL_INCLUSIVE, type AgencyConfig } from "./content";
+import {
+  ALL_INCLUSIVE,
+  ALL_INCLUSIVE_MEDIA,
+  ALL_INCLUSIVE_GALLERY_COPY,
+  type AgencyConfig,
+} from "./content";
+import { PhotoCarousel } from "./PhotoCarousel";
+import buffet from "@/assets/landing/comandatuba/allinclusive/buffet.webp";
+import padaria from "@/assets/landing/comandatuba/allinclusive/padaria.webp";
+import prato from "@/assets/landing/comandatuba/allinclusive/prato-assinatura.webp";
+import drinks from "@/assets/landing/comandatuba/allinclusive/drinks.webp";
+import sobremesas from "@/assets/landing/comandatuba/allinclusive/sobremesas.webp";
+import restaurantePiscina from "@/assets/landing/comandatuba/allinclusive/restaurante-piscina.webp";
+
+const SOURCES: Record<string, string> = {
+  buffet,
+  padaria,
+  "prato-assinatura": prato,
+  drinks,
+  sobremesas,
+  "restaurante-piscina": restaurantePiscina,
+};
 
 export function AllInclusiveSection({ agency }: { agency: AgencyConfig }) {
   return (
@@ -8,13 +28,12 @@ export function AllInclusiveSection({ agency }: { agency: AgencyConfig }) {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
           <div className="order-1 lg:order-none">
-            <img
-              src={img.url}
-              alt="Gastronomia e all inclusive no Transamerica Comandatuba"
-              className="h-64 w-full rounded-2xl object-cover shadow-md sm:h-[420px]"
-              loading="lazy"
-              width={1200}
-              height={900}
+            <PhotoCarousel
+              agency={agency}
+              photos={ALL_INCLUSIVE_MEDIA}
+              sources={SOURCES}
+              copy={ALL_INCLUSIVE_GALLERY_COPY}
+              frameClassName="aspect-[4/3] sm:aspect-[16/11]"
             />
           </div>
           <div className="order-2 flex flex-col justify-center lg:order-none">
