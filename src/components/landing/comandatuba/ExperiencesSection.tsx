@@ -27,7 +27,7 @@ export function ExperiencesSection() {
       <div className="mx-auto max-w-[1280px] px-5 sm:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-display text-[26px] font-bold leading-tight text-slate-900 sm:text-[34px]">
-            🌴 {EXPERIENCES.title} 🌴
+            {EXPERIENCES.title}
           </h2>
           <p className="mt-3 text-[15px] text-slate-600">{EXPERIENCES.subtitle}</p>
         </div>

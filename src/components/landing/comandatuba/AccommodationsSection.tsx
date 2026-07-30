@@ -82,7 +82,7 @@ export function AccommodationsSection({
       <div className="mx-auto max-w-[1280px] px-5 sm:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="font-display text-[26px] font-bold leading-tight text-slate-900 sm:text-[34px]">
-            🛏️ {ACCOMMODATIONS.title} 🛏️
+            {ACCOMMODATIONS.title}
           </h2>
           <p className="mt-3 text-[14px] leading-relaxed text-slate-500">{ACCOMMODATIONS.subtitle}</p>
         </div>
