@@ -230,11 +230,12 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       setSellerId("");
       setSellerCommission(0);
       setSubmitting(false);
-      setOpportunityId(null);
-      setSourceKind(null);
-      setImportDetected({ tripId: null, quoteId: null });
-      setImporting(false);
-      setImportSourceLabel("");
+      setSearchTerm("");
+      setCandidate(null);
+      setWalletId(null);
+      setQuoteId(null);
+      setPrecedence(DEFAULT_PRECEDENCE);
+      setExcluded(new Set());
     }
   }, [open]);
 
@@ -249,83 +250,93 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     return { sale, taxes, base: sale - taxes, commission };
   }, [products]);
 
-  // ---------- CRM import helpers ----------
-  const opportunity = useMemo(
-    () => closedOpportunities.find((o: any) => o.id === opportunityId) || null,
-    [closedOpportunities, opportunityId],
+  // ---------- multi-source import ----------
+  const { data: searchResults = [], isFetching: searching } = useOperationSearch(searchTerm);
+  const { data: bundle = null, isFetching: bundleLoading } = useOperationBundle(candidate);
+
+  const selectedWallet = useMemo(
+    () => bundle?.wallets.find((w) => w.id === walletId) || null,
+    [bundle, walletId],
+  );
+  const selectedQuote = useMemo(
+    () => bundle?.quotes.find((q) => q.id === quoteId) || null,
+    [bundle, quoteId],
   );
 
-  // When an opportunity is selected, detect linked Wallet (trip) and Quote
+  // Auto-select the most recent source of each kind when the bundle resolves
   useEffect(() => {
-    if (!opportunity || !user) {
-      setImportDetected({ tripId: null, quoteId: null });
-      setSourceKind(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const [tripRes, quoteRes] = await Promise.all([
-        supabase.from("trips").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
-        supabase.from("quotes").select("id").eq("opportunity_id", opportunity.id).eq("user_id", user.id).maybeSingle(),
-      ]);
-      if (cancelled) return;
-      const tripId = tripRes.data?.id || null;
-      const quoteId = quoteRes.data?.id || null;
-      setImportDetected({ tripId, quoteId });
-      // auto-select preferred source
-      if (tripId) setSourceKind("wallet");
-      else if (quoteId) setSourceKind("quote");
-      else setSourceKind(null);
-    })();
-    return () => { cancelled = true; };
-  }, [opportunity, user]);
+    if (!bundle) return;
+    setWalletId(bundle.wallets[0]?.id || null);
+    setQuoteId(bundle.quotes[0]?.id || null);
+    setExcluded(new Set());
+  }, [bundle]);
 
-  // When a source is chosen, fetch + map its services into draft products,
-  // and pre-fill client/destination/saleDate from the opportunity.
+  const pairs: ServicePair[] = useMemo(() => {
+    if (!selectedWallet && !selectedQuote) return [];
+    return matchServices(selectedWallet?.services || [], selectedQuote?.services || []);
+  }, [selectedWallet, selectedQuote]);
+
+  const divergences = useMemo(
+    () => (selectedWallet && selectedQuote ? detectDivergences(pairs) : []),
+    [pairs, selectedWallet, selectedQuote],
+  );
+
+  const importSourceLabel = useMemo(() => {
+    const parts: string[] = [];
+    if (selectedWallet) parts.push("Carteira Digital");
+    if (selectedQuote) parts.push("Orçamento");
+    if (candidate?.hasOpportunity) parts.push("CRM");
+    return parts.join(" + ");
+  }, [selectedWallet, selectedQuote, candidate]);
+
+  // Build draft products from the selected sources, honoring precedence rules.
   useEffect(() => {
-    if (origin !== "crm" || !opportunity || !sourceKind) return;
-    let cancelled = false;
-    (async () => {
-      setImporting(true);
-      try {
-        const opp: any = opportunity;
-        // Pre-fill metadata
-        setClient({ id: opp.client_id || "", name: opp.client?.name || "Cliente" });
-        if (opp.destination) setDestination(opp.destination);
-        if (opp.notes) setNotes(opp.notes);
-
-        let imported: DraftProduct[] = [];
-        if (sourceKind === "wallet" && importDetected.tripId) {
-          const { data } = await supabase
-            .from("trip_services")
-            .select("*")
-            .eq("trip_id", importDetected.tripId)
-            .order("order_index");
-          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "trip", termsData?.byOperator));
-          setImportSourceLabel("Carteira Digital");
-        } else if (sourceKind === "quote" && importDetected.quoteId) {
-          const { data } = await supabase
-            .from("quote_services")
-            .select("*")
-            .eq("quote_id", importDetected.quoteId)
-            .order("order_index");
-          imported = (data || []).map((s: any) => serviceToDraftProduct(s, "quote", termsData?.byOperator));
-          setImportSourceLabel("Orçamento");
+    if (origin !== "crm") return;
+    const drafts = pairs
+      .filter((p) => !excluded.has(p.key))
+      .map((p) => buildDraftFromPair(p, precedence) as DraftProduct)
+      .map((d) => {
+        const terms = d.operator_id ? termsData?.byOperator.get(d.operator_id) : undefined;
+        if (!terms) return d;
+        const next = { ...d };
+        if (terms.default_commission_type) {
+          next.commission_type = terms.default_commission_type;
+          next.commission_value = terms.default_commission_type === "percentage"
+            ? Number(terms.default_commission_percent || 0)
+            : Number(terms.default_commission_fixed || 0);
         }
-        if (!cancelled) setProducts(imported);
-      } finally {
-        if (!cancelled) setImporting(false);
-      }
-    })();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [origin, opportunity, sourceKind, importDetected.tripId, importDetected.quoteId]);
+        if (terms.default_non_commissionable_fees != null) {
+          next.non_commissionable_taxes = Number(terms.default_non_commissionable_fees);
+        }
+        if (terms.payment_rule && terms.payment_rule !== "manual") next.payment_rule = terms.payment_rule;
+        if (terms.payment_days != null) next.payment_days = Number(terms.payment_days);
+        next.requires_invoice = !!terms.requires_invoice;
+        return next;
+      });
+    setProducts(drafts);
+  }, [origin, pairs, excluded, precedence, termsData]);
+
+  // Pre-fill the sale metadata from the resolved bundle
+  useEffect(() => {
+    if (origin !== "crm" || !bundle) return;
+    setClient({ id: bundle.clientId || "", name: bundle.clientName || "Cliente" });
+    if (bundle.destination) setDestination(bundle.destination);
+    if (bundle.notes) setNotes(bundle.notes);
+  }, [origin, bundle]);
+
+  const toggleExcluded = (key: string) => {
+    setExcluded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
 
   const canAdvance = (): boolean => {
     switch (step) {
       case "origin": return origin === "manual" || origin === "crm";
-      case "opportunity": return !!opportunityId;
-      case "source": return !!sourceKind && products.length > 0 && !importing;
+      case "locate": return !!candidate;
+      case "sources": return !bundleLoading && products.length > 0;
       case "confirm": return !!client && destination.trim().length > 1 && !!saleDate;
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
