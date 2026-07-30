@@ -73,3 +73,60 @@ describe('assinantes', () => {
     expect(buildSigners(passengers, [])).toEqual([]);
   });
 });
+
+import { validateContractPayload } from '@/lib/saleContractData';
+import type { ContractPayload } from '@/types/contracts';
+
+const basePayload = (financial: Partial<ContractPayload['financial']>): ContractPayload =>
+  ({
+    contract_title: 'C', contract_number: 'X', revision: 1, emitted_at: new Date().toISOString(),
+    sale_reference: 's', agency: { trade_name: 'A', cnpj: '1' }, client: { name: 'C', document: '1' },
+    passengers: [{ name: 'C' }], signers: [], trip: { start_date: '2026-01-01', end_date: '2026-01-05' },
+    services: [{ type: 'outro', type_label: 'Outro', amount: 100, currency: 'BRL' }],
+    included: [], not_included: [],
+    financial: {
+      gross: 10000, discounts: 0, taxes: 0, service_fee: 0, total: 10000, currency: 'BRL',
+      down_payment: 0, balance: 0, paid: 4000, pending: 6000, paid_to_supplier: 0,
+      payment_method: 'PIX', installments_count: null, installment_value: null,
+      payments: [], received: [{ date: '2026-01-10', amount: 4000, method: 'pix', kind: 'entrada' }],
+      schedule: [], payment_summary: '', ...financial,
+    },
+    conditions: {}, insurance: { contracted: true }, attachments: [], legal_body_html: '',
+    sections: [], signature_config: {}, footer_config: {},
+  }) as ContractPayload;
+
+const errorsOf = (p: ContractPayload) => validateContractPayload(p).filter((i) => i.severity === 'error').map((i) => i.field);
+
+describe('validação do parcelamento', () => {
+  it('bloqueia saldo pendente sem parcelamento definido', () => {
+    expect(errorsOf(basePayload({}))).toContain('installments');
+  });
+
+  it('bloqueia parcelamento que não fecha com o saldo', () => {
+    const p = basePayload({
+      installments_count: 3, installment_value: 1000,
+      schedule: [1, 2, 3].map((n) => ({ number: n, due_date: `2026-0${n + 1}-10`, amount: 1000 })),
+    });
+    expect(errorsOf(p)).toContain('installments_total');
+  });
+
+  it('bloqueia 1º vencimento anterior ou igual ao último pagamento', () => {
+    const p = basePayload({
+      installments_count: 3, installment_value: 2000,
+      schedule: [{ number: 1, due_date: '2026-01-10', amount: 2000 }, { number: 2, due_date: '2026-02-10', amount: 2000 }, { number: 3, due_date: '2026-03-10', amount: 2000 }],
+    });
+    const errs = errorsOf(p);
+    expect(errs).toContain('first_due_date');
+    expect(errs).toContain('schedule_overlap');
+  });
+
+  it('aceita cronograma coerente', () => {
+    const p = basePayload({
+      installments_count: 3, installment_value: 2000,
+      schedule: [{ number: 1, due_date: '2026-02-10', amount: 2000 }, { number: 2, due_date: '2026-03-10', amount: 2000 }, { number: 3, due_date: '2026-04-10', amount: 2000 }],
+    });
+    const errs = errorsOf(p);
+    expect(errs).not.toContain('installments_total');
+    expect(errs).not.toContain('first_due_date');
+  });
+});
