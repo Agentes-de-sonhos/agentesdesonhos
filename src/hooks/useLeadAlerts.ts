@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-export type LeadSource = "conversational" | "sales_landing";
+export type LeadSource = "conversational" | "sales_landing" | "product_landing";
 
 export interface LeadItem {
   id: string;
@@ -21,6 +21,13 @@ export interface LeadItem {
 const SOURCE_LABEL: Record<LeadSource, string> = {
   conversational: "Formulário Conversacional",
   sales_landing: "Página de Vendas",
+  product_landing: "Landing de Destino",
+};
+
+const TABLE_BY_SOURCE: Record<LeadSource, string> = {
+  conversational: "lead_captures",
+  sales_landing: "sales_landing_leads",
+  product_landing: "product_landing_leads",
 };
 
 export function useLeads() {
@@ -29,7 +36,7 @@ export function useLeads() {
     queryKey: ["leads-unified", user?.id],
     queryFn: async (): Promise<LeadItem[]> => {
       if (!user?.id) return [];
-      const [convRes, landingRes] = await Promise.all([
+      const [convRes, landingRes, productRes] = await Promise.all([
         supabase
           .from("lead_captures")
           .select("id, lead_name, lead_phone, destination, is_read, attended_at, whatsapp_message, created_at")
@@ -40,9 +47,15 @@ export function useLeads() {
           .select("id, lead_name, lead_phone, is_read, attended_at, created_at")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
+        supabase
+          .from("product_landing_leads")
+          .select("id, lead_name, lead_phone, product_key, is_read, attended_at, created_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
       ]);
       if (convRes.error) throw convRes.error;
       if (landingRes.error) throw landingRes.error;
+      if (productRes.error) throw productRes.error;
       const conv: LeadItem[] = (convRes.data ?? []).map((l: any) => ({
         id: l.id,
         source: "conversational",
@@ -67,7 +80,19 @@ export function useLeads() {
         whatsapp_message: null,
         created_at: l.created_at,
       }));
-      return [...conv, ...landing].sort(
+      const productLanding: LeadItem[] = (productRes.data ?? []).map((l: any) => ({
+        id: l.id,
+        source: "product_landing",
+        source_label: SOURCE_LABEL.product_landing,
+        lead_name: l.lead_name,
+        lead_phone: l.lead_phone,
+        destination: l.product_key ?? null,
+        is_read: !!l.is_read,
+        attended_at: l.attended_at,
+        whatsapp_message: null,
+        created_at: l.created_at,
+      }));
+      return [...conv, ...landing, ...productLanding].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
     },
@@ -94,8 +119,8 @@ export function useMarkLeadRead() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (lead: Pick<LeadItem, "id" | "source">) => {
-      const table = lead.source === "conversational" ? "lead_captures" : "sales_landing_leads";
-      const { error } = await supabase.from(table).update({ is_read: true }).eq("id", lead.id);
+      const table = TABLE_BY_SOURCE[lead.source];
+      const { error } = await supabase.from(table as any).update({ is_read: true } as never).eq("id", lead.id);
       if (error) throw error;
     },
     onMutate: async (lead) => {
@@ -125,10 +150,10 @@ export function useMarkLeadAttended() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: async (lead: Pick<LeadItem, "id" | "source">) => {
-      const table = lead.source === "conversational" ? "lead_captures" : "sales_landing_leads";
+      const table = TABLE_BY_SOURCE[lead.source];
       const { error } = await supabase
-        .from(table)
-        .update({ is_read: true, attended_at: new Date().toISOString() })
+        .from(table as any)
+        .update({ is_read: true, attended_at: new Date().toISOString() } as never)
         .eq("id", lead.id);
       if (error) throw error;
     },
@@ -144,12 +169,14 @@ export function useMarkAllLeadsRead() {
   return useMutation({
     mutationFn: async () => {
       if (!user?.id) return;
-      const [convRes, landingRes] = await Promise.all([
+      const [convRes, landingRes, productRes] = await Promise.all([
         supabase.from("lead_captures").update({ is_read: true }).eq("agent_user_id", user.id).eq("is_read", false),
         supabase.from("sales_landing_leads").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false),
+        supabase.from("product_landing_leads").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false),
       ]);
       if (convRes.error) throw convRes.error;
       if (landingRes.error) throw landingRes.error;
+      if (productRes.error) throw productRes.error;
     },
     onMutate: async () => {
       const queryKey = ["leads-unified", user?.id];
@@ -266,6 +293,33 @@ function subscribeLeadRealtime(
           lead_name: row.lead_name,
           lead_phone: row.lead_phone,
           destination: null,
+          is_read: !!row.is_read,
+          attended_at: row.attended_at,
+          whatsapp_message: null,
+          created_at: row.created_at,
+        };
+        const first = sharedSubscribers.values().next().value as LeadSubscriber | undefined;
+        first?.(lead);
+        qc.invalidateQueries({ queryKey: ["leads-unified", userId] });
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "product_landing_leads",
+        filter: `user_id=eq.${userId}`,
+      },
+      (payload) => {
+        const row: any = payload.new;
+        const lead: LeadItem = {
+          id: row.id,
+          source: "product_landing",
+          source_label: SOURCE_LABEL.product_landing,
+          lead_name: row.lead_name,
+          lead_phone: row.lead_phone,
+          destination: row.product_key ?? null,
           is_read: !!row.is_read,
           attended_at: row.attended_at,
           whatsapp_message: null,
