@@ -679,6 +679,19 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                       htmlFor="contract-included"
                       className="sm:col-span-2"
                       hint="Um item por linha. Ex.: Aéreo ida e volta / Hospedagem 5 noites com café / Transfer aeroporto-hotel."
+                      action={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={scopeLoading}
+                          onClick={() => generateScope('included')}
+                        >
+                          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                          Gerar com IA
+                        </Button>
+                      }
                     >
                       <Textarea
                         id="contract-included"
@@ -693,6 +706,19 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                       htmlFor="contract-not-included"
                       className="sm:col-span-2"
                       hint="Um item por linha. Ex.: Refeições não citadas / Passeios opcionais / Taxas de turismo local."
+                      action={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={scopeLoading}
+                          onClick={() => generateScope('not_included')}
+                        >
+                          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                          Gerar com IA
+                        </Button>
+                      }
                     >
                       <Textarea
                         id="contract-not-included"
