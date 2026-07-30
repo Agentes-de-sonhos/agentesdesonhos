@@ -29,6 +29,8 @@ export interface ProductLanding {
   whatsapp_message_template: string | null;
   timezone: string;
   office_hours: OfficeHours;
+  /** Admin-only homologation window; while open, events are flagged is_test. */
+  test_mode_until: string | null;
   views_count: number;
   leads_count: number;
   created_at: string;
