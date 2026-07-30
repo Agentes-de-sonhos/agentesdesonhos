@@ -459,25 +459,30 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
           {step === "origin" && (
             <StepOrigin value={origin} onChange={setOrigin} />
           )}
-          {step === "opportunity" && (
-            <StepOpportunity
-              opportunities={closedOpportunities}
-              selectedId={opportunityId}
-              onSelect={setOpportunityId}
+          {step === "locate" && (
+            <StepLocateOperation
+              term={searchTerm}
+              setTerm={setSearchTerm}
+              results={searchResults}
+              loading={searching}
+              selectedKey={candidate?.key || null}
+              onSelect={setCandidate}
             />
           )}
-          {step === "source" && (
-            <StepSource
-              detected={importDetected}
-              sourceKind={sourceKind}
-              setSourceKind={setSourceKind}
-              importing={importing}
-              products={products}
-              onAdd={openAddProduct}
-              onEdit={openEditProduct}
-              onRemove={removeProduct}
-              totals={totals}
-              onSwitchToManual={() => { setOrigin("manual"); setStep("client"); }}
+          {step === "sources" && (
+            <StepOperationSources
+              bundle={bundle}
+              loading={bundleLoading}
+              walletId={walletId}
+              setWalletId={setWalletId}
+              quoteId={quoteId}
+              setQuoteId={setQuoteId}
+              precedence={precedence}
+              setPrecedence={setPrecedence}
+              pairs={pairs}
+              divergences={divergences}
+              excluded={excluded}
+              toggleExcluded={toggleExcluded}
             />
           )}
           {step === "confirm" && (
