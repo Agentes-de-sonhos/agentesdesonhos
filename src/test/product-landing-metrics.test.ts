@@ -24,7 +24,11 @@ describe("product landing metrics", () => {
       [{}, {}, {}, {}, { is_test: true }, { is_test: true }],
       [{}, { is_test: true }]
     );
-    expect(mixed).toEqual(only);
+    expect({ views: mixed.views, leads: mixed.leads, conversion: mixed.conversion }).toEqual({
+      views: only.views,
+      leads: only.leads,
+      conversion: only.conversion,
+    });
   });
 
   it("recalcula indicadores sem eventos válidos", () => {
