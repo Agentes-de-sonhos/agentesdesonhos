@@ -512,6 +512,78 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_product_landings: {
+        Row: {
+          created_at: string
+          id: string
+          leads_count: number
+          office_hours: Json
+          override_agency_name: string | null
+          override_city: string | null
+          override_consultant_name: string | null
+          override_consultant_photo_url: string | null
+          override_consultant_role: string | null
+          override_email: string | null
+          override_logo_url: string | null
+          override_phone: string | null
+          override_whatsapp: string | null
+          product_key: string
+          slug: string
+          status: string
+          timezone: string
+          updated_at: string
+          user_id: string
+          views_count: number
+          whatsapp_message_template: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          leads_count?: number
+          office_hours?: Json
+          override_agency_name?: string | null
+          override_city?: string | null
+          override_consultant_name?: string | null
+          override_consultant_photo_url?: string | null
+          override_consultant_role?: string | null
+          override_email?: string | null
+          override_logo_url?: string | null
+          override_phone?: string | null
+          override_whatsapp?: string | null
+          product_key: string
+          slug: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+          views_count?: number
+          whatsapp_message_template?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          leads_count?: number
+          office_hours?: Json
+          override_agency_name?: string | null
+          override_city?: string | null
+          override_consultant_name?: string | null
+          override_consultant_photo_url?: string | null
+          override_consultant_role?: string | null
+          override_email?: string | null
+          override_logo_url?: string | null
+          override_phone?: string | null
+          override_whatsapp?: string | null
+          product_key?: string
+          slug?: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+          views_count?: number
+          whatsapp_message_template?: string | null
+        }
+        Relationships: []
+      }
       agency_showcases: {
         Row: {
           auto_categories: string[] | null
@@ -8037,6 +8109,145 @@ export type Database = {
         }
         Relationships: []
       }
+      product_landing_leads: {
+        Row: {
+          adults: number | null
+          attended_at: string | null
+          children: number | null
+          children_ages: string | null
+          client_id: string | null
+          consent_accepted: boolean
+          consent_at: string | null
+          created_at: string
+          id: string
+          idempotency_key: string | null
+          interest_category: string | null
+          is_read: boolean
+          landing_id: string
+          lead_email: string | null
+          lead_name: string
+          lead_phone: string
+          message: string | null
+          opportunity_id: string | null
+          origin_city: string | null
+          page_url: string | null
+          product_key: string
+          referrer: string | null
+          travel_period: string | null
+          user_agent: string | null
+          user_id: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          adults?: number | null
+          attended_at?: string | null
+          children?: number | null
+          children_ages?: string | null
+          client_id?: string | null
+          consent_accepted?: boolean
+          consent_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          interest_category?: string | null
+          is_read?: boolean
+          landing_id: string
+          lead_email?: string | null
+          lead_name: string
+          lead_phone: string
+          message?: string | null
+          opportunity_id?: string | null
+          origin_city?: string | null
+          page_url?: string | null
+          product_key: string
+          referrer?: string | null
+          travel_period?: string | null
+          user_agent?: string | null
+          user_id: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          adults?: number | null
+          attended_at?: string | null
+          children?: number | null
+          children_ages?: string | null
+          client_id?: string | null
+          consent_accepted?: boolean
+          consent_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string | null
+          interest_category?: string | null
+          is_read?: boolean
+          landing_id?: string
+          lead_email?: string | null
+          lead_name?: string
+          lead_phone?: string
+          message?: string | null
+          opportunity_id?: string | null
+          origin_city?: string | null
+          page_url?: string | null
+          product_key?: string
+          referrer?: string | null
+          travel_period?: string | null
+          user_agent?: string | null
+          user_id?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_landing_leads_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "agency_product_landings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_landing_views: {
+        Row: {
+          created_at: string
+          id: string
+          landing_id: string
+          session_hash: string
+          viewed_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          landing_id: string
+          session_hash: string
+          viewed_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          landing_id?: string
+          session_hash?: string
+          viewed_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_landing_views_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "agency_product_landings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_workshops: {
         Row: {
           category: Database["public"]["Enums"]["workshop_category"]
@@ -8101,6 +8312,7 @@ export type Database = {
           niches: string[] | null
           partnership_interests: string[] | null
           phone: string | null
+          public_slug: string | null
           services: string[] | null
           specialties: string[] | null
           state: string | null
@@ -8131,6 +8343,7 @@ export type Database = {
           niches?: string[] | null
           partnership_interests?: string[] | null
           phone?: string | null
+          public_slug?: string | null
           services?: string[] | null
           specialties?: string[] | null
           state?: string | null
@@ -8161,6 +8374,7 @@ export type Database = {
           niches?: string[] | null
           partnership_interests?: string[] | null
           phone?: string | null
+          public_slug?: string | null
           services?: string[] | null
           specialties?: string[] | null
           state?: string | null
@@ -12214,6 +12428,7 @@ export type Database = {
         }
       }
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
+      check_public_slug_available: { Args: { p_slug: string }; Returns: Json }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
       clone_itinerary_for_trip: {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
@@ -12440,6 +12655,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_product_landing: {
+        Args: { p_product_key: string; p_slug: string }
+        Returns: Json
+      }
       get_public_profile: {
         Args: { _user_id: string }
         Returns: {
@@ -12548,6 +12767,7 @@ export type Database = {
       }
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
+      is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
       list_award_history: {
         Args: { _limit?: number }
@@ -12605,6 +12825,7 @@ export type Database = {
           window_reads: number
         }[]
       }
+      normalize_public_slug: { Args: { _input: string }; Returns: string }
       recompute_monthly_nominee: {
         Args: { _user_id: string }
         Returns: undefined
@@ -12668,6 +12889,15 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      submit_product_landing_lead: {
+        Args: {
+          p_idempotency_key?: string
+          p_payload: Json
+          p_product_key: string
+          p_slug: string
+        }
+        Returns: Json
+      }
       submit_sales_landing_lead: {
         Args: { p_lead_name: string; p_lead_phone: string; p_slug: string }
         Returns: Json
@@ -12704,6 +12934,10 @@ export type Database = {
         Returns: undefined
       }
       team_self: { Args: never; Returns: Json }
+      track_product_landing_view: {
+        Args: { p_landing_id: string; p_session_hash: string }
+        Returns: undefined
+      }
       track_sales_landing_view: {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined
