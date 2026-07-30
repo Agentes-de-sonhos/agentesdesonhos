@@ -267,9 +267,9 @@ export function buildPaymentPlan(args: {
   const parts: string[] = [];
   received.forEach((p) => {
     parts.push(
-      `${p.kind === 'entrada' ? 'Entrada' : 'Pagamento adicional'} de ${money(p.amount)} recebido${
-        p.method ? ` via ${p.method}` : ''
-      } em ${formatDateBR(p.date)}`,
+      p.kind === 'entrada'
+        ? `Entrada de ${money(p.amount)} recebida${p.method ? ` via ${p.method}` : ''} em ${formatDateBR(p.date)}`
+        : `Pagamento adicional de ${money(p.amount)} recebido${p.method ? ` via ${p.method}` : ''} em ${formatDateBR(p.date)}`,
     );
   });
   if (pending > 0) {
