@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Copy, ExternalLink, Eye, Loader2, Settings2, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
+import { conversionRate, isTestModeActive } from "@/lib/productLandingMetrics";
 import {
   LANDING_PRODUCTS,
   buildProductLandingUrl,
