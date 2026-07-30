@@ -9,6 +9,7 @@ import type {
   ContractTemplateSection,
 } from '@/types/contracts';
 import { PRODUCT_TYPES, type Sale, type SaleProduct, type CustomerPayment } from '@/types/financial';
+import type { InsuranceFieldProvenance } from '@/lib/insuranceSources';
 
 export interface TravelerRow {
   id: string;
