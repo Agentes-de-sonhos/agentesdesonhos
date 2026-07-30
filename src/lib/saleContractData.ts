@@ -498,6 +498,60 @@ export function validateContractPayload(payload: ContractPayload): ContractValid
   if (payload.financial.total <= 0) push('total', 'Valor total do contrato deve ser maior que zero.');
   if (!payload.financial.payment_method)
     push('payment_method', 'Forma de pagamento não informada.', 'warning');
+
+  // ── Coerência do parcelamento com os pagamentos registrados ──
+  const f = payload.financial;
+  const cents = (v: number) => Math.round((Number(v) || 0) * 100);
+  if (f.pending > 0) {
+    if (!f.installments_count || !f.installment_value) {
+      push(
+        'installments',
+        `Há saldo pendente de ${formatMoney(f.pending, f.currency)}. Informe a quantidade e o valor das parcelas para gerar o cronograma.`,
+      );
+    } else {
+      if (cents(f.installments_count * f.installment_value) !== cents(f.pending)) {
+        push(
+          'installments_total',
+          `O parcelamento (${f.installments_count}x de ${formatMoney(f.installment_value, f.currency)} = ${formatMoney(
+            f.installments_count * f.installment_value,
+            f.currency,
+          )}) não fecha com o saldo pendente de ${formatMoney(f.pending, f.currency)}.`,
+        );
+      }
+      if (!f.schedule.length) {
+        push('first_due_date', 'Informe a data do 1º vencimento para gerar o cronograma das parcelas.');
+      }
+    }
+  }
+  if (f.schedule.length) {
+    const paidDates = new Set(f.received.map((p) => p.date));
+    const lastReceived = f.received.length ? f.received[f.received.length - 1].date : null;
+    const first = f.schedule[0].due_date;
+    if (lastReceived && first <= lastReceived) {
+      push(
+        'first_due_date',
+        `O 1º vencimento (${formatDateBR(first)}) não pode ser anterior ou igual ao último pagamento já recebido (${formatDateBR(lastReceived)}).`,
+      );
+    }
+    const overlap = f.schedule.filter((i) => paidDates.has(i.due_date));
+    if (overlap.length)
+      push(
+        'schedule_overlap',
+        `Há parcela com vencimento na mesma data de um pagamento já registrado (${overlap
+          .map((i) => formatDateBR(i.due_date))
+          .join(', ')}).`,
+      );
+  }
+  if (f.down_payment > 0 && f.received.length && cents(f.down_payment) !== cents(f.received[0].amount))
+    push(
+      'down_payment',
+      `A entrada informada (${formatMoney(f.down_payment, f.currency)}) difere do primeiro pagamento registrado (${formatMoney(
+        f.received[0].amount,
+        f.currency,
+      )}).`,
+      'warning',
+    );
+
   if (!payload.insurance.contracted && !payload.insurance.refusal_acknowledged)
     push('insurance', 'Registre a ciência da recusa do seguro viagem.', 'warning');
   if (!payload.legal_body_html && !payload.sections.length)
