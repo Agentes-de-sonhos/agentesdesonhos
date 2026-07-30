@@ -153,7 +153,7 @@ export function AccommodationsSection({
                   <p className="mt-2 line-clamp-3 text-[13px] leading-snug text-slate-600">
                     {a.cardText}
                   </p>
-                  <div className="mt-4 flex flex-col gap-2">
+                  <div className="mt-auto flex flex-col gap-2 pt-4">
                     <button
                       type="button"
                       onClick={() => setOpenItem(a)}
