@@ -25,6 +25,19 @@ function sessionHash(landingId: string): string {
   }
 }
 
+/**
+ * Agency phones are stored in local Brazilian format ("(35) 99954-0212").
+ * wa.me requires E.164 digits, so prefix the country code when the number
+ * clearly lacks it. Numbers already carrying a country code are untouched.
+ */
+export function normalizeWhatsappDigits(raw: string | null | undefined): string {
+  const digits = String(raw || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.length === 10 || digits.length === 11) return `55${digits}`;
+  if (digits.length === 12 || digits.length === 13) return digits;
+  return digits;
+}
+
 export function usePublicProductLanding(productKey: string, slug: string | undefined) {
   const [data, setData] = useState<PublicProductLanding | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,14 +70,14 @@ export function usePublicProductLanding(productKey: string, slug: string | undef
         const consultantName: string = res.consultant_name || "";
         const agency: AgencyConfig = {
           ...DEFAULT_AGENCY,
-          name: res.agency_name || DEFAULT_AGENCY.name,
+          name: String(res.agency_name || DEFAULT_AGENCY.name).trim(),
           logoUrl: res.logo_url || null,
           primaryColor: DEFAULT_AGENCY.primaryColor,
           consultantName,
           consultantFirstName: consultantName.split(" ")[0] || "",
           consultantRole: res.consultant_role || DEFAULT_AGENCY.consultantRole,
           consultantPhotoUrl: res.consultant_photo_url || null,
-          whatsapp: String(res.whatsapp || "").replace(/\D/g, ""),
+          whatsapp: normalizeWhatsappDigits(res.whatsapp),
           phone: res.phone || "",
           email: res.email || "",
           city: res.city || "",
