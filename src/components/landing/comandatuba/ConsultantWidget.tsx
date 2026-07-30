@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
 import { MessageCircle, X, Check } from "lucide-react";
-import { CONSULTANT_COPY, whatsappDefaultMessage, whatsappUrl, type AgencyConfig } from "./content";
+import {
+  CONSULTANT_COPY,
+  whatsappDefaultMessage,
+  type AgencyConfig,
+  type LandingContext,
+} from "./content";
+import { useWhatsAppCta } from "./useWhatsAppCta";
 
 const STORAGE_KEY = "comandatuba_consultant_collapsed";
 const BENEFITS = CONSULTANT_COPY.benefits;
 
-export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
+export function ConsultantWidget({
+  agency,
+  context = null,
+}: {
+  agency: AgencyConfig;
+  context?: LandingContext | null;
+}) {
+  const cta = useWhatsAppCta(agency, context, whatsappDefaultMessage(agency));
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return sessionStorage.getItem(STORAGE_KEY) === "1";
@@ -26,7 +39,12 @@ export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
     .join("")
     .toUpperCase();
 
-  const waHref = whatsappUrl(agency, whatsappDefaultMessage(agency));
+  const waHref = cta.href;
+  const ctaLabel = cta.available
+    ? agency.consultantFirstName
+      ? CONSULTANT_COPY.cta
+      : CONSULTANT_COPY.ctaNoConsultant
+    : "Solicitar contato";
 
   // Desktop widget
   return (
@@ -93,16 +111,33 @@ export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
                   </li>
                 ))}
               </ul>
-              <a
-                href={waHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[13.5px] font-semibold text-white shadow-sm"
-                style={{ backgroundColor: agency.primaryColor }}
-              >
-                <MessageCircle className="h-4 w-4" />
-                {agency.consultantFirstName ? CONSULTANT_COPY.cta : CONSULTANT_COPY.ctaNoConsultant}
-              </a>
+              {cta.available ? (
+                <a
+                  href={waHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[13.5px] font-semibold text-white shadow-sm"
+                  style={{ backgroundColor: agency.primaryColor }}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  {ctaLabel}
+                </a>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={cta.onFallback}
+                    className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-[13.5px] font-semibold text-white shadow-sm"
+                    style={{ backgroundColor: agency.primaryColor }}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    {ctaLabel}
+                  </button>
+                  <p className="mt-2 text-[11.5px] leading-snug text-slate-500">
+                    {cta.outsideHoursNote}
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -110,12 +145,11 @@ export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
 
       {/* Mobile sticky bar */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-3 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] shadow-2xl backdrop-blur lg:hidden">
-        <a
+        <MobileCtaWrapper
+          available={cta.available}
           href={waHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 rounded-xl px-3 py-2"
-          style={{ backgroundColor: `${agency.primaryColor}12` }}
+          onFallback={cta.onFallback}
+          background={`${agency.primaryColor}12`}
         >
           {agency.consultantPhotoUrl ? (
             <img src={agency.consultantPhotoUrl} alt="" className="h-10 w-10 rounded-full object-cover" />
@@ -137,10 +171,38 @@ export function ConsultantWidget({ agency }: { agency: AgencyConfig }) {
             className="inline-flex h-9 items-center justify-center gap-1 rounded-lg px-3 text-[12px] font-semibold text-white"
             style={{ backgroundColor: agency.primaryColor }}
           >
-            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+            <MessageCircle className="h-3.5 w-3.5" /> {cta.available ? "WhatsApp" : "Contato"}
           </span>
-        </a>
+        </MobileCtaWrapper>
       </div>
     </>
+  );
+}
+
+function MobileCtaWrapper({
+  available,
+  href,
+  onFallback,
+  background,
+  children,
+}: {
+  available: boolean;
+  href?: string;
+  onFallback: () => void;
+  background: string;
+  children: React.ReactNode;
+}) {
+  const className = "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left";
+  if (available && href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} style={{ backgroundColor: background }}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <button type="button" onClick={onFallback} className={className} style={{ backgroundColor: background }}>
+      {children}
+    </button>
   );
 }

@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useSalesLandings } from "@/hooks/useSalesLandings";
+import { ProductLandingsSection } from "@/components/leads/ProductLandingsSection";
 import {
   Plus,
   Globe,
@@ -202,6 +203,8 @@ export default function SalesLandings() {
             })}
           </div>
         )}
+
+        <ProductLandingsSection />
       </div>
     </DashboardLayout>
   );

@@ -7,9 +7,12 @@ import {
   FORM_ANCHOR_ID,
   ACCOMMODATION_FORM_OPTIONS,
   whatsappFromForm,
-  whatsappUrl,
   type AgencyConfig,
+  type LandingContext,
 } from "./content";
+import { supabase } from "@/integrations/supabase/client";
+import { useWhatsAppCta } from "./useWhatsAppCta";
+import { COMANDATUBA_PRODUCT_KEY } from "@/config/landingProducts";
 
 function maskPhone(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 11);
@@ -27,9 +30,11 @@ export type FormRef = {
 export function QuoteFormSection({
   agency,
   formRef,
+  context = null,
 }: {
   agency: AgencyConfig;
   formRef: React.MutableRefObject<FormRef | null>;
+  context?: LandingContext | null;
 }) {
   const [params] = useSearchParams();
   const [name, setName] = useState("");
@@ -46,6 +51,11 @@ export function QuoteFormSection({
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const submittingRef = useRef(false);
+  const idempotencyRef = useRef<string>(
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
 
   useMemo(() => {
     formRef.current = {
@@ -71,6 +81,11 @@ export function QuoteFormSection({
   }, []);
 
   const emailValid = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const successCta = useWhatsAppCta(
+    agency,
+    context,
+    whatsappFromForm(agency, { period, origin, adults, kids, category })
+  );
   const whatsappValid = whatsapp.replace(/\D/g, "").length >= 10;
   const nameValid = name.trim().length >= 2;
   const valid = nameValid && whatsappValid && emailValid && consent;
@@ -85,40 +100,46 @@ export function QuoteFormSection({
     submittingRef.current = true;
     setLoading(true);
 
-    const payload = {
-      name,
-      whatsapp,
-      email,
-      origin,
-      period,
-      adults,
-      kids,
-      kidsAges,
-      category,
-      notes,
-      // hidden tracking
-      destination: "Transamerica Comandatuba",
-      landing: "transamerica-comandatuba",
-      agency: agency.name,
-      consultant: agency.consultantName,
-      referrer: typeof document !== "undefined" ? document.referrer : "",
-      ...utm,
-    };
-
     try {
-      // Same posture as the Orlando Magic demo: this form is prepared for
-      // the lead-distribution integration and stores the payload locally.
-      if (typeof window !== "undefined") {
-        // eslint-disable-next-line no-console
-        console.info("[comandatuba lead]", payload);
-        try {
-          const bucket = JSON.parse(localStorage.getItem("comandatuba_leads") || "[]");
-          bucket.push({ ...payload, at: new Date().toISOString() });
-          localStorage.setItem("comandatuba_leads", JSON.stringify(bucket));
-        } catch {
-          /* ignore */
-        }
+      const isPublished = !!context && !context.isDemo && !!context.slug;
+
+      if (!isPublished) {
+        // Demo route: nothing is persisted, no CRM record is created.
+        setSent(true);
+        toast.success(FORM.successTitle(name.trim().split(" ")[0] || ""));
+        return;
       }
+
+      const { data, error } = await supabase.rpc("submit_product_landing_lead" as any, {
+        p_product_key: context!.productKey || COMANDATUBA_PRODUCT_KEY,
+        p_slug: context!.slug,
+        p_payload: {
+          lead_name: name.trim(),
+          lead_phone: whatsapp,
+          lead_email: email.trim() || null,
+          origin_city: origin.trim(),
+          travel_period: period.trim(),
+          adults: String(adults),
+          children: String(kids),
+          children_ages: kidsAges.trim(),
+          interest_category: category,
+          message: notes.trim(),
+          destination: "Transamerica Comandatuba",
+          consent_accepted: consent,
+          referrer: typeof document !== "undefined" ? document.referrer : "",
+          page_url: typeof window !== "undefined" ? window.location.href : "",
+          user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+          ...utm,
+        },
+        p_idempotency_key: idempotencyRef.current,
+      });
+
+      const res = data as any;
+      if (error || !res || res.error) {
+        toast.error(res?.error || FORM.errorTitle);
+        return;
+      }
+
       setSent(true);
       toast.success(FORM.successTitle(name.trim().split(" ")[0] || ""));
     } catch {
@@ -153,25 +174,22 @@ export function QuoteFormSection({
             <p className="mt-2 text-[14px] leading-relaxed text-slate-600">
               {FORM.successText(agency.name)}
             </p>
-            <a
-              href={whatsappUrl(
-                agency,
-                whatsappFromForm(agency, {
-                  period,
-                  origin,
-                  adults,
-                  kids,
-                  category,
-                })
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[13.5px] font-semibold text-white shadow-sm"
-              style={{ backgroundColor: agency.primaryColor }}
-            >
-              <MessageCircle className="h-4 w-4" />
-              {FORM.successCta}
-            </a>
+            {successCta.available ? (
+              <a
+                href={successCta.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[13.5px] font-semibold text-white shadow-sm"
+                style={{ backgroundColor: agency.primaryColor }}
+              >
+                <MessageCircle className="h-4 w-4" />
+                {FORM.successCta}
+              </a>
+            ) : (
+              <p className="mt-4 text-[13px] text-slate-600">
+                Atendimento: {successCta.hoursLabel}. Retornaremos no próximo horário disponível.
+              </p>
+            )}
           </div>
         ) : (
           <form onSubmit={onSubmit} className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" noValidate>

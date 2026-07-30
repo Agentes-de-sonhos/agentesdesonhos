@@ -80,6 +80,27 @@ const CriarCartao = lazy(() => import("./pages/CriarCartao"));
 const VitrinePublica = lazy(() => import("./pages/VitrinePublica"));
 const CartaoPublico = lazy(() => import("./pages/CartaoPublico"));
 const SlugResolver = lazy(() => import("./components/routing/SlugResolver"));
+const ProductLandingResolver = lazy(() => import("./components/routing/ProductLandingResolver"));
+import { productForHostname } from "@/config/landingProducts";
+
+// White-label product landing hosts (e.g. comandatuba.proximaviagem.tur.br).
+// The hostname selects the product; the first path segment selects the agency.
+const isProductLandingHost = !!productForHostname(
+  typeof window !== "undefined" ? window.location.hostname : ""
+);
+
+function ProductLandingHome() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white p-6">
+      <div className="max-w-md space-y-2 text-center">
+        <h1 className="text-xl font-semibold text-slate-900">Link incompleto</h1>
+        <p className="text-sm text-slate-500">
+          Use o link completo enviado pelo seu consultor de viagens para acessar a página.
+        </p>
+      </div>
+    </div>
+  );
+}
 const NotFound = lazy(() => import("./pages/NotFound"));
 const OrcamentoPublico = lazy(() => import("./pages/OrcamentoPublico"));
 const CertificateTest = lazy(() => import("./pages/CertificateTest"));
@@ -171,6 +192,8 @@ const App = () => (
               element={
                 window.location.hostname.startsWith("ativar-cartao") ? (
                   <AtivarCartao />
+                ) : isProductLandingHost ? (
+                  <ProductLandingHome />
                 ) : window.location.hostname.startsWith("lp.") ? (
                   <SalesLandingPublic />
                 ) : (
@@ -214,7 +237,9 @@ const App = () => (
             <Route
               path="/:slug"
               element={
-                window.location.hostname.startsWith("lp.") ? (
+                isProductLandingHost ? (
+                  <ProductLandingResolver />
+                ) : window.location.hostname.startsWith("lp.") ? (
                   <SalesLandingPublic />
                 ) : (
                   <SlugResolver />

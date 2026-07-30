@@ -20,6 +20,20 @@ export type AgencyConfig = {
   privacyUrl: string;
 };
 
+/** White-label runtime context for a published agency instance. */
+export type LandingContext = {
+  landingId: string | null;
+  productKey: string;
+  slug: string | null;
+  isDemo: boolean;
+  /** Agency service windows, evaluated in `timezone`. */
+  officeHours: import("@/lib/officeHours").OfficeHours | null;
+  timezone: string;
+  /** Server clock at page load (never the visitor's device clock). */
+  serverNowIso: string | null;
+  whatsappMessageTemplate: string | null;
+};
+
 export const DEFAULT_AGENCY: AgencyConfig = {
   name: "Agentes de Sonhos",
   logoUrl: null,
