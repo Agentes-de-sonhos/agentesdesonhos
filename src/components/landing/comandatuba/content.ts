@@ -85,6 +85,53 @@ export const ALL_INCLUSIVE = {
     "Horários, cardápios, bebidas, pontos de atendimento, reservas e inclusões podem variar conforme a operação e as condições vigentes do resort. Alguns serviços e experiências especiais podem ter custo adicional.",
 };
 
+/** Photos of the all inclusive gallery (gastronomy, bar and leisure structure). */
+export const ALL_INCLUSIVE_MEDIA = [
+  {
+    key: "buffet",
+    caption: "Buffets variados ao longo do dia",
+    alt: "Buffet quente do Transamerica Comandatuba com pizza e pratos servidos",
+    position: "center 50%",
+  },
+  {
+    key: "padaria",
+    caption: "Padaria e panificação artesanal",
+    alt: "Cestos com pães, croissants e doces frescos da padaria do resort",
+    position: "center 50%",
+  },
+  {
+    key: "prato-assinatura",
+    caption: "Pratos preparados na hora",
+    alt: "Prato de carne com purê servido em restaurante do resort, ao lado de uma taça de vinho",
+    position: "center 45%",
+  },
+  {
+    key: "drinks",
+    caption: "Bebidas e drinks selecionados",
+    alt: "Três drinks coloridos servidos em taças sobre mesa de madeira",
+    position: "center 45%",
+  },
+  {
+    key: "sobremesas",
+    caption: "Sobremesas e sabores baianos",
+    alt: "Mesa de sobremesas do resort com bolos, doces e frutas",
+    position: "center 50%",
+  },
+  {
+    key: "restaurante-piscina",
+    caption: "Estrutura de lazer e alimentação integradas",
+    alt: "Piscina do resort cercada por coqueiros com o restaurante principal ao fundo",
+    position: "center 55%",
+  },
+];
+
+export const ALL_INCLUSIVE_GALLERY_COPY = {
+  ariaLabel: "Galeria de gastronomia e all inclusive do Transamerica Comandatuba",
+  prev: "Foto anterior",
+  next: "Próxima foto",
+  openPhoto: (caption: string) => `Ampliar foto: ${caption}`,
+};
+
 export const EXPERIENCES = {
   title: "Experiências e lazer para todos os ritmos",
   subtitle:

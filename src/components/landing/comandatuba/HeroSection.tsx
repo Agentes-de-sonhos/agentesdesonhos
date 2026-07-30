@@ -4,8 +4,8 @@ import { HERO, scrollToForm, scrollTo, type AgencyConfig } from "./content";
 
 export function HeroSection({ agency }: { agency: AgencyConfig }) {
   return (
-    <section className="relative overflow-hidden">
-      <div className="relative h-[520px] w-full sm:h-[600px] lg:h-[640px]">
+    <section className="relative">
+      <div className="relative h-[480px] w-full overflow-hidden sm:h-[560px] lg:h-[600px]">
         <img
           src={heroImg}
           alt={HERO.imageAlt}
@@ -50,7 +50,7 @@ export function HeroSection({ agency }: { agency: AgencyConfig }) {
       </div>
 
       {/* Indicators band */}
-      <div className="mx-auto -mt-16 max-w-[1200px] px-5 sm:px-8">
+      <div className="mx-auto mt-6 max-w-[1200px] px-5 sm:mt-8 sm:px-8">
         <div className="grid grid-cols-1 gap-3 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-100 sm:grid-cols-3 sm:p-5">
           {HERO.indicators.map((it) => (
             <div key={it.title} className="flex items-start gap-3 rounded-xl p-2">
