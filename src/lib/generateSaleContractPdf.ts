@@ -465,6 +465,7 @@ export async function generateSaleContractPdf(
     y += 4;
     for (const s of extraSigners) {
       ensure(18);
+      doc.setFont('helvetica', 'normal');
       doc.setDrawColor(120, 120, 120);
       doc.line(M_L, y, M_L + sigW, y);
       y += 4;
