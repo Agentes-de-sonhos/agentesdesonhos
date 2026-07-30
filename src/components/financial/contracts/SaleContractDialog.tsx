@@ -31,7 +31,13 @@ import {
   validateContractPayload,
   type ContractDraftOverrides,
 } from '@/lib/saleContractData';
-import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
+import {
+  PDF_GENERATOR_VERSION,
+  contractPdfFileName,
+  downloadPdfBlob,
+  generateSaleContractPdf,
+} from '@/lib/generateSaleContractPdf';
+import { downloadStoredContractPdf, sha256Hex, uploadContractPdf } from '@/lib/contractPdfStorage';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
@@ -139,7 +145,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const [quickTravelerOpen, setQuickTravelerOpen] = useState(false);
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
-  const { contracts, createContract, logAction } = useSaleContracts(sale?.id);
+  const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
 
   const { data: saleData, isLoading: loadingSale } = useQuery({
     queryKey: ['sale-contract-source', sale?.id],
@@ -284,7 +290,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
     setGenerating(true);
     try {
       const documentHash = hashPayload(payload);
-      await createContract.mutateAsync({
+      const created = await createContract.mutateAsync({
         payload,
         templateId: templateData?.template?.id ?? null,
         templateVersion: templateData?.template?.version ?? null,
@@ -292,7 +298,38 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
         supersedesId: contracts[0]?.id ?? null,
         documentHash,
       });
-      await generateSaleContractPdf(payload, { download: true });
+
+      // O arquivo é gerado UMA vez: os mesmos bytes são baixados, armazenados e hasheados.
+      const blob = await generateSaleContractPdf(payload);
+      const bytes = await blob.arrayBuffer();
+      const sha256 = await sha256Hex(bytes);
+      const fileName = contractPdfFileName(payload);
+
+      let storagePath: string | null = null;
+      let storageError: string | null = null;
+      try {
+        storagePath = await uploadContractPdf({
+          agencyId: created.agency_id,
+          saleId: created.sale_id,
+          contractId: created.id,
+          blob,
+        });
+      } catch (e) {
+        storageError = e instanceof Error ? e.message : 'Falha desconhecida ao armazenar o PDF.';
+        toast.warning('Contrato gerado, mas o arquivo não pôde ser arquivado. O hash foi registrado.');
+      }
+
+      await attachPdf.mutateAsync({
+        contractId: created.id,
+        sha256,
+        sizeBytes: blob.size,
+        storagePath,
+        fileName,
+        generatorVersion: PDF_GENERATOR_VERSION,
+        storageError,
+      });
+
+      downloadPdfBlob(blob, fileName);
       setTab('versoes');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao gerar contrato');
@@ -301,9 +338,21 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
     }
   };
 
-  const handleDownloadExisting = async (contractId: string, stored: ContractPayload) => {
-    await generateSaleContractPdf(stored, { download: true });
-    void logAction(contractId, 'downloaded');
+  const handleDownloadExisting = async (contract: SaleContract) => {
+    try {
+      if (contract.pdf_storage_path) {
+        // Entrega o arquivo original arquivado — garante hash idêntico ao registrado.
+        const blob = await downloadStoredContractPdf(contract.pdf_storage_path);
+        downloadPdfBlob(blob, contract.pdf_file_name ?? contractPdfFileName(contract.generated_payload_json));
+      } else {
+        const blob = await generateSaleContractPdf(contract.generated_payload_json);
+        downloadPdfBlob(blob, contractPdfFileName(contract.generated_payload_json));
+        toast.info('Este contrato foi gerado antes do arquivamento automático; o PDF foi remontado a partir dos dados salvos.');
+      }
+      void logAction(contract.id, 'downloaded');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Não foi possível baixar o PDF.');
+    }
   };
 
   const hasTemplate = !!templateData?.template;
