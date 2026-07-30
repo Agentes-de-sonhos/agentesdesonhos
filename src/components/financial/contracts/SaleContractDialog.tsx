@@ -15,10 +15,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { AlertTriangle, Copy, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Sale } from '@/types/financial';
-import type { ContractPayload } from '@/types/contracts';
+import type { ContractPayload, SaleContract } from '@/types/contracts';
 import { useAgencyContractTemplate, useSaleContracts } from '@/hooks/useSaleContracts';
 import { CurrencyInput } from '@/components/shared/CurrencyInput';
 import { maskDocument, validateDocument } from '@/lib/documentMask';
@@ -31,7 +31,13 @@ import {
   validateContractPayload,
   type ContractDraftOverrides,
 } from '@/lib/saleContractData';
-import { generateSaleContractPdf } from '@/lib/generateSaleContractPdf';
+import {
+  PDF_GENERATOR_VERSION,
+  contractPdfFileName,
+  downloadPdfBlob,
+  generateSaleContractPdf,
+} from '@/lib/generateSaleContractPdf';
+import { downloadStoredContractPdf, sha256Hex, uploadContractPdf } from '@/lib/contractPdfStorage';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
@@ -70,7 +76,7 @@ function passengerInfo(
   if (t.data_nascimento) {
     parts.push(`${formatDateBR(t.data_nascimento)}${age !== null ? ` (${age} anos)` : ''}`);
   }
-  return { category, details: parts.join(' • ') };
+  return { category, age, details: parts.join(' • ') };
 }
 
 /** Bloco visual padrão das seções do formulário. */
@@ -139,7 +145,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const [quickTravelerOpen, setQuickTravelerOpen] = useState(false);
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
-  const { contracts, createContract, logAction } = useSaleContracts(sale?.id);
+  const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
 
   const { data: saleData, isLoading: loadingSale } = useQuery({
     queryKey: ['sale-contract-source', sale?.id],
@@ -284,7 +290,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
     setGenerating(true);
     try {
       const documentHash = hashPayload(payload);
-      await createContract.mutateAsync({
+      const created = await createContract.mutateAsync({
         payload,
         templateId: templateData?.template?.id ?? null,
         templateVersion: templateData?.template?.version ?? null,
@@ -292,7 +298,38 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
         supersedesId: contracts[0]?.id ?? null,
         documentHash,
       });
-      await generateSaleContractPdf(payload, { download: true });
+
+      // O arquivo é gerado UMA vez: os mesmos bytes são baixados, armazenados e hasheados.
+      const blob = await generateSaleContractPdf(payload);
+      const bytes = await blob.arrayBuffer();
+      const sha256 = await sha256Hex(bytes);
+      const fileName = contractPdfFileName(payload);
+
+      let storagePath: string | null = null;
+      let storageError: string | null = null;
+      try {
+        storagePath = await uploadContractPdf({
+          agencyId: created.agency_id,
+          saleId: created.sale_id,
+          contractId: created.id,
+          blob,
+        });
+      } catch (e) {
+        storageError = e instanceof Error ? e.message : 'Falha desconhecida ao armazenar o PDF.';
+        toast.warning('Contrato gerado, mas o arquivo não pôde ser arquivado. O hash foi registrado.');
+      }
+
+      await attachPdf.mutateAsync({
+        contractId: created.id,
+        sha256,
+        sizeBytes: blob.size,
+        storagePath,
+        fileName,
+        generatorVersion: PDF_GENERATOR_VERSION,
+        storageError,
+      });
+
+      downloadPdfBlob(blob, fileName);
       setTab('versoes');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao gerar contrato');
@@ -301,9 +338,21 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
     }
   };
 
-  const handleDownloadExisting = async (contractId: string, stored: ContractPayload) => {
-    await generateSaleContractPdf(stored, { download: true });
-    void logAction(contractId, 'downloaded');
+  const handleDownloadExisting = async (contract: SaleContract) => {
+    try {
+      if (contract.pdf_storage_path) {
+        // Entrega o arquivo original arquivado — garante hash idêntico ao registrado.
+        const blob = await downloadStoredContractPdf(contract.pdf_storage_path);
+        downloadPdfBlob(blob, contract.pdf_file_name ?? contractPdfFileName(contract.generated_payload_json));
+      } else {
+        const blob = await generateSaleContractPdf(contract.generated_payload_json);
+        downloadPdfBlob(blob, contractPdfFileName(contract.generated_payload_json));
+        toast.info('Este contrato foi gerado antes do arquivamento automático; o PDF foi remontado a partir dos dados salvos.');
+      }
+      void logAction(contract.id, 'downloaded');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Não foi possível baixar o PDF.');
+    }
   };
 
   const hasTemplate = !!templateData?.template;
@@ -476,11 +525,15 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                           const selectedIds = overrides.passenger_ids ?? travelers.map((x) => x.id);
                           const checked = selectedIds.includes(t.id);
                           const info = passengerInfo(t, sale?.start_date ?? null);
+                          const isAdult = info.age !== null && info.age >= 18;
+                          const signatoryIds = overrides.signatory_ids ?? [];
+                          const isSignatory = signatoryIds.includes(t.id);
                           return (
-                            <label
+                            <div
                               key={t.id}
-                              className="flex items-start gap-3 rounded-lg border border-border bg-background p-2.5 text-sm hover:bg-muted/40 transition-colors cursor-pointer"
+                              className="rounded-lg border border-border bg-background p-2.5 text-sm transition-colors"
                             >
+                            <label className="flex items-start gap-3 cursor-pointer">
                               <Checkbox
                                 className="mt-0.5"
                                 checked={checked}
@@ -489,6 +542,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                                     ? [...selectedIds, t.id]
                                     : selectedIds.filter((id) => id !== t.id);
                                   set('passenger_ids', next);
+                                  if (!v) set('signatory_ids', signatoryIds.filter((id) => id !== t.id));
                                 }}
                               />
                               <span className="min-w-0 flex-1">
@@ -506,6 +560,33 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                                 </span>
                               </span>
                             </label>
+                            {checked && (
+                              <div className="mt-2 border-t border-border/60 pt-2 pl-7">
+                                {isAdult ? (
+                                  <label className="flex items-center gap-2 text-xs cursor-pointer">
+                                    <Checkbox
+                                      checked={isSignatory}
+                                      onCheckedChange={(v) =>
+                                        set(
+                                          'signatory_ids',
+                                          v
+                                            ? [...signatoryIds, t.id]
+                                            : signatoryIds.filter((id) => id !== t.id),
+                                        )
+                                      }
+                                    />
+                                    <span className="text-muted-foreground">
+                                      Incluir linha de assinatura (anuente) no contrato
+                                    </span>
+                                  </label>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">
+                                    Menor de idade — representado pelo responsável legal, sem linha de assinatura.
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            </div>
                           );
                         })}
                       </div>
@@ -655,6 +736,53 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                         placeholder="Ex.: 10"
                       />
                     </Field>
+                    <Field
+                      label="Valor da parcela"
+                      htmlFor="contract-installment-value"
+                      hint="Parcelas × valor deve fechar com o saldo pendente."
+                    >
+                      <CurrencyInput
+                        id="contract-installment-value"
+                        value={overrides.installment_value ?? null}
+                        onValueChange={(v) =>
+                          setOverrides((prev) => ({ ...prev, installment_value: v ?? undefined }))
+                        }
+                      />
+                    </Field>
+                    <Field
+                      label="1º vencimento"
+                      htmlFor="contract-first-due"
+                      hint="As demais parcelas são mensais a partir desta data."
+                    >
+                      <Input
+                        id="contract-first-due"
+                        type="date"
+                        value={overrides.first_due_date ?? ''}
+                        onChange={(e) => set('first_due_date', e.target.value || undefined)}
+                      />
+                    </Field>
+                    {payload && (
+                      <div className="sm:col-span-3 rounded-lg border border-border bg-muted/40 p-3 text-xs space-y-1.5">
+                        <p className="font-medium text-foreground">Resumo automático do pagamento</p>
+                        <p className="text-muted-foreground">
+                          Total {formatMoney(payload.financial.total)} • Recebido{' '}
+                          {formatMoney(payload.financial.paid)} • Saldo pendente{' '}
+                          {formatMoney(payload.financial.pending)}
+                        </p>
+                        {payload.financial.schedule.length > 0 && (
+                          <p className="text-muted-foreground">
+                            {payload.financial.schedule.length} parcela(s) de{' '}
+                            {formatMoney(payload.financial.schedule[0].amount)} — vencimentos{' '}
+                            {payload.financial.schedule
+                              .map((i) => new Date(`${i.due_date}T12:00:00`).toLocaleDateString('pt-BR'))
+                              .join(', ')}
+                          </p>
+                        )}
+                        {payload.financial.payment_summary && (
+                          <p className="text-muted-foreground">{payload.financial.payment_summary}</p>
+                        )}
+                      </div>
+                    )}
                     <Field label="Forma de pagamento" htmlFor="contract-payment-method" className="sm:col-span-3">
                       <Input
                         id="contract-payment-method"
@@ -939,25 +1067,59 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                 ) : (
                   contracts.map((c) => (
                     <Card key={c.id}>
-                      <CardContent className="py-3 flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="font-medium text-sm truncate">{c.contract_number}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Versão {c.revision} • {new Date(c.generated_at).toLocaleString('pt-BR')}
-                          </p>
+                      <CardContent className="py-3 space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">{c.contract_number}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Versão {c.revision} • {new Date(c.generated_at).toLocaleString('pt-BR')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge variant={c.status === 'superseded' ? 'secondary' : 'default'}>
+                              {c.status === 'superseded' ? 'Substituído' : 'Vigente'}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1"
+                              onClick={() => handleDownloadExisting(c)}
+                            >
+                              <Download className="h-3.5 w-3.5" /> PDF
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant={c.status === 'superseded' ? 'secondary' : 'default'}>
-                            {c.status === 'superseded' ? 'Substituído' : 'Vigente'}
-                          </Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-1"
-                            onClick={() => handleDownloadExisting(c.id, c.generated_payload_json)}
-                          >
-                            <Download className="h-3.5 w-3.5" /> PDF
-                          </Button>
+                        <div className="rounded-md bg-muted/50 px-2.5 py-2 text-[11px] text-muted-foreground space-y-1">
+                          {c.pdf_sha256 ? (
+                            <>
+                              <div className="flex items-start gap-2">
+                                <span className="font-medium text-foreground/80 shrink-0">SHA-256 do PDF:</span>
+                                <code className="break-all font-mono">{c.pdf_sha256}</code>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-5 w-5 shrink-0"
+                                  onClick={() => {
+                                    void navigator.clipboard.writeText(c.pdf_sha256!);
+                                    toast.success('Hash copiado');
+                                  }}
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <p>
+                                {c.pdf_size_bytes ? `${(c.pdf_size_bytes / 1024).toFixed(1)} KB` : '—'}
+                                {c.pdf_generated_at
+                                  ? ` • gerado em ${new Date(c.pdf_generated_at).toLocaleString('pt-BR')}`
+                                  : ''}
+                                {c.pdf_generator_version ? ` • ${c.pdf_generator_version}` : ''}
+                                {c.pdf_storage_path ? ' • arquivo arquivado' : ' • arquivo não arquivado'}
+                              </p>
+                            </>
+                          ) : (
+                            <p>PDF gerado antes do registro de hash — baixe novamente para remontar o documento.</p>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

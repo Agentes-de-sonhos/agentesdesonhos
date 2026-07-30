@@ -1,8 +1,11 @@
 import type {
   AgencyContractTemplate,
+  ContractInstallment,
   ContractPassenger,
   ContractPayload,
+  ContractReceivedPayment,
   ContractService,
+  ContractSigner,
   ContractTemplateSection,
 } from '@/types/contracts';
 import { PRODUCT_TYPES, type Sale, type SaleProduct, type CustomerPayment } from '@/types/financial';
@@ -62,6 +65,20 @@ export function diffNights(start?: string | null, end?: string | null): number |
   const ms = b.getTime() - a.getTime();
   return ms > 0 ? Math.round(ms / 86400000) : 0;
 }
+
+/** Soma meses no calendário real: preserva o dia e ajusta para o último dia do mês quando necessário. */
+export function addMonthsKeepingDay(iso: string, months: number): string {
+  const base = parseLocalDate(iso);
+  if (!base) return iso;
+  const day = base.getDate();
+  const target = new Date(base.getFullYear(), base.getMonth() + months, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(day, lastDay));
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${target.getFullYear()}-${p(target.getMonth() + 1)}-${p(target.getDate())}`;
+}
+
+const round2 = (v: number) => Math.round((Number(v) || 0) * 100) / 100;
 
 function ageAt(birth?: string | null, refDate?: string | null): number | null {
   const b = parseLocalDate(birth);
@@ -139,6 +156,8 @@ export interface ContractDraftOverrides {
   payment_method?: string;
   installments_count?: number | null;
   installment_value?: number | null;
+  /** Data do 1º vencimento das parcelas futuras (YYYY-MM-DD). */
+  first_due_date?: string;
   due_dates?: string;
   down_payment?: number;
   paid_to_supplier?: number;
@@ -162,6 +181,8 @@ export interface ContractDraftOverrides {
   conditions_general?: string;
   attachments?: string;
   passenger_ids?: string[];
+  /** Passageiros com papel explícito de assinatura, confirmado pela agência. */
+  signatory_ids?: string[];
 }
 
 export interface BuildContractInput {
@@ -185,6 +206,118 @@ function splitLines(value?: string): string[] {
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean);
+}
+
+export interface PaymentPlan {
+  received: ContractReceivedPayment[];
+  schedule: ContractInstallment[];
+  paid: number;
+  pending: number;
+  installmentsCount: number | null;
+  installmentValue: number | null;
+  summary: string;
+  /** Última data de pagamento já recebido (YYYY-MM-DD) ou null. */
+  lastReceivedDate: string | null;
+}
+
+/**
+ * Constrói o plano de pagamento do contrato exclusivamente a partir de dados registrados:
+ * pagamentos efetivamente recebidos (customer_payments) + parcelamento confirmado pela agência.
+ * Nunca infere cronograma quando faltam dados — nesse caso `schedule` fica vazio e a validação bloqueia.
+ */
+export function buildPaymentPlan(args: {
+  total: number;
+  currency: string;
+  payments: { date: string; amount: number; method: string }[];
+  installmentsCount?: number | null;
+  installmentValue?: number | null;
+  firstDueDate?: string;
+  manualDueDates?: string;
+  paymentMethod?: string;
+  paidToSupplier?: number;
+}): PaymentPlan {
+  const ordered = [...args.payments]
+    .filter((p) => !!p.date)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const received: ContractReceivedPayment[] = ordered.map((p, i) => ({
+    date: p.date.slice(0, 10),
+    amount: round2(p.amount),
+    method: p.method,
+    kind: i === 0 ? 'entrada' : 'adicional',
+  }));
+  const paid = round2(received.reduce((s, p) => s + p.amount, 0));
+  const pending = round2(Math.max(0, args.total - paid));
+  const lastReceivedDate = received.length ? received[received.length - 1].date : null;
+
+  const count = args.installmentsCount && args.installmentsCount > 0 ? args.installmentsCount : null;
+  const value = args.installmentValue && args.installmentValue > 0 ? round2(args.installmentValue) : null;
+
+  const schedule: ContractInstallment[] = [];
+  if (count && value && args.firstDueDate) {
+    for (let i = 0; i < count; i++) {
+      schedule.push({
+        number: i + 1,
+        due_date: addMonthsKeepingDay(args.firstDueDate, i),
+        amount: value,
+      });
+    }
+  }
+
+  const money = (v: number) => formatMoney(v, args.currency);
+  const parts: string[] = [];
+  received.forEach((p) => {
+    parts.push(
+      p.kind === 'entrada'
+        ? `Entrada de ${money(p.amount)} recebida${p.method ? ` via ${p.method}` : ''} em ${formatDateBR(p.date)}`
+        : `Pagamento adicional de ${money(p.amount)} recebido${p.method ? ` via ${p.method}` : ''} em ${formatDateBR(p.date)}`,
+    );
+  });
+  if (pending > 0) {
+    if (count && value) {
+      const dates = schedule.length
+        ? ` com vencimentos de ${formatDateBR(schedule[0].due_date)} a ${formatDateBR(
+            schedule[schedule.length - 1].due_date,
+          )}`
+        : args.manualDueDates
+          ? ` conforme vencimentos informados: ${args.manualDueDates}`
+          : '';
+      parts.push(`Saldo pendente de ${money(pending)} parcelado em ${count}x de ${money(value)}${dates}`);
+    } else {
+      parts.push(`Saldo pendente de ${money(pending)}`);
+    }
+  } else if (received.length) {
+    parts.push('Contrato integralmente quitado junto à CONTRATADA');
+  }
+  if (args.paidToSupplier && args.paidToSupplier > 0) {
+    parts.push(
+      `Adicionalmente, ${money(round2(args.paidToSupplier))} foram pagos pelo CONTRATANTE diretamente ao fornecedor (informativo; não abate o saldo devido à CONTRATADA)`,
+    );
+  }
+  const prefix = args.paymentMethod ? `${args.paymentMethod.trim().replace(/\.$/, '')}. ` : '';
+  const summary = parts.length ? `${prefix}${parts.join('. ')}.` : prefix.trim();
+
+  return {
+    received,
+    schedule,
+    paid,
+    pending,
+    installmentsCount: count,
+    installmentValue: value,
+    summary,
+    lastReceivedDate,
+  };
+}
+
+/** Assinantes adicionais: somente adultos com papel explícito marcado pela agência. */
+export function buildSigners(
+  passengers: ContractPassenger[],
+  selectedNames: string[],
+): ContractSigner[] {
+  const norm = (v: string) => v.trim().toLocaleLowerCase();
+  const wanted = new Set(selectedNames.map(norm));
+  return passengers
+    .filter((p) => !p.is_minor && p.category === 'adulto' && wanted.has(norm(p.name)))
+    .map((p) => ({ name: p.name, role: 'anuente' as const, document: p.cpf }));
 }
 
 export function buildContractPayload(input: BuildContractInput): ContractPayload {
@@ -213,8 +346,29 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
   const taxes = Number(overrides.taxes) || 0;
   const serviceFee = Number(overrides.service_fee) || 0;
   const total = Math.max(0, gross - discounts + taxes + serviceFee);
-  const paid = payments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
   const downPayment = Number(overrides.down_payment) || 0;
+  const rawPayments = payments.map((p) => ({
+    date: p.payment_date,
+    amount: Number(p.amount) || 0,
+    method: p.payment_method,
+  }));
+  const plan = buildPaymentPlan({
+    total,
+    currency: 'BRL',
+    payments: rawPayments,
+    installmentsCount: overrides.installments_count,
+    installmentValue: overrides.installment_value,
+    firstDueDate: overrides.first_due_date,
+    manualDueDates: overrides.due_dates,
+    paymentMethod: overrides.payment_method || sale.payment_method || undefined,
+    paidToSupplier: Number(overrides.paid_to_supplier) || 0,
+  });
+
+  const selectedSignatoryNames = (overrides.signatory_ids ?? [])
+    .map((id) => travelers.find((t) => t.id === id)?.nome_completo)
+    .filter((v): v is string => !!v)
+    .filter((name) => name.trim().toLocaleLowerCase() !== contractorName.trim().toLocaleLowerCase());
+  const signers = buildSigners(passengers, selectedSignatoryNames);
 
   const nights = diffNights(sale.start_date, sale.end_date);
 
@@ -246,6 +400,7 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
       financial_responsible: overrides.financial_responsible,
     },
     passengers,
+    signers,
     trip: {
       title: overrides.trip_title || sale.destination,
       scope: overrides.trip_scope ?? '',
@@ -271,19 +426,18 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
       currency: 'BRL',
       down_payment: downPayment,
       balance: Math.max(0, total - downPayment),
-      paid,
-      pending: Math.max(0, total - paid),
+      paid: plan.paid,
+      pending: plan.pending,
       paid_to_supplier: Number(overrides.paid_to_supplier) || 0,
       payment_method: overrides.payment_method || sale.payment_method || undefined,
-      installments_count: overrides.installments_count ?? null,
-      installment_value: overrides.installment_value ?? null,
+      installments_count: plan.installmentsCount,
+      installment_value: plan.installmentValue,
       due_dates: overrides.due_dates,
       notes: overrides.financial_notes,
-      payments: payments.map((p) => ({
-        date: p.payment_date,
-        amount: Number(p.amount) || 0,
-        method: p.payment_method,
-      })),
+      payments: rawPayments,
+      received: plan.received,
+      schedule: plan.schedule,
+      payment_summary: plan.summary,
     },
     conditions: {
       penalties: overrides.conditions_penalties,
@@ -344,6 +498,60 @@ export function validateContractPayload(payload: ContractPayload): ContractValid
   if (payload.financial.total <= 0) push('total', 'Valor total do contrato deve ser maior que zero.');
   if (!payload.financial.payment_method)
     push('payment_method', 'Forma de pagamento não informada.', 'warning');
+
+  // ── Coerência do parcelamento com os pagamentos registrados ──
+  const f = payload.financial;
+  const cents = (v: number) => Math.round((Number(v) || 0) * 100);
+  if (f.pending > 0) {
+    if (!f.installments_count || !f.installment_value) {
+      push(
+        'installments',
+        `Há saldo pendente de ${formatMoney(f.pending, f.currency)}. Informe a quantidade e o valor das parcelas para gerar o cronograma.`,
+      );
+    } else {
+      if (cents(f.installments_count * f.installment_value) !== cents(f.pending)) {
+        push(
+          'installments_total',
+          `O parcelamento (${f.installments_count}x de ${formatMoney(f.installment_value, f.currency)} = ${formatMoney(
+            f.installments_count * f.installment_value,
+            f.currency,
+          )}) não fecha com o saldo pendente de ${formatMoney(f.pending, f.currency)}.`,
+        );
+      }
+      if (!f.schedule.length) {
+        push('first_due_date', 'Informe a data do 1º vencimento para gerar o cronograma das parcelas.');
+      }
+    }
+  }
+  if (f.schedule.length) {
+    const paidDates = new Set(f.received.map((p) => p.date));
+    const lastReceived = f.received.length ? f.received[f.received.length - 1].date : null;
+    const first = f.schedule[0].due_date;
+    if (lastReceived && first <= lastReceived) {
+      push(
+        'first_due_date',
+        `O 1º vencimento (${formatDateBR(first)}) não pode ser anterior ou igual ao último pagamento já recebido (${formatDateBR(lastReceived)}).`,
+      );
+    }
+    const overlap = f.schedule.filter((i) => paidDates.has(i.due_date));
+    if (overlap.length)
+      push(
+        'schedule_overlap',
+        `Há parcela com vencimento na mesma data de um pagamento já registrado (${overlap
+          .map((i) => formatDateBR(i.due_date))
+          .join(', ')}).`,
+      );
+  }
+  if (f.down_payment > 0 && f.received.length && cents(f.down_payment) !== cents(f.received[0].amount))
+    push(
+      'down_payment',
+      `A entrada informada (${formatMoney(f.down_payment, f.currency)}) difere do primeiro pagamento registrado (${formatMoney(
+        f.received[0].amount,
+        f.currency,
+      )}).`,
+      'warning',
+    );
+
   if (!payload.insurance.contracted && !payload.insurance.refusal_acknowledged)
     push('insurance', 'Registre a ciência da recusa do seguro viagem.', 'warning');
   if (!payload.legal_body_html && !payload.sections.length)

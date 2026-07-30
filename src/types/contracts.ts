@@ -83,6 +83,14 @@ export interface SaleContract {
   attachments_json: ContractAttachment[];
   source_hash: string | null;
   document_hash: string | null;
+  /** Hash SHA-256 dos bytes exatos do PDF entregue. */
+  pdf_sha256: string | null;
+  pdf_size_bytes: number | null;
+  pdf_generated_at: string | null;
+  pdf_generator_version: string | null;
+  pdf_storage_path: string | null;
+  pdf_mime_type: string | null;
+  pdf_file_name: string | null;
   supersedes_contract_id: string | null;
   created_at: string;
 }
@@ -104,6 +112,26 @@ export interface ContractPassenger {
   is_minor?: boolean;
   guardian?: string;
   notes?: string;
+}
+
+/** Linha de assinatura adicional, criada apenas com papel explícito confirmado pela agência. */
+export interface ContractSigner {
+  name: string;
+  role: 'anuente' | 'signatario';
+  document?: string;
+}
+
+export interface ContractInstallment {
+  number: number;
+  due_date: string;
+  amount: number;
+}
+
+export interface ContractReceivedPayment {
+  date: string;
+  amount: number;
+  method: string;
+  kind: 'entrada' | 'adicional';
 }
 
 export interface ContractService {
@@ -171,6 +199,12 @@ export interface ContractFinancialBlock {
   due_dates?: string;
   notes?: string;
   payments: { date: string; amount: number; method: string }[];
+  /** Pagamentos já recebidos pela CONTRATADA, classificados. */
+  received: ContractReceivedPayment[];
+  /** Cronograma das parcelas futuras (gerado a partir do 1º vencimento ou vazio). */
+  schedule: ContractInstallment[];
+  /** Descrição consolidada e automática da forma de pagamento. */
+  payment_summary: string;
 }
 
 export interface ContractConditionsBlock {
@@ -212,6 +246,7 @@ export interface ContractPayload {
   agency: ContractAgencyBlock;
   client: ContractClientBlock;
   passengers: ContractPassenger[];
+  signers: ContractSigner[];
   trip: ContractTripBlock;
   services: ContractService[];
   included: string[];

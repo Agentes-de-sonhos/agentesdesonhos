@@ -123,6 +123,51 @@ export function useSaleContracts(saleId?: string) {
     onError: (e: Error) => toast.error(e.message || 'Erro ao gerar contrato'),
   });
 
+  /**
+   * Registra o arquivo PDF efetivamente entregue (hash dos bytes, tamanho, caminho).
+   * Nunca sobrescreve: o banco bloqueia alteração de um PDF já registrado.
+   */
+  const attachPdf = useMutation({
+    mutationFn: async (input: {
+      contractId: string;
+      sha256: string;
+      sizeBytes: number;
+      storagePath: string | null;
+      fileName: string;
+      generatorVersion: string;
+      storageError?: string | null;
+    }) => {
+      const { error } = await (supabase.from('sale_contracts') as any)
+        .update({
+          pdf_sha256: input.sha256,
+          pdf_size_bytes: input.sizeBytes,
+          pdf_generated_at: new Date().toISOString(),
+          pdf_generator_version: input.generatorVersion,
+          pdf_storage_path: input.storagePath,
+          pdf_mime_type: 'application/pdf',
+          pdf_file_name: input.fileName,
+        })
+        .eq('id', input.contractId);
+      if (error) throw error;
+
+      await (supabase.from('sale_contract_audit_logs') as any).insert({
+        contract_id: input.contractId,
+        agency_id: agencyOwnerId,
+        sale_id: saleId ?? null,
+        action: 'pdf_registered',
+        actor_id: user?.id ?? null,
+        details: {
+          pdf_sha256: input.sha256,
+          pdf_size_bytes: input.sizeBytes,
+          pdf_storage_path: input.storagePath,
+          pdf_generator_version: input.generatorVersion,
+          storage_error: input.storageError ?? null,
+        },
+      });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sale-contracts', saleId] }),
+  });
+
   const logAction = async (contractId: string, action: 'viewed' | 'downloaded') => {
     if (!agencyOwnerId) return;
     await (supabase.from('sale_contract_audit_logs') as any).insert({
@@ -138,6 +183,7 @@ export function useSaleContracts(saleId?: string) {
     contracts: contractsQuery.data ?? [],
     isLoading: contractsQuery.isLoading,
     createContract,
+    attachPdf,
     logAction,
   };
 }

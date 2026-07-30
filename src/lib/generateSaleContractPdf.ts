@@ -5,6 +5,32 @@ import { formatDateBR, formatMoney } from '@/lib/saleContractData';
 const M_L = 18;
 const M_R = 18;
 
+/** Versão do gerador — registrada junto ao hash para rastreabilidade do arquivo entregue. */
+export const PDF_GENERATOR_VERSION = 'contract-pdf/2.0.0';
+
+const slug = (v: string) =>
+  v
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+export function contractPdfFileName(payload: ContractPayload): string {
+  return `Contrato_${slug(payload.contract_number)}_${slug(payload.client.name)}.pdf`;
+}
+
+/** Baixa exatamente os bytes recebidos — nunca reserializa o documento. */
+export function downloadPdfBlob(blob: Blob, fileName: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   adulto: 'Adulto',
   crianca: 'Criança',
@@ -80,15 +106,20 @@ export async function generateSaleContractPdf(
   };
 
   const sectionTitle = (title: string) => {
-    ensure(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    const lines: string[] = doc.splitTextToSize(title.toUpperCase(), cW - 4);
+    const boxH = lines.length * 5 + 2;
+    // Título nunca é cortado nem separado do próprio bloco: cabe inteiro na página.
+    ensure(boxH + 8);
     y += 3;
     doc.setFillColor(240, 242, 245);
-    doc.rect(M_L, y - 4.5, cW, 7, 'F');
+    doc.rect(M_L, y - 4.5, cW, boxH, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(25, 25, 25);
-    doc.text(title.toUpperCase(), M_L + 2, y);
-    y += 7;
+    lines.forEach((line, i) => doc.text(line, M_L + 2, y + i * 5));
+    y += boxH + 2.5;
   };
 
   const kv = (label: string, value?: string | null) => {
@@ -286,7 +317,6 @@ export async function generateSaleContractPdf(
   kv('Forma de pagamento', f.payment_method);
   if (f.installments_count)
     kv('Parcelamento', `${f.installments_count}x${f.installment_value ? ` de ${formatMoney(f.installment_value, f.currency)}` : ''}`);
-  kv('Vencimentos', f.due_dates);
   kv('Total já pago', formatMoney(f.paid, f.currency));
   kv('Saldo pendente', formatMoney(f.pending, f.currency));
   if (f.paid_to_supplier) {
@@ -297,6 +327,42 @@ export async function generateSaleContractPdf(
     );
   }
   if (f.notes) text(f.notes, 9);
+
+  if (f.payment_summary) {
+    y += 2;
+    text('Composição do pagamento', 9, 'bold');
+    text(f.payment_summary, 9);
+  }
+
+  if (f.received.length) {
+    y += 2;
+    text('Pagamentos já recebidos pela CONTRATADA', 9, 'bold');
+    f.received.forEach((p) =>
+      text(
+        `•  ${formatDateBR(p.date)} — ${formatMoney(p.amount, f.currency)}${p.method ? ` (${p.method})` : ''}${
+          p.kind === 'entrada' ? ' — entrada' : ''
+        }`,
+        9,
+        'normal',
+        4,
+      ),
+    );
+  }
+
+  if (f.schedule.length) {
+    y += 2;
+    text('Cronograma das parcelas a vencer', 9, 'bold');
+    f.schedule.forEach((i) =>
+      text(
+        `•  Parcela ${i.number}/${f.schedule.length} — vencimento ${formatDateBR(i.due_date)} — ${formatMoney(i.amount, f.currency)}`,
+        9,
+        'normal',
+        4,
+      ),
+    );
+  } else if (f.due_dates) {
+    kv('Vencimentos', f.due_dates);
+  }
 
   // ── Seguro ──
   sectionTitle('Seguro viagem');
@@ -388,17 +454,39 @@ export async function generateSaleContractPdf(
   );
   y += 10;
 
-  if (payload.signature_config.show_passenger_signatures) {
-    const norm = (v: string) => v.trim().toLowerCase();
-    for (const p of payload.passengers.filter((p) => norm(p.name) !== norm(payload.client.name))) {
-      ensure(16);
+  // Assinaturas adicionais: SOMENTE quem tem papel explícito confirmado pela agência.
+  // Menores de idade nunca recebem linha de assinatura — são representados pelo responsável legal.
+  const extraSigners = (payload.signers ?? []).filter(
+    (s) => s.name.trim().toLowerCase() !== payload.client.name.trim().toLowerCase(),
+  );
+  if (extraSigners.length) {
+    y += 2;
+    text('Demais signatários e anuentes', 9, 'bold');
+    y += 4;
+    for (const s of extraSigners) {
+      ensure(18);
+      doc.setFont('helvetica', 'normal');
       doc.setDrawColor(120, 120, 120);
       doc.line(M_L, y, M_L + sigW, y);
       y += 4;
+      doc.setFontSize(8);
       doc.setTextColor(80, 80, 80);
-      doc.text(p.name, M_L, y);
+      doc.text(s.document ? `${s.name} — CPF ${s.document}` : s.name, M_L, y);
+      y += 3.5;
+      doc.setTextColor(120, 120, 120);
+      doc.text(s.role === 'signatario' ? 'SIGNATÁRIO' : 'ANUENTE', M_L, y);
       y += 8;
     }
+  }
+  const minors = payload.passengers.filter((p) => p.is_minor);
+  if (minors.length) {
+    ensure(12);
+    text(
+      `Os passageiros menores de idade (${minors
+        .map((m) => m.name)
+        .join(', ')}) são representados neste contrato por seu(s) responsável(is) legal(is), não havendo assinatura própria.`,
+      8,
+    );
   }
 
   if (payload.signature_config.show_witnesses) {
@@ -466,13 +554,7 @@ export async function generateSaleContractPdf(
     creator: agencyName,
     keywords: `contrato,${payload.contract_number}`,
   });
-  const slug = (v: string) =>
-    v
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-  const fileName = `Contrato_${slug(payload.contract_number)}_${slug(payload.client.name)}.pdf`;
-  if (options.download) doc.save(fileName);
-  return doc.output('blob');
+  const blob = doc.output('blob') as Blob;
+  if (options.download) downloadPdfBlob(blob, contractPdfFileName(payload));
+  return blob;
 }
