@@ -38,6 +38,9 @@ import {
   generateSaleContractPdf,
 } from '@/lib/generateSaleContractPdf';
 import { downloadStoredContractPdf, sha256Hex, uploadContractPdf } from '@/lib/contractPdfStorage';
+import { FIELD_LABEL, SOURCE_LABEL } from '@/lib/insuranceSources';
+import { InsuranceImportDialog } from './InsuranceImportDialog';
+import { useInsuranceSources } from './useInsuranceSources';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
@@ -143,6 +146,9 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const emissionCityInitialized = useRef(false);
   const [manualClientId, setManualClientId] = useState<string | null>(null);
   const [quickTravelerOpen, setQuickTravelerOpen] = useState(false);
+  const [insuranceImportOpen, setInsuranceImportOpen] = useState(false);
+  const [insuranceLookupEnabled, setInsuranceLookupEnabled] = useState(false);
+  const insuranceSources = useInsuranceSources(sale, insuranceLookupEnabled);
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
   const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
@@ -844,6 +850,25 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                   )}
 
                   {insuranceMode === 'contratado' && (
+                    <>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-border p-3">
+                      <p className="text-xs text-muted-foreground max-w-md">
+                        Traga os dados já cadastrados nas fontes vinculadas a esta venda (venda,
+                        carteira digital e orçamento). Nada é preenchido sem sua confirmação.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setInsuranceImportOpen(true);
+                          setInsuranceLookupEnabled(true);
+                        }}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Importar dados do seguro
+                      </Button>
+                    </div>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <Field label="Seguradora" htmlFor="ins-insurer">
                         <Input
@@ -878,6 +903,15 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                         />
                       </Field>
                     </div>
+                    {(overrides.insurance_provenance?.length ?? 0) > 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Campos importados nesta revisão:{' '}
+                        {overrides.insurance_provenance!
+                          .map((p) => `${FIELD_LABEL[p.field]} (${SOURCE_LABEL[p.source_kind]})`)
+                          .join(' · ')}
+                      </p>
+                    )}
+                    </>
                   )}
                 </FormSection>
 
@@ -1145,6 +1179,39 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           }}
         />
       )}
+
+      <InsuranceImportDialog
+        open={insuranceImportOpen}
+        onOpenChange={setInsuranceImportOpen}
+        loading={insuranceSources.isLoading}
+        candidates={insuranceSources.candidates}
+        userId={user?.id ?? null}
+        current={{
+          insurer: overrides.insurance_insurer ?? '',
+          plan: overrides.insurance_plan ?? '',
+          validity: overrides.insurance_validity ?? '',
+          coverage: overrides.insurance_coverage ?? '',
+        }}
+        onApply={({ values, provenance }) => {
+          setOverrides((prev) => ({
+            ...prev,
+            ...(values.insurer !== undefined ? { insurance_insurer: values.insurer } : {}),
+            ...(values.plan !== undefined ? { insurance_plan: values.plan } : {}),
+            ...(values.validity !== undefined ? { insurance_validity: values.validity } : {}),
+            ...(values.coverage !== undefined ? { insurance_coverage: values.coverage } : {}),
+            insurance_provenance: [
+              ...(prev.insurance_provenance ?? []).filter(
+                (p) => !provenance.some((n) => n.field === p.field),
+              ),
+              ...provenance,
+            ],
+          }));
+          setInsuranceImportOpen(false);
+          toast.success(
+            `${provenance.length} campo(s) importado(s). Revise antes de gerar o contrato.`,
+          );
+        }}
+      />
     </>
   );
 }
