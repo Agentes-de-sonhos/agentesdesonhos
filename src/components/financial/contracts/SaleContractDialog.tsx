@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Copy, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { AlertTriangle, Copy, Download, FileText, Loader2, MessageCircle, ShieldCheck, Sparkles, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Sale } from '@/types/financial';
 import type { ContractPayload, SaleContract } from '@/types/contracts';
@@ -171,6 +171,50 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const [scopeItems, setScopeItems] = useState<ScopeItem[]>([]);
   const [scopeLoading, setScopeLoading] = useState(false);
   const [scopeError, setScopeError] = useState<string | null>(null);
+
+  /**
+   * Gera sugestões de escopo com IA. Nada é escrito no formulário aqui —
+   * o resultado vai para o modal de revisão.
+   */
+  async function generateScope(field: ScopeField) {
+    if (!sale) return;
+    setScopeField(field);
+    setScopeItems([]);
+    setScopeError(null);
+    setScopeLoading(true);
+    setScopeLookupEnabled(true);
+    try {
+      const result = await scopeSources.refetch();
+      const services = result.data ?? [];
+      if (!services.length) {
+        setScopeError(
+          'Não há serviços cadastrados nesta venda (nem em orçamento/carteira vinculados) para gerar a sugestão.',
+        );
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('contract-scope-ai', {
+        body: {
+          field,
+          sale_id: sale.id,
+          services,
+          already_included: field === 'not_included' ? (overrides.included ?? '') : '',
+        },
+      });
+      if (error) {
+        const message =
+          (data as { error?: string } | null)?.error ??
+          'Não foi possível gerar a sugestão agora. Tente novamente.';
+        setScopeError(message);
+        return;
+      }
+      const items = parseScopeItems(data, services.map((s) => s.id));
+      setScopeItems(items);
+    } catch {
+      setScopeError('Não foi possível gerar a sugestão agora. Tente novamente.');
+    } finally {
+      setScopeLoading(false);
+    }
+  }
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
   const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
