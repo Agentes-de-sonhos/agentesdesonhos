@@ -188,19 +188,18 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: termsData } = useAgencySupplierTerms();
-  const { closedOpportunities } = useClosedOpportunities();
-
   const [step, setStep] = useState<WizardStep>("origin");
   const [submitting, setSubmitting] = useState(false);
 
   // step 1
   const [origin, setOrigin] = useState<"manual" | "crm">("manual");
-  // CRM import state
-  const [opportunityId, setOpportunityId] = useState<string | null>(null);
-  const [sourceKind, setSourceKind] = useState<"wallet" | "quote" | null>(null);
-  const [importDetected, setImportDetected] = useState<{ tripId: string | null; quoteId: string | null }>({ tripId: null, quoteId: null });
-  const [importing, setImporting] = useState(false);
-  const [importSourceLabel, setImportSourceLabel] = useState<string>("");
+  // multi-source import state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [candidate, setCandidate] = useState<OperationCandidate | null>(null);
+  const [walletId, setWalletId] = useState<string | null>(null);
+  const [quoteId, setQuoteId] = useState<string | null>(null);
+  const [precedence, setPrecedence] = useState<Precedence>(DEFAULT_PRECEDENCE);
+  const [excluded, setExcluded] = useState<Set<string>>(new Set());
   // step 2
   const [client, setClient] = useState<{ id: string; name: string } | null>(null);
   // step 3
