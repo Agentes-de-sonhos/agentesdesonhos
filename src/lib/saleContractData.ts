@@ -9,6 +9,7 @@ import type {
   ContractTemplateSection,
 } from '@/types/contracts';
 import { PRODUCT_TYPES, type Sale, type SaleProduct, type CustomerPayment } from '@/types/financial';
+import type { ScopeProvenanceEntry } from '@/lib/contractScope';
 import type { InsuranceFieldProvenance } from '@/lib/insuranceSources';
 
 export interface TravelerRow {
@@ -175,6 +176,8 @@ export interface ContractDraftOverrides {
   insurance_refusal_ack?: boolean;
   /** Proveniência auditável dos campos de seguro importados de fontes vinculadas. */
   insurance_provenance?: InsuranceFieldProvenance[];
+  /** Proveniência auditável dos itens de escopo sugeridos por IA e confirmados pela agência. */
+  scope_provenance?: ScopeProvenanceEntry[];
   conditions_penalties?: string;
   conditions_no_show?: string;
   conditions_baggage?: string;

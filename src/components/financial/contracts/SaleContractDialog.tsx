@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, Copy, Download, FileText, Loader2, MessageCircle, ShieldCheck, UserPlus, Users } from 'lucide-react';
+import { AlertTriangle, Copy, Download, FileText, Loader2, MessageCircle, ShieldCheck, Sparkles, UserPlus, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Sale } from '@/types/financial';
 import type { ContractPayload, SaleContract } from '@/types/contracts';
@@ -41,6 +41,15 @@ import { downloadStoredContractPdf, sha256Hex, uploadContractPdf } from '@/lib/c
 import { FIELD_LABEL, SOURCE_LABEL } from '@/lib/insuranceSources';
 import { InsuranceImportDialog } from './InsuranceImportDialog';
 import { useInsuranceSources } from './useInsuranceSources';
+import { ScopeSuggestionDialog } from './ScopeSuggestionDialog';
+import { useContractScopeSources } from './useContractScopeSources';
+import {
+  mergeScopeLines,
+  parseScopeItems,
+  type ScopeField,
+  type ScopeItem,
+  type ScopeProvenanceEntry,
+} from '@/lib/contractScope';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
@@ -110,6 +119,7 @@ function Field({
   required,
   htmlFor,
   className,
+  action,
   children,
 }: {
   label: string;
@@ -118,13 +128,17 @@ function Field({
   required?: boolean;
   htmlFor?: string;
   className?: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className={cn('space-y-1.5', className)}>
-      <Label htmlFor={htmlFor} className="text-xs font-medium text-foreground">
-        {label} {required && <span className="text-destructive">*</span>}
-      </Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={htmlFor} className="text-xs font-medium text-foreground">
+          {label} {required && <span className="text-destructive">*</span>}
+        </Label>
+        {action}
+      </div>
       {children}
       {error ? (
         <p className="text-xs font-medium text-destructive">{error}</p>
@@ -149,6 +163,58 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const [insuranceImportOpen, setInsuranceImportOpen] = useState(false);
   const [insuranceLookupEnabled, setInsuranceLookupEnabled] = useState(false);
   const insuranceSources = useInsuranceSources(sale, insuranceLookupEnabled);
+
+  // Sugestão de escopo com IA (inclusos / não inclusos).
+  const [scopeLookupEnabled, setScopeLookupEnabled] = useState(false);
+  const scopeSources = useContractScopeSources(sale, scopeLookupEnabled);
+  const [scopeField, setScopeField] = useState<ScopeField | null>(null);
+  const [scopeItems, setScopeItems] = useState<ScopeItem[]>([]);
+  const [scopeLoading, setScopeLoading] = useState(false);
+  const [scopeError, setScopeError] = useState<string | null>(null);
+
+  /**
+   * Gera sugestões de escopo com IA. Nada é escrito no formulário aqui —
+   * o resultado vai para o modal de revisão.
+   */
+  async function generateScope(field: ScopeField) {
+    if (!sale) return;
+    setScopeField(field);
+    setScopeItems([]);
+    setScopeError(null);
+    setScopeLoading(true);
+    setScopeLookupEnabled(true);
+    try {
+      const result = await scopeSources.refetch();
+      const services = result.data ?? [];
+      if (!services.length) {
+        setScopeError(
+          'Não há serviços cadastrados nesta venda (nem em orçamento/carteira vinculados) para gerar a sugestão.',
+        );
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('contract-scope-ai', {
+        body: {
+          field,
+          sale_id: sale.id,
+          services,
+          already_included: field === 'not_included' ? (overrides.included ?? '') : '',
+        },
+      });
+      if (error) {
+        const message =
+          (data as { error?: string } | null)?.error ??
+          'Não foi possível gerar a sugestão agora. Tente novamente.';
+        setScopeError(message);
+        return;
+      }
+      const items = parseScopeItems(data, services.map((s) => s.id));
+      setScopeItems(items);
+    } catch {
+      setScopeError('Não foi possível gerar a sugestão agora. Tente novamente.');
+    } finally {
+      setScopeLoading(false);
+    }
+  }
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
   const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
@@ -657,6 +723,19 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                       htmlFor="contract-included"
                       className="sm:col-span-2"
                       hint="Um item por linha. Ex.: Aéreo ida e volta / Hospedagem 5 noites com café / Transfer aeroporto-hotel."
+                      action={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={scopeLoading}
+                          onClick={() => generateScope('included')}
+                        >
+                          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                          Gerar com IA
+                        </Button>
+                      }
                     >
                       <Textarea
                         id="contract-included"
@@ -671,6 +750,19 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                       htmlFor="contract-not-included"
                       className="sm:col-span-2"
                       hint="Um item por linha. Ex.: Refeições não citadas / Passeios opcionais / Taxas de turismo local."
+                      action={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={scopeLoading}
+                          onClick={() => generateScope('not_included')}
+                        >
+                          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                          Gerar com IA
+                        </Button>
+                      }
                     >
                       <Textarea
                         id="contract-not-included"
@@ -1209,6 +1301,58 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           setInsuranceImportOpen(false);
           toast.success(
             `${provenance.length} campo(s) importado(s). Revise antes de gerar o contrato.`,
+          );
+        }}
+      />
+
+      <ScopeSuggestionDialog
+        open={scopeField !== null}
+        onOpenChange={(o) => {
+          if (!o) {
+            setScopeField(null);
+            setScopeItems([]);
+            setScopeError(null);
+          }
+        }}
+        field={scopeField ?? 'included'}
+        loading={scopeLoading}
+        error={scopeError}
+        items={scopeItems}
+        current={(scopeField === 'not_included' ? overrides.not_included : overrides.included) ?? ''}
+        onRetry={() => scopeField && generateScope(scopeField)}
+        onApply={({ mode, items }) => {
+          const field = scopeField ?? 'included';
+          const currentText = (field === 'not_included' ? overrides.not_included : overrides.included) ?? '';
+          const { text, applied } = mergeScopeLines(
+            currentText,
+            items.map((i) => i.text),
+            mode,
+          );
+          const appliedAt = new Date().toISOString();
+          const provenance: ScopeProvenanceEntry[] = items.map((i) => ({
+            field,
+            text: i.text,
+            source_type: i.item.source_type,
+            source_ids: i.item.source_ids,
+            confidence: i.item.confidence,
+            applied_at: appliedAt,
+            applied_by: user?.id ?? null,
+            edited: i.edited,
+          }));
+          setOverrides((prev) => ({
+            ...prev,
+            [field]: text,
+            scope_provenance: [
+              ...(prev.scope_provenance ?? []).filter((p) => !(mode === 'replace' && p.field === field)),
+              ...provenance,
+            ],
+          }));
+          setScopeField(null);
+          setScopeItems([]);
+          toast.success(
+            applied > 0
+              ? `${applied} item(ns) aplicado(s). Revise antes de gerar o contrato.`
+              : 'Os itens selecionados já estavam no campo.',
           );
         }}
       />
