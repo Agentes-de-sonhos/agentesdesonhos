@@ -1,8 +1,11 @@
 import type {
   AgencyContractTemplate,
+  ContractInstallment,
   ContractPassenger,
   ContractPayload,
+  ContractReceivedPayment,
   ContractService,
+  ContractSigner,
   ContractTemplateSection,
 } from '@/types/contracts';
 import { PRODUCT_TYPES, type Sale, type SaleProduct, type CustomerPayment } from '@/types/financial';
@@ -62,6 +65,20 @@ export function diffNights(start?: string | null, end?: string | null): number |
   const ms = b.getTime() - a.getTime();
   return ms > 0 ? Math.round(ms / 86400000) : 0;
 }
+
+/** Soma meses no calendário real: preserva o dia e ajusta para o último dia do mês quando necessário. */
+export function addMonthsKeepingDay(iso: string, months: number): string {
+  const base = parseLocalDate(iso);
+  if (!base) return iso;
+  const day = base.getDate();
+  const target = new Date(base.getFullYear(), base.getMonth() + months, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(day, lastDay));
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${target.getFullYear()}-${p(target.getMonth() + 1)}-${p(target.getDate())}`;
+}
+
+const round2 = (v: number) => Math.round((Number(v) || 0) * 100) / 100;
 
 function ageAt(birth?: string | null, refDate?: string | null): number | null {
   const b = parseLocalDate(birth);
@@ -139,6 +156,8 @@ export interface ContractDraftOverrides {
   payment_method?: string;
   installments_count?: number | null;
   installment_value?: number | null;
+  /** Data do 1º vencimento das parcelas futuras (YYYY-MM-DD). */
+  first_due_date?: string;
   due_dates?: string;
   down_payment?: number;
   paid_to_supplier?: number;
@@ -162,6 +181,8 @@ export interface ContractDraftOverrides {
   conditions_general?: string;
   attachments?: string;
   passenger_ids?: string[];
+  /** Passageiros com papel explícito de assinatura, confirmado pela agência. */
+  signatory_ids?: string[];
 }
 
 export interface BuildContractInput {
