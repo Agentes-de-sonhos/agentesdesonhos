@@ -530,6 +530,7 @@ export type Database = {
           product_key: string
           slug: string
           status: string
+          test_mode_until: string | null
           timezone: string
           updated_at: string
           user_id: string
@@ -553,6 +554,7 @@ export type Database = {
           product_key: string
           slug: string
           status?: string
+          test_mode_until?: string | null
           timezone?: string
           updated_at?: string
           user_id: string
@@ -576,6 +578,7 @@ export type Database = {
           product_key?: string
           slug?: string
           status?: string
+          test_mode_until?: string | null
           timezone?: string
           updated_at?: string
           user_id?: string
@@ -8123,6 +8126,7 @@ export type Database = {
           idempotency_key: string | null
           interest_category: string | null
           is_read: boolean
+          is_test: boolean
           landing_id: string
           lead_email: string | null
           lead_name: string
@@ -8155,6 +8159,7 @@ export type Database = {
           idempotency_key?: string | null
           interest_category?: string | null
           is_read?: boolean
+          is_test?: boolean
           landing_id: string
           lead_email?: string | null
           lead_name: string
@@ -8187,6 +8192,7 @@ export type Database = {
           idempotency_key?: string | null
           interest_category?: string | null
           is_read?: boolean
+          is_test?: boolean
           landing_id?: string
           lead_email?: string | null
           lead_name?: string
@@ -8220,6 +8226,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_test: boolean
           landing_id: string
           session_hash: string
           viewed_date: string
@@ -8227,6 +8234,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_test?: boolean
           landing_id: string
           session_hash: string
           viewed_date?: string
@@ -8234,6 +8242,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_test?: boolean
           landing_id?: string
           session_hash?: string
           viewed_date?: string
@@ -12807,6 +12816,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      mark_product_landing_test_events: {
+        Args: { p_from: string; p_landing_id: string; p_to: string }
+        Returns: Json
+      }
       news_ranking: {
         Args: { p_limit?: number; p_window?: string }
         Returns: {
@@ -12826,6 +12839,10 @@ export type Database = {
         }[]
       }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
+      recalc_product_landing_counters: {
+        Args: { p_landing_id: string }
+        Returns: Json
+      }
       recompute_monthly_nominee: {
         Args: { _user_id: string }
         Returns: undefined
@@ -12886,6 +12903,10 @@ export type Database = {
       seed_default_pipeline_stages: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      set_product_landing_test_mode: {
+        Args: { p_landing_id: string; p_minutes?: number }
+        Returns: Json
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

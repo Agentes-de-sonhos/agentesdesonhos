@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Copy, ExternalLink, Eye, Loader2, Settings2, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
+import { conversionRate, isTestModeActive } from "@/lib/productLandingMetrics";
 import {
   LANDING_PRODUCTS,
   buildProductLandingUrl,
@@ -81,10 +82,10 @@ export function ProductLandingsSection() {
           const landing = byProduct.get(product.productKey);
           const active = landing?.status === "active";
           const url = landing ? buildProductLandingUrl(product, landing.slug) : null;
-          const conversion =
-            landing && landing.views_count > 0
-              ? ((landing.leads_count / landing.views_count) * 100).toFixed(1)
-              : "0";
+          const conversion = landing
+            ? conversionRate(landing.views_count, landing.leads_count)
+            : "0";
+          const testMode = isTestModeActive(landing?.test_mode_until);
 
           return (
             <Card key={product.productKey} className="border-0 shadow-card">
@@ -95,11 +96,25 @@ export function ProductLandingsSection() {
                     <p className="text-xs text-muted-foreground">{product.summary}</p>
                   </div>
                   {landing && (
-                    <Badge variant={active ? "default" : "secondary"} className="shrink-0 text-xs">
-                      {active ? "Ativa" : "Desativada"}
-                    </Badge>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <Badge variant={active ? "default" : "secondary"} className="text-xs">
+                        {active ? "Ativa" : "Desativada"}
+                      </Badge>
+                      {testMode && (
+                        <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-700">
+                          Homologação
+                        </Badge>
+                      )}
+                    </div>
                   )}
                 </div>
+
+                {testMode && (
+                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+                    Modo homologação ativo: visitas e leads registrados agora são marcados como
+                    teste e não entram nas métricas comerciais.
+                  </p>
+                )}
 
                 {landing && url && (
                   <>

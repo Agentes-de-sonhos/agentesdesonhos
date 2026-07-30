@@ -75,7 +75,9 @@ export default function ComandatubaLandingPage({
         link.setAttribute("rel", "canonical");
         document.head.appendChild(link);
       }
-      link.setAttribute("href", `${window.location.origin}${window.location.pathname}`);
+      // Normalize the trailing slash so "/slug" and "/slug/" share one canonical.
+      const path = window.location.pathname.replace(/\/+$/, "") || "/";
+      link.setAttribute("href", `${window.location.origin}${path}`);
     }
     return () => {
       document.title = prev;
