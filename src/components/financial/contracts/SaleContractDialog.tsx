@@ -844,6 +844,25 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                   )}
 
                   {insuranceMode === 'contratado' && (
+                    <>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed border-border p-3">
+                      <p className="text-xs text-muted-foreground max-w-md">
+                        Traga os dados já cadastrados nas fontes vinculadas a esta venda (venda,
+                        carteira digital e orçamento). Nada é preenchido sem sua confirmação.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setInsuranceImportOpen(true);
+                          setInsuranceLookupEnabled(true);
+                        }}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Importar dados do seguro
+                      </Button>
+                    </div>
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <Field label="Seguradora" htmlFor="ins-insurer">
                         <Input
@@ -878,6 +897,15 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                         />
                       </Field>
                     </div>
+                    {(overrides.insurance_provenance?.length ?? 0) > 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Campos importados nesta revisão:{' '}
+                        {overrides.insurance_provenance!
+                          .map((p) => `${FIELD_LABEL[p.field]} (${SOURCE_LABEL[p.source_kind]})`)
+                          .join(' · ')}
+                      </p>
+                    )}
+                    </>
                   )}
                 </FormSection>
 
