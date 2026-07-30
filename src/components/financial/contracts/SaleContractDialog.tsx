@@ -1304,6 +1304,58 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
           );
         }}
       />
+
+      <ScopeSuggestionDialog
+        open={scopeField !== null}
+        onOpenChange={(o) => {
+          if (!o) {
+            setScopeField(null);
+            setScopeItems([]);
+            setScopeError(null);
+          }
+        }}
+        field={scopeField ?? 'included'}
+        loading={scopeLoading}
+        error={scopeError}
+        items={scopeItems}
+        current={(scopeField === 'not_included' ? overrides.not_included : overrides.included) ?? ''}
+        onRetry={() => scopeField && generateScope(scopeField)}
+        onApply={({ mode, items }) => {
+          const field = scopeField ?? 'included';
+          const currentText = (field === 'not_included' ? overrides.not_included : overrides.included) ?? '';
+          const { text, applied } = mergeScopeLines(
+            currentText,
+            items.map((i) => i.text),
+            mode,
+          );
+          const appliedAt = new Date().toISOString();
+          const provenance: ScopeProvenanceEntry[] = items.map((i) => ({
+            field,
+            text: i.text,
+            source_type: i.item.source_type,
+            source_ids: i.item.source_ids,
+            confidence: i.item.confidence,
+            applied_at: appliedAt,
+            applied_by: user?.id ?? null,
+            edited: i.edited,
+          }));
+          setOverrides((prev) => ({
+            ...prev,
+            [field]: text,
+            scope_provenance: [
+              ...(prev.scope_provenance ?? []).filter((p) => !(mode === 'replace' && p.field === field)),
+              ...provenance,
+            ],
+          }));
+          setScopeField(null);
+          setScopeItems([]);
+          toast.success(
+            applied > 0
+              ? `${applied} item(ns) aplicado(s). Revise antes de gerar o contrato.`
+              : 'Os itens selecionados já estavam no campo.',
+          );
+        }}
+      />
     </>
   );
 }
