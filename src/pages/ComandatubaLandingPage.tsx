@@ -51,10 +51,11 @@ export default function ComandatubaLandingPage({
   agency?: AgencyConfig;
   context?: LandingContext;
 } = {}) {
-  useNoindex();
   const demoAgency = useComandatubaAgency();
   const agency = agencyProp ?? demoAgency;
   const ctx = context ?? DEMO_CONTEXT;
+  // The internal demo must never be indexed; published agency pages are public.
+  useNoindex(ctx.isDemo);
   const formRef = useRef<FormRef | null>(null);
 
   useEffect(() => {
