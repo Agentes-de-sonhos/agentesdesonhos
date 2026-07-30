@@ -103,30 +103,201 @@ export const EXPERIENCES = {
   ],
 };
 
+export type AccommodationGroupKey = "apartamentos" | "suites" | "bangalos";
+
+export type AccommodationCategory = {
+  /** Stable key used for tracking and image mapping. */
+  key: string;
+  /** Exact value persisted in the lead / form field. */
+  name: string;
+  group: AccommodationGroupKey;
+  capacity: string;
+  cardText: string;
+  details: string[];
+  imageAlt: string;
+};
+
+export const ACCOMMODATION_GROUPS: { key: AccommodationGroupKey; label: string }[] = [
+  { key: "apartamentos", label: "Apartamentos" },
+  { key: "suites", label: "Suítes" },
+  { key: "bangalos", label: "Bangalôs" },
+];
+
+export const ACCOMMODATION_CATEGORIES: AccommodationCategory[] = [
+  {
+    key: "apartamento-standard",
+    name: "Apartamento Standard",
+    group: "apartamentos",
+    capacity: "Até 4 pessoas, desde que uma ou duas tenham até 17 anos.",
+    cardText:
+      "Praticidade no bloco principal, perto das piscinas, restaurantes e áreas centrais do resort.",
+    details: [
+      "Bloco principal, alas norte e sul.",
+      "Aproximadamente 32 m² mais terraço.",
+      "Configurações de camas sujeitas à disponibilidade.",
+      "Possibilidade de quartos conjugados.",
+    ],
+    imageAlt:
+      "Apartamento Standard do Transamerica Comandatuba, no bloco principal do resort",
+  },
+  {
+    key: "apartamento-luxo",
+    name: "Apartamento Luxo",
+    group: "apartamentos",
+    capacity: "Até 4 pessoas, desde que uma ou duas tenham até 17 anos.",
+    cardText: "Mais espaço no bloco central, com vista voltada para a piscina ou para os jardins.",
+    details: [
+      "Ala leste do bloco principal.",
+      "Aproximadamente 38 m² mais terraço.",
+      "Duas camas de casal king size.",
+      "Possibilidade de unidades conjugadas.",
+      "Banheira integrada à área do chuveiro.",
+    ],
+    imageAlt:
+      "Apartamento Luxo do Transamerica Comandatuba, com duas camas king size na ala leste",
+  },
+  {
+    key: "apartamento-premium",
+    name: "Apartamento Premium",
+    group: "apartamentos",
+    capacity: "Até 3 pessoas: dois adultos e uma criança ou um adulto e duas crianças.",
+    cardText: "Localização privilegiada em frente à piscina, com fácil acesso às áreas de lazer.",
+    details: [
+      "Ala sul do bloco principal.",
+      "Aproximadamente 37 m² mais terraço.",
+      "Cama king size.",
+      "Serviços e comodidades Premium sujeitos às condições vigentes.",
+    ],
+    imageAlt:
+      "Apartamento Premium do Transamerica Comandatuba, na ala sul em frente à piscina",
+  },
+  {
+    key: "apartamento-adaptado",
+    name: "Apartamento Adaptado",
+    group: "apartamentos",
+    capacity: "Até 3 pessoas.",
+    cardText:
+      "Acomodação térrea preparada para oferecer mais segurança, autonomia e facilidade de acesso.",
+    details: [
+      "Unidades no piso térreo.",
+      "Alas norte e leste.",
+      "Três camas de solteiro.",
+      "Banheiro adaptado com barras de apoio.",
+      "Porta deslizante, cadeira de banho e suporte de cabides rebaixado.",
+    ],
+    imageAlt:
+      "Apartamento Adaptado do Transamerica Comandatuba, no piso térreo com acessibilidade",
+  },
+  {
+    key: "suite-familia",
+    name: "Suíte Família",
+    group: "suites",
+    capacity: "Até 5 pessoas: quatro adultos e uma criança.",
+    cardText: "Dois ambientes e dois banheiros para famílias que desejam mais espaço e privacidade.",
+    details: [
+      "Dois quartos.",
+      "Uma cama king size e três camas de solteiro.",
+      "Dois banheiros.",
+      "Aproximadamente 63 m² mais terraço.",
+      "Ala norte do bloco principal.",
+      "Vista para os coqueiros e parcialmente para o mar.",
+    ],
+    imageAlt: "Suíte Família do Transamerica Comandatuba, com dois quartos na ala norte",
+  },
+  {
+    key: "suite-premium",
+    name: "Suíte Premium",
+    group: "suites",
+    capacity: "Até 2 pessoas.",
+    cardText: "Uma opção espaçosa para casais, com sala de estar, closet e localização privilegiada.",
+    details: [
+      "Ala leste do bloco principal.",
+      "Cama king size.",
+      "Ampla sala de estar.",
+      "Closet e lavabo.",
+      "Terraço e vista privilegiada.",
+    ],
+    imageAlt: "Suíte Premium do Transamerica Comandatuba, com ampla sala de estar para casais",
+  },
+  {
+    key: "bangalo-standard",
+    name: "Bangalô Standard",
+    group: "bangalos",
+    capacity: "Até 3 adultos ou 2 adultos e 1 criança.",
+    cardText: "Mais privacidade e contato com a natureza, cercado pelos jardins da ilha.",
+    details: [
+      "Uma cama queen size e uma cama de solteiro.",
+      "Aproximadamente 24 m² mais varanda.",
+      "Entre 300 e 600 metros da recepção.",
+      "Unidades conectantes.",
+      "Transporte interno sujeito à operação.",
+    ],
+    imageAlt: "Bangalô Standard do Transamerica Comandatuba, cercado pelos jardins da ilha",
+  },
+  {
+    key: "bangalo-luxo",
+    name: "Bangalô Luxo",
+    group: "bangalos",
+    capacity: "Até 4 pessoas, desde que uma ou duas tenham até 17 anos.",
+    cardText: "Um bangalô mais amplo, com varanda e vista para o coqueiral ou para o mar.",
+    details: [
+      "Cama king size ou configuração familiar conforme disponibilidade.",
+      "Aproximadamente 36 m² mais varanda.",
+      "Entre 200 e 500 metros da recepção.",
+      "Rede na varanda.",
+    ],
+    imageAlt: "Bangalô Luxo do Transamerica Comandatuba, com varanda e rede voltada ao coqueiral",
+  },
+  {
+    key: "bangalo-familia",
+    name: "Bangalô Família",
+    group: "bangalos",
+    capacity: "Até 4 adultos ou 3 adultos e 1 criança.",
+    cardText: "Uma verdadeira casa de praia, com dois quartos, sala e ampla varanda.",
+    details: [
+      "Categoria composta por uma única unidade.",
+      "Dois quartos.",
+      "Um quarto com cama king size.",
+      "Um quarto com duas camas de solteiro.",
+      "Banheiros privativos.",
+      "Sala entre os quartos.",
+      "Varanda e vista para o mar.",
+    ],
+    imageAlt: "Bangalô Família do Transamerica Comandatuba, com dois quartos e vista para o mar",
+  },
+  {
+    key: "bangalo-premium",
+    name: "Bangalô Premium",
+    group: "bangalos",
+    capacity: "Até 6 adultos ou 4 adultos e 2 crianças.",
+    cardText:
+      "A acomodação mais ampla do resort, com três quartos, sala e varanda voltada para o mar.",
+    details: [
+      "Três quartos.",
+      "Três banheiros privativos.",
+      "Uma cama king size e quatro camas de solteiro.",
+      "Ampla sala de estar.",
+      "Aproximadamente 115 m² mais 33 m² de varanda.",
+      "Vista para o mar.",
+      "Próximo ao bloco central e à piscina.",
+    ],
+    imageAlt: "Bangalô Premium do Transamerica Comandatuba, a acomodação mais ampla do resort",
+  },
+];
+
+/** Exact options for the "Acomodação de interesse" form field. */
+export const ACCOMMODATION_FORM_OPTIONS = ACCOMMODATION_CATEGORIES.map((c) => c.name);
+
 export const ACCOMMODATIONS = {
-  title: "Acomodações para diferentes momentos",
+  title: "Acomodações para cada forma de viajar",
   subtitle:
-    "Da praticidade de ficar perto das áreas centrais à sensação de refúgio em meio à natureza, a sua agência ajuda a encontrar a opção mais adequada para a viagem.",
-  items: [
-    {
-      key: "apartamento",
-      name: "Apartamentos",
-      text: "Conforto e praticidade, com opções próximas às principais áreas do resort.",
-    },
-    {
-      key: "suite",
-      name: "Suítes",
-      text: "Mais espaço e configurações pensadas para casais, famílias e momentos especiais.",
-    },
-    {
-      key: "bangalo",
-      name: "Bangalôs",
-      text: "Mais privacidade e contato com os jardins e a atmosfera tropical da ilha.",
-    },
-  ],
+    "Entre apartamentos próximos às áreas centrais, suítes espaçosas e bangalôs cercados pela natureza, existem opções para casais, famílias e grupos de diferentes tamanhos. Conheça as categorias e conte com a sua agência para escolher a mais adequada para a viagem.",
   cta: "Consultar esta opção",
+  detailsCta: "Ver detalhes",
+  capacityLabel: "Capacidade",
+  detailsLabel: "Características",
   disclaimer:
-    "Capacidades, localização, benefícios e disponibilidade variam entre as categorias. A sua agência confirmará a opção adequada à composição da viagem.",
+    "Capacidades, configurações, localização, serviços, benefícios e disponibilidade podem variar. A sua agência confirmará as condições vigentes e a categoria mais adequada para a composição da viagem.",
 };
 
 export const AUDIENCE = {
