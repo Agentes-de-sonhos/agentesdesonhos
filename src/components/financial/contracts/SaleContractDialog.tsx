@@ -38,6 +38,9 @@ import {
   generateSaleContractPdf,
 } from '@/lib/generateSaleContractPdf';
 import { downloadStoredContractPdf, sha256Hex, uploadContractPdf } from '@/lib/contractPdfStorage';
+import { FIELD_LABEL, SOURCE_LABEL } from '@/lib/insuranceSources';
+import { InsuranceImportDialog } from './InsuranceImportDialog';
+import { useInsuranceSources } from './useInsuranceSources';
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
@@ -143,6 +146,9 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   const emissionCityInitialized = useRef(false);
   const [manualClientId, setManualClientId] = useState<string | null>(null);
   const [quickTravelerOpen, setQuickTravelerOpen] = useState(false);
+  const [insuranceImportOpen, setInsuranceImportOpen] = useState(false);
+  const [insuranceLookupEnabled, setInsuranceLookupEnabled] = useState(false);
+  const insuranceSources = useInsuranceSources(sale, insuranceLookupEnabled);
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
   const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
