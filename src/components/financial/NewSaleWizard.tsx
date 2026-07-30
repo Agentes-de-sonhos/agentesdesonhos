@@ -400,13 +400,36 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     if (!client) return;
     setSubmitting(true);
     try {
+      const isImport = origin === "crm" && !!candidate;
       const sale: any = await createSale({
         client_name: client.name,
         destination,
         sale_amount: totals.sale,
         sale_date: saleDate,
         notes: notes || undefined,
+        ...(client.id ? { client_id: client.id } : {}),
         ...(sellerId ? { seller_id: sellerId, seller_commission_percent: sellerCommission } : {}),
+        ...(isImport
+          ? {
+              opportunity_id: candidate!.opportunityId || undefined,
+              source_trip_id: walletId || undefined,
+              source_quote_id: quoteId || undefined,
+              source_operation_id: candidate!.operationId || undefined,
+              import_fingerprint: buildImportFingerprint({
+                opportunityId: candidate!.opportunityId,
+                tripId: walletId,
+                quoteId,
+                operationId: candidate!.operationId,
+              }),
+              import_provenance: {
+                imported_at: new Date().toISOString(),
+                sources: importSourceLabel,
+                precedence,
+                divergences_count: divergences.length,
+                excluded_count: excluded.size,
+              },
+            }
+          : {}),
       } as any);
       if (!sale?.id) throw new Error("Falha ao criar venda");
 
