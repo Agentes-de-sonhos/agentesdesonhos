@@ -172,6 +172,8 @@ export interface ContractDraftOverrides {
   insurance_coverage?: string;
   insurance_covered?: string;
   insurance_refusal_ack?: boolean;
+  /** Proveniência auditável dos campos de seguro importados de fontes vinculadas. */
+  insurance_provenance?: InsuranceFieldProvenance[];
   conditions_penalties?: string;
   conditions_no_show?: string;
   conditions_baggage?: string;
