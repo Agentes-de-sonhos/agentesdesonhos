@@ -55,7 +55,7 @@ export interface ScopeSourceService {
 
 /** Chaves que NUNCA podem ser enviadas à IA. */
 const BLOCKED_KEY =
-  /(price|cost|custo|valor|amount|total|comiss|markup|margem|lucro|net_|fee|taxa|tax\b|payment|pagamento|internal|interna|confiden|cpf|passport|passaporte|document|rg\b|email|phone|telefone|whatsapp)/i;
+  /(price|cost|custo|valor|amount|total|comm?iss|markup|margem|lucro|net_|fee|taxa|tax\b|payment|pagamento|internal|interna|confiden|cpf|passport|passaporte|document|rg\b|email|phone|telefone|whatsapp)/i;
 
 /** Chaves que descrevem escopo e são úteis para o contrato. */
 const MAX_DETAIL_LEN = 240;
