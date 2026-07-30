@@ -9221,6 +9221,9 @@ export type Database = {
           requires_invoice: boolean | null
           sale_id: string
           sale_price: number
+          source_kind: string | null
+          source_provenance: Json
+          source_service_id: string | null
           supplier_name: string | null
           updated_at: string
           user_id: string
@@ -9249,6 +9252,9 @@ export type Database = {
           requires_invoice?: boolean | null
           sale_id: string
           sale_price?: number
+          source_kind?: string | null
+          source_provenance?: Json
+          source_service_id?: string | null
           supplier_name?: string | null
           updated_at?: string
           user_id: string
@@ -9277,6 +9283,9 @@ export type Database = {
           requires_invoice?: boolean | null
           sale_id?: string
           sale_price?: number
+          source_kind?: string | null
+          source_provenance?: Json
+          source_service_id?: string | null
           supplier_name?: string | null
           updated_at?: string
           user_id?: string
@@ -9307,6 +9316,8 @@ export type Database = {
           destination: string
           end_date: string | null
           id: string
+          import_fingerprint: string | null
+          import_provenance: Json
           include_in_billing: boolean | null
           notes: string | null
           opportunity_id: string | null
@@ -9316,6 +9327,9 @@ export type Database = {
           sale_date: string
           seller_commission_percent: number | null
           seller_id: string | null
+          source_operation_id: string | null
+          source_quote_id: string | null
+          source_trip_id: string | null
           start_date: string | null
           trip_status: string | null
           trip_type: string | null
@@ -9330,6 +9344,8 @@ export type Database = {
           destination: string
           end_date?: string | null
           id?: string
+          import_fingerprint?: string | null
+          import_provenance?: Json
           include_in_billing?: boolean | null
           notes?: string | null
           opportunity_id?: string | null
@@ -9339,6 +9355,9 @@ export type Database = {
           sale_date?: string
           seller_commission_percent?: number | null
           seller_id?: string | null
+          source_operation_id?: string | null
+          source_quote_id?: string | null
+          source_trip_id?: string | null
           start_date?: string | null
           trip_status?: string | null
           trip_type?: string | null
@@ -9353,6 +9372,8 @@ export type Database = {
           destination?: string
           end_date?: string | null
           id?: string
+          import_fingerprint?: string | null
+          import_provenance?: Json
           include_in_billing?: boolean | null
           notes?: string | null
           opportunity_id?: string | null
@@ -9362,6 +9383,9 @@ export type Database = {
           sale_date?: string
           seller_commission_percent?: number | null
           seller_id?: string | null
+          source_operation_id?: string | null
+          source_quote_id?: string | null
+          source_trip_id?: string | null
           start_date?: string | null
           trip_status?: string | null
           trip_type?: string | null
