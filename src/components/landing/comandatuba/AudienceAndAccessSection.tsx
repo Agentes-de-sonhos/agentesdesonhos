@@ -1,6 +1,6 @@
 import { Users, Heart, Baby, Users2, Plane, ShipWheel, Sparkles } from "lucide-react";
-import familyImg from "@/assets/landing/comandatuba/family-beach.jpg";
 import { AUDIENCE, HOW_TO_GET, type AgencyConfig } from "./content";
+import { MediaGallery } from "./MediaGallery";
 
 const AUD_ICONS = [Users, Heart, Baby, Users2];
 
@@ -35,14 +35,7 @@ export function AudienceAndAccessSection({ agency }: { agency: AgencyConfig }) {
           </div>
 
           <div>
-            <img
-              src={familyImg}
-              alt="Família na praia da Ilha de Comandatuba"
-              className="h-full w-full rounded-2xl object-cover shadow-md"
-              loading="lazy"
-              width={1200}
-              height={1200}
-            />
+            <MediaGallery agency={agency} />
           </div>
 
           <div>

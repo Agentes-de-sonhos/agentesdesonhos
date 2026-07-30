@@ -343,6 +343,70 @@ export const HOW_TO_GET = {
     "Rotas, companhias, frequências, transfers, horários e eventuais custos estão sujeitos a disponibilidade e confirmação.",
 };
 
+/** Compact multimedia gallery shown in the middle column of the audience/access section. */
+export type GalleryMedia = {
+  key: string;
+  kind: "video" | "photo";
+  caption: string;
+  alt: string;
+  /** object-position for the short card frame. */
+  position: string;
+};
+
+export const GALLERY_MEDIA: GalleryMedia[] = [
+  {
+    key: "video-aereo",
+    kind: "video",
+    caption: "Comandatuba vista do alto",
+    alt: "Vídeo com tour aéreo sobre a Ilha de Comandatuba e o resort",
+    position: "center 50%",
+  },
+  {
+    key: "aerea",
+    kind: "photo",
+    caption: "Uma ilha cercada pela natureza",
+    alt: "Vista aérea da Ilha de Comandatuba, com praia, mar e vegetação preservada",
+    position: "center 50%",
+  },
+  {
+    key: "familia",
+    kind: "photo",
+    caption: "Momentos para viver em família",
+    alt: "Criança se divertindo com o personagem Tobby em área de lazer do resort",
+    position: "center 40%",
+  },
+  {
+    key: "piscina",
+    kind: "photo",
+    caption: "Piscinas para aproveitar o dia",
+    alt: "Piscina do Transamerica Comandatuba cercada por coqueiros e espreguiçadeiras",
+    position: "center 55%",
+  },
+  {
+    key: "esporte",
+    kind: "photo",
+    caption: "Esporte e lazer em diferentes ritmos",
+    alt: "Quadra de tênis do Transamerica Comandatuba em meio à vegetação",
+    position: "center 40%",
+  },
+  {
+    key: "bem-estar",
+    kind: "photo",
+    caption: "Tempo para desacelerar",
+    alt: "Ambiente de spa do Transamerica Comandatuba preparado para relaxamento",
+    position: "center 30%",
+  },
+];
+
+export const GALLERY_COPY = {
+  videoBadge: "Vídeo • 30s",
+  ariaLabel: "Galeria de fotos e vídeo do Transamerica Comandatuba",
+  prev: "Mídia anterior",
+  next: "Próxima mídia",
+  openVideo: "Assistir ao vídeo Comandatuba vista do alto",
+  openPhoto: (caption: string) => `Ampliar foto: ${caption}`,
+};
+
 export const FORM = {
   title: "Solicite sua cotação personalizada",
   subtitle:
