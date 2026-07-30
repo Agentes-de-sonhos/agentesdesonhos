@@ -9088,6 +9088,13 @@ export type Database = {
           generated_payload_json: Json
           id: string
           passengers_snapshot_json: Json
+          pdf_file_name: string | null
+          pdf_generated_at: string | null
+          pdf_generator_version: string | null
+          pdf_mime_type: string | null
+          pdf_sha256: string | null
+          pdf_size_bytes: number | null
+          pdf_storage_path: string | null
           pdf_url: string | null
           revision: number
           sale_id: string
@@ -9114,6 +9121,13 @@ export type Database = {
           generated_payload_json?: Json
           id?: string
           passengers_snapshot_json?: Json
+          pdf_file_name?: string | null
+          pdf_generated_at?: string | null
+          pdf_generator_version?: string | null
+          pdf_mime_type?: string | null
+          pdf_sha256?: string | null
+          pdf_size_bytes?: number | null
+          pdf_storage_path?: string | null
           pdf_url?: string | null
           revision?: number
           sale_id: string
@@ -9140,6 +9154,13 @@ export type Database = {
           generated_payload_json?: Json
           id?: string
           passengers_snapshot_json?: Json
+          pdf_file_name?: string | null
+          pdf_generated_at?: string | null
+          pdf_generator_version?: string | null
+          pdf_mime_type?: string | null
+          pdf_sha256?: string | null
+          pdf_size_bytes?: number | null
+          pdf_storage_path?: string | null
           pdf_url?: string | null
           revision?: number
           sale_id?: string
