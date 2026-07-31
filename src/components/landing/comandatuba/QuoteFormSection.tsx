@@ -51,6 +51,7 @@ export function QuoteFormSection({
   const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
   const [consent, setConsent] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const submittingRef = useRef(false);
