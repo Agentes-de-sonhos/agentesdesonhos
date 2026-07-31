@@ -109,13 +109,13 @@ export const ALL_INCLUSIVE_MEDIA = [
   },
   {
     key: "padaria",
-    caption: "Padaria e panificação artesanal",
-    alt: "Cestos com pães, croissants e doces frescos da padaria do resort",
+    caption: "Pães, croissants, bolos e doces variados",
+    alt: "Cestos com pães, croissants, bolos e doces variados do resort",
     position: "center 50%",
   },
   {
     key: "prato-assinatura",
-    caption: "Pratos preparados na hora",
+    caption: "Pratos variados da gastronomia do resort",
     alt: "Prato de carne com purê servido em restaurante do resort, ao lado de uma taça de vinho",
     position: "center 45%",
   },
@@ -253,7 +253,7 @@ export const ACCOMMODATION_CATEGORIES: AccommodationCategory[] = [
     key: "suite-familia",
     name: "Suíte Família",
     group: "suites",
-    capacity: "Até 5 pessoas: quatro adultos e uma criança.",
+    capacity: "Até 5 pessoas: quatro adultos e uma criança de até 11 anos.",
     cardText: "Dois ambientes e dois banheiros para famílias que desejam mais espaço e privacidade.",
     details: [
       "Dois quartos.",
@@ -313,7 +313,7 @@ export const ACCOMMODATION_CATEGORIES: AccommodationCategory[] = [
     key: "bangalo-familia",
     name: "Bangalô Família",
     group: "bangalos",
-    capacity: "Até 4 adultos ou 3 adultos e 1 criança.",
+    capacity: "Até 4 adultos ou 3 adultos e 1 criança de até 11 anos.",
     cardText: "Uma verdadeira casa de praia, com dois quartos, sala e ampla varanda.",
     details: [
       "Categoria composta por uma única unidade.",
@@ -401,7 +401,7 @@ export const HOW_TO_GET = {
   highlightText:
     "A sua agência compara voos, horários, transfers e condições para indicar a logística mais confortável para a sua viagem.",
   note:
-    "Rotas, companhias, frequências, transfers, horários e eventuais custos estão sujeitos a disponibilidade e confirmação.",
+    "Rotas, companhias, frequências, transfers, travessia de balsa, horários e eventuais custos estão sujeitos a disponibilidade e confirmação. O transfer e a travessia podem ser cobrados separadamente da hospedagem.",
 };
 
 /** Compact multimedia gallery shown in the middle column of the audience/access section. */
