@@ -52,6 +52,7 @@ export function QuoteFormSection({
   const [notes, setNotes] = useState("");
   const [consent, setConsent] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
+  const { privacy: privacyDoc } = useLandingLegalDocuments(agency, "Transamerica Comandatuba");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const submittingRef = useRef(false);
