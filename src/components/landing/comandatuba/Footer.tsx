@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import { FOOTER_COPY, type AgencyConfig } from "./content";
 import { LegalDocumentModal } from "@/components/landing/legal/LegalDocumentModal";
 import { useLandingLegalDocuments } from "@/components/landing/legal/useLandingLegalDocuments";
@@ -11,7 +11,7 @@ export function Footer({ agency }: { agency: AgencyConfig }) {
   return (
     <footer className="bg-white">
       <div className="mx-auto max-w-[1280px] px-5 py-12 sm:px-8">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <div className="flex items-center gap-3">
               {agency.logoUrl ? (
@@ -30,13 +30,6 @@ export function Footer({ agency }: { agency: AgencyConfig }) {
                 <p className="text-[11px] text-slate-500">{FOOTER_COPY.tagline}</p>
               </div>
             </div>
-          </div>
-
-          <div className="space-y-3 text-[13.5px] text-slate-600">
-            <p className="font-semibold text-slate-800">Fale conosco</p>
-            <p className="flex items-center gap-2"><MessageCircle className="h-4 w-4" style={{ color: agency.primaryColor }} /> WhatsApp: +{agency.whatsapp}</p>
-            <p className="flex items-center gap-2"><Phone className="h-4 w-4" style={{ color: agency.primaryColor }} /> {agency.phone}</p>
-            <p className="flex items-center gap-2"><Mail className="h-4 w-4" style={{ color: agency.primaryColor }} /> {agency.email}</p>
           </div>
 
           <div className="space-y-3 text-[13.5px] text-slate-600">
