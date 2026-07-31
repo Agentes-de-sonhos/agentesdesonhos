@@ -763,6 +763,7 @@ export type Database = {
           last_login_at: string | null
           login: string
           login_normalized: string | null
+          notification_email: string | null
           password_hash: string | null
           role_title: string | null
           status: Database["public"]["Enums"]["team_member_status"]
@@ -778,6 +779,7 @@ export type Database = {
           last_login_at?: string | null
           login: string
           login_normalized?: string | null
+          notification_email?: string | null
           password_hash?: string | null
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
@@ -793,6 +795,7 @@ export type Database = {
           last_login_at?: string | null
           login?: string
           login_normalized?: string | null
+          notification_email?: string | null
           password_hash?: string | null
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
@@ -7522,6 +7525,7 @@ export type Database = {
       opportunities: {
         Row: {
           adults_count: number
+          assigned_team_member_id: string | null
           children_count: number
           client_id: string
           created_at: string
@@ -7542,6 +7546,7 @@ export type Database = {
         }
         Insert: {
           adults_count?: number
+          assigned_team_member_id?: string | null
           children_count?: number
           client_id: string
           created_at?: string
@@ -7562,6 +7567,7 @@ export type Database = {
         }
         Update: {
           adults_count?: number
+          assigned_team_member_id?: string | null
           children_count?: number
           client_id?: string
           created_at?: string
@@ -7581,6 +7587,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "opportunities_assigned_team_member_id_fkey"
+            columns: ["assigned_team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "opportunities_client_id_fkey"
             columns: ["client_id"]
@@ -8112,9 +8125,93 @@ export type Database = {
         }
         Relationships: []
       }
+      product_landing_lead_deliveries: {
+        Row: {
+          attempts: number
+          channel: string
+          claimed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          landing_id: string
+          lead_id: string
+          provider_message_id: string | null
+          recipient_email: string
+          recipient_kind: string
+          recipient_member_id: string | null
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          channel?: string
+          claimed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          landing_id: string
+          lead_id: string
+          provider_message_id?: string | null
+          recipient_email: string
+          recipient_kind?: string
+          recipient_member_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          claimed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          landing_id?: string
+          lead_id?: string
+          provider_message_id?: string | null
+          recipient_email?: string
+          recipient_kind?: string
+          recipient_member_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_landing_lead_deliveries_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "agency_product_landings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_landing_lead_deliveries_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "product_landing_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_landing_lead_deliveries_recipient_member_id_fkey"
+            columns: ["recipient_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_landing_leads: {
         Row: {
           adults: number | null
+          assigned_team_member_id: string | null
+          assignment_reason: string | null
           attended_at: string | null
           children: number | null
           children_ages: string | null
@@ -8148,6 +8245,8 @@ export type Database = {
         }
         Insert: {
           adults?: number | null
+          assigned_team_member_id?: string | null
+          assignment_reason?: string | null
           attended_at?: string | null
           children?: number | null
           children_ages?: string | null
@@ -8181,6 +8280,8 @@ export type Database = {
         }
         Update: {
           adults?: number | null
+          assigned_team_member_id?: string | null
+          assignment_reason?: string | null
           attended_at?: string | null
           children?: number | null
           children_ages?: string | null
@@ -8214,9 +8315,127 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "product_landing_leads_assigned_team_member_id_fkey"
+            columns: ["assigned_team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "product_landing_leads_landing_id_fkey"
             columns: ["landing_id"]
             isOneToOne: false
+            referencedRelation: "agency_product_landings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_landing_notification_recipients: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          id: string
+          kind: string
+          landing_id: string
+          team_member_id: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          kind?: string
+          landing_id: string
+          team_member_id?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          kind?: string
+          landing_id?: string
+          team_member_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_landing_notification_recipients_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "agency_product_landings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_landing_notification_recipients_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_landing_notification_settings: {
+        Row: {
+          allow_test_sends: boolean
+          created_at: string
+          default_assignee_member_id: string | null
+          email_enabled: boolean
+          id: string
+          include_owner: boolean
+          landing_id: string
+          notify_days: string[]
+          notify_end: string
+          notify_start: string
+          outside_behavior: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_test_sends?: boolean
+          created_at?: string
+          default_assignee_member_id?: string | null
+          email_enabled?: boolean
+          id?: string
+          include_owner?: boolean
+          landing_id: string
+          notify_days?: string[]
+          notify_end?: string
+          notify_start?: string
+          outside_behavior?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_test_sends?: boolean
+          created_at?: string
+          default_assignee_member_id?: string | null
+          email_enabled?: boolean
+          id?: string
+          include_owner?: boolean
+          landing_id?: string
+          notify_days?: string[]
+          notify_end?: string
+          notify_start?: string
+          outside_behavior?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_landing_notification_se_default_assignee_member_id_fkey"
+            columns: ["default_assignee_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_landing_notification_settings_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: true
             referencedRelation: "agency_product_landings"
             referencedColumns: ["id"]
           },
@@ -12439,9 +12658,47 @@ export type Database = {
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_public_slug_available: { Args: { p_slug: string }; Returns: Json }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
+      claim_product_landing_lead_deliveries: {
+        Args: { p_limit?: number }
+        Returns: {
+          adults: number
+          agency_name: string
+          assignee_name: string
+          attempts: number
+          children: number
+          children_ages: string
+          created_at: string
+          delivery_id: string
+          interest_category: string
+          is_test: boolean
+          lead_email: string
+          lead_id: string
+          lead_name: string
+          lead_phone: string
+          message: string
+          origin_city: string
+          product_key: string
+          recipient_email: string
+          recipient_kind: string
+          timezone: string
+          travel_period: string
+          utm_campaign: string
+          utm_medium: string
+          utm_source: string
+        }[]
+      }
       clone_itinerary_for_trip: {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
+      }
+      complete_product_landing_lead_delivery: {
+        Args: {
+          p_delivery_id: string
+          p_error?: string
+          p_provider_message_id?: string
+          p_status: string
+        }
+        Returns: undefined
       }
       confirm_award_winner: {
         Args: {
@@ -12472,6 +12729,10 @@ export type Database = {
         }
       }
       current_agency_id: { Args: never; Returns: string }
+      enqueue_product_landing_lead_notifications: {
+        Args: { p_lead_id: string }
+        Returns: number
+      }
       ensure_client_and_opportunity_for_lead: {
         Args: {
           _destination: string
@@ -12664,6 +12925,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_product_landing_notifications: {
+        Args: { p_landing_id: string }
+        Returns: Json
+      }
       get_public_product_landing: {
         Args: { p_product_key: string; p_slug: string }
         Returns: Json
@@ -12839,6 +13104,16 @@ export type Database = {
         }[]
       }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
+      product_landing_next_notify_at: {
+        Args: {
+          p_days: string[]
+          p_end: string
+          p_from?: string
+          p_start: string
+          p_tz: string
+        }
+        Returns: string
+      }
       recalc_product_landing_counters: {
         Args: { p_landing_id: string }
         Returns: Json
@@ -12886,6 +13161,10 @@ export type Database = {
       save_card_capture_via_token: {
         Args: { _data: Json; _token: string }
         Returns: string
+      }
+      save_product_landing_notifications: {
+        Args: { p_config: Json; p_landing_id: string }
+        Returns: Json
       }
       search_cities: {
         Args: { max_results?: number; q: string }

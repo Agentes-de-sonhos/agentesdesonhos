@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Copy, ExternalLink, Eye, Loader2, Settings2, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
+import { LeadNotificationsSection } from "@/components/leads/LeadNotificationsSection";
 import { conversionRate, isTestModeActive } from "@/lib/productLandingMetrics";
 import {
   LANDING_PRODUCTS,
@@ -345,6 +346,15 @@ function ProductLandingDialog({
               })}
             </div>
           </div>
+
+          {landing ? (
+            <LeadNotificationsSection landingId={landing.id} />
+          ) : (
+            <p className="rounded-xl border border-dashed p-4 text-xs text-muted-foreground">
+              Depois de publicar a página você poderá configurar as notificações de novos leads por
+              e-mail, escolher os destinatários da equipe e definir o responsável padrão.
+            </p>
+          )}
         </div>
 
         <DialogFooter>
