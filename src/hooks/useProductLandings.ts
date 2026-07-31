@@ -26,6 +26,13 @@ export interface ProductLanding {
   override_consultant_role: string | null;
   override_consultant_photo_url: string | null;
   override_city: string | null;
+  /** Legal document overrides (fall back to the agency profile). */
+  override_legal_name: string | null;
+  override_cnpj: string | null;
+  override_address: string | null;
+  override_website: string | null;
+  override_privacy_email: string | null;
+  override_privacy_officer: string | null;
   whatsapp_message_template: string | null;
   timezone: string;
   office_hours: OfficeHours;
@@ -156,6 +163,12 @@ export function useProductLandings() {
             override_consultant_role: rest.override_consultant_role ?? null,
             override_consultant_photo_url: rest.override_consultant_photo_url ?? null,
             override_city: rest.override_city ?? null,
+            override_legal_name: rest.override_legal_name ?? null,
+            override_cnpj: rest.override_cnpj ?? null,
+            override_address: rest.override_address ?? null,
+            override_website: rest.override_website ?? null,
+            override_privacy_email: rest.override_privacy_email ?? null,
+            override_privacy_officer: rest.override_privacy_officer ?? null,
             whatsapp_message_template: rest.whatsapp_message_template ?? null,
           } as never,
           { onConflict: "user_id,product_key" }

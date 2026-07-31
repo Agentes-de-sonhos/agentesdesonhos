@@ -83,6 +83,23 @@ export function usePublicProductLanding(productKey: string, slug: string | undef
           city: res.city || "",
           hours: DEFAULT_AGENCY.hours,
           privacyUrl: DEFAULT_AGENCY.privacyUrl,
+          // Legal data resolved server-side (agency profile + landing overrides).
+          legal: res.legal
+            ? {
+                name: String(res.agency_name || "").trim(),
+                legalName: res.legal.legal_name || "",
+                cnpj: res.legal.cnpj || "",
+                address: res.legal.address || "",
+                city: res.legal.city || res.city || "",
+                state: res.legal.state || "",
+                website: res.legal.website || "",
+                privacyEmail: res.legal.privacy_email || res.email || "",
+                privacyOfficer: res.legal.privacy_officer || "",
+                phone: res.phone || "",
+                whatsapp: normalizeWhatsappDigits(res.whatsapp),
+                email: res.email || "",
+              }
+            : null,
         };
 
         const context: LandingContext = {

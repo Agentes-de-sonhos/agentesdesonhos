@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { MessageCircle, Phone, Mail, MapPin, Clock } from "lucide-react";
 import { FOOTER_COPY, type AgencyConfig } from "./content";
+import { LegalDocumentModal } from "@/components/landing/legal/LegalDocumentModal";
+import { useLandingLegalDocuments } from "@/components/landing/legal/useLandingLegalDocuments";
 
 export function Footer({ agency }: { agency: AgencyConfig }) {
   const initial = agency.name.charAt(0).toUpperCase();
+  const [openDoc, setOpenDoc] = useState<"privacy" | "terms" | null>(null);
+  const { privacy, terms } = useLandingLegalDocuments(agency, "Transamerica Comandatuba");
   return (
     <footer className="bg-white">
       <div className="mx-auto max-w-[1280px] px-5 py-12 sm:px-8">
@@ -47,8 +52,12 @@ export function Footer({ agency }: { agency: AgencyConfig }) {
 
           <div className="space-y-2 text-[13.5px] text-slate-600">
             <p className="font-semibold text-slate-800">Institucional</p>
-            <a href={agency.privacyUrl} className="block hover:underline">Política de privacidade</a>
-            <a href="/termos-de-uso" className="block hover:underline">Termos de uso</a>
+            <button type="button" onClick={() => setOpenDoc("privacy")} className="block text-left hover:underline">
+              Política de privacidade
+            </button>
+            <button type="button" onClick={() => setOpenDoc("terms")} className="block text-left hover:underline">
+              Termos de uso
+            </button>
           </div>
         </div>
       </div>
@@ -58,6 +67,19 @@ export function Footer({ agency }: { agency: AgencyConfig }) {
           <p>© {new Date().getFullYear()} {agency.name}. Todos os direitos reservados.</p>
         </div>
       </div>
+
+      <LegalDocumentModal
+        doc={privacy}
+        open={openDoc === "privacy"}
+        onOpenChange={(o) => setOpenDoc(o ? "privacy" : null)}
+        accentColor={agency.primaryColor}
+      />
+      <LegalDocumentModal
+        doc={terms}
+        open={openDoc === "terms"}
+        onOpenChange={(o) => setOpenDoc(o ? "terms" : null)}
+        accentColor={agency.primaryColor}
+      />
     </footer>
   );
 }

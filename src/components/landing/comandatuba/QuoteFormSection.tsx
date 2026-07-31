@@ -13,6 +13,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useWhatsAppCta } from "./useWhatsAppCta";
 import { COMANDATUBA_PRODUCT_KEY } from "@/config/landingProducts";
+import { LegalDocumentModal } from "@/components/landing/legal/LegalDocumentModal";
+import { useLandingLegalDocuments } from "@/components/landing/legal/useLandingLegalDocuments";
+import { PRIVACY_POLICY_VERSION, TERMS_VERSION } from "@/lib/landingLegalDocuments";
 
 function maskPhone(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 11);
@@ -48,6 +51,8 @@ export function QuoteFormSection({
   const [category, setCategory] = useState("");
   const [notes, setNotes] = useState("");
   const [consent, setConsent] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const { privacy: privacyDoc } = useLandingLegalDocuments(agency, "Transamerica Comandatuba");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const submittingRef = useRef(false);
@@ -126,6 +131,8 @@ export function QuoteFormSection({
           message: notes.trim(),
           destination: "Transamerica Comandatuba",
           consent_accepted: consent,
+          consent_policy_version: PRIVACY_POLICY_VERSION,
+          consent_terms_version: TERMS_VERSION,
           referrer: typeof document !== "undefined" ? document.referrer : "",
           page_url: typeof window !== "undefined" ? window.location.href : "",
           user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
@@ -307,13 +314,14 @@ export function QuoteFormSection({
               />
               <span>
                 {FORM.consent(agency.name).split("Política de Privacidade")[0]}
-                <a
-                  href={agency.privacyUrl}
+                <button
+                  type="button"
+                  onClick={() => setLegalOpen(true)}
                   className="underline"
                   style={{ color: agency.primaryColor }}
                 >
                   Política de Privacidade
-                </a>
+                </button>
                 {FORM.consent(agency.name).split("Política de Privacidade")[1] ?? ""}
               </span>
             </label>
@@ -347,6 +355,13 @@ export function QuoteFormSection({
         .input:focus { outline: none; border-color: ${agency.primaryColor}; box-shadow: 0 0 0 3px ${agency.primaryColor}25; }
         select.input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2rem; }
       `}</style>
+
+      <LegalDocumentModal
+        doc={privacyDoc}
+        open={legalOpen}
+        onOpenChange={setLegalOpen}
+        accentColor={agency.primaryColor}
+      />
     </section>
   );
 }
