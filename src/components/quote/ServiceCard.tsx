@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront, GripVertical,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront, GripVertical, ImageOff, Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useServiceImages } from "@/hooks/useServiceImages";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, computeFlightStatus, type FlightStatus } from "./flight-wizard/flightStatus";
 import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
@@ -264,11 +265,11 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
               <div className="px-4 pb-4 pt-0 border-t border-border/50">
                 <div className="pt-3 space-y-3">
                   {images.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {images.map((url, i) => (
-                        <img key={i} src={url} alt={`${label} ${i + 1}`} className="h-24 w-auto max-w-[200px] rounded-lg border border-border object-cover" />
-                      ))}
-                    </div>
+                    <ServiceCardThumbs
+                      images={images}
+                      label={label}
+                      placeId={(service.service_data as any)?.place_id ?? null}
+                    />
                   )}
                   {details.length > 0 && (
                     <div className="flex flex-wrap gap-x-4 gap-y-1">
@@ -411,6 +412,35 @@ function SortableServiceItem({
           </button>
         }
       />
+    </div>
+  );
+}
+
+/** Miniaturas do editor com resolução de referências do Google e fallback seguro. */
+function ServiceCardThumbs({ images, label, placeId }: { images: string[]; label: string; placeId?: string | null }) {
+  const { usable, loading, markFailed, hasGoogleImage } = useServiceImages(images, placeId);
+  if (usable.length === 0) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageOff className="h-3.5 w-3.5" />}
+        {loading ? "Carregando fotos..." : "Fotos indisponíveis — envie uma imagem própria"}
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-1">
+      <div className="flex flex-wrap gap-2">
+        {usable.map((img, i) => (
+          <img
+            key={img.ref}
+            src={img.src as string}
+            alt={`${label} ${i + 1}`}
+            className="h-24 w-auto max-w-[200px] rounded-lg border border-border object-cover"
+            onError={() => markFailed(img.ref)}
+          />
+        ))}
+      </div>
+      {hasGoogleImage && <p className="text-[10px] text-muted-foreground/80">Fotos: Google Maps</p>}
     </div>
   );
 }
