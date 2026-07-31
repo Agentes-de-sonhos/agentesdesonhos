@@ -414,3 +414,32 @@ function SortableServiceItem({
     </div>
   );
 }
+
+/** Miniaturas do editor com resolução de referências do Google e fallback seguro. */
+function ServiceCardThumbs({ images, label, placeId }: { images: string[]; label: string; placeId?: string | null }) {
+  const { usable, loading, markFailed, hasGoogleImage } = useServiceImages(images, placeId);
+  if (usable.length === 0) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageOff className="h-3.5 w-3.5" />}
+        {loading ? "Carregando fotos..." : "Fotos indisponíveis — envie uma imagem própria"}
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-1">
+      <div className="flex flex-wrap gap-2">
+        {usable.map((img, i) => (
+          <img
+            key={img.ref}
+            src={img.src as string}
+            alt={`${label} ${i + 1}`}
+            className="h-24 w-auto max-w-[200px] rounded-lg border border-border object-cover"
+            onError={() => markFailed(img.ref)}
+          />
+        ))}
+      </div>
+      {hasGoogleImage && <p className="text-[10px] text-muted-foreground/80">Fotos: Google Maps</p>}
+    </div>
+  );
+}
