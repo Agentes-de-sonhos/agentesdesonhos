@@ -18,6 +18,8 @@ export type AgencyConfig = {
   city: string;
   hours: string;
   privacyUrl: string;
+  /** Business data used only by the legal documents (never invented). */
+  legal?: Partial<import("@/lib/landingLegalDocuments").AgencyLegalInfo> | null;
 };
 
 /** White-label runtime context for a published agency instance. */
@@ -48,6 +50,7 @@ export const DEFAULT_AGENCY: AgencyConfig = {
   city: "",
   hours: "Seg. a Sex., das 9h às 18h",
   privacyUrl: "/politica-de-privacidade",
+  legal: null,
 };
 
 export const HERO = {
@@ -485,7 +488,7 @@ export const FORM = {
     "Revise os campos e tente novamente. Você também pode falar diretamente com a agência pelo WhatsApp.",
   errorCta: "Falar pelo WhatsApp",
   consent: (agency: string) =>
-    `Concordo em receber contato da ${agency} sobre esta solicitação. Meus dados serão tratados conforme a Política de Privacidade.`,
+    `Declaro que li a Política de Privacidade e autorizo o contato da ${agency} para atender a esta solicitação.`,
 };
 
 export const FAQ = [
