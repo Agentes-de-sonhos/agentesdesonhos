@@ -8,6 +8,7 @@ import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Chevron
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
+import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -2612,6 +2613,23 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
   const removeImage = (index: number) => {
     onImageUrlsChange(imageUrls.filter((_, i) => i !== index));
   };
+
+/** Miniatura resiliente: resolve referências gplace:// e aplica fallback. */
+function ResolvedThumb({ imageRef, placeId, alt, className }: { imageRef: string; placeId?: string | null; alt: string; className: string }) {
+  const { usable, loading, markFailed, items } = useServiceImages([imageRef], placeId);
+  const img = usable[0];
+  if (!img?.src) {
+    return (
+      <div className={`${className} flex flex-col items-center justify-center gap-1 bg-muted/50 text-muted-foreground`}>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageOff className="h-4 w-4" />}
+        {!loading && <span className="text-[10px] px-1 text-center">Indisponível</span>}
+      </div>
+    );
+  }
+  return (
+    <img src={img.src} alt={alt} className={className} loading="lazy" onError={() => markFailed(img.ref)} />
+  );
+}
 
   const handleGooglePhotosSelected = (urls: string[]) => {
     const remaining = MAX_IMAGES_PER_SERVICE - imageUrls.length;
