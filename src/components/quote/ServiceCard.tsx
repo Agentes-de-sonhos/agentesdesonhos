@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront, GripVertical,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront, GripVertical, ImageOff, Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useServiceImages } from "@/hooks/useServiceImages";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, computeFlightStatus, type FlightStatus } from "./flight-wizard/flightStatus";
 import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
