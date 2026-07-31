@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Check, Loader2, Camera } from "lucide-react";
+import { makeGplaceRef } from "@/lib/serviceImages";
 
 interface GooglePhoto {
   url: string;
@@ -73,16 +74,24 @@ export function GoogleHotelPhotos({
 
   const togglePhoto = useCallback((index: number) => {
     const photo = photos[index];
-    if (!photo) return;
-    const isSelected = existingUrls.includes(photo.url);
+    if (!photo || !placeId) return;
+    // Persistimos apenas a referência estável — nunca a URL temporária do Google.
+    const ref = makeGplaceRef(placeId, index);
+    const isSelected = existingUrls.includes(ref) || existingUrls.includes(photo.url);
     if (isSelected) {
-      onPhotoRemoved?.(photo.url);
+      onPhotoRemoved?.(existingUrls.includes(ref) ? ref : photo.url);
     } else {
-      onPhotosSelected([photo.url]);
+      onPhotosSelected([ref]);
     }
-  }, [photos, existingUrls, onPhotosSelected, onPhotoRemoved]);
+  }, [photos, existingUrls, onPhotosSelected, onPhotoRemoved, placeId]);
 
-  const selectedCount = photos.filter(p => existingUrls.includes(p.url)).length;
+  const isPhotoSelected = useCallback(
+    (photo: GooglePhoto, index: number) =>
+      (!!placeId && existingUrls.includes(makeGplaceRef(placeId, index))) || existingUrls.includes(photo.url),
+    [existingUrls, placeId],
+  );
+
+  const selectedCount = photos.filter((p, i) => isPhotoSelected(p, i)).length;
 
   if (!placeId || (!loading && photos.length === 0)) return null;
 
@@ -129,7 +138,7 @@ export function GoogleHotelPhotos({
 
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
         {photos.map((photo, i) => {
-          const isSelected = existingUrls.includes(photo.url);
+          const isSelected = isPhotoSelected(photo, i);
           return (
             <button
               key={i}
