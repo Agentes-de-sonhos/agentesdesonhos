@@ -8,6 +8,7 @@ import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
+import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
 
 type QuoteDocument = {
   id: string;
