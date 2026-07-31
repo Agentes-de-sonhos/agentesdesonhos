@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign, Settings2, Car } from "lucide-react";
+import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Plane, Trash2, Hotel, MapPin, CheckCircle2, DollarSign, Settings2, Car, ImageOff } from "lucide-react";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
@@ -2616,7 +2616,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
 
 /** Miniatura resiliente: resolve referências gplace:// e aplica fallback. */
 function ResolvedThumb({ imageRef, placeId, alt, className }: { imageRef: string; placeId?: string | null; alt: string; className: string }) {
-  const { usable, loading, markFailed, items } = useServiceImages([imageRef], placeId);
+  const { usable, loading, markFailed } = useServiceImages([imageRef], placeId);
   const img = usable[0];
   if (!img?.src) {
     return (

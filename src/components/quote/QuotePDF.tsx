@@ -348,6 +348,31 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
   const showDetailedPrices = (quote as any).show_detailed_prices !== false;
 
+  // Resolve imagens do Google (referências gplace:// e URLs legadas) para URLs
+  // válidas no momento da geração — nada é copiado ou persistido.
+  const imageMap = new Map<string, string>();
+  const googleAttributions = new Set<string>();
+  for (const svc of quote.services || []) {
+    const refs = [
+      ...((svc as any).image_urls || []),
+      ...((svc as any).image_url ? [(svc as any).image_url] : []),
+    ].filter(Boolean) as string[];
+    if (!refs.some(isGoogleImageRef)) continue;
+    try {
+      const resolved = await resolveServiceImages(refs, (svc.service_data as any)?.place_id ?? null);
+      resolved.forEach((r) => {
+        if (r.src) imageMap.set(r.ref, r.src);
+        (r.attributions || []).forEach((a) => googleAttributions.add(a));
+      });
+    } catch {
+      /* mantém o comportamento anterior; imagens sem resolução são omitidas */
+    }
+  }
+  const resolveImg = (ref: string): string | null => {
+    if (imageMap.has(ref)) return imageMap.get(ref)!;
+    return isGoogleImageRef(ref) ? null : ref;
+  };
+
   const servicesHtml =
     quote.services
       ?.map((service) => {
@@ -377,10 +402,12 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || "Outros Serviços"; break;
         }
         // PDF: usar APENAS a primeira imagem cadastrada para economizar espaço vertical
-        const allImages = [
+        const allImages = ([
           ...(service.image_urls || []),
           ...(service.image_url && !(service.image_urls || []).includes(service.image_url) ? [service.image_url] : []),
-        ];
+        ] as string[])
+          .map(resolveImg)
+          .filter((u): u is string => !!u);
         const firstImage = allImages[0] || null;
         // Hotel: use a gallery grid (max 10) above the description
         const isHotel = service.service_type === "hotel";
