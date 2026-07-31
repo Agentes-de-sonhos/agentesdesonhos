@@ -721,7 +721,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
           if (urls.length === 0) return null;
           return (
             <div className="mb-4 -mx-1 overflow-hidden rounded-xl">
-              <ServiceImageCarousel images={urls} alt={title} />
+              <ServiceImageCarousel images={urls} alt={title} placeId={(service as any)?.service_data?.place_id ?? null} />
             </div>
           );
         })()}

@@ -264,11 +264,11 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
               <div className="px-4 pb-4 pt-0 border-t border-border/50">
                 <div className="pt-3 space-y-3">
                   {images.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {images.map((url, i) => (
-                        <img key={i} src={url} alt={`${label} ${i + 1}`} className="h-24 w-auto max-w-[200px] rounded-lg border border-border object-cover" />
-                      ))}
-                    </div>
+                    <ServiceCardThumbs
+                      images={images}
+                      label={label}
+                      placeId={(service.service_data as any)?.place_id ?? null}
+                    />
                   )}
                   {details.length > 0 && (
                     <div className="flex flex-wrap gap-x-4 gap-y-1">
