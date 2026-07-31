@@ -354,6 +354,13 @@ export function QuoteFormSection({
         .input:focus { outline: none; border-color: ${agency.primaryColor}; box-shadow: 0 0 0 3px ${agency.primaryColor}25; }
         select.input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.85rem center; padding-right: 2rem; }
       `}</style>
+
+      <LegalDocumentModal
+        doc={privacyDoc}
+        open={legalOpen}
+        onOpenChange={setLegalOpen}
+        accentColor={agency.primaryColor}
+      />
     </section>
   );
 }
