@@ -13,6 +13,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useWhatsAppCta } from "./useWhatsAppCta";
 import { COMANDATUBA_PRODUCT_KEY } from "@/config/landingProducts";
+import { LegalDocumentModal } from "@/components/landing/legal/LegalDocumentModal";
+import { useLandingLegalDocuments } from "@/components/landing/legal/useLandingLegalDocuments";
+import { PRIVACY_POLICY_VERSION, TERMS_VERSION } from "@/lib/landingLegalDocuments";
 
 function maskPhone(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 11);
@@ -126,6 +129,8 @@ export function QuoteFormSection({
           message: notes.trim(),
           destination: "Transamerica Comandatuba",
           consent_accepted: consent,
+          consent_policy_version: PRIVACY_POLICY_VERSION,
+          consent_terms_version: TERMS_VERSION,
           referrer: typeof document !== "undefined" ? document.referrer : "",
           page_url: typeof window !== "undefined" ? window.location.href : "",
           user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
@@ -307,13 +312,14 @@ export function QuoteFormSection({
               />
               <span>
                 {FORM.consent(agency.name).split("Política de Privacidade")[0]}
-                <a
-                  href={agency.privacyUrl}
+                <button
+                  type="button"
+                  onClick={() => setLegalOpen(true)}
                   className="underline"
                   style={{ color: agency.primaryColor }}
                 >
                   Política de Privacidade
-                </a>
+                </button>
                 {FORM.consent(agency.name).split("Política de Privacidade")[1] ?? ""}
               </span>
             </label>
