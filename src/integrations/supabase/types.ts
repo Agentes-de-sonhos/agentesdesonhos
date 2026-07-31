@@ -518,14 +518,20 @@ export type Database = {
           id: string
           leads_count: number
           office_hours: Json
+          override_address: string | null
           override_agency_name: string | null
           override_city: string | null
+          override_cnpj: string | null
           override_consultant_name: string | null
           override_consultant_photo_url: string | null
           override_consultant_role: string | null
           override_email: string | null
+          override_legal_name: string | null
           override_logo_url: string | null
           override_phone: string | null
+          override_privacy_email: string | null
+          override_privacy_officer: string | null
+          override_website: string | null
           override_whatsapp: string | null
           product_key: string
           slug: string
@@ -542,14 +548,20 @@ export type Database = {
           id?: string
           leads_count?: number
           office_hours?: Json
+          override_address?: string | null
           override_agency_name?: string | null
           override_city?: string | null
+          override_cnpj?: string | null
           override_consultant_name?: string | null
           override_consultant_photo_url?: string | null
           override_consultant_role?: string | null
           override_email?: string | null
+          override_legal_name?: string | null
           override_logo_url?: string | null
           override_phone?: string | null
+          override_privacy_email?: string | null
+          override_privacy_officer?: string | null
+          override_website?: string | null
           override_whatsapp?: string | null
           product_key: string
           slug: string
@@ -566,14 +578,20 @@ export type Database = {
           id?: string
           leads_count?: number
           office_hours?: Json
+          override_address?: string | null
           override_agency_name?: string | null
           override_city?: string | null
+          override_cnpj?: string | null
           override_consultant_name?: string | null
           override_consultant_photo_url?: string | null
           override_consultant_role?: string | null
           override_email?: string | null
+          override_legal_name?: string | null
           override_logo_url?: string | null
           override_phone?: string | null
+          override_privacy_email?: string | null
+          override_privacy_officer?: string | null
+          override_website?: string | null
           override_whatsapp?: string | null
           product_key?: string
           slug?: string
@@ -8218,6 +8236,8 @@ export type Database = {
           client_id: string | null
           consent_accepted: boolean
           consent_at: string | null
+          consent_policy_version: string | null
+          consent_terms_version: string | null
           created_at: string
           id: string
           idempotency_key: string | null
@@ -8253,6 +8273,8 @@ export type Database = {
           client_id?: string | null
           consent_accepted?: boolean
           consent_at?: string | null
+          consent_policy_version?: string | null
+          consent_terms_version?: string | null
           created_at?: string
           id?: string
           idempotency_key?: string | null
@@ -8288,6 +8310,8 @@ export type Database = {
           client_id?: string | null
           consent_accepted?: boolean
           consent_at?: string | null
+          consent_policy_version?: string | null
+          consent_terms_version?: string | null
           created_at?: string
           id?: string
           idempotency_key?: string | null
