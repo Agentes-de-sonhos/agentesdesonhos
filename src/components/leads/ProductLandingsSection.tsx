@@ -222,6 +222,12 @@ type DialogValues = {
   override_consultant_role: string | null;
   override_email: string | null;
   override_city: string | null;
+  override_legal_name: string | null;
+  override_cnpj: string | null;
+  override_address: string | null;
+  override_website: string | null;
+  override_privacy_email: string | null;
+  override_privacy_officer: string | null;
   timezone: string;
   office_hours: OfficeHours;
 };
@@ -248,6 +254,12 @@ function ProductLandingDialog({
   const [role, setRole] = useState(landing?.override_consultant_role ?? "");
   const [email, setEmail] = useState(landing?.override_email ?? "");
   const [city, setCity] = useState(landing?.override_city ?? "");
+  const [legalName, setLegalName] = useState(landing?.override_legal_name ?? "");
+  const [cnpj, setCnpj] = useState(landing?.override_cnpj ?? "");
+  const [address, setAddress] = useState(landing?.override_address ?? "");
+  const [website, setWebsite] = useState(landing?.override_website ?? "");
+  const [privacyEmail, setPrivacyEmail] = useState(landing?.override_privacy_email ?? "");
+  const [privacyOfficer, setPrivacyOfficer] = useState(landing?.override_privacy_officer ?? "");
   const [timezone, setTimezone] = useState(landing?.timezone ?? DEFAULT_TIMEZONE);
   const [hours, setHours] = useState<OfficeHours>(landing?.office_hours ?? DEFAULT_OFFICE_HOURS);
 
@@ -309,6 +321,33 @@ function ProductLandingDialog({
           <div className="space-y-1.5">
             <Label htmlFor="pl-tz">Fuso horário</Label>
             <Input id="pl-tz" value={timezone} onChange={(e) => setTimezone(e.target.value)} />
+          </div>
+
+          <div className="space-y-2 rounded-xl border p-3">
+            <Label>Dados para a Política de privacidade e os Termos de uso</Label>
+            <p className="text-xs text-muted-foreground">
+              Esses dados aparecem nos documentos legais exibidos no rodapé da página. Campos em
+              branco usam o que já estiver no seu perfil — o que não existir simplesmente não é
+              exibido, nada é preenchido automaticamente por suposição.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Razão social" value={legalName} onChange={setLegalName} placeholder="Do seu perfil" />
+              <Field label="CNPJ" value={cnpj} onChange={setCnpj} placeholder="Do seu perfil" />
+              <Field label="Endereço" value={address} onChange={setAddress} placeholder="Do seu perfil" />
+              <Field label="Site" value={website} onChange={setWebsite} placeholder="opcional" />
+              <Field
+                label="E-mail para privacidade (LGPD)"
+                value={privacyEmail}
+                onChange={setPrivacyEmail}
+                placeholder="Usa o e-mail de contato"
+              />
+              <Field
+                label="Responsável pelos dados"
+                value={privacyOfficer}
+                onChange={setPrivacyOfficer}
+                placeholder="opcional"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -373,6 +412,12 @@ function ProductLandingDialog({
                 override_consultant_role: role.trim() || null,
                 override_email: email.trim() || null,
                 override_city: city.trim() || null,
+                override_legal_name: legalName.trim() || null,
+                override_cnpj: cnpj.trim() || null,
+                override_address: address.trim() || null,
+                override_website: website.trim() || null,
+                override_privacy_email: privacyEmail.trim() || null,
+                override_privacy_officer: privacyOfficer.trim() || null,
                 timezone: timezone.trim() || DEFAULT_TIMEZONE,
                 office_hours: hours,
               })
