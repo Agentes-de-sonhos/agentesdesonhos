@@ -2635,11 +2635,11 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
       <div className="flex flex-wrap gap-2">
         {imageUrls.map((url, i) => (
           <div key={i} className="relative inline-block group">
-            <img
-              src={url}
+            <ResolvedThumb
+              imageRef={url}
+              placeId={placeId}
               alt={`Serviço ${i + 1}`}
               className="h-24 w-32 rounded-lg border border-border object-cover transition-opacity"
-              loading="lazy"
             />
             <button
               type="button"
@@ -2705,11 +2705,11 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
       <div className="flex flex-wrap gap-2">
         {imageUrls.map((url, i) => (
           <div key={i} className="relative inline-block">
-            <img
-              src={url}
+            <ResolvedThumb
+              imageRef={url}
+              placeId={placeId}
               alt={`Serviço ${i + 1}`}
               className="h-24 w-32 rounded-lg border border-border object-cover"
-              loading="lazy"
             />
             <button
               type="button"
