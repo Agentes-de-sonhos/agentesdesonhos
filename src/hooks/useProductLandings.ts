@@ -26,6 +26,13 @@ export interface ProductLanding {
   override_consultant_role: string | null;
   override_consultant_photo_url: string | null;
   override_city: string | null;
+  /** Legal document overrides (fall back to the agency profile). */
+  override_legal_name: string | null;
+  override_cnpj: string | null;
+  override_address: string | null;
+  override_website: string | null;
+  override_privacy_email: string | null;
+  override_privacy_officer: string | null;
   whatsapp_message_template: string | null;
   timezone: string;
   office_hours: OfficeHours;
