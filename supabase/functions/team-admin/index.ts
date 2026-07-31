@@ -42,9 +42,13 @@ Deno.serve(async (req) => {
     const { action } = body
 
     if (action === 'create') {
-      const { full_name, login, password, role_title, permissions, stage_permissions } = body
+      const { full_name, login, password, role_title, notification_email, permissions, stage_permissions } = body
       if (!full_name || !login || !password || password.length < 6) {
         return json({ error: 'Dados inválidos. Senha precisa ter ao menos 6 caracteres.' }, 400)
+      }
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (notification_email && !emailRe.test(String(notification_email).trim())) {
+        return json({ error: 'Informe um e-mail de notificação válido.' }, 400)
       }
       // Verifica limite
       const { count } = await admin.from('agency_team_members')
@@ -79,6 +83,7 @@ Deno.serve(async (req) => {
       const { data: created, error } = await admin.from('agency_team_members').insert({
         agency_id: ownerId, full_name, login: login.trim(),
         role_title: role_title ?? null, status: 'active',
+        notification_email: notification_email ? String(notification_email).trim().toLowerCase() : null,
         auth_user_id: authUserId, synthetic_email: email,
       }).select('id').single()
       if (error) {
@@ -123,7 +128,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'update') {
-      const { id, full_name, role_title, password, permissions, stage_permissions } = body
+      const { id, full_name, role_title, notification_email, password, permissions, stage_permissions } = body
       const { data: member } = await admin.from('agency_team_members')
         .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
@@ -131,6 +136,13 @@ Deno.serve(async (req) => {
       const patch: any = { updated_at: new Date().toISOString() }
       if (full_name !== undefined) patch.full_name = full_name
       if (role_title !== undefined) patch.role_title = role_title
+      if (notification_email !== undefined) {
+        const trimmed = notification_email ? String(notification_email).trim().toLowerCase() : null
+        if (trimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+          return json({ error: 'Informe um e-mail de notificação válido.' }, 400)
+        }
+        patch.notification_email = trimmed
+      }
       await admin.from('agency_team_members').update(patch).eq('id', id)
 
       // Atualiza hash da senha na tabela isolada (se solicitado)

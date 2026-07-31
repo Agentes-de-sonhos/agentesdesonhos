@@ -55,6 +55,7 @@ export function TeamMemberForm({ mode, memberId, open, onOpenChange }: Props) {
   const [password, setPassword] = useState('')
   const [password2, setPassword2] = useState('')
   const [roleTitle, setRoleTitle] = useState('')
+  const [notificationEmail, setNotificationEmail] = useState('')
 
   const [clientsLevel, setClientsLevel] = useState<ClientsLevel>('none')
   const [permSet, setPermSet] = useState<Set<string>>(new Set())
@@ -67,6 +68,7 @@ export function TeamMemberForm({ mode, memberId, open, onOpenChange }: Props) {
     setFullName(detail.full_name)
     setLogin(detail.login)
     setRoleTitle(detail.role_title ?? '')
+    setNotificationEmail((detail as any).notification_email ?? '')
     const clientsKeys = new Set(detail.permissions.filter(p => p.module_key === 'clients' && p.enabled).map(p => p.permission_key))
     setPermSet(clientsKeys)
     setClientsLevel(clientsKeys.size === 0 ? 'none'
@@ -125,6 +127,7 @@ export function TeamMemberForm({ mode, memberId, open, onOpenChange }: Props) {
       action: mode === 'create' ? 'create' : 'update',
       full_name: fullName.trim(),
       role_title: roleTitle.trim() || null,
+      notification_email: notificationEmail.trim() || null,
       ...buildPayload(),
     }
     if (mode === 'create') {
@@ -171,6 +174,15 @@ export function TeamMemberForm({ mode, memberId, open, onOpenChange }: Props) {
               <div>
                 <Label>Login (e-mail ou usuário) *</Label>
                 <Input value={login} onChange={e => setLogin(e.target.value)} disabled={mode === 'edit'} />
+              </div>
+              <div>
+                <Label>E-mail para notificações</Label>
+                <Input
+                  type="email"
+                  value={notificationEmail}
+                  onChange={e => setNotificationEmail(e.target.value)}
+                  placeholder="usado para avisos de novos leads"
+                />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
