@@ -10,6 +10,7 @@ import {
   ArrowLeft, MapPin, Globe, Instagram, BadgeCheck, MessageCircle, Mail, Award,
 } from "lucide-react";
 import { LANGUAGE_LEVELS } from "@/i18n/cadastroGuia";
+import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
 
 const levelLabel = (lv: string) => LANGUAGE_LEVELS.find((l) => l.value === lv)?.label || lv;
 
@@ -46,7 +47,7 @@ export default function GuideDetail() {
       <DashboardLayout>
         <div className="text-center py-12 space-y-3">
           <p className="text-muted-foreground">Guia não encontrado.</p>
-          <Button variant="outline" onClick={() => navigate("/mapa-turismo?categoria=Guias")}>Voltar</Button>
+          <BackToDirectoryButton variant="outline" category="Guias" label="Voltar para Guias" />
         </div>
       </DashboardLayout>
     );
@@ -58,9 +59,7 @@ export default function GuideDetail() {
   return (
     <DashboardLayout>
       <div className="space-y-6 max-w-5xl mx-auto">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/mapa-turismo?categoria=Guias")} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> Voltar para Guias
-        </Button>
+        <BackToDirectoryButton category="Guias" label="Voltar para Guias" className="-ml-2" />
 
         {/* Hero */}
         <Card className="overflow-hidden border-0 shadow-card">
