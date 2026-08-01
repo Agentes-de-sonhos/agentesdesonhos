@@ -60,10 +60,10 @@ export default function OperadoraDetail() {
 
   const updateMutation = useOperatorUpdate(id || "", "tour_operators");
 
-  const {
-    reviews, isLoading: reviewsLoading, userReview,
-    averageRating, totalReviews, submitReview, deleteReview,
-  } = useOperatorReviews(id || "");
+  const { data: reviewStatsMap = {} } = useSupplierReviewStatsMap();
+  const stats = reviewStatsMap[reviewTargetKey("operator", id || "")];
+  const averageRating = stats?.average ?? 0;
+  const totalReviews = stats?.count ?? 0;
 
   const handleReviewClick = () => {
     if (!user) { toast.error("Você precisa estar logado para avaliar"); return; }

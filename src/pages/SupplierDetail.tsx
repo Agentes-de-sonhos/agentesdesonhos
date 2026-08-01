@@ -71,7 +71,10 @@ export default function SupplierDetail() {
 
   const updateMutation = useOperatorUpdate(id || "", "trade_suppliers");
 
-  const { reviews, isLoading: reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview } = useSupplierReviews(id || "");
+  const { data: reviewStatsMap = {} } = useSupplierReviewStatsMap();
+  const stats = reviewStatsMap[reviewTargetKey("supplier", id || "")];
+  const averageRating = stats?.average ?? 0;
+  const totalReviews = stats?.count ?? 0;
 
   const handleReviewClick = () => {
     if (!user) { toast.error("Você precisa estar logado para avaliar"); return; }
