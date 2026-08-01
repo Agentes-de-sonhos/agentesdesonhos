@@ -153,6 +153,23 @@ export function isCruisesListingPath(path: unknown): boolean {
   return isDirectoryPath(path) && pathnameOf(path) === CRUISES_ROOT;
 }
 
+/** true apenas para as listagens do diretório (nunca perfis). */
+export function isDirectoryListingPath(path: unknown): boolean {
+  if (!isDirectoryPath(path)) return false;
+  const pathname = pathnameOf(path);
+  return pathname === DIRECTORY_ROOT || pathname === CRUISES_ROOT;
+}
+
+/**
+ * true para qualquer rota de PERFIL do Mapa do Turismo:
+ * /mapa-turismo/:id, /mapa-turismo/operadora/:id, /mapa-turismo/guia/:id
+ * e /mapa-turismo/cruzeiros/:id.
+ */
+export function isDirectoryDetailPath(path: unknown): boolean {
+  if (!isDirectoryPath(path)) return false;
+  return !isDirectoryListingPath(path);
+}
+
 /** Extrai e normaliza a categoria embutida na URL do diretório. */
 export function categoryFromDirectoryPath(path: unknown): string | null {
   if (!isDirectoryPath(path)) return null;
