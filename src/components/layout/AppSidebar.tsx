@@ -618,7 +618,10 @@ export function AppSidebar() {
           )}
         </button>
         {isOpen && !collapsed && (
-          <nav id={groupId} className="flex flex-col gap-0.5 mt-0.5 ml-4 pl-2 border-l border-border/60 animate-fade-in">
+          <nav
+            id={groupId}
+            className="flex flex-col gap-0.5 mt-0.5 ml-4 pl-2 border-l border-border/60 animate-fade-in [&_a]:text-[13px]"
+          >
             {children.map((child) => (
               <Fragment key={child.url}>
                 {renderSingleItem(child, sectionBgColor, sectionTextColor, sectionBorderColor)}
