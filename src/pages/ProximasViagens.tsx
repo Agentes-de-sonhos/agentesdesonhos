@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, MapPin, User, Calendar, Check, Edit2, ExternalLink, Loader2, Search, Clock,
+  Plane, MapPin, User, Calendar, Edit2, ExternalLink, Loader2, Search, Clock, AlertCircle, RefreshCw,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,50 +17,30 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useUpcomingTrips, parseLocalDate, type UpcomingTrip } from "@/hooks/useUpcomingTrips";
 import { useReminders } from "@/hooks/useReminders";
 import { cn } from "@/lib/utils";
 
 export type PeriodFilter = "all" | "7" | "30";
-export type KindFilter = "all" | "departure" | "return";
+export type StatusFilter = "all" | "future" | "in_progress";
 
-interface TripRow {
-  id: string;
-  trip_id: string;
-  daysRemaining: number;
-  days_before: number;
-  follow_up_note: string | null;
-  trip?: {
-    client_name?: string | null;
-    destination?: string | null;
-    start_date?: string | null;
-    end_date?: string | null;
-  } | null;
-}
-
-/** Shared search + filter + ordering rules (kept pure for tests). */
+/** Shared search + filter + ordering rules (pure, kept for tests). */
 export function filterUpcomingTrips(
-  rows: TripRow[],
-  { search, period, kind }: { search: string; period: PeriodFilter; kind: KindFilter },
-): TripRow[] {
+  trips: UpcomingTrip[],
+  { search, period, status }: { search: string; period: PeriodFilter; status: StatusFilter },
+): UpcomingTrip[] {
   const term = search.trim().toLowerCase();
-  return rows
-    .filter((r) => {
-      const isReturn = r.days_before === -1;
-      if (kind === "departure" && isReturn) return false;
-      if (kind === "return" && !isReturn) return false;
-      if (period !== "all" && r.daysRemaining > Number(period)) return false;
+  return trips
+    .filter((t) => {
+      if (status === "future" && t.inProgress) return false;
+      if (status === "in_progress" && !t.inProgress) return false;
+      if (period !== "all" && t.daysRemaining > Number(period)) return false;
       if (!term) return true;
-      const haystack = [r.trip?.client_name, r.trip?.destination].filter(Boolean).join(" ").toLowerCase();
+      const haystack = [t.client_name, t.trip_title, t.destination]
+        .filter(Boolean).join(" ").toLowerCase();
       return haystack.includes(term);
     })
-    .sort((a, b) => a.daysRemaining - b.daysRemaining);
-}
-
-function parseLocalDate(value?: string | null): Date | null {
-  if (!value) return null;
-  const [y, m, d] = value.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d);
+    .sort((a, b) => a.start_date.localeCompare(b.start_date));
 }
 
 function formatLocal(value?: string | null): string | null {
@@ -68,23 +48,32 @@ function formatLocal(value?: string | null): string | null {
   return date ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : null;
 }
 
+function countdownLabel(trip: UpcomingTrip): string {
+  if (trip.inProgress) return "Em andamento";
+  if (trip.daysRemaining === 0) return "Embarque hoje";
+  if (trip.daysRemaining === 1) return "Embarque amanhã";
+  return `Embarque em ${trip.daysRemaining} dias`;
+}
+
 export default function ProximasViagens() {
   const navigate = useNavigate();
-  const { reminders, isLoading, updateFollowUp, markCompleted, isUpdating } = useReminders();
+  const { trips, isLoading, isError, error, refetch } = useUpcomingTrips();
+  const { updateFollowUp, isUpdating } = useReminders();
   const [search, setSearch] = useState("");
   const [period, setPeriod] = useState<PeriodFilter>("all");
-  const [kind, setKind] = useState<KindFilter>("all");
+  const [status, setStatus] = useState<StatusFilter>("all");
   const [editingReminder, setEditingReminder] = useState<string | null>(null);
   const [followUpText, setFollowUpText] = useState("");
 
   const rows = useMemo(
-    () => filterUpcomingTrips(reminders as unknown as TripRow[], { search, period, kind }),
-    [reminders, search, period, kind],
+    () => filterUpcomingTrips(trips, { search, period, status }),
+    [trips, search, period, status],
   );
 
   const handleSaveFollowUp = async () => {
     if (!editingReminder) return;
     await updateFollowUp({ id: editingReminder, follow_up_note: followUpText });
+    await refetch();
     setEditingReminder(null);
     setFollowUpText("");
   };
@@ -101,7 +90,7 @@ export default function ProximasViagens() {
             <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-reminders))]" />
           </div>
           <p className="text-sm text-muted-foreground max-w-2xl">
-            Acompanhe todas as viagens futuras dos seus clientes, com contagem regressiva, follow-up e acesso rápido à carteira digital.
+            Todas as viagens futuras e em andamento dos seus clientes, com contagem regressiva, follow-up e acesso rápido à carteira digital.
           </p>
         </header>
 
@@ -126,14 +115,14 @@ export default function ProximasViagens() {
               <SelectItem value="30">Próximos 30 dias</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={kind} onValueChange={(v) => setKind(v as KindFilter)}>
-            <SelectTrigger className="w-full sm:w-[170px]" aria-label="Filtrar por tipo">
+          <Select value={status} onValueChange={(v) => setStatus(v as StatusFilter)}>
+            <SelectTrigger className="w-full sm:w-[180px]" aria-label="Filtrar por situação">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Embarques e retornos</SelectItem>
-              <SelectItem value="departure">Somente embarques</SelectItem>
-              <SelectItem value="return">Somente retornos</SelectItem>
+              <SelectItem value="all">Futuras e em andamento</SelectItem>
+              <SelectItem value="future">Somente futuras</SelectItem>
+              <SelectItem value="in_progress">Somente em andamento</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -144,15 +133,28 @@ export default function ProximasViagens() {
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </CardContent>
           </Card>
+        ) : isError ? (
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardContent className="py-14 text-center space-y-3">
+              <AlertCircle className="h-10 w-10 mx-auto text-destructive" />
+              <p className="font-medium text-foreground">Não foi possível carregar suas viagens</p>
+              <p className="text-sm text-muted-foreground">
+                {error?.message || "Tente novamente em alguns instantes."}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <RefreshCw className="h-3.5 w-3.5 mr-1" /> Tentar novamente
+              </Button>
+            </CardContent>
+          </Card>
         ) : rows.length === 0 ? (
           <Card className="border-0 shadow-md">
             <CardContent className="py-16 text-center text-muted-foreground">
               <Clock className="h-10 w-10 mx-auto mb-4 opacity-50" />
               <p className="font-medium">
-                {reminders.length === 0 ? "Nenhuma viagem futura por aqui" : "Nenhuma viagem encontrada"}
+                {trips.length === 0 ? "Nenhuma viagem futura por aqui" : "Nenhuma viagem encontrada"}
               </p>
               <p className="text-sm mt-1">
-                {reminders.length === 0
+                {trips.length === 0
                   ? "Cadastre viagens na Carteira Digital para acompanhar embarques e retornos."
                   : "Ajuste a busca ou os filtros para ver outras viagens."}
               </p>
@@ -160,91 +162,82 @@ export default function ProximasViagens() {
           </Card>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
-            {rows.map((reminder) => {
-              const isReturn = reminder.days_before === -1;
-              const dateLabel = formatLocal(isReturn ? reminder.trip?.end_date : reminder.trip?.start_date);
-              const endLabel = formatLocal(reminder.trip?.end_date);
+            {rows.map((trip) => {
+              const startLabel = formatLocal(trip.start_date);
+              const endLabel = formatLocal(trip.end_date);
               return (
                 <Card
-                  key={reminder.id}
+                  key={trip.id}
                   className={cn(
                     "border shadow-sm",
-                    isReturn
+                    trip.inProgress
                       ? "border-accent/50 bg-accent/5"
-                      : reminder.daysRemaining <= 1
+                      : trip.daysRemaining <= 1
                         ? "border-destructive/50 bg-destructive/5"
-                        : reminder.daysRemaining <= 3
+                        : trip.daysRemaining <= 3
                           ? "border-primary/50 bg-primary/5"
                           : "border-border",
                   )}
                 >
                   <CardContent className="pt-5 space-y-3">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <span className="font-medium truncate">{reminder.trip?.client_name || "Cliente"}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                          <span className="font-medium truncate">{trip.client_name || "Cliente"}</span>
+                        </div>
+                        {trip.trip_title && (
+                          <p className="text-sm text-muted-foreground truncate mt-0.5">{trip.trip_title}</p>
+                        )}
                       </div>
                       <Badge
-                        variant={!isReturn && reminder.daysRemaining <= 1 ? "destructive" : "outline"}
+                        variant={!trip.inProgress && trip.daysRemaining <= 1 ? "destructive" : "outline"}
                         className="shrink-0"
                       >
-                        {isReturn ? "Retorno" : "Embarque"}
-                        {reminder.daysRemaining === 0
-                          ? " hoje"
-                          : reminder.daysRemaining === 1
-                            ? " amanhã"
-                            : ` em ${reminder.daysRemaining} dias`}
+                        {countdownLabel(trip)}
                       </Badge>
                     </div>
 
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <p className="flex items-center gap-2">
                         <MapPin className="h-3.5 w-3.5" />
-                        <span className="truncate">{reminder.trip?.destination || "Destino não informado"}</span>
+                        <span className="truncate">{trip.destination || "Destino não informado"}</span>
                       </p>
                       <p className="flex items-center gap-2">
                         <Calendar className="h-3.5 w-3.5" />
                         <span>
-                          {isReturn ? "Retorno: " : "Início: "}
-                          {dateLabel || "—"}
-                          {!isReturn && endLabel ? ` • Fim: ${endLabel}` : ""}
+                          Início: {startLabel || "—"}
+                          {endLabel ? ` • Fim: ${endLabel}` : ""}
                         </span>
                       </p>
                     </div>
 
-                    {reminder.follow_up_note && (
+                    {trip.followUpNote && (
                       <div className="rounded bg-muted/50 p-2 text-sm">
                         <span className="text-muted-foreground">Follow-up: </span>
-                        {reminder.follow_up_note}
+                        {trip.followUpNote}
                       </div>
                     )}
 
                     <div className="flex flex-wrap items-center gap-2 pt-1">
+                      {trip.reminderId && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingReminder(trip.reminderId);
+                            setFollowUpText(trip.followUpNote || "");
+                          }}
+                        >
+                          <Edit2 className="h-3.5 w-3.5 mr-1" /> Follow-up
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          setEditingReminder(reminder.id);
-                          setFollowUpText(reminder.follow_up_note || "");
-                        }}
-                      >
-                        <Edit2 className="h-3.5 w-3.5 mr-1" /> Follow-up
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/ferramentas-ia/trip-wallet/${reminder.trip_id}`)}
+                        onClick={() => navigate(`/ferramentas-ia/trip-wallet/${trip.id}`)}
                       >
                         <ExternalLink className="h-3.5 w-3.5 mr-1" /> Abrir Viagem
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary hover:text-primary/80 hover:bg-primary/10"
-                        disabled={isUpdating}
-                        onClick={() => markCompleted(reminder.id)}
-                      >
-                        <Check className="h-3.5 w-3.5 mr-1" /> Concluir
                       </Button>
                     </div>
                   </CardContent>
