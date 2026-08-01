@@ -1,25 +1,19 @@
-import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCruises } from "@/hooks/useCruises";
-import { useCruiseReviews } from "@/hooks/useCruiseReviews";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
 import { OperatorHero } from "@/components/operator/OperatorHero";
 import { OperatorInfoCard } from "@/components/operator/OperatorInfoCard";
-import { SalesChannelCards } from "@/components/operator/SalesChannelCards";
-import { ContactCards } from "@/components/operator/ContactCards";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
-import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
-import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
-import { toast } from "sonner";
+import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
+import { CompetitiveAdvantagesCard } from "@/components/operator/CompetitiveAdvantagesCard";
+import { BusinessHoursCard } from "@/components/operator/BusinessHoursCard";
+import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
 import {
   Ship, ArrowLeft, MapPin, Users, Anchor, Waves, Compass,
-  ShoppingCart, Phone, Loader2
+  ShoppingCart, Phone, FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,22 +32,9 @@ const TIPO_META: Record<string, { icon: typeof Ship; color: string; label: strin
 export default function CruiseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { isAdmin } = useUserRole();
   const { data: companies = [], isLoading } = useCruises();
-  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const company = companies.find((c) => c.id === id);
-
-  const {
-    reviews, isLoading: reviewsLoading, userReview,
-    averageRating, totalReviews, submitReview, deleteReview,
-  } = useCruiseReviews(id || "");
-
-  const handleReviewClick = () => {
-    if (!user) { toast.error("Você precisa estar logado para avaliar"); return; }
-    setReviewModalOpen(true);
-  };
 
   if (isLoading) {
     return (
@@ -82,7 +63,7 @@ export default function CruiseDetailPage() {
           </div>
           <h2 className="text-xl font-semibold text-foreground">Companhia não encontrada</h2>
           <p className="text-muted-foreground mt-2 mb-8">A companhia que você está procurando não existe ou foi removida.</p>
-          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo?categoria=Cruzeiros")}>
+          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo/cruzeiros")}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
           </Button>
         </div>
@@ -90,40 +71,49 @@ export default function CruiseDetailPage() {
     );
   }
 
+  const op = company.operator || null;
   const tipoMeta = TIPO_META[company.tipo];
   const TipoIcon = tipoMeta?.icon || Ship;
   const isLuxo = company.categoria === "Luxo";
 
-  // Build social links for sidebar
-  const socialLinks: Record<string, string> = {};
-  if (company.website) socialLinks.website = company.website;
-  if (company.social_links && typeof company.social_links === "object") {
-    Object.entries(company.social_links).forEach(([k, v]) => {
-      if (v) socialLinks[k] = String(v);
-    });
-  }
+  // Commercial fields: prefer the tour_operators profile, fall back to legacy cruise data
+  const about = op?.short_description || company.descricao_curta;
+  const howToSell = op?.how_to_sell || company.how_to_sell;
+  const salesChannels = op?.sales_channels || company.sales_channels;
+  const contacts = op?.commercial_contacts || company.commercial_contacts;
+  const advantages = op?.competitive_advantages || null;
+  const specialties = op?.specialties || company.specialties;
+  const businessHours = (op?.business_hours as any) || null;
+  const website = op?.website || company.website;
+  const instagram = op?.instagram || null;
 
-  // Build category label with tipo info
+  const socialLinks: Record<string, string> = {};
+  const mergeLinks = (links: Record<string, string> | null | undefined) => {
+    if (!links || typeof links !== "object") return;
+    Object.entries(links).forEach(([k, v]) => { if (v) socialLinks[k] = String(v); });
+  };
+  mergeLinks(company.social_links);
+  mergeLinks(op?.social_links);
+
+  const hasSocial = !!website || !!instagram || Object.keys(socialLinks).length > 0;
+
   const categoryLabel = `Companhia Marítima • ${tipoMeta?.label || company.tipo} • ${company.categoria === "Contemporaneo" ? "Contemporâneo" : company.categoria}`;
 
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
-        <Button variant="ghost" onClick={() => navigate("/mapa-turismo?categoria=Cruzeiros")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Mapa do Turismo
+        <Button variant="ghost" onClick={() => navigate("/mapa-turismo/cruzeiros")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Companhias Marítimas
         </Button>
 
-        {/* Hero - same pattern as operators */}
         <OperatorHero
           name={company.nome}
           category={categoryLabel}
-          logoUrl={company.logo_url}
-          averageRating={averageRating}
-          totalReviews={totalReviews}
-          onReviewClick={handleReviewClick}
+          logoUrl={company.logo_url || op?.logo_url || null}
+          hideRating
         />
 
-        {/* Cruise-specific badges */}
+        {/* Cruise-specific classification badges */}
         <div className="flex flex-wrap gap-2 -mt-4">
           <Badge className={cn("gap-1.5 px-3 py-1.5 text-xs font-semibold border", CATEGORIA_COLORS[company.categoria] || "")}>
             {isLuxo && <span>✦</span>}
@@ -140,35 +130,35 @@ export default function CruiseDetailPage() {
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
-            {/* About / Description */}
-            {company.descricao_curta && (
-              <OperatorInfoCard icon={Ship} title="Sobre">
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{company.descricao_curta}</p>
+            {about && (
+              <OperatorInfoCard icon={FileText} title="Sobre" iconColor="text-sky-600">
+                <RichContentDisplay content={about} lineClamp={10} />
               </OperatorInfoCard>
             )}
 
-            {/* How to sell */}
-            {company.how_to_sell && (
+            {advantages && <CompetitiveAdvantagesCard advantages={advantages} />}
+
+            {howToSell && (
               <OperatorInfoCard icon={ShoppingCart} title="Como Vender">
-                <p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">{company.how_to_sell}</p>
+                <RichContentDisplay content={howToSell} />
               </OperatorInfoCard>
             )}
 
-            {/* Sales channels */}
-            {company.sales_channels && (
+            {salesChannels && (
               <OperatorInfoCard icon={Users} title="Canais de Venda">
-                <SalesChannelCards salesChannels={company.sales_channels} />
+                <RichContentDisplay content={salesChannels} />
               </OperatorInfoCard>
             )}
 
-            {/* Contacts */}
-            {company.commercial_contacts && (
+            {contacts && (
               <OperatorInfoCard icon={Phone} title="Contatos Comerciais" iconColor="text-emerald-600">
-                <ContactCards contacts={company.commercial_contacts} />
+                <RichContentDisplay content={contacts} />
               </OperatorInfoCard>
             )}
 
-            {/* Regions */}
+            {businessHours && <BusinessHoursCard hours={businessHours} />}
+
+            {/* Cruise-specific: regions served */}
             {company.regioes.length > 0 && (
               <OperatorInfoCard icon={MapPin} title="Regiões Atendidas">
                 <div className="flex flex-wrap gap-2">
@@ -182,7 +172,7 @@ export default function CruiseDetailPage() {
               </OperatorInfoCard>
             )}
 
-            {/* Client profiles */}
+            {/* Cruise-specific: traveler profile */}
             {company.perfis.length > 0 && (
               <OperatorInfoCard icon={Users} title="Perfil do Viajante" iconColor="text-violet-600">
                 <div className="flex flex-wrap gap-2">
@@ -198,53 +188,29 @@ export default function CruiseDetailPage() {
               </OperatorInfoCard>
             )}
 
-            {/* Reviews list */}
-            <OperatorReviewsList
-              reviews={reviews}
-              isLoading={reviewsLoading}
-              isAdmin={isAdmin}
-              onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })}
-              isDeleting={deleteReview.isPending}
-            />
+            {op && <SupplierMaterialsCard supplierId={op.id} supplierName={op.name} />}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-5 lg:sticky lg:top-6">
-            {/* Specialties */}
-            {company.specialties && (
-              <OperatorSidebar operator={{ specialties: company.specialties, category: "", social_links: null }} />
+            {specialties && (
+              <OperatorSidebar operator={{ specialties, category: "", social_links: null }} />
             )}
 
-            {/* Social links */}
-            {Object.keys(socialLinks).length > 0 && (
+            {hasSocial && (
               <OperatorSidebar operator={{
                 specialties: null,
                 category: "",
-                social_links: socialLinks,
-                website: company.website,
+                social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+                website,
+                instagram,
               }} />
             )}
 
-            {/* Company info */}
-            <OperatorSidebar operator={{
-              specialties: null,
-              social_links: null,
-              category: "Companhia Marítima",
-            }} />
+            <OperatorSidebar operator={{ specialties: null, social_links: null, category: "Companhia Marítima" }} />
           </div>
         </div>
       </div>
-
-      <OperatorReviewModal
-        open={reviewModalOpen}
-        onOpenChange={setReviewModalOpen}
-        onSubmit={(data: any) => {
-          submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) });
-        }}
-        isSubmitting={submitReview.isPending}
-        existingReview={userReview}
-        operatorName={company.nome}
-      />
     </DashboardLayout>
   );
 }
