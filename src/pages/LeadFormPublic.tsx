@@ -1,344 +1,438 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, MessageCircle, Loader2, ExternalLink } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Loader2,
+  MessageCircle,
+  Send,
+  ShieldCheck,
+  SkipForward,
+} from "lucide-react";
 import { toast } from "sonner";
-
-interface FormData {
-  id: string;
-  user_id: string;
-  welcome_message: string | null;
-}
-
-interface AgentProfile {
-  name: string;
-  phone: string | null;
-  avatar_url: string | null;
-  agency_name: string | null;
-}
+import { describeOfficeHours } from "@/lib/officeHours";
+import {
+  buildLeadSummary,
+  buildLeadWhatsappMessage,
+  buildSteps,
+  CONSENT_TEXT,
+  CONSENT_VERSION,
+  DEFAULT_BRAND_COLOR,
+  DEFAULT_CLOSING_MESSAGE,
+  DEFAULT_WELCOME_MESSAGE,
+  officeHoursOf,
+  validateStep,
+  type LeadAnswers,
+  type StepKey,
+} from "@/lib/leadFormConfig";
+import { usePublicLeadForm } from "@/hooks/usePublicLeadForm";
 
 interface ChatMessage {
   id: string;
   type: "bot" | "user";
   text: string;
-  isTyping?: boolean;
 }
-
-const WIZARD_STEPS = [
-  { key: "name", question: "Para começar, qual é o seu nome? 😊" },
-  { key: "phone", question: "Ótimo! Qual seu número de WhatsApp com DDD?" },
-  { key: "destination", question: "Para qual destino você gostaria de viajar? ✈️" },
-  { key: "travel_dates", question: "Tem alguma data ou período em mente?" },
-  { key: "travelers_count", question: "Quantas pessoas vão viajar?" },
-  { key: "budget", question: "Tem um orçamento aproximado em mente? (pode ser um valor por pessoa ou total)" },
-  { key: "additional_info", question: "Quer adicionar algo mais? Algum pedido especial, dúvida ou observação? 💬" },
-];
 
 export default function LeadFormPublic() {
   const { token } = useParams<{ token: string }>();
-  const [formData, setFormData] = useState<FormData | null>(null);
-  const [agent, setAgent] = useState<AgentProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { config, loading, loadError, isOpen, submit } = usePublicLeadForm(token);
+
+  const steps = useMemo(() => (config ? buildSteps(config) : []), [config]);
+  const brand = config?.brand_color?.trim() || DEFAULT_BRAND_COLOR;
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
   const [inputValue, setInputValue] = useState("");
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [isSending, setIsSending] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-  const [isFinalizing, setIsFinalizing] = useState(false);
-  const [aiSuggestion, setAiSuggestion] = useState("");
-  const [whatsappUrl, setWhatsappUrl] = useState("");
+  const [answers, setAnswers] = useState<LeadAnswers>({});
+  const [consent, setConsent] = useState(false);
+  const [askingConsent, setAskingConsent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const bootstrapped = useRef(false);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, askingConsent, done]);
 
-  // Load form and agent data
   useEffect(() => {
-    async function load() {
-      if (!token) return;
-      const { data: form, error } = await supabase
-        .from("lead_capture_forms")
-        .select("id, user_id, welcome_message")
-        .eq("token", token)
-        .eq("is_active", true)
-        .maybeSingle();
+    if (!config || bootstrapped.current || !steps.length) return;
+    bootstrapped.current = true;
+    setMessages([
+      { id: "welcome", type: "bot", text: config.welcome_message || DEFAULT_WELCOME_MESSAGE },
+      { id: "q0", type: "bot", text: steps[0].question },
+    ]);
+  }, [config, steps]);
 
-      if (error || !form) {
-        setLoading(false);
-        return;
-      }
+  const step = steps[stepIndex];
+  const progress = steps.length ? Math.round(((stepIndex + (askingConsent || done ? 1 : 0)) / steps.length) * 100) : 0;
 
-      setFormData(form as FormData);
+  const answerKey = (key: StepKey): keyof LeadAnswers => key as keyof LeadAnswers;
 
-      // Load agent profile
-      const { data: profileArr } = await supabase
-        .rpc("get_public_profile", { _user_id: (form as FormData).user_id });
-      const profile = profileArr?.[0] ? { name: profileArr[0].name, phone: profileArr[0].phone, avatar_url: profileArr[0].avatar_url, agency_name: profileArr[0].agency_name } as AgentProfile : null;
+  const pushMessages = (items: ChatMessage[]) => setMessages((prev) => [...prev, ...items]);
 
-      if (profile) setAgent(profile as AgentProfile);
-
-      // Show welcome message
-      const welcomeMsg = (form as FormData).welcome_message || "Olá! 👋 Vou te ajudar a planejar sua viagem!";
-      setMessages([
-        { id: "welcome", type: "bot", text: welcomeMsg },
-        { id: "q0", type: "bot", text: WIZARD_STEPS[0].question },
-      ]);
-
-      setLoading(false);
-    }
-    load();
-  }, [token]);
-
-  const addBotMessage = (text: string) => {
-    const id = `bot-${Date.now()}`;
-    setMessages((prev) => [...prev, { id, type: "bot", text }]);
-  };
-
-  const generateEmpathy = async (question: string, answer: string) => {
-    try {
-      const { data } = await supabase.functions.invoke("lead-wizard-ai", {
-        body: { type: "empathy", data: { question, answer } },
-      });
-      return data?.response || null;
-    } catch {
-      return null;
-    }
-  };
-
-  const handleSend = async () => {
-    if (!inputValue.trim() || isSending || isComplete || isFinalizing) return;
-
-    const answer = inputValue.trim();
-    setInputValue("");
-    setIsSending(true);
-
-    // Add user message
-    const step = WIZARD_STEPS[currentStep];
-    setMessages((prev) => [...prev, { id: `user-${Date.now()}`, type: "user", text: answer }]);
-
-    const newAnswers = { ...answers, [step.key]: answer };
-    setAnswers(newAnswers);
-
-    const nextStep = currentStep + 1;
-
-    if (nextStep < WIZARD_STEPS.length) {
-      // Generate empathy response
-      const empathy = await generateEmpathy(step.question, answer);
-      if (empathy) addBotMessage(empathy);
-
-      // Show next question
-      setTimeout(() => {
-        addBotMessage(WIZARD_STEPS[nextStep].question);
-        setCurrentStep(nextStep);
-        setIsSending(false);
-      }, empathy ? 800 : 300);
+  const advance = (nextAnswers: LeadAnswers, shown: string) => {
+    const nextIndex = stepIndex + 1;
+    const items: ChatMessage[] = [{ id: `u-${stepIndex}-${Date.now()}`, type: "user", text: shown }];
+    if (nextIndex < steps.length) {
+      items.push({ id: `q${nextIndex}-${Date.now()}`, type: "bot", text: steps[nextIndex].question });
+      setStepIndex(nextIndex);
     } else {
-      // All steps done - block input immediately and finalize
-      setIsFinalizing(true);
-      addBotMessage("Perfeito! 🎯 Estou preparando tudo pra você...");
-      await finalizeLead(newAnswers);
-      setIsSending(false);
+      items.push({
+        id: `consent-${Date.now()}`,
+        type: "bot",
+        text: "Perfeito! Só preciso da sua autorização para guardar esses dados e entrar em contato. 🔒",
+      });
+      setAskingConsent(true);
     }
+    setAnswers(nextAnswers);
+    pushMessages(items);
   };
 
-  const finalizeLead = async (allAnswers: Record<string, string>) => {
-    if (!formData) {
-      addBotMessage("Obrigado pelas informações! Entraremos em contato em breve. 😊");
-      setIsComplete(true);
+  const handleSend = () => {
+    if (!step || submitting || askingConsent || done) return;
+    const value = inputValue.trim();
+    const error = validateStep(step.key, value, config?.require_email === true);
+    if (error) {
+      toast.error(error);
+      return;
+    }
+    setInputValue("");
+    advance({ ...answers, [answerKey(step.key)]: value }, value);
+  };
+
+  const handleSkip = () => {
+    if (!step || !step.optional || submitting || askingConsent || done) return;
+    setInputValue("");
+    advance({ ...answers, [answerKey(step.key)]: "" }, "Prefiro não informar");
+  };
+
+  const handleBack = () => {
+    if (submitting || done) return;
+    if (askingConsent) {
+      setAskingConsent(false);
+      setMessages((prev) => prev.slice(0, -1));
+      return;
+    }
+    if (stepIndex === 0) return;
+    const prevIndex = stepIndex - 1;
+    setStepIndex(prevIndex);
+    setInputValue(String(answers[answerKey(steps[prevIndex].key)] ?? ""));
+    setMessages((prev) => prev.slice(0, -2));
+  };
+
+  const handleSubmit = async () => {
+    if (!consent) {
+      toast.error("É necessário autorizar o contato para enviar.");
+      return;
+    }
+    setSubmitting(true);
+
+    const summary = buildLeadSummary(answers);
+    let aiSuggestion = "";
+    let aiSummary = "";
+    let whatsappMessage = buildLeadWhatsappMessage(answers, config?.agency_name);
+
+    if (config?.ai_enabled) {
+      try {
+        const { data } = await supabase.functions.invoke("lead-wizard-ai", {
+          body: {
+            type: "suggestion",
+            data: {
+              leadName: answers.name,
+              destination: answers.destination,
+              travelDates: answers.travel_dates,
+              travelersCount: answers.travelers_count,
+              budget: answers.budget,
+              additionalInfo: answers.additional_info,
+            },
+            agentName: config.consultant_name,
+          },
+        });
+        aiSuggestion = String(data?.suggestion ?? "").slice(0, 2000);
+        aiSummary = String(data?.lead_summary ?? "").slice(0, 500);
+        if (data?.whatsapp_message) whatsappMessage = String(data.whatsapp_message).slice(0, 2000);
+      } catch {
+        /* AI is a bonus: the lead is never lost because of it */
+      }
+    }
+
+    const result = await submit({
+      lead_name: answers.name,
+      lead_phone: answers.phone,
+      lead_email: answers.email || null,
+      destination: answers.destination || null,
+      travel_dates: answers.travel_dates || null,
+      travelers_count: answers.travelers_count || null,
+      budget: answers.budget || null,
+      additional_info: answers.additional_info || null,
+      lead_summary: aiSummary || summary,
+      ai_suggestion: aiSuggestion || null,
+      whatsapp_message: whatsappMessage,
+      consent: true,
+      consent_version: CONSENT_VERSION,
+      honeypot,
+    });
+
+    setSubmitting(false);
+
+    if (result.error) {
+      toast.error(result.error);
       return;
     }
 
-    try {
-      let suggestion = "";
-      let whatsappMessage = `Olá! Tenho interesse em uma viagem. Meu nome é ${allAnswers.name}.`;
-
-      // Try AI suggestion only if agent exists
-      if (agent) {
-        try {
-          const { data: aiData } = await supabase.functions.invoke("lead-wizard-ai", {
-            body: {
-              type: "suggestion",
-              data: {
-                leadName: allAnswers.name,
-                destination: allAnswers.destination,
-                travelDates: allAnswers.travel_dates,
-                travelersCount: allAnswers.travelers_count,
-                budget: allAnswers.budget,
-                additionalInfo: allAnswers.additional_info,
-              },
-              agentName: agent.name,
-              agentPhone: agent.phone,
-            },
-          });
-          suggestion = aiData?.suggestion || "";
-          whatsappMessage = aiData?.whatsapp_message || whatsappMessage;
-        } catch (aiErr) {
-          console.warn("AI suggestion failed, continuing without it:", aiErr);
-        }
-      }
-
-      setAiSuggestion(suggestion);
-
-      // Save lead (don't let save failure block completion)
-      try {
-        await supabase.from("lead_captures").insert({
-          form_id: formData.id,
-          agent_user_id: formData.user_id,
-          lead_name: allAnswers.name,
-          lead_phone: allAnswers.phone,
-          destination: allAnswers.destination || null,
-          travel_dates: allAnswers.travel_dates || null,
-          travelers_count: allAnswers.travelers_count || null,
-          budget: allAnswers.budget || null,
-          additional_info: allAnswers.additional_info || null,
-          ai_suggestion: suggestion,
-          whatsapp_message: whatsappMessage,
-        } as never);
-      } catch (saveErr) {
-        console.error("Lead save error:", saveErr);
-      }
-
-      // Build WhatsApp URL
-      if (agent?.phone) {
-        const cleanPhone = agent.phone.replace(/\D/g, "");
-        const encoded = encodeURIComponent(whatsappMessage);
-        setWhatsappUrl(`https://wa.me/${cleanPhone}?text=${encoded}`);
-      }
-
-      // Show AI suggestion
-      if (suggestion) {
-        addBotMessage(suggestion);
-      }
-
-      setTimeout(() => {
-        addBotMessage(
-          agent?.phone
-            ? `Pronto! Agora é só clicar no botão abaixo para falar diretamente com ${agent.name} pelo WhatsApp! 💚`
-            : `Obrigado! ${agent?.name || "Nosso consultor"} vai entrar em contato com você em breve!`
-        );
-        setIsComplete(true);
-      }, 1500);
-    } catch (err) {
-      console.error("Finalize error:", err);
-      addBotMessage("Obrigado pelas informações! Entraremos em contato em breve. 😊");
-      setIsComplete(true);
-    }
+    setAskingConsent(false);
+    setDone(true);
+    pushMessages([
+      {
+        id: `done-${Date.now()}`,
+        type: "bot",
+        text: config?.closing_message || DEFAULT_CLOSING_MESSAGE,
+      },
+      ...(aiSuggestion ? [{ id: `ai-${Date.now()}`, type: "bot" as const, text: aiSuggestion }] : []),
+    ]);
   };
+
+  const whatsappHref = useMemo(() => {
+    const digits = (config?.whatsapp ?? "").replace(/\D/g, "");
+    if (!digits) return null;
+    const phone = digits.startsWith("55") ? digits : `55${digits}`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(buildLeadWhatsappMessage(answers, config?.agency_name))}`;
+  }, [config, answers]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="h-7 w-7 animate-spin text-slate-400" />
       </div>
     );
   }
 
-  if (!formData) {
+  if (loadError || !config) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-        <div className="text-center max-w-md">
-          <MessageCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-gray-700 mb-2">Formulário não encontrado</h1>
-          <p className="text-gray-500">Este link pode ter expirado ou estar inativo.</p>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+        <div className="max-w-sm text-center space-y-3">
+          <MessageCircle className="h-10 w-10 mx-auto text-slate-300" />
+          <h1 className="text-lg font-semibold text-slate-800">Formulário indisponível</h1>
+          <p className="text-sm text-slate-500">
+            {loadError ?? "Este link não está mais ativo. Fale diretamente com sua agência."}
+          </p>
         </div>
       </div>
     );
   }
+
+  const hoursLabel = describeOfficeHours(officeHoursOf(config.office_hours));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-emerald-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        {agent?.avatar_url ? (
-          <img src={agent.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover ring-2 ring-emerald-200" />
-        ) : (
-          <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-            <MessageCircle className="h-5 w-5 text-emerald-600" />
-          </div>
-        )}
-        <div>
-          <p className="font-semibold text-gray-800 text-sm">{agent?.name || "Consultor de Viagens"}</p>
-          {agent?.agency_name && <p className="text-xs text-gray-500">{agent.agency_name}</p>}
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {config.is_test && (
+        <div className="bg-amber-100 text-amber-900 text-xs font-medium text-center py-2 px-4">
+          Modo de teste — este envio não conta nas métricas nem cria oportunidades.
         </div>
+      )}
+
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+          {config.logo_url ? (
+            <img
+              src={config.logo_url}
+              alt={config.agency_name ?? "Agência"}
+              className="h-10 w-10 rounded-xl object-contain bg-white border"
+              loading="lazy"
+            />
+          ) : (
+            <div
+              className="h-10 w-10 rounded-xl flex items-center justify-center text-white"
+              style={{ backgroundColor: brand }}
+            >
+              <MessageCircle className="h-5 w-5" />
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm font-semibold text-slate-900 truncate">
+              {config.headline || config.agency_name || "Planeje sua viagem"}
+            </h1>
+            <p className="text-xs text-slate-500 truncate">
+              {config.consultant_name ? `${config.consultant_name} • ` : ""}
+              {isOpen ? "Online agora" : "Fora do horário de atendimento"}
+            </p>
+          </div>
+        </div>
+        <Progress value={done ? 100 : progress} className="h-1 rounded-none" />
       </header>
 
-      {/* Chat area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 max-w-2xl w-full mx-auto">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                msg.type === "user"
-                  ? "bg-emerald-600 text-white rounded-br-md"
-                  : "bg-white text-gray-800 rounded-bl-md border border-gray-100"
-              }`}
-            >
-              {msg.text}
-            </div>
-          </div>
-        ))}
-
-        {isSending && (
-          <div className="flex justify-start">
-            <div className="bg-white text-gray-400 px-4 py-2.5 rounded-2xl rounded-bl-md border border-gray-100 shadow-sm">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+      {/* Chat */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-4 py-6 space-y-3">
+          {messages.map((m) => (
+            <div key={m.id} className={m.type === "user" ? "flex justify-end" : "flex justify-start"}>
+              <div
+                className={
+                  m.type === "user"
+                    ? "max-w-[85%] rounded-2xl rounded-br-sm px-4 py-2.5 text-sm text-white whitespace-pre-line"
+                    : "max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm bg-white border text-slate-700 whitespace-pre-line shadow-sm"
+                }
+                style={m.type === "user" ? { backgroundColor: brand } : undefined}
+              >
+                {m.text}
               </div>
             </div>
-          </div>
-        )}
+          ))}
 
-        {isComplete && whatsappUrl && (
-          <div className="flex justify-center pt-4">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white font-semibold px-6 py-3 rounded-full shadow-lg transition-all hover:scale-105"
-            >
-              <ExternalLink className="h-5 w-5" />
-              Falar no WhatsApp
-            </a>
-          </div>
-        )}
+          {done && (
+            <div className="rounded-2xl border bg-white p-5 space-y-4 shadow-sm">
+              <div className="flex items-center gap-2 text-emerald-700">
+                <CheckCircle2 className="h-5 w-5" />
+                <span className="text-sm font-semibold">Contato enviado com sucesso</span>
+              </div>
+              {isOpen && whatsappHref ? (
+                <>
+                  <p className="text-sm text-slate-600">
+                    Estamos atendendo agora. Se preferir, continue a conversa no WhatsApp.
+                  </p>
+                  <Button asChild className="w-full text-white" style={{ backgroundColor: brand }}>
+                    <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="h-4 w-4 mr-2" /> Falar no WhatsApp
+                    </a>
+                  </Button>
+                </>
+              ) : (
+                <div className="flex items-start gap-2 text-sm text-slate-600">
+                  <Clock className="h-4 w-4 mt-0.5 shrink-0 text-slate-400" />
+                  <span>
+                    Recebemos seus dados fora do horário de atendimento. Retornamos no próximo horário disponível.
+                    <span className="block text-xs text-slate-400 mt-1">{hoursLabel}</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
-        <div ref={chatEndRef} />
-      </div>
-
-      {/* Input */}
-      {!isComplete && !isFinalizing && (
-        <div className="sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-gray-100 p-3 max-w-2xl w-full mx-auto">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="flex gap-2"
-          >
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Digite sua resposta..."
-              disabled={isSending}
-              className="flex-1 rounded-full border-gray-200 focus-visible:ring-emerald-500"
-              autoFocus
-            />
-            <Button
-              type="submit"
-              size="icon"
-              disabled={!inputValue.trim() || isSending}
-              className="rounded-full bg-emerald-600 hover:bg-emerald-700 shrink-0"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+          <div ref={chatEndRef} />
         </div>
+      </main>
+
+      {/* Composer */}
+      {!done && (
+        <footer className="bg-white border-t sticky bottom-0">
+          <div className="max-w-2xl mx-auto px-4 py-3 space-y-3">
+            {/* Honeypot: hidden from humans, filled by bots */}
+            <input
+              type="text"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="hidden"
+            />
+
+            {askingConsent ? (
+              <div className="space-y-3">
+                <label className="flex items-start gap-3 text-xs text-slate-600 leading-relaxed cursor-pointer">
+                  <Checkbox
+                    checked={consent}
+                    onCheckedChange={(v) => setConsent(v === true)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    {CONSENT_TEXT}
+                    {(config.privacy_url || config.terms_url) && (
+                      <span className="block mt-1 space-x-2">
+                        {config.privacy_url && (
+                          <a
+                            href={config.privacy_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            Política de privacidade
+                          </a>
+                        )}
+                        {config.terms_url && (
+                          <a href={config.terms_url} target="_blank" rel="noopener noreferrer" className="underline">
+                            Termos de uso
+                          </a>
+                        )}
+                      </span>
+                    )}
+                  </span>
+                </label>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" onClick={handleBack} disabled={submitting} aria-label="Voltar">
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    className="flex-1 text-white"
+                    style={{ backgroundColor: brand }}
+                    onClick={handleSubmit}
+                    disabled={submitting || !consent}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="h-4 w-4 mr-2" /> Enviar meus dados
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleBack}
+                  disabled={stepIndex === 0 || submitting}
+                  aria-label="Voltar"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <Input
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSend();
+                  }}
+                  placeholder={step?.placeholder ?? "Digite aqui..."}
+                  inputMode={step?.inputMode ?? "text"}
+                  maxLength={1000}
+                  autoFocus
+                />
+                {step?.optional && (
+                  <Button variant="ghost" size="icon" onClick={handleSkip} aria-label="Pular">
+                    <SkipForward className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button
+                  size="icon"
+                  className="text-white shrink-0"
+                  style={{ backgroundColor: brand }}
+                  onClick={handleSend}
+                  aria-label="Enviar"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            <p className="text-[11px] text-slate-400 text-center">
+              Seus dados são usados apenas para o atendimento desta viagem. {hoursLabel}
+            </p>
+          </div>
+        </footer>
       )}
     </div>
   );
