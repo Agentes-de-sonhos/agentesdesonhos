@@ -214,7 +214,7 @@ export default function CruisesPage() {
 
           <div
             data-testid="cruise-search-wrapper"
-            className="relative w-full md:min-w-[240px] md:flex-1 xl:max-w-[420px]"
+            className="relative w-full md:min-w-[240px] md:flex-1 md:ml-auto xl:max-w-[420px]"
           >
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
