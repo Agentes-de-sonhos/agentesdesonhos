@@ -9,6 +9,11 @@ import {
   sanitizeReviewComment,
   normalizeReviewPayload,
   REVIEW_COMMENT_MAX_LENGTH,
+  REVIEWABLE_SOURCES,
+  REVIEW_SOURCE_LABEL,
+  isReviewableSource,
+  eligibilityMessage,
+  reviewErrorMessage,
 } from "@/lib/communityReviews";
 
 describe("escala pública 3 a 5 estrelas", () => {
