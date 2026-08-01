@@ -53,11 +53,15 @@ export function ChatFloatingButton() {
 
   const handleAgentChat = useCallback(
     async (agent: OnlineAgent) => {
-      const convId = await startConversation(agent.user_id);
-      if (convId) {
-        setActiveConversationId(convId);
-        setView("dm");
-        setIsOpen(true);
+      try {
+        const convId = await startConversation(agent.user_id);
+        if (convId) {
+          setActiveConversationId(convId);
+          setView("dm");
+          setIsOpen(true);
+        }
+      } catch {
+        toast.error("Não foi possível abrir a conversa");
       }
     },
     [startConversation]
@@ -81,7 +85,10 @@ export function ChatFloatingButton() {
 
   const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
   // Hide chat button on dashboard for Premium/Fundador non-admin users
-  const hideOnDashboardForPlan = isDashboard && shouldApplyPremiumFundadorFilter(isAdmin, plan);
+  // ...but never hide while the panel is open (e.g. opened via "Mensagem" in the
+  // online users popover), otherwise the DM window would never appear here.
+  const hideOnDashboardForPlan =
+    isDashboard && shouldApplyPremiumFundadorFilter(isAdmin, plan) && !isOpen;
   const shouldShow = (isDashboard || totalUnread > 0 || isOpen) && !hideOnDashboardForPlan;
   if (!shouldShow) return null;
   // Hide button when other overlays (modals, drawers, expanded sidebar) are open,
