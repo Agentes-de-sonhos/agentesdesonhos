@@ -216,3 +216,98 @@ describe("Cruzeiros: listagem dedicada única", () => {
     expect(resolveDirectoryReturn(null, { category: "Companhias Marítimas" }).path).toBe("/mapa-turismo/cruzeiros");
   });
 });
+
+// ---------------------------------------------------------------------------
+// REGRA AUTORITATIVA: voltar de um PERFIL sempre retorna à listagem do MESMO
+// serviço de origem — nunca à home neutra e nunca a Operadoras (salvo quando o
+// fornecedor é realmente Operadora).
+// ---------------------------------------------------------------------------
+describe("retorno de perfil por serviço (10 serviços)", () => {
+  beforeEach(() => sessionStorage.clear());
+
+  const store = (path: string, scrollY?: number) =>
+    sessionStorage.setItem("mapaTurismo:return", JSON.stringify({ path, scrollY }));
+
+  const CASES: Array<{ category: string; route: string }> = [
+    { category: "Operadoras de turismo", route: "/mapa-turismo/operadoras" },
+    { category: "Consolidadoras", route: "/mapa-turismo/consolidadoras" },
+    { category: "Companhias aéreas", route: "/mapa-turismo/companhias-aereas" },
+    { category: "Hospedagem", route: "/mapa-turismo/hospedagem" },
+    { category: "Locadoras de veículos", route: "/mapa-turismo/locadoras" },
+    { category: "Cruzeiros", route: "/mapa-turismo/cruzeiros" },
+    { category: "Seguros viagem", route: "/mapa-turismo/seguros" },
+    { category: "Parques e atrações", route: "/mapa-turismo/parques" },
+    { category: "Receptivos", route: "/mapa-turismo/receptivos" },
+    { category: "Guias", route: "/mapa-turismo/guias" },
+  ];
+
+  it.each(CASES)("navegação por card ($category) preserva rota, filtros e rolagem", ({ category, route }) => {
+    const origin = `${route}?q=teste&ordenar=likes`;
+    const state = { directoryReturn: { path: origin, scrollY: 512 } };
+    store(origin, 512);
+    const r = resolveDirectoryReturn(state, { category });
+    expect(r.path).toBe(origin);
+    expect(r.scrollY).toBe(512);
+  });
+
+  it.each(CASES)("reload/link direto sem location.state ($category) volta ao serviço", ({ category, route }) => {
+    const r = resolveDirectoryReturn(null, { category });
+    expect(r.path).toBe(route);
+  });
+
+  it.each(CASES)("reload com storage do próprio serviço ($category) mantém snapshot", ({ category, route }) => {
+    store(`${route}?q=abc`, 300);
+    const r = resolveDirectoryReturn(null, { category });
+    expect(r.path).toBe(`${route}?q=abc`);
+    expect(r.scrollY).toBe(300);
+  });
+
+  it.each(CASES)("nunca cai na home neutra nem em Operadoras indevidamente ($category)", ({ category, route }) => {
+    // state contaminado apontando para a home e storage apontando para Operadoras
+    const contaminated = { directoryReturn: { path: "/mapa-turismo", scrollY: 10 } };
+    store("/mapa-turismo/operadoras?q=cvc", 999);
+    const r = resolveDirectoryReturn(contaminated, { category });
+    expect(r.path).toBe(category === "Operadoras de turismo" ? "/mapa-turismo/operadoras?q=cvc" : route);
+    if (category !== "Operadoras de turismo") {
+      expect(r.path).not.toBe("/mapa-turismo");
+      expect(r.path.startsWith("/mapa-turismo/operadoras")).toBe(false);
+    }
+  });
+
+  it("state de outro serviço não vaza (Receptivo aberto com state de Operadoras)", () => {
+    const state = { directoryReturn: { path: "/mapa-turismo/operadoras", scrollY: 80 } };
+    expect(resolveDirectoryReturn(state, { category: "Receptivos" }).path).toBe("/mapa-turismo/receptivos");
+  });
+
+  it("aliases do banco resolvem para o serviço correto", () => {
+    expect(resolveDirectoryReturn(null, { category: "Hotel" }).path).toBe("/mapa-turismo/hospedagem");
+    expect(resolveDirectoryReturn(null, { category: "Parques" }).path).toBe("/mapa-turismo/parques");
+    expect(resolveDirectoryReturn(null, { category: "Cias Aéreas" }).path).toBe("/mapa-turismo/companhias-aereas");
+    expect(resolveDirectoryReturn(null, { category: "seguros de viagem" }).path).toBe("/mapa-turismo/seguros");
+    expect(resolveDirectoryReturn(null, { category: "Companhias Marítimas" }).path).toBe("/mapa-turismo/cruzeiros");
+    expect(resolveDirectoryReturn(null, { category: "guia de turismo" }).path).toBe("/mapa-turismo/guias");
+  });
+
+  it("retorno jamais aponta para uma rota de perfil", () => {
+    const state = { directoryReturn: { path: "/mapa-turismo/operadora/abc" } };
+    expect(resolveDirectoryReturn(state, { category: "Receptivos" }).path).toBe("/mapa-turismo/receptivos");
+    store("/mapa-turismo/cruzeiros/xyz");
+    expect(resolveDirectoryReturn(null, { category: "Cruzeiros" }).path).toBe("/mapa-turismo/cruzeiros");
+  });
+
+  it("Cruzeiros: perfil marítimo volta à listagem dedicada mesmo sem categoria", () => {
+    store("/mapa-turismo/cruzeiros?tipo=Expedicao", 120);
+    const r = resolveDirectoryReturn(null, { path: "/mapa-turismo/cruzeiros" });
+    expect(r.path).toBe("/mapa-turismo/cruzeiros?tipo=Expedicao");
+    expect(r.scrollY).toBe(120);
+  });
+
+  it("Cruzeiros: storage de Hospedagem não vaza para o perfil marítimo", () => {
+    store("/mapa-turismo/hospedagem?q=resort");
+    expect(resolveDirectoryReturn(null, { path: "/mapa-turismo/cruzeiros" }).path).toBe("/mapa-turismo/cruzeiros");
+  });
+
+  it("sem categoria e sem contexto (estado transitório) usa a home neutra", () => {
+    expect(resolveDirectoryReturn(null, {}).path).toBe("/mapa-turismo");
+  });
+});
