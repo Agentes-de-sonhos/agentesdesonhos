@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDirectoryReturn } from "@/hooks/useDirectoryReturn";
+import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
