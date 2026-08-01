@@ -53,7 +53,7 @@ export function usePublicLeadForm(token: string | undefined) {
       }
       const { data, error } = await supabase.rpc("get_public_lead_form", { p_token: token });
       if (cancelled) return;
-      const payload = (data ?? null) as (PublicLeadForm & { error?: string }) | null;
+      const payload = (data ?? null) as unknown as (PublicLeadForm & { error?: string }) | null;
       if (error || !payload || payload.error) {
         setLoadError(payload?.error ?? "Formulário não encontrado.");
         setLoading(false);
