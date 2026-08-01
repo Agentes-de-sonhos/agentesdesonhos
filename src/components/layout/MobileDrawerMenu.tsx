@@ -178,6 +178,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
   const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -217,7 +218,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         (it) => !isItemHiddenForUser(it.key, isAdmin, plan)
       );
       if (filteredItems.length === 0) continue;
-      const sortedItems = filteredItems.sort((a, b) => {
+      const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
