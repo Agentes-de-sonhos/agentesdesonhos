@@ -2,13 +2,11 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ExternalLink, Loader2, ArrowRight, Newspaper,
+  ExternalLink, Loader2, Newspaper,
   Flame, Zap, Star, TrendingUp, ThumbsUp,
   Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Brain,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
 import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
@@ -140,7 +138,6 @@ function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending
 }
 
 export function CuratedNewsFeed() {
-  const navigate = useNavigate();
   const { data: news, isLoading } = useQuery({
     queryKey: ["curated-news-dashboard"],
     queryFn: async () => {
