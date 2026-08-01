@@ -6,6 +6,8 @@ import {
   resolveDirectoryReturn,
   dedicatedDirectoryRoute,
   hasDedicatedDirectoryRoute,
+  isDirectoryDetailPath,
+  isDirectoryListingPath,
 } from "@/lib/directoryNavigation";
 
 describe("resolveDirectoryCategory", () => {
@@ -110,6 +112,20 @@ describe("resolveDirectoryReturn — compatibilidade do contexto armazenado", ()
 });
 
 describe("Cruzeiros: listagem dedicada única", () => {
+  it("detecta rotas de detalhe (scroll ao topo) sem afetar listagens", () => {
+    expect(isDirectoryDetailPath("/mapa-turismo/abc")).toBe(true);
+    expect(isDirectoryDetailPath("/mapa-turismo/operadora/abc")).toBe(true);
+    expect(isDirectoryDetailPath("/mapa-turismo/guia/abc")).toBe(true);
+    expect(isDirectoryDetailPath("/mapa-turismo/cruzeiros/abc")).toBe(true);
+    expect(isDirectoryDetailPath("/mapa-turismo")).toBe(false);
+    expect(isDirectoryDetailPath("/mapa-turismo?categoria=Guias")).toBe(false);
+    expect(isDirectoryDetailPath("/mapa-turismo/cruzeiros")).toBe(false);
+    expect(isDirectoryDetailPath("/mapa-turismo/cruzeiros?tipo=Fluvial")).toBe(false);
+    expect(isDirectoryDetailPath("/dashboard")).toBe(false);
+    expect(isDirectoryListingPath("/mapa-turismo/cruzeiros")).toBe(true);
+    expect(isDirectoryListingPath("/mapa-turismo/cruzeiros/abc")).toBe(false);
+  });
+
   it("a rota da categoria Cruzeiros é sempre a experiência dedicada", () => {
     expect(dedicatedDirectoryRoute("Cruzeiros")).toBe("/mapa-turismo/cruzeiros");
     expect(dedicatedDirectoryRoute("Companhias Marítimas")).toBe("/mapa-turismo/cruzeiros");

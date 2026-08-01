@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { TeamRouteGuard } from "@/components/team/TeamRouteGuard";
+import { DirectoryDetailScrollTop } from "@/components/mapa-turismo/DirectoryDetailScrollTop";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ProtectedShell } from "@/components/auth/ProtectedShell";
 import { AdminRoute } from "@/components/auth/AdminRoute";
@@ -177,6 +178,7 @@ const App = () => (
           <NewLeadAlertProvider>
           <Suspense fallback={<LoadingScreen />}>
           <TeamRouteGuard />
+          <DirectoryDetailScrollTop />
           <Routes>
 
             <Route path="/auth" element={

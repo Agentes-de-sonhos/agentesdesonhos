@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useId, useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,8 +9,8 @@ import { useCruises, useRegioes, usePerfisCliente } from "@/hooks/useCruises";
 import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
-  Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Waves, Sailboat, MapPin, ThumbsUp, ChevronDown
+  Ship, Search, X, Loader2, Anchor, Compass, ChevronRight,
+  Waves, MapPin, ThumbsUp, ChevronDown, Users, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -59,43 +59,49 @@ function matchCruises(companies: CompanhiaMaritima[], filters: CruiseFilters) {
 }
 
 /**
- * Grupo de filtros com título claro. Os grupos longos (Regiões/Porte/Perfil)
- * podem ser recolhidos no mobile para reduzir a rolagem; no desktop ficam sempre
- * visíveis. Tipo e Posicionamento nunca são recolhidos.
+ * Bloco de filtros recolhível (desktop e mobile), fechado por padrão.
+ * O cabeçalho mantém ícone, título, chevron e badge com a quantidade de
+ * filtros selecionados. Os filtros ativos continuam resumidos nos chips.
  */
 function FilterGroup({
   title,
   icon: Icon,
   activeCount,
   children,
-  defaultOpen = false,
 }: {
   title: string;
   icon: typeof MapPin;
   activeCount: number;
   children: React.ReactNode;
-  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen || activeCount > 0);
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+
   return (
-    <div>
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full sm:cursor-default flex items-center justify-between gap-2 mb-2"
+        aria-controls={panelId}
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/40 transition-colors min-h-[44px]"
       >
-        <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-          <Icon className="h-3 w-3" /> {title}
+        <span className="text-sm font-medium text-foreground flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> {title}
           {activeCount > 0 && (
-            <span className="ml-1 rounded-full bg-primary/10 text-primary px-1.5 text-[10px] font-semibold">
+            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">
               {activeCount}
             </span>
           )}
         </span>
-        <ChevronDown className={cn("h-4 w-4 text-muted-foreground sm:hidden transition-transform", open && "rotate-180")} />
+        <ChevronDown
+          aria-hidden="true"
+          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
+        />
       </button>
-      <div className={cn("flex flex-wrap gap-1.5", open ? "flex" : "hidden sm:flex")}>{children}</div>
+      <div id={panelId} hidden={!open} className="px-4 pb-4 pt-1">
+        <div className="flex flex-wrap gap-1.5">{children}</div>
+      </div>
     </div>
   );
 }
@@ -178,7 +184,7 @@ export default function CruisesPage() {
   }
   if (filters.categoria !== "all") {
     const label = CATEGORIA_OPTIONS.find((c) => c.value === filters.categoria)?.label || filters.categoria;
-    activeChips.push({ label: `Categoria: ${label}`, onRemove: () => setFilters((p) => ({ ...p, categoria: "all" })) });
+    activeChips.push({ label: `Posicionamento: ${label}`, onRemove: () => setFilters((p) => ({ ...p, categoria: "all" })) });
   }
   filters.subtipos.forEach((s) => {
     activeChips.push({ label: s, onRemove: () => toggleFilter("subtipos", s) });
@@ -220,7 +226,8 @@ export default function CruisesPage() {
           icon={Ship}
         />
 
-        {/* Tipo buttons */}
+        {/* Tipo de navegação + busca compacta na mesma linha */}
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap gap-2">
           {TIPO_OPTIONS.map((opt) => {
             const Icon = opt.icon;
@@ -247,42 +254,49 @@ export default function CruisesPage() {
           })}
         </div>
 
-        {/* Categoria pills */}
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIA_OPTIONS.map((opt) => {
-            const isActive = filters.categoria === opt.value;
-            const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setFilters((p) => ({ ...p, categoria: p.categoria === opt.value ? "all" : opt.value as any }))}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                  isActive
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80"
-                )}
-              >
-                {opt.label}
-                <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Search + region/profile filters */}
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative w-full md:w-[320px] md:shrink-0">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
-              placeholder="Buscar companhia..."
+              type="search"
+              aria-label="Buscar companhia marítima"
+              placeholder="Buscar companhia marítima..."
               value={filters.search}
               onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
-              className="pl-10 h-10 bg-card"
+              className="pl-10 h-10 bg-card w-full"
             />
           </div>
+        </div>
+
+        {/* Filtros avançados recolhíveis */}
+        <div className="space-y-3">
+          {/* Posicionamento */}
+          <FilterGroup
+            title="Posicionamento"
+            icon={Sparkles}
+            activeCount={filters.categoria !== "all" ? 1 : 0}
+          >
+            {CATEGORIA_OPTIONS.map((opt) => {
+              const isActive = filters.categoria === opt.value;
+              const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setFilters((p) => ({ ...p, categoria: p.categoria === opt.value ? "all" : opt.value as any }))}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80"
+                  )}
+                >
+                  {opt.label}
+                  <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </FilterGroup>
 
           {/* Region tags */}
           <FilterGroup title="Regiões" icon={MapPin} activeCount={filters.regioes.length}>
@@ -310,9 +324,9 @@ export default function CruisesPage() {
             })}
           </FilterGroup>
 
-          {/* Porte / posicionamento tags */}
+          {/* Porte e características */}
           {subtipoOptions.length > 0 && (
-            <FilterGroup title="Porte e posicionamento" icon={Ship} activeCount={filters.subtipos.length}>
+            <FilterGroup title="Porte e características" icon={Ship} activeCount={filters.subtipos.length}>
                 {subtipoOptions.map((s) => {
                   const isActive = filters.subtipos.includes(s);
                   const count = countFor({ subtipos: [s] });
@@ -339,7 +353,7 @@ export default function CruisesPage() {
           )}
 
           {/* Profile tags */}
-          <FilterGroup title="Perfil do viajante" icon={Sailboat} activeCount={filters.perfis.length}>
+          <FilterGroup title="Perfil do viajante" icon={Users} activeCount={filters.perfis.length}>
             {perfis.map((p) => {
                 const isActive = filters.perfis.includes(p.id);
                 const count = countFor({ perfis: [p.id] });
@@ -445,7 +459,7 @@ function CruiseCard({
   return (
     <Card
       className={cn(
-        "group border-0 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 cursor-pointer",
+        "group border-0 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 cursor-pointer h-full flex flex-col",
         isLuxo
           ? "bg-gradient-to-br from-amber-50/80 via-card to-card dark:from-amber-950/30 dark:via-card dark:to-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 shadow-[0_4px_24px_-4px_rgba(217,169,78,0.15)] hover:shadow-[0_12px_32px_-8px_rgba(217,169,78,0.25)]"
           : "bg-card/90 backdrop-blur-sm ring-1 ring-border/40 shadow-card hover:shadow-card-hover"
@@ -496,20 +510,6 @@ function CruiseCard({
           </div>
         </div>
 
-        {/* Likes row */}
-        <div className="mt-3 flex items-center gap-3">
-          <button
-            onClick={onLike}
-            className={cn(
-              "flex items-center gap-1 text-xs transition-colors",
-              liked ? "text-primary font-medium" : "text-muted-foreground hover:text-primary"
-            )}
-          >
-            <ThumbsUp className={cn("h-3.5 w-3.5", liked && "fill-primary")} />
-            {likeCount > 0 && <span>{likeCount}</span>}
-          </button>
-        </div>
-
         {/* Regions */}
         {displayRegioes.length > 0 && (
           <div className="mt-3 flex items-center gap-2">
@@ -531,7 +531,9 @@ function CruiseCard({
 
         {/* Profile chips */}
         {company.perfis.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex items-center gap-2">
+            <Users className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+            <div className="flex flex-wrap gap-1.5">
             {company.perfis.map((p) => (
               <button
                 key={p.id}
@@ -544,25 +546,26 @@ function CruiseCard({
                 {p.nome}
               </button>
             ))}
+            </div>
           </div>
         )}
 
         {/* Footer */}
         <div className="mt-auto pt-4">
           <div className="flex items-center justify-between border-t border-border/40 pt-3">
-            {company.website ? (
-              <a
-                href={company.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1.5 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Globe className="h-3.5 w-3.5" /> Visitar site
-              </a>
-            ) : (
-              <span />
-            )}
+            <button
+              type="button"
+              onClick={onLike}
+              aria-pressed={liked}
+              aria-label={liked ? "Remover curtida" : "Curtir companhia"}
+              className={cn(
+                "flex items-center gap-1 text-xs transition-colors h-8 px-1",
+                liked ? "text-primary font-medium" : "text-muted-foreground hover:text-primary"
+              )}
+            >
+              <ThumbsUp className={cn("h-4 w-4", liked && "fill-primary")} aria-hidden="true" />
+              {likeCount > 0 && <span>{likeCount}</span>}
+            </button>
             <Button
               variant="ghost"
               size="sm"
