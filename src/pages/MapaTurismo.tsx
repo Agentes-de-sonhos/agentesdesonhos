@@ -292,10 +292,9 @@ function MapaTurismoListing({ category }: { category: string }) {
         _hasProfile: isFilled(g.bio) || isFilled(g.about),
       };
     });
-    // Companhias marítimas têm listagem dedicada (/mapa-turismo/cruzeiros) e
-    // nunca são renderizadas na grade genérica do diretório.
+    // Companhias marítimas vêm da fonte especializada (/mapa-turismo/cruzeiros).
     return [...fromSuppliers, ...fromOperators, ...fromTravelMeet, ...fromGuides].filter(
-      (item: any) => !hasDedicatedDirectoryRoute(item.category),
+      (item: any) => !isSpecializedDirectoryCategory(item.category),
     );
   }, [suppliers, tourOperators, travelMeetSuppliers, tourGuides]);
 
@@ -412,39 +411,17 @@ function MapaTurismoListing({ category }: { category: string }) {
     <DashboardLayout>
       
       <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <BackToDirectoryHomeButton />
+        </div>
+
         <PageHeader
           pageKey="mapa-turismo"
-          title="Mapa do Turismo"
+          title={serviceTitle}
           subtitle="Encontre parceiros do trade turístico"
-          icon={Globe}
+          icon={ServiceIcon}
           adminTab="trade-suppliers"
         />
-
-        {/* Category grid */}
-        <div
-          className="grid gap-3 w-full"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))" }}
-        >
-          {CATEGORIES_DATA.map((cat) => {
-            const Icon = cat.icon;
-            const isActive = categoryFilter === cat.category;
-            return (
-              <button
-                key={cat.category}
-                onClick={() => handleCategoryChange(cat)}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
-                  isActive
-                    ? `${cat.activeColor} shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-[1.02] border-transparent`
-                    : `${cat.color} border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/50`
-                )}
-              >
-                <Icon className={cn("h-6 w-6", isActive ? "text-white" : cat.iconColor)} />
-                <span className="text-center leading-tight px-1">{cat.title}</span>
-              </button>
-            );
-          })}
-        </div>
 
         {/* Filters row: search + specialties inline */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-wrap">
