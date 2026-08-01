@@ -2,10 +2,9 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { BackToDirectoryHomeButton } from "@/components/mapa-turismo/BackToDirectoryHomeButton";
 import { AdvancedFilters } from "@/components/mapa-turismo/AdvancedFilters";
-import { CruiseCompanyLogo, resolveCruiseLogoUrl } from "@/components/mapa-turismo/CruiseCompanyLogo";
+import { resolveCruiseLogoUrl } from "@/components/mapa-turismo/CruiseCompanyLogo";
 import { DirectorySupplierCard } from "@/components/mapa-turismo/DirectorySupplierCard";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,8 @@ import { useCruises, useRegioes, usePerfisCliente } from "@/hooks/useCruises";
 import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
-  Ship, Search, X, Loader2, Anchor, Compass, ChevronRight,
-  Waves, MapPin, ThumbsUp, ChevronDown, Users, Sparkles
+  Ship, Search, X, Loader2, Anchor, Compass,
+  Waves, MapPin, Users, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
