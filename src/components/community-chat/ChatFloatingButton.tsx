@@ -25,6 +25,7 @@ import {
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
 import { useOverlayPresence } from "@/hooks/useOverlayPresence";
+import { toast } from "sonner";
 
 type ChatView = "menu" | "room" | "dm" | "conversations";
 
