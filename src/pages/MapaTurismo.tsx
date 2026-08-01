@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,7 +46,7 @@ import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
-import { captureDirectoryReturn } from "@/lib/directoryNavigation";
+import { captureDirectoryReturn, dedicatedDirectoryRoute, hasDedicatedDirectoryRoute } from "@/lib/directoryNavigation";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -65,7 +65,8 @@ const CATEGORIES_DATA: CategoryDef[] = [
   { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-100 text-sky-700", activeColor: "bg-sky-500 text-white", iconColor: "text-sky-500" },
   { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-100 text-amber-700", activeColor: "bg-amber-500 text-white", iconColor: "text-amber-500" },
   { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-100 text-emerald-700", activeColor: "bg-emerald-500 text-white", iconColor: "text-emerald-500" },
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500" },
+  // Cruzeiros tem experiência dedicada (/mapa-turismo/cruzeiros): a aba navega para lá.
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500", link: CRUISES_ROOT },
   { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", activeColor: "bg-rose-500 text-white", iconColor: "text-rose-500" },
   { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", activeColor: "bg-pink-500 text-white", iconColor: "text-pink-500" },
   { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
@@ -82,7 +83,18 @@ interface Specialty {
 
 type SortOption = "alpha" | "rating" | "likes";
 
+/**
+ * URLs antigas com `?categoria=Cruzeiros` (ou apelidos) são redirecionadas para a
+ * listagem dedicada antes de qualquer render da grade genérica (sem flash).
+ */
 export default function MapaTurismo() {
+  const [params] = useSearchParams();
+  const dedicated = dedicatedDirectoryRoute(params.get("categoria"));
+  if (dedicated) return <Navigate to={dedicated} replace />;
+  return <MapaTurismoDirectory />;
+}
+
+function MapaTurismoDirectory() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialParams = useRef(new URLSearchParams(searchParams)).current;
   const initialCategoria = initialParams.get("categoria");
@@ -102,9 +114,6 @@ export default function MapaTurismo() {
   );
   const [hospQuickFilter, setHospQuickFilter] = useState<"resort" | "rede" | null>(
     initialHosp === "resort" || initialHosp === "rede" ? initialHosp : null,
-  );
-  const [cruiseQuickFilters, setCruiseQuickFilters] = useState<string[]>(
-    initialParams.get("cruzeiro")?.split(",").filter(Boolean) || [],
   );
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string; source: string } | null>(null);
