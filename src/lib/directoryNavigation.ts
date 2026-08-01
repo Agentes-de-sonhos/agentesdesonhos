@@ -109,9 +109,54 @@ export function directoryPathForCategory(category?: string | null): string {
   return resolved ? `${DIRECTORY_ROOT}?categoria=${encodeURIComponent(resolved)}` : DIRECTORY_ROOT;
 }
 
-/** Aceita apenas caminhos internos do Mapa do Turismo (evita open redirect). */
+/**
+ * Aceita apenas caminhos internos do Mapa do Turismo (evita open redirect e
+ * prefixos parecidos como "/mapa-turismo-malicioso").
+ */
 export function isDirectoryPath(path: unknown): path is string {
-  return typeof path === "string" && path.startsWith(DIRECTORY_ROOT);
+  if (typeof path !== "string") return false;
+  if (path === DIRECTORY_ROOT) return true;
+  const next = path.charAt(DIRECTORY_ROOT.length);
+  return path.startsWith(DIRECTORY_ROOT) && (next === "?" || next === "/");
+}
+
+/** Só o caminho (sem query) de um retorno do diretório. */
+function pathnameOf(path: string): string {
+  const [pathname] = path.split("?");
+  return pathname.replace(/\/+$/, "") || DIRECTORY_ROOT;
+}
+
+/** true quando o caminho é a listagem específica de cruzeiros. */
+export function isCruisesListingPath(path: unknown): boolean {
+  return isDirectoryPath(path) && pathnameOf(path) === CRUISES_ROOT;
+}
+
+/** Extrai e normaliza a categoria embutida na URL do diretório. */
+export function categoryFromDirectoryPath(path: unknown): string | null {
+  if (!isDirectoryPath(path)) return null;
+  if (isCruisesListingPath(path)) return "Cruzeiros";
+  const query = path.includes("?") ? path.slice(path.indexOf("?") + 1) : "";
+  const raw = new URLSearchParams(query).get("categoria");
+  return resolveDirectoryCategory(raw);
+}
+
+/**
+ * Um retorno armazenado só pode ser reutilizado se pertencer ao contexto do
+ * perfil atual. Evita retorno cruzado obsoleto (ex.: storage de Consolidadoras
+ * aplicado a um link direto de Parques).
+ */
+function isStoredReturnCompatible(
+  stored: DirectoryReturn,
+  fallback: { category?: string | null; path?: string },
+): boolean {
+  // Página de detalhe de cruzeiros: só aceita a listagem específica.
+  if (isCruisesListingPath(fallback.path)) return isCruisesListingPath(stored.path);
+
+  const realCategory = resolveDirectoryCategory(fallback.category);
+  if (realCategory) return categoryFromDirectoryPath(stored.path) === realCategory;
+
+  // Sem categoria e sem rota específica não há como validar: usa o fallback.
+  return !fallback.path;
 }
 
 function getScrollY(): number {
@@ -160,7 +205,7 @@ export function resolveDirectoryReturn(
   if (fromState && isDirectoryPath(fromState.path)) return fromState;
 
   const stored = readStoredReturn();
-  if (stored) return stored;
+  if (stored && isStoredReturnCompatible(stored, fallback)) return stored;
 
   const fallbackPath = isDirectoryPath(fallback.path)
     ? fallback.path
