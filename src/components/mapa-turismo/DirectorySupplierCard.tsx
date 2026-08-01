@@ -154,7 +154,7 @@ export function DirectorySupplierCard({
             <button
               type="button"
               data-testid="directory-supplier-like"
-              onClick={onLike}
+              onClick={(e) => { e.stopPropagation(); onLike(e); }}
               aria-pressed={liked}
               aria-label={liked ? "Remover curtida" : `Curtir ${name}`}
               className={cn(
