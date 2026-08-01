@@ -34,11 +34,12 @@ describe("linha superior de filtros — Companhias Marítimas", () => {
     expect(group).toContain("md:overflow-visible");
   });
 
-  it("busca é flexível com largura mínima utilizável", () => {
+  it("busca é flexível, alinhada à direita em desktop", () => {
     const search = classOf("cruise-search-wrapper");
     expect(search).toContain("w-full");
     expect(search).toContain("md:flex-1");
     expect(search).toContain("md:min-w-[240px]");
+    expect(search).toContain("md:ml-auto");
   });
 
   it("mantém os quatro tipos de navegação", () => {
