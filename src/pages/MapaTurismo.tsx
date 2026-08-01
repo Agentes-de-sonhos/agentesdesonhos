@@ -550,134 +550,69 @@ function MapaTurismoListing({ category }: { category: string }) {
               const liked = hasLiked(supplier.id, supplier._source);
               const fullStars = stats?.count ? Math.round(stats.total / stats.count) : 0;
 
+              const openProfile = () => {
+                if (supplier._source === "travelmeet") {
+                  if (supplier.website_url) window.open(supplier.website_url, "_blank");
+                  return;
+                }
+                navigate(
+                  supplier._source === "operator"
+                    ? `/mapa-turismo/operadora/${supplier.id}`
+                    : supplier._source === "guide"
+                    ? `/mapa-turismo/guia/${supplier.id}`
+                    : `/mapa-turismo/${supplier.id}`,
+                  captureDirectoryReturn()
+                );
+              };
+
+              const showRating = supplier._source !== "operator" && supplier._source !== "cruise";
+
               return (
-                <Card
+                <DirectorySupplierCard
                   key={`${supplier._source}-${supplier.id}`}
-                  className="group cursor-pointer shadow-card border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
-                  onClick={() => {
-                    if (supplier._source === "travelmeet") {
-                      if (supplier.website_url) {
-                        window.open(supplier.website_url, "_blank");
-                      }
-                      return;
-                    }
-                    navigate(
-                      supplier._source === "cruise"
-                        ? `/mapa-turismo/cruzeiros/${supplier.id}`
-                        : supplier._source === "operator"
-                        ? `/mapa-turismo/operadora/${supplier.id}`
-                        : supplier._source === "guide"
-                        ? `/mapa-turismo/guia/${supplier.id}`
-                        : `/mapa-turismo/${supplier.id}`,
-                      captureDirectoryReturn()
-                    );
-                  }}
+                  name={supplier.name}
+                  category={supplier.category}
+                  logoUrl={supplier.logo_url}
+                  specialties={supplier.specialties}
+                  likeCount={likeCount}
+                  liked={liked}
+                  onLike={(e) => handleToggleLike(e, supplier.id, supplier._source)}
+                  onOpen={openProfile}
+                  tags={
+                    <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
+                      {supplier.category}
+                    </Badge>
+                  }
                 >
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 ring-border/50">
-                        {supplier.logo_url ? (
-                          <img src={supplier.logo_url} alt={supplier.name} className="h-full w-full object-contain p-1.5" />
-                        ) : (
-                          <Building2 className="h-7 w-7 text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground truncate text-base">{supplier.name}</h3>
-                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                              <Badge variant="secondary" className="text-xs">
-                                {supplier.category}
-                              </Badge>
-                              {supplier._hasProfile && (
-                                <span
-                                  className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/60 px-2 py-0.5 text-[10px] font-medium"
-                                  title="Esta empresa possui perfil completo no Mapa do Turismo"
-                                >
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  Perfil completo
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 flex-shrink-0 mt-0.5" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {supplier.specialties && supplier.specialties.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-1.5">
-                        {supplier.specialties.slice(0, 3).map((specialty: Specialty) => (
-                          <Badge key={specialty.id} variant="outline" className="text-xs bg-primary/5 border-primary/20">
-                            {specialty.name}
-                          </Badge>
+                  {showRating && (
+                    <div className="mt-3 flex items-center gap-1.5 text-sm min-w-0 flex-wrap">
+                      <span className="font-semibold text-foreground whitespace-nowrap">{avgRating ?? "—"}</span>
+                      <div className="flex items-center gap-0.5 shrink-0" aria-label={`${reviewCount} avaliações`}>
+                        {Array.from({ length: 5 }).map((_, index) => (
+                          <Star
+                            key={index}
+                            className={cn(
+                              "h-3.5 w-3.5",
+                              index < fullStars ? "fill-current text-amber-400" : "text-muted-foreground/30"
+                            )}
+                          />
                         ))}
-                        {supplier.specialties.length > 3 && (
-                          <Badge variant="outline" className="text-xs">+{supplier.specialties.length - 3}</Badge>
-                        )}
                       </div>
-                    )}
-
-                    {/* Social interaction bar */}
-                    <div className="mt-4 pt-3 border-t border-border/50">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        {/* Rating — oculto para operadoras e cruzeiros */}
-                        {supplier._source !== "operator" && supplier._source !== "cruise" ? (
-                        <div className="flex items-center gap-1.5 text-sm min-w-0">
-                          <span className="font-semibold text-foreground whitespace-nowrap">
-                            {avgRating ?? "—"}
-                          </span>
-                          <div className="flex items-center gap-0.5 text-amber-400 shrink-0" aria-label={`${reviewCount} avaliações`}>
-                            {Array.from({ length: 5 }).map((_, index) => (
-                              <Star
-                                key={index}
-                                className={cn(
-                                  "h-3.5 w-3.5",
-                                  index < fullStars ? "fill-current text-amber-400" : "text-muted-foreground/30"
-                                )}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-muted-foreground text-xs whitespace-nowrap">
-                            {reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"}
-                          </span>
-                        </div>
-                        ) : <div />}
-
-                        {/* Likes */}
-                        <button
-                          onClick={(e) => handleToggleLike(e, supplier.id, supplier._source)}
-                          className={cn(
-                            "flex items-center gap-1 text-sm transition-colors rounded-full px-2 py-0.5",
-                            liked
-                              ? "text-primary font-semibold bg-primary/10"
-                              : "text-muted-foreground hover:text-primary hover:bg-primary/5"
-                          )}
-                        >
-                          <ThumbsUp className={cn("h-3.5 w-3.5", liked && "fill-primary")} />
-                          <span>{likeCount}</span>
-                        </button>
-
-                        {/* Avaliar — oculto para operadoras e cruzeiros */}
-                        {supplier._source !== "operator" && supplier._source !== "cruise" && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground px-2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenReview(supplier);
-                          }}
-                        >
-                          <Star className="h-3 w-3" />
-                          Avaliar
-                        </Button>
-                        )}
-                      </div>
+                      <span className="text-muted-foreground text-xs whitespace-nowrap">
+                        {reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground px-2"
+                        onClick={(e) => { e.stopPropagation(); handleOpenReview(supplier); }}
+                      >
+                        <Star className="h-3 w-3" />
+                        Avaliar
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+                </DirectorySupplierCard>
               );
             })}
           </div>
