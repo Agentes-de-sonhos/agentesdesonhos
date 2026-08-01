@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCruises, useRegioes, usePerfisCliente } from "@/hooks/useCruises";
-import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
+import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
   Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Waves, Sailboat, MapPin, Star, ThumbsUp
+  Waves, Sailboat, MapPin, ThumbsUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -50,17 +50,17 @@ export default function CruisesPage() {
   const { data: regioes = [] } = useRegioes();
   const { data: perfis = [] } = usePerfisCliente();
   const { getLikeCount, hasLiked, toggleLike } = useSupplierLikes();
-  const { data: reviewStatsMap = {} } = useSupplierReviewStats();
 
   const [filters, setFilters] = useState<CruiseFilters>({
     search: "",
     tipo: "all",
     categoria: "all",
+    subtipos: [],
     regioes: [],
     perfis: [],
   });
 
-  const toggleFilter = (key: "regioes" | "perfis", value: string) => {
+  const toggleFilter = (key: "regioes" | "perfis" | "subtipos", value: string) => {
     setFilters((prev) => ({
       ...prev,
       [key]: prev[key].includes(value)
@@ -70,18 +70,26 @@ export default function CruisesPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ search: "", tipo: "all", categoria: "all", regioes: [], perfis: [] });
+    setFilters({ search: "", tipo: "all", categoria: "all", subtipos: [], regioes: [], perfis: [] });
   };
 
   const hasActiveFilters =
     filters.search || filters.tipo !== "all" || filters.categoria !== "all" ||
-    filters.regioes.length > 0 || filters.perfis.length > 0;
+    filters.subtipos.length > 0 || filters.regioes.length > 0 || filters.perfis.length > 0;
+
+  // Porte / posicionamento chips derived from the cruise-specific `subtipo` values
+  const subtipoOptions = useMemo(() => {
+    const set = new Set<string>();
+    companies.forEach((c) => { if (c.subtipo) set.add(c.subtipo); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [companies]);
 
   const filtered = useMemo(() => {
     return companies.filter((c) => {
       if (filters.search && !c.nome.toLowerCase().includes(filters.search.toLowerCase())) return false;
       if (filters.tipo !== "all" && c.tipo !== filters.tipo) return false;
       if (filters.categoria !== "all" && c.categoria !== filters.categoria) return false;
+      if (filters.subtipos.length > 0 && !(c.subtipo && filters.subtipos.includes(c.subtipo))) return false;
       if (filters.regioes.length > 0 && !c.regioes.some((r) => filters.regioes.includes(r.id))) return false;
       if (filters.perfis.length > 0 && !c.perfis.some((p) => filters.perfis.includes(p.id))) return false;
       return true;
@@ -98,6 +106,9 @@ export default function CruisesPage() {
     const label = CATEGORIA_OPTIONS.find((c) => c.value === filters.categoria)?.label || filters.categoria;
     activeChips.push({ label: `Categoria: ${label}`, onRemove: () => setFilters((p) => ({ ...p, categoria: "all" })) });
   }
+  filters.subtipos.forEach((s) => {
+    activeChips.push({ label: s, onRemove: () => toggleFilter("subtipos", s) });
+  });
   filters.regioes.forEach((rId) => {
     const reg = regioes.find((r) => r.id === rId);
     if (reg) activeChips.push({
@@ -217,6 +228,34 @@ export default function CruisesPage() {
             </div>
           </div>
 
+          {/* Porte / posicionamento tags */}
+          {subtipoOptions.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                <Ship className="h-3 w-3" /> Porte e posicionamento
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {subtipoOptions.map((s) => {
+                  const isActive = filters.subtipos.includes(s);
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => toggleFilter("subtipos", s)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-full text-xs transition-all border",
+                        isActive
+                          ? "bg-primary text-primary-foreground border-primary font-medium"
+                          : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Profile tags */}
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
@@ -284,9 +323,6 @@ export default function CruisesPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((company) => {
-              const stats = reviewStatsMap[`cruise:${company.id}`];
-              const avgRating = stats ? stats.total / stats.count : 0;
-              const reviewCount = stats?.count || 0;
               const likeCount = getLikeCount(company.id, "cruise");
               const liked = hasLiked(company.id, "cruise");
 
@@ -295,8 +331,6 @@ export default function CruisesPage() {
                   key={company.id}
                   company={company}
                   onProfileClick={(id) => toggleFilter("perfis", id)}
-                  averageRating={avgRating}
-                  reviewCount={reviewCount}
                   likeCount={likeCount}
                   liked={liked}
                   onLike={(e) => handleLike(e, company.id)}
@@ -313,16 +347,12 @@ export default function CruisesPage() {
 function CruiseCard({
   company,
   onProfileClick,
-  averageRating,
-  reviewCount,
   likeCount,
   liked,
   onLike,
 }: {
   company: CompanhiaMaritima;
   onProfileClick: (id: string) => void;
-  averageRating: number;
-  reviewCount: number;
   likeCount: number;
   liked: boolean;
   onLike: (e: React.MouseEvent) => void;
@@ -386,15 +416,8 @@ function CruiseCard({
           </div>
         </div>
 
-        {/* Rating & Likes row */}
+        {/* Likes row */}
         <div className="mt-3 flex items-center gap-3">
-          {reviewCount > 0 && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              <span className="font-semibold text-foreground">{averageRating.toFixed(1)}</span>
-              <span>({reviewCount})</span>
-            </div>
-          )}
           <button
             onClick={onLike}
             className={cn(

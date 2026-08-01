@@ -709,8 +709,8 @@ export default function MapaTurismo() {
                     {/* Social interaction bar */}
                     <div className="mt-4 pt-3 border-t border-border/50">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        {/* Rating — oculto para operadoras */}
-                        {supplier._source !== "operator" ? (
+                        {/* Rating — oculto para operadoras e cruzeiros */}
+                        {supplier._source !== "operator" && supplier._source !== "cruise" ? (
                         <div className="flex items-center gap-1.5 text-sm min-w-0">
                           <span className="font-semibold text-foreground whitespace-nowrap">
                             {avgRating ?? "—"}
@@ -746,8 +746,8 @@ export default function MapaTurismo() {
                           <span>{likeCount}</span>
                         </button>
 
-                        {/* Avaliar — oculto para operadoras */}
-                        {supplier._source !== "operator" && (
+                        {/* Avaliar — oculto para operadoras e cruzeiros */}
+                        {supplier._source !== "operator" && supplier._source !== "cruise" && (
                         <Button
                           variant="ghost"
                           size="sm"
