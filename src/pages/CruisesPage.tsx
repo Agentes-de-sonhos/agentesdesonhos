@@ -10,7 +10,7 @@ import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
   Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Waves, Sailboat, MapPin, ThumbsUp
+  Waves, Sailboat, MapPin, ThumbsUp, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -105,16 +105,15 @@ export default function CruisesPage() {
   }, [companies]);
 
   const filtered = useMemo(() => {
-    return companies.filter((c) => {
-      if (filters.search && !c.nome.toLowerCase().includes(filters.search.toLowerCase())) return false;
-      if (filters.tipo !== "all" && c.tipo !== filters.tipo) return false;
-      if (filters.categoria !== "all" && c.categoria !== filters.categoria) return false;
-      if (filters.subtipos.length > 0 && !(c.subtipo && filters.subtipos.includes(c.subtipo))) return false;
-      if (filters.regioes.length > 0 && !c.regioes.some((r) => filters.regioes.includes(r.id))) return false;
-      if (filters.perfis.length > 0 && !c.perfis.some((p) => filters.perfis.includes(p.id))) return false;
-      return true;
-    });
+    return matchCruises(companies, filters);
   }, [companies, filters]);
+
+  /**
+   * Quantidade de companhias por opção, considerando os demais filtros ativos.
+   * Alimenta os contadores exibidos em cada chip.
+   */
+  const countFor = (patch: Partial<CruiseFilters>) =>
+    matchCruises(companies, { ...filters, ...patch }).length;
 
   // Active filter chips
   const activeChips: { label: string; onRemove: () => void }[] = [];
