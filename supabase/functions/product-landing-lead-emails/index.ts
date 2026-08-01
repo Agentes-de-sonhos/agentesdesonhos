@@ -3,6 +3,7 @@
 // Never touches lead/CRM records: a failure here only affects the delivery row.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { renderLeadEmail } from "./template.ts";
+import { drainConversationalQueue } from "./conversational.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -104,7 +105,11 @@ Deno.serve(async (req) => {
   }
 
   console.log(`[lead-emails] done claimed=${rows.length} sent=${sent} failed=${failed}`);
-  return new Response(JSON.stringify({ claimed: rows.length, sent, failed }), {
+
+  // Same cron pass also drains the conversational lead-form queue.
+  const conversational = await drainConversationalQueue(supabase, resendKey, FROM, limit);
+
+  return new Response(JSON.stringify({ claimed: rows.length, sent, failed, conversational }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
