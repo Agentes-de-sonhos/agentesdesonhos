@@ -36,6 +36,12 @@ interface MenuItem {
   /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
   activePrefix?: string;
   children?: MenuItem[];
+  /** Aparência de cabeçalho de seção (caixa alta + cor temática). */
+  sectionStyle?: {
+    headerBg: string;
+    headerHoverBg: string;
+    hoverColor: string;
+  };
 }
 
 interface MenuSection {
@@ -107,6 +113,7 @@ const clientesItem: MenuItem = {
   activePrefix: CLIENTES_DIRECT_ITEM.activePrefix,
   icon: Users,
   requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
+  sectionStyle: CLIENTES_DIRECT_ITEM.theme,
 };
 
 const financeiroItem: MenuItem = {
@@ -116,6 +123,7 @@ const financeiroItem: MenuItem = {
   activePrefix: FINANCEIRO_DIRECT_ITEM.activePrefix,
   icon: DollarSign,
   requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
+  sectionStyle: FINANCEIRO_DIRECT_ITEM.theme,
 };
 
 const marketingSection: MenuSection = {
@@ -332,13 +340,20 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     const isLockedByStart = isStartPlan && startPlanLockedUrls.includes(item.url);
     const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital || isLockedByStart;
 
+    const sectionStyle = item.sectionStyle;
     return (
       <button
         key={item.url}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
           "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
-          isActive && !isLocked && sectionBgColor
+          sectionStyle
+            ? isActive && !isLocked
+              ? cn(sectionStyle.headerBg, sectionStyle.headerHoverBg, "font-semibold")
+              : isLocked
+                ? "opacity-60"
+                : cn("text-sidebar-foreground", sectionStyle.hoverColor)
+          : isActive && !isLocked && sectionBgColor
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
               ? "bg-muted text-foreground font-semibold shadow-sm"
@@ -350,10 +365,16 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         )}
       >
         <div className="relative flex-shrink-0">
-          <item.icon className={cn("h-5 w-5 transition-colors", isActive && !isLocked && !sectionBgColor ? "text-foreground" : "", isLocked ? "text-muted-foreground" : "")} />
+          <item.icon className={cn(sectionStyle ? "h-4 w-4 transition-colors" : "h-5 w-5 transition-colors", isActive && !isLocked && !sectionBgColor && !sectionStyle ? "text-foreground" : "", isLocked ? "text-muted-foreground" : "")} />
           {isLocked && <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />}
         </div>
-        <span className={cn("truncate flex-1", isLocked && "text-muted-foreground")}>
+        <span
+          className={cn(
+            "truncate flex-1",
+            sectionStyle && "text-[11px] font-bold uppercase tracking-wider whitespace-nowrap",
+            isLocked && "text-muted-foreground"
+          )}
+        >
           {item.title}
         </span>
       </button>

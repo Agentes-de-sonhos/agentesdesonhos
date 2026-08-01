@@ -13,6 +13,32 @@ describe("menu principal: Gestão de Clientes e Gestão Financeira como links di
     expect(FINANCEIRO_DIRECT_ITEM.activePrefix).toBe("/financeiro");
   });
 
+  it("exibe rótulos em caixa alta", () => {
+    expect(CLIENTES_DIRECT_ITEM.title).toBe("GESTÃO DE CLIENTES");
+    expect(FINANCEIRO_DIRECT_ITEM.title).toBe("GESTÃO FINANCEIRA");
+  });
+
+  it("preserva as cores temáticas das antigas seções", () => {
+    expect(CLIENTES_DIRECT_ITEM.theme).toEqual({
+      headerBg: "bg-cyan-600 text-white",
+      headerHoverBg: "hover:bg-cyan-700",
+      hoverColor: "hover:bg-cyan-600 hover:text-white",
+    });
+    expect(FINANCEIRO_DIRECT_ITEM.theme).toEqual({
+      headerBg: "bg-emerald-600 text-white",
+      headerHoverBg: "hover:bg-emerald-700",
+      hoverColor: "hover:bg-emerald-600 hover:text-white",
+    });
+  });
+
+  it("aplica o estilo temático de cabeçalho nos dois menus (sem hover cinza)", () => {
+    for (const src of [sidebar, drawer]) {
+      expect(src).toContain("sectionStyle: CLIENTES_DIRECT_ITEM.theme");
+      expect(src).toContain("sectionStyle: FINANCEIRO_DIRECT_ITEM.theme");
+      expect(src).toContain("uppercase tracking-wider");
+    }
+  });
+
   it("não existem mais seções expansíveis para essas áreas", () => {
     for (const src of [sidebar, drawer]) {
       expect(src).not.toContain("clientesSection");
