@@ -7,7 +7,6 @@ import { Globe, ArrowLeft } from "lucide-react";
 // (hook useSalesLandings, rotas /meus-leads/landings/nova e /:id/editar),
 // porém todos os acessos visuais foram ocultados nesta tela. Esta página
 // exibe somente os modelos oficiais da plataforma.
-const SHOW_CUSTOM_LANDINGS = false;
 
 export default function SalesLandings() {
   const navigate = useNavigate();
