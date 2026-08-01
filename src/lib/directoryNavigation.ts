@@ -287,21 +287,28 @@ function readStoredReturn(): DirectoryReturn | null {
 
 /**
  * Resolve o destino do botão "Voltar ao diretório".
- * Ordem: state da navegação → sessionStorage → fallback pela categoria real.
+ *
+ * Ordem: state da navegação → sessionStorage → rota canônica do serviço real.
+ * Em todos os casos o destino é validado contra o serviço do fornecedor, de
+ * modo que o retorno de um perfil nunca cai na home neutra nem em outro
+ * serviço (nem em Operadoras, salvo se o fornecedor for realmente Operadora).
  */
 export function resolveDirectoryReturn(
   locationState: unknown,
   fallback: { category?: string | null; path?: string } = {},
 ): DirectoryReturn {
   const fromState = (locationState as { directoryReturn?: DirectoryReturn } | null)?.directoryReturn;
-  if (fromState && isDirectoryPath(fromState.path)) return fromState;
+  if (isReturnCompatible(fromState, fallback)) return fromState as DirectoryReturn;
 
   const stored = readStoredReturn();
-  if (stored && isStoredReturnCompatible(stored, fallback)) return stored;
+  if (isReturnCompatible(stored, fallback)) return stored as DirectoryReturn;
 
-  const fallbackPath = isDirectoryPath(fallback.path)
-    ? fallback.path
-    : directoryPathForCategory(fallback.category);
+  const canonical = categoryListingRoute(fallback.category);
+  if (canonical) return { path: canonical };
+
+  const fallbackPath = isDirectoryListingPath(fallback.path)
+    ? (fallback.path as string)
+    : DIRECTORY_ROOT;
   return { path: fallbackPath };
 }
 
