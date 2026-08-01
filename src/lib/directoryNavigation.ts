@@ -227,22 +227,28 @@ export function categoryFromDirectoryPath(path: unknown): string | null {
 }
 
 /**
- * Um retorno armazenado só pode ser reutilizado se pertencer ao contexto do
- * perfil atual. Evita retorno cruzado obsoleto (ex.: storage de Consolidadoras
- * aplicado a um link direto de Parques).
+ * Um retorno (do state ou do storage) só pode ser reutilizado se pertencer ao
+ * serviço do perfil atual. Evita retorno cruzado (ex.: contexto de Operadoras
+ * aplicado a um Receptivo) e retorno para a home neutra.
  */
-function isStoredReturnCompatible(
-  stored: DirectoryReturn,
+function isReturnCompatible(
+  candidate: DirectoryReturn | null | undefined,
   fallback: { category?: string | null; path?: string },
 ): boolean {
-  // Página de detalhe de cruzeiros: só aceita a listagem específica.
-  if (isCruisesListingPath(fallback.path)) return isCruisesListingPath(stored.path);
+  if (!candidate || !isDirectoryListingPath(candidate.path)) return false;
 
   const realCategory = resolveDirectoryCategory(fallback.category);
-  if (realCategory) return categoryFromDirectoryPath(stored.path) === realCategory;
+  if (realCategory) {
+    // Regra autoritativa: o retorno tem de apontar para a listagem do MESMO serviço.
+    return categoryFromDirectoryPath(candidate.path) === realCategory;
+  }
 
-  // Sem categoria e sem rota específica não há como validar: usa o fallback.
-  return !fallback.path;
+  // Sem categoria conhecida, mas com rota específica exigida (ex.: cruzeiros).
+  const fallbackCategory = categoryFromDirectoryPath(fallback.path);
+  if (fallbackCategory) return categoryFromDirectoryPath(candidate.path) === fallbackCategory;
+
+  // Nada a validar: aceita qualquer listagem do diretório.
+  return true;
 }
 
 function getScrollY(): number {
@@ -281,21 +287,28 @@ function readStoredReturn(): DirectoryReturn | null {
 
 /**
  * Resolve o destino do botão "Voltar ao diretório".
- * Ordem: state da navegação → sessionStorage → fallback pela categoria real.
+ *
+ * Ordem: state da navegação → sessionStorage → rota canônica do serviço real.
+ * Em todos os casos o destino é validado contra o serviço do fornecedor, de
+ * modo que o retorno de um perfil nunca cai na home neutra nem em outro
+ * serviço (nem em Operadoras, salvo se o fornecedor for realmente Operadora).
  */
 export function resolveDirectoryReturn(
   locationState: unknown,
   fallback: { category?: string | null; path?: string } = {},
 ): DirectoryReturn {
   const fromState = (locationState as { directoryReturn?: DirectoryReturn } | null)?.directoryReturn;
-  if (fromState && isDirectoryPath(fromState.path)) return fromState;
+  if (isReturnCompatible(fromState, fallback)) return fromState as DirectoryReturn;
 
   const stored = readStoredReturn();
-  if (stored && isStoredReturnCompatible(stored, fallback)) return stored;
+  if (isReturnCompatible(stored, fallback)) return stored as DirectoryReturn;
 
-  const fallbackPath = isDirectoryPath(fallback.path)
-    ? fallback.path
-    : directoryPathForCategory(fallback.category);
+  const canonical = categoryListingRoute(fallback.category);
+  if (canonical) return { path: canonical };
+
+  const fallbackPath = isDirectoryListingPath(fallback.path)
+    ? (fallback.path as string)
+    : DIRECTORY_ROOT;
   return { path: fallbackPath };
 }
 
