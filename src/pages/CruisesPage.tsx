@@ -218,15 +218,15 @@ export default function CruisesPage() {
           </div>
         </div>
 
-        {/* Filtros avançados recolhíveis */}
-        <div className="space-y-3">
-          {/* Posicionamento */}
-          <FilterGroup
-            title="Posicionamento"
-            icon={Sparkles}
-            activeCount={filters.categoria !== "all" ? 1 : 0}
-          >
-            {CATEGORIA_OPTIONS.map((opt) => {
+        {/* Barra única de filtros avançados (um painel compartilhado) */}
+        <AdvancedFilters
+          groups={[
+            {
+              id: "positioning",
+              label: "Posicionamento",
+              icon: Sparkles,
+              activeCount: filters.categoria !== "all" ? 1 : 0,
+              content: CATEGORIA_OPTIONS.map((opt) => {
               const isActive = filters.categoria === opt.value;
               const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
               return (
@@ -246,12 +246,14 @@ export default function CruisesPage() {
                   </span>
                 </button>
               );
-            })}
-          </FilterGroup>
-
-          {/* Region tags */}
-          <FilterGroup title="Regiões" icon={MapPin} activeCount={filters.regioes.length}>
-            {regioes.map((r) => {
+              }),
+            },
+            {
+              id: "regions",
+              label: "Regiões",
+              icon: MapPin,
+              activeCount: filters.regioes.length,
+              content: regioes.map((r) => {
                 const isActive = filters.regioes.includes(r.id);
                 const count = countFor({ regioes: [r.id] });
                 if (count === 0 && !isActive) return null;
@@ -272,13 +274,15 @@ export default function CruisesPage() {
                     </span>
                   </button>
                 );
-            })}
-          </FilterGroup>
-
-          {/* Porte e características */}
-          {subtipoOptions.length > 0 && (
-            <FilterGroup title="Porte e características" icon={Ship} activeCount={filters.subtipos.length}>
-                {subtipoOptions.map((s) => {
+              }),
+            },
+            ...(subtipoOptions.length > 0
+              ? [{
+                  id: "size",
+                  label: "Porte e características",
+                  icon: Ship,
+                  activeCount: filters.subtipos.length,
+                  content: subtipoOptions.map((s) => {
                   const isActive = filters.subtipos.includes(s);
                   const count = countFor({ subtipos: [s] });
                   if (count === 0 && !isActive) return null;
@@ -299,13 +303,15 @@ export default function CruisesPage() {
                       </span>
                     </button>
                   );
-                })}
-            </FilterGroup>
-          )}
-
-          {/* Profile tags */}
-          <FilterGroup title="Perfil do viajante" icon={Users} activeCount={filters.perfis.length}>
-            {perfis.map((p) => {
+                  }),
+                }]
+              : []),
+            {
+              id: "traveler",
+              label: "Perfil do viajante",
+              icon: Users,
+              activeCount: filters.perfis.length,
+              content: perfis.map((p) => {
                 const isActive = filters.perfis.includes(p.id);
                 const count = countFor({ perfis: [p.id] });
                 if (count === 0 && !isActive) return null;
@@ -324,9 +330,10 @@ export default function CruisesPage() {
                     <span className="ml-1 text-[10px] opacity-60">{count}</span>
                   </button>
                 );
-            })}
-          </FilterGroup>
-        </div>
+              }),
+            },
+          ]}
+        />
 
         {/* Active filter chips */}
         {activeChips.length > 0 && (
