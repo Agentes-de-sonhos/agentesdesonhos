@@ -200,6 +200,7 @@ const clientesItem: MenuItem = {
   icon: Users,
   requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
   anyPermission: CLIENTES_DIRECT_ITEM.anyPermission,
+  sectionStyle: CLIENTES_DIRECT_ITEM.theme,
 };
 
 const financeiroItem: MenuItem = {
@@ -210,6 +211,7 @@ const financeiroItem: MenuItem = {
   icon: DollarSign,
   requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
   anyPermission: FINANCEIRO_DIRECT_ITEM.anyPermission,
+  sectionStyle: FINANCEIRO_DIRECT_ITEM.theme,
 };
 
 const marketingSection: MenuSection = {
@@ -512,6 +514,7 @@ export function AppSidebar() {
     const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital || isLockedByStart;
     const showLockIcon = isLocked || forceShowLock;
 
+    const sectionStyle = item.sectionStyle;
     const menuLink = (
       <Link
         key={item.url}
@@ -520,7 +523,13 @@ export function AppSidebar() {
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300",
           collapsed ? "py-1" : "py-1.5",
-          isActive && !isLocked && sectionBgColor
+          sectionStyle
+            ? isActive && !isLocked
+              ? cn(sectionStyle.headerBg, sectionStyle.headerHoverBg, "font-semibold")
+              : isLocked
+                ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
+                : cn("text-sidebar-foreground", sectionStyle.hoverColor)
+          : isActive && !isLocked && sectionBgColor
             ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
             : isActive && !isLocked
               ? "bg-muted text-foreground font-semibold shadow-sm"
@@ -534,8 +543,8 @@ export function AppSidebar() {
         <div className="relative flex-shrink-0">
           <item.icon
             className={cn(
-              "h-5 w-5 transition-all duration-300",
-              isActive && !isLocked && !sectionBgColor && "text-foreground",
+              sectionStyle ? "h-4 w-4 transition-all duration-300" : "h-5 w-5 transition-all duration-300",
+              isActive && !isLocked && !sectionBgColor && !sectionStyle && "text-foreground",
               isLocked && "text-muted-foreground"
             )}
           />
@@ -545,7 +554,13 @@ export function AppSidebar() {
         </div>
         {!collapsed && (
           <>
-            <span className={cn("truncate flex-1", isLocked && "text-muted-foreground")}>
+            <span
+              className={cn(
+                "truncate flex-1",
+                sectionStyle && "text-[11px] font-bold uppercase tracking-wider text-left whitespace-nowrap",
+                isLocked && "text-muted-foreground"
+              )}
+            >
               {item.title}
             </span>
             {item.isHighlighted && !isActive && !isLocked && (
