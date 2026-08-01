@@ -14,9 +14,7 @@ import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { RichContentEditor } from "@/components/operator/RichContentEditor";
 import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
-import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
-import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
-import { useSupplierReviews } from "@/hooks/useSupplierReviews";
+import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
@@ -259,8 +257,13 @@ function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpe
               </OperatorInfoCard>
             ) : null}
 
-            <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} />
             <SupplierMaterialsCard supplierId={supplier.id} supplierName={supplier.name} />
+
+            <CommunityRecognitionSection
+              supplierSource="supplier"
+              supplierId={supplier.id}
+              supplierName={supplier.name}
+            />
           </div>
 
           {/* Sidebar */}
@@ -301,7 +304,6 @@ function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpe
         </div>
       </div>
 
-      <OperatorReviewModal open={reviewModalOpen} onOpenChange={setReviewModalOpen} onSubmit={(data: any) => { submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) }); }} isSubmitting={submitReview.isPending} existingReview={userReview} operatorName={supplier.name} />
     </DashboardLayout>
   );
 }

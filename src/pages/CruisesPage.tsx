@@ -4,12 +4,16 @@ import { BackToDirectoryHomeButton } from "@/components/mapa-turismo/BackToDirec
 import { AdvancedFilters } from "@/components/mapa-turismo/AdvancedFilters";
 import { resolveCruiseLogoUrl } from "@/components/mapa-turismo/CruiseCompanyLogo";
 import { DirectorySupplierCard } from "@/components/mapa-turismo/DirectorySupplierCard";
+import { CardReviewSummary } from "@/components/mapa-turismo/CardReviewSummary";
+import { CommunityReviewDialog } from "@/components/mapa-turismo/CommunityReviewDialog";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCruises, useRegioes, usePerfisCliente } from "@/hooks/useCruises";
 import { useSupplierLikes } from "@/hooks/useSupplierLikes";
+import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
+import { reviewTargetKey } from "@/lib/communityReviews";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
   Ship, Search, X, Loader2, Anchor, Compass,
@@ -69,6 +73,8 @@ export default function CruisesPage() {
   const { data: regioes = [] } = useRegioes();
   const { data: perfis = [] } = usePerfisCliente();
   const { getLikeCount, hasLiked, toggleLike } = useSupplierLikes();
+  const { data: reviewStatsMap = {} } = useSupplierReviewStatsMap();
+  const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string } | null>(null);
 
   const initialParams = useRef(new URLSearchParams(searchParams)).current;
   const [filters, setFilters] = useState<CruiseFilters>({
@@ -388,6 +394,7 @@ export default function CruisesPage() {
             {filtered.map((company) => {
               const likeCount = getLikeCount(company.id, "cruise");
               const liked = hasLiked(company.id, "cruise");
+              const stats = reviewStatsMap[reviewTargetKey("cruise", company.id)];
 
               return (
                 <CruiseCard
@@ -397,12 +404,32 @@ export default function CruisesPage() {
                   likeCount={likeCount}
                   liked={liked}
                   onLike={(e) => handleLike(e, company.id)}
+                  reviewAverage={stats?.average}
+                  reviewCount={stats?.count}
+                  onRate={() => {
+                    if (!user) {
+                      toast.error("Faça login para avaliar");
+                      return;
+                    }
+                    setReviewTarget({ id: company.id, name: company.nome });
+                  }}
                 />
               );
             })}
           </div>
         )}
       </div>
+
+      {reviewTarget && (
+        <CommunityReviewDialog
+          open={!!reviewTarget}
+          onOpenChange={(open) => !open && setReviewTarget(null)}
+          supplierName={reviewTarget.name}
+          supplierSource="cruise"
+          supplierId={reviewTarget.id}
+          surface="card"
+        />
+      )}
     </DashboardLayout>
   );
 }
@@ -413,12 +440,18 @@ function CruiseCard({
   likeCount,
   liked,
   onLike,
+  reviewAverage,
+  reviewCount,
+  onRate,
 }: {
   company: CompanhiaMaritima;
   onProfileClick: (id: string) => void;
   likeCount: number;
   liked: boolean;
   onLike: (e: React.MouseEvent) => void;
+  reviewAverage?: number | null;
+  reviewCount?: number | null;
+  onRate: () => void;
 }) {
   const navigate = useNavigate();
   const isLuxo = company.categoria === "Luxo";
@@ -435,6 +468,9 @@ function CruiseCard({
       onLike={onLike}
       onOpen={openProfile}
       highlighted={isLuxo}
+      rating={
+        <CardReviewSummary average={reviewAverage} count={reviewCount} onClick={onRate} />
+      }
       tags={
         <>
           <Badge variant="outline" className={cn(

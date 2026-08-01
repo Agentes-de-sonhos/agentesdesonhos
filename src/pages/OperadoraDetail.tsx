@@ -15,9 +15,7 @@ import { BusinessHoursCard, businessHoursToHtml } from "@/components/operator/Bu
 import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
-import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
-import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
-import { useOperatorReviews } from "@/hooks/useOperatorReviews";
+import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
@@ -314,11 +312,15 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
 
 
 
-            {/* 8. Avaliações — desativadas para operadoras (mantidas no banco) */}
-            {/* <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} /> */}
-
-            {/* 9. Materiais de Divulgação */}
+            {/* 8. Materiais de Divulgação */}
             <SupplierMaterialsCard supplierId={operator.id} supplierName={operator.name} />
+
+            {/* 9. Reconhecimento da comunidade */}
+            <CommunityRecognitionSection
+              supplierSource="operator"
+              supplierId={operator.id}
+              supplierName={operator.name}
+            />
           </div>
 
           {/* ===== RIGHT COLUMN (SIDEBAR) ===== */}
@@ -408,8 +410,6 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
         </div>
       </div>
 
-      {/* Modal de avaliação de operadora desativado */}
-      {/* <OperatorReviewModal open={reviewModalOpen} onOpenChange={setReviewModalOpen} onSubmit={(data: any) => { submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) }); }} isSubmitting={submitReview.isPending} existingReview={userReview} operatorName={operator.name} /> */}
     </DashboardLayout>
   );
 }

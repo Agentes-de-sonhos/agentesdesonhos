@@ -74,6 +74,8 @@ export interface DirectorySupplierCardProps {
   liked: boolean;
   onLike: (e: MouseEvent) => void;
   onOpen: () => void;
+  /** Bloco central do rodapé (avaliação/estrelas). Não abre o perfil. */
+  rating?: ReactNode;
   moreLabel?: string;
   /** Destaque visual (ex.: luxo/expedição em Cruzeiros). */
   highlighted?: boolean;
@@ -87,7 +89,7 @@ export interface DirectorySupplierCardProps {
  */
 export function DirectorySupplierCard({
   name, category, logoUrl, tags, specialties, children,
-  likeCount, liked, onLike, onOpen, moreLabel = "Ver mais", highlighted, className,
+  likeCount, liked, onLike, onOpen, rating, moreLabel = "Ver mais", highlighted, className,
 }: DirectorySupplierCardProps) {
   const theme = getDirectoryCategoryTheme(category);
   const specialtyTags = normalizeSpecialtyTags(specialties);
@@ -150,7 +152,7 @@ export function DirectorySupplierCard({
 
         {/* Rodapé */}
         <div className="mt-auto pt-4">
-          <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-3">
+          <div className="flex items-center justify-between gap-1.5 border-t border-border/40 pt-3">
             <button
               type="button"
               data-testid="directory-supplier-like"
@@ -158,19 +160,27 @@ export function DirectorySupplierCard({
               aria-pressed={liked}
               aria-label={liked ? "Remover curtida" : `Curtir ${name}`}
               className={cn(
-                "flex items-center gap-1 text-xs transition-colors h-8 px-1",
+                "flex items-center gap-1 text-xs transition-colors h-8 px-1 shrink-0",
                 liked ? "text-primary font-medium" : "text-muted-foreground hover:text-primary",
               )}
             >
               <ThumbsUp className={cn("h-4 w-4", liked && "fill-primary")} aria-hidden="true" />
               {likeCount > 0 && <span>{likeCount}</span>}
             </button>
+            {rating && (
+              <div
+                data-testid="directory-supplier-rating-slot"
+                className="flex-1 flex items-center justify-center min-w-0"
+              >
+                {rating}
+              </div>
+            )}
             <Button
               variant="ghost"
               size="sm"
               data-testid="directory-supplier-more"
               className={cn(
-                "h-8 text-xs gap-1 font-medium",
+                "h-8 text-xs gap-1 font-medium shrink-0 px-2",
                 highlighted
                   ? "text-amber-700 hover:text-amber-800 hover:bg-amber-100/50 dark:text-amber-400 dark:hover:bg-amber-950/50"
                   : theme.moreColor,
