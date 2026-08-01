@@ -226,7 +226,8 @@ export default function CruisesPage() {
           icon={Ship}
         />
 
-        {/* Tipo buttons */}
+        {/* Tipo de navegação + busca compacta na mesma linha */}
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap gap-2">
           {TIPO_OPTIONS.map((opt) => {
             const Icon = opt.icon;
@@ -253,42 +254,49 @@ export default function CruisesPage() {
           })}
         </div>
 
-        {/* Categoria pills */}
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIA_OPTIONS.map((opt) => {
-            const isActive = filters.categoria === opt.value;
-            const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setFilters((p) => ({ ...p, categoria: p.categoria === opt.value ? "all" : opt.value as any }))}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                  isActive
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80"
-                )}
-              >
-                {opt.label}
-                <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Search + region/profile filters */}
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative w-full md:w-[320px] md:shrink-0">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
-              placeholder="Buscar companhia..."
+              type="search"
+              aria-label="Buscar companhia marítima"
+              placeholder="Buscar companhia marítima..."
               value={filters.search}
               onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
-              className="pl-10 h-10 bg-card"
+              className="pl-10 h-10 bg-card w-full"
             />
           </div>
+        </div>
+
+        {/* Filtros avançados recolhíveis */}
+        <div className="space-y-3">
+          {/* Posicionamento */}
+          <FilterGroup
+            title="Posicionamento"
+            icon={Sparkles}
+            activeCount={filters.categoria !== "all" ? 1 : 0}
+          >
+            {CATEGORIA_OPTIONS.map((opt) => {
+              const isActive = filters.categoria === opt.value;
+              const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setFilters((p) => ({ ...p, categoria: p.categoria === opt.value ? "all" : opt.value as any }))}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted text-muted-foreground border-transparent hover:bg-muted/80"
+                  )}
+                >
+                  {opt.label}
+                  <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </FilterGroup>
 
           {/* Region tags */}
           <FilterGroup title="Regiões" icon={MapPin} activeCount={filters.regioes.length}>
@@ -316,9 +324,9 @@ export default function CruisesPage() {
             })}
           </FilterGroup>
 
-          {/* Porte / posicionamento tags */}
+          {/* Porte e características */}
           {subtipoOptions.length > 0 && (
-            <FilterGroup title="Porte e posicionamento" icon={Ship} activeCount={filters.subtipos.length}>
+            <FilterGroup title="Porte e características" icon={Ship} activeCount={filters.subtipos.length}>
                 {subtipoOptions.map((s) => {
                   const isActive = filters.subtipos.includes(s);
                   const count = countFor({ subtipos: [s] });
@@ -345,7 +353,7 @@ export default function CruisesPage() {
           )}
 
           {/* Profile tags */}
-          <FilterGroup title="Perfil do viajante" icon={Sailboat} activeCount={filters.perfis.length}>
+          <FilterGroup title="Perfil do viajante" icon={Users} activeCount={filters.perfis.length}>
             {perfis.map((p) => {
                 const isActive = filters.perfis.includes(p.id);
                 const count = countFor({ perfis: [p.id] });
