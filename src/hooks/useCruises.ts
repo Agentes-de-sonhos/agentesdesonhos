@@ -1,10 +1,55 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { CompanhiaMaritima, Regiao, PerfilCliente } from "@/types/cruises";
+import type { CompanhiaMaritima, Regiao, PerfilCliente, CruiseOperatorProfile } from "@/types/cruises";
+
+/** Normalized key used to link companhias_maritimas with tour_operators by name. */
+function normalizeName(value: string): string {
+  return (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+const SUFFIXES = ["cruises", "cruise", "cruzeiros", "cruzeiro", "cruiseline", "cruiselines", "lines", "line"];
+
+function looseKey(value: string): string {
+  let key = normalizeName(value);
+  for (const suffix of SUFFIXES) {
+    if (key.length > suffix.length + 2 && key.endsWith(suffix)) {
+      key = key.slice(0, -suffix.length);
+      break;
+    }
+  }
+  return key;
+}
+
+export const CRUISE_OPERATOR_CATEGORY = "Companhias Marítimas";
+
+export function useCruiseOperatorProfiles() {
+  return useQuery({
+    queryKey: ["cruise-operator-profiles"],
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async (): Promise<CruiseOperatorProfile[]> => {
+      const { data, error } = await supabase
+        .from("tour_operators")
+        .select(
+          "id, name, logo_url, category, short_description, specialties, website, instagram, social_links, how_to_sell, sales_channels, commercial_contacts, competitive_advantages, business_hours"
+        )
+        .eq("category", CRUISE_OPERATOR_CATEGORY);
+      if (error) throw error;
+      return (data || []) as unknown as CruiseOperatorProfile[];
+    },
+  });
+}
 
 export function useCruises() {
+  const { data: operators = [] } = useCruiseOperatorProfiles();
+
   return useQuery({
-    queryKey: ["companhias-maritimas"],
+    queryKey: ["companhias-maritimas", operators.length],
+    refetchOnWindowFocus: false,
     queryFn: async (): Promise<CompanhiaMaritima[]> => {
       // Fetch companies
       const { data: companies, error } = await supabase
@@ -41,8 +86,18 @@ export function useCruises() {
         profMap.set(link.companhia_id, arr);
       });
 
+      // Index commercial profiles by normalized name (exact first, loose fallback)
+      const exactMap = new Map<string, CruiseOperatorProfile>();
+      const looseMap = new Map<string, CruiseOperatorProfile>();
+      operators.forEach((op) => {
+        exactMap.set(normalizeName(op.name), op);
+        const lk = looseKey(op.name);
+        if (!looseMap.has(lk)) looseMap.set(lk, op);
+      });
+
       return (companies || []).map((c: any) => ({
         ...c,
+        operator: exactMap.get(normalizeName(c.nome)) || looseMap.get(looseKey(c.nome)) || null,
         regioes: (regMap.get(c.id) || []).sort((a, b) => a.ordem_exibicao - b.ordem_exibicao),
         perfis: (profMap.get(c.id) || []).sort((a, b) => a.ordem_exibicao - b.ordem_exibicao),
       }));
