@@ -239,7 +239,11 @@ function MapaTurismoDirectory() {
         _hasProfile: isFilled(g.bio) || isFilled(g.about),
       };
     });
-    return [...fromSuppliers, ...fromOperators, ...fromTravelMeet, ...fromGuides];
+    // Companhias marítimas têm listagem dedicada (/mapa-turismo/cruzeiros) e
+    // nunca são renderizadas na grade genérica do diretório.
+    return [...fromSuppliers, ...fromOperators, ...fromTravelMeet, ...fromGuides].filter(
+      (item: any) => !hasDedicatedDirectoryRoute(item.category),
+    );
   }, [suppliers, tourOperators, travelMeetSuppliers, tourGuides]);
 
   // Contextual specialties: only from items matching the active category
