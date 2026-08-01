@@ -50,7 +50,6 @@ import {
   categoryListingRoute,
   directoryServiceTitle,
   isSpecializedDirectoryCategory,
-  resolveDirectoryCategory,
 } from "@/lib/directoryNavigation";
 import { BackToDirectoryHomeButton } from "@/components/mapa-turismo/BackToDirectoryHomeButton";
 import { toast } from "sonner";

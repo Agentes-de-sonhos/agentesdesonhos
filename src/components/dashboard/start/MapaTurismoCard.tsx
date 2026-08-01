@@ -18,6 +18,7 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DIRECTORY_ROOT, categoryListingRoute } from "@/lib/directoryNavigation";
 
 interface CategoryDef {
   title: string;
@@ -126,9 +127,7 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
               return (
                 <button
                   key={cat.category}
-                  onClick={() =>
-                    navigate(`/mapa-turismo?categoria=${encodeURIComponent(cat.category)}`)
-                  }
+                  onClick={() => navigate(categoryListingRoute(cat.category) ?? DIRECTORY_ROOT)}
                   aria-label={`Acessar ${cat.title}`}
                   className={cn(
                     "snap-start shrink-0 flex flex-col items-center justify-center gap-2 rounded-2xl w-[92px] h-[92px] sm:w-[104px] sm:h-[104px] text-xs font-medium transition-all duration-200 border border-transparent",
