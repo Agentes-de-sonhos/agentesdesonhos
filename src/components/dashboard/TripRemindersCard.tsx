@@ -26,6 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useReminders } from "@/hooks/useReminders";
+import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { cn } from "@/lib/utils";
 
 export function TripRemindersCard() {
@@ -90,12 +91,21 @@ export function TripRemindersCard() {
     return (
       <Card className="border-0 shadow-md">
         <CardContent className="pt-6">
-          <div className="mb-4 w-fit">
-            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-              <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
-              Próximas Viagens
-            </h2>
-            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-reminders))]" />
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div className="w-fit">
+              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
+                Próximas Viagens
+              </h2>
+              <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-reminders))]" />
+            </div>
+            <SectionCtaLink
+              to="/proximas-viagens"
+              label="Ver todas as próximas viagens"
+              shortLabel="Ver todas"
+              tabTitle="Próximas Viagens"
+              className="text-[hsl(var(--section-reminders))]"
+            />
           </div>
           <div className="text-center py-8 text-muted-foreground">
             <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -113,7 +123,7 @@ export function TripRemindersCard() {
     <>
       <Card className="border-0 shadow-md">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-start justify-between gap-3 mb-4">
             <div className="w-fit">
               <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
                 <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
@@ -121,9 +131,18 @@ export function TripRemindersCard() {
               </h2>
               <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-reminders))]" />
             </div>
-            <Badge variant="outline" className="text-[hsl(var(--section-reminders))] border-[hsl(var(--section-reminders))]">
-              {reminders.length} lembrete{reminders.length !== 1 ? "s" : ""}
-            </Badge>
+            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+              <SectionCtaLink
+                to="/proximas-viagens"
+                label="Ver todas as próximas viagens"
+                shortLabel="Ver todas"
+                tabTitle="Próximas Viagens"
+                className="text-[hsl(var(--section-reminders))]"
+              />
+              <Badge variant="outline" className="text-[hsl(var(--section-reminders))] border-[hsl(var(--section-reminders))]">
+                {reminders.length} lembrete{reminders.length !== 1 ? "s" : ""}
+              </Badge>
+            </div>
           </div>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
             {reminders.slice(0, 10).map((reminder) => {

@@ -90,27 +90,10 @@ export function WorkspaceShell({ children }: Props) {
 
   if (!ws) return <>{children}</>;
 
-  const hasTabs = ws.tabs.length > 0;
-
   return (
     <div ref={rootRef} className="flex flex-col min-h-screen bg-background">
       <TabBar />
       <div className="flex-1 min-h-0 relative">
-        {/*
-          Phantom layer: when no tabs are open we still keep a MemoryRouter mounted
-          so the sidebar / global chrome (rendered by DashboardLayout inside the
-          routes) stays visible. The main content area is covered by an empty-state
-          overlay while the sidebar remains clickable — link clicks are intercepted
-          globally and turned into openTab() calls.
-        */}
-        {!hasTabs && (
-          <div key="__ws_phantom__" className="min-h-full" aria-hidden>
-            <MemoryRouter initialEntries={["/dashboard"]}>
-              {children}
-            </MemoryRouter>
-          </div>
-        )}
-
         {ws.tabs.map((tab) => {
           const active = tab.id === ws.activeId;
           return (
@@ -126,20 +109,6 @@ export function WorkspaceShell({ children }: Props) {
             </div>
           );
         })}
-
-        {!hasTabs && (
-          <div
-            className="fixed left-0 lg:left-16 right-0 bottom-0 top-10 z-30 bg-background flex items-center justify-center px-6"
-            role="status"
-          >
-            <div className="text-center max-w-md">
-              <h2 className="text-lg font-semibold text-foreground">Nenhuma aba aberta</h2>
-              <p className="text-sm text-muted-foreground mt-2">
-                Use o menu lateral para abrir uma nova tela.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

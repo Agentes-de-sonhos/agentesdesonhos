@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DIRECTORY_ROOT, categoryListingRoute } from "@/lib/directoryNavigation";
+import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 
 interface CategoryDef {
   title: string;
@@ -90,6 +91,13 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
               </h2>
               <div className="mt-2 h-1 w-full rounded-full bg-primary" />
             </div>
+            <SectionCtaLink
+              to={DIRECTORY_ROOT}
+              label="Ver Mapa do Turismo"
+              shortLabel="Ver mapa"
+              tabTitle="Mapa do Turismo"
+              className="text-primary"
+            />
           </div>
           <p className="text-sm text-muted-foreground max-w-2xl text-left">
             Encontre seus parceiros ideais: busque, filtre e conecte-se com fornecedores do turismo em poucos cliques.

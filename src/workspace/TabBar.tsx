@@ -18,12 +18,20 @@ export function TabBar() {
     >
       {ws.tabs.map((tab) => {
         const active = tab.id === ws.activeId;
+        const pinned = Boolean(tab.pinned);
         return (
           <div
             key={tab.id}
             role="tab"
             aria-selected={active}
             onClick={() => ws.activateTab(tab.id)}
+            onAuxClick={(e) => {
+              // middle-click closes — never the pinned home tab
+              if (e.button === 1 && !pinned) {
+                e.preventDefault();
+                ws.closeTab(tab.id);
+              }
+            }}
             className={cn(
               "group flex items-center gap-2 px-3 min-w-[120px] max-w-[220px] cursor-pointer border-r border-border select-none",
               "text-sm transition-colors",
@@ -34,6 +42,7 @@ export function TabBar() {
             title={`${tab.title}\n${tab.path}`}
           >
             <span className="truncate flex-1">{tab.title}</span>
+            {!pinned && (
             <button
               type="button"
               aria-label={`Fechar aba ${tab.title}`}
@@ -45,6 +54,7 @@ export function TabBar() {
             >
               <X className="h-3.5 w-3.5" />
             </button>
+            )}
           </div>
         );
       })}
@@ -52,7 +62,7 @@ export function TabBar() {
       <div className="flex items-center gap-2 px-3 text-xs text-muted-foreground ml-auto shrink-0">
         <Plus className={cn("h-3.5 w-3.5", !ws.canOpenMore && "opacity-30")} />
         <span>
-          {ws.tabs.length}/{ws.max}
+          {ws.contentCount}/{ws.max}
         </span>
       </div>
     </div>

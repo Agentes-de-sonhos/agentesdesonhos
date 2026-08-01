@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
+import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -63,12 +64,21 @@ export function UpcomingAgendaEventsCard() {
   return (
     <Card className="border-0 shadow-card">
       <CardHeader className="pb-2">
-        <div className="w-fit">
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-[hsl(var(--section-events))]" />
-            Minha Agenda
-          </h2>
-          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-events))]" />
+        <div className="flex items-start justify-between gap-3">
+          <div className="w-fit">
+            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-[hsl(var(--section-events))]" />
+              Minha Agenda
+            </h2>
+            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-events))]" />
+          </div>
+          <SectionCtaLink
+            to="/agenda"
+            label="Ver toda a agenda"
+            shortLabel="Ver tudo"
+            tabTitle="Agenda"
+            className="text-[hsl(var(--section-events))]"
+          />
         </div>
       </CardHeader>
       <CardContent>

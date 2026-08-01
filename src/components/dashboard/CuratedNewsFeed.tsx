@@ -2,14 +2,13 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ExternalLink, Loader2, ArrowRight, Newspaper,
+  ExternalLink, Loader2, Newspaper,
   Flame, Zap, Star, TrendingUp, ThumbsUp,
   Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Brain,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
+import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 
 interface CuratedNews {
@@ -139,7 +138,6 @@ function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending
 }
 
 export function CuratedNewsFeed() {
-  const navigate = useNavigate();
   const { data: news, isLoading } = useQuery({
     queryKey: ["curated-news-dashboard"],
     queryFn: async () => {
@@ -181,12 +179,21 @@ export function CuratedNewsFeed() {
     return (
       <Card className="border-0 shadow-md">
         <CardContent className="pt-6 space-y-4">
-          <div className="mb-3 w-fit">
-            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-              <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
-              Radar do Turismo
-            </h2>
-            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="w-fit">
+              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
+                Radar do Turismo
+              </h2>
+              <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+            </div>
+            <SectionCtaLink
+              to="/noticias"
+              label="Ver todas as notícias"
+              shortLabel="Ver todas"
+              tabTitle="Notícias"
+              className="text-[hsl(var(--section-news))]"
+            />
           </div>
           <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
             <div className="rounded-full bg-muted p-3">
@@ -209,12 +216,21 @@ export function CuratedNewsFeed() {
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardContent className="pt-6 space-y-0.5">
         <div className="mb-4 space-y-2">
-          <div className="w-fit">
-            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-              <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
-              Radar do Turismo
-            </h2>
-            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="w-fit">
+              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+                <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
+                Radar do Turismo
+              </h2>
+              <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+            </div>
+            <SectionCtaLink
+              to="/noticias"
+              label="Ver todas as notícias"
+              shortLabel="Ver todas"
+              tabTitle="Notícias"
+              className="text-[hsl(var(--section-news))]"
+            />
           </div>
           <p className="text-sm text-muted-foreground">
             Acompanhe as notícias mais recentes do trade e acesse os destaques, o Top 5 e tudo o que movimenta o turismo hoje.
@@ -267,17 +283,6 @@ export function CuratedNewsFeed() {
             </div>
           );
         })}
-
-        <div className="pt-3 border-t">
-          <Button
-            variant="ghost"
-            className="w-full text-[hsl(var(--section-news))] hover:text-[hsl(var(--section-news))] hover:bg-[hsl(var(--section-news))]/5"
-            onClick={() => navigate("/noticias")}
-          >
-            Mais notícias
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
