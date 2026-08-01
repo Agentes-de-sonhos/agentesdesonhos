@@ -385,7 +385,9 @@ export function AppSidebar() {
         .filter(isPermittedForTeam)
         .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan));
       if (filteredItems.length === 0) continue;
-      const sortedItems = filteredItems.sort((a, b) => {
+      // Ferramentas de Marketing tem hierarquia fixa (com o grupo "Outras"),
+      // portanto não é reordenada pela configuração administrativa.
+      const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
