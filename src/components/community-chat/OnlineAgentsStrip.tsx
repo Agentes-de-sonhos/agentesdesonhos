@@ -374,33 +374,13 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
                             </p>
                           )}
                         </div>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7"
-                                onClick={() => handleViewProfile(agent)}
-                              >
-                                <User className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Ver Perfil</p></TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7"
-                                onClick={() => handleMessage(agent)}
-                              >
-                                <MessageCircle className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Mensagem</p></TooltipContent>
-                          </Tooltip>
+                        <div className="flex-shrink-0">
+                          <AgentActions
+                            agent={agent}
+                            compact
+                            onViewProfile={() => handleViewProfile(agent)}
+                            onMessage={() => handleMessage(agent)}
+                          />
                         </div>
                       </div>
                     ))}
