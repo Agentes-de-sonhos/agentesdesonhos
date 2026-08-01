@@ -13824,6 +13824,10 @@ export type Database = {
         Args: { _source: string; _supplier_id: string }
         Returns: boolean
       }
+      supplier_review_target_exists: {
+        Args: { _source: string; _supplier_id: string }
+        Returns: boolean
+      }
       supplier_slug_exists: { Args: { p_slug: string }; Returns: boolean }
       team_get_member_detail: { Args: { _member_id: string }; Returns: Json }
       team_list_members: {
