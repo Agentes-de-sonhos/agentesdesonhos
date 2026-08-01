@@ -500,8 +500,11 @@ export function AppSidebar() {
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
 
   const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string, forceShowLock?: boolean) => {
+    if (item.children) {
+      return renderGroupItem(item, sectionBgColor, sectionTextColor, sectionBorderColor);
+    }
     const isActive =
-      isItemActive(item.url) ||
+      isItemActive(item.url, item.exactUrl) ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
@@ -566,6 +569,65 @@ export function AppSidebar() {
     }
 
     return menuLink;
+  };
+
+  const renderGroupItem = (
+    group: MenuItem,
+    sectionBgColor?: string,
+    sectionTextColor?: string,
+    sectionBorderColor?: string
+  ) => {
+    const children = group.children ?? [];
+    const childActive = children.some((c) => isItemActive(c.url, c.exactUrl));
+    const groupId = `menu-group-${group.key}`;
+    const isOpen = openGroups[group.key || group.title] ?? childActive;
+    const GroupIcon = group.icon;
+
+    return (
+      <div key={group.key || group.title} className="flex flex-col">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={groupId}
+          onClick={() =>
+            setOpenGroups((prev) => ({
+              ...prev,
+              [group.key || group.title]: !isOpen,
+            }))
+          }
+          className={cn(
+            "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300 w-full text-left",
+            collapsed ? "py-1" : "py-1.5",
+            childActive && sectionBgColor
+              ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
+              : sectionBgColor
+                ? cn(sectionBgColor, sectionTextColor, "hover:font-semibold")
+                : "text-sidebar-foreground hover:bg-sidebar-accent"
+          )}
+        >
+          <GroupIcon className="h-5 w-5 flex-shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="truncate flex-1">{group.title}</span>
+              {isOpen ? (
+                <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
+              )}
+            </>
+          )}
+        </button>
+        {isOpen && !collapsed && (
+          <nav id={groupId} className="flex flex-col gap-0.5 mt-0.5 ml-4 pl-2 border-l border-border/60 animate-fade-in">
+            {children.map((child) => (
+              <Fragment key={child.url}>
+                {renderSingleItem(child, sectionBgColor, sectionTextColor, sectionBorderColor)}
+              </Fragment>
+            ))}
+          </nav>
+        )}
+      </div>
+    );
   };
 
   const renderSection = (section: MenuSection) => {
