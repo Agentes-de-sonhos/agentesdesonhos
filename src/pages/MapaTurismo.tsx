@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 import { useSuppliersWithSpecialties } from "@/hooks/useSupplierSpecialties";
 import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
-import { reviewTargetKey } from "@/lib/communityReviews";
+import { reviewTargetKey, isReviewableSource } from "@/lib/communityReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
