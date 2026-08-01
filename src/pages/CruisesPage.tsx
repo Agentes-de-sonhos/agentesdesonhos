@@ -9,8 +9,8 @@ import { useCruises, useRegioes, usePerfisCliente } from "@/hooks/useCruises";
 import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
-  Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Waves, Sailboat, MapPin, ThumbsUp, ChevronDown, Users, Sparkles
+  Ship, Search, X, Loader2, Anchor, Compass, ChevronRight,
+  Waves, MapPin, ThumbsUp, ChevronDown, Users, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -184,7 +184,7 @@ export default function CruisesPage() {
   }
   if (filters.categoria !== "all") {
     const label = CATEGORIA_OPTIONS.find((c) => c.value === filters.categoria)?.label || filters.categoria;
-    activeChips.push({ label: `Categoria: ${label}`, onRemove: () => setFilters((p) => ({ ...p, categoria: "all" })) });
+    activeChips.push({ label: `Posicionamento: ${label}`, onRemove: () => setFilters((p) => ({ ...p, categoria: "all" })) });
   }
   filters.subtipos.forEach((s) => {
     activeChips.push({ label: s, onRemove: () => toggleFilter("subtipos", s) });
@@ -510,20 +510,6 @@ function CruiseCard({
           </div>
         </div>
 
-        {/* Likes row */}
-        <div className="mt-3 flex items-center gap-3">
-          <button
-            onClick={onLike}
-            className={cn(
-              "flex items-center gap-1 text-xs transition-colors",
-              liked ? "text-primary font-medium" : "text-muted-foreground hover:text-primary"
-            )}
-          >
-            <ThumbsUp className={cn("h-3.5 w-3.5", liked && "fill-primary")} />
-            {likeCount > 0 && <span>{likeCount}</span>}
-          </button>
-        </div>
-
         {/* Regions */}
         {displayRegioes.length > 0 && (
           <div className="mt-3 flex items-center gap-2">
@@ -545,7 +531,9 @@ function CruiseCard({
 
         {/* Profile chips */}
         {company.perfis.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex items-center gap-2">
+            <Users className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+            <div className="flex flex-wrap gap-1.5">
             {company.perfis.map((p) => (
               <button
                 key={p.id}
@@ -558,25 +546,26 @@ function CruiseCard({
                 {p.nome}
               </button>
             ))}
+            </div>
           </div>
         )}
 
         {/* Footer */}
         <div className="mt-auto pt-4">
           <div className="flex items-center justify-between border-t border-border/40 pt-3">
-            {company.website ? (
-              <a
-                href={company.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1.5 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Globe className="h-3.5 w-3.5" /> Visitar site
-              </a>
-            ) : (
-              <span />
-            )}
+            <button
+              type="button"
+              onClick={onLike}
+              aria-pressed={liked}
+              aria-label={liked ? "Remover curtida" : "Curtir companhia"}
+              className={cn(
+                "flex items-center gap-1 text-xs transition-colors h-8 px-1",
+                liked ? "text-primary font-medium" : "text-muted-foreground hover:text-primary"
+              )}
+            >
+              <ThumbsUp className={cn("h-4 w-4", liked && "fill-primary")} aria-hidden="true" />
+              {likeCount > 0 && <span>{likeCount}</span>}
+            </button>
             <Button
               variant="ghost"
               size="sm"
