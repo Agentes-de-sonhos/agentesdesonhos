@@ -459,7 +459,7 @@ function CruiseCard({
   return (
     <Card
       className={cn(
-        "group border-0 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 cursor-pointer",
+        "group border-0 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 cursor-pointer h-full flex flex-col",
         isLuxo
           ? "bg-gradient-to-br from-amber-50/80 via-card to-card dark:from-amber-950/30 dark:via-card dark:to-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 shadow-[0_4px_24px_-4px_rgba(217,169,78,0.15)] hover:shadow-[0_12px_32px_-8px_rgba(217,169,78,0.25)]"
           : "bg-card/90 backdrop-blur-sm ring-1 ring-border/40 shadow-card hover:shadow-card-hover"
