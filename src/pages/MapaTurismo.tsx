@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,8 @@ import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
+import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
+import { captureDirectoryReturn } from "@/lib/directoryNavigation";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -82,12 +84,28 @@ type SortOption = "alpha" | "rating" | "likes";
 
 export default function MapaTurismo() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>(DEFAULT_CATEGORY);
-  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>("alpha");
-  const [hospQuickFilter, setHospQuickFilter] = useState<"resort" | "rede" | null>(null);
-  const [cruiseQuickFilters, setCruiseQuickFilters] = useState<string[]>([]);
+  const initialParams = useRef(new URLSearchParams(searchParams)).current;
+  const initialCategoria = initialParams.get("categoria");
+  const initialSort = initialParams.get("ordenar");
+  const initialHosp = initialParams.get("hosp");
+  const [search, setSearch] = useState(initialParams.get("q") || "");
+  const [categoryFilter, setCategoryFilter] = useState<string>(
+    initialCategoria && (CATEGORY_NAMES.includes(initialCategoria) || initialCategoria === "all")
+      ? initialCategoria
+      : DEFAULT_CATEGORY,
+  );
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(
+    initialParams.get("especialidade")?.split(",").filter(Boolean) || [],
+  );
+  const [sortBy, setSortBy] = useState<SortOption>(
+    initialSort === "rating" || initialSort === "likes" ? initialSort : "alpha",
+  );
+  const [hospQuickFilter, setHospQuickFilter] = useState<"resort" | "rede" | null>(
+    initialHosp === "resort" || initialHosp === "rede" ? initialHosp : null,
+  );
+  const [cruiseQuickFilters, setCruiseQuickFilters] = useState<string[]>(
+    initialParams.get("cruzeiro")?.split(",").filter(Boolean) || [],
+  );
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string; source: string } | null>(null);
   const navigate = useNavigate();
@@ -100,23 +118,24 @@ export default function MapaTurismo() {
   const { submitReview: submitSupplierReview } = useSupplierReviews(reviewTarget?.source === "supplier" ? reviewTarget.id : "");
   const { submitReview: submitOperatorReview } = useOperatorReviews(reviewTarget?.source === "operator" ? reviewTarget.id : "");
 
+  // A URL reflete o contexto completo do diretório (categoria + filtros + busca +
+  // ordenação), tornando refresh, link direto e histórico do navegador previsíveis.
   useEffect(() => {
-    const categoria = searchParams.get("categoria");
-    if (categoria && CATEGORY_NAMES.includes(categoria)) {
-      setCategoryFilter(categoria);
-    }
-    const especialidade = searchParams.get("especialidade");
-    if (especialidade) {
-      setSelectedSpecialties(especialidade.split(","));
-    }
-  }, []);
-
-  const updateUrlParams = (category: string, specialties: string[]) => {
     const params: Record<string, string> = {};
-    if (category !== "all") params.categoria = category;
-    if (specialties.length > 0) params.especialidade = specialties.join(",");
-    setSearchParams(params);
-  };
+    if (categoryFilter !== "all") params.categoria = categoryFilter;
+    if (selectedSpecialties.length > 0) params.especialidade = selectedSpecialties.join(",");
+    if (search.trim()) params.q = search.trim();
+    if (sortBy !== "alpha") params.ordenar = sortBy;
+    if (hospQuickFilter) params.hosp = hospQuickFilter;
+    if (cruiseQuickFilters.length > 0) params.cruzeiro = cruiseQuickFilters.join(",");
+    const next = new URLSearchParams(params).toString();
+    if (next !== searchParams.toString()) {
+      setSearchParams(params, { replace: true });
+    }
+  }, [categoryFilter, selectedSpecialties, search, sortBy, hospQuickFilter, cruiseQuickFilters, searchParams, setSearchParams]);
+
+  // Restaura a rolagem quando o usuário volta de um perfil.
+  useDirectoryScrollRestore(true);
 
   const handleCategoryChange = (cat: CategoryDef) => {
     const newCat = categoryFilter === cat.category ? "all" : cat.category;
@@ -124,12 +143,10 @@ export default function MapaTurismo() {
     setSelectedSpecialties([]);
     setHospQuickFilter(null);
     setCruiseQuickFilters([]);
-    updateUrlParams(newCat, []);
   };
 
   const handleSpecialtiesChange = (specialties: string[]) => {
     setSelectedSpecialties(specialties);
-    updateUrlParams(categoryFilter, specialties);
   };
 
   const clearAllFilters = () => {
@@ -138,7 +155,6 @@ export default function MapaTurismo() {
     setSelectedSpecialties([]);
     setHospQuickFilter(null);
     setCruiseQuickFilters([]);
-    setSearchParams({ categoria: DEFAULT_CATEGORY });
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
@@ -656,7 +672,8 @@ export default function MapaTurismo() {
                         ? `/mapa-turismo/operadora/${supplier.id}`
                         : supplier._source === "guide"
                         ? `/mapa-turismo/guia/${supplier.id}`
-                        : `/mapa-turismo/${supplier.id}`
+                        : `/mapa-turismo/${supplier.id}`,
+                      captureDirectoryReturn()
                     );
                   }}
                 >

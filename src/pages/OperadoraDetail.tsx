@@ -30,6 +30,7 @@ import { TextEditForm } from "@/components/edit-mode/forms/TextEditForm";
 import { TagsEditForm } from "@/components/edit-mode/forms/TagsEditForm";
 import { SocialLinksEditForm } from "@/components/edit-mode/forms/SocialLinksEditForm";
 import { CompanyInfoEditForm } from "@/components/edit-mode/forms/CompanyInfoEditForm";
+import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
 
 interface BusinessHours {
   commercial?: string;
@@ -98,9 +99,7 @@ export default function OperadoraDetail() {
           </div>
           <h2 className="text-xl font-semibold text-foreground">Operadora não encontrada</h2>
           <p className="text-muted-foreground mt-2 mb-8">A operadora que você está procurando não existe ou foi removida.</p>
-          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao diretório
-          </Button>
+          <BackToDirectoryButton variant="outline" />
         </div>
       </DashboardLayout>
     );
@@ -184,9 +183,7 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/mapa-turismo")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao diretório
-          </Button>
+          <BackToDirectoryButton category={operator.category} className="-ml-2" />
           {isAdmin && <EditModeToggle />}
         </div>
 

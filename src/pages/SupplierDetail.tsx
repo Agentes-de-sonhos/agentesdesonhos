@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,7 +102,7 @@ export default function SupplierDetail() {
           <div className="h-20 w-20 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-6"><Building2 className="h-10 w-10 text-muted-foreground/40" /></div>
           <h2 className="text-xl font-semibold text-foreground">Fornecedor não encontrado</h2>
           <p className="text-muted-foreground mt-2 mb-8">O fornecedor que você está procurando não existe ou foi removido.</p>
-          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo")}><ArrowLeft className="mr-2 h-4 w-4" />Voltar ao diretório</Button>
+          <BackToDirectoryButton variant="outline" />
         </div>
       </DashboardLayout>
     );
@@ -174,9 +175,7 @@ function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpe
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/mapa-turismo")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao diretório
-          </Button>
+          <BackToDirectoryButton category={supplier.category} className="-ml-2" />
           {isAdmin && <EditModeToggle />}
         </div>
 
