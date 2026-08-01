@@ -390,7 +390,7 @@ function CruiseCard({
           ? "bg-gradient-to-br from-amber-50/80 via-card to-card dark:from-amber-950/30 dark:via-card dark:to-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 shadow-[0_4px_24px_-4px_rgba(217,169,78,0.15)] hover:shadow-[0_12px_32px_-8px_rgba(217,169,78,0.25)]"
           : "bg-card/90 backdrop-blur-sm ring-1 ring-border/40 shadow-card hover:shadow-card-hover"
       )}
-      onClick={() => navigate(`/mapa-turismo/cruzeiros/${company.id}`)}
+      onClick={() => navigate(`/mapa-turismo/cruzeiros/${company.id}`, captureDirectoryReturn())}
     >
       {/* Luxury accent bar */}
       {isLuxo && (
@@ -510,7 +510,7 @@ function CruiseCard({
                 "h-8 text-xs gap-1 font-medium",
                 isLuxo ? "text-amber-700 hover:text-amber-800 hover:bg-amber-100/50 dark:text-amber-400 dark:hover:bg-amber-950/50" : "text-primary"
               )}
-              onClick={(e) => { e.stopPropagation(); navigate(`/mapa-turismo/cruzeiros/${company.id}`); }}
+              onClick={(e) => { e.stopPropagation(); navigate(`/mapa-turismo/cruzeiros/${company.id}`, captureDirectoryReturn()); }}
             >
               Ver mais <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Button>

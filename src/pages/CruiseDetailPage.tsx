@@ -63,8 +63,7 @@ export default function CruiseDetailPage() {
           </div>
           <h2 className="text-xl font-semibold text-foreground">Companhia não encontrada</h2>
           <p className="text-muted-foreground mt-2 mb-8">A companhia que você está procurando não existe ou foi removida.</p>
-          <Button variant="outline" className="rounded-xl" onClick={() => navigate("/mapa-turismo/cruzeiros")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+          <BackToDirectoryButton variant="outline" fallbackPath={CRUISES_ROOT} category="Cruzeiros" label="Voltar
           </Button>
         </div>
       </DashboardLayout>
