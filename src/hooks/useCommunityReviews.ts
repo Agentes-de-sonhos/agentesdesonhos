@@ -13,7 +13,8 @@ export interface CommunityReview {
   id: string;
   supplier_source: string;
   supplier_id: string;
-  user_id: string;
+  /** NULL para autores de terceiros (minimização de dados). */
+  user_id: string | null;
   rating: number;
   comment: string | null;
   comment_status: ReviewCommentStatus;

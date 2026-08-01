@@ -9,7 +9,23 @@ export const REVIEW_MAX_RATING = 5;
 export const REVIEW_COMMENT_MAX_LENGTH = 500;
 export const REVIEW_SCALE_HINT = "Escala pública de 3 a 5 estrelas";
 
-export type CommunityReviewSource = "operator" | "supplier" | "guide" | "cruise" | "travelmeet";
+/**
+ * Fontes avaliáveis. "travelmeet" não entra: são dados de uma API externa, sem
+ * entidade local que possa ser validada pelo servidor.
+ */
+export type CommunityReviewSource = "operator" | "supplier" | "guide" | "cruise";
+
+export const REVIEWABLE_SOURCES: readonly CommunityReviewSource[] = [
+  "operator",
+  "supplier",
+  "guide",
+  "cruise",
+] as const;
+
+/** Só fornecedores com entidade local validável podem receber avaliação. */
+export function isReviewableSource(source: string | null | undefined): boolean {
+  return REVIEWABLE_SOURCES.includes(String(source) as CommunityReviewSource);
+}
 export type ReviewCommentStatus = "none" | "pending" | "approved" | "rejected";
 
 export const LOW_STAR_GUIDANCE = {
@@ -100,6 +116,8 @@ export type EligibilityReason =
   | "unauthenticated"
   | "email_unconfirmed"
   | "incomplete_profile"
+  | "sem_vinculo_agencia"
+  | "sem_assinatura"
   | "own_company";
 
 export function eligibilityMessage(reason: string | null | undefined): string {
@@ -110,6 +128,10 @@ export function eligibilityMessage(reason: string | null | undefined): string {
       return "Confirme seu e-mail para poder avaliar fornecedores.";
     case "incomplete_profile":
       return "Complete seu perfil com nome e foto para avaliar. Assim sua avaliação aparece com identificação real.";
+    case "sem_vinculo_agencia":
+      return "O reconhecimento da comunidade é feito por profissionais vinculados a uma agência. Finalize a configuração da sua agência para participar.";
+    case "sem_assinatura":
+      return "As avaliações são exclusivas de assinantes ativos da plataforma. Ative ou renove seu plano para reconhecer parceiros.";
     case "own_company":
       return "Você não pode avaliar um fornecedor vinculado à sua própria agência.";
     default:
@@ -126,6 +148,8 @@ export function reviewErrorMessage(message: string | null | undefined): string {
     return eligibilityMessage(reason);
   }
   if (raw.includes("invalid_rating")) return "Selecione uma nota entre 3 e 5 estrelas.";
+  if (raw.includes("invalid_supplier") || raw.includes("invalid_source"))
+    return "Este fornecedor não está disponível para avaliação no diretório.";
   if (raw.includes("unauthenticated")) return eligibilityMessage("unauthenticated");
   if (raw.includes("rate_limited")) return "Muitas denúncias em pouco tempo. Tente novamente mais tarde.";
   if (raw.includes("own_review")) return "Você não pode denunciar sua própria avaliação.";
@@ -153,5 +177,4 @@ export const REVIEW_SOURCE_LABEL: Record<string, string> = {
   supplier: "Fornecedores do trade",
   guide: "Guias de turismo",
   cruise: "Companhias marítimas",
-  travelmeet: "Travelmeet",
 };
