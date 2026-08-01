@@ -43,6 +43,10 @@ export function DashboardBanner() {
 
   const items = banners ?? [];
 
+  useEffect(() => {
+    setImageFailed(false);
+  }, [current]);
+
   const goTo = useCallback(
     (index: number) => {
       if (isTransitioning || items.length === 0) return;
