@@ -49,9 +49,10 @@ describe("AgentActions (online users popover)", () => {
     const listener = (e: Event) => dispatched.push((e as CustomEvent).detail);
     window.addEventListener("start-dm", listener);
 
-    const { onMessage } = setup(() =>
+    const onMessage = vi.fn(() =>
       window.dispatchEvent(new CustomEvent("start-dm", { detail: agent }))
     );
+    setup(onMessage);
     fireEvent.click(screen.getByRole("button", { name: /mensagem/i }));
 
     expect(onMessage).toHaveBeenCalledTimes(1);
