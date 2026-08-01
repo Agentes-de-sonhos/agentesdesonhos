@@ -10714,6 +10714,57 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_community_reviews: {
+        Row: {
+          comment: string | null
+          comment_status: string
+          created_at: string
+          id: string
+          legacy_review_id: string | null
+          legacy_table: string | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
+          rating: number
+          supplier_id: string
+          supplier_source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          comment_status?: string
+          created_at?: string
+          id?: string
+          legacy_review_id?: string | null
+          legacy_table?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          rating: number
+          supplier_id: string
+          supplier_source: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          comment_status?: string
+          created_at?: string
+          id?: string
+          legacy_review_id?: string | null
+          legacy_table?: string | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          rating?: number
+          supplier_id?: string
+          supplier_source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       supplier_contacts: {
         Row: {
           created_at: string
@@ -10849,6 +10900,48 @@ export type Database = {
           },
         ]
       }
+      supplier_review_moderation_events: {
+        Row: {
+          action: string
+          comment_snapshot: string | null
+          created_at: string
+          id: string
+          moderated_by: string
+          rating: number | null
+          reason: string | null
+          review_id: string
+          reviewer_user_id: string
+          supplier_id: string
+          supplier_source: string
+        }
+        Insert: {
+          action: string
+          comment_snapshot?: string | null
+          created_at?: string
+          id?: string
+          moderated_by: string
+          rating?: number | null
+          reason?: string | null
+          review_id: string
+          reviewer_user_id: string
+          supplier_id: string
+          supplier_source: string
+        }
+        Update: {
+          action?: string
+          comment_snapshot?: string | null
+          created_at?: string
+          id?: string
+          moderated_by?: string
+          rating?: number | null
+          reason?: string | null
+          review_id?: string
+          reviewer_user_id?: string
+          supplier_id?: string
+          supplier_source?: string
+        }
+        Relationships: []
+      }
       supplier_review_moderation_log: {
         Row: {
           comment: string | null
@@ -10887,6 +10980,50 @@ export type Database = {
           supplier_id?: string
         }
         Relationships: []
+      }
+      supplier_review_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_user_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          review_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_user_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_user_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          review_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_review_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_community_reviews"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_reviews: {
         Row: {
@@ -12943,7 +13080,34 @@ export type Database = {
           zip_code: string
         }[]
       }
+      admin_list_supplier_reviews: {
+        Args: {
+          _limit?: number
+          _offset?: number
+          _rating?: number
+          _source?: string
+          _status?: string
+        }
+        Returns: {
+          author_agency_name: string
+          author_avatar_url: string
+          author_name: string
+          comment: string
+          comment_status: string
+          created_at: string
+          id: string
+          moderation_reason: string
+          open_reports: number
+          rating: number
+          report_reasons: string[]
+          supplier_id: string
+          supplier_source: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       admin_list_user_projects: { Args: never; Returns: Json }
+      admin_supplier_review_counts: { Args: never; Returns: Json }
       admin_update_user_role: {
         Args: {
           _new_role: Database["public"]["Enums"]["app_role"]
@@ -13111,6 +13275,10 @@ export type Database = {
         }
       }
       current_agency_id: { Args: never; Returns: string }
+      delete_my_supplier_review: {
+        Args: { _review_id: string }
+        Returns: boolean
+      }
       enqueue_lead_form_notifications: {
         Args: { p_lead_id: string }
         Returns: number
@@ -13375,6 +13543,39 @@ export type Database = {
           uses_count: number
         }[]
       }
+      get_supplier_review_stats: {
+        Args: never
+        Returns: {
+          average_rating: number
+          review_count: number
+          supplier_id: string
+          supplier_source: string
+        }[]
+      }
+      get_supplier_reviews: {
+        Args: {
+          _limit?: number
+          _offset?: number
+          _source: string
+          _supplier_id: string
+        }
+        Returns: {
+          author_agency_name: string
+          author_avatar_url: string
+          author_name: string
+          comment: string
+          comment_status: string
+          created_at: string
+          id: string
+          is_mine: boolean
+          moderation_reason: string
+          rating: number
+          supplier_id: string
+          supplier_source: string
+          updated_at: string
+          user_id: string
+        }[]
+      }
       get_trip_by_public_code: {
         Args: { p_agency_slug: string; p_code: string }
         Returns: Json
@@ -13480,6 +13681,10 @@ export type Database = {
         Args: { p_from: string; p_landing_id: string; p_to: string }
         Returns: Json
       }
+      moderate_supplier_review: {
+        Args: { _action: string; _reason?: string; _review_id: string }
+        Returns: Json
+      }
       news_ranking: {
         Args: { p_limit?: number; p_window?: string }
         Returns: {
@@ -13518,6 +13723,10 @@ export type Database = {
         Returns: undefined
       }
       register_news_read: { Args: { p_noticia_id: string }; Returns: boolean }
+      report_supplier_review: {
+        Args: { _details?: string; _reason: string; _review_id: string }
+        Returns: Json
+      }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
       revert_award_confirmation: {
         Args: { _award_id: string }
@@ -13600,6 +13809,20 @@ export type Database = {
       submit_sales_landing_lead: {
         Args: { p_lead_name: string; p_lead_phone: string; p_slug: string }
         Returns: Json
+      }
+      submit_supplier_review: {
+        Args: {
+          _comment?: string
+          _rating: number
+          _source: string
+          _supplier_id: string
+        }
+        Returns: Json
+      }
+      supplier_review_eligibility: { Args: never; Returns: Json }
+      supplier_review_is_own_company: {
+        Args: { _source: string; _supplier_id: string }
+        Returns: boolean
       }
       supplier_slug_exists: { Args: { p_slug: string }; Returns: boolean }
       team_get_member_detail: { Args: { _member_id: string }; Returns: Json }

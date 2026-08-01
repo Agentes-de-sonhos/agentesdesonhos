@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { LANGUAGE_LEVELS } from "@/i18n/cadastroGuia";
 import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
+import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
 
 const levelLabel = (lv: string) => LANGUAGE_LEVELS.find((l) => l.value === lv)?.label || lv;
 
@@ -154,6 +155,12 @@ export default function GuideDetail() {
                 </div>
               </CardContent></Card>
             )}
+
+            <CommunityRecognitionSection
+              supplierSource="guide"
+              supplierId={guide.id}
+              supplierName={guide.full_name}
+            />
           </div>
 
           <div className="space-y-4">

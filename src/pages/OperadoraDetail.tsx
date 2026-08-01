@@ -15,9 +15,9 @@ import { BusinessHoursCard, businessHoursToHtml } from "@/components/operator/Bu
 import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
-import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
-import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
-import { useOperatorReviews } from "@/hooks/useOperatorReviews";
+import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
+import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
+import { reviewTargetKey } from "@/lib/communityReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
@@ -62,10 +62,10 @@ export default function OperadoraDetail() {
 
   const updateMutation = useOperatorUpdate(id || "", "tour_operators");
 
-  const {
-    reviews, isLoading: reviewsLoading, userReview,
-    averageRating, totalReviews, submitReview, deleteReview,
-  } = useOperatorReviews(id || "");
+  const { data: reviewStatsMap = {} } = useSupplierReviewStatsMap();
+  const stats = reviewStatsMap[reviewTargetKey("operator", id || "")];
+  const averageRating = stats?.average ?? 0;
+  const totalReviews = stats?.count ?? 0;
 
   const handleReviewClick = () => {
     if (!user) { toast.error("Você precisa estar logado para avaliar"); return; }
@@ -113,13 +113,8 @@ export default function OperadoraDetail() {
       reviewModalOpen={reviewModalOpen}
       setReviewModalOpen={setReviewModalOpen}
       handleReviewClick={handleReviewClick}
-      reviews={reviews}
-      reviewsLoading={reviewsLoading}
-      userReview={userReview}
       averageRating={averageRating}
       totalReviews={totalReviews}
-      submitReview={submitReview}
-      deleteReview={deleteReview}
       updateMutation={updateMutation}
     />
   );
@@ -127,7 +122,7 @@ export default function OperadoraDetail() {
   return isAdmin ? <EditModeProvider>{content}</EditModeProvider> : content;
 }
 
-function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, reviews, reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview, updateMutation }: any) {
+function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, averageRating, totalReviews, updateMutation }: any) {
   // Edit state
   const [editName, setEditName] = useState(operator.name);
   const [editLogo, setEditLogo] = useState(operator.logo_url);
@@ -314,11 +309,15 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
 
 
 
-            {/* 8. Avaliações — desativadas para operadoras (mantidas no banco) */}
-            {/* <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} /> */}
-
-            {/* 9. Materiais de Divulgação */}
+            {/* 8. Materiais de Divulgação */}
             <SupplierMaterialsCard supplierId={operator.id} supplierName={operator.name} />
+
+            {/* 9. Reconhecimento da comunidade */}
+            <CommunityRecognitionSection
+              supplierSource="operator"
+              supplierId={operator.id}
+              supplierName={operator.name}
+            />
           </div>
 
           {/* ===== RIGHT COLUMN (SIDEBAR) ===== */}
@@ -408,8 +407,6 @@ function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setRev
         </div>
       </div>
 
-      {/* Modal de avaliação de operadora desativado */}
-      {/* <OperatorReviewModal open={reviewModalOpen} onOpenChange={setReviewModalOpen} onSubmit={(data: any) => { submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) }); }} isSubmitting={submitReview.isPending} existingReview={userReview} operatorName={operator.name} /> */}
     </DashboardLayout>
   );
 }

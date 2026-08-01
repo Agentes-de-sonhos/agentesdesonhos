@@ -11,6 +11,7 @@ import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 import { CompetitiveAdvantagesCard } from "@/components/operator/CompetitiveAdvantagesCard";
 import { BusinessHoursCard } from "@/components/operator/BusinessHoursCard";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
+import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
 import {
   Ship, ArrowLeft, MapPin, Users, Anchor, Waves, Compass,
   ShoppingCart, Phone, FileText,
@@ -187,6 +188,12 @@ export default function CruiseDetailPage() {
             )}
 
             {op && <SupplierMaterialsCard supplierId={op.id} supplierName={op.name} />}
+
+            <CommunityRecognitionSection
+              supplierSource="cruise"
+              supplierId={company.id}
+              supplierName={company.nome}
+            />
           </div>
 
           {/* Sidebar */}

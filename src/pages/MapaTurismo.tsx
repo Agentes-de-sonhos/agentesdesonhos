@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SupplierReviewDialog } from "@/components/mapa-turismo/SupplierReviewDialog";
+import { CommunityReviewDialog } from "@/components/mapa-turismo/CommunityReviewDialog";
+import { CardReviewSummary } from "@/components/mapa-turismo/CardReviewSummary";
 import { DirectorySupplierCard } from "@/components/mapa-turismo/DirectorySupplierCard";
 import {
   Building2,
@@ -33,9 +34,9 @@ import {
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSuppliersWithSpecialties } from "@/hooks/useSupplierSpecialties";
-import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
-import { useSupplierReviews } from "@/hooks/useSupplierReviews";
-import { useOperatorReviews } from "@/hooks/useOperatorReviews";
+import { useSupplierLikes } from "@/hooks/useSupplierLikes";
+import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
+import { reviewTargetKey } from "@/lib/communityReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
@@ -180,11 +181,7 @@ function MapaTurismoListing({ category }: { category: string }) {
   const { user } = useAuth();
 
   const { getLikeCount, hasLiked, toggleLike } = useSupplierLikes();
-  const { data: reviewStatsMap = {} } = useSupplierReviewStats();
-
-  // Review submission hook for the dialog target
-  const { submitReview: submitSupplierReview } = useSupplierReviews(reviewTarget?.source === "supplier" ? reviewTarget.id : "");
-  const { submitReview: submitOperatorReview } = useOperatorReviews(reviewTarget?.source === "operator" ? reviewTarget.id : "");
+  const { data: reviewStatsMap = {} } = useSupplierReviewStatsMap();
 
   // A URL reflete o contexto completo do diretório (categoria + filtros + busca +
   // ordenação), tornando refresh, link direto e histórico do navegador previsíveis.
@@ -339,10 +336,10 @@ function MapaTurismoListing({ category }: { category: string }) {
     results = [...results].sort((a, b) => {
       if (sortBy === "alpha") return a.name.localeCompare(b.name);
       if (sortBy === "rating") {
-        const ra = reviewStatsMap[a.id];
-        const rb = reviewStatsMap[b.id];
-        const avgA = ra ? ra.total / ra.count : 0;
-        const avgB = rb ? rb.total / rb.count : 0;
+        const ra = reviewStatsMap[reviewTargetKey(a._source, a.id)];
+        const rb = reviewStatsMap[reviewTargetKey(b._source, b.id)];
+        const avgA = ra?.average ?? 0;
+        const avgB = rb?.average ?? 0;
         if (avgB !== avgA) return avgB - avgA;
         return a.name.localeCompare(b.name);
       }
@@ -369,15 +366,6 @@ function MapaTurismoListing({ category }: { category: string }) {
   };
 
   const queryClient = useQueryClient();
-  const handleSubmitReview = (data: { rating: number; comment?: string }) => {
-    const mutation = reviewTarget?.source === "operator" ? submitOperatorReview : submitSupplierReview;
-    mutation.mutate(data, {
-      onSuccess: () => {
-        setReviewDialogOpen(false);
-        queryClient.invalidateQueries({ queryKey: ["supplier-review-stats-all"] });
-      },
-    });
-  };
 
   const handleToggleLike = (e: React.MouseEvent, supplierId: string, source: string) => {
     e.stopPropagation();
@@ -529,12 +517,9 @@ function MapaTurismoListing({ category }: { category: string }) {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredSuppliers.map((supplier) => {
-              const stats = reviewStatsMap[`${supplier._source}:${supplier.id}`];
-              const avgRating = stats?.count ? (stats.total / stats.count).toFixed(1).replace(".", ",") : null;
-              const reviewCount = stats?.count || 0;
+              const stats = reviewStatsMap[reviewTargetKey(supplier._source, supplier.id)];
               const likeCount = getLikeCount(supplier.id, supplier._source);
               const liked = hasLiked(supplier.id, supplier._source);
-              const fullStars = stats?.count ? Math.round(stats.total / stats.count) : 0;
 
               const openProfile = () => {
                 if (supplier._source === "travelmeet") {
@@ -551,8 +536,6 @@ function MapaTurismoListing({ category }: { category: string }) {
                 );
               };
 
-              const showRating = supplier._source !== "operator" && supplier._source !== "cruise";
-
               return (
                 <DirectorySupplierCard
                   key={`${supplier._source}-${supplier.id}`}
@@ -564,55 +547,36 @@ function MapaTurismoListing({ category }: { category: string }) {
                   liked={liked}
                   onLike={(e) => handleToggleLike(e, supplier.id, supplier._source)}
                   onOpen={openProfile}
+                  rating={
+                    <CardReviewSummary
+                      average={stats?.average}
+                      count={stats?.count}
+                      onClick={() => handleOpenReview(supplier)}
+                    />
+                  }
                   tags={
                     <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
                       {supplier.category}
                     </Badge>
                   }
-                >
-                  {showRating && (
-                    <div className="mt-3 flex items-center gap-1.5 text-sm min-w-0 flex-wrap">
-                      <span className="font-semibold text-foreground whitespace-nowrap">{avgRating ?? "—"}</span>
-                      <div className="flex items-center gap-0.5 shrink-0" aria-label={`${reviewCount} avaliações`}>
-                        {Array.from({ length: 5 }).map((_, index) => (
-                          <Star
-                            key={index}
-                            className={cn(
-                              "h-3.5 w-3.5",
-                              index < fullStars ? "fill-current text-amber-400" : "text-muted-foreground/30"
-                            )}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-muted-foreground text-xs whitespace-nowrap">
-                        {reviewCount} {reviewCount === 1 ? "avaliação" : "avaliações"}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground px-2"
-                        onClick={(e) => { e.stopPropagation(); handleOpenReview(supplier); }}
-                      >
-                        <Star className="h-3 w-3" />
-                        Avaliar
-                      </Button>
-                    </div>
-                  )}
-                </DirectorySupplierCard>
+                />
               );
             })}
           </div>
         )}
       </div>
 
-      {/* Review Dialog */}
-      <SupplierReviewDialog
-        open={reviewDialogOpen}
-        onOpenChange={setReviewDialogOpen}
-        supplierName={reviewTarget?.name || ""}
-        onSubmit={handleSubmitReview}
-          isSubmitting={submitSupplierReview.isPending || submitOperatorReview.isPending}
-      />
+      {/* Modal único de avaliação (Reconhecimento da comunidade) */}
+      {reviewTarget && (
+        <CommunityReviewDialog
+          open={reviewDialogOpen}
+          onOpenChange={setReviewDialogOpen}
+          supplierName={reviewTarget.name}
+          supplierSource={reviewTarget.source}
+          supplierId={reviewTarget.id}
+          surface="card"
+        />
+      )}
     </DashboardLayout>
   );
 }

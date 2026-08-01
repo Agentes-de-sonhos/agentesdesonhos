@@ -7,6 +7,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminNewsManager } from "@/components/admin/AdminNewsManager";
 import { AdminTradeUpdatesManager } from "@/components/admin/AdminTradeUpdatesManager";
 import { AdminSuppliersManager } from "@/components/admin/AdminSuppliersManager";
+import { AdminSupplierReviewsManager } from "@/components/admin/AdminSupplierReviewsManager";
 import { AdminTradeSuppliersManager } from "@/components/admin/AdminTradeSuppliersManager";
 import { AdminMaterialsManager } from "@/components/admin/AdminMaterialsManager";
 import { AdminFlightBlocksManager } from "@/components/admin/AdminFlightBlocksManager";
@@ -132,6 +133,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminTradeUpdatesManager />;
     case "suppliers":
       return <AdminSuppliersManager />;
+    case "supplier-reviews":
+      return <AdminSupplierReviewsManager />;
     case "academy":
       return <AdminAcademyManager />;
     case "community":

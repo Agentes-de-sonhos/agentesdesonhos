@@ -14,9 +14,9 @@ import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { RichContentEditor } from "@/components/operator/RichContentEditor";
 import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
-import { OperatorReviewModal } from "@/components/operator/OperatorReviewModal";
-import { OperatorReviewsList } from "@/components/operator/OperatorReviewsList";
-import { useSupplierReviews } from "@/hooks/useSupplierReviews";
+import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
+import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
+import { reviewTargetKey } from "@/lib/communityReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
@@ -73,7 +73,10 @@ export default function SupplierDetail() {
 
   const updateMutation = useOperatorUpdate(id || "", "trade_suppliers");
 
-  const { reviews, isLoading: reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview } = useSupplierReviews(id || "");
+  const { data: reviewStatsMap = {} } = useSupplierReviewStatsMap();
+  const stats = reviewStatsMap[reviewTargetKey("supplier", id || "")];
+  const averageRating = stats?.average ?? 0;
+  const totalReviews = stats?.count ?? 0;
 
   const handleReviewClick = () => {
     if (!user) { toast.error("Você precisa estar logado para avaliar"); return; }
@@ -117,13 +120,8 @@ export default function SupplierDetail() {
       reviewModalOpen={reviewModalOpen}
       setReviewModalOpen={setReviewModalOpen}
       handleReviewClick={handleReviewClick}
-      reviews={reviews}
-      reviewsLoading={reviewsLoading}
-      userReview={userReview}
       averageRating={averageRating}
       totalReviews={totalReviews}
-      submitReview={submitReview}
-      deleteReview={deleteReview}
       updateMutation={updateMutation}
     />
   );
@@ -131,7 +129,7 @@ export default function SupplierDetail() {
   return isAdmin ? <EditModeProvider>{content}</EditModeProvider> : content;
 }
 
-function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, reviews, reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview, updateMutation }: any) {
+function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, averageRating, totalReviews, updateMutation }: any) {
   const [editName, setEditName] = useState(supplier.name);
   const [editLogo, setEditLogo] = useState(supplier.logo_url);
   const [editHowToSell, setEditHowToSell] = useState(supplier.how_to_sell || "");
@@ -259,8 +257,13 @@ function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpe
               </OperatorInfoCard>
             ) : null}
 
-            <OperatorReviewsList reviews={reviews} isLoading={reviewsLoading} isAdmin={isAdmin} onDeleteReview={(reviewId: string, reason: string) => deleteReview.mutate({ reviewId, reason })} isDeleting={deleteReview.isPending} />
             <SupplierMaterialsCard supplierId={supplier.id} supplierName={supplier.name} />
+
+            <CommunityRecognitionSection
+              supplierSource="supplier"
+              supplierId={supplier.id}
+              supplierName={supplier.name}
+            />
           </div>
 
           {/* Sidebar */}
@@ -301,7 +304,6 @@ function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpe
         </div>
       </div>
 
-      <OperatorReviewModal open={reviewModalOpen} onOpenChange={setReviewModalOpen} onSubmit={(data: any) => { submitReview.mutate(data, { onSuccess: () => setReviewModalOpen(false) }); }} isSubmitting={submitReview.isPending} existingReview={userReview} operatorName={supplier.name} />
     </DashboardLayout>
   );
 }
