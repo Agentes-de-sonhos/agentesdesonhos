@@ -16,6 +16,8 @@ import {
   ShoppingCart, Phone, FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
+import { CRUISES_ROOT } from "@/lib/directoryNavigation";
 
 const CATEGORIA_COLORS: Record<string, string> = {
   Luxo: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
