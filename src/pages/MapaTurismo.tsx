@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 import { useSuppliersWithSpecialties } from "@/hooks/useSupplierSpecialties";
 import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
-import { reviewTargetKey } from "@/lib/communityReviews";
+import { reviewTargetKey, isReviewableSource } from "@/lib/communityReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
@@ -548,11 +548,13 @@ function MapaTurismoListing({ category }: { category: string }) {
                   onLike={(e) => handleToggleLike(e, supplier.id, supplier._source)}
                   onOpen={openProfile}
                   rating={
-                    <CardReviewSummary
-                      average={stats?.average}
-                      count={stats?.count}
-                      onClick={() => handleOpenReview(supplier)}
-                    />
+                    isReviewableSource(supplier._source) ? (
+                      <CardReviewSummary
+                        average={stats?.average}
+                        count={stats?.count}
+                        onClick={() => handleOpenReview(supplier)}
+                      />
+                    ) : undefined
                   }
                   tags={
                     <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">

@@ -13,7 +13,8 @@ export interface CommunityReview {
   id: string;
   supplier_source: string;
   supplier_id: string;
-  user_id: string;
+  /** NULL para autores de terceiros (minimização de dados). */
+  user_id: string | null;
   rating: number;
   comment: string | null;
   comment_status: ReviewCommentStatus;
@@ -56,7 +57,10 @@ export function useSupplierReviewStatsMap() {
   });
 }
 
-/** Elegibilidade (autenticado + e-mail confirmado + nome e foto no perfil). */
+/**
+ * Elegibilidade: autenticado + e-mail confirmado + nome e foto no perfil +
+ * vínculo de agência + assinatura ativa (validado no servidor).
+ */
 export function useReviewEligibility() {
   const { user } = useAuth();
   return useQuery({

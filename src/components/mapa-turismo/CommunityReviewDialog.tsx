@@ -175,6 +175,16 @@ export function CommunityReviewDialog({
                   Completar meu perfil
                 </Button>
               )}
+              {eligibility?.reason === "sem_assinatura" && (
+                <Button className="w-full rounded-xl" onClick={() => navigate("/planos")}>
+                  Ver planos
+                </Button>
+              )}
+              {eligibility?.reason === "sem_vinculo_agencia" && (
+                <Button className="w-full rounded-xl" onClick={() => navigate("/configuracoes")}>
+                  Configurar minha agência
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-5 pt-1">
