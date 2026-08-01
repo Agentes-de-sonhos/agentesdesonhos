@@ -23,7 +23,9 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Switch } from "@/components/ui/switch";
-import { Users, MessageCircle, User, Building2, MapPin } from "lucide-react";
+import { Users, MessageCircle, User, Building2, MapPin, UserPlus, Check, Clock, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useConnections } from "@/hooks/useTradeConnect";
 
 interface OnlineAgentsStripProps {
   onAgentClick?: (agent: OnlineAgent) => void;
@@ -32,6 +34,118 @@ interface OnlineAgentsStripProps {
    * Any interaction (toggle on, view profile, send message) opens the upgrade dialog.
    */
   restrictedMode?: boolean;
+}
+
+/**
+ * Compact action row (Ver perfil / Mensagem / Conectar) shared by the hover card
+ * and the "+N" popover list. Reuses the existing DM (`start-dm` event ->
+ * ChatFloatingButton) and community connection flows — no parallel systems.
+ */
+export function AgentActions({
+  agent,
+  onMessage,
+  onViewProfile,
+  isMessaging,
+  compact = false,
+}: {
+  agent: OnlineAgent;
+  onMessage: () => void;
+  onViewProfile: () => void;
+  isMessaging?: boolean;
+  compact?: boolean;
+}) {
+  const { user } = useAuth();
+  const { getConnectionStatus, getConnectionId, sendRequest, respondRequest, isSending } =
+    useConnections();
+  const isSelf = user?.id === agent.user_id;
+  const status = isSelf ? "none" : getConnectionStatus(agent.user_id);
+
+  if (isSelf) return null;
+
+  const stop = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const connectProps = (() => {
+    switch (status) {
+      case "accepted":
+        return { label: "Conectados", icon: Check, disabled: true, onClick: () => {} };
+      case "pending_sent":
+        return { label: "Solicitado", icon: Clock, disabled: true, onClick: () => {} };
+      case "pending_received":
+        return {
+          label: "Aceitar",
+          icon: Check,
+          disabled: isSending,
+          onClick: () => {
+            const id = getConnectionId(agent.user_id);
+            if (id) respondRequest({ connectionId: id, accept: true });
+          },
+        };
+      case "rejected":
+      default:
+        return {
+          label: "Conectar",
+          icon: UserPlus,
+          disabled: isSending,
+          onClick: () => sendRequest(agent.user_id),
+        };
+    }
+  })();
+
+  const ConnectIcon = connectProps.icon;
+  const btn = `h-7 px-2 text-[11px] gap-1 min-w-0 ${compact ? "" : "flex-1"}`;
+
+  return (
+    <div className={`flex flex-wrap items-center gap-1.5 ${compact ? "" : "mt-3"}`}>
+      <Button
+        size="sm"
+        variant="default"
+        className={btn}
+        aria-label={`Ver perfil de ${agent.name}`}
+        onClick={(e) => {
+          stop(e);
+          onViewProfile();
+        }}
+      >
+        <User className="h-3.5 w-3.5" />
+        <span className="truncate">Perfil</span>
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        className={btn}
+        aria-label={`Enviar mensagem para ${agent.name}`}
+        disabled={isMessaging}
+        onClick={(e) => {
+          stop(e);
+          onMessage();
+        }}
+      >
+        {isMessaging ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <MessageCircle className="h-3.5 w-3.5" />
+        )}
+        <span className="truncate">Mensagem</span>
+      </Button>
+      <Button
+        size="sm"
+        variant="secondary"
+        className={btn}
+        aria-label={`${connectProps.label} — ${agent.name}`}
+        disabled={connectProps.disabled}
+        onClick={(e) => {
+          stop(e);
+          connectProps.onClick();
+        }}
+      >
+        <ConnectIcon className="h-3.5 w-3.5" />
+        <span className="truncate">{connectProps.label}</span>
+      </Button>
+    </div>
+  );
 }
 
 function AgentHoverCard({
@@ -45,10 +159,11 @@ function AgentHoverCard({
   onMessage: () => void;
   onViewProfile: () => void;
 }) {
+  const [open, setOpen] = useState(false);
   return (
-    <HoverCard openDelay={300} closeDelay={200}>
+    <HoverCard open={open} onOpenChange={setOpen} openDelay={300} closeDelay={200}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
-      <HoverCardContent side="bottom" align="center" className="w-64 p-4">
+      <HoverCardContent side="bottom" align="center" className="w-64 p-3">
         <div className="flex items-start gap-3">
           <Avatar className="h-12 w-12 border border-border">
             <AvatarImage src={agent.avatar_url || undefined} alt={agent.name} />
@@ -74,14 +189,17 @@ function AgentHoverCard({
             </div>
           </div>
         </div>
-        <div className="flex gap-2 mt-3">
-          <Button size="sm" variant="default" className="flex-1 h-8 text-xs" onClick={onViewProfile}>
-            <User className="h-3.5 w-3.5 mr-1" /> Ver Perfil
-          </Button>
-          <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={onMessage}>
-            <MessageCircle className="h-3.5 w-3.5 mr-1" /> Mensagem
-          </Button>
-        </div>
+        <AgentActions
+          agent={agent}
+          onViewProfile={() => {
+            setOpen(false);
+            onViewProfile();
+          }}
+          onMessage={() => {
+            setOpen(false);
+            onMessage();
+          }}
+        />
       </HoverCardContent>
     </HoverCard>
   );
@@ -141,6 +259,7 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
   const { isAdmin } = useUserRole();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
@@ -150,6 +269,8 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
       setUpgradeOpen(true);
       return;
     }
+    // Never open a conversation with yourself.
+    if (user?.id === agent.user_id) return;
     if (onAgentClick) {
       onAgentClick(agent);
     } else {
@@ -256,33 +377,13 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
                             </p>
                           )}
                         </div>
-                        <div className="flex gap-1 flex-shrink-0">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7"
-                                onClick={() => handleViewProfile(agent)}
-                              >
-                                <User className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Ver Perfil</p></TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-7 w-7"
-                                onClick={() => handleMessage(agent)}
-                              >
-                                <MessageCircle className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Mensagem</p></TooltipContent>
-                          </Tooltip>
+                        <div className="flex-shrink-0">
+                          <AgentActions
+                            agent={agent}
+                            compact
+                            onViewProfile={() => handleViewProfile(agent)}
+                            onMessage={() => handleMessage(agent)}
+                          />
                         </div>
                       </div>
                     ))}
