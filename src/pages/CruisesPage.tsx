@@ -381,7 +381,7 @@ export default function CruisesPage() {
         )}
 
         {/* Count */}
-        {hasActiveFilters && (
+        {!isLoading && (
           <p className="text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
             companhia{filtered.length !== 1 ? "s" : ""} encontrada{filtered.length !== 1 ? "s" : ""}
