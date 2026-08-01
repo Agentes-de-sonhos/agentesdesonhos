@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { BackToDirectoryHomeButton } from "@/components/mapa-turismo/BackToDirectoryHomeButton";
 import { AdvancedFilters } from "@/components/mapa-turismo/AdvancedFilters";
+import { CruiseCompanyLogo, resolveCruiseLogoUrl } from "@/components/mapa-turismo/CruiseCompanyLogo";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -442,18 +443,17 @@ function CruiseCard({
       <CardContent className="p-5 flex flex-col h-full">
         {/* Header */}
         <div className="flex items-start gap-3.5">
-          <div className={cn(
-            "h-14 w-14 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 ring-1 transition-transform duration-300 group-hover:scale-105",
-            isLuxo
-              ? "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/60 dark:to-amber-950 ring-amber-200/50 dark:ring-amber-700/50"
-              : "bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-950 dark:to-cyan-900 ring-border/50"
-          )}>
-            {company.logo_url ? (
-              <img src={company.logo_url} alt={company.nome} className="h-full w-full object-contain p-1.5" loading="lazy" decoding="async" />
-            ) : (
-              <Ship className={cn("h-7 w-7", isLuxo ? "text-amber-600 dark:text-amber-400" : "text-cyan-600 dark:text-cyan-400")} />
+          <CruiseCompanyLogo
+            nome={company.nome}
+            logoUrl={resolveCruiseLogoUrl(company)}
+            className={cn(
+              "h-14 w-14 rounded-xl ring-1 transition-transform duration-300 group-hover:scale-105",
+              isLuxo
+                ? "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/60 dark:to-amber-950 ring-amber-200/50 dark:ring-amber-700/50"
+                : "bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-cyan-950 dark:to-cyan-900 ring-border/50"
             )}
-          </div>
+            iconClassName={isLuxo ? "text-amber-600 dark:text-amber-400" : "text-cyan-600 dark:text-cyan-400"}
+          />
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-foreground truncate text-[15px] leading-tight">{company.nome}</h3>
             <div className="flex flex-wrap gap-1.5 mt-2">
