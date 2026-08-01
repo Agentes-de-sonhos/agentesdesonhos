@@ -13434,6 +13434,10 @@ export type Database = {
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
+      is_within_office_hours_json: {
+        Args: { p_at?: string; p_hours: Json; p_tz: string }
+        Returns: boolean
+      }
       list_award_history: {
         Args: { _limit?: number }
         Returns: {
