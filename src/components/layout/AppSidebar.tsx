@@ -47,6 +47,8 @@ import {
   Rss,
   User,
   Receipt,
+  MoreHorizontal,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -85,6 +87,10 @@ interface MenuItem {
   isHighlighted?: boolean;
   key?: string;
   requiredPermission?: string;
+  /** Only match the exact pathname (avoids parent/child URL collisions). */
+  exactUrl?: boolean;
+  /** Expandable group of child tools (no route of its own). */
+  children?: MenuItem[];
 }
 
 interface MenuSection {
