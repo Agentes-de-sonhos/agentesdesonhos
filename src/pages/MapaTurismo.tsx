@@ -143,6 +143,11 @@ function MapaTurismoDirectory() {
   useDirectoryScrollRestore(true);
 
   const handleCategoryChange = (cat: CategoryDef) => {
+    // Categorias com experiência dedicada (Cruzeiros) navegam para a rota própria.
+    if (cat.link) {
+      navigate(cat.link);
+      return;
+    }
     const newCat = categoryFilter === cat.category ? "all" : cat.category;
     setCategoryFilter(newCat);
     setSelectedSpecialties([]);
