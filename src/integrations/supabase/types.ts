@@ -5599,31 +5599,100 @@ export type Database = {
       }
       lead_capture_forms: {
         Row: {
+          agency_name_override: string | null
+          ai_enabled: boolean
+          ask_budget: boolean
+          ask_dates: boolean
+          ask_email: boolean
+          ask_travelers: boolean
+          brand_color: string | null
+          closing_message: string | null
+          consultant_name_override: string | null
+          consultant_photo_url_override: string | null
+          consultant_role_override: string | null
           created_at: string | null
+          headline: string | null
+          hours_confirmed: boolean
           id: string
           is_active: boolean | null
+          leads_count: number
+          logo_url_override: string | null
+          office_hours: Json
+          privacy_url: string | null
+          require_email: boolean
+          terms_url: string | null
+          test_mode_until: string | null
+          timezone: string
           token: string
           updated_at: string | null
           user_id: string
+          views_count: number
           welcome_message: string | null
+          whatsapp_override: string | null
         }
         Insert: {
+          agency_name_override?: string | null
+          ai_enabled?: boolean
+          ask_budget?: boolean
+          ask_dates?: boolean
+          ask_email?: boolean
+          ask_travelers?: boolean
+          brand_color?: string | null
+          closing_message?: string | null
+          consultant_name_override?: string | null
+          consultant_photo_url_override?: string | null
+          consultant_role_override?: string | null
           created_at?: string | null
+          headline?: string | null
+          hours_confirmed?: boolean
           id?: string
           is_active?: boolean | null
+          leads_count?: number
+          logo_url_override?: string | null
+          office_hours?: Json
+          privacy_url?: string | null
+          require_email?: boolean
+          terms_url?: string | null
+          test_mode_until?: string | null
+          timezone?: string
           token?: string
           updated_at?: string | null
           user_id: string
+          views_count?: number
           welcome_message?: string | null
+          whatsapp_override?: string | null
         }
         Update: {
+          agency_name_override?: string | null
+          ai_enabled?: boolean
+          ask_budget?: boolean
+          ask_dates?: boolean
+          ask_email?: boolean
+          ask_travelers?: boolean
+          brand_color?: string | null
+          closing_message?: string | null
+          consultant_name_override?: string | null
+          consultant_photo_url_override?: string | null
+          consultant_role_override?: string | null
           created_at?: string | null
+          headline?: string | null
+          hours_confirmed?: boolean
           id?: string
           is_active?: boolean | null
+          leads_count?: number
+          logo_url_override?: string | null
+          office_hours?: Json
+          privacy_url?: string | null
+          require_email?: boolean
+          terms_url?: string | null
+          test_mode_until?: string | null
+          timezone?: string
           token?: string
           updated_at?: string | null
           user_id?: string
+          views_count?: number
           welcome_message?: string | null
+          whatsapp_override?: string | null
         }
         Relationships: []
       }
@@ -5634,17 +5703,29 @@ export type Database = {
           ai_suggestion: string | null
           attended_at: string | null
           budget: string | null
+          client_id: string | null
+          consent_at: string | null
+          consent_version: string | null
           created_at: string | null
           destination: string | null
           form_id: string
           id: string
+          idempotency_key: string | null
           is_read: boolean | null
+          is_test: boolean
+          lead_email: string | null
           lead_name: string
           lead_phone: string
+          lead_summary: string | null
+          opportunity_id: string | null
+          session_id: string | null
+          source_url: string | null
           status: string | null
           travel_dates: string | null
           travelers_count: string | null
+          utm: Json | null
           whatsapp_message: string | null
+          within_office_hours: boolean | null
         }
         Insert: {
           additional_info?: string | null
@@ -5652,17 +5733,29 @@ export type Database = {
           ai_suggestion?: string | null
           attended_at?: string | null
           budget?: string | null
+          client_id?: string | null
+          consent_at?: string | null
+          consent_version?: string | null
           created_at?: string | null
           destination?: string | null
           form_id: string
           id?: string
+          idempotency_key?: string | null
           is_read?: boolean | null
+          is_test?: boolean
+          lead_email?: string | null
           lead_name: string
           lead_phone: string
+          lead_summary?: string | null
+          opportunity_id?: string | null
+          session_id?: string | null
+          source_url?: string | null
           status?: string | null
           travel_dates?: string | null
           travelers_count?: string | null
+          utm?: Json | null
           whatsapp_message?: string | null
+          within_office_hours?: boolean | null
         }
         Update: {
           additional_info?: string | null
@@ -5670,21 +5763,254 @@ export type Database = {
           ai_suggestion?: string | null
           attended_at?: string | null
           budget?: string | null
+          client_id?: string | null
+          consent_at?: string | null
+          consent_version?: string | null
           created_at?: string | null
           destination?: string | null
           form_id?: string
           id?: string
+          idempotency_key?: string | null
           is_read?: boolean | null
+          is_test?: boolean
+          lead_email?: string | null
           lead_name?: string
           lead_phone?: string
+          lead_summary?: string | null
+          opportunity_id?: string | null
+          session_id?: string | null
+          source_url?: string | null
           status?: string | null
           travel_dates?: string | null
           travelers_count?: string | null
+          utm?: Json | null
           whatsapp_message?: string | null
+          within_office_hours?: boolean | null
         }
         Relationships: [
           {
             foreignKeyName: "lead_captures_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lead_capture_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_form_lead_deliveries: {
+        Row: {
+          attempts: number
+          channel: string
+          claimed_at: string | null
+          created_at: string
+          error_message: string | null
+          form_id: string
+          id: string
+          lead_id: string
+          provider_message_id: string | null
+          recipient_email: string
+          recipient_kind: string
+          recipient_member_id: string | null
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          channel?: string
+          claimed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          form_id: string
+          id?: string
+          lead_id: string
+          provider_message_id?: string | null
+          recipient_email: string
+          recipient_kind?: string
+          recipient_member_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          claimed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          form_id?: string
+          id?: string
+          lead_id?: string
+          provider_message_id?: string | null
+          recipient_email?: string
+          recipient_kind?: string
+          recipient_member_id?: string | null
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_form_lead_deliveries_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lead_capture_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_form_lead_deliveries_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "lead_captures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_form_lead_deliveries_recipient_member_id_fkey"
+            columns: ["recipient_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_form_notification_recipients: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          form_id: string
+          id: string
+          kind: string
+          team_member_id: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email: string
+          form_id: string
+          id?: string
+          kind?: string
+          team_member_id?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          form_id?: string
+          id?: string
+          kind?: string
+          team_member_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_form_notification_recipients_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lead_capture_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_form_notification_recipients_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_form_notification_settings: {
+        Row: {
+          allow_test_sends: boolean
+          created_at: string
+          email_enabled: boolean
+          form_id: string
+          id: string
+          include_owner: boolean
+          notify_days: string[]
+          notify_end: string
+          notify_start: string
+          outside_behavior: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_test_sends?: boolean
+          created_at?: string
+          email_enabled?: boolean
+          form_id: string
+          id?: string
+          include_owner?: boolean
+          notify_days?: string[]
+          notify_end?: string
+          notify_start?: string
+          outside_behavior?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_test_sends?: boolean
+          created_at?: string
+          email_enabled?: boolean
+          form_id?: string
+          id?: string
+          include_owner?: boolean
+          notify_days?: string[]
+          notify_end?: string
+          notify_start?: string
+          outside_behavior?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_form_notification_settings_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: true
+            referencedRelation: "lead_capture_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_form_views: {
+        Row: {
+          created_at: string
+          form_id: string
+          id: string
+          is_test: boolean
+          session_hash: string
+          user_id: string
+          viewed_date: string
+        }
+        Insert: {
+          created_at?: string
+          form_id: string
+          id?: string
+          is_test?: boolean
+          session_hash: string
+          user_id: string
+          viewed_date?: string
+        }
+        Update: {
+          created_at?: string
+          form_id?: string
+          id?: string
+          is_test?: boolean
+          session_hash?: string
+          user_id?: string
+          viewed_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_form_views_form_id_fkey"
             columns: ["form_id"]
             isOneToOne: false
             referencedRelation: "lead_capture_forms"
@@ -12682,6 +13008,29 @@ export type Database = {
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_public_slug_available: { Args: { p_slug: string }; Returns: Json }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
+      claim_lead_form_deliveries: {
+        Args: { p_limit?: number }
+        Returns: {
+          additional_info: string
+          agency_name: string
+          attempts: number
+          budget: string
+          created_at: string
+          delivery_id: string
+          destination: string
+          is_test: boolean
+          lead_email: string
+          lead_id: string
+          lead_name: string
+          lead_phone: string
+          lead_summary: string
+          recipient_email: string
+          recipient_kind: string
+          timezone: string
+          travel_dates: string
+          travelers_count: string
+        }[]
+      }
       claim_product_landing_lead_deliveries: {
         Args: { p_limit?: number }
         Returns: {
@@ -12714,6 +13063,15 @@ export type Database = {
       clone_itinerary_for_trip: {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
+      }
+      complete_lead_form_delivery: {
+        Args: {
+          p_delivery_id: string
+          p_error?: string
+          p_provider_message_id?: string
+          p_status: string
+        }
+        Returns: undefined
       }
       complete_product_landing_lead_delivery: {
         Args: {
@@ -12753,6 +13111,10 @@ export type Database = {
         }
       }
       current_agency_id: { Args: never; Returns: string }
+      enqueue_lead_form_notifications: {
+        Args: { p_lead_id: string }
+        Returns: number
+      }
       enqueue_product_landing_lead_notifications: {
         Args: { p_lead_id: string }
         Returns: number
@@ -12919,6 +13281,10 @@ export type Database = {
         Args: { p_agency_slug: string; p_code: string }
         Returns: Json
       }
+      get_lead_form_notifications: {
+        Args: { p_form_id: string }
+        Returns: Json
+      }
       get_monthly_sales_ranking: {
         Args: { target_month: number; target_year: number }
         Returns: {
@@ -12953,6 +13319,7 @@ export type Database = {
         Args: { p_landing_id: string }
         Returns: Json
       }
+      get_public_lead_form: { Args: { p_token: string }; Returns: Json }
       get_public_product_landing: {
         Args: { p_product_key: string; p_slug: string }
         Returns: Json
@@ -13067,6 +13434,10 @@ export type Database = {
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
+      is_within_office_hours_json: {
+        Args: { p_at?: string; p_hours: Json; p_tz: string }
+        Returns: boolean
+      }
       list_award_history: {
         Args: { _limit?: number }
         Returns: {
@@ -13213,6 +13584,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      submit_conversational_lead: {
+        Args: { p_payload: Json; p_token: string }
+        Returns: Json
+      }
       submit_product_landing_lead: {
         Args: {
           p_idempotency_key?: string
@@ -13258,6 +13633,10 @@ export type Database = {
         Returns: undefined
       }
       team_self: { Args: never; Returns: Json }
+      track_lead_form_view: {
+        Args: { p_session_hash: string; p_token: string }
+        Returns: undefined
+      }
       track_product_landing_view: {
         Args: { p_landing_id: string; p_session_hash: string }
         Returns: undefined

@@ -98,3 +98,5 @@ verify_jwt = false
 
 [functions.news-collector-orchestrator]
 verify_jwt = false
+[functions.submit-lead-form]
+verify_jwt = false
