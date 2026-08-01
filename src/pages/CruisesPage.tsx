@@ -45,6 +45,61 @@ const TIPO_COLORS: Record<string, string> = {
   Expedicao: "bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300",
 };
 
+/** Predicado único de filtragem, reutilizado pela listagem e pelos contadores. */
+function matchCruises(companies: CompanhiaMaritima[], filters: CruiseFilters) {
+  return companies.filter((c) => {
+    if (filters.search && !c.nome.toLowerCase().includes(filters.search.toLowerCase())) return false;
+    if (filters.tipo !== "all" && c.tipo !== filters.tipo) return false;
+    if (filters.categoria !== "all" && c.categoria !== filters.categoria) return false;
+    if (filters.subtipos.length > 0 && !(c.subtipo && filters.subtipos.includes(c.subtipo))) return false;
+    if (filters.regioes.length > 0 && !c.regioes.some((r) => filters.regioes.includes(r.id))) return false;
+    if (filters.perfis.length > 0 && !c.perfis.some((p) => filters.perfis.includes(p.id))) return false;
+    return true;
+  });
+}
+
+/**
+ * Grupo de filtros com título claro. Os grupos longos (Regiões/Porte/Perfil)
+ * podem ser recolhidos no mobile para reduzir a rolagem; no desktop ficam sempre
+ * visíveis. Tipo e Posicionamento nunca são recolhidos.
+ */
+function FilterGroup({
+  title,
+  icon: Icon,
+  activeCount,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon: typeof MapPin;
+  activeCount: number;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen || activeCount > 0);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full sm:cursor-default flex items-center justify-between gap-2 mb-2"
+      >
+        <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+          <Icon className="h-3 w-3" /> {title}
+          {activeCount > 0 && (
+            <span className="ml-1 rounded-full bg-primary/10 text-primary px-1.5 text-[10px] font-semibold">
+              {activeCount}
+            </span>
+          )}
+        </span>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground sm:hidden transition-transform", open && "rotate-180")} />
+      </button>
+      <div className={cn("flex flex-wrap gap-1.5", open ? "flex" : "hidden sm:flex")}>{children}</div>
+    </div>
+  );
+}
+
 export default function CruisesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
