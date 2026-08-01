@@ -225,6 +225,7 @@ export default function CruisesPage() {
           {TIPO_OPTIONS.map((opt) => {
             const Icon = opt.icon;
             const isActive = filters.tipo === opt.value;
+            const count = countFor({ tipo: opt.value as CruiseFilters["tipo"] });
             return (
               <button
                 key={opt.value}
@@ -238,6 +239,9 @@ export default function CruisesPage() {
               >
                 <Icon className="h-4 w-4" />
                 {opt.label}
+                <span className={cn("text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
+                  {count}
+                </span>
               </button>
             );
           })}
@@ -247,6 +251,7 @@ export default function CruisesPage() {
         <div className="flex flex-wrap gap-2">
           {CATEGORIA_OPTIONS.map((opt) => {
             const isActive = filters.categoria === opt.value;
+            const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
             return (
               <button
                 key={opt.value}
@@ -259,6 +264,9 @@ export default function CruisesPage() {
                 )}
               >
                 {opt.label}
+                <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
+                  {count}
+                </span>
               </button>
             );
           })}
@@ -277,13 +285,11 @@ export default function CruisesPage() {
           </div>
 
           {/* Region tags */}
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-              <MapPin className="h-3 w-3" /> Regiões
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {regioes.map((r) => {
+          <FilterGroup title="Regiões" icon={MapPin} activeCount={filters.regioes.length}>
+            {regioes.map((r) => {
                 const isActive = filters.regioes.includes(r.id);
+                const count = countFor({ regioes: [r.id] });
+                if (count === 0 && !isActive) return null;
                 return (
                   <button
                     key={r.id}
@@ -291,26 +297,26 @@ export default function CruisesPage() {
                     className={cn(
                       "px-2.5 py-1 rounded-full text-xs transition-all border",
                       isActive
-                        ? "bg-primary text-primary-foreground border-primary font-medium"
+                        ? "bg-primary text-primary-foreground border-primary font-medium shadow-sm"
                         : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
                     )}
                   >
                     {r.nome}
+                    <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/50")}>
+                      {count}
+                    </span>
                   </button>
                 );
-              })}
-            </div>
-          </div>
+            })}
+          </FilterGroup>
 
           {/* Porte / posicionamento tags */}
           {subtipoOptions.length > 0 && (
-            <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                <Ship className="h-3 w-3" /> Porte e posicionamento
-              </p>
-              <div className="flex flex-wrap gap-1.5">
+            <FilterGroup title="Porte e posicionamento" icon={Ship} activeCount={filters.subtipos.length}>
                 {subtipoOptions.map((s) => {
                   const isActive = filters.subtipos.includes(s);
+                  const count = countFor({ subtipos: [s] });
+                  if (count === 0 && !isActive) return null;
                   return (
                     <button
                       key={s}
@@ -318,26 +324,26 @@ export default function CruisesPage() {
                       className={cn(
                         "px-2.5 py-1 rounded-full text-xs transition-all border",
                         isActive
-                          ? "bg-primary text-primary-foreground border-primary font-medium"
+                          ? "bg-primary text-primary-foreground border-primary font-medium shadow-sm"
                           : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
                       )}
                     >
                       {s}
+                      <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/50")}>
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
-              </div>
-            </div>
+            </FilterGroup>
           )}
 
           {/* Profile tags */}
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-              <Sailboat className="h-3 w-3" /> Perfil do viajante
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {perfis.map((p) => {
+          <FilterGroup title="Perfil do viajante" icon={Sailboat} activeCount={filters.perfis.length}>
+            {perfis.map((p) => {
                 const isActive = filters.perfis.includes(p.id);
+                const count = countFor({ perfis: [p.id] });
+                if (count === 0 && !isActive) return null;
                 return (
                   <button
                     key={p.id}
@@ -345,16 +351,16 @@ export default function CruisesPage() {
                     className={cn(
                       "px-2.5 py-1 rounded-full text-xs transition-all border",
                       isActive
-                        ? "bg-accent text-accent-foreground border-accent font-medium"
+                        ? "bg-accent text-accent-foreground border-accent font-medium shadow-sm"
                         : "bg-card text-muted-foreground border-border hover:border-accent/40 hover:text-foreground"
                     )}
                   >
                     {p.nome}
+                    <span className="ml-1 text-[10px] opacity-60">{count}</span>
                   </button>
                 );
-              })}
-            </div>
-          </div>
+            })}
+          </FilterGroup>
         </div>
 
         {/* Active filter chips */}
