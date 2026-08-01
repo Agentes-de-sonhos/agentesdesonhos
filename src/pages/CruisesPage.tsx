@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useId, useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
   Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Waves, Sailboat, MapPin, ThumbsUp, ChevronDown
+  Waves, Sailboat, MapPin, ThumbsUp, ChevronDown, Users, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -59,43 +59,49 @@ function matchCruises(companies: CompanhiaMaritima[], filters: CruiseFilters) {
 }
 
 /**
- * Grupo de filtros com título claro. Os grupos longos (Regiões/Porte/Perfil)
- * podem ser recolhidos no mobile para reduzir a rolagem; no desktop ficam sempre
- * visíveis. Tipo e Posicionamento nunca são recolhidos.
+ * Bloco de filtros recolhível (desktop e mobile), fechado por padrão.
+ * O cabeçalho mantém ícone, título, chevron e badge com a quantidade de
+ * filtros selecionados. Os filtros ativos continuam resumidos nos chips.
  */
 function FilterGroup({
   title,
   icon: Icon,
   activeCount,
   children,
-  defaultOpen = false,
 }: {
   title: string;
   icon: typeof MapPin;
   activeCount: number;
   children: React.ReactNode;
-  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen || activeCount > 0);
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+
   return (
-    <div>
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full sm:cursor-default flex items-center justify-between gap-2 mb-2"
+        aria-controls={panelId}
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/40 transition-colors min-h-[44px]"
       >
-        <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-          <Icon className="h-3 w-3" /> {title}
+        <span className="text-sm font-medium text-foreground flex items-center gap-2">
+          <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> {title}
           {activeCount > 0 && (
-            <span className="ml-1 rounded-full bg-primary/10 text-primary px-1.5 text-[10px] font-semibold">
+            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">
               {activeCount}
             </span>
           )}
         </span>
-        <ChevronDown className={cn("h-4 w-4 text-muted-foreground sm:hidden transition-transform", open && "rotate-180")} />
+        <ChevronDown
+          aria-hidden="true"
+          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
+        />
       </button>
-      <div className={cn("flex flex-wrap gap-1.5", open ? "flex" : "hidden sm:flex")}>{children}</div>
+      <div id={panelId} hidden={!open} className="px-4 pb-4 pt-1">
+        <div className="flex flex-wrap gap-1.5">{children}</div>
+      </div>
     </div>
   );
 }
