@@ -63,8 +63,7 @@ export default function CruiseDetailPage() {
           </div>
           <h2 className="text-xl font-semibold text-foreground">Companhia não encontrada</h2>
           <p className="text-muted-foreground mt-2 mb-8">A companhia que você está procurando não existe ou foi removida.</p>
-          <BackToDirectoryButton variant="outline" fallbackPath={CRUISES_ROOT} category="Cruzeiros" label="Voltar
-          </Button>
+          <BackToDirectoryButton variant="outline" fallbackPath={CRUISES_ROOT} category="Cruzeiros" label="Companhias Marítimas" />
         </div>
       </DashboardLayout>
     );
@@ -101,9 +100,7 @@ export default function CruiseDetailPage() {
   return (
     <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
-        <Button variant="ghost" onClick={() => navigate("/mapa-turismo/cruzeiros")} className="rounded-xl text-muted-foreground hover:text-foreground -ml-2">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Companhias Marítimas
-        </Button>
+        <BackToDirectoryButton fallbackPath={CRUISES_ROOT} category="Cruzeiros" label="Companhias Marítimas" className="-ml-2" />
 
         <OperatorHero
           name={company.nome}
