@@ -57,7 +57,10 @@ export function useSupplierReviewStatsMap() {
   });
 }
 
-/** Elegibilidade (autenticado + e-mail confirmado + nome e foto no perfil). */
+/**
+ * Elegibilidade: autenticado + e-mail confirmado + nome e foto no perfil +
+ * vínculo de agência + assinatura ativa (validado no servidor).
+ */
 export function useReviewEligibility() {
   const { user } = useAuth();
   return useQuery({
