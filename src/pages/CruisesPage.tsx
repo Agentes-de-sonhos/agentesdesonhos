@@ -228,6 +228,34 @@ export default function CruisesPage() {
             </div>
           </div>
 
+          {/* Porte / posicionamento tags */}
+          {subtipoOptions.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                <Ship className="h-3 w-3" /> Porte e posicionamento
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {subtipoOptions.map((s) => {
+                  const isActive = filters.subtipos.includes(s);
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => toggleFilter("subtipos", s)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-full text-xs transition-all border",
+                        isActive
+                          ? "bg-primary text-primary-foreground border-primary font-medium"
+                          : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Profile tags */}
           <div>
             <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
@@ -295,9 +323,6 @@ export default function CruisesPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((company) => {
-              const stats = reviewStatsMap[`cruise:${company.id}`];
-              const avgRating = stats ? stats.total / stats.count : 0;
-              const reviewCount = stats?.count || 0;
               const likeCount = getLikeCount(company.id, "cruise");
               const liked = hasLiked(company.id, "cruise");
 
@@ -306,8 +331,6 @@ export default function CruisesPage() {
                   key={company.id}
                   company={company}
                   onProfileClick={(id) => toggleFilter("perfis", id)}
-                  averageRating={avgRating}
-                  reviewCount={reviewCount}
                   likeCount={likeCount}
                   liked={liked}
                   onLike={(e) => handleLike(e, company.id)}
@@ -324,16 +347,12 @@ export default function CruisesPage() {
 function CruiseCard({
   company,
   onProfileClick,
-  averageRating,
-  reviewCount,
   likeCount,
   liked,
   onLike,
 }: {
   company: CompanhiaMaritima;
   onProfileClick: (id: string) => void;
-  averageRating: number;
-  reviewCount: number;
   likeCount: number;
   liked: boolean;
   onLike: (e: React.MouseEvent) => void;
@@ -397,15 +416,8 @@ function CruiseCard({
           </div>
         </div>
 
-        {/* Rating & Likes row */}
+        {/* Likes row */}
         <div className="mt-3 flex items-center gap-3">
-          {reviewCount > 0 && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-              <span className="font-semibold text-foreground">{averageRating.toFixed(1)}</span>
-              <span>({reviewCount})</span>
-            </div>
-          )}
           <button
             onClick={onLike}
             className={cn(
