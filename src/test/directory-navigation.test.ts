@@ -89,13 +89,21 @@ describe("isDirectoryPath", () => {
 describe("resolveDirectoryReturn", () => {
   beforeEach(() => sessionStorage.clear());
 
-  it("prefers navigation state", () => {
+  it("prefers navigation state when it belongs to the same service", () => {
+    const r = resolveDirectoryReturn(
+      { directoryReturn: { path: "/mapa-turismo/hospedagem?q=resort", scrollY: 320 } },
+      { category: "Hospedagem" },
+    );
+    expect(r.path).toBe("/mapa-turismo/hospedagem?q=resort");
+    expect(r.scrollY).toBe(320);
+  });
+
+  it("descarta state de outro serviço em favor da rota real do fornecedor", () => {
     const r = resolveDirectoryReturn(
       { directoryReturn: { path: "/mapa-turismo?categoria=Consolidadoras", scrollY: 320 } },
       { category: "Hospedagem" },
     );
-    expect(r.path).toBe("/mapa-turismo?categoria=Consolidadoras");
-    expect(r.scrollY).toBe(320);
+    expect(r.path).toBe("/mapa-turismo/hospedagem");
   });
 
   it("falls back to sessionStorage", () => {
