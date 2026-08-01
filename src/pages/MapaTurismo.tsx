@@ -46,7 +46,7 @@ import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
-import { captureDirectoryReturn, dedicatedDirectoryRoute, hasDedicatedDirectoryRoute } from "@/lib/directoryNavigation";
+import { CRUISES_ROOT, captureDirectoryReturn, dedicatedDirectoryRoute, hasDedicatedDirectoryRoute } from "@/lib/directoryNavigation";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -136,12 +136,11 @@ function MapaTurismoDirectory() {
     if (search.trim()) params.q = search.trim();
     if (sortBy !== "alpha") params.ordenar = sortBy;
     if (hospQuickFilter) params.hosp = hospQuickFilter;
-    if (cruiseQuickFilters.length > 0) params.cruzeiro = cruiseQuickFilters.join(",");
     const next = new URLSearchParams(params).toString();
     if (next !== searchParams.toString()) {
       setSearchParams(params, { replace: true });
     }
-  }, [categoryFilter, selectedSpecialties, search, sortBy, hospQuickFilter, cruiseQuickFilters, searchParams, setSearchParams]);
+  }, [categoryFilter, selectedSpecialties, search, sortBy, hospQuickFilter, searchParams, setSearchParams]);
 
   // Restaura a rolagem quando o usuário volta de um perfil.
   useDirectoryScrollRestore(true);
@@ -151,7 +150,6 @@ function MapaTurismoDirectory() {
     setCategoryFilter(newCat);
     setSelectedSpecialties([]);
     setHospQuickFilter(null);
-    setCruiseQuickFilters([]);
   };
 
   const handleSpecialtiesChange = (specialties: string[]) => {
@@ -163,7 +161,6 @@ function MapaTurismoDirectory() {
     setCategoryFilter(DEFAULT_CATEGORY);
     setSelectedSpecialties([]);
     setHospQuickFilter(null);
-    setCruiseQuickFilters([]);
   };
 
   const { data: suppliers, isLoading } = useSuppliersWithSpecialties();
@@ -180,19 +177,6 @@ function MapaTurismoDirectory() {
         .order("name");
       if (error) throw error;
       return (data || []).filter((op: any) => op.approval_status === "approved");
-      return data;
-    },
-  });
-
-  const { data: cruiseCompanies, isLoading: loadingCruises } = useQuery({
-    queryKey: ["cruise-companies-listing"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("companhias_maritimas")
-        .select("*")
-        .eq("ativo", true)
-        .order("nome");
-      if (error) throw error;
       return data;
     },
   });
@@ -225,24 +209,6 @@ function MapaTurismoDirectory() {
       _source: "operator" as const,
       _hasProfile: isFilled(op.commercial_contacts),
     }));
-    const fromCruises = (cruiseCompanies || []).map((cm: any) => {
-      const specs: string[] = [];
-      if (cm.tipo) specs.push(cm.tipo);
-      if (cm.categoria) specs.push(cm.categoria);
-      if (cm.subtipo) specs.push(cm.subtipo);
-      return {
-        id: cm.id,
-        name: cm.nome,
-        category: "Cruzeiros",
-        logo_url: cm.logo_url || null,
-        website_url: cm.website,
-        instagram_url: null,
-        sales_channel: cm.sales_channels,
-        specialties: specs.map((s, i) => ({ id: `cruise-${i}`, name: s })),
-        _source: "cruise" as const,
-        _hasProfile: isFilled(cm.commercial_contacts),
-      };
-    });
     const fromTravelMeet = (travelMeetSuppliers || []).map((tm: any) => ({
       id: `tm-${tm.id}`,
       name: tm.name || tm.company_name || tm.brand_name || "Sem nome",
@@ -271,8 +237,8 @@ function MapaTurismoDirectory() {
         _hasProfile: isFilled(g.bio) || isFilled(g.about),
       };
     });
-    return [...fromSuppliers, ...fromOperators, ...fromCruises, ...fromTravelMeet, ...fromGuides];
-  }, [suppliers, tourOperators, cruiseCompanies, travelMeetSuppliers, tourGuides]);
+    return [...fromSuppliers, ...fromOperators, ...fromTravelMeet, ...fromGuides];
+  }, [suppliers, tourOperators, travelMeetSuppliers, tourGuides]);
 
   // Contextual specialties: only from items matching the active category
   const allSpecialties = useMemo(() => {
@@ -322,18 +288,7 @@ function MapaTurismoDirectory() {
             matchesQuickFilter = nameOrSpecs.includes("rede hoteleira") || nameOrSpecs.includes("rede");
           }
 
-          // Cruise quick filters
-          let matchesCruiseFilter = true;
-          if (cruiseQuickFilters.length > 0 && item.category === "Cruzeiros") {
-            const specNames = (item.specialties || []).map((s: Specialty) => s.name.trim().toLowerCase());
-            matchesCruiseFilter = cruiseQuickFilters.every((f) =>
-              specNames.some((sn) => sn.includes(f.toLowerCase()))
-            );
-          } else if (cruiseQuickFilters.length > 0 && item.category !== "Cruzeiros") {
-            matchesCruiseFilter = false;
-          }
-
-          return matchesSearch && matchesCategory && matchesSpecialties && matchesQuickFilter && matchesCruiseFilter;
+          return matchesSearch && matchesCategory && matchesSpecialties && matchesQuickFilter;
         })
       : [];
 
@@ -361,9 +316,9 @@ function MapaTurismoDirectory() {
     });
 
     return results;
-  }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, cruiseQuickFilters, sortBy, reviewStatsMap, getLikeCount]);
+  }, [allItems, hasActiveFilter, search, categoryFilter, selectedSpecialties, hospQuickFilter, sortBy, reviewStatsMap, getLikeCount]);
 
-  const isLoadingAll = isLoading || loadingOperators || loadingCruises || loadingTravelMeet || loadingGuides;
+  const isLoadingAll = isLoading || loadingOperators || loadingTravelMeet || loadingGuides;
 
   const handleOpenReview = (supplier: any) => {
     if (!user) {
@@ -511,105 +466,6 @@ function MapaTurismoDirectory() {
           </div>
         )}
 
-        {/* Cruzeiros quick filters */}
-        {categoryFilter === "Cruzeiros" && (() => {
-          const cruiseItems = allItems.filter((item) => item.category === "Cruzeiros");
-          const getSpecCount = (keyword: string) =>
-            cruiseItems.filter((item) =>
-              (item.specialties || []).some((s: Specialty) => s.name.trim().toLowerCase().includes(keyword.toLowerCase()))
-            ).length;
-
-          const CRUISE_TIPO_FILTERS = [
-            { label: "Oceânico", value: "Oceanico", icon: Anchor },
-            { label: "Fluvial", value: "Fluvial", icon: Waves },
-            { label: "Expedição", value: "Expedicao", icon: Compass },
-          ];
-
-          const CRUISE_CHAR_FILTERS = [
-            "Luxo", "Premium", "Contemporaneo",
-            "Navio Pequeno", "Navio Médio", "Navio Grande",
-            "Boutique", "All Inclusive", "Iate", "Veleiro", "Temático",
-          ];
-
-          const toggleCruiseFilter = (val: string) => {
-            setCruiseQuickFilters((prev) =>
-              prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
-            );
-          };
-
-          const visibleChars = CRUISE_CHAR_FILTERS.filter((f) => getSpecCount(f) > 0);
-
-          return (
-            <div className="space-y-3">
-              {/* Tipo de navegação */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground mr-1">Tipo:</span>
-                {CRUISE_TIPO_FILTERS.map((f) => {
-                  const count = getSpecCount(f.value);
-                  if (count === 0) return null;
-                  const Icon = f.icon;
-                  const isActive = cruiseQuickFilters.includes(f.value);
-                  return (
-                    <Button
-                      key={f.value}
-                      variant={isActive ? "default" : "outline"}
-                      size="sm"
-                      className={cn(
-                        "rounded-full px-4 gap-1.5 h-8 text-xs font-medium transition-all",
-                        isActive
-                          ? "bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-600 shadow-sm"
-                          : "border-border text-muted-foreground hover:border-cyan-400 hover:text-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950"
-                      )}
-                      onClick={() => toggleCruiseFilter(f.value)}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {f.label}
-                      <span className={cn("text-[10px] ml-0.5", isActive ? "text-cyan-200" : "text-muted-foreground/60")}>
-                        {count}
-                      </span>
-                    </Button>
-                  );
-                })}
-              </div>
-
-              {/* Características */}
-              {visibleChars.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-medium text-muted-foreground mr-1">Filtros:</span>
-                  {visibleChars.map((f) => {
-                    const isActive = cruiseQuickFilters.includes(f);
-                    const count = getSpecCount(f);
-                    return (
-                      <button
-                        key={f}
-                        onClick={() => toggleCruiseFilter(f)}
-                        className={cn(
-                          "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-all border",
-                          isActive
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-                        )}
-                      >
-                        {f === "Contemporaneo" ? "Contemporâneo" : f}
-                        <span className={cn("text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/50")}>
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                  {cruiseQuickFilters.length > 0 && (
-                    <button
-                      onClick={() => setCruiseQuickFilters([])}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <X className="h-3 w-3" /> Limpar
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })()}
 
         {hasActiveFilter && filteredSuppliers.length > 0 && (
           <div className="flex items-center gap-3">
