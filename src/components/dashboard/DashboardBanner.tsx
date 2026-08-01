@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ExpandableBanner } from "@/components/ui/expandable-banner";
 
 import bannerWelcome from "@/assets/banner-welcome.jpg";
 import bannerAcademy from "@/assets/banner-academy.jpg";
@@ -24,6 +25,7 @@ interface Banner {
 export function DashboardBanner() {
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   const { data: banners } = useQuery({
     queryKey: ["dashboard-banners"],
@@ -62,7 +64,8 @@ export function DashboardBanner() {
   if (items.length === 0) return null;
 
   const slide = items[current];
-  const bgImage = slide.image_url || fallbackImages[current % fallbackImages.length];
+  const fallbackImage = fallbackImages[current % fallbackImages.length];
+  const bgImage = !imageFailed && slide.image_url ? slide.image_url : fallbackImage;
 
   const link = slide.button_link?.trim() || "";
   const hasLink = link.length > 0;
@@ -77,38 +80,7 @@ export function DashboardBanner() {
   const buttonText = slide.button_text?.trim() || "";
   const hasContent = Boolean(title || description || buttonText);
 
-  return (
-    <div
-      className={cn(
-        "relative w-full rounded-2xl overflow-hidden group bg-muted",
-        hasLink && "cursor-pointer"
-      )}
-      onClick={hasLink ? openLink : undefined}
-      role={hasLink ? "link" : undefined}
-      tabIndex={hasLink ? 0 : undefined}
-      onKeyDown={
-        hasLink
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                openLink();
-              }
-            }
-          : undefined
-      }
-    >
-      {/* Image respects natural aspect ratio */}
-      <img
-        key={slide.id}
-        src={bgImage}
-        alt={title || "Banner"}
-        className={cn(
-          "block w-full h-auto transition-opacity duration-500",
-          isTransitioning ? "opacity-0" : "opacity-100"
-        )}
-      />
-
-      {hasContent && (
+  const overlay = hasContent ? (
         <>
           {/* Dark overlay for legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 pointer-events-none" />
@@ -116,7 +88,7 @@ export function DashboardBanner() {
           {/* Content */}
           <div
             className={cn(
-              "absolute inset-0 z-10 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-10 transition-opacity duration-300",
+          "absolute inset-0 z-10 flex flex-col justify-center px-6 sm:px-10 lg:px-14 py-6 sm:py-10 transition-opacity duration-300 pointer-events-none",
               isTransitioning ? "opacity-0" : "opacity-100"
             )}
           >
@@ -131,7 +103,7 @@ export function DashboardBanner() {
               </p>
             )}
             {buttonText && (
-              <div className="mt-4">
+          <div className="mt-4 pointer-events-auto">
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -145,8 +117,10 @@ export function DashboardBanner() {
             )}
           </div>
         </>
-      )}
+  ) : null;
 
+  const chrome = (
+    <>
       {/* Arrows */}
       {items.length > 1 && (
         <>
@@ -169,7 +143,7 @@ export function DashboardBanner() {
 
       {/* Dots */}
       {items.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        <div className="absolute bottom-3 left-3 z-20 flex gap-2">
           {items.map((_, i) => (
             <button
               key={i}
@@ -183,6 +157,20 @@ export function DashboardBanner() {
           ))}
         </div>
       )}
-    </div>
+    </>
+  );
+
+  return (
+    <ExpandableBanner
+      key={slide.id}
+      src={bgImage}
+      alt={title || "Banner"}
+      revealRatio={0.25}
+      className={cn(isTransitioning && "opacity-0", "transition-opacity duration-500", hasLink && "cursor-pointer")}
+      overlay={overlay}
+      chrome={chrome}
+      onActivate={hasLink ? openLink : undefined}
+      onImageError={() => setImageFailed(true)}
+    />
   );
 }
