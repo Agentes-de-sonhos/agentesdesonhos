@@ -6,7 +6,7 @@ import {
   Store, CreditCard, Wallet, StickyNote, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
   X, Building2, FolderOpen, DollarSign, ShoppingBag, ArrowUpCircle, ArrowDownCircle, LayoutDashboard,
-  Sparkles, Rss, Receipt,
+  Sparkles, Rss, Receipt, MoreHorizontal, ChevronRight, Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,8 @@ interface MenuItem {
   isPremium?: boolean;
   isHighlighted?: boolean;
   key?: string;
+  exactUrl?: boolean;
+  children?: MenuItem[];
 }
 
 interface MenuSection {
@@ -125,11 +127,20 @@ const marketingSection: MenuSection = {
   hoverColor: "hover:bg-pink-600 hover:text-white", headerBg: "bg-pink-600 text-white", headerHoverBg: "hover:bg-pink-700",
   bgColor: "bg-pink-50", textColor: "text-pink-700", borderColor: "border-pink-600",
   items: [
-    { key: "cartao_visitas", title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
-    { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
-    { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
-    { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
-    { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+    { key: "paginas_vendas", title: "Páginas de vendas personalizadas", url: "/meus-leads/landings", icon: Globe },
+    { key: "captacao_leads", title: "Formulário conversacional", url: "/meus-leads", icon: UserPlus, exactUrl: true },
+    { key: "cartao_visitas", title: "Cartão de visitas", url: "/meu-cartao", icon: CreditCard },
+    {
+      key: "outras_marketing",
+      title: "Outras",
+      url: "",
+      icon: MoreHorizontal,
+      children: [
+        { key: "vitrine_ofertas", title: "Vitrine de ofertas", url: "/minha-vitrine", icon: Store },
+        { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+        { key: "personalizador_laminas", title: "Personalizador de lâminas", url: "/personalizador-laminas", icon: Paintbrush },
+      ],
+    },
   ],
 };
 
