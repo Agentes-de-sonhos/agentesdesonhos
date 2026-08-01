@@ -8,6 +8,11 @@ import {
   hasDedicatedDirectoryRoute,
   isDirectoryDetailPath,
   isDirectoryListingPath,
+  categoryListingRoute,
+  categoryFromDirectoryPath,
+  directoryServiceTitle,
+  isSpecializedDirectoryCategory,
+  DIRECTORY_SERVICES,
 } from "@/lib/directoryNavigation";
 
 describe("resolveDirectoryCategory", () => {
@@ -23,9 +28,54 @@ describe("resolveDirectoryCategory", () => {
 });
 
 describe("directoryPathForCategory", () => {
-  it("never falls back to Operadoras for another category", () => {
-    expect(directoryPathForCategory("Seguros viagem")).toBe("/mapa-turismo?categoria=Seguros%20viagem");
-    expect(directoryPathForCategory("Parques")).toBe("/mapa-turismo?categoria=Parques%20e%20atra%C3%A7%C3%B5es");
+  it("usa rotas canônicas por serviço", () => {
+    expect(directoryPathForCategory("Seguros viagem")).toBe("/mapa-turismo/seguros");
+    expect(directoryPathForCategory("Parques")).toBe("/mapa-turismo/parques");
+    expect(directoryPathForCategory(null)).toBe("/mapa-turismo");
+    expect(directoryPathForCategory("Categoria inexistente")).toBe("/mapa-turismo");
+  });
+});
+
+describe("rotas canônicas de listagem", () => {
+  it("cada um dos 10 serviços tem rota própria e título amigável", () => {
+    expect(DIRECTORY_SERVICES).toHaveLength(10);
+    expect(categoryListingRoute("Operadoras de turismo")).toBe("/mapa-turismo/operadoras");
+    expect(categoryListingRoute("Consolidadoras")).toBe("/mapa-turismo/consolidadoras");
+    expect(categoryListingRoute("Companhias aéreas")).toBe("/mapa-turismo/companhias-aereas");
+    expect(categoryListingRoute("Hospedagem")).toBe("/mapa-turismo/hospedagem");
+    expect(categoryListingRoute("Locadoras de veículos")).toBe("/mapa-turismo/locadoras");
+    expect(categoryListingRoute("Cruzeiros")).toBe("/mapa-turismo/cruzeiros");
+    expect(categoryListingRoute("Seguros viagem")).toBe("/mapa-turismo/seguros");
+    expect(categoryListingRoute("Parques e atrações")).toBe("/mapa-turismo/parques");
+    expect(categoryListingRoute("Receptivos")).toBe("/mapa-turismo/receptivos");
+    expect(categoryListingRoute("Guias")).toBe("/mapa-turismo/guias");
+    expect(categoryListingRoute("nada")).toBeNull();
+    expect(directoryServiceTitle("Companhias aéreas")).toBe("Companhias Aéreas");
+    expect(directoryServiceTitle("Locadoras de veículos")).toBe("Locadoras");
+  });
+
+  it("categoryFromDirectoryPath reconhece slugs e legado", () => {
+    expect(categoryFromDirectoryPath("/mapa-turismo/parques?q=kennedy")).toBe("Parques e atrações");
+    expect(categoryFromDirectoryPath("/mapa-turismo/cruzeiros?tipo=Fluvial")).toBe("Cruzeiros");
+    expect(categoryFromDirectoryPath("/mapa-turismo?categoria=Hotel")).toBe("Hospedagem");
+    expect(categoryFromDirectoryPath("/mapa-turismo")).toBeNull();
+  });
+
+  it("todas as rotas canônicas são listagens, nunca detalhes", () => {
+    for (const service of DIRECTORY_SERVICES) {
+      const path = `/mapa-turismo/${service.slug}`;
+      expect(isDirectoryListingPath(path)).toBe(true);
+      expect(isDirectoryDetailPath(path)).toBe(false);
+      expect(isDirectoryListingPath(`${path}?q=abc`)).toBe(true);
+      expect(isDirectoryDetailPath(`${path}/abc`)).toBe(true);
+    }
+  });
+
+  it("apenas Cruzeiros é fonte especializada", () => {
+    expect(isSpecializedDirectoryCategory("Cruzeiros")).toBe(true);
+    expect(isSpecializedDirectoryCategory("Companhias Marítimas")).toBe(true);
+    expect(isSpecializedDirectoryCategory("Hospedagem")).toBe(false);
+    expect(isSpecializedDirectoryCategory("Guias")).toBe(false);
   });
 });
 
@@ -55,14 +105,14 @@ describe("resolveDirectoryReturn", () => {
 
   it("falls back to the real category on direct access", () => {
     expect(resolveDirectoryReturn(null, { category: "Parques e atrações" }).path).toBe(
-      "/mapa-turismo?categoria=Parques%20e%20atra%C3%A7%C3%B5es",
+      "/mapa-turismo/parques",
     );
     expect(resolveDirectoryReturn(null, { path: "/mapa-turismo/cruzeiros" }).path).toBe("/mapa-turismo/cruzeiros");
   });
 
   it("ignores unsafe external state", () => {
     expect(resolveDirectoryReturn({ directoryReturn: { path: "https://evil.com" } }, { category: "Guias" }).path).toBe(
-      "/mapa-turismo?categoria=Guias",
+      "/mapa-turismo/guias",
     );
   });
 });
@@ -74,9 +124,9 @@ describe("resolveDirectoryReturn — compatibilidade do contexto armazenado", ()
     sessionStorage.setItem("mapaTurismo:return", JSON.stringify({ path, scrollY }));
 
   it("1) storage de Consolidadoras + acesso direto a um Parque volta para Parques", () => {
-    store("/mapa-turismo?categoria=Consolidadoras&busca=cvc", 900);
+    store("/mapa-turismo/consolidadoras?q=cvc", 900);
     const r = resolveDirectoryReturn(null, { category: "Parques e atrações" });
-    expect(r.path).toBe("/mapa-turismo?categoria=Parques%20e%20atra%C3%A7%C3%B5es");
+    expect(r.path).toBe("/mapa-turismo/parques");
     expect(r.scrollY).toBeUndefined();
   });
 
@@ -88,13 +138,13 @@ describe("resolveDirectoryReturn — compatibilidade do contexto armazenado", ()
   });
 
   it("2b) storage de outra categoria não vaza para o detalhe de Cruzeiros", () => {
-    store("/mapa-turismo?categoria=Consolidadoras");
+    store("/mapa-turismo/consolidadoras");
     const r = resolveDirectoryReturn(null, { path: "/mapa-turismo/cruzeiros", category: "Cruzeiros" });
     expect(r.path).toBe("/mapa-turismo/cruzeiros");
   });
 
   it("3) storage de Parques + detalhe de Parque preserva busca e filtros", () => {
-    const path = "/mapa-turismo?categoria=Parques%20e%20atra%C3%A7%C3%B5es&busca=kennedy&ordenar=nome";
+    const path = "/mapa-turismo/parques?q=kennedy&ordenar=likes";
     store(path, 250);
     const r = resolveDirectoryReturn(null, { category: "Parques" });
     expect(r.path).toBe(path);
@@ -107,7 +157,7 @@ describe("resolveDirectoryReturn — compatibilidade do contexto armazenado", ()
     expect(isDirectoryPath("/mapa-turismo")).toBe(true);
     expect(isDirectoryPath("/mapa-turismo/cruzeiros")).toBe(true);
     store("/mapa-turismo-malicioso?categoria=Guias");
-    expect(resolveDirectoryReturn(null, { category: "Guias" }).path).toBe("/mapa-turismo?categoria=Guias");
+    expect(resolveDirectoryReturn(null, { category: "Guias" }).path).toBe("/mapa-turismo/guias");
   });
 });
 
@@ -135,19 +185,18 @@ describe("Cruzeiros: listagem dedicada única", () => {
   });
 
   it("clicar na aba Cruzeiros / URL antiga => /mapa-turismo/cruzeiros", () => {
-    // aba do diretório e redirect de ?categoria=Cruzeiros usam o mesmo helper
     expect(directoryPathForCategory("Cruzeiros")).toBe("/mapa-turismo/cruzeiros");
     expect(hasDedicatedDirectoryRoute("Cruzeiros")).toBe(true);
   });
 
-  it("nenhuma companhia marítima entra na grade genérica", () => {
+  it("nenhuma companhia marítima entra na listagem genérica", () => {
     const items = [
       { name: "MSC Cruzeiros", category: "Cruzeiros" },
       { name: "Costa", category: "Companhias Marítimas" },
       { name: "CVC", category: "Operadoras de turismo" },
       { name: "Kennedy Space Center", category: "Parques e atrações" },
     ];
-    const generic = items.filter((i) => !hasDedicatedDirectoryRoute(i.category));
+    const generic = items.filter((i) => !isSpecializedDirectoryCategory(i.category));
     expect(generic.map((i) => i.name)).toEqual(["CVC", "Kennedy Space Center"]);
   });
 
