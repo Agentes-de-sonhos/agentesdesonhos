@@ -39,32 +39,77 @@ describe("dashboard block CTAs", () => {
   });
 });
 
-const row = (over: Partial<any> = {}) => ({
-  id: over.id ?? "r1",
-  trip_id: over.trip_id ?? "t1",
+const trip = (over: Partial<any> = {}) => ({
+  id: over.id ?? "t1",
+  client_name: "Ana Souza",
+  trip_title: "Lua de mel",
+  destination: "Lisboa",
+  start_date: over.start_date ?? "2026-09-01",
+  end_date: over.end_date ?? "2026-09-10",
+  status: over.status ?? "active",
   daysRemaining: over.daysRemaining ?? 5,
-  days_before: over.days_before ?? 3,
-  follow_up_note: null,
-  trip: { client_name: "Ana Souza", destination: "Lisboa", start_date: "2026-09-01", end_date: "2026-09-10" },
+  inProgress: over.inProgress ?? false,
+  reminderId: over.reminderId ?? null,
+  followUpNote: over.followUpNote ?? null,
   ...over,
 });
 
-describe("Próximas Viagens filtering", () => {
-  const rows = [
-    row({ id: "a", daysRemaining: 20 }),
-    row({ id: "b", daysRemaining: 2 }),
-    row({ id: "c", daysRemaining: 40, days_before: -1, trip: { client_name: "Bruno", destination: "Roma" } }),
-  ] as any[];
-
-  it("orders by nearest departure first", () => {
-    const out = filterUpcomingTrips(rows, { search: "", period: "all", kind: "all" });
-    expect(out.map((r) => r.id)).toEqual(["b", "a", "c"]);
+describe("Próximas Viagens — uma viagem = um item", () => {
+  it("orders by nearest start_date first", () => {
+    const out = filterUpcomingTrips(
+      [
+        trip({ id: "a", start_date: "2026-10-01", daysRemaining: 30 }),
+        trip({ id: "b", start_date: "2026-08-10", daysRemaining: 2 }),
+        trip({ id: "c", start_date: "2026-09-01", daysRemaining: 10 }),
+      ] as any[],
+      { search: "", period: "all", status: "all" },
+    );
+    expect(out.map((t) => t.id)).toEqual(["b", "c", "a"]);
   });
 
-  it("filters by period, kind and search", () => {
-    expect(filterUpcomingTrips(rows, { search: "", period: "7", kind: "all" }).map((r) => r.id)).toEqual(["b"]);
-    expect(filterUpcomingTrips(rows, { search: "", period: "all", kind: "return" }).map((r) => r.id)).toEqual(["c"]);
-    expect(filterUpcomingTrips(rows, { search: "roma", period: "all", kind: "all" }).map((r) => r.id)).toEqual(["c"]);
-    expect(filterUpcomingTrips(rows, { search: "ana", period: "all", kind: "departure" }).map((r) => r.id)).toEqual(["b", "a"]);
+  it("keeps a future trip that has no reminder at all", () => {
+    const out = filterUpcomingTrips([trip({ id: "no-rem", reminderId: null })] as any[], {
+      search: "", period: "all", status: "all",
+    });
+    expect(out).toHaveLength(1);
+    expect(out[0].reminderId).toBeNull();
+  });
+
+  it("never duplicates a trip and hides follow-up when no reminder exists", () => {
+    const src = read("src/hooks/useUpcomingTrips.ts");
+    // one row per trip comes from querying trips (not trip_reminders)
+    expect(src).toContain('.from("trips")');
+    expect(src).toContain("byTrip.set");
+    const page = read("src/pages/ProximasViagens.tsx");
+    expect(page).toContain("{trip.reminderId && (");
+    // no incorrect "conclude the trip" action bound to a reminder RPC
+    expect(page).not.toContain("markCompleted");
+  });
+
+  it("does not depend on reminder completion state", () => {
+    const src = read("src/hooks/useUpcomingTrips.ts");
+    expect(src).not.toContain("is_completed");
+  });
+
+  it("excludes cancelled/archived trips and scopes by user_id (RLS)", () => {
+    const src = read("src/hooks/useUpcomingTrips.ts");
+    expect(src).toContain("EXCLUDED_STATUSES");
+    expect(src).toContain('"archived"');
+    expect(src).toContain('"cancelado"');
+    expect(src).toContain('.eq("user_id", user.id)');
+  });
+
+  it("filters by period and real trip situation", () => {
+    const rows = [trip({ id: "x", daysRemaining: 40 }), trip({ id: "y", daysRemaining: 3 }), trip({ id: "z", daysRemaining: -2, inProgress: true })] as any[];
+    expect(filterUpcomingTrips(rows, { search: "", period: "7", status: "all" }).map((t) => t.id)).toEqual(["z", "y"].sort((a, b) => 0) as any);
+    expect(filterUpcomingTrips(rows, { search: "", period: "all", status: "in_progress" }).map((t) => t.id)).toEqual(["z"]);
+    expect(filterUpcomingTrips(rows, { search: "", period: "all", status: "future" }).map((t) => t.id)).toHaveLength(2);
+  });
+
+  it("searches client, trip title and destination", () => {
+    const rows = [trip({ id: "a" }), trip({ id: "b", client_name: "Bruno", trip_title: null, destination: "Roma" })] as any[];
+    expect(filterUpcomingTrips(rows, { search: "lua de mel", period: "all", status: "all" }).map((t) => t.id)).toEqual(["a"]);
+    expect(filterUpcomingTrips(rows, { search: "roma", period: "all", status: "all" }).map((t) => t.id)).toEqual(["b"]);
+    expect(filterUpcomingTrips(rows, { search: "ana", period: "all", status: "all" }).map((t) => t.id)).toEqual(["a"]);
   });
 });
