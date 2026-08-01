@@ -6,20 +6,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SupplierReviewDialog } from "@/components/mapa-turismo/SupplierReviewDialog";
+import { DirectorySupplierCard } from "@/components/mapa-turismo/DirectorySupplierCard";
 import {
   Building2,
   Search,
   Globe,
-  ChevronRight,
   Loader2,
-  Tag,
   Plane,
   Hotel,
   Car,
@@ -30,9 +28,7 @@ import {
   Users,
   X,
   Star,
-  ThumbsUp,
   ArrowUpDown,
-  CheckCircle2,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
