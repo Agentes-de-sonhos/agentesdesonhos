@@ -106,7 +106,29 @@ export function resolveDirectoryCategory(category?: string | null): string | nul
 /** URL do diretório já posicionada na categoria informada. */
 export function directoryPathForCategory(category?: string | null): string {
   const resolved = resolveDirectoryCategory(category);
+  const dedicated = dedicatedDirectoryRoute(resolved);
+  if (dedicated) return dedicated;
   return resolved ? `${DIRECTORY_ROOT}?categoria=${encodeURIComponent(resolved)}` : DIRECTORY_ROOT;
+}
+
+/**
+ * Categorias com experiência dedicada própria (listagem especializada).
+ * Centraliza a decisão de rota: "Cruzeiros" NUNCA volta a ser uma categoria
+ * genérica da grade do Mapa do Turismo.
+ */
+const DEDICATED_ROUTES: Record<string, string> = {
+  Cruzeiros: CRUISES_ROOT,
+};
+
+/** Rota dedicada da categoria, quando existir (ex.: Cruzeiros → /mapa-turismo/cruzeiros). */
+export function dedicatedDirectoryRoute(category?: string | null): string | null {
+  const resolved = resolveDirectoryCategory(category);
+  return resolved ? DEDICATED_ROUTES[resolved] ?? null : null;
+}
+
+/** true quando a categoria tem listagem dedicada (não deve aparecer na grade genérica). */
+export function hasDedicatedDirectoryRoute(category?: string | null): boolean {
+  return dedicatedDirectoryRoute(category) !== null;
 }
 
 /**

@@ -4,6 +4,8 @@ import {
   directoryPathForCategory,
   isDirectoryPath,
   resolveDirectoryReturn,
+  dedicatedDirectoryRoute,
+  hasDedicatedDirectoryRoute,
 } from "@/lib/directoryNavigation";
 
 describe("resolveDirectoryCategory", () => {
@@ -104,5 +106,48 @@ describe("resolveDirectoryReturn — compatibilidade do contexto armazenado", ()
     expect(isDirectoryPath("/mapa-turismo/cruzeiros")).toBe(true);
     store("/mapa-turismo-malicioso?categoria=Guias");
     expect(resolveDirectoryReturn(null, { category: "Guias" }).path).toBe("/mapa-turismo?categoria=Guias");
+  });
+});
+
+describe("Cruzeiros: listagem dedicada única", () => {
+  it("a rota da categoria Cruzeiros é sempre a experiência dedicada", () => {
+    expect(dedicatedDirectoryRoute("Cruzeiros")).toBe("/mapa-turismo/cruzeiros");
+    expect(dedicatedDirectoryRoute("Companhias Marítimas")).toBe("/mapa-turismo/cruzeiros");
+    expect(dedicatedDirectoryRoute("cruzeiro")).toBe("/mapa-turismo/cruzeiros");
+    expect(dedicatedDirectoryRoute("Consolidadoras")).toBeNull();
+    expect(dedicatedDirectoryRoute(null)).toBeNull();
+  });
+
+  it("clicar na aba Cruzeiros / URL antiga => /mapa-turismo/cruzeiros", () => {
+    // aba do diretório e redirect de ?categoria=Cruzeiros usam o mesmo helper
+    expect(directoryPathForCategory("Cruzeiros")).toBe("/mapa-turismo/cruzeiros");
+    expect(hasDedicatedDirectoryRoute("Cruzeiros")).toBe(true);
+  });
+
+  it("nenhuma companhia marítima entra na grade genérica", () => {
+    const items = [
+      { name: "MSC Cruzeiros", category: "Cruzeiros" },
+      { name: "Costa", category: "Companhias Marítimas" },
+      { name: "CVC", category: "Operadoras de turismo" },
+      { name: "Kennedy Space Center", category: "Parques e atrações" },
+    ];
+    const generic = items.filter((i) => !hasDedicatedDirectoryRoute(i.category));
+    expect(generic.map((i) => i.name)).toEqual(["CVC", "Kennedy Space Center"]);
+  });
+
+  it("perfil de cruzeiro => voltar => listagem dedicada com filtros", () => {
+    sessionStorage.clear();
+    sessionStorage.setItem(
+      "mapaTurismo:return",
+      JSON.stringify({ path: "/mapa-turismo/cruzeiros?tipo=Fluvial&perfis=abc", scrollY: 640 }),
+    );
+    const r = resolveDirectoryReturn(null, { path: "/mapa-turismo/cruzeiros", category: "Cruzeiros" });
+    expect(r.path).toBe("/mapa-turismo/cruzeiros?tipo=Fluvial&perfis=abc");
+    expect(r.scrollY).toBe(640);
+  });
+
+  it("fallback direto de um perfil de cruzeiro nunca cai na grade genérica", () => {
+    sessionStorage.clear();
+    expect(resolveDirectoryReturn(null, { category: "Companhias Marítimas" }).path).toBe("/mapa-turismo/cruzeiros");
   });
 });

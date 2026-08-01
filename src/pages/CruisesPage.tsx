@@ -10,7 +10,7 @@ import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
   Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Waves, Sailboat, MapPin, ThumbsUp
+  Waves, Sailboat, MapPin, ThumbsUp, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -44,6 +44,61 @@ const TIPO_COLORS: Record<string, string> = {
   Fluvial: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
   Expedicao: "bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300",
 };
+
+/** Predicado único de filtragem, reutilizado pela listagem e pelos contadores. */
+function matchCruises(companies: CompanhiaMaritima[], filters: CruiseFilters) {
+  return companies.filter((c) => {
+    if (filters.search && !c.nome.toLowerCase().includes(filters.search.toLowerCase())) return false;
+    if (filters.tipo !== "all" && c.tipo !== filters.tipo) return false;
+    if (filters.categoria !== "all" && c.categoria !== filters.categoria) return false;
+    if (filters.subtipos.length > 0 && !(c.subtipo && filters.subtipos.includes(c.subtipo))) return false;
+    if (filters.regioes.length > 0 && !c.regioes.some((r) => filters.regioes.includes(r.id))) return false;
+    if (filters.perfis.length > 0 && !c.perfis.some((p) => filters.perfis.includes(p.id))) return false;
+    return true;
+  });
+}
+
+/**
+ * Grupo de filtros com título claro. Os grupos longos (Regiões/Porte/Perfil)
+ * podem ser recolhidos no mobile para reduzir a rolagem; no desktop ficam sempre
+ * visíveis. Tipo e Posicionamento nunca são recolhidos.
+ */
+function FilterGroup({
+  title,
+  icon: Icon,
+  activeCount,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon: typeof MapPin;
+  activeCount: number;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen || activeCount > 0);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full sm:cursor-default flex items-center justify-between gap-2 mb-2"
+      >
+        <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+          <Icon className="h-3 w-3" /> {title}
+          {activeCount > 0 && (
+            <span className="ml-1 rounded-full bg-primary/10 text-primary px-1.5 text-[10px] font-semibold">
+              {activeCount}
+            </span>
+          )}
+        </span>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground sm:hidden transition-transform", open && "rotate-180")} />
+      </button>
+      <div className={cn("flex flex-wrap gap-1.5", open ? "flex" : "hidden sm:flex")}>{children}</div>
+    </div>
+  );
+}
 
 export default function CruisesPage() {
   const navigate = useNavigate();
@@ -105,16 +160,15 @@ export default function CruisesPage() {
   }, [companies]);
 
   const filtered = useMemo(() => {
-    return companies.filter((c) => {
-      if (filters.search && !c.nome.toLowerCase().includes(filters.search.toLowerCase())) return false;
-      if (filters.tipo !== "all" && c.tipo !== filters.tipo) return false;
-      if (filters.categoria !== "all" && c.categoria !== filters.categoria) return false;
-      if (filters.subtipos.length > 0 && !(c.subtipo && filters.subtipos.includes(c.subtipo))) return false;
-      if (filters.regioes.length > 0 && !c.regioes.some((r) => filters.regioes.includes(r.id))) return false;
-      if (filters.perfis.length > 0 && !c.perfis.some((p) => filters.perfis.includes(p.id))) return false;
-      return true;
-    });
+    return matchCruises(companies, filters);
   }, [companies, filters]);
+
+  /**
+   * Quantidade de companhias por opção, considerando os demais filtros ativos.
+   * Alimenta os contadores exibidos em cada chip.
+   */
+  const countFor = (patch: Partial<CruiseFilters>) =>
+    matchCruises(companies, { ...filters, ...patch }).length;
 
   // Active filter chips
   const activeChips: { label: string; onRemove: () => void }[] = [];
@@ -171,6 +225,7 @@ export default function CruisesPage() {
           {TIPO_OPTIONS.map((opt) => {
             const Icon = opt.icon;
             const isActive = filters.tipo === opt.value;
+            const count = countFor({ tipo: opt.value as CruiseFilters["tipo"] });
             return (
               <button
                 key={opt.value}
@@ -184,6 +239,9 @@ export default function CruisesPage() {
               >
                 <Icon className="h-4 w-4" />
                 {opt.label}
+                <span className={cn("text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
+                  {count}
+                </span>
               </button>
             );
           })}
@@ -193,6 +251,7 @@ export default function CruisesPage() {
         <div className="flex flex-wrap gap-2">
           {CATEGORIA_OPTIONS.map((opt) => {
             const isActive = filters.categoria === opt.value;
+            const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
             return (
               <button
                 key={opt.value}
@@ -205,6 +264,9 @@ export default function CruisesPage() {
                 )}
               >
                 {opt.label}
+                <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
+                  {count}
+                </span>
               </button>
             );
           })}
@@ -223,13 +285,11 @@ export default function CruisesPage() {
           </div>
 
           {/* Region tags */}
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-              <MapPin className="h-3 w-3" /> Regiões
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {regioes.map((r) => {
+          <FilterGroup title="Regiões" icon={MapPin} activeCount={filters.regioes.length}>
+            {regioes.map((r) => {
                 const isActive = filters.regioes.includes(r.id);
+                const count = countFor({ regioes: [r.id] });
+                if (count === 0 && !isActive) return null;
                 return (
                   <button
                     key={r.id}
@@ -237,26 +297,26 @@ export default function CruisesPage() {
                     className={cn(
                       "px-2.5 py-1 rounded-full text-xs transition-all border",
                       isActive
-                        ? "bg-primary text-primary-foreground border-primary font-medium"
+                        ? "bg-primary text-primary-foreground border-primary font-medium shadow-sm"
                         : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
                     )}
                   >
                     {r.nome}
+                    <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/50")}>
+                      {count}
+                    </span>
                   </button>
                 );
-              })}
-            </div>
-          </div>
+            })}
+          </FilterGroup>
 
           {/* Porte / posicionamento tags */}
           {subtipoOptions.length > 0 && (
-            <div>
-              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                <Ship className="h-3 w-3" /> Porte e posicionamento
-              </p>
-              <div className="flex flex-wrap gap-1.5">
+            <FilterGroup title="Porte e posicionamento" icon={Ship} activeCount={filters.subtipos.length}>
                 {subtipoOptions.map((s) => {
                   const isActive = filters.subtipos.includes(s);
+                  const count = countFor({ subtipos: [s] });
+                  if (count === 0 && !isActive) return null;
                   return (
                     <button
                       key={s}
@@ -264,26 +324,26 @@ export default function CruisesPage() {
                       className={cn(
                         "px-2.5 py-1 rounded-full text-xs transition-all border",
                         isActive
-                          ? "bg-primary text-primary-foreground border-primary font-medium"
+                          ? "bg-primary text-primary-foreground border-primary font-medium shadow-sm"
                           : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
                       )}
                     >
                       {s}
+                      <span className={cn("ml-1 text-[10px]", isActive ? "text-primary-foreground/70" : "text-muted-foreground/50")}>
+                        {count}
+                      </span>
                     </button>
                   );
                 })}
-              </div>
-            </div>
+            </FilterGroup>
           )}
 
           {/* Profile tags */}
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-              <Sailboat className="h-3 w-3" /> Perfil do viajante
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {perfis.map((p) => {
+          <FilterGroup title="Perfil do viajante" icon={Sailboat} activeCount={filters.perfis.length}>
+            {perfis.map((p) => {
                 const isActive = filters.perfis.includes(p.id);
+                const count = countFor({ perfis: [p.id] });
+                if (count === 0 && !isActive) return null;
                 return (
                   <button
                     key={p.id}
@@ -291,16 +351,16 @@ export default function CruisesPage() {
                     className={cn(
                       "px-2.5 py-1 rounded-full text-xs transition-all border",
                       isActive
-                        ? "bg-accent text-accent-foreground border-accent font-medium"
+                        ? "bg-accent text-accent-foreground border-accent font-medium shadow-sm"
                         : "bg-card text-muted-foreground border-border hover:border-accent/40 hover:text-foreground"
                     )}
                   >
                     {p.nome}
+                    <span className="ml-1 text-[10px] opacity-60">{count}</span>
                   </button>
                 );
-              })}
-            </div>
-          </div>
+            })}
+          </FilterGroup>
         </div>
 
         {/* Active filter chips */}
@@ -321,7 +381,7 @@ export default function CruisesPage() {
         )}
 
         {/* Count */}
-        {hasActiveFilters && (
+        {!isLoading && (
           <p className="text-sm text-muted-foreground">
             <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
             companhia{filtered.length !== 1 ? "s" : ""} encontrada{filtered.length !== 1 ? "s" : ""}
