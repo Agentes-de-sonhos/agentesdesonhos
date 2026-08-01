@@ -227,22 +227,28 @@ export function categoryFromDirectoryPath(path: unknown): string | null {
 }
 
 /**
- * Um retorno armazenado só pode ser reutilizado se pertencer ao contexto do
- * perfil atual. Evita retorno cruzado obsoleto (ex.: storage de Consolidadoras
- * aplicado a um link direto de Parques).
+ * Um retorno (do state ou do storage) só pode ser reutilizado se pertencer ao
+ * serviço do perfil atual. Evita retorno cruzado (ex.: contexto de Operadoras
+ * aplicado a um Receptivo) e retorno para a home neutra.
  */
-function isStoredReturnCompatible(
-  stored: DirectoryReturn,
+function isReturnCompatible(
+  candidate: DirectoryReturn | null | undefined,
   fallback: { category?: string | null; path?: string },
 ): boolean {
-  // Página de detalhe de cruzeiros: só aceita a listagem específica.
-  if (isCruisesListingPath(fallback.path)) return isCruisesListingPath(stored.path);
+  if (!candidate || !isDirectoryListingPath(candidate.path)) return false;
 
   const realCategory = resolveDirectoryCategory(fallback.category);
-  if (realCategory) return categoryFromDirectoryPath(stored.path) === realCategory;
+  if (realCategory) {
+    // Regra autoritativa: o retorno tem de apontar para a listagem do MESMO serviço.
+    return categoryFromDirectoryPath(candidate.path) === realCategory;
+  }
 
-  // Sem categoria e sem rota específica não há como validar: usa o fallback.
-  return !fallback.path;
+  // Sem categoria conhecida, mas com rota específica exigida (ex.: cruzeiros).
+  const fallbackCategory = categoryFromDirectoryPath(fallback.path);
+  if (fallbackCategory) return categoryFromDirectoryPath(candidate.path) === fallbackCategory;
+
+  // Nada a validar: aceita qualquer listagem do diretório.
+  return true;
 }
 
 function getScrollY(): number {
