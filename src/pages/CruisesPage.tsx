@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,9 @@ import {
   Waves, Sailboat, MapPin, ThumbsUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
+import { captureDirectoryReturn } from "@/lib/directoryNavigation";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -45,20 +47,38 @@ const TIPO_COLORS: Record<string, string> = {
 
 export default function CruisesPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { data: companies = [], isLoading } = useCruises();
   const { data: regioes = [] } = useRegioes();
   const { data: perfis = [] } = usePerfisCliente();
   const { getLikeCount, hasLiked, toggleLike } = useSupplierLikes();
 
+  const initialParams = useRef(new URLSearchParams(searchParams)).current;
   const [filters, setFilters] = useState<CruiseFilters>({
-    search: "",
-    tipo: "all",
-    categoria: "all",
-    subtipos: [],
-    regioes: [],
-    perfis: [],
+    search: initialParams.get("q") || "",
+    tipo: (initialParams.get("tipo") as CruiseFilters["tipo"]) || "all",
+    categoria: (initialParams.get("categoria") as CruiseFilters["categoria"]) || "all",
+    subtipos: initialParams.get("porte")?.split(",").filter(Boolean) || [],
+    regioes: initialParams.get("regioes")?.split(",").filter(Boolean) || [],
+    perfis: initialParams.get("perfis")?.split(",").filter(Boolean) || [],
   });
+
+  // Espelha os filtros de cruzeiros na URL, para que o retorno de um perfil
+  // (e refresh/link direto) preserve tipo, posicionamento, região e perfil.
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (filters.search.trim()) params.q = filters.search.trim();
+    if (filters.tipo !== "all") params.tipo = filters.tipo;
+    if (filters.categoria !== "all") params.categoria = filters.categoria;
+    if (filters.subtipos.length) params.porte = filters.subtipos.join(",");
+    if (filters.regioes.length) params.regioes = filters.regioes.join(",");
+    if (filters.perfis.length) params.perfis = filters.perfis.join(",");
+    const next = new URLSearchParams(params).toString();
+    if (next !== searchParams.toString()) setSearchParams(params, { replace: true });
+  }, [filters, searchParams, setSearchParams]);
+
+  useDirectoryScrollRestore(true);
 
   const toggleFilter = (key: "regioes" | "perfis" | "subtipos", value: string) => {
     setFilters((prev) => ({
