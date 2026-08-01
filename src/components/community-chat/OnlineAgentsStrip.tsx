@@ -41,7 +41,7 @@ interface OnlineAgentsStripProps {
  * and the "+N" popover list. Reuses the existing DM (`start-dm` event ->
  * ChatFloatingButton) and community connection flows — no parallel systems.
  */
-function AgentActions({
+export function AgentActions({
   agent,
   onMessage,
   onViewProfile,
