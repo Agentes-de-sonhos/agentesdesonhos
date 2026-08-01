@@ -59,54 +59,6 @@ function matchCruises(companies: CompanhiaMaritima[], filters: CruiseFilters) {
   });
 }
 
-/**
- * Bloco de filtros recolhível (desktop e mobile), fechado por padrão.
- * O cabeçalho mantém ícone, título, chevron e badge com a quantidade de
- * filtros selecionados. Os filtros ativos continuam resumidos nos chips.
- */
-function FilterGroup({
-  title,
-  icon: Icon,
-  activeCount,
-  children,
-}: {
-  title: string;
-  icon: typeof MapPin;
-  activeCount: number;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  const panelId = useId();
-
-  return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls={panelId}
-        className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/40 transition-colors min-h-[44px]"
-      >
-        <span className="text-sm font-medium text-foreground flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> {title}
-          {activeCount > 0 && (
-            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">
-              {activeCount}
-            </span>
-          )}
-        </span>
-        <ChevronDown
-          aria-hidden="true"
-          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
-        />
-      </button>
-      <div id={panelId} hidden={!open} className="px-4 pb-4 pt-1">
-        <div className="flex flex-wrap gap-1.5">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 export default function CruisesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
