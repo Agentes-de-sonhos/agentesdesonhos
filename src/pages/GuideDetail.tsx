@@ -159,7 +159,7 @@ export default function GuideDetail() {
             <CommunityRecognitionSection
               supplierSource="guide"
               supplierId={guide.id}
-              supplierName={guide.name}
+              supplierName={guide.full_name}
             />
           </div>
 
