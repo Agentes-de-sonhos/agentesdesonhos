@@ -670,8 +670,29 @@ export function AppSidebar() {
                 {section.title}
               </p>
               <nav className="flex flex-col gap-0.5 mt-1">
-                {section.items.filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key))).map((item) => {
-                  const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
+                {section.items
+                  .filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key)))
+                  .flatMap((item) =>
+                    item.children
+                      ? [
+                          { item, depth: 0, isGroupLabel: true as const },
+                          ...item.children.map((child) => ({ item: child, depth: 1, isGroupLabel: false as const })),
+                        ]
+                      : [{ item, depth: 0, isGroupLabel: false as const }]
+                  )
+                  .map(({ item, depth, isGroupLabel }) => {
+                  if (isGroupLabel) {
+                    return (
+                      <p
+                        key={`group-${item.key}`}
+                        className="flex items-center gap-2 px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        <item.icon className="h-3.5 w-3.5" />
+                        {item.title}
+                      </p>
+                    );
+                  }
+                  const itemActive = isItemActive(item.url, item.exactUrl);
                   const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
                   const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
                   const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
@@ -683,6 +704,7 @@ export function AppSidebar() {
                       onClick={(e) => handleMenuClick(item, e)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
+                        depth > 0 && "ml-3 text-[13px]",
                         itemActive && !isLocked
                           ? cn(section.bgColor, section.textColor, "border-l-[3px]", section.borderColor, "font-semibold")
                           : isLocked
