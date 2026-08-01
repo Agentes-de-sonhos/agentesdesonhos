@@ -16,6 +16,7 @@ import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
 import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
@@ -32,6 +33,8 @@ interface MenuItem {
   isHighlighted?: boolean;
   key?: string;
   exactUrl?: boolean;
+  /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
+  activePrefix?: string;
   children?: MenuItem[];
 }
 
@@ -96,30 +99,23 @@ const criarSection: MenuSection = {
   ],
 };
 
-const clientesSection: MenuSection = {
-  title: "GESTÃO DE CLIENTES", key: "section_clientes", icon: Users,
-  hoverColor: "hover:bg-cyan-600 hover:text-white", headerBg: "bg-cyan-600 text-white", headerHoverBg: "hover:bg-cyan-700",
-  bgColor: "bg-cyan-50", textColor: "text-cyan-700", borderColor: "border-cyan-600",
-  items: [
-    { key: "dashboard_clientes", title: "Dashboard", url: "/gestao-clientes/dashboard", icon: LayoutDashboard, requiredFeature: "crm_basic" },
-    { key: "gestao_clientes", title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic" },
-    { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic" },
-    { key: "operacoes", title: "Operações", url: "/gestao-clientes/operacoes", icon: CalendarDays, requiredFeature: "crm_basic" },
-    { key: "meta_vendas", title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial" },
-  ],
+// Links diretos (sem submenu) para as visões gerais das duas áreas.
+const clientesItem: MenuItem = {
+  key: CLIENTES_DIRECT_ITEM.key,
+  title: CLIENTES_DIRECT_ITEM.title,
+  url: CLIENTES_DIRECT_ITEM.url,
+  activePrefix: CLIENTES_DIRECT_ITEM.activePrefix,
+  icon: Users,
+  requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
 };
 
-const financeiroSection: MenuSection = {
-  title: "GESTÃO FINANCEIRA", key: "section_financeiro", icon: DollarSign,
-  hoverColor: "hover:bg-emerald-600 hover:text-white", headerBg: "bg-emerald-600 text-white", headerHoverBg: "hover:bg-emerald-700",
-  bgColor: "bg-emerald-50", textColor: "text-emerald-700", borderColor: "border-emerald-600",
-  items: [
-    { key: "dashboard_fin", title: "Visão Geral", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial" },
-    { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial" },
-    { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial" },
-    { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial" },
-    { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial" },
-  ],
+const financeiroItem: MenuItem = {
+  key: FINANCEIRO_DIRECT_ITEM.key,
+  title: FINANCEIRO_DIRECT_ITEM.title,
+  url: FINANCEIRO_DIRECT_ITEM.url,
+  activePrefix: FINANCEIRO_DIRECT_ITEM.activePrefix,
+  icon: DollarSign,
+  requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
 };
 
 const marketingSection: MenuSection = {
@@ -193,12 +189,12 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const isStartPlan = !isPromotor && plan === "start";
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, marketingSection],
     []
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [],
+    () => [clientesItem, financeiroItem],
     []
   );
 
@@ -246,6 +242,8 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     }
 
     for (const item of standaloneItems) {
+      if (isSectionHiddenForUser(item.key, isAdmin, plan)) continue;
+      if (isItemHiddenForUser(item.key, isAdmin, plan)) continue;
       entries.push({
         type: "item",
         item,
@@ -324,7 +322,10 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     if (item.children) {
       return renderGroupItem(item, sectionBgColor, sectionTextColor, sectionBorderColor);
     }
-    const isActive = location.pathname === item.url || (item.url === "/dashboard" && location.pathname === "/");
+    const isActive =
+      location.pathname === item.url ||
+      (!!item.activePrefix && location.pathname.startsWith(item.activePrefix)) ||
+      (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
     const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
