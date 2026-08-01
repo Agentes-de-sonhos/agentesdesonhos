@@ -347,10 +347,6 @@ function MapaTurismoListing({ category }: { category: string }) {
 
     // Sort
     results = [...results].sort((a, b) => {
-      // Prioridade 1: empresas com perfil preenchido vêm primeiro
-      if (a._hasProfile !== b._hasProfile) {
-        return a._hasProfile ? -1 : 1;
-      }
       if (sortBy === "alpha") return a.name.localeCompare(b.name);
       if (sortBy === "rating") {
         const ra = reviewStatsMap[a.id];
