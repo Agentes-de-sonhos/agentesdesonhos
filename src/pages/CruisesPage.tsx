@@ -214,9 +214,7 @@ export default function CruisesPage() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/mapa-turismo")} className="gap-1 text-muted-foreground">
-            ← Mapa do Turismo
-          </Button>
+          <BackToDirectoryHomeButton />
         </div>
 
         <PageHeader
