@@ -179,8 +179,14 @@ export default function CruisesPage() {
         />
 
         {/* Tipo de navegação + busca compacta na mesma linha */}
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-2">
+        <div
+          data-testid="cruise-filters-row"
+          className="flex flex-col gap-3 md:flex-row md:flex-nowrap md:items-center md:gap-3 lg:gap-4"
+        >
+        <div
+          data-testid="cruise-tipo-group"
+          className="flex flex-nowrap gap-1.5 md:shrink-0 md:gap-2 overflow-x-auto md:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {TIPO_OPTIONS.map((opt) => {
             const Icon = opt.icon;
             const isActive = filters.tipo === opt.value;
@@ -190,7 +196,7 @@ export default function CruisesPage() {
                 key={opt.value}
                 onClick={() => setFilters((p) => ({ ...p, tipo: p.tipo === opt.value ? "all" : opt.value as any }))}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border",
+                  "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-2.5 text-sm font-medium transition-all md:gap-2 lg:px-4",
                   isActive
                     ? "bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]"
                     : "bg-card text-foreground border-border hover:border-primary/30 hover:shadow-sm"
@@ -206,7 +212,10 @@ export default function CruisesPage() {
           })}
         </div>
 
-          <div className="relative w-full md:w-[320px] md:shrink-0">
+          <div
+            data-testid="cruise-search-wrapper"
+            className="relative w-full md:min-w-[240px] md:flex-1 xl:max-w-[420px]"
+          >
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               type="search"
