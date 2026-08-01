@@ -1,6 +1,7 @@
-import { useId, useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { BackToDirectoryHomeButton } from "@/components/mapa-turismo/BackToDirectoryHomeButton";
+import { AdvancedFilters } from "@/components/mapa-turismo/AdvancedFilters";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,54 +58,6 @@ function matchCruises(companies: CompanhiaMaritima[], filters: CruiseFilters) {
     if (filters.perfis.length > 0 && !c.perfis.some((p) => filters.perfis.includes(p.id))) return false;
     return true;
   });
-}
-
-/**
- * Bloco de filtros recolhível (desktop e mobile), fechado por padrão.
- * O cabeçalho mantém ícone, título, chevron e badge com a quantidade de
- * filtros selecionados. Os filtros ativos continuam resumidos nos chips.
- */
-function FilterGroup({
-  title,
-  icon: Icon,
-  activeCount,
-  children,
-}: {
-  title: string;
-  icon: typeof MapPin;
-  activeCount: number;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-  const panelId = useId();
-
-  return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls={panelId}
-        className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-muted/40 transition-colors min-h-[44px]"
-      >
-        <span className="text-sm font-medium text-foreground flex items-center gap-2">
-          <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" /> {title}
-          {activeCount > 0 && (
-            <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">
-              {activeCount}
-            </span>
-          )}
-        </span>
-        <ChevronDown
-          aria-hidden="true"
-          className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
-        />
-      </button>
-      <div id={panelId} hidden={!open} className="px-4 pb-4 pt-1">
-        <div className="flex flex-wrap gap-1.5">{children}</div>
-      </div>
-    </div>
-  );
 }
 
 export default function CruisesPage() {
@@ -266,15 +219,15 @@ export default function CruisesPage() {
           </div>
         </div>
 
-        {/* Filtros avançados recolhíveis */}
-        <div className="space-y-3">
-          {/* Posicionamento */}
-          <FilterGroup
-            title="Posicionamento"
-            icon={Sparkles}
-            activeCount={filters.categoria !== "all" ? 1 : 0}
-          >
-            {CATEGORIA_OPTIONS.map((opt) => {
+        {/* Barra única de filtros avançados (um painel compartilhado) */}
+        <AdvancedFilters
+          groups={[
+            {
+              id: "positioning",
+              label: "Posicionamento",
+              icon: Sparkles,
+              activeCount: filters.categoria !== "all" ? 1 : 0,
+              content: CATEGORIA_OPTIONS.map((opt) => {
               const isActive = filters.categoria === opt.value;
               const count = countFor({ categoria: opt.value as CruiseFilters["categoria"] });
               return (
@@ -294,12 +247,14 @@ export default function CruisesPage() {
                   </span>
                 </button>
               );
-            })}
-          </FilterGroup>
-
-          {/* Region tags */}
-          <FilterGroup title="Regiões" icon={MapPin} activeCount={filters.regioes.length}>
-            {regioes.map((r) => {
+              }),
+            },
+            {
+              id: "regions",
+              label: "Regiões",
+              icon: MapPin,
+              activeCount: filters.regioes.length,
+              content: regioes.map((r) => {
                 const isActive = filters.regioes.includes(r.id);
                 const count = countFor({ regioes: [r.id] });
                 if (count === 0 && !isActive) return null;
@@ -320,13 +275,15 @@ export default function CruisesPage() {
                     </span>
                   </button>
                 );
-            })}
-          </FilterGroup>
-
-          {/* Porte e características */}
-          {subtipoOptions.length > 0 && (
-            <FilterGroup title="Porte e características" icon={Ship} activeCount={filters.subtipos.length}>
-                {subtipoOptions.map((s) => {
+              }),
+            },
+            ...(subtipoOptions.length > 0
+              ? [{
+                  id: "size",
+                  label: "Porte e características",
+                  icon: Ship,
+                  activeCount: filters.subtipos.length,
+                  content: subtipoOptions.map((s) => {
                   const isActive = filters.subtipos.includes(s);
                   const count = countFor({ subtipos: [s] });
                   if (count === 0 && !isActive) return null;
@@ -347,13 +304,15 @@ export default function CruisesPage() {
                       </span>
                     </button>
                   );
-                })}
-            </FilterGroup>
-          )}
-
-          {/* Profile tags */}
-          <FilterGroup title="Perfil do viajante" icon={Users} activeCount={filters.perfis.length}>
-            {perfis.map((p) => {
+                  }),
+                }]
+              : []),
+            {
+              id: "traveler",
+              label: "Perfil do viajante",
+              icon: Users,
+              activeCount: filters.perfis.length,
+              content: perfis.map((p) => {
                 const isActive = filters.perfis.includes(p.id);
                 const count = countFor({ perfis: [p.id] });
                 if (count === 0 && !isActive) return null;
@@ -372,9 +331,10 @@ export default function CruisesPage() {
                     <span className="ml-1 text-[10px] opacity-60">{count}</span>
                   </button>
                 );
-            })}
-          </FilterGroup>
-        </div>
+              }),
+            },
+          ]}
+        />
 
         {/* Active filter chips */}
         {activeChips.length > 0 && (
