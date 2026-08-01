@@ -36,6 +36,12 @@ interface MenuItem {
   /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
   activePrefix?: string;
   children?: MenuItem[];
+  /** Aparência de cabeçalho de seção (caixa alta + cor temática). */
+  sectionStyle?: {
+    headerBg: string;
+    headerHoverBg: string;
+    hoverColor: string;
+  };
 }
 
 interface MenuSection {
