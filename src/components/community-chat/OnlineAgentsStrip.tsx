@@ -259,6 +259,7 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
   const { isAdmin } = useUserRole();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
