@@ -65,6 +65,7 @@ import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
 import {
   Tooltip,
   TooltipContent,
@@ -89,6 +90,10 @@ interface MenuItem {
   requiredPermission?: string;
   /** Only match the exact pathname (avoids parent/child URL collisions). */
   exactUrl?: boolean;
+  /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
+  activePrefix?: string;
+  /** Basta uma destas permissões de equipe para exibir o item. */
+  anyPermission?: string[];
   /** Expandable group of child tools (no route of its own). */
   children?: MenuItem[];
 }
@@ -180,42 +185,25 @@ const criarSection: MenuSection = {
   ],
 };
 
-const clientesSection: MenuSection = {
-  title: "GESTÃO DE CLIENTES",
-  key: "section_clientes",
+// Gestão de Clientes e Gestão Financeira são links diretos (sem submenu).
+const clientesItem: MenuItem = {
+  key: CLIENTES_DIRECT_ITEM.key,
+  title: CLIENTES_DIRECT_ITEM.title,
+  url: CLIENTES_DIRECT_ITEM.url,
+  activePrefix: CLIENTES_DIRECT_ITEM.activePrefix,
   icon: Users,
-  hoverColor: "hover:bg-cyan-600 hover:text-white",
-  headerBg: "bg-cyan-600 text-white",
-  headerHoverBg: "hover:bg-cyan-700",
-  bgColor: "bg-cyan-50",
-  textColor: "text-cyan-700",
-  borderColor: "border-cyan-600",
-  items: [
-    { key: "dashboard_clientes", title: "Visão Geral", url: "/gestao-clientes/dashboard", icon: LayoutDashboard, requiredFeature: "crm_basic", requiredPermission: "dashboard.view" },
-    { key: "gestao_clientes", title: "Clientes", url: "/gestao-clientes/clientes", icon: Users, requiredFeature: "crm_basic", requiredPermission: "clients.view" },
-    { key: "oportunidades", title: "Oportunidades", url: "/gestao-clientes/funil", icon: ShoppingCart, requiredFeature: "crm_basic", requiredPermission: "opportunities.view" },
-    { key: "operacoes", title: "Operações", url: "/gestao-clientes/operacoes", icon: CalendarDays, requiredFeature: "crm_basic", requiredPermission: "operations.view" },
-    { key: "meta_vendas", title: "Meta de Vendas", url: "/gestao-clientes/metas", icon: Calculator, requiredFeature: "financial", requiredPermission: "goals.view" },
-  ],
+  requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
+  anyPermission: CLIENTES_DIRECT_ITEM.anyPermission,
 };
 
-const financeiroSection: MenuSection = {
-  title: "GESTÃO FINANCEIRA",
-  key: "section_financeiro",
+const financeiroItem: MenuItem = {
+  key: FINANCEIRO_DIRECT_ITEM.key,
+  title: FINANCEIRO_DIRECT_ITEM.title,
+  url: FINANCEIRO_DIRECT_ITEM.url,
+  activePrefix: FINANCEIRO_DIRECT_ITEM.activePrefix,
   icon: DollarSign,
-  hoverColor: "hover:bg-emerald-600 hover:text-white",
-  headerBg: "bg-emerald-600 text-white",
-  headerHoverBg: "hover:bg-emerald-700",
-  bgColor: "bg-emerald-50",
-  textColor: "text-emerald-700",
-  borderColor: "border-emerald-600",
-  items: [
-    { key: "dashboard_fin", title: "Visão Geral", url: "/financeiro?tab=dashboard", icon: LayoutDashboard, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "vendas_fin", title: "Vendas", url: "/financeiro?tab=vendas", icon: ShoppingBag, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "entradas", title: "Entradas", url: "/financeiro?tab=entradas", icon: ArrowUpCircle, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "despesas", title: "Despesas", url: "/financeiro?tab=despesas", icon: ArrowDownCircle, requiredFeature: "financial", requiredPermission: "financial.access" },
-    { key: "comissoes", title: "Comissões", url: "/financeiro?tab=comissoes", icon: Receipt, requiredFeature: "financial", requiredPermission: "financial.access" },
-  ],
+  requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
+  anyPermission: FINANCEIRO_DIRECT_ITEM.anyPermission,
 };
 
 const marketingSection: MenuSection = {
@@ -307,6 +295,7 @@ export function AppSidebar() {
       "roteiros",
     ]);
     if (item.key && TEAM_ALLOWED_KEYS.has(item.key)) return true;
+    if (item.anyPermission?.length) return item.anyPermission.some((p) => canPerm(p));
     // Para team member: só mostra itens com requiredPermission liberado
     if (!item.requiredPermission) return false;
     return canPerm(item.requiredPermission);
@@ -361,12 +350,12 @@ export function AppSidebar() {
   );
 
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, marketingSection],
     []
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [],
+    () => [clientesItem, financeiroItem],
     []
   );
 
@@ -417,6 +406,9 @@ export function AppSidebar() {
     }
 
     for (const item of standaloneItems) {
+      if (isSectionHiddenForUser(item.key, isAdmin, plan)) continue;
+      if (isItemHiddenForUser(item.key, isAdmin, plan)) continue;
+      if (!isPermittedForTeam(item)) continue;
       entries.push({
         type: "item",
         item,
@@ -505,6 +497,7 @@ export function AppSidebar() {
     }
     const isActive =
       isItemActive(item.url, item.exactUrl) ||
+      (!!item.activePrefix && location.pathname.startsWith(item.activePrefix)) ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
