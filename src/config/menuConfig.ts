@@ -59,10 +59,12 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
     { key: "dashboard_fin", label: "Dashboard" },
   ],
   marketing: [
-    { key: "cartao_visitas", label: "Cartão de Visitas" },
-    { key: "vitrine_ofertas", label: "Vitrine de Ofertas" },
-    { key: "personalizador_laminas", label: "Personalizador de Lâminas" },
-    { key: "captacao_leads", label: "Captação de Leads" },
-    { key: "conteudo", label: "Conteúdo" },
+    { key: "paginas_vendas", label: "Páginas de vendas personalizadas" },
+    { key: "captacao_leads", label: "Formulário conversacional" },
+    { key: "cartao_visitas", label: "Cartão de visitas" },
+    { key: "outras_marketing", label: "Outras" },
+    { key: "vitrine_ofertas", label: "Vitrine de ofertas" },
+    { key: "conteudo", label: "Legendas, Stories e WhatsApp" },
+    { key: "personalizador_laminas", label: "Personalizador de lâminas" },
   ],
 };

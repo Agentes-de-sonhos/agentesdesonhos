@@ -6,7 +6,7 @@ import {
   Store, CreditCard, Wallet, StickyNote, Home, BookOpen, Compass, CalendarDays, BookMarked,
   Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
   X, Building2, FolderOpen, DollarSign, ShoppingBag, ArrowUpCircle, ArrowDownCircle, LayoutDashboard,
-  Sparkles, Rss, Receipt,
+  Sparkles, Rss, Receipt, MoreHorizontal, ChevronRight, Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,8 @@ interface MenuItem {
   isPremium?: boolean;
   isHighlighted?: boolean;
   key?: string;
+  exactUrl?: boolean;
+  children?: MenuItem[];
 }
 
 interface MenuSection {
@@ -125,11 +127,20 @@ const marketingSection: MenuSection = {
   hoverColor: "hover:bg-pink-600 hover:text-white", headerBg: "bg-pink-600 text-white", headerHoverBg: "hover:bg-pink-700",
   bgColor: "bg-pink-50", textColor: "text-pink-700", borderColor: "border-pink-600",
   items: [
-    { key: "cartao_visitas", title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard },
-    { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
-    { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
-    { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },
-    { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+    { key: "paginas_vendas", title: "Páginas de vendas personalizadas", url: "/meus-leads/landings", icon: Globe },
+    { key: "captacao_leads", title: "Formulário conversacional", url: "/meus-leads", icon: UserPlus, exactUrl: true },
+    { key: "cartao_visitas", title: "Cartão de visitas", url: "/meu-cartao", icon: CreditCard },
+    {
+      key: "outras_marketing",
+      title: "Outras",
+      url: "",
+      icon: MoreHorizontal,
+      children: [
+        { key: "vitrine_ofertas", title: "Vitrine de ofertas", url: "/minha-vitrine", icon: Store },
+        { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+        { key: "personalizador_laminas", title: "Personalizador de lâminas", url: "/personalizador-laminas", icon: Paintbrush },
+      ],
+    },
   ],
 };
 
@@ -167,6 +178,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
   const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -206,7 +218,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
         (it) => !isItemHiddenForUser(it.key, isAdmin, plan)
       );
       if (filteredItems.length === 0) continue;
-      const sortedItems = filteredItems.sort((a, b) => {
+      const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
@@ -268,8 +280,16 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     });
   };
 
+  const isUrlActive = (url: string, exact?: boolean) => {
+    if (!url) return false;
+    if (exact) return location.pathname === url;
+    return location.pathname === url || location.pathname.startsWith(url);
+  };
+
   const isSectionActive = (section: MenuSection) =>
-    section.items.some((i) => location.pathname === i.url || location.pathname.startsWith(i.url));
+    section.items.some((i) =>
+      i.children ? i.children.some((c) => isUrlActive(c.url, c.exactUrl)) : isUrlActive(i.url, i.exactUrl)
+    );
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
@@ -301,6 +321,9 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   );
 
   const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
+    if (item.children) {
+      return renderGroupItem(item, sectionBgColor, sectionTextColor, sectionBorderColor);
+    }
     const isActive = location.pathname === item.url || (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
@@ -333,6 +356,55 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
           {item.title}
         </span>
       </button>
+    );
+  };
+
+  const renderGroupItem = (
+    group: MenuItem,
+    sectionBgColor?: string,
+    sectionTextColor?: string,
+    sectionBorderColor?: string
+  ) => {
+    const children = group.children ?? [];
+    const childActive = children.some((c) => isUrlActive(c.url, c.exactUrl));
+    const groupKey = group.key || group.title;
+    const groupId = `drawer-group-${groupKey}`;
+    const isOpen = openGroups[groupKey] ?? childActive;
+    const GroupIcon = group.icon;
+
+    return (
+      <div key={groupKey} className="flex flex-col">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={groupId}
+          onClick={() => setOpenGroups((prev) => ({ ...prev, [groupKey]: !isOpen }))}
+          className={cn(
+            "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
+            childActive && sectionBgColor
+              ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
+              : sectionBgColor
+                ? cn(sectionBgColor, sectionTextColor)
+                : "text-sidebar-foreground hover:bg-sidebar-accent"
+          )}
+        >
+          <GroupIcon className="h-5 w-5 flex-shrink-0" />
+          <span className="truncate flex-1">{group.title}</span>
+          {isOpen ? (
+            <ChevronDown className="h-4 w-4 flex-shrink-0" />
+          ) : (
+            <ChevronRight className="h-4 w-4 flex-shrink-0" />
+          )}
+        </button>
+        {isOpen && (
+          <nav
+            id={groupId}
+            className="flex flex-col gap-0.5 mt-0.5 ml-4 pl-2 border-l border-border/60 animate-fade-in [&_button]:text-[13px] [&_button]:py-2"
+          >
+            {children.map((child) => renderMenuItem(child, sectionBgColor, sectionTextColor, sectionBorderColor))}
+          </nav>
+        )}
+      </div>
     );
   };
 

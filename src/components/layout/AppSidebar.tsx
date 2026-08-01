@@ -47,6 +47,8 @@ import {
   Rss,
   User,
   Receipt,
+  MoreHorizontal,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -85,6 +87,10 @@ interface MenuItem {
   isHighlighted?: boolean;
   key?: string;
   requiredPermission?: string;
+  /** Only match the exact pathname (avoids parent/child URL collisions). */
+  exactUrl?: boolean;
+  /** Expandable group of child tools (no route of its own). */
+  children?: MenuItem[];
 }
 
 interface MenuSection {
@@ -223,11 +229,20 @@ const marketingSection: MenuSection = {
   textColor: "text-pink-700",
   borderColor: "border-pink-600",
   items: [
-    { key: "cartao_visitas", title: "Cartão de Visitas", url: "/meu-cartao", icon: CreditCard, requiredFeature: "business_card" },
-    { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store, requiredFeature: "showcase" },
-    { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush, requiredFeature: "lamina_customizer" },
-    { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus, requiredFeature: "lead_capture" },
-    { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+    { key: "paginas_vendas", title: "Páginas de vendas personalizadas", url: "/meus-leads/landings", icon: Globe, requiredFeature: "lead_capture" },
+    { key: "captacao_leads", title: "Formulário conversacional", url: "/meus-leads", icon: UserPlus, requiredFeature: "lead_capture", exactUrl: true },
+    { key: "cartao_visitas", title: "Cartão de visitas", url: "/meu-cartao", icon: CreditCard, requiredFeature: "business_card" },
+    {
+      key: "outras_marketing",
+      title: "Outras",
+      url: "",
+      icon: MoreHorizontal,
+      children: [
+        { key: "vitrine_ofertas", title: "Vitrine de ofertas", url: "/minha-vitrine", icon: Store, requiredFeature: "showcase" },
+        { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
+        { key: "personalizador_laminas", title: "Personalizador de lâminas", url: "/personalizador-laminas", icon: Paintbrush, requiredFeature: "lamina_customizer" },
+      ],
+    },
   ],
 };
 
@@ -270,6 +285,7 @@ export function AppSidebar() {
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
   const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -370,7 +386,9 @@ export function AppSidebar() {
         .filter(isPermittedForTeam)
         .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan));
       if (filteredItems.length === 0) continue;
-      const sortedItems = filteredItems.sort((a, b) => {
+      // Ferramentas de Marketing tem hierarquia fixa (com o grupo "Outras"),
+      // portanto não é reordenada pela configuração administrativa.
+      const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
         const sectionOrder = orderMap[sectionKey] || {};
         return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
@@ -431,16 +449,22 @@ export function AppSidebar() {
     });
   };
 
-  const isItemActive = (itemUrl: string) => {
+  const isItemActive = (itemUrl: string, exact?: boolean) => {
+    if (!itemUrl) return false;
     const [pathname, search] = itemUrl.split("?");
     if (search) {
       return location.pathname === pathname && location.search === `?${search}`;
     }
+    if (exact) return location.pathname === itemUrl;
     return location.pathname === itemUrl || location.pathname.startsWith(itemUrl);
   };
 
-  const isSectionActive = (section: MenuSection) =>
-    section.items.some((i) => isItemActive(i.url));
+  const isItemOrChildActive = (item: MenuItem): boolean =>
+    item.children
+      ? item.children.some((c) => isItemActive(c.url, c.exactUrl))
+      : isItemActive(item.url, item.exactUrl);
+
+  const isSectionActive = (section: MenuSection) => section.items.some(isItemOrChildActive);
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
@@ -476,8 +500,11 @@ export function AppSidebar() {
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
 
   const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string, forceShowLock?: boolean) => {
+    if (item.children) {
+      return renderGroupItem(item, sectionBgColor, sectionTextColor, sectionBorderColor);
+    }
     const isActive =
-      isItemActive(item.url) ||
+      isItemActive(item.url, item.exactUrl) ||
       (item.url === "/dashboard" && location.pathname === "/");
     const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
     const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
@@ -544,6 +571,68 @@ export function AppSidebar() {
     return menuLink;
   };
 
+  const renderGroupItem = (
+    group: MenuItem,
+    sectionBgColor?: string,
+    sectionTextColor?: string,
+    sectionBorderColor?: string
+  ) => {
+    const children = group.children ?? [];
+    const childActive = children.some((c) => isItemActive(c.url, c.exactUrl));
+    const groupId = `menu-group-${group.key}`;
+    const isOpen = openGroups[group.key || group.title] ?? childActive;
+    const GroupIcon = group.icon;
+
+    return (
+      <div key={group.key || group.title} className="flex flex-col">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={groupId}
+          onClick={() =>
+            setOpenGroups((prev) => ({
+              ...prev,
+              [group.key || group.title]: !isOpen,
+            }))
+          }
+          className={cn(
+            "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300 w-full text-left",
+            collapsed ? "py-1" : "py-1.5",
+            childActive && sectionBgColor
+              ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
+              : sectionBgColor
+                ? cn(sectionBgColor, sectionTextColor, "hover:font-semibold")
+                : "text-sidebar-foreground hover:bg-sidebar-accent"
+          )}
+        >
+          <GroupIcon className="h-5 w-5 flex-shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="truncate flex-1">{group.title}</span>
+              {isOpen ? (
+                <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
+              )}
+            </>
+          )}
+        </button>
+        {isOpen && !collapsed && (
+          <nav
+            id={groupId}
+            className="flex flex-col gap-0.5 mt-0.5 ml-4 pl-2 border-l border-border/60 animate-fade-in [&_a]:text-[13px]"
+          >
+            {children.map((child) => (
+              <Fragment key={child.url}>
+                {renderSingleItem(child, sectionBgColor, sectionTextColor, sectionBorderColor)}
+              </Fragment>
+            ))}
+          </nav>
+        )}
+      </div>
+    );
+  };
+
   const renderSection = (section: MenuSection) => {
     const isActive = isSectionActive(section);
     const hasExplicitState = section.title in openSections;
@@ -581,8 +670,29 @@ export function AppSidebar() {
                 {section.title}
               </p>
               <nav className="flex flex-col gap-0.5 mt-1">
-                {section.items.filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key))).map((item) => {
-                  const itemActive = location.pathname === item.url || location.pathname.startsWith(item.url);
+                {section.items
+                  .filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key)))
+                  .flatMap((item) =>
+                    item.children
+                      ? [
+                          { item, depth: 0, isGroupLabel: true as const },
+                          ...item.children.map((child) => ({ item: child, depth: 1, isGroupLabel: false as const })),
+                        ]
+                      : [{ item, depth: 0, isGroupLabel: false as const }]
+                  )
+                  .map(({ item, depth, isGroupLabel }) => {
+                  if (isGroupLabel) {
+                    return (
+                      <p
+                        key={`group-${item.key}`}
+                        className="flex items-center gap-2 px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+                      >
+                        <item.icon className="h-3.5 w-3.5" />
+                        {item.title}
+                      </p>
+                    );
+                  }
+                  const itemActive = isItemActive(item.url, item.exactUrl);
                   const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
                   const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
                   const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
@@ -594,6 +704,7 @@ export function AppSidebar() {
                       onClick={(e) => handleMenuClick(item, e)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
+                        depth > 0 && "ml-3 text-[13px]",
                         itemActive && !isLocked
                           ? cn(section.bgColor, section.textColor, "border-l-[3px]", section.borderColor, "font-semibold")
                           : isLocked
