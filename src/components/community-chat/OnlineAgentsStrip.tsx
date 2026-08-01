@@ -268,6 +268,8 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
       setUpgradeOpen(true);
       return;
     }
+    // Never open a conversation with yourself.
+    if (user?.id === agent.user_id) return;
     if (onAgentClick) {
       onAgentClick(agent);
     } else {
