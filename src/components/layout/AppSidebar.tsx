@@ -96,6 +96,12 @@ interface MenuItem {
   anyPermission?: string[];
   /** Expandable group of child tools (no route of its own). */
   children?: MenuItem[];
+  /** Renderiza o item com aparência de cabeçalho de seção (caixa alta + cor temática). */
+  sectionStyle?: {
+    headerBg: string;
+    headerHoverBg: string;
+    hoverColor: string;
+  };
 }
 
 interface MenuSection {
