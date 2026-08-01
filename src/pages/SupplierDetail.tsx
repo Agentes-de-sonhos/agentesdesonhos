@@ -15,6 +15,8 @@ import { RichContentEditor } from "@/components/operator/RichContentEditor";
 import { RichContentDisplay } from "@/components/operator/RichContentDisplay";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
 import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
+import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
+import { reviewTargetKey } from "@/lib/communityReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
@@ -118,13 +120,8 @@ export default function SupplierDetail() {
       reviewModalOpen={reviewModalOpen}
       setReviewModalOpen={setReviewModalOpen}
       handleReviewClick={handleReviewClick}
-      reviews={reviews}
-      reviewsLoading={reviewsLoading}
-      userReview={userReview}
       averageRating={averageRating}
       totalReviews={totalReviews}
-      submitReview={submitReview}
-      deleteReview={deleteReview}
       updateMutation={updateMutation}
     />
   );
@@ -132,7 +129,7 @@ export default function SupplierDetail() {
   return isAdmin ? <EditModeProvider>{content}</EditModeProvider> : content;
 }
 
-function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, reviews, reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview, updateMutation }: any) {
+function SupplierContent({ supplier, contacts, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, averageRating, totalReviews, updateMutation }: any) {
   const [editName, setEditName] = useState(supplier.name);
   const [editLogo, setEditLogo] = useState(supplier.logo_url);
   const [editHowToSell, setEditHowToSell] = useState(supplier.how_to_sell || "");

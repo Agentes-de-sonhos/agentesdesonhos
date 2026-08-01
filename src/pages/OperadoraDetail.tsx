@@ -16,6 +16,8 @@ import { CertificationsCard } from "@/components/operator/CertificationsCard";
 import { OperatorSidebar } from "@/components/operator/OperatorSidebar";
 import { SupplierMaterialsCard } from "@/components/supplier/SupplierMaterialsCard";
 import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
+import { useSupplierReviewStatsMap } from "@/hooks/useCommunityReviews";
+import { reviewTargetKey } from "@/lib/communityReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useOperatorUpdate } from "@/hooks/useOperatorUpdate";
@@ -111,13 +113,8 @@ export default function OperadoraDetail() {
       reviewModalOpen={reviewModalOpen}
       setReviewModalOpen={setReviewModalOpen}
       handleReviewClick={handleReviewClick}
-      reviews={reviews}
-      reviewsLoading={reviewsLoading}
-      userReview={userReview}
       averageRating={averageRating}
       totalReviews={totalReviews}
-      submitReview={submitReview}
-      deleteReview={deleteReview}
       updateMutation={updateMutation}
     />
   );
@@ -125,7 +122,7 @@ export default function OperadoraDetail() {
   return isAdmin ? <EditModeProvider>{content}</EditModeProvider> : content;
 }
 
-function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, reviews, reviewsLoading, userReview, averageRating, totalReviews, submitReview, deleteReview, updateMutation }: any) {
+function OperadoraContent({ operator, isAdmin, navigate, reviewModalOpen, setReviewModalOpen, handleReviewClick, averageRating, totalReviews, updateMutation }: any) {
   // Edit state
   const [editName, setEditName] = useState(operator.name);
   const [editLogo, setEditLogo] = useState(operator.logo_url);
