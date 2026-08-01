@@ -62,3 +62,47 @@ describe("resolveDirectoryReturn", () => {
     );
   });
 });
+
+describe("resolveDirectoryReturn — compatibilidade do contexto armazenado", () => {
+  beforeEach(() => sessionStorage.clear());
+
+  const store = (path: string, scrollY?: number) =>
+    sessionStorage.setItem("mapaTurismo:return", JSON.stringify({ path, scrollY }));
+
+  it("1) storage de Consolidadoras + acesso direto a um Parque volta para Parques", () => {
+    store("/mapa-turismo?categoria=Consolidadoras&busca=cvc", 900);
+    const r = resolveDirectoryReturn(null, { category: "Parques e atrações" });
+    expect(r.path).toBe("/mapa-turismo?categoria=Parques%20e%20atra%C3%A7%C3%B5es");
+    expect(r.scrollY).toBeUndefined();
+  });
+
+  it("2) storage de Cruzeiros + detalhe de Cruzeiros preserva filtros", () => {
+    store("/mapa-turismo/cruzeiros?tipo=Fluvial&porte=Navio%20Grande", 420);
+    const r = resolveDirectoryReturn(null, { path: "/mapa-turismo/cruzeiros", category: "Cruzeiros" });
+    expect(r.path).toBe("/mapa-turismo/cruzeiros?tipo=Fluvial&porte=Navio%20Grande");
+    expect(r.scrollY).toBe(420);
+  });
+
+  it("2b) storage de outra categoria não vaza para o detalhe de Cruzeiros", () => {
+    store("/mapa-turismo?categoria=Consolidadoras");
+    const r = resolveDirectoryReturn(null, { path: "/mapa-turismo/cruzeiros", category: "Cruzeiros" });
+    expect(r.path).toBe("/mapa-turismo/cruzeiros");
+  });
+
+  it("3) storage de Parques + detalhe de Parque preserva busca e filtros", () => {
+    const path = "/mapa-turismo?categoria=Parques%20e%20atra%C3%A7%C3%B5es&busca=kennedy&ordenar=nome";
+    store(path, 250);
+    const r = resolveDirectoryReturn(null, { category: "Parques" });
+    expect(r.path).toBe(path);
+    expect(r.scrollY).toBe(250);
+  });
+
+  it("4) rejeita prefixos parecidos como /mapa-turismo-malicioso", () => {
+    expect(isDirectoryPath("/mapa-turismo-malicioso")).toBe(false);
+    expect(isDirectoryPath("/mapa-turismo-malicioso?categoria=Guias")).toBe(false);
+    expect(isDirectoryPath("/mapa-turismo")).toBe(true);
+    expect(isDirectoryPath("/mapa-turismo/cruzeiros")).toBe(true);
+    store("/mapa-turismo-malicioso?categoria=Guias");
+    expect(resolveDirectoryReturn(null, { category: "Guias" }).path).toBe("/mapa-turismo?categoria=Guias");
+  });
+});
