@@ -269,6 +269,15 @@ const App = () => (
               <Route path="/mapa-turismo" element={<MapaTurismo />} />
               <Route path="/mapa-turismo/cruzeiros" element={<CruisesPage />} />
               <Route path="/mapa-turismo/cruzeiros/:id" element={<CruiseDetailPage />} />
+              <Route path="/mapa-turismo/operadoras" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/consolidadoras" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/companhias-aereas" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/hospedagem" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/locadoras" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/seguros" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/parques" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/receptivos" element={<MapaTurismo />} />
+              <Route path="/mapa-turismo/guias" element={<MapaTurismo />} />
               <Route path="/mapa-turismo/operadora/:id" element={<OperadoraDetail />} />
               <Route path="/mapa-turismo/guia/:id" element={<GuideDetail />} />
               <Route path="/mapa-turismo/:id" element={<SupplierDetail />} />

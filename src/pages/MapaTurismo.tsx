@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,7 +43,15 @@ import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
 import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
-import { CRUISES_ROOT, captureDirectoryReturn, dedicatedDirectoryRoute, hasDedicatedDirectoryRoute } from "@/lib/directoryNavigation";
+import {
+  DIRECTORY_ROOT,
+  captureDirectoryReturn,
+  categoryFromDirectoryPath,
+  categoryListingRoute,
+  directoryServiceTitle,
+  isSpecializedDirectoryCategory,
+} from "@/lib/directoryNavigation";
+import { BackToDirectoryHomeButton } from "@/components/mapa-turismo/BackToDirectoryHomeButton";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -53,7 +61,6 @@ interface CategoryDef {
   color: string;
   activeColor: string;
   iconColor: string;
-  link?: string;
 }
 
 const CATEGORIES_DATA: CategoryDef[] = [
@@ -62,16 +69,12 @@ const CATEGORIES_DATA: CategoryDef[] = [
   { title: "Cias Aéreas", icon: Plane, category: "Companhias aéreas", color: "bg-sky-100 text-sky-700", activeColor: "bg-sky-500 text-white", iconColor: "text-sky-500" },
   { title: "Hospedagem", icon: Hotel, category: "Hospedagem", color: "bg-amber-100 text-amber-700", activeColor: "bg-amber-500 text-white", iconColor: "text-amber-500" },
   { title: "Locadoras", icon: Car, category: "Locadoras de veículos", color: "bg-emerald-100 text-emerald-700", activeColor: "bg-emerald-500 text-white", iconColor: "text-emerald-500" },
-  // Cruzeiros tem experiência dedicada (/mapa-turismo/cruzeiros): a aba navega para lá.
-  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500", link: CRUISES_ROOT },
+  { title: "Cruzeiros", icon: Ship, category: "Cruzeiros", color: "bg-cyan-100 text-cyan-700", activeColor: "bg-cyan-500 text-white", iconColor: "text-cyan-500" },
   { title: "Seguros", icon: Shield, category: "Seguros viagem", color: "bg-rose-100 text-rose-700", activeColor: "bg-rose-500 text-white", iconColor: "text-rose-500" },
   { title: "Parques", icon: Ticket, category: "Parques e atrações", color: "bg-pink-100 text-pink-700", activeColor: "bg-pink-500 text-white", iconColor: "text-pink-500" },
   { title: "Receptivos", icon: MapPin, category: "Receptivos", color: "bg-orange-100 text-orange-700", activeColor: "bg-orange-500 text-white", iconColor: "text-orange-500" },
   { title: "Guias", icon: Users, category: "Guias", color: "bg-teal-100 text-teal-700", activeColor: "bg-teal-500 text-white", iconColor: "text-teal-500" },
 ];
-
-const CATEGORY_NAMES = CATEGORIES_DATA.map((c) => c.category);
-const DEFAULT_CATEGORY = "Operadoras de turismo";
 
 interface Specialty {
   id: string;
@@ -81,28 +84,91 @@ interface Specialty {
 type SortOption = "alpha" | "rating" | "likes";
 
 /**
- * URLs antigas com `?categoria=Cruzeiros` (ou apelidos) são redirecionadas para a
- * listagem dedicada antes de qualquer render da grade genérica (sem flash).
+ * Duas camadas:
+ * 1. `/mapa-turismo` → home neutra (apenas seletor de serviços);
+ * 2. `/mapa-turismo/<slug>` → listagem isolada do serviço.
+ *
+ * URLs antigas `?categoria=<categoria>` são redirecionadas (replace) para a rota
+ * canônica, preservando os filtros relevantes da query.
  */
 export default function MapaTurismo() {
   const [params] = useSearchParams();
-  const dedicated = dedicatedDirectoryRoute(params.get("categoria"));
-  if (dedicated) return <Navigate to={dedicated} replace />;
-  return <MapaTurismoDirectory />;
+  const { pathname } = useLocation();
+
+  const routeCategory = categoryFromDirectoryPath(pathname);
+  if (routeCategory) {
+    return <MapaTurismoListing key={routeCategory} category={routeCategory} />;
+  }
+
+  const rawCategoria = params.get("categoria");
+  if (rawCategoria) {
+    const target = categoryListingRoute(rawCategoria);
+    if (!target) return <Navigate to={DIRECTORY_ROOT} replace />;
+    const query = new URLSearchParams(params);
+    query.delete("categoria");
+    const search = query.toString();
+    return <Navigate to={search ? `${target}?${search}` : target} replace />;
+  }
+
+  return <MapaTurismoHome />;
 }
 
-function MapaTurismoDirectory() {
+/** Home neutra: cabeçalho + seletor de serviços. Nada selecionado, sem listagem. */
+function MapaTurismoHome() {
+  const navigate = useNavigate();
+  return (
+    <DashboardLayout>
+      <div className="space-y-6 animate-fade-in">
+        <PageHeader
+          pageKey="mapa-turismo"
+          title="Mapa do Turismo"
+          subtitle="Encontre parceiros do trade turístico"
+          icon={Globe}
+          adminTab="trade-suppliers"
+        />
+
+        <div
+          className="grid gap-3 w-full"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))" }}
+        >
+          {CATEGORIES_DATA.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.category}
+                onClick={() => navigate(categoryListingRoute(cat.category) ?? DIRECTORY_ROOT)}
+                aria-label={`Explorar ${cat.title}`}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border border-transparent",
+                  cat.color,
+                  "hover:scale-[1.02] hover:shadow-md hover:border-border/50",
+                )}
+              >
+                <Icon className={cn("h-6 w-6", cat.iconColor)} />
+                <span className="text-center leading-tight px-1">{cat.title}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          Selecione um serviço para explorar os parceiros
+        </p>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function MapaTurismoListing({ category }: { category: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialParams = useRef(new URLSearchParams(searchParams)).current;
-  const initialCategoria = initialParams.get("categoria");
   const initialSort = initialParams.get("ordenar");
   const initialHosp = initialParams.get("hosp");
   const [search, setSearch] = useState(initialParams.get("q") || "");
-  const [categoryFilter, setCategoryFilter] = useState<string>(
-    initialCategoria && (CATEGORY_NAMES.includes(initialCategoria) || initialCategoria === "all")
-      ? initialCategoria
-      : DEFAULT_CATEGORY,
-  );
+  const categoryFilter = category;
+  const serviceTitle = directoryServiceTitle(category) ?? category;
+  const serviceDef = CATEGORIES_DATA.find((c) => c.category === category);
+  const ServiceIcon = serviceDef?.icon ?? Globe;
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>(
     initialParams.get("especialidade")?.split(",").filter(Boolean) || [],
   );
@@ -128,7 +194,6 @@ function MapaTurismoDirectory() {
   // ordenação), tornando refresh, link direto e histórico do navegador previsíveis.
   useEffect(() => {
     const params: Record<string, string> = {};
-    if (categoryFilter !== "all") params.categoria = categoryFilter;
     if (selectedSpecialties.length > 0) params.especialidade = selectedSpecialties.join(",");
     if (search.trim()) params.q = search.trim();
     if (sortBy !== "alpha") params.ordenar = sortBy;
@@ -137,22 +202,10 @@ function MapaTurismoDirectory() {
     if (next !== searchParams.toString()) {
       setSearchParams(params, { replace: true });
     }
-  }, [categoryFilter, selectedSpecialties, search, sortBy, hospQuickFilter, searchParams, setSearchParams]);
+  }, [selectedSpecialties, search, sortBy, hospQuickFilter, searchParams, setSearchParams]);
 
   // Restaura a rolagem quando o usuário volta de um perfil.
   useDirectoryScrollRestore(true);
-
-  const handleCategoryChange = (cat: CategoryDef) => {
-    // Categorias com experiência dedicada (Cruzeiros) navegam para a rota própria.
-    if (cat.link) {
-      navigate(cat.link);
-      return;
-    }
-    const newCat = categoryFilter === cat.category ? "all" : cat.category;
-    setCategoryFilter(newCat);
-    setSelectedSpecialties([]);
-    setHospQuickFilter(null);
-  };
 
   const handleSpecialtiesChange = (specialties: string[]) => {
     setSelectedSpecialties(specialties);
@@ -160,7 +213,6 @@ function MapaTurismoDirectory() {
 
   const clearAllFilters = () => {
     setSearch("");
-    setCategoryFilter(DEFAULT_CATEGORY);
     setSelectedSpecialties([]);
     setHospQuickFilter(null);
   };
@@ -239,10 +291,9 @@ function MapaTurismoDirectory() {
         _hasProfile: isFilled(g.bio) || isFilled(g.about),
       };
     });
-    // Companhias marítimas têm listagem dedicada (/mapa-turismo/cruzeiros) e
-    // nunca são renderizadas na grade genérica do diretório.
+    // Companhias marítimas vêm da fonte especializada (/mapa-turismo/cruzeiros).
     return [...fromSuppliers, ...fromOperators, ...fromTravelMeet, ...fromGuides].filter(
-      (item: any) => !hasDedicatedDirectoryRoute(item.category),
+      (item: any) => !isSpecializedDirectoryCategory(item.category),
     );
   }, [suppliers, tourOperators, travelMeetSuppliers, tourGuides]);
 
@@ -359,39 +410,17 @@ function MapaTurismoDirectory() {
     <DashboardLayout>
       
       <div className="space-y-6 animate-fade-in">
+        <div className="flex items-center gap-2">
+          <BackToDirectoryHomeButton />
+        </div>
+
         <PageHeader
           pageKey="mapa-turismo"
-          title="Mapa do Turismo"
+          title={serviceTitle}
           subtitle="Encontre parceiros do trade turístico"
-          icon={Globe}
+          icon={ServiceIcon}
           adminTab="trade-suppliers"
         />
-
-        {/* Category grid */}
-        <div
-          className="grid gap-3 w-full"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))" }}
-        >
-          {CATEGORIES_DATA.map((cat) => {
-            const Icon = cat.icon;
-            const isActive = categoryFilter === cat.category;
-            return (
-              <button
-                key={cat.category}
-                onClick={() => handleCategoryChange(cat)}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
-                  isActive
-                    ? `${cat.activeColor} shadow-lg ring-2 ring-offset-2 ring-offset-background ring-current scale-[1.02] border-transparent`
-                    : `${cat.color} border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/50`
-                )}
-              >
-                <Icon className={cn("h-6 w-6", isActive ? "text-white" : cat.iconColor)} />
-                <span className="text-center leading-tight px-1">{cat.title}</span>
-              </button>
-            );
-          })}
-        </div>
 
         {/* Filters row: search + specialties inline */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-wrap">

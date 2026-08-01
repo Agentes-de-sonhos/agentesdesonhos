@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { LucideIcon, Plane, Building2, Hotel, Car, Ship, Shield, Ticket, MapPin, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DIRECTORY_ROOT, categoryListingRoute } from "@/lib/directoryNavigation";
 
 interface CategoryCardProps {
   title: string;
@@ -26,7 +27,7 @@ function CategoryCard({ title, icon: Icon, category, color }: CategoryCardProps)
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/mapa-turismo?categoria=${encodeURIComponent(category)}`);
+    navigate(categoryListingRoute(category) ?? DIRECTORY_ROOT);
   };
 
   return (

@@ -1,5 +1,6 @@
 import { useId, useState, useMemo, useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { BackToDirectoryHomeButton } from "@/components/mapa-turismo/BackToDirectoryHomeButton";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -214,9 +215,7 @@ export default function CruisesPage() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/mapa-turismo")} className="gap-1 text-muted-foreground">
-            ← Mapa do Turismo
-          </Button>
+          <BackToDirectoryHomeButton />
         </div>
 
         <PageHeader
