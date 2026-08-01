@@ -32,9 +32,6 @@ import {
   Star,
   ThumbsUp,
   ArrowUpDown,
-  Anchor,
-  Waves,
-  Compass,
   CheckCircle2,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
