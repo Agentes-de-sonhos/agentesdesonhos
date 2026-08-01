@@ -101,7 +101,7 @@ describe("Próximas Viagens — uma viagem = um item", () => {
 
   it("filters by period and real trip situation", () => {
     const rows = [trip({ id: "x", daysRemaining: 40 }), trip({ id: "y", daysRemaining: 3 }), trip({ id: "z", daysRemaining: -2, inProgress: true })] as any[];
-    expect(filterUpcomingTrips(rows, { search: "", period: "7", status: "all" }).map((t) => t.id)).toEqual(["z", "y"].sort((a, b) => 0) as any);
+    expect(filterUpcomingTrips(rows, { search: "", period: "7", status: "all" }).map((t) => t.id)).toEqual(["y", "z"]);
     expect(filterUpcomingTrips(rows, { search: "", period: "all", status: "in_progress" }).map((t) => t.id)).toEqual(["z"]);
     expect(filterUpcomingTrips(rows, { search: "", period: "all", status: "future" }).map((t) => t.id)).toHaveLength(2);
   });
