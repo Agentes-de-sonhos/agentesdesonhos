@@ -82,10 +82,30 @@ export function WorkspaceGate({ children }: Props) {
   }
 
   return (
-    <WorkspaceProvider initialPath={decision.initialPath} initialTitle={decision.initialTitle}>
+    <WorkspaceProvider
+      initialPath={decision.initialPath}
+      initialTitle={decision.initialTitle}
+      homePath={resolveHomePath({ role, plan })}
+    >
       <WorkspaceShell>{children}</WorkspaceShell>
     </WorkspaceProvider>
   );
+}
+
+/** Home ("Inicial") route for the pinned first tab, per role/plan. */
+export function resolveHomePath({
+  role,
+  plan,
+}: {
+  role: string | null | undefined;
+  plan: string | null | undefined;
+}): string {
+  if (role === "admin") return "/admin";
+  if (role === "fornecedor") return "/dashboard-fornecedor";
+  if (plan === "educa_pass") return "/educa-academy";
+  if (plan === "cartao_digital") return "/meu-cartao";
+  if (plan === "start") return "/dashboard-start";
+  return "/dashboard";
 }
 
 function deriveInitialTitle(pathname: string): string {
