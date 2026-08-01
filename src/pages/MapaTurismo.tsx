@@ -45,6 +45,8 @@ import { useSupplierReviews } from "@/hooks/useSupplierReviews";
 import { useOperatorReviews } from "@/hooks/useOperatorReviews";
 import { useTravelMeetSuppliers } from "@/hooks/useTravelMeetSuppliers";
 import { useApprovedTourGuides } from "@/hooks/useTourGuides";
+import { useDirectoryScrollRestore } from "@/hooks/useDirectoryReturn";
+import { captureDirectoryReturn } from "@/lib/directoryNavigation";
 import { toast } from "sonner";
 
 interface CategoryDef {
@@ -670,7 +672,8 @@ export default function MapaTurismo() {
                         ? `/mapa-turismo/operadora/${supplier.id}`
                         : supplier._source === "guide"
                         ? `/mapa-turismo/guia/${supplier.id}`
-                        : `/mapa-turismo/${supplier.id}`
+                        : `/mapa-turismo/${supplier.id}`,
+                      captureDirectoryReturn()
                     );
                   }}
                 >
