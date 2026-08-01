@@ -40,6 +40,61 @@ export const DIRECTORY_CATEGORIES = [
   "Guias",
 ] as const;
 
+/**
+ * Configuração única do Mapa do Turismo: categoria oficial → título curto,
+ * slug/rota canônica e se a categoria possui experiência especializada.
+ */
+export interface DirectoryServiceConfig {
+  category: string;
+  /** Nome amigável usado nos títulos das listagens. */
+  title: string;
+  slug: string;
+  /** true apenas para categorias com página/fonte de dados especializada. */
+  specialized?: boolean;
+}
+
+export const DIRECTORY_SERVICES: DirectoryServiceConfig[] = [
+  { category: "Operadoras de turismo", title: "Operadoras", slug: "operadoras" },
+  { category: "Consolidadoras", title: "Consolidadoras", slug: "consolidadoras" },
+  { category: "Companhias aéreas", title: "Companhias Aéreas", slug: "companhias-aereas" },
+  { category: "Hospedagem", title: "Hospedagem", slug: "hospedagem" },
+  { category: "Locadoras de veículos", title: "Locadoras", slug: "locadoras" },
+  { category: "Cruzeiros", title: "Cruzeiros", slug: "cruzeiros", specialized: true },
+  { category: "Seguros viagem", title: "Seguros", slug: "seguros" },
+  { category: "Parques e atrações", title: "Parques", slug: "parques" },
+  { category: "Receptivos", title: "Receptivos", slug: "receptivos" },
+  { category: "Guias", title: "Guias", slug: "guias" },
+];
+
+const SERVICE_BY_CATEGORY = new Map(DIRECTORY_SERVICES.map((s) => [s.category, s]));
+const SERVICE_BY_SLUG = new Map(DIRECTORY_SERVICES.map((s) => [s.slug, s]));
+
+/** Rota canônica da listagem isolada de uma categoria. */
+export function categoryListingRoute(category?: string | null): string | null {
+  const resolved = resolveDirectoryCategory(category);
+  const service = resolved ? SERVICE_BY_CATEGORY.get(resolved) : null;
+  return service ? `${DIRECTORY_ROOT}/${service.slug}` : null;
+}
+
+/** Alias explícito exigido pela arquitetura de rotas. */
+export const routeForDirectoryCategory = categoryListingRoute;
+
+/** Configuração do serviço a partir da categoria. */
+export function directoryServiceForCategory(category?: string | null): DirectoryServiceConfig | null {
+  const resolved = resolveDirectoryCategory(category);
+  return resolved ? SERVICE_BY_CATEGORY.get(resolved) ?? null : null;
+}
+
+/** Título amigável da listagem (ex.: "Companhias Aéreas"). */
+export function directoryServiceTitle(category?: string | null): string | null {
+  return directoryServiceForCategory(category)?.title ?? null;
+}
+
+/** true apenas para categorias com fonte/página especializada (hoje: Cruzeiros). */
+export function isSpecializedDirectoryCategory(category?: string | null): boolean {
+  return directoryServiceForCategory(category)?.specialized === true;
+}
+
 const normalize = (value: string) =>
   value
     .normalize("NFD")
@@ -105,30 +160,17 @@ export function resolveDirectoryCategory(category?: string | null): string | nul
 
 /** URL do diretório já posicionada na categoria informada. */
 export function directoryPathForCategory(category?: string | null): string {
-  const resolved = resolveDirectoryCategory(category);
-  const dedicated = dedicatedDirectoryRoute(resolved);
-  if (dedicated) return dedicated;
-  return resolved ? `${DIRECTORY_ROOT}?categoria=${encodeURIComponent(resolved)}` : DIRECTORY_ROOT;
+  return categoryListingRoute(category) ?? DIRECTORY_ROOT;
 }
 
-/**
- * Categorias com experiência dedicada própria (listagem especializada).
- * Centraliza a decisão de rota: "Cruzeiros" NUNCA volta a ser uma categoria
- * genérica da grade do Mapa do Turismo.
- */
-const DEDICATED_ROUTES: Record<string, string> = {
-  Cruzeiros: CRUISES_ROOT,
-};
-
-/** Rota dedicada da categoria, quando existir (ex.: Cruzeiros → /mapa-turismo/cruzeiros). */
+/** Rota especializada da categoria, quando existir (hoje só Cruzeiros). */
 export function dedicatedDirectoryRoute(category?: string | null): string | null {
-  const resolved = resolveDirectoryCategory(category);
-  return resolved ? DEDICATED_ROUTES[resolved] ?? null : null;
+  return isSpecializedDirectoryCategory(category) ? CRUISES_ROOT : null;
 }
 
-/** true quando a categoria tem listagem dedicada (não deve aparecer na grade genérica). */
+/** @deprecated use isSpecializedDirectoryCategory */
 export function hasDedicatedDirectoryRoute(category?: string | null): boolean {
-  return dedicatedDirectoryRoute(category) !== null;
+  return isSpecializedDirectoryCategory(category);
 }
 
 /**
@@ -157,7 +199,9 @@ export function isCruisesListingPath(path: unknown): boolean {
 export function isDirectoryListingPath(path: unknown): boolean {
   if (!isDirectoryPath(path)) return false;
   const pathname = pathnameOf(path);
-  return pathname === DIRECTORY_ROOT || pathname === CRUISES_ROOT;
+  if (pathname === DIRECTORY_ROOT) return true;
+  const slug = pathname.slice(DIRECTORY_ROOT.length + 1);
+  return SERVICE_BY_SLUG.has(slug);
 }
 
 /**
@@ -173,7 +217,10 @@ export function isDirectoryDetailPath(path: unknown): boolean {
 /** Extrai e normaliza a categoria embutida na URL do diretório. */
 export function categoryFromDirectoryPath(path: unknown): string | null {
   if (!isDirectoryPath(path)) return null;
-  if (isCruisesListingPath(path)) return "Cruzeiros";
+  const pathname = pathnameOf(path);
+  const slug = pathname.slice(DIRECTORY_ROOT.length + 1);
+  const service = SERVICE_BY_SLUG.get(slug);
+  if (service) return service.category;
   const query = path.includes("?") ? path.slice(path.indexOf("?") + 1) : "";
   const raw = new URLSearchParams(query).get("categoria");
   return resolveDirectoryCategory(raw);
