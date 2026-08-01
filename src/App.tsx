@@ -177,6 +177,7 @@ const App = () => (
           <NewLeadAlertProvider>
           <Suspense fallback={<LoadingScreen />}>
           <TeamRouteGuard />
+          <DirectoryDetailScrollTop />
           <Routes>
 
             <Route path="/auth" element={
