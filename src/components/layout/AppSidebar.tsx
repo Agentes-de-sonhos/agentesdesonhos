@@ -285,6 +285,7 @@ export function AppSidebar() {
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
   const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -448,16 +449,22 @@ export function AppSidebar() {
     });
   };
 
-  const isItemActive = (itemUrl: string) => {
+  const isItemActive = (itemUrl: string, exact?: boolean) => {
+    if (!itemUrl) return false;
     const [pathname, search] = itemUrl.split("?");
     if (search) {
       return location.pathname === pathname && location.search === `?${search}`;
     }
+    if (exact) return location.pathname === itemUrl;
     return location.pathname === itemUrl || location.pathname.startsWith(itemUrl);
   };
 
-  const isSectionActive = (section: MenuSection) =>
-    section.items.some((i) => isItemActive(i.url));
+  const isItemOrChildActive = (item: MenuItem): boolean =>
+    item.children
+      ? item.children.some((c) => isItemActive(c.url, c.exactUrl))
+      : isItemActive(item.url, item.exactUrl);
+
+  const isSectionActive = (section: MenuSection) => section.items.some(isItemOrChildActive);
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
