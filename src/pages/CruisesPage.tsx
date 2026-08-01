@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCruises, useRegioes, usePerfisCliente } from "@/hooks/useCruises";
-import { useSupplierLikes, useSupplierReviewStats } from "@/hooks/useSupplierLikes";
+import { useSupplierLikes } from "@/hooks/useSupplierLikes";
 import type { CruiseFilters, CompanhiaMaritima } from "@/types/cruises";
 import {
   Ship, Search, X, Loader2, Globe, Anchor, Compass, ChevronRight,
-  Waves, Sailboat, MapPin, Star, ThumbsUp
+  Waves, Sailboat, MapPin, ThumbsUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
@@ -50,17 +50,17 @@ export default function CruisesPage() {
   const { data: regioes = [] } = useRegioes();
   const { data: perfis = [] } = usePerfisCliente();
   const { getLikeCount, hasLiked, toggleLike } = useSupplierLikes();
-  const { data: reviewStatsMap = {} } = useSupplierReviewStats();
 
   const [filters, setFilters] = useState<CruiseFilters>({
     search: "",
     tipo: "all",
     categoria: "all",
+    subtipos: [],
     regioes: [],
     perfis: [],
   });
 
-  const toggleFilter = (key: "regioes" | "perfis", value: string) => {
+  const toggleFilter = (key: "regioes" | "perfis" | "subtipos", value: string) => {
     setFilters((prev) => ({
       ...prev,
       [key]: prev[key].includes(value)
@@ -70,18 +70,26 @@ export default function CruisesPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ search: "", tipo: "all", categoria: "all", regioes: [], perfis: [] });
+    setFilters({ search: "", tipo: "all", categoria: "all", subtipos: [], regioes: [], perfis: [] });
   };
 
   const hasActiveFilters =
     filters.search || filters.tipo !== "all" || filters.categoria !== "all" ||
-    filters.regioes.length > 0 || filters.perfis.length > 0;
+    filters.subtipos.length > 0 || filters.regioes.length > 0 || filters.perfis.length > 0;
+
+  // Porte / posicionamento chips derived from the cruise-specific `subtipo` values
+  const subtipoOptions = useMemo(() => {
+    const set = new Set<string>();
+    companies.forEach((c) => { if (c.subtipo) set.add(c.subtipo); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [companies]);
 
   const filtered = useMemo(() => {
     return companies.filter((c) => {
       if (filters.search && !c.nome.toLowerCase().includes(filters.search.toLowerCase())) return false;
       if (filters.tipo !== "all" && c.tipo !== filters.tipo) return false;
       if (filters.categoria !== "all" && c.categoria !== filters.categoria) return false;
+      if (filters.subtipos.length > 0 && !(c.subtipo && filters.subtipos.includes(c.subtipo))) return false;
       if (filters.regioes.length > 0 && !c.regioes.some((r) => filters.regioes.includes(r.id))) return false;
       if (filters.perfis.length > 0 && !c.perfis.some((p) => filters.perfis.includes(p.id))) return false;
       return true;
@@ -98,6 +106,9 @@ export default function CruisesPage() {
     const label = CATEGORIA_OPTIONS.find((c) => c.value === filters.categoria)?.label || filters.categoria;
     activeChips.push({ label: `Categoria: ${label}`, onRemove: () => setFilters((p) => ({ ...p, categoria: "all" })) });
   }
+  filters.subtipos.forEach((s) => {
+    activeChips.push({ label: s, onRemove: () => toggleFilter("subtipos", s) });
+  });
   filters.regioes.forEach((rId) => {
     const reg = regioes.find((r) => r.id === rId);
     if (reg) activeChips.push({
