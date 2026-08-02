@@ -79,7 +79,7 @@ export function TripRemindersCard() {
 
   if (isLoading) {
     return (
-      <Card className="border-0 shadow-md">
+      <Card className="border-0 shadow-md h-full">
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </CardContent>
@@ -89,8 +89,8 @@ export function TripRemindersCard() {
 
   if (reminders.length === 0) {
     return (
-      <Card className="border-0 shadow-md">
-        <CardContent className="pt-6">
+      <Card className="border-0 shadow-md h-full">
+        <CardContent className="pt-6 h-full">
           <div className="mb-4 flex items-start justify-between gap-3">
             <div className="w-fit">
               <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
@@ -121,9 +121,9 @@ export function TripRemindersCard() {
 
   return (
     <>
-      <Card className="border-0 shadow-md">
-        <CardContent className="pt-6">
-          <div className="flex items-start justify-between gap-3 mb-4">
+      <Card className="border-0 shadow-md h-full flex flex-col min-h-0">
+        <CardContent className="pt-6 flex-1 min-h-0 flex flex-col">
+          <div className="flex items-start justify-between gap-3 mb-4 flex-shrink-0">
             <div className="w-fit">
               <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
                 <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
@@ -144,7 +144,7 @@ export function TripRemindersCard() {
               </Badge>
             </div>
           </div>
-          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+          <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-2">
             {reminders.slice(0, 10).map((reminder) => {
               const isReturn = reminder.days_before === -1;
               return (
