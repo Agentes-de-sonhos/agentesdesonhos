@@ -22,9 +22,8 @@ describe("dashboard block CTAs", () => {
     expect(src).toContain('to="/noticias"');
     expect(src).toContain("Ver todas as notícias");
     expect(src).not.toContain("Mais notícias");
-    // individual news still open externally
-    expect(src).toContain('target="_blank"');
-    expect(src).toContain('rel="noopener noreferrer"');
+    // individual news still open externally in a safe tab
+    expect(src).toContain('window.open(item.url_original, "_blank", "noopener,noreferrer")');
   });
 
   it("tourism map block links to the directory root", () => {
