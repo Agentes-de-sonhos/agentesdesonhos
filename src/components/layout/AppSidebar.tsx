@@ -340,6 +340,12 @@ export function AppSidebar() {
     }, 300);
   };
 
+  /** Expande imediatamente, cancelando timers/estados pendentes de hover. */
+  const expandNow = useCallback(() => {
+    clearTimers();
+    setCollapsed(false);
+  }, []);
+
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
@@ -468,6 +474,12 @@ export function AppSidebar() {
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
+      // Sidebar recolhida: o clique apenas expande (evita clique fantasma na transição)
+      if (collapsed) {
+        e.preventDefault();
+        expandNow();
+        return;
+      }
       // Educa Pass: only allow EducaTravel Academy
       if (isEducaPass && item.url !== "/educa-academy") {
         e.preventDefault();
@@ -494,7 +506,7 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, startPlanLockedUrls]
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, startPlanLockedUrls, collapsed, expandNow]
   );
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
