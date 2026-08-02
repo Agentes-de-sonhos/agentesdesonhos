@@ -769,7 +769,7 @@ export function AppSidebar() {
         {/* Toggle visual removido: o hover sobre o menu já expande/recolhe automaticamente */}
 
         {/* Scrollable Navigation */}
-        <div ref={scrollAreaRef} className={cn("flex-1 py-2 space-y-0.5", collapsed ? "overflow-x-hidden overflow-y-auto scrollbar-none" : "overflow-y-auto")}>
+        <div ref={scrollAreaRef} className={cn("flex-1 py-2 space-y-0.5", collapsed ? "overflow-x-hidden overflow-y-auto scrollbar-hide" : "overflow-y-auto")}>
           {/* Início */}
           <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
             {renderSingleItem(meusProjetosItem)}
