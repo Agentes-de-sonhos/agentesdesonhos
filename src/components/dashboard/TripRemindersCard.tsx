@@ -30,10 +30,13 @@ import {
 import { useReminders } from "@/hooks/useReminders";
 import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { useAdaptivePageSize } from "@/hooks/useAdaptivePageSize";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
 import { cn } from "@/lib/utils";
 
 /** Approximate rendered height of one compact reminder card (card + gap). */
 const ROW_HEIGHT = 168;
+/** Fixed page size on desktop: always up to 3 trips per page. */
+const DESKTOP_PAGE_SIZE = 3;
 
 export function TripRemindersCard() {
   const navigate = useNavigate();
@@ -41,12 +44,16 @@ export function TripRemindersCard() {
   const [editingReminder, setEditingReminder] = useState<string | null>(null);
   const [followUpText, setFollowUpText] = useState("");
   const [page, setPage] = useState(0);
-  const { ref: listRef, pageSize } = useAdaptivePageSize<HTMLDivElement>({
+  const isDesktop = useIsDesktop();
+  // Desktop is deterministic (always 3) — no ResizeObserver needed there.
+  const { ref: listRef, pageSize: adaptivePageSize } = useAdaptivePageSize<HTMLDivElement>({
     rowHeight: ROW_HEIGHT,
     min: 1,
     max: 3,
     fallback: 2,
+    enabled: !isDesktop,
   });
+  const pageSize = isDesktop ? DESKTOP_PAGE_SIZE : adaptivePageSize;
 
   const total = reminders.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -167,7 +174,7 @@ export function TripRemindersCard() {
               </Badge>
             </div>
           </div>
-          <div ref={listRef} className="space-y-3 flex-1 min-h-0 overflow-hidden">
+          <div ref={listRef} className="space-y-3 min-h-0 overflow-hidden">
             {pageReminders.map((reminder) => {
               const isReturn = reminder.days_before === -1;
               return (
@@ -254,7 +261,7 @@ export function TripRemindersCard() {
           </div>
 
           {/* Paginação adaptativa — nunca rolagem, rodapé em linha única */}
-          <div className="pt-1.5 border-t flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0">
+          <div className="mt-auto pt-1.5 border-t flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0">
             <p className="text-xs text-muted-foreground whitespace-nowrap truncate">
               Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + pageSize, total)}</span> de{" "}
               <span className="font-medium text-foreground">{total}</span> viagem{total !== 1 ? "s" : ""}

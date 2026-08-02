@@ -57,7 +57,8 @@ describe("dashboard centered container", () => {
 describe("inner sections keep their approved rules", () => {
   it("agenda + trips stay side by side with equal heights and 5 desktop items", () => {
     expect(dashboard).toContain("lg:grid-cols-2");
-    expect(dashboard).toContain("lg:h-[max(60vh,560px)] lg:max-h-[820px]");
+    expect(dashboard).not.toContain("lg:max-h-[820px]");
+    expect(dashboard).toContain("items-stretch");
     const agenda = read("src/components/dashboard/UpcomingAgendaEventsCard.tsx");
     expect(agenda).toContain("DESKTOP_PAGE_SIZE = 5");
   });

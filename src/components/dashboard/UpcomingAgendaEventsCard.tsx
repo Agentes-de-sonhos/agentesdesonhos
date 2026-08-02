@@ -118,7 +118,7 @@ export function UpcomingAgendaEventsCard() {
           </div>
         ) : (
           <div className="flex-1 min-h-0 flex flex-col @container">
-            <div ref={listRef} className="flex-1 min-h-0 overflow-hidden space-y-1.5">
+            <div ref={listRef} className="min-h-0 overflow-hidden space-y-1.5">
             {pageEvents.map((event) => {
                // Parse date using local components to avoid UTC timezone shift
                const [y, m, d] = event.event_date.split('-').map(Number);
@@ -175,7 +175,7 @@ export function UpcomingAgendaEventsCard() {
             </div>
 
             {/* Pagination footer — always a single compact line */}
-            <div className="pt-1.5 border-t flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0">
+            <div className="mt-auto pt-1.5 border-t flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0">
               <p className="text-xs text-muted-foreground whitespace-nowrap truncate">
                 Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + pageSize, total)}</span> de{" "}
                 <span className="font-medium text-foreground">{total}</span> atividades

@@ -198,9 +198,9 @@ export default function Dashboard() {
             {isTeamMember ? (
               <>
                 {/* Minha Agenda & Próximas Viagens (apenas estas seções para subusuários) */}
-                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2 lg:h-[max(60vh,560px)] lg:max-h-[820px]">
-                  <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
-                  <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
+                  <div className="flex flex-col min-w-0 min-h-0 h-full [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
+                  <div className="flex flex-col min-w-0 min-h-0 h-full [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
                 </section>
               </>
             ) : isSimplifiedDashboard ? (
@@ -211,9 +211,9 @@ export default function Dashboard() {
                 </section>
 
                 {/* Agenda & Próximas Viagens lado a lado; demais seções em largura total */}
-                <section className="order-3 grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch lg:h-[max(60vh,560px)] lg:max-h-[820px]">
-                  <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
-                  <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
+                <section className="order-3 grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch">
+                  <div className="flex flex-col min-w-0 min-h-0 h-full [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
+                  <div className="flex flex-col min-w-0 min-h-0 h-full [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
                 </section>
                 <section className="order-4 min-w-0"><CuratedNewsFeed /></section>
                 <section className="order-5 min-w-0"><CommunitySocialFeed defaultExpanded /></section>
@@ -223,9 +223,9 @@ export default function Dashboard() {
             ) : (
               <>
                 {/* 2. Minha Agenda & Próximas Viagens (única linha em duas colunas no desktop) */}
-                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2 lg:h-[max(60vh,560px)] lg:max-h-[820px]">
-                  <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
-                  <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2">
+                  <div className="flex flex-col min-w-0 min-h-0 h-full [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
+                  <div className="flex flex-col min-w-0 min-h-0 h-full [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
                 </section>
 
                 {/* 2b. Leads aguardando atendimento */}

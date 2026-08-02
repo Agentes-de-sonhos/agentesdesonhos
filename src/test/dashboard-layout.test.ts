@@ -8,20 +8,23 @@ const news = read("src/components/dashboard/CuratedNewsFeed.tsx");
 describe("dashboard layout restructure", () => {
   it("keeps only the agenda + upcoming trips row in two columns", () => {
     const twoColRows = dashboard.match(/lg:grid-cols-2/g) ?? [];
-    expect(dashboard).toContain("lg:h-[max(60vh,560px)]");
+    expect(dashboard).not.toContain("lg:h-[max(60vh,560px)]");
     // every remaining two-column row belongs to sections outside the reorganized blocks
     expect(twoColRows.length).toBeGreaterThan(0);
   });
 
   it("gives the first row enough height for 5 agenda rows without inner overflow", () => {
-    expect(dashboard).toContain("lg:h-[max(60vh,560px)] lg:max-h-[820px]");
+    expect(dashboard).not.toContain("lg:max-h-[820px]");
+    expect(dashboard).not.toContain("60vh");
+    expect(dashboard).not.toContain("560px");
+    expect(dashboard).toContain("items-stretch");
     expect(dashboard).not.toContain("clamp(380px,60vh,760px)");
     expect(dashboard).not.toContain("clamp(380px");
     expect(dashboard).not.toContain("lg:max-h-[60vh]");
   });
 
   it("wraps first-row cards so nothing leaks outside the card", () => {
-    expect(dashboard).toContain("min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0");
+    expect(dashboard).toContain("min-h-0 h-full [&>*]:h-full [&>*]:min-h-0");
     const agenda = read("src/components/dashboard/UpcomingAgendaEventsCard.tsx");
     const trips = read("src/components/dashboard/TripRemindersCard.tsx");
     expect(agenda).toContain("min-h-0 overflow-hidden");
@@ -95,6 +98,10 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
     expect(agenda).toContain("DESKTOP_PAGE_SIZE = 5");
     expect(agenda).toContain("isDesktop ? DESKTOP_PAGE_SIZE : adaptivePageSize");
     expect(agenda).toContain("enabled: !isDesktop");
+    expect(trips).toContain('from "@/hooks/useIsDesktop"');
+    expect(trips).toContain("DESKTOP_PAGE_SIZE = 3");
+    expect(trips).toContain("isDesktop ? DESKTOP_PAGE_SIZE : adaptivePageSize");
+    expect(trips).toContain("enabled: !isDesktop");
   });
 
   it("hook measures with ResizeObserver and has a deterministic fallback", () => {
@@ -115,7 +122,8 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
 
   it("keeps both footers on a single compact line (counter left, pagination right)", () => {
     for (const file of [agenda, trips]) {
-      expect(file).toContain("flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0");
+      expect(file).toContain("mt-auto pt-1.5 border-t flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0");
+      expect(file).not.toMatch(/ref=\{listRef\} className="[^"]*flex-1/);
       expect(file).not.toContain("@[26rem]:flex-row items-center justify-between");
       expect(file).toContain("Mostrando <span");
     }
