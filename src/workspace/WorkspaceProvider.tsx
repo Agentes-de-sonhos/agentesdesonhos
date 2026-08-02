@@ -11,6 +11,8 @@ export interface WorkspaceTab {
   id: string;
   path: string;
   title: string;
+  /** Router `state` carried over from the originating navigation, if any. */
+  state?: unknown;
   /** Pinned tabs are permanent: always first, never closable. */
   pinned?: boolean;
 }
@@ -22,8 +24,8 @@ interface WorkspaceState {
 }
 
 type Action =
-  | { type: "OPEN"; path: string; title: string }
-  | { type: "OPEN_OR_ACTIVATE"; path: string; title: string }
+  | { type: "OPEN"; path: string; title: string; state?: unknown }
+  | { type: "OPEN_OR_ACTIVATE"; path: string; title: string; state?: unknown }
   | { type: "CLOSE"; id: string }
   | { type: "CLOSE_OTHERS"; id: string }
   | { type: "CLOSE_ALL" }
@@ -60,7 +62,7 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
     case "OPEN": {
       if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
-      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title) };
+      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "OPEN_OR_ACTIVATE": {
@@ -71,7 +73,7 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
         return { ...state, activeId: existing.id };
       }
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
-      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title) };
+      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "CLOSE": {
@@ -102,8 +104,8 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
 }
 
 interface WorkspaceContextValue extends WorkspaceState {
-  openTab: (path: string, title: string) => void;
-  openOrActivateTab: (path: string, title: string) => void;
+  openTab: (path: string, title: string, state?: unknown) => void;
+  openOrActivateTab: (path: string, title: string, state?: unknown) => void;
   closeTab: (id: string) => void;
   closeOtherTabs: (id: string) => void;
   closeAllTabs: () => void;
@@ -136,11 +138,11 @@ export function WorkspaceProvider({ initialPath, initialTitle, homePath = "/dash
     return { tabs, activeId: tabs[tabs.length - 1].id, homePath };
   });
 
-  const openTab = useCallback((path: string, title: string) => {
-    dispatch({ type: "OPEN", path, title });
+  const openTab = useCallback((path: string, title: string, navState?: unknown) => {
+    dispatch({ type: "OPEN", path, title, state: navState });
   }, []);
-  const openOrActivateTab = useCallback((path: string, title: string) => {
-    dispatch({ type: "OPEN_OR_ACTIVATE", path, title });
+  const openOrActivateTab = useCallback((path: string, title: string, navState?: unknown) => {
+    dispatch({ type: "OPEN_OR_ACTIVATE", path, title, state: navState });
   }, []);
   const closeTab = useCallback((id: string) => dispatch({ type: "CLOSE", id }), []);
   const closeOtherTabs = useCallback((id: string) => dispatch({ type: "CLOSE_OTHERS", id }), []);
