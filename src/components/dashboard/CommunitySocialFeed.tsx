@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
+import { SectionCtaLink } from "./SectionCtaLink";
 import {
   ArrowRight,
   Heart,
