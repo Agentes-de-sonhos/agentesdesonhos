@@ -205,7 +205,7 @@ export default function Dashboard() {
             ) : isSimplifiedDashboard ? (
               <>
                 {/* 2b. Leads aguardando atendimento */}
-                <section className="order-[2.5]">
+                <section className="order-2">
                   <LeadsAwaitingCard />
                 </section>
 
@@ -214,10 +214,10 @@ export default function Dashboard() {
                   <div className="flex flex-col min-w-0 h-full min-h-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
                   <div className="flex flex-col min-w-0 h-full min-h-0 [&>*]:h-full"><TripRemindersCard /></div>
                 </section>
-                <section className="order-[3.3] min-w-0"><CuratedNewsFeed /></section>
-                <section className="order-[3.5] min-w-0"><CommunitySocialFeed defaultExpanded /></section>
-                <section className="order-[3.7] min-w-0"><AcademyCollapsibleCard /></section>
-                <section className="order-[3.9] min-w-0"><MapaTurismoCard alwaysExpanded /></section>
+                <section className="order-4 min-w-0"><CuratedNewsFeed /></section>
+                <section className="order-5 min-w-0"><CommunitySocialFeed defaultExpanded /></section>
+                <section className="order-6 min-w-0"><AcademyCollapsibleCard /></section>
+                <section className="order-7 min-w-0"><MapaTurismoCard alwaysExpanded /></section>
               </>
             ) : (
               <>
@@ -228,44 +228,44 @@ export default function Dashboard() {
                 </section>
 
                 {/* 2b. Leads aguardando atendimento */}
-                <section className="order-[2.5]">
+                <section className="order-3">
                   <LeadsAwaitingCard />
                 </section>
 
                 {/* 3. Notícias do Trade — largura total */}
-                <section className="order-3 min-w-0">
+                <section className="order-4 min-w-0">
                   <CuratedNewsFeed />
                 </section>
 
                 {/* 3b. Comunidade — largura total */}
-                <section className="order-[3.3] min-w-0">
+                <section className="order-5 min-w-0">
                   <CommunitySocialFeed />
                 </section>
 
                 {/* 3c. EducaTravel Academy — largura total */}
-                <section className="order-[3.6] min-w-0">
+                <section className="order-6 min-w-0">
                   <AcademyCollapsibleCard />
                 </section>
 
                 {/* 3d. Mapa do Turismo — largura total */}
-                <section className="order-[3.8] min-w-0">
+                <section className="order-7 min-w-0">
                   <MapaTurismoCard />
                 </section>
 
                 {/* 4. Clientes + Financeiro lado a lado */}
-                <section className="order-4 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+                <section className="order-8 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
                   <div className="min-w-0"><ClientesCard /></div>
                   <div className="min-w-0"><FinanceiroCard /></div>
                 </section>
 
                 {/* 5b. Marketing + Ferramentas do Agente lado a lado (alturas independentes) */}
-                <section className="order-[5.5] grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+                <section className="order-9 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
                   <div className="min-w-0"><MarketingCard /></div>
                   <div className="min-w-0"><AgentToolsCard /></div>
                 </section>
 
                 {/* 6. Recursos de Vendas + Guias e Referências lado a lado */}
-                <section className="order-6 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
+                <section className="order-10 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
                   <div className="min-w-0"><SalesResourcesCard /></div>
                   <div className="min-w-0"><GuidesReferencesCard /></div>
                 </section>
