@@ -21,9 +21,10 @@ describe("dashboard layout restructure", () => {
 
   it("renders news, community, academy and tourism map as full-width rows", () => {
     for (const block of ["<CuratedNewsFeed />", "<CommunitySocialFeed />", "<AcademyCollapsibleCard />", "<MapaTurismoCard />"]) {
-      expect(dashboard).toContain(`<section className="order-[3.${"3568".includes("x") ? "" : ""}`.slice(0, 30));
       expect(dashboard).toContain(block);
     }
+    expect(dashboard).toContain('<section className="order-3 min-w-0">');
+    expect(dashboard).toContain('<section className="order-[3.3] min-w-0">');
     // no legacy two-column wrappers pairing these blocks
     expect(dashboard).not.toContain("<CuratedNewsFeed /></div>");
     expect(dashboard).not.toContain("<CommunitySocialFeed /></div>");
