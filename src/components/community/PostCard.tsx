@@ -1,3 +1,4 @@
+import { LinkifiedText } from "@/components/community/LinkifiedText";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
