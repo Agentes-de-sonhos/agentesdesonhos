@@ -40,7 +40,7 @@ export function DashboardSectionHeader({
       className={cn(
         "@container mb-3 grid min-w-0 items-center gap-x-3 gap-y-2",
         "grid-cols-[auto_auto] justify-between",
-        "@[44rem]:grid-cols-[auto_minmax(0,1fr)_auto] @[44rem]:gap-x-4 @[60rem]:gap-x-6",
+        "@[44rem]:grid-cols-[auto_minmax(0,1fr)_auto] @[44rem]:gap-x-6 @[60rem]:gap-x-8",
         className,
       )}
     >
@@ -52,7 +52,7 @@ export function DashboardSectionHeader({
         <div className={cn("mt-2 h-1 w-full rounded-full", accentClassName)} />
       </div>
 
-      <p className="order-last col-span-2 min-w-0 truncate text-center text-xs text-muted-foreground @[44rem]:order-none @[44rem]:col-span-1 @[44rem]:whitespace-nowrap @[60rem]:text-sm">
+      <p className="order-last col-span-2 min-w-0 truncate text-left text-xs text-muted-foreground @[44rem]:order-none @[44rem]:col-span-1 @[44rem]:whitespace-nowrap @[60rem]:text-sm">
         {description}
       </p>
 
