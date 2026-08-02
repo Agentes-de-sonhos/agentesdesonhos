@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,14 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Heart, MessageCircle, Trash2, Pin, CheckCircle2, Send, Loader2, MoreHorizontal, Pencil,
-  FileText, Download, BarChart3, Check,
+  FileText, Download,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { PostImageGallery, postImages } from "./PostImageGallery";
+import { PostPoll } from "./PostPoll";
 import { DOC_EXT_LABEL, formatBytes } from "@/lib/communityMedia";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 
@@ -55,18 +56,6 @@ export function PostCard({
   const wasEdited = !!(post as any).edited_at;
   const videoUrl = (post as any).video_url as string | null | undefined;
   const documents = ((post as any).documents || []) as { name: string; url: string; size: number; mime: string }[];
-  const poll = (post as any).poll as { question: string; options: { id: string; text: string }[] } | null;
-  const pollVotes = ((post as any).poll_votes || []) as { option_id: string }[];
-  const userVote = (post as any).user_poll_option as string | null | undefined;
-
-  const pollTallies = useMemo(() => {
-    const counts: Record<string, number> = {};
-    pollVotes.forEach((v) => {
-      counts[v.option_id] = (counts[v.option_id] || 0) + 1;
-    });
-    return counts;
-  }, [pollVotes]);
-  const pollTotal = pollVotes.length;
 
   const handleToggleComments = async () => {
     if (!showComments) {
