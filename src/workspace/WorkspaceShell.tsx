@@ -3,6 +3,9 @@ import { MemoryRouter } from "react-router-dom";
 import { toast } from "sonner";
 import { TabBar } from "./TabBar";
 import { useWorkspace, MAX_TABS } from "./WorkspaceProvider";
+import { HomeTabRouter } from "./HomeTabRouter";
+import { shouldInterceptAnchor } from "./homeNavigation";
+import { titleForPath } from "./routeTitle";
 
 interface Props {
   /** Same JSX subtree used when Workspace is off (typically the app's <Routes/>). */
@@ -81,14 +84,16 @@ export function WorkspaceShell({ children }: Props) {
       const anchor = target.closest("a[href]") as HTMLAnchorElement | null;
       if (!anchor) return;
 
-      // Only intercept links inside navigation surfaces
-      const inNav = anchor.closest('nav, aside, [role="navigation"], [data-workspace-menu]');
+      // Intercept links inside navigation surfaces *and* anywhere inside the
+      // pinned home tab, which must never be replaced by another route.
+      const inNav = anchor.closest(
+        'nav, aside, [role="navigation"], [data-workspace-menu], [data-workspace-home]',
+      );
       if (!inNav) return;
 
+      // Skips external, mailto:/tel:, downloads and explicit _blank links.
+      if (!shouldInterceptAnchor(anchor)) return;
       const href = anchor.getAttribute("href") || "";
-      if (!href.startsWith("/")) return; // ignore external / mailto / #
-      if (anchor.target === "_blank") return;
-      if (anchor.hasAttribute("data-workspace-ignore")) return;
 
       e.preventDefault();
       e.stopPropagation();
@@ -105,8 +110,7 @@ export function WorkspaceShell({ children }: Props) {
         anchor.getAttribute("data-workspace-title") ||
         anchor.getAttribute("aria-label") ||
         anchor.textContent?.trim() ||
-        href.split("/").filter(Boolean).pop() ||
-        "Nova aba";
+        titleForPath(href);
       const title = label.length > 40 ? label.slice(0, 40) + "…" : label;
       openTabRef.current?.(href, title);
     };
@@ -123,20 +127,55 @@ export function WorkspaceShell({ children }: Props) {
       <div className="flex-1 min-h-0 relative">
         {ws.tabs.map((tab) => {
           const active = tab.id === ws.activeId;
+          const isHome = Boolean(tab.pinned);
           return (
             <div
               key={tab.id}
               aria-hidden={!active}
+              {...(isHome ? { "data-workspace-home": "" } : {})}
               style={{ display: active ? "block" : "none" }}
               className="min-h-full"
             >
-              <MemoryRouter initialEntries={[tab.path]}>
-                {children}
-              </MemoryRouter>
+              {isHome ? (
+                <HomeTabRouter
+                  homePath={ws.homePath}
+                  onNavigateAway={(path, title, state) => {
+                    const hasExisting = (tabsRef.current ?? []).some((t) => t.path === path);
+                    if (!hasExisting && !canOpenRef.current) {
+                      toast.error(`Limite de ${MAX_TABS} abas atingido. Feche uma aba para abrir outra.`);
+                      return;
+                    }
+                    openTabRef.current?.(path, title, state);
+                  }}
+                >
+                  {children}
+                </HomeTabRouter>
+              ) : (
+                <MemoryRouter
+                  initialEntries={[
+                    tab.state !== undefined && tab.state !== null
+                      ? { pathname: tab.path.split("?")[0].split("#")[0], search: extractSearch(tab.path), hash: extractHash(tab.path), state: tab.state }
+                      : tab.path,
+                  ]}
+                >
+                  {children}
+                </MemoryRouter>
+              )}
             </div>
           );
         })}
       </div>
     </div>
   );
+}
+
+function extractSearch(path: string): string {
+  const withoutHash = path.split("#")[0];
+  const idx = withoutHash.indexOf("?");
+  return idx >= 0 ? withoutHash.slice(idx) : "";
+}
+
+function extractHash(path: string): string {
+  const idx = path.indexOf("#");
+  return idx >= 0 ? path.slice(idx) : "";
 }

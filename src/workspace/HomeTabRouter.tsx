@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useMemo, useRef, useState } from "react";
-import { Router, createPath, parsePath, type Location, type To } from "react-router-dom";
+import { NavigationType, Router, createPath, parsePath, type Location, type To } from "react-router-dom";
 import { resolveHomeNavigation, buildPath } from "./homeNavigation";
 
 interface Entry {
@@ -95,7 +95,7 @@ export function HomeTabRouter({ homePath, onNavigateAway, children }: Props) {
   };
 
   return (
-    <Router location={location} navigator={navigator as never} navigationType="PUSH" static={false}>
+    <Router location={location} navigator={navigator as never} navigationType={NavigationType.Push} static={false}>
       {children}
     </Router>
   );
