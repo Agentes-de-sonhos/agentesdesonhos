@@ -9,6 +9,8 @@ interface Options {
   max?: number;
   /** Deterministic value used in SSR/tests (no layout available). */
   fallback?: number;
+  /** When false, no ResizeObserver is attached and `fallback`/`min` is kept. */
+  enabled?: boolean;
 }
 
 /**
@@ -21,6 +23,7 @@ export function useAdaptivePageSize<T extends HTMLElement = HTMLDivElement>({
   min = 2,
   max = 5,
   fallback,
+  enabled = true,
 }: Options) {
   const ref = useRef<T | null>(null);
   const [pageSize, setPageSize] = useState<number>(fallback ?? min);
@@ -36,6 +39,7 @@ export function useAdaptivePageSize<T extends HTMLElement = HTMLDivElement>({
   }, [rowHeight, min, max]);
 
   useEffect(() => {
+    if (!enabled) return;
     if (typeof ResizeObserver === "undefined") return;
     const el = ref.current;
     if (!el) return;
@@ -44,7 +48,7 @@ export function useAdaptivePageSize<T extends HTMLElement = HTMLDivElement>({
     observer.observe(el);
     measure();
     return () => observer.disconnect();
-  }, [measure]);
+  }, [measure, enabled]);
 
   return { ref, pageSize };
 }
