@@ -201,15 +201,12 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 </h2>
                 <div className="mt-2 h-1 w-full rounded-full bg-emerald-600" />
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hidden @[28rem]:inline-flex shrink-0 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-600/5"
-                onClick={() => navigate("/educa-academy")}
-              >
-                Ver todos os treinamentos
-                <ArrowRight className="h-4 w-4 ml-1.5" />
-              </Button>
+              <SectionCtaLink
+                to="/educa-academy"
+                label="Ver todos os treinamentos"
+                tabTitle="EducaTravel Academy"
+                className="hidden @[28rem]:inline-flex text-emerald-700 hover:text-emerald-800"
+              />
             </div>
 
             {/* Subtítulo abaixo do título, alinhado à esquerda, largura controlada */}
@@ -238,14 +235,12 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
 
           {/* Footer — mobile only */}
           <div className="pt-2 border-t @[28rem]:hidden">
-            <Button
-              variant="ghost"
-              className="w-full text-emerald-700 hover:text-emerald-800 hover:bg-emerald-600/5"
-              onClick={() => navigate("/educa-academy")}
-            >
-              Ver todos os treinamentos
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+            <SectionCtaLink
+              to="/educa-academy"
+              label="Ver todos os treinamentos"
+              tabTitle="EducaTravel Academy"
+              className="w-full justify-center text-emerald-700 hover:text-emerald-800"
+            />
           </div>
         </CardContent>
       </Card>
