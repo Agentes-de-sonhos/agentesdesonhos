@@ -20,9 +20,15 @@ describe("Dashboard section headers", () => {
     expect(header).toContain("@container");
     expect(header).toContain("@[44rem]:grid-cols-[auto_minmax(0,1fr)_auto]");
     expect(header).toContain("whitespace-nowrap");
-    expect(header).toContain("text-center");
+    expect(header).toContain("text-left");
+    expect(header).not.toContain("text-center");
     expect(header).toContain("truncate");
     expect(header).toContain("min-w-0");
+  });
+
+  it("uses a responsive gap between title and description", () => {
+    expect(header).toContain("@[44rem]:gap-x-6");
+    expect(header).toContain("@[60rem]:gap-x-8");
   });
 
   it("falls back to two lines only on narrow containers", () => {
