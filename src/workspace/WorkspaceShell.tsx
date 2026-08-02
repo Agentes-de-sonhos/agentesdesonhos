@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { TabBar } from "./TabBar";
 import { useWorkspace, MAX_TABS } from "./WorkspaceProvider";
 import { HomeTabRouter } from "./HomeTabRouter";
-import { shouldInterceptAnchor } from "./homeNavigation";
+import { isExitRoute, shouldInterceptAnchor } from "./homeNavigation";
 import { titleForPath } from "./routeTitle";
 
 interface Props {
@@ -94,6 +94,10 @@ export function WorkspaceShell({ children }: Props) {
       // Skips external, mailto:/tel:, downloads and explicit _blank links.
       if (!shouldInterceptAnchor(anchor)) return;
       const href = anchor.getAttribute("href") || "";
+      // Auth/onboarding exits keep their normal in-place navigation.
+      if (isExitRoute(href.split("?")[0].split("#")[0])) return;
+
+      const insideHome = Boolean(anchor.closest("[data-workspace-home]"));
 
       e.preventDefault();
       e.stopPropagation();
@@ -106,11 +110,14 @@ export function WorkspaceShell({ children }: Props) {
         return;
       }
 
-      const label =
-        anchor.getAttribute("data-workspace-title") ||
-        anchor.getAttribute("aria-label") ||
-        anchor.textContent?.trim() ||
-        titleForPath(href);
+      // Inside the dashboard, arbitrary link text ("Abrir viagem") would make a
+      // poor window title, so we fall back to the canonical route title.
+      const label = insideHome
+        ? anchor.getAttribute("data-workspace-title") || titleForPath(href)
+        : anchor.getAttribute("data-workspace-title") ||
+          anchor.getAttribute("aria-label") ||
+          anchor.textContent?.trim() ||
+          titleForPath(href);
       const title = label.length > 40 ? label.slice(0, 40) + "…" : label;
       openTabRef.current?.(href, title);
     };
