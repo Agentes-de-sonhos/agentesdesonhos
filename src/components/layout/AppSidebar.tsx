@@ -607,16 +607,21 @@ export function AppSidebar() {
           type="button"
           aria-expanded={isOpen}
           aria-controls={groupId}
+          aria-label={collapsed ? group.title : undefined}
           onClick={() =>
-            setOpenGroups((prev) => ({
-              ...prev,
-              [group.key || group.title]: !isOpen,
-            }))
+            collapsed
+              ? expandNow()
+              : setOpenGroups((prev) => ({
+                  ...prev,
+                  [group.key || group.title]: !isOpen,
+                }))
           }
           className={cn(
             "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300 w-full text-left",
             collapsed ? "py-1" : "py-1.5",
-            childActive && sectionBgColor
+            collapsed
+              ? "text-sidebar-foreground"
+              : childActive && sectionBgColor
               ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
               : sectionBgColor
                 ? cn(sectionBgColor, sectionTextColor, "hover:font-semibold")
