@@ -53,6 +53,7 @@ export function HomeTabRouter({ homePath, onNavigateAway, children }: Props) {
         typeof to === "string" ? to : { pathname: to.pathname, search: to.search, hash: to.hash },
         homePath,
         entriesRef.current[indexRef.current]?.pathname ?? homePath,
+        { replace },
       );
 
       if (decision.type === "open") {
