@@ -6,23 +6,30 @@ import { Calendar, Clock, ChevronLeft, ChevronRight, Loader2 } from "lucide-reac
 import { useAgenda } from "@/hooks/useAgenda";
 import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { useAdaptivePageSize } from "@/hooks/useAdaptivePageSize";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
 import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
 /** Approximate rendered height of one compact agenda row (row + gap). */
-const ROW_HEIGHT = 60;
+const ROW_HEIGHT = 56;
+/** Fixed page size on desktop: always up to 5 appointments per page. */
+const DESKTOP_PAGE_SIZE = 5;
 
 export function UpcomingAgendaEventsCard() {
   const navigate = useNavigate();
   const { getUpcomingEvents, getFollowupEvents, isLoading } = useAgenda();
   const [page, setPage] = useState(0);
-  const { ref: listRef, pageSize } = useAdaptivePageSize<HTMLDivElement>({
+  const isDesktop = useIsDesktop();
+  // Desktop is deterministic (always 5) — no ResizeObserver needed there.
+  const { ref: listRef, pageSize: adaptivePageSize } = useAdaptivePageSize<HTMLDivElement>({
     rowHeight: ROW_HEIGHT,
     min: 2,
     max: 5,
-    fallback: 4,
+    fallback: 3,
+    enabled: !isDesktop,
   });
+  const pageSize = isDesktop ? DESKTOP_PAGE_SIZE : adaptivePageSize;
 
   // Use local date components to avoid UTC shift
   const now = new Date();
@@ -95,7 +102,7 @@ export function UpcomingAgendaEventsCard() {
           />
         </div>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <CardContent className="flex-1 min-h-0 flex flex-col overflow-hidden pb-3">
         {total === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -111,7 +118,7 @@ export function UpcomingAgendaEventsCard() {
           </div>
         ) : (
           <div className="flex-1 min-h-0 flex flex-col @container">
-            <div ref={listRef} className="flex-1 min-h-0 overflow-hidden space-y-2">
+            <div ref={listRef} className="flex-1 min-h-0 overflow-hidden space-y-1.5">
             {pageEvents.map((event) => {
                // Parse date using local components to avoid UTC timezone shift
                const [y, m, d] = event.event_date.split('-').map(Number);
@@ -167,13 +174,13 @@ export function UpcomingAgendaEventsCard() {
             })}
             </div>
 
-            {/* Pagination footer */}
-            <div className="pt-2 mt-1 border-t flex flex-col @[26rem]:flex-row items-center justify-between gap-1 @[26rem]:gap-2 shrink-0">
-              <p className="text-xs text-muted-foreground">
+            {/* Pagination footer — always a single compact line */}
+            <div className="pt-1.5 border-t flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0">
+              <p className="text-xs text-muted-foreground whitespace-nowrap truncate">
                 Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + pageSize, total)}</span> de{" "}
                 <span className="font-medium text-foreground">{total}</span> atividades
               </p>
-              <div className="flex items-center gap-1">
+              <div className="flex flex-nowrap items-center gap-1 shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
