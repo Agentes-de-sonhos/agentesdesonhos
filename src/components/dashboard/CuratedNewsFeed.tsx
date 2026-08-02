@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Newspaper, Loader2, ExternalLink, Eye, ThumbsUp, Crown, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Newspaper, Loader2, ExternalLink, Eye, ThumbsUp, Crown, ShieldCheck, AlertTriangle, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { useNewsHighlights, type HighlightNews, type Top5Item } from "@/hooks/useNewsHighlights";
@@ -55,7 +55,7 @@ function SectionHeader() {
         />
       </div>
       <p className="text-sm text-muted-foreground max-w-2xl">
-        O destaque do período e o Top 5 da semana, com a mesma curadoria da página completa.
+        Fique por dentro das principais notícias do turismo, reunidas em um só lugar.
       </p>
     </div>
   );
@@ -103,14 +103,14 @@ export function CuratedNewsFeed() {
             <p className="text-sm font-medium text-muted-foreground">Nenhuma notícia publicada ainda.</p>
           </div>
         ) : (
-          <div className="grid gap-4 @[42rem]:gap-5 grid-cols-1 @[42rem]:grid-cols-[minmax(0,62fr)_minmax(0,38fr)] items-start min-w-0">
+          <div className="grid gap-4 @[42rem]:gap-5 grid-cols-1 @[42rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-stretch min-w-0">
             {/* Destaque do período */}
             <div className="min-w-0">
               {featured ? (
                 <button
                   type="button"
                   onClick={() => handleRead(featured)}
-                  className="group w-full text-left rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-4 sm:p-5 transition-colors hover:border-primary/50"
+                  className="group flex h-full w-full flex-col text-left rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-4 sm:p-5 transition-colors hover:border-primary/50"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
@@ -132,7 +132,7 @@ export function CuratedNewsFeed() {
                   {featured.resumo && (
                     <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">{featured.resumo}</p>
                   )}
-                  <div className="mt-3 flex items-center gap-3 border-t border-border/40 pt-2 text-[11px] text-muted-foreground tabular-nums">
+                  <div className="mt-auto pt-3 flex items-center gap-3 border-t border-border/40 text-[11px] text-muted-foreground tabular-nums">
                     <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {featured.reads_count}</span>
                     <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" /> {featured.likes_count}</span>
                     <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
@@ -141,34 +141,38 @@ export function CuratedNewsFeed() {
                   </div>
                 </button>
               ) : (
-                <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                <div className="flex h-full items-center justify-center rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
                   Ainda não há {label.toLowerCase()} definida para o período.
                 </div>
               )}
             </div>
 
-            {/* Top 5 da Semana */}
-            <div className="min-w-0">
-              <h3 className="mb-1 text-sm font-semibold text-foreground">Top 5 da Semana</h3>
-              <div>
+            {/* Top 5 da Semana — bloco único de destaque (o card é o bloco, as linhas são leves) */}
+            <div className="min-w-0 flex h-full flex-col rounded-xl border border-[hsl(var(--section-news)/0.28)] bg-gradient-to-b from-[hsl(var(--section-news)/0.06)] to-card p-4 sm:p-5">
+              <div className="flex items-center gap-2 pb-2 min-w-0">
+                <Trophy className="h-4 w-4 shrink-0 text-[hsl(var(--section-news))]" />
+                <h3 className="text-sm font-semibold text-foreground whitespace-nowrap">Top 5 da Semana</h3>
+                <span className="ml-2 h-1 flex-1 rounded-full bg-[hsl(var(--section-news)/0.25)]" />
+              </div>
+              <div className="flex flex-col divide-y divide-[hsl(var(--section-news)/0.14)]">
                 {top5.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => handleRead(item)}
-                    className="w-full text-left group flex gap-3 py-2 border-b border-border/50 last:border-b-0 hover:bg-muted/40 rounded-md px-2 -mx-2 transition-colors"
+                    className="w-full text-left group flex items-start gap-3 py-2 first:pt-0 transition-colors hover:bg-[hsl(var(--section-news)/0.06)] rounded-md px-2 -mx-2"
                   >
-                    <span className="w-6 shrink-0 font-display text-2xl font-bold leading-none tabular-nums text-primary/70">
+                    <span className="w-6 shrink-0 font-display text-xl @[52rem]:text-2xl font-bold leading-none tabular-nums text-[hsl(var(--section-news))]">
                       {item.position}
                     </span>
                     <div className="min-w-0 flex-1">
                       <h4 className={cn("text-[13px] font-semibold leading-snug text-foreground line-clamp-2 group-hover:text-primary transition-colors")}>
                         {item.titulo_curto}
                       </h4>
-                      <div className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground">
-                        <span className="font-medium">{item.fonte}</span>
-                        <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {item.reads_count}</span>
-                        <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> {item.likes_count}</span>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted-foreground">
+                        <span className="font-medium truncate max-w-[10rem]">{item.fonte}</span>
+                        <span className="inline-flex items-center gap-1 tabular-nums"><Eye className="h-3 w-3" /> {item.reads_count}</span>
+                        <span className="inline-flex items-center gap-1 tabular-nums"><ThumbsUp className="h-3 w-3" /> {item.likes_count}</span>
                       </div>
                     </div>
                   </button>
