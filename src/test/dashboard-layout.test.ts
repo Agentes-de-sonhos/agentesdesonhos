@@ -221,3 +221,28 @@ describe("Comunidade e Academy no dashboard", () => {
     expect(academy).toContain("@[72rem]:grid-cols-4");
   });
 });
+
+describe("Notícias do Trade — destaque e Top 5 refinados", () => {
+  const news = read("src/components/dashboard/CuratedNewsFeed.tsx");
+
+  it("limits featured title and summary to two lines with ellipsis", () => {
+    expect(news).toMatch(/<h3[^>]*line-clamp-2[^>]*>\s*\{featured\.titulo_curto\}/);
+    expect(news).toMatch(/<p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">\{featured\.resumo\}<\/p>/);
+    expect(news).not.toContain("line-clamp-3");
+  });
+
+  it("does not fake the clamp with fixed heights", () => {
+    expect(news).not.toMatch(/h-\[\d+px\]/);
+  });
+
+  it("removes the decorative blue rule from the Top 5 header", () => {
+    expect(news).not.toContain('<span className="ml-2 h-1 flex-1 rounded-full bg-[hsl(var(--section-news)/0.25)]" />');
+    expect(news).not.toMatch(/h-1 flex-1 rounded-full/);
+  });
+
+  it("keeps the trophy icon and Top 5 title", () => {
+    expect(news).toContain("<Trophy");
+    expect(news).toContain("Top 5 da Semana");
+    expect(news).toContain('className="flex items-center gap-2 pb-2 min-w-0"');
+  });
+});
