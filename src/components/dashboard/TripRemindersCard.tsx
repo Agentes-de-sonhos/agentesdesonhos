@@ -145,7 +145,7 @@ export function TripRemindersCard() {
   return (
     <>
       <Card className="border-0 shadow-md h-full flex flex-col min-h-0 overflow-hidden">
-        <CardContent className="pt-4 @[26rem]:pt-6 flex-1 min-h-0 flex flex-col @container overflow-hidden">
+        <CardContent className="pt-4 pb-3 flex-1 min-h-0 flex flex-col @container overflow-hidden">
           <div className="flex items-start justify-between gap-3 mb-3 flex-shrink-0">
             <div className="w-fit">
               <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
@@ -253,13 +253,13 @@ export function TripRemindersCard() {
             })}
           </div>
 
-          {/* Paginação adaptativa — nunca rolagem */}
-          <div className="pt-2 mt-1 border-t flex flex-col @[26rem]:flex-row items-center justify-between gap-1 @[26rem]:gap-2 shrink-0">
-            <p className="text-xs text-muted-foreground whitespace-nowrap">
+          {/* Paginação adaptativa — nunca rolagem, rodapé em linha única */}
+          <div className="pt-1.5 border-t flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0">
+            <p className="text-xs text-muted-foreground whitespace-nowrap truncate">
               Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + pageSize, total)}</span> de{" "}
-              <span className="font-medium text-foreground">{total}</span> viagens
+              <span className="font-medium text-foreground">{total}</span> viagem{total !== 1 ? "s" : ""}
             </p>
-            <div className="flex items-center gap-1">
+            <div className="flex flex-nowrap items-center gap-1 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -269,6 +269,7 @@ export function TripRemindersCard() {
                 disabled={safePage === 0}
               >
                 <ChevronLeft className="h-4 w-4" />
+                <span className="hidden @[26rem]:inline ml-1 text-xs">Anterior</span>
               </Button>
               <span className="text-xs text-muted-foreground px-1 tabular-nums whitespace-nowrap">
                 {safePage + 1} / {totalPages}
@@ -281,6 +282,7 @@ export function TripRemindersCard() {
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={safePage >= totalPages - 1}
               >
+                <span className="hidden @[26rem]:inline mr-1 text-xs">Próximo</span>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

@@ -8,17 +8,16 @@ const news = read("src/components/dashboard/CuratedNewsFeed.tsx");
 describe("dashboard layout restructure", () => {
   it("keeps only the agenda + upcoming trips row in two columns", () => {
     const twoColRows = dashboard.match(/lg:grid-cols-2/g) ?? [];
-    expect(dashboard).toContain("lg:h-[min(60vh,760px)]");
+    expect(dashboard).toContain("lg:h-[max(60vh,560px)]");
     // every remaining two-column row belongs to sections outside the reorganized blocks
     expect(twoColRows.length).toBeGreaterThan(0);
   });
 
-  it("limits the first row to a real 60vh ceiling on desktop (no min that can exceed 60vh)", () => {
-    expect(dashboard).toContain("lg:h-[min(60vh,760px)]");
+  it("gives the first row enough height for 5 agenda rows without inner overflow", () => {
+    expect(dashboard).toContain("lg:h-[max(60vh,560px)] lg:max-h-[820px]");
     expect(dashboard).not.toContain("clamp(380px,60vh,760px)");
     expect(dashboard).not.toContain("clamp(380px");
     expect(dashboard).not.toContain("lg:max-h-[60vh]");
-    expect(dashboard).not.toMatch(/lg:min-h-\[\d+(px|vh|rem)\]/);
   });
 
   it("wraps first-row cards so nothing leaks outside the card", () => {
@@ -91,6 +90,11 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
     }
     expect(agenda).toContain("max: 5");
     expect(agenda).toContain("min: 2");
+    // desktop is fixed at 5 and skips the observer entirely
+    expect(agenda).toContain('from "@/hooks/useIsDesktop"');
+    expect(agenda).toContain("DESKTOP_PAGE_SIZE = 5");
+    expect(agenda).toContain("isDesktop ? DESKTOP_PAGE_SIZE : adaptivePageSize");
+    expect(agenda).toContain("enabled: !isDesktop");
   });
 
   it("hook measures with ResizeObserver and has a deterministic fallback", () => {
@@ -107,6 +111,30 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
       expect(file).toContain("Math.ceil(total / pageSize)");
     }
     expect(agenda).toContain("Math.min(startIdx + pageSize, total)");
+  });
+
+  it("keeps both footers on a single compact line (counter left, pagination right)", () => {
+    for (const file of [agenda, trips]) {
+      expect(file).toContain("flex flex-row flex-nowrap items-center justify-between gap-2 shrink-0");
+      expect(file).not.toContain("@[26rem]:flex-row items-center justify-between");
+      expect(file).toContain("Mostrando <span");
+    }
+  });
+
+  it("keeps the header on one desktop line with nowrap greeting, points and currencies", () => {
+    const pill = read("src/components/layout/GamificationPill.tsx");
+    const fx = read("src/components/dashboard/ExchangeRateCard.tsx");
+    expect(dashboard).toContain("sm:flex-nowrap sm:items-center sm:justify-between");
+    expect(dashboard).toContain("whitespace-nowrap truncate min-w-0");
+    expect(dashboard).toContain("flex flex-nowrap items-center gap-2 lg:gap-1.5 xl:gap-3 shrink-0");
+    expect(pill).toContain("whitespace-nowrap shrink-0");
+    expect(fx).toContain("flex flex-nowrap items-center");
+    expect((fx.match(/whitespace-nowrap/g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("halves the main content side padding on smaller desktops", () => {
+    const layout = read("src/components/layout/DashboardLayout.tsx");
+    expect(layout).toContain("lg:pl-6 lg:pr-6 xl:pl-12 xl:pr-12");
   });
 
   it("keeps agenda rows on a single line (truncate, no wrap)", () => {

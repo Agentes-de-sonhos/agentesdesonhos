@@ -135,17 +135,17 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 animate-fade-in min-w-0 overflow-x-hidden">
         {/* Header with Welcome Message, Exchange Rate, Notifications, Profile & Logout */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between gap-3 lg:gap-2 xl:gap-3 min-w-0">
           {/* Welcome message + Online agents */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+          <div className="flex flex-col sm:flex-row sm:flex-nowrap sm:items-center gap-3 lg:gap-2 min-w-0">
+            <h1 className="font-display text-2xl lg:text-xl xl:text-3xl font-bold text-foreground whitespace-nowrap truncate min-w-0">
               {getGreeting()}, {firstName}!
             </h1>
             <OnlineAgentsStrip />
           </div>
-          
+
           {/* Top bar with all header elements */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-nowrap items-center gap-2 lg:gap-1.5 xl:gap-3 shrink-0">
             <GamificationPill />
             <ExchangeRateCard />
             <div className="h-6 w-px bg-border hidden sm:block" />
@@ -197,7 +197,7 @@ export default function Dashboard() {
             {isTeamMember ? (
               <>
                 {/* Minha Agenda & Próximas Viagens (apenas estas seções para subusuários) */}
-                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2 lg:h-[min(60vh,760px)]">
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2 lg:h-[max(60vh,560px)] lg:max-h-[820px]">
                   <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
                   <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
                 </section>
@@ -210,7 +210,7 @@ export default function Dashboard() {
                 </section>
 
                 {/* Agenda & Próximas Viagens lado a lado; demais seções em largura total */}
-                <section className="order-3 grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch lg:h-[min(60vh,760px)]">
+                <section className="order-3 grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch lg:h-[max(60vh,560px)] lg:max-h-[820px]">
                   <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
                   <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
                 </section>
@@ -222,7 +222,7 @@ export default function Dashboard() {
             ) : (
               <>
                 {/* 2. Minha Agenda & Próximas Viagens (única linha em duas colunas no desktop) */}
-                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2 lg:h-[min(60vh,760px)]">
+                <section className="grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch order-2 lg:h-[max(60vh,560px)] lg:max-h-[820px]">
                   <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
                   <div className="flex flex-col min-w-0 min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
                 </section>

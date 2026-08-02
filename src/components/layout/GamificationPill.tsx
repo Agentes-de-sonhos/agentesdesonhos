@@ -35,12 +35,12 @@ export function GamificationPill({ restrictedMode = false }: GamificationPillPro
         <TooltipTrigger asChild>
           <button
             onClick={handleClick}
-            className="flex items-center gap-2 bg-purple-600 rounded-full px-3 py-1.5 text-xs cursor-pointer hover:bg-purple-700 transition-colors"
+            className="flex items-center gap-2 bg-purple-600 rounded-full px-3 py-1.5 text-xs cursor-pointer whitespace-nowrap shrink-0 hover:bg-purple-700 transition-colors"
           >
             <span className="hidden sm:inline">{level.icon}</span>
             <span className="flex items-center gap-1">
               <Star className="h-3.5 w-3.5 text-yellow-400" />
-              <span className="font-semibold text-white/90">
+              <span className="font-semibold text-white/90 whitespace-nowrap">
                 {myPoints.toFixed(0)} pts
               </span>
             </span>
