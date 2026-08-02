@@ -459,7 +459,7 @@ export default function Noticias() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {isAdmin && <AdminEditButton adminTab="news" />}
+              {isAdmin && <AdminEditButton adminTab="curadoria" />}
               <a
                 href="#todas-as-noticias"
                 onClick={(e) => {
