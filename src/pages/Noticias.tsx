@@ -460,9 +460,18 @@ export default function Noticias() {
             </div>
             <div className="flex items-center gap-2">
               {isAdmin && <AdminEditButton adminTab="news" />}
-              <Button size="sm" variant="ghost" onClick={handleReload} aria-label="Atualizar">
-                <RefreshCw className={cn("h-4 w-4", feedQuery.isFetching && "animate-spin")} />
-              </Button>
+              <a
+                href="#todas-as-noticias"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document
+                    .getElementById("todas-as-noticias")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="text-xs md:text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline transition-colors"
+              >
+                Todas as notícias
+              </a>
             </div>
           </div>
 
@@ -478,22 +487,55 @@ export default function Noticias() {
             <span>Última atualização <strong className="text-foreground">{lastUpdateLabel}</strong></span>
             <span className="text-border">•</span>
             <span>Próxima coleta às <strong className="text-foreground">{nextCollection}</strong></span>
-            {pendingCount > 0 && (
-              <Button size="sm" variant="secondary" onClick={handleReload} className="gap-1.5 h-7 ml-auto">
-                <RefreshCw className="h-3.5 w-3.5" />
-                {pendingCount} {pendingCount === 1 ? "nova" : "novas"}
-              </Button>
-            )}
           </div>
         </header>
 
-        {/* Tabs */}
-        <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-          <TabsList className="grid grid-cols-2 max-w-md">
-            <TabsTrigger value="destaques">Destaques</TabsTrigger>
-            <TabsTrigger value="todas">Todas as notícias</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Blocos principais: Notícia do Dia/Semana + Top 5 da Semana */}
+        {highlightsQuery.isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          (featured || top5.length > 0) && (
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-6">
+              {featured ? (
+                <NewsCard
+                  item={featured}
+                  variant="feature"
+                  featuredLabel={featuredLabel}
+                  manualBadge={featured.is_manual}
+                  onRead={handleRead}
+                  onLike={toggleLike}
+                  liked={isLiked(featured.id)}
+                  likeCount={getLikeCount(featured.id) || featured.likes_count}
+                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
+                  isAdmin={isAdmin}
+                />
+              ) : (
+                <div className="rounded-lg border border-dashed border-border/60 p-6 text-sm text-muted-foreground">
+                  Ainda não há {featuredLabel.toLowerCase()} definida para o período.
+                </div>
+              )}
+              <aside className="rounded-lg border border-border/60 bg-card p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <h2 className="text-sm font-display font-bold text-foreground">Top 5 da Semana</h2>
+                </div>
+                <div className="flex flex-col">
+                  {top5.map((r) => (
+                    <RankingItem key={r.id} item={r} position={r.position} onRead={handleRead} />
+                  ))}
+                  {top5.length === 0 && (
+                    <p className="text-xs text-muted-foreground py-4">
+                      Ainda não há dados suficientes para o ranking desta semana. Acesse e curta notícias
+                      para influenciar o Top 5.
+                    </p>
+                  )}
+                </div>
+              </aside>
+            </div>
+          )
+        )}
 
         {/* Filtros */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -528,19 +570,17 @@ export default function Noticias() {
               ))}
             </SelectContent>
           </Select>
-          {view === "todas" && (
-            <Select value={orderBy} onValueChange={(v) => setOrderBy(v as any)}>
-              <SelectTrigger className="h-9 w-[170px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Mais recentes</SelectItem>
-                <SelectItem value="score">Mais relevantes</SelectItem>
-                <SelectItem value="reads">Mais acessadas</SelectItem>
-                <SelectItem value="likes">Mais curtidas</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+          <Select value={orderBy} onValueChange={(v) => setOrderBy(v as any)}>
+            <SelectTrigger className="h-9 w-[170px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Mais recentes</SelectItem>
+              <SelectItem value="score">Mais relevantes</SelectItem>
+              <SelectItem value="reads">Mais acessadas</SelectItem>
+              <SelectItem value="likes">Mais curtidas</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Estados de carregamento */}
