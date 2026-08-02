@@ -419,7 +419,7 @@ export default function Noticias() {
     return arr.sort((a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2));
   }, [filtered, orderBy]);
 
-  /* Notícias por categoria (destaques) */
+  /* Notícias por categoria — destaque de cada categoria pelo score de engajamento */
   const byCategory = useMemo(() => {
     const map = new Map<string, Noticia[]>();
     for (const n of filtered) {
@@ -430,18 +430,10 @@ export default function Noticias() {
     return map;
   }, [filtered]);
 
-  const ranking = rankingQuery.data ?? [];
-  const topOne = ranking[0];
-  const topRest = ranking.slice(1, 5);
-
-  const featuredLabel = weekend ? "Notícia da Semana" : "Notícia do Dia";
-  const top5Label = weekend ? "Top 5 da Semana" : "Top 5 do Dia";
-
-  const handleReload = () => {
-    setPendingCount(0);
-    feedQuery.refetch();
-    rankingQuery.refetch();
-  };
+  const highlights = highlightsQuery.data;
+  const featured = highlights?.featured ?? null;
+  const top5: RankingRow[] = highlights?.top5 ?? [];
+  const featuredLabel = highlightLabel(highlights?.mode ?? "daily");
 
   // Métricas do cabeçalho
   const news24hCount = useMemo(() => {
