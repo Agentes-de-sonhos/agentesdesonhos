@@ -81,7 +81,7 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
 
   return (
     <Card className="border-0 shadow-card">
-      <CardContent className="pt-5 pb-5 space-y-3">
+      <CardContent className="pt-5 pb-5 space-y-3 @container min-w-0">
         <DashboardSectionHeader
           icon={Globe}
           title="Mapa do Turismo"
@@ -103,7 +103,7 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
               type="button"
               aria-label="Rolar para a esquerda"
               onClick={() => scrollBy("left")}
-              className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background"
+              className="hidden sm:flex @[62rem]:!hidden absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -113,7 +113,7 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
               type="button"
               aria-label="Rolar para a direita"
               onClick={() => scrollBy("right")}
-              className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background"
+              className="hidden sm:flex @[62rem]:!hidden absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -121,7 +121,7 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
 
           <div
             ref={scrollerRef}
-            className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 sm:px-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 sm:px-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden @[62rem]:grid @[62rem]:grid-cols-10 @[62rem]:gap-3 @[68rem]:gap-4 @[62rem]:overflow-visible @[62rem]:px-0 @[62rem]:mx-auto @[62rem]:max-w-[1480px] @[62rem]:justify-items-center"
           >
             {CATEGORIES_DATA.map((cat) => {
               const Icon = cat.icon;
@@ -132,11 +132,12 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
                   aria-label={`Acessar ${cat.title}`}
                   className={cn(
                     "snap-start shrink-0 flex flex-col items-center justify-center gap-2 rounded-2xl w-[92px] h-[92px] sm:w-[104px] sm:h-[104px] text-xs font-medium transition-all duration-200 border border-transparent",
+                    "@[62rem]:w-full @[62rem]:h-auto @[62rem]:aspect-square @[62rem]:max-w-[144px] @[68rem]:text-[13px]",
                     cat.color,
                     "hover:scale-[1.02] hover:shadow-md hover:border-border/50"
                   )}
                 >
-                  <Icon className={cn("h-6 w-6", cat.iconColor)} />
+                  <Icon className={cn("h-6 w-6 @[68rem]:h-7 @[68rem]:w-7", cat.iconColor)} />
                   <span className="text-center leading-tight px-1">{cat.title}</span>
                 </button>
               );
