@@ -10,6 +10,24 @@ interface Props {
 }
 
 /**
+ * Resets the vertical scroll of the real scrolling surfaces (window plus any
+ * inner overflow container inside the active tab) so the tab bar is visible.
+ * Horizontal scroll — notably the tab bar itself — is never touched.
+ */
+export function scrollWorkspaceToTop(root: HTMLElement | null) {
+  try {
+    window.scrollTo({ top: 0, left: window.scrollX, behavior: "auto" });
+  } catch {
+    window.scrollTo(0, 0);
+  }
+  const doc = document.scrollingElement as HTMLElement | null;
+  if (doc) doc.scrollTop = 0;
+  root?.querySelectorAll<HTMLElement>("[data-workspace-scroll]").forEach((el) => {
+    el.scrollTop = 0;
+  });
+}
+
+/**
  * Shell that renders the tab bar and mounts every open tab in its own MemoryRouter,
  * keeping non-active tabs alive via display:none so state is preserved.
  *
