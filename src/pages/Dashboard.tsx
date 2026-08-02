@@ -135,17 +135,17 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 animate-fade-in min-w-0 overflow-x-hidden">
         {/* Header with Welcome Message, Exchange Rate, Notifications, Profile & Logout */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between gap-3 lg:gap-2 xl:gap-3 min-w-0">
           {/* Welcome message + Online agents */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+          <div className="flex flex-col sm:flex-row sm:flex-nowrap sm:items-center gap-3 lg:gap-2 min-w-0">
+            <h1 className="font-display text-2xl lg:text-xl xl:text-3xl font-bold text-foreground whitespace-nowrap truncate min-w-0">
               {getGreeting()}, {firstName}!
             </h1>
             <OnlineAgentsStrip />
           </div>
-          
+
           {/* Top bar with all header elements */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-nowrap items-center gap-2 lg:gap-1.5 xl:gap-3 shrink-0">
             <GamificationPill />
             <ExchangeRateCard />
             <div className="h-6 w-px bg-border hidden sm:block" />
