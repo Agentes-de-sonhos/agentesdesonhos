@@ -1,3 +1,4 @@
+import { LinkifiedText } from "@/components/community/LinkifiedText";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -313,7 +314,10 @@ function PostCard({
 
       {post.content && (
         <div className="px-4 pb-2">
-          <p className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed">{post.content}</p>
+          <LinkifiedText
+            text={post.content}
+            className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed"
+          />
         </div>
       )}
 
@@ -392,9 +396,10 @@ function PostCard({
                       <p className="text-xs font-semibold text-foreground">
                         {toTitleCase(c.profile?.name) || "Membro"}
                       </p>
-                      <p className="text-sm text-foreground whitespace-pre-wrap break-words mt-0.5">
-                        {c.content}
-                      </p>
+                      <LinkifiedText
+                        text={c.content}
+                        className="text-sm text-foreground whitespace-pre-wrap break-words mt-0.5"
+                      />
                     </div>
                     <div className="flex items-center gap-3 mt-1 px-2">
                       <span className="text-[11px] text-muted-foreground">{timeAgo(c.created_at)}</span>
