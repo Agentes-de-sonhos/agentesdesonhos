@@ -23,11 +23,28 @@ describe("dashboard layout restructure", () => {
     for (const block of ["<CuratedNewsFeed />", "<CommunitySocialFeed />", "<AcademyCollapsibleCard />", "<MapaTurismoCard />"]) {
       expect(dashboard).toContain(block);
     }
-    expect(dashboard).toContain('<section className="order-3 min-w-0">');
-    expect(dashboard).toContain('<section className="order-[3.3] min-w-0">');
+    expect(dashboard).toContain('<section className="order-4 min-w-0">');
+    expect(dashboard).toContain('<section className="order-5 min-w-0">');
     // no legacy two-column wrappers pairing these blocks
     expect(dashboard).not.toContain("<CuratedNewsFeed /></div>");
     expect(dashboard).not.toContain("<CommunitySocialFeed /></div>");
+  });
+
+  it("never uses fractional order utilities", () => {
+    expect(dashboard).not.toMatch(/order-\[\d+\.\d+\]/);
+  });
+
+  it("keeps a valid strictly increasing integer order sequence in every branch", () => {
+    const branches = dashboard.split(/\) : is|\) : \(/).slice(1);
+    expect(branches.length).toBeGreaterThanOrEqual(2);
+    for (const branch of branches) {
+      const orders = [...branch.matchAll(/order-(\d+)\b/g)].map((m) => Number(m[1]));
+      expect(orders.length).toBeGreaterThan(0);
+      for (const value of orders) expect(Number.isInteger(value)).toBe(true);
+      const sorted = [...orders].sort((a, b) => a - b);
+      expect(orders).toEqual(sorted);
+      expect(new Set(orders).size).toBe(orders.length);
+    }
   });
 
   it("does not duplicate the reorganized blocks in the main dashboard branch", () => {
