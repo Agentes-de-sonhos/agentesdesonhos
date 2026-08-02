@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Newspaper, Loader2, ExternalLink, Eye, ThumbsUp, Crown, ShieldCheck, AlertTriangle, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
+import { DashboardSectionHeader } from "@/components/dashboard/DashboardSectionHeader";
 import { useNewsHighlights, type HighlightNews, type Top5Item } from "@/hooks/useNewsHighlights";
 import { highlightLabel } from "@/lib/newsRanking";
 import { cn } from "@/lib/utils";
@@ -37,27 +37,20 @@ function CategoryBadge({ categoria }: { categoria: string }) {
 
 function SectionHeader() {
   return (
-    <div className="mb-4 space-y-2 min-w-0">
-      <div className="flex flex-col @[34rem]:flex-row @[34rem]:items-start @[34rem]:justify-between gap-2 @[34rem]:gap-3 min-w-0">
-        <div className="w-fit">
-          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
-            Notícias do Trade
-          </h2>
-          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
-        </div>
-        <SectionCtaLink
-          to="/noticias"
-          label="Ver todas as notícias"
-          shortLabel="Ver todas"
-          tabTitle="Notícias"
-          className="text-[hsl(var(--section-news))]"
-        />
-      </div>
-      <p className="text-sm text-muted-foreground max-w-2xl">
-        Fique por dentro das principais notícias do turismo, reunidas em um só lugar.
-      </p>
-    </div>
+    <DashboardSectionHeader
+      icon={Newspaper}
+      title="Notícias do Trade"
+      description="Fique por dentro das principais notícias do turismo em um só lugar."
+      iconClassName="text-[hsl(var(--section-news))]"
+      accentClassName="bg-[hsl(var(--section-news))]"
+      cta={{
+        to: "/noticias",
+        label: "Ver todas as notícias",
+        shortLabel: "Ver todas",
+        tabTitle: "Notícias",
+        className: "text-[hsl(var(--section-news))]",
+      }}
+    />
   );
 }
 

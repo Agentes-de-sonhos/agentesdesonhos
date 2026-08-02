@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DIRECTORY_ROOT, categoryListingRoute } from "@/lib/directoryNavigation";
-import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
+import { DashboardSectionHeader } from "@/components/dashboard/DashboardSectionHeader";
 
 interface CategoryDef {
   title: string;
@@ -82,27 +82,20 @@ export function MapaTurismoCard({ alwaysExpanded = false }: MapaTurismoCardProps
   return (
     <Card className="border-0 shadow-card">
       <CardContent className="pt-5 pb-5 space-y-3">
-        <div className="space-y-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="w-fit">
-              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                <Globe className="h-5 w-5 text-primary" />
-                Mapa do Turismo
-              </h2>
-              <div className="mt-2 h-1 w-full rounded-full bg-primary" />
-            </div>
-            <SectionCtaLink
-              to={DIRECTORY_ROOT}
-              label="Ver Mapa do Turismo"
-              shortLabel="Ver mapa"
-              tabTitle="Mapa do Turismo"
-              className="text-primary"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground max-w-2xl text-left">
-            Encontre seus parceiros ideais: busque, filtre e conecte-se com fornecedores do turismo em poucos cliques.
-          </p>
-        </div>
+        <DashboardSectionHeader
+          icon={Globe}
+          title="Mapa do Turismo"
+          description="Encontre e conecte-se com os melhores fornecedores do turismo."
+          iconClassName="text-primary"
+          accentClassName="bg-primary"
+          cta={{
+            to: DIRECTORY_ROOT,
+            label: "Ver Mapa do Turismo",
+            shortLabel: "Ver mapa",
+            tabTitle: "Mapa do Turismo",
+            className: "text-primary",
+          }}
+        />
 
         <div className="relative">
           {canScrollLeft && (

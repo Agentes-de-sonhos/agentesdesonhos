@@ -194,7 +194,7 @@ describe("Notícias do Trade block", () => {
   });
 
   it("uses the new inviting intro copy", () => {
-    expect(news).toContain("Fique por dentro das principais notícias do turismo, reunidas em um só lugar.");
+    expect(news).toContain("Fique por dentro das principais notícias do turismo em um só lugar.");
     expect(news).not.toContain("O destaque do período e o Top 5 da semana, com a mesma curadoria da página completa.");
   });
 
