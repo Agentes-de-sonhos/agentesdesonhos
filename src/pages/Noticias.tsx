@@ -328,22 +328,17 @@ export default function Noticias() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [view, setView] = useState<"destaques" | "todas">("destaques");
   const [search, setSearch] = useState("");
   const [categoriaFilter, setCategoriaFilter] = useState<string>("all");
   const [portalFilter, setPortalFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<"recent" | "reads" | "likes" | "score">("recent");
   const [visibleCount, setVisibleCount] = useState(20);
-  const [pendingCount, setPendingCount] = useState(0);
   const [categoryVisibleCounts, setCategoryVisibleCounts] = useState<Record<string, number>>({});
 
   // Reset per-category counts when filters change
   useEffect(() => {
     setCategoryVisibleCounts({});
   }, [search, categoriaFilter, portalFilter, orderBy]);
-
-  const weekend = isWeekend();
-  const rankingWindow: "day" | "week" = weekend ? "week" : "day";
 
   /* Feed principal — últimas notícias */
   const feedQuery = useQuery({
@@ -359,39 +354,12 @@ export default function Noticias() {
       return (data ?? []) as Noticia[];
     },
     staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
     refetchOnWindowFocus: false,
   });
 
-  /* Ranking (Top 5) */
-  const rankingQuery = useQuery({
-    queryKey: ["news-ranking", rankingWindow],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("news_ranking", {
-        p_window: rankingWindow,
-        p_limit: 5,
-      });
-      if (error) throw error;
-      return (data ?? []) as RankingRow[];
-    },
-    staleTime: 60_000,
-    refetchOnWindowFocus: false,
-  });
-
-  /* Polling — sinaliza novas notícias sem trocar o scroll */
-  useEffect(() => {
-    const items = feedQuery.data ?? [];
-    if (items.length === 0) return;
-    const latestSeen = new Date(items[0].data_publicacao).getTime();
-    const intervalId = window.setInterval(async () => {
-      const { data } = await (supabase.from("noticias_dashboard") as any)
-        .select("id, data_publicacao")
-        .eq("status", "aprovado")
-        .eq("hidden", false)
-        .gt("data_publicacao", new Date(latestSeen).toISOString());
-      setPendingCount((data ?? []).length);
-    }, 60_000);
-    return () => window.clearInterval(intervalId);
-  }, [feedQuery.data]);
+  /* Destaques: Notícia do Dia/Semana + Top 5 da Semana (regras no servidor) */
+  const highlightsQuery = useNewsHighlights();
 
   const news = feedQuery.data ?? [];
   const newsIds = useMemo(() => news.map((n) => n.id), [news]);
@@ -399,7 +367,7 @@ export default function Noticias() {
 
   /* Registrar leitura */
   const handleRead = useCallback(
-    async (item: Noticia) => {
+    async (item: NewsCardItem) => {
       window.open(item.url_original, "_blank", "noopener,noreferrer");
       try {
         await (supabase as any).rpc("register_news_read", { p_noticia_id: item.id });
@@ -424,7 +392,7 @@ export default function Noticias() {
     onSuccess: () => {
       toast({ title: "Notícia ocultada", description: "A notícia não aparece mais no feed dos agentes." });
       queryClient.invalidateQueries({ queryKey: ["news-feed"] });
-      queryClient.invalidateQueries({ queryKey: ["news-ranking"] });
+      queryClient.invalidateQueries({ queryKey: ["news-highlights"] });
     },
     onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
   });
