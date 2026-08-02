@@ -17,6 +17,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { DashboardContainer } from "@/components/dashboard/DashboardContainer";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -132,8 +133,8 @@ export default function Dashboard() {
   const isLoading = suppliersLoading;
 
   return (
-    <DashboardLayout>
-      <div className="space-y-4 sm:space-y-6 animate-fade-in min-w-0 overflow-x-hidden">
+    <DashboardLayout flushHorizontal>
+      <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in overflow-x-hidden">
         {/* Header with Welcome Message, Exchange Rate, Notifications, Profile & Logout */}
         <div className="flex flex-col sm:flex-row sm:flex-nowrap sm:items-center sm:justify-between gap-3 lg:gap-2 xl:gap-3 min-w-0">
           {/* Welcome message + Online agents */}
@@ -273,7 +274,7 @@ export default function Dashboard() {
             )}
           </Suspense>
         )}
-      </div>
+      </DashboardContainer>
     </DashboardLayout>
   );
 }
