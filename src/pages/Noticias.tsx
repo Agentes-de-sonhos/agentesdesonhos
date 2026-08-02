@@ -6,12 +6,11 @@ import {
   Newspaper, ExternalLink, Loader2, TrendingUp, Flame, Search, Crown,
   Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Building2, Ticket,
   DollarSign, GraduationCap, Users, Sparkles, Shield, Wrench, Filter,
-  RefreshCw, EyeOff, Eye, ThumbsUp, X, ChevronDown,
+  EyeOff, Eye, ThumbsUp, X, ChevronDown, ShieldCheck,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -19,6 +18,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
+import { useNewsHighlights, type Top5Item } from "@/hooks/useNewsHighlights";
+import { highlightLabel, sortByEngagement } from "@/lib/newsRanking";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 import { cn } from "@/lib/utils";
 
@@ -37,12 +38,10 @@ type Noticia = {
   hidden: boolean;
 };
 
-type RankingRow = Noticia & {
-  window_reads: number;
-  window_likes: number;
-  score: number;
-  rank_position: number;
-};
+type RankingRow = Top5Item;
+
+/** Card/leitura aceitam qualquer notícia com os campos de exibição. */
+type NewsCardItem = Omit<Noticia, "status" | "hidden">;
 
 /* ── Categorias ──────────────────────────────────────────── */
 const CATEGORIAS = [
@@ -155,16 +154,18 @@ function NewsCard({
   likeCount,
   variant = "default",
   featuredLabel,
+  manualBadge,
   onHide,
   isAdmin,
 }: {
-  item: Noticia;
-  onRead: (item: Noticia) => void;
+  item: NewsCardItem;
+  onRead: (item: NewsCardItem) => void;
   onLike: (id: string) => void;
   liked: boolean;
   likeCount: number;
   variant?: "default" | "feature" | "compact";
   featuredLabel?: string;
+  manualBadge?: boolean;
   onHide?: (id: string) => void;
   isAdmin?: boolean;
 }) {
@@ -200,6 +201,11 @@ function NewsCard({
             </span>
           )}
           <CategoryBadge categoria={item.categoria} />
+          {manualBadge && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <ShieldCheck className="h-3 w-3" /> Escolha da administração
+            </span>
+          )}
           <span className="text-[11px] font-medium text-muted-foreground">{item.fonte}</span>
           <span className="text-[11px] text-muted-foreground">·</span>
           <span className="text-[11px] text-muted-foreground">{formatRelative(item.data_publicacao)}</span>
@@ -280,7 +286,7 @@ function RankingItem({
 }: {
   item: RankingRow;
   position: number;
-  onRead: (item: Noticia) => void;
+  onRead: (item: NewsCardItem) => void;
 }) {
   return (
     <button
@@ -295,6 +301,14 @@ function RankingItem({
         <h4 className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
           {item.titulo_curto}
         </h4>
+        {item.is_manual && (
+          <span
+            className="mt-1 inline-flex items-center gap-1 text-[10px] text-muted-foreground"
+            title="Posição definida pela administração"
+          >
+            <ShieldCheck className="h-3 w-3" /> Curadoria
+          </span>
+        )}
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
           <span className="font-medium">{item.fonte}</span>
           <span>·</span>
@@ -314,22 +328,17 @@ export default function Noticias() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [view, setView] = useState<"destaques" | "todas">("destaques");
   const [search, setSearch] = useState("");
   const [categoriaFilter, setCategoriaFilter] = useState<string>("all");
   const [portalFilter, setPortalFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<"recent" | "reads" | "likes" | "score">("recent");
   const [visibleCount, setVisibleCount] = useState(20);
-  const [pendingCount, setPendingCount] = useState(0);
   const [categoryVisibleCounts, setCategoryVisibleCounts] = useState<Record<string, number>>({});
 
   // Reset per-category counts when filters change
   useEffect(() => {
     setCategoryVisibleCounts({});
   }, [search, categoriaFilter, portalFilter, orderBy]);
-
-  const weekend = isWeekend();
-  const rankingWindow: "day" | "week" = weekend ? "week" : "day";
 
   /* Feed principal — últimas notícias */
   const feedQuery = useQuery({
@@ -345,39 +354,12 @@ export default function Noticias() {
       return (data ?? []) as Noticia[];
     },
     staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
     refetchOnWindowFocus: false,
   });
 
-  /* Ranking (Top 5) */
-  const rankingQuery = useQuery({
-    queryKey: ["news-ranking", rankingWindow],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any).rpc("news_ranking", {
-        p_window: rankingWindow,
-        p_limit: 5,
-      });
-      if (error) throw error;
-      return (data ?? []) as RankingRow[];
-    },
-    staleTime: 60_000,
-    refetchOnWindowFocus: false,
-  });
-
-  /* Polling — sinaliza novas notícias sem trocar o scroll */
-  useEffect(() => {
-    const items = feedQuery.data ?? [];
-    if (items.length === 0) return;
-    const latestSeen = new Date(items[0].data_publicacao).getTime();
-    const intervalId = window.setInterval(async () => {
-      const { data } = await (supabase.from("noticias_dashboard") as any)
-        .select("id, data_publicacao")
-        .eq("status", "aprovado")
-        .eq("hidden", false)
-        .gt("data_publicacao", new Date(latestSeen).toISOString());
-      setPendingCount((data ?? []).length);
-    }, 60_000);
-    return () => window.clearInterval(intervalId);
-  }, [feedQuery.data]);
+  /* Destaques: Notícia do Dia/Semana + Top 5 da Semana (regras no servidor) */
+  const highlightsQuery = useNewsHighlights();
 
   const news = feedQuery.data ?? [];
   const newsIds = useMemo(() => news.map((n) => n.id), [news]);
@@ -385,7 +367,7 @@ export default function Noticias() {
 
   /* Registrar leitura */
   const handleRead = useCallback(
-    async (item: Noticia) => {
+    async (item: NewsCardItem) => {
       window.open(item.url_original, "_blank", "noopener,noreferrer");
       try {
         await (supabase as any).rpc("register_news_read", { p_noticia_id: item.id });
@@ -410,7 +392,7 @@ export default function Noticias() {
     onSuccess: () => {
       toast({ title: "Notícia ocultada", description: "A notícia não aparece mais no feed dos agentes." });
       queryClient.invalidateQueries({ queryKey: ["news-feed"] });
-      queryClient.invalidateQueries({ queryKey: ["news-ranking"] });
+      queryClient.invalidateQueries({ queryKey: ["news-highlights"] });
     },
     onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
   });
@@ -437,7 +419,7 @@ export default function Noticias() {
     return arr.sort((a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2));
   }, [filtered, orderBy]);
 
-  /* Notícias por categoria (destaques) */
+  /* Notícias por categoria — destaque de cada categoria pelo score de engajamento */
   const byCategory = useMemo(() => {
     const map = new Map<string, Noticia[]>();
     for (const n of filtered) {
@@ -448,18 +430,10 @@ export default function Noticias() {
     return map;
   }, [filtered]);
 
-  const ranking = rankingQuery.data ?? [];
-  const topOne = ranking[0];
-  const topRest = ranking.slice(1, 5);
-
-  const featuredLabel = weekend ? "Notícia da Semana" : "Notícia do Dia";
-  const top5Label = weekend ? "Top 5 da Semana" : "Top 5 do Dia";
-
-  const handleReload = () => {
-    setPendingCount(0);
-    feedQuery.refetch();
-    rankingQuery.refetch();
-  };
+  const highlights = highlightsQuery.data;
+  const featured = highlights?.featured ?? null;
+  const top5: RankingRow[] = highlights?.top5 ?? [];
+  const featuredLabel = highlightLabel(highlights?.mode ?? "daily");
 
   // Métricas do cabeçalho
   const news24hCount = useMemo(() => {
@@ -485,10 +459,19 @@ export default function Noticias() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {isAdmin && <AdminEditButton adminTab="news" />}
-              <Button size="sm" variant="ghost" onClick={handleReload} aria-label="Atualizar">
-                <RefreshCw className={cn("h-4 w-4", feedQuery.isFetching && "animate-spin")} />
-              </Button>
+              {isAdmin && <AdminEditButton adminTab="curadoria" />}
+              <a
+                href="#todas-as-noticias"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document
+                    .getElementById("todas-as-noticias")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="text-xs md:text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline transition-colors"
+              >
+                Todas as notícias
+              </a>
             </div>
           </div>
 
@@ -504,22 +487,55 @@ export default function Noticias() {
             <span>Última atualização <strong className="text-foreground">{lastUpdateLabel}</strong></span>
             <span className="text-border">•</span>
             <span>Próxima coleta às <strong className="text-foreground">{nextCollection}</strong></span>
-            {pendingCount > 0 && (
-              <Button size="sm" variant="secondary" onClick={handleReload} className="gap-1.5 h-7 ml-auto">
-                <RefreshCw className="h-3.5 w-3.5" />
-                {pendingCount} {pendingCount === 1 ? "nova" : "novas"}
-              </Button>
-            )}
           </div>
         </header>
 
-        {/* Tabs */}
-        <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-          <TabsList className="grid grid-cols-2 max-w-md">
-            <TabsTrigger value="destaques">Destaques</TabsTrigger>
-            <TabsTrigger value="todas">Todas as notícias</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Blocos principais: Notícia do Dia/Semana + Top 5 da Semana */}
+        {highlightsQuery.isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          (featured || top5.length > 0) && (
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-6">
+              {featured ? (
+                <NewsCard
+                  item={featured}
+                  variant="feature"
+                  featuredLabel={featuredLabel}
+                  manualBadge={featured.is_manual}
+                  onRead={handleRead}
+                  onLike={toggleLike}
+                  liked={isLiked(featured.id)}
+                  likeCount={getLikeCount(featured.id) || featured.likes_count}
+                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
+                  isAdmin={isAdmin}
+                />
+              ) : (
+                <div className="rounded-lg border border-dashed border-border/60 p-6 text-sm text-muted-foreground">
+                  Ainda não há {featuredLabel.toLowerCase()} definida para o período.
+                </div>
+              )}
+              <aside className="rounded-lg border border-border/60 bg-card p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <h2 className="text-sm font-display font-bold text-foreground">Top 5 da Semana</h2>
+                </div>
+                <div className="flex flex-col">
+                  {top5.map((r) => (
+                    <RankingItem key={r.id} item={r} position={r.position} onRead={handleRead} />
+                  ))}
+                  {top5.length === 0 && (
+                    <p className="text-xs text-muted-foreground py-4">
+                      Ainda não há dados suficientes para o ranking desta semana. Acesse e curta notícias
+                      para influenciar o Top 5.
+                    </p>
+                  )}
+                </div>
+              </aside>
+            </div>
+          )
+        )}
 
         {/* Filtros */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -554,19 +570,17 @@ export default function Noticias() {
               ))}
             </SelectContent>
           </Select>
-          {view === "todas" && (
-            <Select value={orderBy} onValueChange={(v) => setOrderBy(v as any)}>
-              <SelectTrigger className="h-9 w-[170px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Mais recentes</SelectItem>
-                <SelectItem value="score">Mais relevantes</SelectItem>
-                <SelectItem value="reads">Mais acessadas</SelectItem>
-                <SelectItem value="likes">Mais curtidas</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+          <Select value={orderBy} onValueChange={(v) => setOrderBy(v as any)}>
+            <SelectTrigger className="h-9 w-[170px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Mais recentes</SelectItem>
+              <SelectItem value="score">Mais relevantes</SelectItem>
+              <SelectItem value="reads">Mais acessadas</SelectItem>
+              <SelectItem value="likes">Mais curtidas</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Estados de carregamento */}
@@ -583,42 +597,9 @@ export default function Noticias() {
           </div>
         )}
 
-        {/* View: Destaques do Trade */}
-        {view === "destaques" && filtered.length > 0 && (
-          <div className="space-y-10">
-            {/* Notícia do Dia/Semana (65%) + Top 5 (35%) */}
-            {topOne && (
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-6">
-                <NewsCard
-                  item={topOne}
-                  variant="feature"
-                  featuredLabel={featuredLabel}
-                  onRead={handleRead}
-                  onLike={toggleLike}
-                  liked={isLiked(topOne.id)}
-                  likeCount={getLikeCount(topOne.id) || topOne.likes_count}
-                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                  isAdmin={isAdmin}
-                />
-                <aside className="rounded-lg border border-border/60 bg-card p-4 md:p-5">
-                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-display font-bold text-foreground">{top5Label}</h3>
-                  </div>
-                  <div className="flex flex-col">
-                    {topRest.map((r) => (
-                      <RankingItem key={r.id} item={r} position={r.rank_position} onRead={handleRead} />
-                    ))}
-                    {topRest.length === 0 && (
-                      <p className="text-xs text-muted-foreground py-4">
-                        Ainda não há dados suficientes para o ranking. Acesse e curta notícias para influenciar o Top {top5Label.includes("Semana") ? 5 : 5}.
-                      </p>
-                    )}
-                  </div>
-                </aside>
-              </div>
-            )}
-
+        {/* Listagem única: exploração por categoria, destaques por categoria e todas as notícias */}
+        {filtered.length > 0 && (
+          <div id="todas-as-noticias" className="space-y-10 scroll-mt-24">
             {/* Explorar por categoria */}
             <section>
               <h3 className="text-sm font-display font-bold text-foreground mb-2">Explorar por categoria</h3>
@@ -630,7 +611,7 @@ export default function Noticias() {
                     <button
                       key={cat}
                       type="button"
-                      onClick={() => { setCategoriaFilter(cat); setView("todas"); }}
+                      onClick={() => setCategoriaFilter(cat)}
                       className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card hover:bg-muted hover:border-primary/40 px-3 py-1.5 text-xs transition-colors"
                     >
                       <span>{cat}</span>
@@ -641,44 +622,12 @@ export default function Noticias() {
               </div>
             </section>
 
-            {/* Últimas notícias — cronológico */}
-            {filtered.length > 0 && (
-              <section className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-display font-bold text-foreground">Últimas notícias</h3>
-                  <Button
-                    size="sm"
-                    variant="link"
-                    className="ml-auto h-auto p-0 text-xs"
-                    onClick={() => { setOrderBy("recent"); setView("todas"); }}
-                  >
-                    Ver todas →
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 @lg:grid-cols-2 @4xl:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {filtered.slice(0, 6).map((item) => (
-                    <NewsCard
-                      key={item.id}
-                      item={item}
-                      onRead={handleRead}
-                      onLike={toggleLike}
-                      liked={isLiked(item.id)}
-                      likeCount={getLikeCount(item.id) || item.likes_count}
-                      onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                      isAdmin={isAdmin}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* Notícias organizadas por categoria — no máximo 4 por seção */}
             {CATEGORIAS.map((cat) => {
               const items = byCategory.get(cat) ?? [];
               if (items.length === 0) return null;
-              const sorted = [...items].sort(
-                (a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2)
-              );
+              // Destaque da categoria = maior engajamento (visualizações + curtidas)
+              const sorted = sortByEngagement(items);
               const visible = categoryVisibleCounts[cat] ?? 8;
               const preview = sorted.slice(0, visible);
               const remaining = sorted.length - preview.length;
@@ -726,33 +675,32 @@ export default function Noticias() {
                 </section>
               );
             })}
-          </div>
-        )}
 
-        {/* View: Todas */}
-        {view === "todas" && ordered.length > 0 && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {ordered.slice(0, visibleCount).map((item) => (
-                <NewsCard
-                  key={item.id}
-                  item={item}
-                  onRead={handleRead}
-                  onLike={toggleLike}
-                  liked={isLiked(item.id)}
-                  likeCount={getLikeCount(item.id) || item.likes_count}
-                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                  isAdmin={isAdmin}
-                />
-              ))}
-            </div>
-            {visibleCount < ordered.length && (
-              <div className="flex justify-center pt-4">
-                <Button variant="outline" onClick={() => setVisibleCount((c) => c + 20)}>
-                  Carregar mais notícias
-                </Button>
+            {/* Todas as notícias */}
+            <section className="space-y-3">
+              <h3 className="text-sm font-display font-bold text-foreground">Todas as notícias</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                {ordered.slice(0, visibleCount).map((item) => (
+                  <NewsCard
+                    key={item.id}
+                    item={item}
+                    onRead={handleRead}
+                    onLike={toggleLike}
+                    liked={isLiked(item.id)}
+                    likeCount={getLikeCount(item.id) || item.likes_count}
+                    onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
+                    isAdmin={isAdmin}
+                  />
+                ))}
               </div>
-            )}
+              {visibleCount < ordered.length && (
+                <div className="flex justify-center pt-4">
+                  <Button variant="outline" onClick={() => setVisibleCount((c) => c + 20)}>
+                    Carregar mais notícias
+                  </Button>
+                </div>
+              )}
+            </section>
           </div>
         )}
       </div>
