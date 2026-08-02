@@ -217,7 +217,7 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 Nenhuma trilha disponível no momento.
               </div>
             ) : (
-              <div className="grid gap-3 auto-rows-fr grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))]">
+              <div className="grid gap-3 auto-rows-fr grid-cols-1 @[30rem]:grid-cols-2 @[52rem]:grid-cols-3 @[72rem]:grid-cols-4 justify-center">
                 {visibleTrails.map((trail) => (
                   <TrailCard key={trail.id} trail={trail} onSelect={openTrail} />
                 ))}
