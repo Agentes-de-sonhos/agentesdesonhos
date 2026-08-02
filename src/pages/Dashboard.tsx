@@ -209,19 +209,15 @@ export default function Dashboard() {
                   <LeadsAwaitingCard />
                 </section>
 
-                {/* Fluxo independente por coluna (masonry-like) */}
-                <section className="order-3 grid gap-4 sm:gap-6 lg:grid-cols-2 items-start">
-                  <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
-                    <UpcomingAgendaEventsCard />
-                    <CuratedNewsFeed />
-                    <AcademyCollapsibleCard />
-                  </div>
-                  <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
-                    <TripRemindersCard />
-                    <CommunitySocialFeed defaultExpanded />
-                    <MapaTurismoCard alwaysExpanded />
-                  </div>
+                {/* Agenda & Próximas Viagens lado a lado; demais seções em largura total */}
+                <section className="order-3 grid gap-4 sm:gap-6 lg:grid-cols-2 items-stretch lg:max-h-[60vh] lg:min-h-[380px]">
+                  <div className="flex flex-col min-w-0 h-full min-h-0 [&>*]:h-full"><UpcomingAgendaEventsCard /></div>
+                  <div className="flex flex-col min-w-0 h-full min-h-0 [&>*]:h-full"><TripRemindersCard /></div>
                 </section>
+                <section className="order-[3.3] min-w-0"><CuratedNewsFeed /></section>
+                <section className="order-[3.5] min-w-0"><CommunitySocialFeed defaultExpanded /></section>
+                <section className="order-[3.7] min-w-0"><AcademyCollapsibleCard /></section>
+                <section className="order-[3.9] min-w-0"><MapaTurismoCard alwaysExpanded /></section>
               </>
             ) : (
               <>
