@@ -10,6 +10,7 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { SectionCtaLink } from "./SectionCtaLink";
+import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import {
   ArrowRight,
   Heart,
@@ -103,26 +104,20 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     <Card className="border-0 shadow-card overflow-hidden">
       <CardContent className="pt-5 pb-5 space-y-3 min-w-0">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="w-fit">
-            <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-              <Users className="h-5 w-5 text-[hsl(var(--section-community))]" />
-              Comunidade
-            </h2>
-            <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
-          </div>
-          <SectionCtaLink
-            to="/comunidade"
-            label="Ver toda a comunidade"
-            shortLabel="Ver tudo"
-            tabTitle="Comunidade"
-            className="text-[hsl(var(--section-community))]"
-          />
-        </div>
-
-        <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-          Compartilhe dúvidas, indicações, experiências e oportunidades com outros agentes de viagens.
-        </p>
+        <DashboardSectionHeader
+          icon={Users}
+          title="Comunidade"
+          description="Compartilhe experiências e oportunidades com outros agentes de viagens."
+          iconClassName="text-[hsl(var(--section-community))]"
+          accentClassName="bg-[hsl(var(--section-community))]"
+          cta={{
+            to: "/comunidade",
+            label: "Ver toda a comunidade",
+            shortLabel: "Ver tudo",
+            tabTitle: "Comunidade",
+            className: "text-[hsl(var(--section-community))]",
+          }}
+        />
 
         {/* Coluna central (padrão LinkedIn) */}
         <div className="mx-auto w-full max-w-[780px] min-w-0 space-y-3">
