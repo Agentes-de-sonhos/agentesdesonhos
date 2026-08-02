@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { toast } from "sonner";
 import { TabBar } from "./TabBar";
@@ -7,6 +7,24 @@ import { useWorkspace, MAX_TABS } from "./WorkspaceProvider";
 interface Props {
   /** Same JSX subtree used when Workspace is off (typically the app's <Routes/>). */
   children: ReactNode;
+}
+
+/**
+ * Resets the vertical scroll of the real scrolling surfaces (window plus any
+ * inner overflow container inside the active tab) so the tab bar is visible.
+ * Horizontal scroll — notably the tab bar itself — is never touched.
+ */
+export function scrollWorkspaceToTop(root: HTMLElement | null) {
+  try {
+    window.scrollTo({ top: 0, left: window.scrollX, behavior: "auto" });
+  } catch {
+    window.scrollTo(0, 0);
+  }
+  const doc = document.scrollingElement as HTMLElement | null;
+  if (doc) doc.scrollTop = 0;
+  root?.querySelectorAll<HTMLElement>("[data-workspace-scroll]").forEach((el) => {
+    el.scrollTop = 0;
+  });
 }
 
 /**
@@ -20,6 +38,15 @@ interface Props {
 export function WorkspaceShell({ children }: Props) {
   const ws = useWorkspace();
   const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // Every tab open/switch must show the tab bar: reset the real vertical
+  // scroll container(s) to the top. Hash navigation is respected.
+  useLayoutEffect(() => {
+    if (!ws?.activeId) return;
+    if (window.location.hash) return;
+    const raf = requestAnimationFrame(() => scrollWorkspaceToTop(rootRef.current));
+    return () => cancelAnimationFrame(raf);
+  }, [ws?.activeId]);
 
   const openTabRef = useRef(ws?.openOrActivateTab);
   const tabsRef = useRef(ws?.tabs);

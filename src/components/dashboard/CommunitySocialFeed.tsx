@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
+import { SectionCtaLink } from "./SectionCtaLink";
 import {
   ArrowRight,
   Heart,
@@ -110,14 +111,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
             </h2>
             <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
           </div>
-          <Link
+          <SectionCtaLink
             to="/comunidade"
-            className="text-xs sm:text-sm font-medium text-[hsl(var(--section-community))] hover:underline inline-flex items-center gap-1 flex-shrink-0 mt-1"
-          >
-            <span className="hidden sm:inline">Ver toda a comunidade</span>
-            <span className="sm:hidden">Ver tudo</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+            label="Ver toda a comunidade"
+            shortLabel="Ver tudo"
+            tabTitle="Comunidade"
+            className="text-[hsl(var(--section-community))]"
+          />
         </div>
 
         <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "./WorkspaceProvider";
@@ -8,6 +9,15 @@ import { useWorkspace } from "./WorkspaceProvider";
  */
 export function TabBar() {
   const ws = useWorkspace();
+  const activeRef = useRef<HTMLDivElement | null>(null);
+
+  // Keep the active tab visible — horizontal axis only, never vertical.
+  useEffect(() => {
+    const el = activeRef.current;
+    if (!el) return;
+    el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "auto" });
+  }, [ws?.activeId, ws?.tabs.length]);
+
   if (!ws) return null;
 
   return (
@@ -22,8 +32,10 @@ export function TabBar() {
         return (
           <div
             key={tab.id}
+            ref={active ? activeRef : undefined}
             role="tab"
             aria-selected={active}
+            tabIndex={active ? 0 : -1}
             onClick={() => ws.activateTab(tab.id)}
             onAuxClick={(e) => {
               // middle-click closes — never the pinned home tab
@@ -33,8 +45,9 @@ export function TabBar() {
               }
             }}
             className={cn(
-              "group flex items-center gap-2 px-3 min-w-[120px] max-w-[220px] cursor-pointer border-r border-border select-none",
+              "group flex items-center gap-2 px-3 min-w-[120px] max-w-[220px] border-r border-border select-none",
               "text-sm transition-colors",
+              active ? "cursor-default" : "cursor-pointer",
               active
                 ? "bg-background text-foreground border-t-2 border-t-primary -mb-px"
                 : "text-muted-foreground hover:bg-background/60",

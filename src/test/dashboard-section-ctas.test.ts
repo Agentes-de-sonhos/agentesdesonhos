@@ -37,6 +37,40 @@ describe("dashboard block CTAs", () => {
     expect(src).toContain("data-workspace-menu");
     expect(src).toContain("data-workspace-title");
   });
+
+  it("community block opens its own internal window", () => {
+    const src = read("src/components/dashboard/CommunitySocialFeed.tsx");
+    expect(src).toContain("SectionCtaLink");
+    expect(src).toContain('to="/comunidade"');
+    expect(src).toContain('tabTitle="Comunidade"');
+  });
+
+  it("academy block opens its own internal window on desktop and mobile", () => {
+    const src = read("src/components/dashboard/AcademyCollapsibleCard.tsx");
+    const matches = src.match(/tabTitle="EducaTravel Academy"/g) ?? [];
+    expect(matches).toHaveLength(2);
+    expect(src).not.toContain('onClick={() => navigate("/educa-academy")}');
+  });
+});
+
+describe("workspace window scroll + active tab cursor", () => {
+  it("resets the correct vertical containers when a tab opens/activates", () => {
+    const src = read("src/workspace/WorkspaceShell.tsx");
+    expect(src).toContain("scrollWorkspaceToTop");
+    expect(src).toContain("useLayoutEffect");
+    expect(src).toContain("requestAnimationFrame");
+    expect(src).toContain("window.location.hash");
+    expect(src).toContain("[data-workspace-scroll]");
+    expect(src).toContain('behavior: "auto"');
+  });
+
+  it("active tab uses the default cursor and keeps the pinned tab without X", () => {
+    const src = read("src/workspace/TabBar.tsx");
+    expect(src).toContain('active ? "cursor-default" : "cursor-pointer"');
+    expect(src).toContain("{!pinned && (");
+    // tab bar keeps only horizontal auto-scroll to reveal the active tab
+    expect(src).toContain('inline: "nearest"');
+  });
 });
 
 const trip = (over: Partial<any> = {}) => ({
