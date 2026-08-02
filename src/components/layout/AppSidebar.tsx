@@ -66,6 +66,7 @@ import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
+import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS, calculateAnchorScrollDelta } from "@/lib/sidebarAnchor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface MenuItem {
@@ -523,9 +524,10 @@ export function AppSidebar() {
         to={isLocked ? "#" : item.url}
         aria-label={collapsed ? item.title : undefined}
         onClick={(e) => handleMenuClick(item, e)}
+        data-sidebar-row={item.key || item.url}
         className={cn(
-          "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300",
-          collapsed ? "py-1" : "py-1.5",
+          "group rounded-xl px-3 text-sm font-medium transition-[width,background-color,color] duration-300",
+          SIDEBAR_ROW_CLASS,
           collapsed
             ? cn("text-sidebar-foreground", isLocked && "opacity-60")
             : sectionStyle
@@ -606,9 +608,10 @@ export function AppSidebar() {
                   [group.key || group.title]: !isOpen,
                 }))
           }
+          data-sidebar-row={group.key || group.title}
           className={cn(
-            "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300 w-full text-left",
-            collapsed ? "py-1" : "py-1.5",
+            "group rounded-xl px-3 text-sm font-medium transition-[background-color,color] duration-300 w-full text-left",
+            SIDEBAR_ROW_CLASS,
             collapsed
               ? "text-sidebar-foreground"
               : childActive && sectionBgColor
@@ -654,12 +657,13 @@ export function AppSidebar() {
 
     if (collapsed) {
       return (
-        <nav key={section.title} className="flex flex-col gap-[2px] px-3">
+        <nav key={section.title} className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
           <button
             type="button"
             aria-label={section.title}
+            data-sidebar-row={section.key || section.title}
             onClick={expandNow}
-            className="flex items-center justify-center rounded-xl px-3 py-1 w-full text-sidebar-foreground"
+            className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-xl px-3 w-full text-sidebar-foreground")}
           >
             <Icon className="h-5 w-5 flex-shrink-0" />
           </button>
@@ -671,8 +675,10 @@ export function AppSidebar() {
       <div key={section.title} className="px-3">
         <button
           onClick={() => toggleSection(section.title)}
+          data-sidebar-row={section.key || section.title}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
+            SIDEBAR_ROW_CLASS,
+            "w-full rounded-xl px-3 text-sm font-medium transition-[background-color,color] duration-200",
             isOpen
               ? cn(section.headerBg, section.headerHoverBg)
               : cn("text-sidebar-foreground", section.hoverColor)
@@ -732,16 +738,16 @@ export function AppSidebar() {
         {/* Toggle visual removido: o hover sobre o menu já expande/recolhe automaticamente */}
 
         {/* Scrollable Navigation */}
-        <div className={cn("flex-1 py-2", collapsed ? "overflow-hidden space-y-[2px]" : "overflow-y-auto space-y-0.5")}>
+        <div ref={scrollAreaRef} className={cn("flex-1 py-2 space-y-0.5", collapsed ? "overflow-x-hidden overflow-y-auto scrollbar-none" : "overflow-y-auto")}>
           {/* Início */}
-          <nav className={cn("flex flex-col", collapsed ? "gap-[2px] px-3" : "gap-0.5 px-3")}>
+          <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
             {renderSingleItem(meuPerfilItem)}
             {!isTeamMember && renderSingleItem(comunidadeItem)}
           </nav>
 
-          <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
+          <div className="px-3 py-1">
             <Separator className="bg-sidebar-border" />
           </div>
 
@@ -751,7 +757,7 @@ export function AppSidebar() {
               return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
             }
             return (
-              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-[2px] px-2" : "gap-0.5 px-3")}>
+              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
                 {renderSingleItem(entry.item)}
               </nav>
             );
@@ -759,11 +765,11 @@ export function AppSidebar() {
         </div>
 
         {/* Bottom Section - Compact */}
-        <div className={cn("flex-shrink-0 border-t border-sidebar-border px-3", collapsed ? "py-1 space-y-[2px]" : "py-2 space-y-0.5")}>
+        <div className="flex-shrink-0 border-t border-sidebar-border px-3 py-2 space-y-0.5">
           {isAdmin && renderSingleItem(adminMenuItem)}
 
           {collapsed ? (
-            <div className="flex flex-col items-center gap-[2px]">
+            <div className={cn("flex flex-col", SIDEBAR_ROW_GAP_CLASS)}>
               <Link
                 to="/suporte"
                 aria-label="Suporte"
