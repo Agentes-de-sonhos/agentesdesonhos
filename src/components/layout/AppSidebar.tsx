@@ -331,6 +331,35 @@ export function AppSidebar() {
     }, 300);
   };
 
+  // Âncora vertical: item sob o cursor no momento em que a expansão é disparada
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const anchorRef = useRef<{ key: string; top: number } | null>(null);
+
+  /** Registra a linha sob o cursor (apenas enquanto recolhido). */
+  const captureAnchor = (target: EventTarget | null) => {
+    if (!collapsed || !(target instanceof Element)) return;
+    const row = target.closest("[data-sidebar-row]") as HTMLElement | null;
+    if (!row) return;
+    const key = row.getAttribute("data-sidebar-row");
+    if (!key) return;
+    anchorRef.current = { key, top: row.getBoundingClientRect().top };
+  };
+
+  // Após expandir (e montar filhos), reposiciona o scroll para manter a âncora sob o cursor
+  useLayoutEffect(() => {
+    if (collapsed) return;
+    const anchor = anchorRef.current;
+    anchorRef.current = null;
+    const container = scrollAreaRef.current;
+    if (!anchor || !container) return;
+    const row = container.querySelector(
+      `[data-sidebar-row="${CSS.escape(anchor.key)}"]`
+    ) as HTMLElement | null;
+    if (!row) return;
+    const delta = calculateAnchorScrollDelta(anchor.top, row.getBoundingClientRect().top);
+    if (delta !== 0) container.scrollTop += delta;
+  }, [collapsed]);
+
   /** Expande imediatamente, cancelando timers/estados pendentes de hover. */
   const expandNow = useCallback(() => {
     clearTimers();
@@ -719,6 +748,8 @@ export function AppSidebar() {
         )}
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
+        onMouseOver={(e) => captureAnchor(e.target)}
+        onFocusCapture={(e) => captureAnchor(e.target)}
       >
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
           <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" className="flex items-center gap-3 min-w-0">
@@ -773,8 +804,9 @@ export function AppSidebar() {
               <Link
                 to="/suporte"
                 aria-label="Suporte"
+                data-sidebar-row="bottom-suporte"
                 onClick={(e) => { e.preventDefault(); expandNow(); }}
-                className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+                className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-lg text-muted-foreground")}
               >
                 <Headset className="h-4 w-4" />
               </Link>
@@ -782,8 +814,9 @@ export function AppSidebar() {
                 <Link
                   to="/minha-conta"
                   aria-label="Minha Conta"
+                  data-sidebar-row="bottom-minha-conta"
                   onClick={(e) => { e.preventDefault(); expandNow(); }}
-                  className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+                  className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-lg text-muted-foreground")}
                 >
                   <Settings className="h-4 w-4" />
                 </Link>
@@ -792,7 +825,8 @@ export function AppSidebar() {
                 variant="ghost"
                 size="icon"
                 aria-label="Sair"
-                className="w-full h-6 rounded-lg text-muted-foreground hover:bg-transparent hover:text-muted-foreground"
+                data-sidebar-row="bottom-sair"
+                className={cn(SIDEBAR_ROW_CLASS, "w-full h-auto justify-center rounded-lg text-muted-foreground hover:bg-transparent hover:text-muted-foreground")}
                 onClick={expandNow}
               >
                 <LogOut className="h-4 w-4" />
