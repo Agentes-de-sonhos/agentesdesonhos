@@ -7050,6 +7050,83 @@ export type Database = {
         }
         Relationships: []
       }
+      news_curation: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          curation_type: string
+          id: string
+          noticia_id: string
+          period_start: string
+          position: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          curation_type: string
+          id?: string
+          noticia_id: string
+          period_start: string
+          position?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          curation_type?: string
+          id?: string
+          noticia_id?: string
+          period_start?: string
+          position?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_curation_noticia_id_fkey"
+            columns: ["noticia_id"]
+            isOneToOne: false
+            referencedRelation: "noticias_dashboard"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_curation_audit: {
+        Row: {
+          action: string
+          admin_id: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          curation_type: string | null
+          id: string
+          period_start: string | null
+          position: number | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          curation_type?: string | null
+          id?: string
+          period_start?: string | null
+          position?: number | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          curation_type?: string | null
+          id?: string
+          period_start?: string | null
+          position?: number | null
+        }
+        Relationships: []
+      }
       news_curation_feedback: {
         Row: {
           categoria: string | null
@@ -13057,6 +13134,10 @@ export type Database = {
         Args: { _end: string; _start: string }
         Returns: Json
       }
+      admin_clear_news_curation: {
+        Args: { p_period_start?: string }
+        Returns: Json
+      }
       admin_export_users: {
         Args: never
         Returns: {
@@ -13107,6 +13188,24 @@ export type Database = {
         }[]
       }
       admin_list_user_projects: { Args: never; Returns: Json }
+      admin_news_curation_list: { Args: never; Returns: Json }
+      admin_remove_news_curation: {
+        Args: {
+          p_curation_type: string
+          p_period_start?: string
+          p_position?: number
+        }
+        Returns: Json
+      }
+      admin_set_news_curation: {
+        Args: {
+          p_curation_type: string
+          p_noticia_id: string
+          p_period_start?: string
+          p_position?: number
+        }
+        Returns: Json
+      }
       admin_supplier_review_counts: { Args: never; Returns: Json }
       admin_update_user_role: {
         Args: {
@@ -13685,6 +13784,7 @@ export type Database = {
         Args: { _action: string; _reason?: string; _review_id: string }
         Returns: Json
       }
+      news_highlights: { Args: never; Returns: Json }
       news_ranking: {
         Args: { p_limit?: number; p_window?: string }
         Returns: {
@@ -13703,6 +13803,8 @@ export type Database = {
           window_reads: number
         }[]
       }
+      news_today_sp: { Args: never; Returns: string }
+      news_week_start_sp: { Args: { p_ref?: string }; Returns: string }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
       product_landing_next_notify_at: {
         Args: {
