@@ -9,7 +9,11 @@ const layout = read("src/components/layout/DashboardLayout.tsx");
 describe("dashboard centered container", () => {
   it("caps content width at 1560px and centers it with fluid gutters", () => {
     expect(container).toContain("mx-auto");
-    expect(container).toContain("w-[min(100%-clamp(16px,4vw,80px),1560px)]");
+    expect(container).toContain("w-[calc(100%_-_clamp(32px,4vw,80px))]");
+    expect(container).toContain("max-w-[1560px]");
+    // the previous expression was not valid CSS (subtraction without calc())
+    expect(container).not.toContain("w-[min(100%-clamp(16px,4vw,80px),1560px)]");
+    expect(container).not.toMatch(/100%-clamp/);
     expect(container).toContain("@container");
     // no app-wide scaling tricks
     expect(container).not.toMatch(/scale-|zoom/);
