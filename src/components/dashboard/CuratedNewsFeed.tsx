@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Newspaper, Loader2, ExternalLink, Eye, ThumbsUp, Crown, ShieldCheck, AlertTriangle, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { DashboardSectionHeader } from "@/components/dashboard/DashboardSectionHeader";
 import { useNewsHighlights, type HighlightNews, type Top5Item } from "@/hooks/useNewsHighlights";
 import { highlightLabel } from "@/lib/newsRanking";

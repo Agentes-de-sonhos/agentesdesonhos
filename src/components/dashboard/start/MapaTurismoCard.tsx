@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DIRECTORY_ROOT, categoryListingRoute } from "@/lib/directoryNavigation";
-import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
 import { DashboardSectionHeader } from "@/components/dashboard/DashboardSectionHeader";
 
 interface CategoryDef {

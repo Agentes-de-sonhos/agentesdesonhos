@@ -1,4 +1,3 @@
-import { SectionCtaLink } from "./SectionCtaLink";
 import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
