@@ -6,12 +6,11 @@ import {
   Newspaper, ExternalLink, Loader2, TrendingUp, Flame, Search, Crown,
   Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Building2, Ticket,
   DollarSign, GraduationCap, Users, Sparkles, Shield, Wrench, Filter,
-  RefreshCw, EyeOff, Eye, ThumbsUp, X, ChevronDown,
+  EyeOff, Eye, ThumbsUp, X, ChevronDown, ShieldCheck,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -19,6 +18,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
+import { useNewsHighlights, type Top5Item } from "@/hooks/useNewsHighlights";
+import { highlightLabel, sortByEngagement } from "@/lib/newsRanking";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 import { cn } from "@/lib/utils";
 
@@ -37,12 +38,7 @@ type Noticia = {
   hidden: boolean;
 };
 
-type RankingRow = Noticia & {
-  window_reads: number;
-  window_likes: number;
-  score: number;
-  rank_position: number;
-};
+type RankingRow = Top5Item;
 
 /* ── Categorias ──────────────────────────────────────────── */
 const CATEGORIAS = [
