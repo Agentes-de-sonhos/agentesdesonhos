@@ -154,16 +154,18 @@ function NewsCard({
   likeCount,
   variant = "default",
   featuredLabel,
+  manualBadge,
   onHide,
   isAdmin,
 }: {
-  item: Noticia;
-  onRead: (item: Noticia) => void;
+  item: NewsCardItem;
+  onRead: (item: NewsCardItem) => void;
   onLike: (id: string) => void;
   liked: boolean;
   likeCount: number;
   variant?: "default" | "feature" | "compact";
   featuredLabel?: string;
+  manualBadge?: boolean;
   onHide?: (id: string) => void;
   isAdmin?: boolean;
 }) {
@@ -199,6 +201,11 @@ function NewsCard({
             </span>
           )}
           <CategoryBadge categoria={item.categoria} />
+          {manualBadge && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <ShieldCheck className="h-3 w-3" /> Escolha da administração
+            </span>
+          )}
           <span className="text-[11px] font-medium text-muted-foreground">{item.fonte}</span>
           <span className="text-[11px] text-muted-foreground">·</span>
           <span className="text-[11px] text-muted-foreground">{formatRelative(item.data_publicacao)}</span>
@@ -279,7 +286,7 @@ function RankingItem({
 }: {
   item: RankingRow;
   position: number;
-  onRead: (item: Noticia) => void;
+  onRead: (item: NewsCardItem) => void;
 }) {
   return (
     <button
@@ -294,6 +301,14 @@ function RankingItem({
         <h4 className="text-sm font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
           {item.titulo_curto}
         </h4>
+        {item.is_manual && (
+          <span
+            className="mt-1 inline-flex items-center gap-1 text-[10px] text-muted-foreground"
+            title="Posição definida pela administração"
+          >
+            <ShieldCheck className="h-3 w-3" /> Curadoria
+          </span>
+        )}
         <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
           <span className="font-medium">{item.fonte}</span>
           <span>·</span>
