@@ -63,14 +63,62 @@ describe("dashboard layout restructure", () => {
     expect((dashboard.match(/<MapaTurismoCard/g) ?? []).length).toBe(2);
   });
 
-  it("agenda and trips cards fill the row height and scroll internally", () => {
+  it("agenda and trips cards fill the row height and paginate instead of scrolling", () => {
     const agenda = read("src/components/dashboard/UpcomingAgendaEventsCard.tsx");
     const trips = read("src/components/dashboard/TripRemindersCard.tsx");
     expect(agenda).toContain("h-full flex flex-col min-h-0");
-    expect(agenda).toContain("flex-1 min-h-0 overflow-y-auto");
     expect(trips).toContain("h-full flex flex-col min-h-0");
-    expect(trips).toContain("flex-1 min-h-0 overflow-y-auto");
     expect(trips).not.toContain("max-h-[400px]");
+    for (const file of [agenda, trips]) {
+      expect(file).not.toContain("overflow-y-auto");
+      expect(file).not.toContain("overflow-x-auto");
+      expect(file).not.toContain("scrollbar-hide");
+    }
+  });
+});
+
+describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
+  const agenda = read("src/components/dashboard/UpcomingAgendaEventsCard.tsx");
+  const trips = read("src/components/dashboard/TripRemindersCard.tsx");
+  const hook = read("src/hooks/useAdaptivePageSize.ts");
+
+  it("uses the reusable adaptive page size hook in both cards", () => {
+    for (const file of [agenda, trips]) {
+      expect(file).toContain('from "@/hooks/useAdaptivePageSize"');
+      expect(file).toContain("useAdaptivePageSize<HTMLDivElement>(");
+      expect(file).toContain("ref={listRef}");
+      expect(file).toContain("overflow-hidden");
+    }
+    expect(agenda).toContain("max: 5");
+    expect(agenda).toContain("min: 2");
+  });
+
+  it("hook measures with ResizeObserver and has a deterministic fallback", () => {
+    expect(hook).toContain("ResizeObserver");
+    expect(hook).toContain('typeof ResizeObserver === "undefined"');
+    expect(hook).toContain("fallback ?? min");
+    expect(hook).toContain("Math.max(min, Math.min(max, fits))");
+  });
+
+  it("normalizes the current page when the page size changes", () => {
+    for (const file of [agenda, trips]) {
+      expect(file).toContain("Math.max(0, Math.min(prev, totalPages - 1))");
+      expect(file).toContain("}, [totalPages]);");
+      expect(file).toContain("Math.ceil(total / pageSize)");
+    }
+    expect(agenda).toContain("Math.min(startIdx + pageSize, total)");
+  });
+
+  it("keeps agenda rows on a single line (truncate, no wrap)", () => {
+    expect(agenda).toContain("truncate whitespace-nowrap");
+    expect(agenda).not.toContain("line-clamp-2");
+  });
+
+  it("uses the exact 'Ver todas' CTA and single-line actions in Próximas Viagens", () => {
+    expect(trips).not.toContain("Ver todas as próximas viagens");
+    expect((trips.match(/label="Ver todas"/g) ?? []).length).toBe(2);
+    expect(trips).toContain("flex flex-nowrap items-center");
+    expect(trips).not.toContain("flex-wrap");
   });
 });
 
@@ -90,7 +138,8 @@ describe("Notícias do Trade block", () => {
 
   it("shows the featured item and Top 5 side by side based on container width (65/35)", () => {
     expect(news).toContain("@container");
-    expect(news).toContain("@[56rem]:grid-cols-[minmax(0,65fr)_minmax(0,35fr)]");
+    expect(news).toContain("@[42rem]:grid-cols-[minmax(0,62fr)_minmax(0,38fr)]");
+    expect(news).not.toContain("@[56rem]:grid-cols-");
     expect(news).not.toContain("lg:grid-cols-[65fr_35fr]");
     expect(news).toContain("Top 5 da Semana");
     expect(news).toContain("{item.position}");
