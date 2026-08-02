@@ -164,13 +164,30 @@ describe("Notícias do Trade block", () => {
     expect(news).not.toContain('from("noticias_dashboard")');
   });
 
-  it("shows the featured item and Top 5 side by side based on container width (65/35)", () => {
+  it("splits the featured item and Top 5 exactly 50/50 from the smaller desktop up", () => {
     expect(news).toContain("@container");
-    expect(news).toContain("@[42rem]:grid-cols-[minmax(0,62fr)_minmax(0,38fr)]");
-    expect(news).not.toContain("@[56rem]:grid-cols-");
+    expect(news).toContain("@[42rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]");
+    expect(news).not.toContain("62fr");
     expect(news).not.toContain("lg:grid-cols-[65fr_35fr]");
     expect(news).toContain("Top 5 da Semana");
     expect(news).toContain("{item.position}");
+    expect(news).toContain("items-stretch");
+  });
+
+  it("renders Top 5 as a single soft-bordered card with light rows", () => {
+    expect(news).toContain("border border-[hsl(var(--section-news)/0.28)]");
+    expect(news).toContain("bg-gradient-to-b from-[hsl(var(--section-news)/0.06)] to-card");
+    expect(news).toContain("rounded-xl");
+    expect(news).toContain("divide-y divide-[hsl(var(--section-news)/0.14)]");
+    expect(news).toContain("<Trophy");
+    // rows stay light: no per-item border/shadow card
+    expect(news).not.toContain("border-b border-border/50");
+    expect(news).not.toContain("shadow-md hover:shadow-lg\" ");
+  });
+
+  it("uses the new inviting intro copy", () => {
+    expect(news).toContain("Fique por dentro das principais notícias do turismo, reunidas em um só lugar.");
+    expect(news).not.toContain("O destaque do período e o Top 5 da semana, com a mesma curadoria da página completa.");
   });
 
   it("registers the read and opens the original URL", () => {
