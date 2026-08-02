@@ -130,10 +130,10 @@ function TrailCard({
       className="group cursor-pointer overflow-hidden transition-all duration-200 hover:shadow-md hover:border-primary/40 h-full"
       onClick={() => onSelect(trail)}
     >
-      {/* Layout: vertical (default + @md 2-col grid item) / horizontal (@3xl+) */}
-      <div className="flex flex-col @[48rem]:flex-row h-full">
+      {/* Layout sempre vertical: imagem no topo, corpo, rodapé com botão */}
+      <div className="flex flex-col h-full min-w-0">
         {/* Image */}
-        <div className="relative aspect-video @[48rem]:aspect-auto @[48rem]:w-56 @[48rem]:flex-shrink-0 @[48rem]:self-stretch bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
+        <div className="relative w-full aspect-video shrink-0 bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
           {trail.image_url ? (
             <img
               src={trail.image_url}
@@ -158,18 +158,10 @@ function TrailCard({
             <MetaRow />
           </div>
 
-          {/* Vertical layout footer (mobile + @md 2-col) */}
-          <div className="mt-auto space-y-3 @[48rem]:hidden">
+          {/* Rodapé: progresso + botão */}
+          <div className="mt-auto space-y-3">
             <ProgressBlock />
             <CtaButton className="w-full" />
-          </div>
-
-          {/* Horizontal layout footer (@3xl+) — progress fills, button bottom-right */}
-          <div className="hidden @[48rem]:flex mt-auto items-end gap-4">
-            <div className="flex-1 min-w-0">
-              <ProgressBlock />
-            </div>
-            <CtaButton />
           </div>
         </CardContent>
       </div>
@@ -189,8 +181,8 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
 
   return (
     <>
-      <Card className="border-0 shadow-card h-full">
-        <CardContent className="pt-5 pb-5 space-y-4 h-full flex flex-col @container">
+      <Card className="border-0 shadow-card overflow-hidden">
+        <CardContent className="pt-5 pb-5 space-y-4 flex flex-col @container min-w-0">
           <div className="space-y-3">
             {/* Primeira linha: título à esquerda, link à direita */}
             <div className="flex items-start justify-between gap-4">
@@ -215,7 +207,7 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
             </p>
           </div>
 
-          <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex flex-col">
             {isLoading ? (
               <div className="flex items-center justify-center py-8 flex-1">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -225,7 +217,7 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 Nenhuma trilha disponível no momento.
               </div>
             ) : (
-              <div className="grid grid-cols-1 @[28rem]:grid-cols-2 @[48rem]:grid-cols-3 @[72rem]:grid-cols-4 auto-rows-fr gap-3 pr-1 flex-1 min-h-0">
+              <div className="grid gap-3 auto-rows-fr grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))]">
                 {visibleTrails.map((trail) => (
                   <TrailCard key={trail.id} trail={trail} onSelect={openTrail} />
                 ))}
