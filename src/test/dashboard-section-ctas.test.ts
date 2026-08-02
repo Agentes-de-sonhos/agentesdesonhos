@@ -19,7 +19,7 @@ describe("dashboard block CTAs", () => {
 
   it("news block links to the news hub and dropped the footer CTA", () => {
     const src = read("src/components/dashboard/CuratedNewsFeed.tsx");
-    expect(src).toContain('to="/noticias"');
+    expect(src).toContain('to: "/noticias"');
     expect(src).toContain("Ver todas as notícias");
     expect(src).not.toContain("Mais notícias");
     // individual news still open externally in a safe tab
@@ -40,13 +40,13 @@ describe("dashboard block CTAs", () => {
   it("community block opens its own internal window", () => {
     const src = read("src/components/dashboard/CommunitySocialFeed.tsx");
     expect(src).toContain("DashboardSectionHeader");
-    expect(src).toContain('to="/comunidade"');
-    expect(src).toContain('tabTitle="Comunidade"');
+    expect(src).toContain('to: "/comunidade"');
+    expect(src).toContain('tabTitle: "Comunidade"');
   });
 
   it("academy block opens its own internal window from the section header", () => {
     const src = read("src/components/dashboard/AcademyCollapsibleCard.tsx");
-    const matches = src.match(/tabTitle="EducaTravel Academy"/g) ?? [];
+    const matches = src.match(/tabTitle: "EducaTravel Academy"/g) ?? [];
     expect(matches).toHaveLength(1);
     expect(src).not.toContain('onClick={() => navigate("/educa-academy")}');
   });
