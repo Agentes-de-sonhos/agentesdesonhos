@@ -78,6 +78,35 @@ export function newsEngagementScore(reads: number, likes: number): number {
   return (reads || 0) + (likes || 0) * 2;
 }
 
+/**
+ * Elegibilidade temporal da curadoria manual — espelha exatamente as validações
+ * da RPC `admin_set_news_curation` (erro `invalid_curation_period`).
+ *
+ * - daily: data de publicação local deve ser exatamente `periodStart`;
+ * - weekly/top5: `periodStart` deve ser uma segunda-feira e a publicação local
+ *   deve estar em [periodStart, periodStart + 7) ;
+ * - a notícia precisa estar aprovada e visível.
+ */
+export function isCurationEligible(input: {
+  curationType: "daily" | "weekly" | "top5";
+  periodStart: string; // YYYY-MM-DD (local SP)
+  publishedAt: string; // ISO
+  status: string;
+  hidden?: boolean | null;
+}): boolean {
+  if (input.status !== "aprovado" || input.hidden) return false;
+  const pub = spDateKey(new Date(input.publishedAt));
+  if (input.curationType === "daily") return pub === input.periodStart;
+
+  const [y, m, d] = input.periodStart.split("-").map(Number);
+  const start = Date.UTC(y, m - 1, d);
+  // segunda-feira?
+  if (new Date(start).getUTCDay() !== 1) return false;
+  const [py, pm, pd] = pub.split("-").map(Number);
+  const pubUtc = Date.UTC(py, pm - 1, pd);
+  return pubUtc >= start && pubUtc < start + 7 * 86_400_000;
+}
+
 export interface RankableNews {
   id: string;
   reads_count: number;
