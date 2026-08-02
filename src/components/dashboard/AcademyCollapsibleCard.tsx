@@ -217,15 +217,6 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
             )}
           </div>
 
-          {/* Footer — mobile only */}
-          <div className="pt-2 border-t @[28rem]:hidden">
-            <SectionCtaLink
-              to="/educa-academy"
-              label="Ver todos os treinamentos"
-              tabTitle="EducaTravel Academy"
-              className="w-full justify-center text-emerald-700 hover:text-emerald-800"
-            />
-          </div>
         </CardContent>
       </Card>
     </>
