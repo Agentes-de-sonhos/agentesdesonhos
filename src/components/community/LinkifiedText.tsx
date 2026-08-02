@@ -2,19 +2,29 @@ import { Fragment } from "react";
 
 /** Matches http(s)://... or www.... tokens inside free text. */
 const URL_REGEX = /((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
-const TRAILING_PUNCTUATION = /[.,;:!?)\]}'"»]+$/;
+const TRAILING_PUNCTUATION = /[.,;:!?'"»]/;
+const CLOSERS: Record<string, string> = { ")": "(", "]": "[", "}": "{" };
 const SAFE_PROTOCOL = /^https?:\/\//i;
 
 export function normalizeUrl(raw: string): { href: string; label: string } | null {
-  let label = raw;
+  let trimmed = raw;
   // Remove sentence punctuation that belongs to the phrase, not the URL.
-  let trimmed = label.replace(TRAILING_PUNCTUATION, "");
-  // Keep balanced closing parens that are part of the URL.
-  while (
-    trimmed.endsWith(")") &&
-    (trimmed.match(/\(/g)?.length ?? 0) < (trimmed.match(/\)/g)?.length ?? 0)
-  ) {
-    trimmed = trimmed.slice(0, -1);
+  // Closing brackets are only dropped when unbalanced inside the URL.
+  for (;;) {
+    const last = trimmed.slice(-1);
+    if (TRAILING_PUNCTUATION.test(last)) {
+      trimmed = trimmed.slice(0, -1);
+      continue;
+    }
+    if (CLOSERS[last]) {
+      const opens = trimmed.split(CLOSERS[last]).length - 1;
+      const closes = trimmed.split(last).length - 1;
+      if (closes > opens) {
+        trimmed = trimmed.slice(0, -1);
+        continue;
+      }
+    }
+    break;
   }
   if (!trimmed) return null;
   const href = /^www\./i.test(trimmed) ? `https://${trimmed}` : trimmed;
@@ -31,7 +41,7 @@ interface LinkifiedTextProps {
 
 /**
  * Renders plain text with URLs converted into safe anchors that open in a real
- * new browser tab. No dangerouslySetInnerHTML: text is tokenized in React.
+ * new browser tab. Text is tokenized in React (no raw HTML injection).
  * Line breaks, spaces and emojis are preserved by the caller's whitespace class.
  */
 export function LinkifiedText({ text, className, as: Tag = "p" }: LinkifiedTextProps) {

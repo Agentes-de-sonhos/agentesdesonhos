@@ -21,7 +21,7 @@ describe("LinkifiedText", () => {
   });
 
   it("prefixa https:// em URLs www.", () => {
-    expect(normalizeUrl("www.exemplo.com/caminho")?.href).toBe("https://exemplo.com/caminho");
+    expect(normalizeUrl("www.exemplo.com/caminho")?.href).toBe("https://www.exemplo.com/caminho");
   });
 
   it("mantem pontuacao final fora do link", () => {
