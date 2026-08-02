@@ -168,53 +168,7 @@ export function PostCard({
           </div>
         )}
 
-        {poll && poll.question && (
-          <div className="rounded-lg border border-border/50 bg-muted/20 p-3 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-              <BarChart3 className="h-3.5 w-3.5 text-primary" />
-              {poll.question}
-            </div>
-            <div className="space-y-1.5">
-              {poll.options.map((o) => {
-                const count = pollTallies[o.id] || 0;
-                const pct = pollTotal > 0 ? Math.round((count / pollTotal) * 100) : 0;
-                const hasVoted = !!userVote;
-                const isMine = userVote === o.id;
-                return (
-                  <button
-                    key={o.id}
-                    type="button"
-                    disabled={hasVoted || !onVotePoll || !user}
-                    onClick={() => onVotePoll?.({ postId: post.id, optionId: o.id })}
-                    className="relative w-full text-left rounded-md border border-border/60 px-2.5 py-1.5 text-xs hover:border-primary/40 disabled:cursor-default overflow-hidden"
-                  >
-                    {hasVoted && (
-                      <span
-                        className={`absolute inset-y-0 left-0 ${isMine ? "bg-primary/20" : "bg-muted"}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    )}
-                    <span className="relative flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5 truncate">
-                        {isMine && <Check className="h-3 w-3 text-primary" />}
-                        {o.text}
-                      </span>
-                      {hasVoted && (
-                        <span className="text-[10px] text-muted-foreground shrink-0">
-                          {pct}% · {count}
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-[10px] text-muted-foreground">
-              {pollTotal} {pollTotal === 1 ? "voto" : "votos"}
-              {userVote ? " · você já votou" : " · toque em uma opção para votar"}
-            </p>
-          </div>
-        )}
+        <PostPoll post={post} onVote={onVotePoll} />
 
         {/* Legacy Tags */}
         {post.tags && post.tags.length > 0 && (
