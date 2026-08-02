@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface Banner {
 }
 
 export function DashboardBanner() {
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
@@ -76,6 +78,12 @@ export function DashboardBanner() {
 
   const openLink = () => {
     if (!hasLink) return;
+    // Internal routes must use the app router (the workspace turns this into a
+    // separate internal window when triggered from the pinned home tab).
+    if (link.startsWith("/") && !link.startsWith("//")) {
+      navigate(link);
+      return;
+    }
     window.open(link, "_blank", "noopener,noreferrer");
   };
 
