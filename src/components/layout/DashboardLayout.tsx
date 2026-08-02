@@ -13,6 +13,11 @@ import { SupplierDashboardLayout } from "./supplier/SupplierDashboardLayout";
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  /**
+   * Removes the shell's lateral padding so the page can provide its own
+   * centered container/gutters (used only by the Dashboard home page).
+   */
+  flushHorizontal?: boolean;
 }
 
 /**
@@ -22,7 +27,7 @@ interface DashboardLayoutProps {
  */
 const DashboardLayoutContext = createContext(false);
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, flushHorizontal = false }: DashboardLayoutProps) {
   const alreadyMounted = useContext(DashboardLayoutContext);
   const { user } = useAuth();
   const { isFornecedor, loading: roleLoading } = useUserRole();
@@ -63,7 +68,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       
       {/* Main content area */}
       <main className="transition-all duration-300 pl-0 lg:pl-16 flex-1 flex flex-col w-full overflow-x-hidden">
-        <div className="py-4 px-4 sm:py-6 sm:px-6 lg:pl-6 lg:pr-6 xl:pl-12 xl:pr-12 flex-1 pb-20 lg:pb-4 min-w-0">
+        <div
+          className={
+            flushHorizontal
+              ? "py-4 sm:py-6 px-0 flex-1 pb-20 lg:pb-4 min-w-0"
+              : "py-4 px-4 sm:py-6 sm:px-6 lg:pl-6 lg:pr-6 xl:pl-12 xl:pr-12 flex-1 pb-20 lg:pb-4 min-w-0"
+          }
+        >
           {children}
         </div>
         <Footer />
