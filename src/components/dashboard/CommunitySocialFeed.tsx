@@ -30,6 +30,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 import { EditPostDialog } from "@/components/community/EditPostDialog";
 import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
+import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -215,6 +216,8 @@ interface PostCardProps {
   deleteComment: (commentId: string) => void;
   isAddingComment: boolean;
   onOpenImage: (url: string) => void;
+  onVotePoll?: (data: { postId: string; optionId: string }) => void;
+  isVoting?: boolean;
 }
 
 function PostCard({
@@ -231,6 +234,8 @@ function PostCard({
   deleteComment,
   isAddingComment,
   onOpenImage,
+  onVotePoll,
+  isVoting,
 }: PostCardProps) {
   const isAuthor = currentUserId === post.user_id;
   const canDelete = isAuthor || isAdmin;
@@ -315,6 +320,10 @@ function PostCard({
           authorName={post.profile?.name || undefined}
         />
       )}
+
+      <div className="px-4 pt-2 min-w-0">
+        <PostPoll post={post} onVote={onVotePoll} isVoting={isVoting} />
+      </div>
 
       {(post.likes_count > 0 || post.comments_count > 0) && (
         <div className="px-4 pt-2 flex items-center gap-3 text-xs text-muted-foreground">
