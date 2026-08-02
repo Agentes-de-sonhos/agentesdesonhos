@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef, Fragment } from "react";
+import React, { useState, useCallback, useMemo, useRef, useLayoutEffect, Fragment } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Map,
@@ -66,6 +66,7 @@ import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
+import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS, calculateAnchorScrollDelta } from "@/lib/sidebarAnchor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface MenuItem {
@@ -330,6 +331,35 @@ export function AppSidebar() {
     }, 300);
   };
 
+  // Âncora vertical: item sob o cursor no momento em que a expansão é disparada
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const anchorRef = useRef<{ key: string; top: number } | null>(null);
+
+  /** Registra a linha sob o cursor (apenas enquanto recolhido). */
+  const captureAnchor = (target: EventTarget | null) => {
+    if (!collapsed || !(target instanceof Element)) return;
+    const row = target.closest("[data-sidebar-row]") as HTMLElement | null;
+    if (!row) return;
+    const key = row.getAttribute("data-sidebar-row");
+    if (!key) return;
+    anchorRef.current = { key, top: row.getBoundingClientRect().top };
+  };
+
+  // Após expandir (e montar filhos), reposiciona o scroll para manter a âncora sob o cursor
+  useLayoutEffect(() => {
+    if (collapsed) return;
+    const anchor = anchorRef.current;
+    anchorRef.current = null;
+    const container = scrollAreaRef.current;
+    if (!anchor || !container) return;
+    const row = container.querySelector(
+      `[data-sidebar-row="${CSS.escape(anchor.key)}"]`
+    ) as HTMLElement | null;
+    if (!row) return;
+    const delta = calculateAnchorScrollDelta(anchor.top, row.getBoundingClientRect().top);
+    if (delta !== 0) container.scrollTop += delta;
+  }, [collapsed]);
+
   /** Expande imediatamente, cancelando timers/estados pendentes de hover. */
   const expandNow = useCallback(() => {
     clearTimers();
@@ -523,9 +553,10 @@ export function AppSidebar() {
         to={isLocked ? "#" : item.url}
         aria-label={collapsed ? item.title : undefined}
         onClick={(e) => handleMenuClick(item, e)}
+        data-sidebar-row={item.key || item.url}
         className={cn(
-          "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300",
-          collapsed ? "py-1" : "py-1.5",
+          "group rounded-xl px-3 text-sm font-medium transition-[width,background-color,color] duration-300",
+          SIDEBAR_ROW_CLASS,
           collapsed
             ? cn("text-sidebar-foreground", isLocked && "opacity-60")
             : sectionStyle
@@ -606,9 +637,10 @@ export function AppSidebar() {
                   [group.key || group.title]: !isOpen,
                 }))
           }
+          data-sidebar-row={group.key || group.title}
           className={cn(
-            "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300 w-full text-left",
-            collapsed ? "py-1" : "py-1.5",
+            "group rounded-xl px-3 text-sm font-medium transition-[background-color,color] duration-300 w-full text-left",
+            SIDEBAR_ROW_CLASS,
             collapsed
               ? "text-sidebar-foreground"
               : childActive && sectionBgColor
@@ -654,12 +686,13 @@ export function AppSidebar() {
 
     if (collapsed) {
       return (
-        <nav key={section.title} className="flex flex-col gap-[2px] px-3">
+        <nav key={section.title} className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
           <button
             type="button"
             aria-label={section.title}
+            data-sidebar-row={section.key || section.title}
             onClick={expandNow}
-            className="flex items-center justify-center rounded-xl px-3 py-1 w-full text-sidebar-foreground"
+            className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-xl px-3 w-full text-sidebar-foreground")}
           >
             <Icon className="h-5 w-5 flex-shrink-0" />
           </button>
@@ -671,8 +704,10 @@ export function AppSidebar() {
       <div key={section.title} className="px-3">
         <button
           onClick={() => toggleSection(section.title)}
+          data-sidebar-row={section.key || section.title}
           className={cn(
-            "w-full flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
+            SIDEBAR_ROW_CLASS,
+            "w-full rounded-xl px-3 text-sm font-medium transition-[background-color,color] duration-200",
             isOpen
               ? cn(section.headerBg, section.headerHoverBg)
               : cn("text-sidebar-foreground", section.hoverColor)
@@ -713,6 +748,8 @@ export function AppSidebar() {
         )}
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
+        onMouseOver={(e) => captureAnchor(e.target)}
+        onFocusCapture={(e) => captureAnchor(e.target)}
       >
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
           <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" className="flex items-center gap-3 min-w-0">
@@ -732,16 +769,16 @@ export function AppSidebar() {
         {/* Toggle visual removido: o hover sobre o menu já expande/recolhe automaticamente */}
 
         {/* Scrollable Navigation */}
-        <div className={cn("flex-1 py-2", collapsed ? "overflow-hidden space-y-[2px]" : "overflow-y-auto space-y-0.5")}>
+        <div ref={scrollAreaRef} className={cn("flex-1 py-2 space-y-0.5", collapsed ? "overflow-x-hidden overflow-y-auto scrollbar-hide" : "overflow-y-auto")}>
           {/* Início */}
-          <nav className={cn("flex flex-col", collapsed ? "gap-[2px] px-3" : "gap-0.5 px-3")}>
+          <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
             {renderSingleItem(meusProjetosItem)}
             {renderSingleItem(minhaAgendaItem)}
             {renderSingleItem(meuPerfilItem)}
             {!isTeamMember && renderSingleItem(comunidadeItem)}
           </nav>
 
-          <div className={cn("px-3", collapsed ? "py-0.5" : "py-1")}>
+          <div className="px-3 py-1">
             <Separator className="bg-sidebar-border" />
           </div>
 
@@ -751,7 +788,7 @@ export function AppSidebar() {
               return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
             }
             return (
-              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col", collapsed ? "items-center gap-[2px] px-2" : "gap-0.5 px-3")}>
+              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
                 {renderSingleItem(entry.item)}
               </nav>
             );
@@ -759,16 +796,17 @@ export function AppSidebar() {
         </div>
 
         {/* Bottom Section - Compact */}
-        <div className={cn("flex-shrink-0 border-t border-sidebar-border px-3", collapsed ? "py-1 space-y-[2px]" : "py-2 space-y-0.5")}>
+        <div className="flex-shrink-0 border-t border-sidebar-border px-3 py-2 space-y-0.5">
           {isAdmin && renderSingleItem(adminMenuItem)}
 
           {collapsed ? (
-            <div className="flex flex-col items-center gap-[2px]">
+            <div className={cn("flex flex-col", SIDEBAR_ROW_GAP_CLASS)}>
               <Link
                 to="/suporte"
                 aria-label="Suporte"
+                data-sidebar-row="bottom-suporte"
                 onClick={(e) => { e.preventDefault(); expandNow(); }}
-                className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+                className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-lg text-muted-foreground")}
               >
                 <Headset className="h-4 w-4" />
               </Link>
@@ -776,8 +814,9 @@ export function AppSidebar() {
                 <Link
                   to="/minha-conta"
                   aria-label="Minha Conta"
+                  data-sidebar-row="bottom-minha-conta"
                   onClick={(e) => { e.preventDefault(); expandNow(); }}
-                  className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+                  className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-lg text-muted-foreground")}
                 >
                   <Settings className="h-4 w-4" />
                 </Link>
@@ -786,7 +825,8 @@ export function AppSidebar() {
                 variant="ghost"
                 size="icon"
                 aria-label="Sair"
-                className="w-full h-6 rounded-lg text-muted-foreground hover:bg-transparent hover:text-muted-foreground"
+                data-sidebar-row="bottom-sair"
+                className={cn(SIDEBAR_ROW_CLASS, "w-full h-auto justify-center rounded-lg text-muted-foreground hover:bg-transparent hover:text-muted-foreground")}
                 onClick={expandNow}
               >
                 <LogOut className="h-4 w-4" />
