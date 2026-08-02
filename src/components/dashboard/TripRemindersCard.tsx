@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -13,6 +13,8 @@ import {
   Loader2,
   Clock,
   Plane,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,13 +29,34 @@ import {
 } from "@/components/ui/dialog";
 import { useReminders } from "@/hooks/useReminders";
 import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
+import { useAdaptivePageSize } from "@/hooks/useAdaptivePageSize";
 import { cn } from "@/lib/utils";
+
+/** Approximate rendered height of one compact reminder card (card + gap). */
+const ROW_HEIGHT = 168;
 
 export function TripRemindersCard() {
   const navigate = useNavigate();
   const { reminders, isLoading, updateFollowUp, markCompleted, isUpdating } = useReminders();
   const [editingReminder, setEditingReminder] = useState<string | null>(null);
   const [followUpText, setFollowUpText] = useState("");
+  const [page, setPage] = useState(0);
+  const { ref: listRef, pageSize } = useAdaptivePageSize<HTMLDivElement>({
+    rowHeight: ROW_HEIGHT,
+    min: 1,
+    max: 3,
+    fallback: 2,
+  });
+
+  const total = reminders.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.max(0, Math.min(page, totalPages - 1));
+  const startIdx = safePage * pageSize;
+  const pageReminders = reminders.slice(startIdx, startIdx + pageSize);
+
+  useEffect(() => {
+    setPage((prev) => Math.max(0, Math.min(prev, totalPages - 1)));
+  }, [totalPages]);
 
   const handleEditFollowUp = (reminderId: string, currentNote: string | null) => {
     setEditingReminder(reminderId);
@@ -101,7 +124,7 @@ export function TripRemindersCard() {
             </div>
             <SectionCtaLink
               to="/proximas-viagens"
-              label="Ver todas as próximas viagens"
+              label="Ver todas"
               shortLabel="Ver todas"
               tabTitle="Próximas Viagens"
               className="text-[hsl(var(--section-reminders))]"
@@ -122,8 +145,8 @@ export function TripRemindersCard() {
   return (
     <>
       <Card className="border-0 shadow-md h-full flex flex-col min-h-0 overflow-hidden">
-        <CardContent className="pt-6 flex-1 min-h-0 flex flex-col">
-          <div className="flex items-start justify-between gap-3 mb-4 flex-shrink-0">
+        <CardContent className="pt-4 @[26rem]:pt-6 flex-1 min-h-0 flex flex-col @container overflow-hidden">
+          <div className="flex items-start justify-between gap-3 mb-3 flex-shrink-0">
             <div className="w-fit">
               <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
                 <Plane className="h-5 w-5 text-[hsl(var(--section-reminders))]" />
@@ -131,27 +154,27 @@ export function TripRemindersCard() {
               </h2>
               <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-reminders))]" />
             </div>
-            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+            <div className="flex flex-col items-end gap-1 flex-shrink-0">
               <SectionCtaLink
                 to="/proximas-viagens"
-                label="Ver todas as próximas viagens"
+                label="Ver todas"
                 shortLabel="Ver todas"
                 tabTitle="Próximas Viagens"
                 className="text-[hsl(var(--section-reminders))]"
               />
-              <Badge variant="outline" className="text-[hsl(var(--section-reminders))] border-[hsl(var(--section-reminders))]">
+              <Badge variant="outline" className="whitespace-nowrap text-[hsl(var(--section-reminders))] border-[hsl(var(--section-reminders))]">
                 {reminders.length} lembrete{reminders.length !== 1 ? "s" : ""}
               </Badge>
             </div>
           </div>
-          <div className="space-y-4 flex-1 min-h-0 overflow-y-auto pr-2">
-            {reminders.slice(0, 10).map((reminder) => {
+          <div ref={listRef} className="space-y-3 flex-1 min-h-0 overflow-hidden">
+            {pageReminders.map((reminder) => {
               const isReturn = reminder.days_before === -1;
               return (
                 <div
                   key={reminder.id}
                   className={cn(
-                    "border rounded-lg p-4 space-y-3 transition-colors",
+                    "border rounded-lg p-2.5 @[26rem]:p-3 space-y-2 transition-colors overflow-hidden",
                     isReturn
                       ? "border-accent/50 bg-accent/10"
                       : reminder.daysRemaining <= 1
@@ -161,20 +184,20 @@ export function TripRemindersCard() {
                       : "border-border"
                   )}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{reminder.trip?.client_name}</span>
-                        {getReminderLabel(reminder.daysRemaining, isReturn)}
+                  <div className="flex items-start justify-between gap-2 min-w-0">
+                    <div className="space-y-0.5 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="font-medium truncate whitespace-nowrap">{reminder.trip?.client_name}</span>
+                        <span className="shrink-0">{getReminderLabel(reminder.daysRemaining, isReturn)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" />
-                        <span>{reminder.trip?.destination}</span>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate whitespace-nowrap">{reminder.trip?.destination}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-3.5 w-3.5" />
-                        <span>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                        <Calendar className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate whitespace-nowrap">
                           {isReturn ? "Retorno: " : ""}
                           {reminder.trip?.start_date &&
                             (() => {
@@ -188,43 +211,79 @@ export function TripRemindersCard() {
                   </div>
 
                   {reminder.follow_up_note && (
-                    <div className="bg-muted/50 rounded p-2 text-sm">
+                    <div className="bg-muted/50 rounded p-2 text-xs truncate whitespace-nowrap">
                       <span className="text-muted-foreground">Follow-up: </span>
                       {reminder.follow_up_note}
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex flex-nowrap items-center gap-1 @[26rem]:gap-2 overflow-hidden">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 px-2 text-xs shrink-0"
                       onClick={() => handleEditFollowUp(reminder.id, reminder.follow_up_note)}
                     >
-                      <Edit2 className="h-3.5 w-3.5 mr-1" />
+                      <Edit2 className="h-3.5 w-3.5 mr-1 shrink-0" />
                       Follow-up
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 px-2 text-xs shrink-0"
                       onClick={() => navigate(`/ferramentas-ia/trip-wallet/${reminder.trip_id}`)}
                     >
-                      <ExternalLink className="h-3.5 w-3.5 mr-1" />
-                      Abrir Viagem
+                      <ExternalLink className="h-3.5 w-3.5 mr-1 shrink-0" />
+                      <span className="hidden @[24rem]:inline">Abrir Viagem</span>
+                      <span className="@[24rem]:hidden">Abrir</span>
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-primary hover:text-primary/80 hover:bg-primary/10"
+                      className="h-7 px-2 text-xs shrink-0 text-primary hover:text-primary/80 hover:bg-primary/10"
                       onClick={() => handleMarkCompleted(reminder.id)}
                       disabled={isUpdating}
                     >
-                      <Check className="h-3.5 w-3.5 mr-1" />
+                      <Check className="h-3.5 w-3.5 mr-1 shrink-0" />
                       Concluir
                     </Button>
                   </div>
                 </div>
               );
             })}
+          </div>
+
+          {/* Paginação adaptativa — nunca rolagem */}
+          <div className="pt-2 mt-1 border-t flex flex-col @[26rem]:flex-row items-center justify-between gap-1 @[26rem]:gap-2 shrink-0">
+            <p className="text-xs text-muted-foreground whitespace-nowrap">
+              Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + pageSize, total)}</span> de{" "}
+              <span className="font-medium text-foreground">{total}</span> viagens
+            </p>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2"
+                aria-label="Página anterior"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground px-1 tabular-nums whitespace-nowrap">
+                {safePage + 1} / {totalPages}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2"
+                aria-label="Próxima página"
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={safePage >= totalPages - 1}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
