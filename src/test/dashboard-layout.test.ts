@@ -210,6 +210,6 @@ describe("Comunidade e Academy no dashboard", () => {
     expect(academy).not.toContain("@[48rem]:flex-row");
     expect(academy).toContain("aspect-video shrink-0");
     expect(academy).toContain("mt-auto space-y-3");
-    expect(academy).toContain("grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))]");
+    expect(academy).toContain("@[72rem]:grid-cols-4");
   });
 });
