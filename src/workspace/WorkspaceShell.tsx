@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useLayoutEffect, useRef } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { toast } from "sonner";
 import { TabBar } from "./TabBar";
@@ -20,6 +20,15 @@ interface Props {
 export function WorkspaceShell({ children }: Props) {
   const ws = useWorkspace();
   const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // Every tab open/switch must show the tab bar: reset the real vertical
+  // scroll container(s) to the top. Hash navigation is respected.
+  useLayoutEffect(() => {
+    if (!ws?.activeId) return;
+    if (window.location.hash) return;
+    const raf = requestAnimationFrame(() => scrollWorkspaceToTop(rootRef.current));
+    return () => cancelAnimationFrame(raf);
+  }, [ws?.activeId]);
 
   const openTabRef = useRef(ws?.openOrActivateTab);
   const tabsRef = useRef(ws?.tabs);
