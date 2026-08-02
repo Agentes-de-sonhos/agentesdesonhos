@@ -66,17 +66,7 @@ import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface MenuItem {
   title: string;
@@ -340,6 +330,12 @@ export function AppSidebar() {
     }, 300);
   };
 
+  /** Expande imediatamente, cancelando timers/estados pendentes de hover. */
+  const expandNow = useCallback(() => {
+    clearTimers();
+    setCollapsed(false);
+  }, []);
+
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isRestrictedPlan = isEducaPass || isCartaoDigital;
@@ -468,6 +464,12 @@ export function AppSidebar() {
 
   const handleMenuClick = useCallback(
     (item: MenuItem, e: React.MouseEvent) => {
+      // Sidebar recolhida: o clique apenas expande (evita clique fantasma na transição)
+      if (collapsed) {
+        e.preventDefault();
+        expandNow();
+        return;
+      }
       // Educa Pass: only allow EducaTravel Academy
       if (isEducaPass && item.url !== "/educa-academy") {
         e.preventDefault();
@@ -494,7 +496,7 @@ export function AppSidebar() {
       trackSectionVisit(item.url);
       setCollapsed(true);
     },
-    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, startPlanLockedUrls]
+    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, startPlanLockedUrls, collapsed, expandNow]
   );
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
@@ -519,11 +521,14 @@ export function AppSidebar() {
       <Link
         key={item.url}
         to={isLocked ? "#" : item.url}
+        aria-label={collapsed ? item.title : undefined}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300",
           collapsed ? "py-1" : "py-1.5",
-          sectionStyle
+          collapsed
+            ? cn("text-sidebar-foreground", isLocked && "opacity-60")
+            : sectionStyle
             ? isActive && !isLocked
               ? cn(sectionStyle.headerBg, sectionStyle.headerHoverBg, "font-semibold")
               : isLocked
@@ -571,17 +576,6 @@ export function AppSidebar() {
       </Link>
     );
 
-    if (collapsed) {
-      return (
-        <Tooltip key={item.url}>
-          <TooltipTrigger asChild>{menuLink}</TooltipTrigger>
-          <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-            <p className="text-sm font-medium">{item.title}</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
     return menuLink;
   };
 
@@ -603,16 +597,21 @@ export function AppSidebar() {
           type="button"
           aria-expanded={isOpen}
           aria-controls={groupId}
+          aria-label={collapsed ? group.title : undefined}
           onClick={() =>
-            setOpenGroups((prev) => ({
-              ...prev,
-              [group.key || group.title]: !isOpen,
-            }))
+            collapsed
+              ? expandNow()
+              : setOpenGroups((prev) => ({
+                  ...prev,
+                  [group.key || group.title]: !isOpen,
+                }))
           }
           className={cn(
             "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300 w-full text-left",
             collapsed ? "py-1" : "py-1.5",
-            childActive && sectionBgColor
+            collapsed
+              ? "text-sidebar-foreground"
+              : childActive && sectionBgColor
               ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
               : sectionBgColor
                 ? cn(sectionBgColor, sectionTextColor, "hover:font-semibold")
@@ -656,89 +655,14 @@ export function AppSidebar() {
     if (collapsed) {
       return (
         <nav key={section.title} className="flex flex-col gap-[2px] px-3">
-          <Popover>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <button
-                    className={cn(
-                      "group flex items-center justify-center rounded-xl px-3 py-1 transition-all duration-300 w-full",
-                      isActive
-                        ? cn(section.headerBg)
-                        : cn("text-sidebar-foreground", section.hoverColor)
-                    )}
-                  >
-                    <Icon className="h-5 w-5 flex-shrink-0 transition-all duration-300 group-hover:scale-110" />
-                  </button>
-                </PopoverTrigger>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                <p className="text-sm font-medium">{section.title}</p>
-              </TooltipContent>
-            </Tooltip>
-            <PopoverContent side="right" align="start" className="w-64 p-2" sideOffset={8}>
-              <p className={cn(
-                "text-[11px] font-bold uppercase tracking-wider px-2 py-1.5 rounded-lg whitespace-nowrap",
-                section.headerBg
-              )}>
-                {section.title}
-              </p>
-              <nav className="flex flex-col gap-0.5 mt-1">
-                {section.items
-                  .filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key)))
-                  .flatMap((item) =>
-                    item.children
-                      ? [
-                          { item, depth: 0, isGroupLabel: true as const },
-                          ...item.children.map((child) => ({ item: child, depth: 1, isGroupLabel: false as const })),
-                        ]
-                      : [{ item, depth: 0, isGroupLabel: false as const }]
-                  )
-                  .map(({ item, depth, isGroupLabel }) => {
-                  if (isGroupLabel) {
-                    return (
-                      <p
-                        key={`group-${item.key}`}
-                        className="flex items-center gap-2 px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
-                      >
-                        <item.icon className="h-3.5 w-3.5" />
-                        {item.title}
-                      </p>
-                    );
-                  }
-                  const itemActive = isItemActive(item.url, item.exactUrl);
-                  const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
-                  const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
-                  const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
-                  const isLocked = isLockedByFeature || isLockedByCartao || isLockedByEduca;
-                  return (
-                    <Link
-                      key={item.url}
-                      to={isLocked ? "#" : item.url}
-                      onClick={(e) => handleMenuClick(item, e)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
-                        depth > 0 && "ml-3 text-[13px]",
-                        itemActive && !isLocked
-                          ? cn(section.bgColor, section.textColor, "border-l-[3px]", section.borderColor, "font-semibold")
-                          : isLocked
-                            ? "opacity-60 cursor-pointer hover:opacity-70"
-                            : cn(section.bgColor, section.textColor, "hover:scale-[1.02] hover:font-semibold"),
-                      )}
-                    >
-                      <div className="relative flex-shrink-0">
-                        <item.icon className="h-4 w-4" />
-                        {isLocked && (
-                          <Lock className="h-2 w-2 absolute -top-0.5 -right-0.5 text-warning" />
-                        )}
-                      </div>
-                      <span className="truncate flex-1">{item.title}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </PopoverContent>
-          </Popover>
+          <button
+            type="button"
+            aria-label={section.title}
+            onClick={expandNow}
+            className="flex items-center justify-center rounded-xl px-3 py-1 w-full text-sidebar-foreground"
+          >
+            <Icon className="h-5 w-5 flex-shrink-0" />
+          </button>
         </nav>
       );
     }
@@ -840,49 +764,33 @@ export function AppSidebar() {
 
           {collapsed ? (
             <div className="flex flex-col items-center gap-[2px]">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/suporte"
-                    className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
-                  >
-                    <Headset className="h-4 w-4" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                  <p className="text-sm font-medium">Suporte</p>
-                </TooltipContent>
-              </Tooltip>
+              <Link
+                to="/suporte"
+                aria-label="Suporte"
+                onClick={(e) => { e.preventDefault(); expandNow(); }}
+                className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+              >
+                <Headset className="h-4 w-4" />
+              </Link>
               {!isFornecedor && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/minha-conta"
-                      className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                    <p className="text-sm font-medium">Minha Conta</p>
-                  </TooltipContent>
-                </Tooltip>
+                <Link
+                  to="/minha-conta"
+                  aria-label="Minha Conta"
+                  onClick={(e) => { e.preventDefault(); expandNow(); }}
+                  className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+                >
+                  <Settings className="h-4 w-4" />
+                </Link>
               )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-full h-6 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                  <p className="text-sm font-medium">Sair</p>
-                </TooltipContent>
-              </Tooltip>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Sair"
+                className="w-full h-6 rounded-lg text-muted-foreground hover:bg-transparent hover:text-muted-foreground"
+                onClick={expandNow}
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           ) : (
             <>
