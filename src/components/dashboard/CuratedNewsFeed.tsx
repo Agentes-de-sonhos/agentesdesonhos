@@ -145,7 +145,6 @@ export function CuratedNewsFeed() {
               <div className="flex items-center gap-2 pb-2 min-w-0">
                 <Trophy className="h-4 w-4 shrink-0 text-[hsl(var(--section-news))]" />
                 <h3 className="text-sm font-semibold text-foreground whitespace-nowrap">Top 5 da Semana</h3>
-                <span className="ml-2 h-1 flex-1 rounded-full bg-[hsl(var(--section-news)/0.25)]" />
               </div>
               <div className="flex flex-col divide-y divide-[hsl(var(--section-news)/0.14)]">
                 {top5.map((item) => (
