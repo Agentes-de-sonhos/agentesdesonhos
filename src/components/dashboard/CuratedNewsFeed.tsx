@@ -1,54 +1,12 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  ExternalLink, Loader2, Newspaper,
-  Flame, Zap, Star, TrendingUp, ThumbsUp,
-  Plane, Ship, Hotel, Globe, BarChart3, Mic, Palmtree, Brain,
-} from "lucide-react";
+import { Newspaper, Loader2, ExternalLink, Eye, ThumbsUp, Crown, ShieldCheck, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useNewsLikes } from "@/hooks/useNewsLikes";
 import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
-import { NewsLikeButton } from "@/components/news/NewsLikeButton";
-
-interface CuratedNews {
-  id: string;
-  titulo_curto: string;
-  resumo: string;
-  categoria: string;
-  fonte: string;
-  url_original: string;
-  relevancia_score: number;
-  score_perfil: number | null;
-  aderencia_perfil: string | null;
-  tipo_exibicao: string;
-  data_publicacao: string;
-  alerta_trade: boolean;
-  is_noticia_do_dia: boolean;
-  top5_position: number | null;
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffHours < 1) return "Agora";
-  if (diffHours < 24) return `Há ${diffHours}h`;
-  if (diffDays === 1) return "Ontem";
-  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-}
-
-const CATEGORIA_ICONS: Record<string, React.ReactNode> = {
-  "Aéreo": <Plane className="h-3 w-3" />,
-  "Cruzeiros": <Ship className="h-3 w-3" />,
-  "Hotel": <Hotel className="h-3 w-3" />,
-  "Destinos": <Globe className="h-3 w-3" />,
-  "Mercado": <BarChart3 className="h-3 w-3" />,
-  "Eventos": <Mic className="h-3 w-3" />,
-  "Turismo": <Palmtree className="h-3 w-3" />,
-};
+import { useNewsHighlights, type HighlightNews, type Top5Item } from "@/hooks/useNewsHighlights";
+import { highlightLabel } from "@/lib/newsRanking";
+import { cn } from "@/lib/utils";
 
 const CATEGORIA_COLORS: Record<string, string> = {
   "Aéreo": "bg-sky-100 text-sky-700 border-sky-200",
@@ -59,230 +17,169 @@ const CATEGORIA_COLORS: Record<string, string> = {
   "Eventos": "bg-purple-100 text-purple-700 border-purple-200",
 };
 
+function formatRelative(dateString: string): string {
+  const date = new Date(dateString);
+  const diffHours = Math.floor((Date.now() - date.getTime()) / 3_600_000);
+  if (diffHours < 1) return "Agora";
+  if (diffHours < 24) return `Há ${diffHours}h`;
+  if (diffHours < 48) return "Ontem";
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+}
+
 function CategoryBadge({ categoria }: { categoria: string }) {
   const colorClass = CATEGORIA_COLORS[categoria] || "bg-muted text-muted-foreground border-border";
-  const icon = CATEGORIA_ICONS[categoria];
   return (
-    <span className={`inline-flex items-center gap-0.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${colorClass}`}>
-      {icon}
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${colorClass}`}>
       {categoria}
     </span>
   );
 }
 
-function NewsMetaRow({ item, isTopTrending }: { item: CuratedNews; isTopTrending: boolean }) {
-  const tags: React.ReactNode[] = [];
-
-  if (item.is_noticia_do_dia) {
-    tags.push(
-      <span key="dia" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 px-1.5 py-0 text-[9px] font-bold uppercase tracking-wider leading-4">
-        <Flame className="h-2.5 w-2.5" /> Dia
-      </span>
-    );
-  }
-
-  if (item.top5_position != null) {
-    tags.push(
-      <span key="top5" className="inline-flex items-center gap-0.5 rounded-full bg-warning/15 text-warning border border-warning/30 px-1.5 py-0 text-[9px] font-bold leading-4">
-        <Zap className="h-2.5 w-2.5" /> Top {item.top5_position}
-      </span>
-    );
-  }
-
-  if (item.alerta_trade) {
-    tags.push(
-      <span key="destaque" className="inline-flex items-center gap-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200 px-1.5 py-0 text-[9px] font-bold leading-4">
-        <Star className="h-2.5 w-2.5" /> Destaque
-      </span>
-    );
-  }
-
-  // Selo "IA ajustada ao seu perfil": aparece quando o aprendizado já tem volume (média/alta)
-  // e o score perfil é alto (≥7). Indica que o sistema reconheceu padrão alinhado.
-  if (
-    item.score_perfil != null &&
-    item.score_perfil >= 7 &&
-    (item.aderencia_perfil === "media" || item.aderencia_perfil === "alta")
-  ) {
-    tags.push(
-      <span
-        key="perfil"
-        title={`IA ajustada ao seu perfil (aderência ${item.aderencia_perfil}) — score ${item.score_perfil}/10`}
-        className="inline-flex items-center gap-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 px-1.5 py-0 text-[9px] font-bold leading-4"
-      >
-        <Brain className="h-2.5 w-2.5" /> Perfil
-      </span>
-    );
-  }
-
-  if (isTopTrending && !item.is_noticia_do_dia) {
-    tags.push(
-      <span key="alta" className="inline-flex items-center gap-0.5 rounded-full bg-destructive/10 text-destructive px-1.5 py-0 text-[9px] font-bold leading-4">
-        <TrendingUp className="h-2.5 w-2.5" /> Em alta
-      </span>
-    );
-  }
-
+function SectionHeader() {
   return (
-    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 min-w-0">
-      <CategoryBadge categoria={item.categoria} />
-      {tags}
-      <span className="text-[10px] text-muted-foreground sm:ml-auto">
-        {item.fonte} • {formatDate(item.data_publicacao)}
-        {item.relevancia_score >= 8 && (
-          <span className="font-semibold text-primary ml-1">★ {item.relevancia_score}</span>
-        )}
-      </span>
+    <div className="mb-4 space-y-2">
+      <div className="flex items-start justify-between gap-3">
+        <div className="w-fit">
+          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+            <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
+            Notícias do Trade
+          </h2>
+          <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
+        </div>
+        <SectionCtaLink
+          to="/noticias"
+          label="Ver todas as notícias"
+          shortLabel="Ver todas"
+          tabTitle="Notícias"
+          className="text-[hsl(var(--section-news))]"
+        />
+      </div>
+      <p className="text-sm text-muted-foreground">
+        O destaque do período e o Top 5 da semana, com a mesma curadoria da página completa.
+      </p>
     </div>
   );
 }
 
 export function CuratedNewsFeed() {
-  const { data: news, isLoading } = useQuery({
-    queryKey: ["curated-news-dashboard"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("noticias_dashboard")
-        .select("*")
-        .eq("status", "aprovado")
-        .eq("hidden", false)
-        .order("created_at", { ascending: false })
-        .order("data_publicacao", { ascending: false })
-        .limit(5);
-      if (error) throw error;
-      return (data as any[]).map((d) => ({
-        ...d,
-        is_noticia_do_dia: d.is_noticia_do_dia ?? false,
-        top5_position: d.top5_position ?? null,
-        alerta_trade: d.alerta_trade ?? false,
-        score_perfil: d.score_perfil ?? null,
-        aderencia_perfil: d.aderencia_perfil ?? null,
-      })) as CuratedNews[];
+  const queryClient = useQueryClient();
+  const { data, isLoading, isError } = useNewsHighlights();
+
+  const handleRead = useCallback(
+    async (item: HighlightNews | Top5Item) => {
+      window.open(item.url_original, "_blank", "noopener,noreferrer");
+      try {
+        await (supabase as any).rpc("register_news_read", { p_noticia_id: item.id });
+        queryClient.invalidateQueries({ queryKey: ["news-highlights"] });
+      } catch {
+        /* silencioso — leitura já contabilizada hoje ou usuário sem sessão */
+      }
     },
-    refetchInterval: 5 * 60 * 1000,
-  });
-
-  const newsIds = useMemo(() => (news || []).map((n) => n.id), [news]);
-  const { getLikeCount, isLiked, toggleLike } = useNewsLikes(newsIds);
-
-  if (isLoading) {
-    return (
-      <Card className="border-0 shadow-md">
-        <CardContent className="flex justify-center py-8">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!news || news.length === 0) {
-    return (
-      <Card className="border-0 shadow-md">
-        <CardContent className="pt-6 space-y-4">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <div className="w-fit">
-              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
-                Radar do Turismo
-              </h2>
-              <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
-            </div>
-            <SectionCtaLink
-              to="/noticias"
-              label="Ver todas as notícias"
-              shortLabel="Ver todas"
-              tabTitle="Notícias"
-              className="text-[hsl(var(--section-news))]"
-            />
-          </div>
-          <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-            <div className="rounded-full bg-muted p-3">
-              <Newspaper className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground font-medium">Nenhuma notícia publicada ainda.</p>
-            <p className="text-xs text-muted-foreground/70">Aguarde, em breve teremos novidades por aqui.</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Top 3 by score for "Em alta" tag
-  const trendingIds = new Set(
-    [...news].sort((a, b) => b.relevancia_score - a.relevancia_score).slice(0, 2).map((n) => n.id)
+    [queryClient]
   );
+
+  const featured = data?.featured ?? null;
+  const top5 = data?.top5 ?? [];
+  const label = highlightLabel(data?.mode ?? "daily");
 
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
-      <CardContent className="pt-6 space-y-0.5">
-        <div className="mb-4 space-y-2">
-          <div className="flex items-start justify-between gap-3">
-            <div className="w-fit">
-              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
-                Radar do Turismo
-              </h2>
-              <div className="mt-2 h-1 w-full rounded-full bg-[hsl(var(--section-news))]" />
-            </div>
-            <SectionCtaLink
-              to="/noticias"
-              label="Ver todas as notícias"
-              shortLabel="Ver todas"
-              tabTitle="Notícias"
-              className="text-[hsl(var(--section-news))]"
-            />
+      <CardContent className="pt-6">
+        <SectionHeader />
+
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
-          <p className="text-sm text-muted-foreground">
-            Acompanhe as notícias mais recentes do trade e acesse os destaques, o Top 5 e tudo o que movimenta o turismo hoje.
-          </p>
-        </div>
-
-        {news.map((item, i) => {
-          const isFirst = i === 0;
-          const likeCount = getLikeCount(item.id);
-          return (
-            <div key={item.id} className="relative group/item">
-              <a
-                href={item.url_original}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group flex items-start gap-3 rounded-xl p-3 transition-all duration-200 hover:bg-[hsl(var(--section-news))]/5 h-auto ${
-                  isFirst ? "bg-primary/[0.03] border border-primary/10" : ""
-                }`}
-              >
-                {/* Rank indicator */}
-                <span className={`flex-shrink-0 w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center mt-0.5 ${
-                  isFirst
-                    ? "bg-[hsl(var(--section-news))] text-white"
-                    : "bg-[hsl(var(--section-news))]/10 text-[hsl(var(--section-news))]"
-                }`}>
-                  {i + 1}
-                </span>
-
-                <div className="flex-1 min-w-0 space-y-1">
-                  <NewsMetaRow item={item} isTopTrending={trendingIds.has(item.id)} />
-                  <h4 className={`font-medium text-foreground group-hover:text-[hsl(var(--section-news))] transition-colors leading-snug whitespace-normal break-words overflow-visible line-clamp-none h-auto ${
-                    isFirst ? "text-sm" : "text-[13px]"
-                  }`}>
-                    {item.titulo_curto}
-                  </h4>
-                </div>
-
-                <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
-                  {likeCount > 0 && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                      <ThumbsUp className="h-3 w-3" /> {likeCount}
+        ) : isError ? (
+          <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+            <AlertTriangle className="h-4 w-4" /> Não foi possível carregar as notícias agora.
+          </div>
+        ) : !featured && top5.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center gap-2">
+            <div className="rounded-full bg-muted p-3">
+              <Newspaper className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">Nenhuma notícia publicada ainda.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 lg:gap-6 lg:grid-cols-[65fr_35fr] items-start">
+            {/* Destaque do período */}
+            <div className="min-w-0">
+              {featured ? (
+                <button
+                  type="button"
+                  onClick={() => handleRead(featured)}
+                  className="group w-full text-left rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-4 sm:p-5 transition-colors hover:border-primary/50"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                      <Crown className="h-3 w-3" /> {label}
                     </span>
+                    <CategoryBadge categoria={featured.categoria} />
+                    {featured.is_manual && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        <ShieldCheck className="h-3 w-3" /> Curadoria
+                      </span>
+                    )}
+                    <span className="text-[11px] text-muted-foreground">
+                      {featured.fonte} · {formatRelative(featured.data_publicacao)}
+                    </span>
+                  </div>
+                  <h3 className="mt-2 font-display text-lg sm:text-xl font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-3">
+                    {featured.titulo_curto}
+                  </h3>
+                  {featured.resumo && (
+                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">{featured.resumo}</p>
                   )}
-                  <ExternalLink className="h-4 w-4 text-[hsl(var(--section-news))] opacity-0 transition-opacity group-hover:opacity-100" />
+                  <div className="mt-3 flex items-center gap-3 border-t border-border/40 pt-2 text-[11px] text-muted-foreground tabular-nums">
+                    <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {featured.reads_count}</span>
+                    <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3.5 w-3.5" /> {featured.likes_count}</span>
+                    <span className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
+                      Ler matéria <ExternalLink className="h-3 w-3" />
+                    </span>
+                  </div>
+                </button>
+              ) : (
+                <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                  Ainda não há {label.toLowerCase()} definida para o período.
                 </div>
-              </a>
-              <div className="absolute top-1.5 right-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                <NewsLikeButton noticiaId={item.id} count={likeCount} liked={isLiked(item.id)} onToggle={toggleLike} />
+              )}
+            </div>
+
+            {/* Top 5 da Semana */}
+            <div className="min-w-0">
+              <h3 className="mb-1 text-sm font-semibold text-foreground">Top 5 da Semana</h3>
+              <div>
+                {top5.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleRead(item)}
+                    className="w-full text-left group flex gap-3 py-2 border-b border-border/50 last:border-b-0 hover:bg-muted/40 rounded-md px-2 -mx-2 transition-colors"
+                  >
+                    <span className="w-6 shrink-0 font-display text-2xl font-bold leading-none tabular-nums text-primary/70">
+                      {item.position}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h4 className={cn("text-[13px] font-semibold leading-snug text-foreground line-clamp-2 group-hover:text-primary transition-colors")}>
+                        {item.titulo_curto}
+                      </h4>
+                      <div className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground">
+                        <span className="font-medium">{item.fonte}</span>
+                        <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {item.reads_count}</span>
+                        <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> {item.likes_count}</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+                {top5.length === 0 && (
+                  <p className="py-4 text-xs text-muted-foreground">Sem ranking suficiente nesta semana.</p>
+                )}
               </div>
             </div>
-          );
-        })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
