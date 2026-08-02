@@ -103,7 +103,7 @@ export function CuratedNewsFeed() {
             <p className="text-sm font-medium text-muted-foreground">Nenhuma notícia publicada ainda.</p>
           </div>
         ) : (
-          <div className="grid gap-4 @[56rem]:gap-6 grid-cols-1 @[56rem]:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] items-start min-w-0">
+          <div className="grid gap-4 @[42rem]:gap-5 grid-cols-1 @[42rem]:grid-cols-[minmax(0,62fr)_minmax(0,38fr)] items-start min-w-0">
             {/* Destaque do período */}
             <div className="min-w-0">
               {featured ? (
@@ -126,7 +126,7 @@ export function CuratedNewsFeed() {
                       {featured.fonte} · {formatRelative(featured.data_publicacao)}
                     </span>
                   </div>
-                  <h3 className="mt-2 font-display text-lg sm:text-xl font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-3">
+                  <h3 className="mt-2 font-display text-base @[42rem]:text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2">
                     {featured.titulo_curto}
                   </h3>
                   {featured.resumo && (

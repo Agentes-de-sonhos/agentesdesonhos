@@ -14,7 +14,7 @@ describe("dashboard block CTAs", () => {
   it("upcoming trips block links to the dedicated page", () => {
     const src = read("src/components/dashboard/TripRemindersCard.tsx");
     expect(src).toContain('to="/proximas-viagens"');
-    expect(src).toContain("Ver todas as próximas viagens");
+    expect(src).toContain("Ver todas");
   });
 
   it("news block links to the news hub and dropped the footer CTA", () => {

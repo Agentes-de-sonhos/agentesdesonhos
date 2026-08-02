@@ -1,20 +1,28 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useAgenda } from "@/hooks/useAgenda";
 import { SectionCtaLink } from "@/components/dashboard/SectionCtaLink";
+import { useAdaptivePageSize } from "@/hooks/useAdaptivePageSize";
 import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 
-const PAGE_SIZE = 8;
+/** Approximate rendered height of one compact agenda row (row + gap). */
+const ROW_HEIGHT = 60;
 
 export function UpcomingAgendaEventsCard() {
   const navigate = useNavigate();
   const { getUpcomingEvents, getFollowupEvents, isLoading } = useAgenda();
   const [page, setPage] = useState(0);
+  const { ref: listRef, pageSize } = useAdaptivePageSize<HTMLDivElement>({
+    rowHeight: ROW_HEIGHT,
+    min: 2,
+    max: 5,
+    fallback: 4,
+  });
 
   // Use local date components to avoid UTC shift
   const now = new Date();
@@ -46,10 +54,16 @@ export function UpcomingAgendaEventsCard() {
   }, [getUpcomingEvents, getFollowupEvents, todayStr]);
 
   const total = allUpcoming.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages - 1);
-  const startIdx = safePage * PAGE_SIZE;
-  const pageEvents = allUpcoming.slice(startIdx, startIdx + PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.max(0, Math.min(page, totalPages - 1));
+  const startIdx = safePage * pageSize;
+  const pageEvents = allUpcoming.slice(startIdx, startIdx + pageSize);
+
+  // Normalize the current page whenever the adaptive page size changes so the
+  // visible page is never empty after a resize.
+  useEffect(() => {
+    setPage((prev) => Math.max(0, Math.min(prev, totalPages - 1)));
+  }, [totalPages]);
 
   if (isLoading) {
     return (
@@ -96,8 +110,8 @@ export function UpcomingAgendaEventsCard() {
             </Button>
           </div>
         ) : (
-          <div className="flex-1 min-h-0 flex flex-col">
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-2 pr-1">
+          <div className="flex-1 min-h-0 flex flex-col @container">
+            <div ref={listRef} className="flex-1 min-h-0 overflow-hidden space-y-2">
             {pageEvents.map((event) => {
                // Parse date using local components to avoid UTC timezone shift
                const [y, m, d] = event.event_date.split('-').map(Number);
@@ -113,7 +127,7 @@ export function UpcomingAgendaEventsCard() {
               return (
                 <div
                   key={event.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-[hsl(var(--section-events))]/10 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 @[20rem]:gap-3 p-1.5 @[20rem]:p-2 rounded-lg hover:bg-[hsl(var(--section-events))]/10 transition-colors cursor-pointer overflow-hidden"
                   onClick={() => {
                     if (event.event_type === 'followup' && event.opportunity_id) {
                       navigate(`/gestao-clientes/funil?opportunity=${event.opportunity_id}`);
@@ -123,23 +137,19 @@ export function UpcomingAgendaEventsCard() {
                   }}
                 >
                   <div
-                    className="w-1 h-10 rounded-full flex-shrink-0"
+                    className="w-1 h-9 rounded-full flex-shrink-0"
                     style={{ backgroundColor: event.color }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{event.title}</p>
-                    {event.event_type === 'followup' && event.description && (
-                      <p
-                        className="text-xs text-foreground/80 mt-0.5 line-clamp-2"
-                        title={event.description}
-                      >
-                        {event.description}
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {format(eventDate, "EEEE, d 'de' MMM", { locale: ptBR })}
-                      {event.event_time && ` às ${event.event_time.slice(0, 5)}`}
+                    <p className="text-sm font-medium truncate whitespace-nowrap" title={event.title}>
+                      {event.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 whitespace-nowrap truncate">
+                      <Clock className="h-3 w-3 shrink-0" />
+                      <span className="truncate">
+                        {format(eventDate, "EEEE, d 'de' MMM", { locale: ptBR })}
+                        {event.event_time && ` às ${event.event_time.slice(0, 5)}`}
+                      </span>
                     </p>
                   </div>
                   <span
@@ -158,9 +168,9 @@ export function UpcomingAgendaEventsCard() {
             </div>
 
             {/* Pagination footer */}
-            <div className="pt-3 mt-1 border-t flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+            <div className="pt-2 mt-1 border-t flex flex-col @[26rem]:flex-row items-center justify-between gap-1 @[26rem]:gap-2 shrink-0">
               <p className="text-xs text-muted-foreground">
-                Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + PAGE_SIZE, total)}</span> de{" "}
+                Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + pageSize, total)}</span> de{" "}
                 <span className="font-medium text-foreground">{total}</span> atividades
               </p>
               <div className="flex items-center gap-1">
