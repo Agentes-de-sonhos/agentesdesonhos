@@ -83,6 +83,8 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     addComment,
     isAddingComment,
     deleteComment,
+    votePoll,
+    isVoting,
   } = useCommunityFeed();
 
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
@@ -160,6 +162,8 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 deleteComment={deleteComment}
                 isAddingComment={isAddingComment}
                 onOpenImage={(url) => setLightboxUrl(url)}
+                onVotePoll={votePoll}
+                isVoting={isVoting}
               />
             ))}
             {posts.length > PREVIEW_LIMIT && (
@@ -321,9 +325,11 @@ function PostCard({
         />
       )}
 
-      <div className="px-4 pt-2 min-w-0">
-        <PostPoll post={post} onVote={onVotePoll} isVoting={isVoting} />
-      </div>
+      {(post as any).poll && (
+        <div className="px-4 pt-2 min-w-0">
+          <PostPoll post={post} onVote={onVotePoll} isVoting={isVoting} />
+        </div>
+      )}
 
       {(post.likes_count > 0 || post.comments_count > 0) && (
         <div className="px-4 pt-2 flex items-center gap-3 text-xs text-muted-foreground">
