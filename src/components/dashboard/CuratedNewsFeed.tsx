@@ -37,8 +37,8 @@ function CategoryBadge({ categoria }: { categoria: string }) {
 
 function SectionHeader() {
   return (
-    <div className="mb-4 space-y-2">
-      <div className="flex items-start justify-between gap-3">
+    <div className="mb-4 space-y-2 min-w-0">
+      <div className="flex flex-col @[34rem]:flex-row @[34rem]:items-start @[34rem]:justify-between gap-2 @[34rem]:gap-3 min-w-0">
         <div className="w-fit">
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
             <Newspaper className="h-5 w-5 text-[hsl(var(--section-news))]" />
@@ -54,7 +54,7 @@ function SectionHeader() {
           className="text-[hsl(var(--section-news))]"
         />
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground max-w-2xl">
         O destaque do período e o Top 5 da semana, com a mesma curadoria da página completa.
       </p>
     </div>
@@ -83,8 +83,8 @@ export function CuratedNewsFeed() {
   const label = highlightLabel(data?.mode ?? "daily");
 
   return (
-    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
-      <CardContent className="pt-6">
+    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+      <CardContent className="pt-6 @container min-w-0">
         <SectionHeader />
 
         {isLoading ? (
@@ -103,7 +103,7 @@ export function CuratedNewsFeed() {
             <p className="text-sm font-medium text-muted-foreground">Nenhuma notícia publicada ainda.</p>
           </div>
         ) : (
-          <div className="grid gap-4 lg:gap-6 lg:grid-cols-[65fr_35fr] items-start">
+          <div className="grid gap-4 @[56rem]:gap-6 grid-cols-1 @[56rem]:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] items-start min-w-0">
             {/* Destaque do período */}
             <div className="min-w-0">
               {featured ? (

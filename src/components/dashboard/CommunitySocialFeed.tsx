@@ -100,8 +100,8 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const visiblePosts = posts.slice(0, PREVIEW_LIMIT);
 
   return (
-    <Card className="border-0 shadow-card">
-      <CardContent className="pt-5 pb-5 space-y-3">
+    <Card className="border-0 shadow-card overflow-hidden">
+      <CardContent className="pt-5 pb-5 space-y-3 min-w-0">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="w-fit">
@@ -124,6 +124,8 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           Compartilhe dúvidas, indicações, experiências e oportunidades com outros agentes de viagens.
         </p>
 
+        {/* Coluna central (padrão LinkedIn) */}
+        <div className="mx-auto w-full max-w-[780px] min-w-0 space-y-3">
         {/* Composer */}
         <CreatePostForm onSubmit={createPost} isCreating={isCreating} />
 
@@ -178,6 +180,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
             )}
           </div>
         )}
+        </div>
 
         {/* Lightbox */}
         <Dialog open={!!lightboxUrl} onOpenChange={(o) => !o && setLightboxUrl(null)}>

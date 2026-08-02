@@ -121,7 +121,7 @@ export function TripRemindersCard() {
 
   return (
     <>
-      <Card className="border-0 shadow-md h-full flex flex-col min-h-0">
+      <Card className="border-0 shadow-md h-full flex flex-col min-h-0 overflow-hidden">
         <CardContent className="pt-6 flex-1 min-h-0 flex flex-col">
           <div className="flex items-start justify-between gap-3 mb-4 flex-shrink-0">
             <div className="w-fit">
