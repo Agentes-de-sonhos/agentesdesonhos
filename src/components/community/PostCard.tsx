@@ -130,7 +130,10 @@ export function PostCard({
 
         {/* Content */}
         {post.content && (
-          <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{post.content}</p>
+          <LinkifiedText
+            text={post.content}
+            className="text-sm text-foreground whitespace-pre-line leading-relaxed break-words"
+          />
         )}
 
         {images.length > 0 && (
@@ -248,7 +251,10 @@ export function PostCard({
                           </Button>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{c.content}</p>
+                      <LinkifiedText
+                        text={c.content}
+                        className="text-xs text-muted-foreground whitespace-pre-line break-words"
+                      />
                     </div>
                   </div>
                 );
