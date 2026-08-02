@@ -72,11 +72,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 interface MenuItem {
   title: string;
@@ -774,49 +769,33 @@ export function AppSidebar() {
 
           {collapsed ? (
             <div className="flex flex-col items-center gap-[2px]">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    to="/suporte"
-                    className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
-                  >
-                    <Headset className="h-4 w-4" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                  <p className="text-sm font-medium">Suporte</p>
-                </TooltipContent>
-              </Tooltip>
+              <Link
+                to="/suporte"
+                aria-label="Suporte"
+                onClick={(e) => { e.preventDefault(); expandNow(); }}
+                className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+              >
+                <Headset className="h-4 w-4" />
+              </Link>
               {!isFornecedor && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to="/minha-conta"
-                      className="flex items-center justify-center rounded-lg p-1 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
-                    >
-                      <Settings className="h-4 w-4" />
-                    </Link>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                    <p className="text-sm font-medium">Minha Conta</p>
-                  </TooltipContent>
-                </Tooltip>
+                <Link
+                  to="/minha-conta"
+                  aria-label="Minha Conta"
+                  onClick={(e) => { e.preventDefault(); expandNow(); }}
+                  className="flex items-center justify-center rounded-lg p-1 text-muted-foreground"
+                >
+                  <Settings className="h-4 w-4" />
+                </Link>
               )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="w-full h-6 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                  <p className="text-sm font-medium">Sair</p>
-                </TooltipContent>
-              </Tooltip>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Sair"
+                className="w-full h-6 rounded-lg text-muted-foreground hover:bg-transparent hover:text-muted-foreground"
+                onClick={expandNow}
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           ) : (
             <>
