@@ -39,15 +39,15 @@ describe("dashboard block CTAs", () => {
 
   it("community block opens its own internal window", () => {
     const src = read("src/components/dashboard/CommunitySocialFeed.tsx");
-    expect(src).toContain("SectionCtaLink");
+    expect(src).toContain("DashboardSectionHeader");
     expect(src).toContain('to="/comunidade"');
     expect(src).toContain('tabTitle="Comunidade"');
   });
 
-  it("academy block opens its own internal window on desktop and mobile", () => {
+  it("academy block opens its own internal window from the section header", () => {
     const src = read("src/components/dashboard/AcademyCollapsibleCard.tsx");
     const matches = src.match(/tabTitle="EducaTravel Academy"/g) ?? [];
-    expect(matches).toHaveLength(2);
+    expect(matches).toHaveLength(1);
     expect(src).not.toContain('onClick={() => navigate("/educa-academy")}');
   });
 });
