@@ -531,11 +531,14 @@ export function AppSidebar() {
       <Link
         key={item.url}
         to={isLocked ? "#" : item.url}
+        aria-label={collapsed ? item.title : undefined}
         onClick={(e) => handleMenuClick(item, e)}
         className={cn(
           "group flex items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-300",
           collapsed ? "py-1" : "py-1.5",
-          sectionStyle
+          collapsed
+            ? cn("text-sidebar-foreground", isLocked && "opacity-60")
+            : sectionStyle
             ? isActive && !isLocked
               ? cn(sectionStyle.headerBg, sectionStyle.headerHoverBg, "font-semibold")
               : isLocked
@@ -582,17 +585,6 @@ export function AppSidebar() {
         )}
       </Link>
     );
-
-    if (collapsed) {
-      return (
-        <Tooltip key={item.url}>
-          <TooltipTrigger asChild>{menuLink}</TooltipTrigger>
-          <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-            <p className="text-sm font-medium">{item.title}</p>
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
 
     return menuLink;
   };
