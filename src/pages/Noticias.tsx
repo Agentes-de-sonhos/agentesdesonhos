@@ -40,6 +40,9 @@ type Noticia = {
 
 type RankingRow = Top5Item;
 
+/** Card/leitura aceitam qualquer notícia com os campos de exibição. */
+type NewsCardItem = Omit<Noticia, "status" | "hidden">;
+
 /* ── Categorias ──────────────────────────────────────────── */
 const CATEGORIAS = [
   "Aéreo",
