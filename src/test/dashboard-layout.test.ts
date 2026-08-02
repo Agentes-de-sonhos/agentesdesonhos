@@ -8,16 +8,17 @@ const news = read("src/components/dashboard/CuratedNewsFeed.tsx");
 describe("dashboard layout restructure", () => {
   it("keeps only the agenda + upcoming trips row in two columns", () => {
     const twoColRows = dashboard.match(/lg:grid-cols-2/g) ?? [];
-    const agendaRows = dashboard.match(/lg:grid-cols-2 items-stretch[^"]*clamp\(380px,60vh,760px\)|items-stretch order-2 lg:h-\[clamp/g) ?? [];
-    expect(agendaRows.length).toBeGreaterThan(0);
+    expect(dashboard).toContain("lg:h-[min(60vh,760px)]");
     // every remaining two-column row belongs to sections outside the reorganized blocks
     expect(twoColRows.length).toBeGreaterThan(0);
   });
 
-  it("limits the first row to 60vh on desktop with a clamped minimum (no min/max conflict)", () => {
-    expect(dashboard).toContain("lg:h-[clamp(380px,60vh,760px)]");
+  it("limits the first row to a real 60vh ceiling on desktop (no min that can exceed 60vh)", () => {
+    expect(dashboard).toContain("lg:h-[min(60vh,760px)]");
+    expect(dashboard).not.toContain("clamp(380px,60vh,760px)");
+    expect(dashboard).not.toContain("clamp(380px");
     expect(dashboard).not.toContain("lg:max-h-[60vh]");
-    expect(dashboard).not.toContain("lg:min-h-[380px]");
+    expect(dashboard).not.toMatch(/lg:min-h-\[\d+(px|vh|rem)\]/);
   });
 
   it("wraps first-row cards so nothing leaks outside the card", () => {
