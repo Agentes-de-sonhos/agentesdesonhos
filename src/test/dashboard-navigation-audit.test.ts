@@ -30,7 +30,6 @@ describe("dashboard navigation audit", () => {
 
   it("keeps individual news links external with a safe rel", () => {
     const news = readFileSync("src/components/dashboard/CuratedNewsFeed.tsx", "utf8");
-    expect(news).toContain('target="_blank"');
-    expect(news).toContain('rel="noopener noreferrer"');
+    expect(news).toContain('window.open(item.url_original, "_blank", "noopener,noreferrer")');
   });
 });

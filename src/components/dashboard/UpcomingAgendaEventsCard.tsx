@@ -53,7 +53,7 @@ export function UpcomingAgendaEventsCard() {
 
   if (isLoading) {
     return (
-      <Card className="border-0 shadow-card">
+      <Card className="border-0 shadow-card h-full">
         <CardContent className="flex items-center justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </CardContent>
@@ -62,8 +62,8 @@ export function UpcomingAgendaEventsCard() {
   }
 
   return (
-    <Card className="border-0 shadow-card">
-      <CardHeader className="pb-2">
+    <Card className="border-0 shadow-card h-full flex flex-col min-h-0">
+      <CardHeader className="pb-2 flex-shrink-0">
         <div className="flex items-start justify-between gap-3">
           <div className="w-fit">
             <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
@@ -81,7 +81,7 @@ export function UpcomingAgendaEventsCard() {
           />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 min-h-0 flex flex-col">
         {total === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -96,7 +96,8 @@ export function UpcomingAgendaEventsCard() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
             {pageEvents.map((event) => {
                // Parse date using local components to avoid UTC timezone shift
                const [y, m, d] = event.event_date.split('-').map(Number);
@@ -154,9 +155,10 @@ export function UpcomingAgendaEventsCard() {
                 </div>
               );
             })}
+            </div>
 
             {/* Pagination footer */}
-            <div className="pt-3 mt-1 border-t flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="pt-3 mt-1 border-t flex flex-col sm:flex-row items-center justify-between gap-2 flex-shrink-0">
               <p className="text-xs text-muted-foreground">
                 Mostrando <span className="font-medium text-foreground">{startIdx + 1}–{Math.min(startIdx + PAGE_SIZE, total)}</span> de{" "}
                 <span className="font-medium text-foreground">{total}</span> atividades
