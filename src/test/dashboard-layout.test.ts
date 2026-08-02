@@ -8,15 +8,25 @@ const news = read("src/components/dashboard/CuratedNewsFeed.tsx");
 describe("dashboard layout restructure", () => {
   it("keeps only the agenda + upcoming trips row in two columns", () => {
     const twoColRows = dashboard.match(/lg:grid-cols-2/g) ?? [];
-    const agendaRows = dashboard.match(/lg:grid-cols-2 items-stretch[^"]*lg:max-h-\[60vh\]|items-stretch order-2 lg:max-h-\[60vh\]/g) ?? [];
+    const agendaRows = dashboard.match(/lg:grid-cols-2 items-stretch[^"]*clamp\(380px,60vh,760px\)|items-stretch order-2 lg:h-\[clamp/g) ?? [];
     expect(agendaRows.length).toBeGreaterThan(0);
     // every remaining two-column row belongs to sections outside the reorganized blocks
     expect(twoColRows.length).toBeGreaterThan(0);
   });
 
-  it("limits the first row to 60vh on desktop with a sensible minimum", () => {
-    expect(dashboard).toContain("lg:max-h-[60vh]");
-    expect(dashboard).toContain("lg:min-h-[380px]");
+  it("limits the first row to 60vh on desktop with a clamped minimum (no min/max conflict)", () => {
+    expect(dashboard).toContain("lg:h-[clamp(380px,60vh,760px)]");
+    expect(dashboard).not.toContain("lg:max-h-[60vh]");
+    expect(dashboard).not.toContain("lg:min-h-[380px]");
+  });
+
+  it("wraps first-row cards so nothing leaks outside the card", () => {
+    expect(dashboard).toContain("min-h-0 lg:h-full overflow-hidden [&>*]:h-full [&>*]:min-h-0");
+    const agenda = read("src/components/dashboard/UpcomingAgendaEventsCard.tsx");
+    const trips = read("src/components/dashboard/TripRemindersCard.tsx");
+    expect(agenda).toContain("min-h-0 overflow-hidden");
+    expect(agenda).toContain('className="pb-2 shrink-0"');
+    expect(trips).toContain("min-h-0 overflow-hidden");
   });
 
   it("renders news, community, academy and tourism map as full-width rows", () => {
@@ -77,8 +87,10 @@ describe("Notícias do Trade block", () => {
     expect(news).not.toContain('from("noticias_dashboard")');
   });
 
-  it("shows the featured item and Top 5 positions side by side (65/35)", () => {
-    expect(news).toContain("lg:grid-cols-[65fr_35fr]");
+  it("shows the featured item and Top 5 side by side based on container width (65/35)", () => {
+    expect(news).toContain("@container");
+    expect(news).toContain("@[56rem]:grid-cols-[minmax(0,65fr)_minmax(0,35fr)]");
+    expect(news).not.toContain("lg:grid-cols-[65fr_35fr]");
     expect(news).toContain("Top 5 da Semana");
     expect(news).toContain("{item.position}");
   });
@@ -86,5 +98,23 @@ describe("Notícias do Trade block", () => {
   it("registers the read and opens the original URL", () => {
     expect(news).toContain('register_news_read');
     expect(news).toContain('window.open(item.url_original, "_blank", "noopener,noreferrer")');
+  });
+});
+
+describe("Comunidade e Academy no dashboard", () => {
+  const community = read("src/components/dashboard/CommunitySocialFeed.tsx");
+  const academy = read("src/components/dashboard/AcademyCollapsibleCard.tsx");
+
+  it("keeps the community feed in a single centered column", () => {
+    expect(community).toContain('mx-auto w-full max-w-[780px]');
+    expect(community).not.toContain("lg:grid-cols-2");
+  });
+
+  it("renders academy trails as vertical cards (image on top, CTA at bottom)", () => {
+    expect(academy).toContain('flex flex-col h-full min-w-0');
+    expect(academy).not.toContain("@[48rem]:flex-row");
+    expect(academy).toContain("aspect-video shrink-0");
+    expect(academy).toContain("mt-auto space-y-3");
+    expect(academy).toContain("grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))]");
   });
 });
