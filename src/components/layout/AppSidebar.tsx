@@ -665,89 +665,14 @@ export function AppSidebar() {
     if (collapsed) {
       return (
         <nav key={section.title} className="flex flex-col gap-[2px] px-3">
-          <Popover>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <button
-                    className={cn(
-                      "group flex items-center justify-center rounded-xl px-3 py-1 transition-all duration-300 w-full",
-                      isActive
-                        ? cn(section.headerBg)
-                        : cn("text-sidebar-foreground", section.hoverColor)
-                    )}
-                  >
-                    <Icon className="h-5 w-5 flex-shrink-0 transition-all duration-300 group-hover:scale-110" />
-                  </button>
-                </PopoverTrigger>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="bg-popover text-popover-foreground border shadow-lg px-3 py-2">
-                <p className="text-sm font-medium">{section.title}</p>
-              </TooltipContent>
-            </Tooltip>
-            <PopoverContent side="right" align="start" className="w-64 p-2" sideOffset={8}>
-              <p className={cn(
-                "text-[11px] font-bold uppercase tracking-wider px-2 py-1.5 rounded-lg whitespace-nowrap",
-                section.headerBg
-              )}>
-                {section.title}
-              </p>
-              <nav className="flex flex-col gap-0.5 mt-1">
-                {section.items
-                  .filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key)))
-                  .flatMap((item) =>
-                    item.children
-                      ? [
-                          { item, depth: 0, isGroupLabel: true as const },
-                          ...item.children.map((child) => ({ item: child, depth: 1, isGroupLabel: false as const })),
-                        ]
-                      : [{ item, depth: 0, isGroupLabel: false as const }]
-                  )
-                  .map(({ item, depth, isGroupLabel }) => {
-                  if (isGroupLabel) {
-                    return (
-                      <p
-                        key={`group-${item.key}`}
-                        className="flex items-center gap-2 px-2 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
-                      >
-                        <item.icon className="h-3.5 w-3.5" />
-                        {item.title}
-                      </p>
-                    );
-                  }
-                  const itemActive = isItemActive(item.url, item.exactUrl);
-                  const isLockedByFeature = item.requiredFeature && !hasFeature(item.requiredFeature);
-                  const isLockedByCartao = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
-                  const isLockedByEduca = isEducaPass && item.url !== "/educa-academy";
-                  const isLocked = isLockedByFeature || isLockedByCartao || isLockedByEduca;
-                  return (
-                    <Link
-                      key={item.url}
-                      to={isLocked ? "#" : item.url}
-                      onClick={(e) => handleMenuClick(item, e)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-all duration-200",
-                        depth > 0 && "ml-3 text-[13px]",
-                        itemActive && !isLocked
-                          ? cn(section.bgColor, section.textColor, "border-l-[3px]", section.borderColor, "font-semibold")
-                          : isLocked
-                            ? "opacity-60 cursor-pointer hover:opacity-70"
-                            : cn(section.bgColor, section.textColor, "hover:scale-[1.02] hover:font-semibold"),
-                      )}
-                    >
-                      <div className="relative flex-shrink-0">
-                        <item.icon className="h-4 w-4" />
-                        {isLocked && (
-                          <Lock className="h-2 w-2 absolute -top-0.5 -right-0.5 text-warning" />
-                        )}
-                      </div>
-                      <span className="truncate flex-1">{item.title}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </PopoverContent>
-          </Popover>
+          <button
+            type="button"
+            aria-label={section.title}
+            onClick={expandNow}
+            className="flex items-center justify-center rounded-xl px-3 py-1 w-full text-sidebar-foreground"
+          >
+            <Icon className="h-5 w-5 flex-shrink-0" />
+          </button>
         </nav>
       );
     }
