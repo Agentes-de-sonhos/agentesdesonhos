@@ -597,42 +597,9 @@ export default function Noticias() {
           </div>
         )}
 
-        {/* View: Destaques do Trade */}
-        {view === "destaques" && filtered.length > 0 && (
-          <div className="space-y-10">
-            {/* Notícia do Dia/Semana (65%) + Top 5 (35%) */}
-            {topOne && (
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(0,35fr)] gap-6">
-                <NewsCard
-                  item={topOne}
-                  variant="feature"
-                  featuredLabel={featuredLabel}
-                  onRead={handleRead}
-                  onLike={toggleLike}
-                  liked={isLiked(topOne.id)}
-                  likeCount={getLikeCount(topOne.id) || topOne.likes_count}
-                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                  isAdmin={isAdmin}
-                />
-                <aside className="rounded-lg border border-border/60 bg-card p-4 md:p-5">
-                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
-                    <TrendingUp className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-display font-bold text-foreground">{top5Label}</h3>
-                  </div>
-                  <div className="flex flex-col">
-                    {topRest.map((r) => (
-                      <RankingItem key={r.id} item={r} position={r.rank_position} onRead={handleRead} />
-                    ))}
-                    {topRest.length === 0 && (
-                      <p className="text-xs text-muted-foreground py-4">
-                        Ainda não há dados suficientes para o ranking. Acesse e curta notícias para influenciar o Top {top5Label.includes("Semana") ? 5 : 5}.
-                      </p>
-                    )}
-                  </div>
-                </aside>
-              </div>
-            )}
-
+        {/* Listagem única: exploração por categoria, destaques por categoria e todas as notícias */}
+        {filtered.length > 0 && (
+          <div id="todas-as-noticias" className="space-y-10 scroll-mt-24">
             {/* Explorar por categoria */}
             <section>
               <h3 className="text-sm font-display font-bold text-foreground mb-2">Explorar por categoria</h3>
@@ -644,7 +611,7 @@ export default function Noticias() {
                     <button
                       key={cat}
                       type="button"
-                      onClick={() => { setCategoriaFilter(cat); setView("todas"); }}
+                      onClick={() => setCategoriaFilter(cat)}
                       className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card hover:bg-muted hover:border-primary/40 px-3 py-1.5 text-xs transition-colors"
                     >
                       <span>{cat}</span>
@@ -655,44 +622,12 @@ export default function Noticias() {
               </div>
             </section>
 
-            {/* Últimas notícias — cronológico */}
-            {filtered.length > 0 && (
-              <section className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-display font-bold text-foreground">Últimas notícias</h3>
-                  <Button
-                    size="sm"
-                    variant="link"
-                    className="ml-auto h-auto p-0 text-xs"
-                    onClick={() => { setOrderBy("recent"); setView("todas"); }}
-                  >
-                    Ver todas →
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 @lg:grid-cols-2 @4xl:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {filtered.slice(0, 6).map((item) => (
-                    <NewsCard
-                      key={item.id}
-                      item={item}
-                      onRead={handleRead}
-                      onLike={toggleLike}
-                      liked={isLiked(item.id)}
-                      likeCount={getLikeCount(item.id) || item.likes_count}
-                      onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                      isAdmin={isAdmin}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* Notícias organizadas por categoria — no máximo 4 por seção */}
             {CATEGORIAS.map((cat) => {
               const items = byCategory.get(cat) ?? [];
               if (items.length === 0) return null;
-              const sorted = [...items].sort(
-                (a, b) => (b.reads_count + b.likes_count * 2) - (a.reads_count + a.likes_count * 2)
-              );
+              // Destaque da categoria = maior engajamento (visualizações + curtidas)
+              const sorted = sortByEngagement(items);
               const visible = categoryVisibleCounts[cat] ?? 8;
               const preview = sorted.slice(0, visible);
               const remaining = sorted.length - preview.length;
@@ -740,33 +675,32 @@ export default function Noticias() {
                 </section>
               );
             })}
-          </div>
-        )}
 
-        {/* View: Todas */}
-        {view === "todas" && ordered.length > 0 && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {ordered.slice(0, visibleCount).map((item) => (
-                <NewsCard
-                  key={item.id}
-                  item={item}
-                  onRead={handleRead}
-                  onLike={toggleLike}
-                  liked={isLiked(item.id)}
-                  likeCount={getLikeCount(item.id) || item.likes_count}
-                  onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                  isAdmin={isAdmin}
-                />
-              ))}
-            </div>
-            {visibleCount < ordered.length && (
-              <div className="flex justify-center pt-4">
-                <Button variant="outline" onClick={() => setVisibleCount((c) => c + 20)}>
-                  Carregar mais notícias
-                </Button>
+            {/* Todas as notícias */}
+            <section className="space-y-3">
+              <h3 className="text-sm font-display font-bold text-foreground">Todas as notícias</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                {ordered.slice(0, visibleCount).map((item) => (
+                  <NewsCard
+                    key={item.id}
+                    item={item}
+                    onRead={handleRead}
+                    onLike={toggleLike}
+                    liked={isLiked(item.id)}
+                    likeCount={getLikeCount(item.id) || item.likes_count}
+                    onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
+                    isAdmin={isAdmin}
+                  />
+                ))}
               </div>
-            )}
+              {visibleCount < ordered.length && (
+                <div className="flex justify-center pt-4">
+                  <Button variant="outline" onClick={() => setVisibleCount((c) => c + 20)}>
+                    Carregar mais notícias
+                  </Button>
+                </div>
+              )}
+            </section>
           </div>
         )}
       </div>
