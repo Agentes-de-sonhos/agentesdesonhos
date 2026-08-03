@@ -163,7 +163,7 @@ function AgentHoverCard({
   return (
     <HoverCard open={open} onOpenChange={setOpen} openDelay={300} closeDelay={200}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
-      <HoverCardContent side="bottom" align="center" className="w-64 p-3">
+      <HoverCardContent side="bottom" align="center" className="w-80 p-3">
         <div className="flex items-start gap-3">
           <Avatar className="h-12 w-12 border border-border">
             <AvatarImage src={agent.avatar_url || undefined} alt={agent.name} />
