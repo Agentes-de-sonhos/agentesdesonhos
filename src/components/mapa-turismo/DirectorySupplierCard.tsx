@@ -97,8 +97,7 @@ export function DirectorySupplierCard({
             category={category}
             className={cn(
               "transition-transform duration-300 group-hover:scale-105",
-              highlighted &&
-                "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/60 dark:to-amber-950 ring-amber-200/50 dark:ring-amber-700/50",
+              highlighted && "border-amber-300 dark:border-amber-700/70",
             )}
             iconClassName={highlighted ? "text-amber-600 dark:text-amber-400" : undefined}
           />
@@ -110,20 +109,10 @@ export function DirectorySupplierCard({
 
         {children}
 
-        {/* Especialidades — todas visíveis, sem limite nem "+N" */}
+        {/* Especialidades — paleta compartilhada com o perfil, no máximo 3 linhas visuais */}
         {specialtyTags.length > 0 && (
-          <div data-testid="directory-supplier-specialties" className="mt-3 flex flex-wrap gap-1.5">
-            {specialtyTags.map((tag) => (
-              <span
-                key={tag}
-                className={cn(
-                  "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border break-words",
-                  theme.chip,
-                )}
-              >
-                {tag}
-              </span>
-            ))}
+          <div data-testid="directory-supplier-specialties" className="mt-3">
+            <SpecialtyList specialties={specialtyTags} variant="card" maxLines={3} />
           </div>
         )}
 
