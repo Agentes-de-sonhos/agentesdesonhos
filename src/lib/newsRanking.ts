@@ -159,3 +159,16 @@ export function mergeTop5<T extends { id: string }>(
 
   return [...taken.values()].sort((a, b) => a.position - b.position);
 }
+/** Hora local (SP) a partir da qual as notícias entram na janela do dia. */
+export const NEWS_DAY_START_HOUR = 7;
+
+/**
+ * Janela diária do Radar: mesmo dia local (America/Sao_Paulo) da referência e
+ * publicada entre 07:00:00 e 23:59:59 (fuso de SP, nunca UTC/navegador).
+ */
+export function isWithinNewsDayWindow(publishedAt: string, ref: Date = new Date()): boolean {
+  const d = new Date(publishedAt);
+  if (Number.isNaN(+d)) return false;
+  if (spDateKey(d) !== spDateKey(ref)) return false;
+  return spParts(d).hour >= NEWS_DAY_START_HOUR;
+}
