@@ -86,15 +86,14 @@ describe("DirectorySupplierCard", () => {
     expect(screen.getByTestId("directory-supplier-logo-fallback")).toBeTruthy();
   });
 
-  it("renderiza TODAS as especialidades, inclusive mais de 10, sem +N nem corte", () => {
+  it("renderiza TODAS as especialidades sem +N, limitando apenas a altura a 3 linhas visuais", () => {
     const specialties = Array.from({ length: 14 }, (_, i) => `Especialidade ${i + 1}`);
     renderCard({ specialties });
-    const wrap = screen.getByTestId("directory-supplier-specialties");
-    expect(wrap.children).toHaveLength(14);
-    expect(wrap.className).toContain("flex-wrap");
-    expect(wrap.className).not.toContain("overflow-hidden");
-    expect(wrap.className).not.toContain("line-clamp");
-    expect(wrap.className).not.toContain("max-h");
+    const list = screen.getByTestId("specialty-list");
+    expect(list.querySelectorAll("[data-specialty]")).toHaveLength(14);
+    expect(list.className).toContain("flex-wrap");
+    expect(list.className).not.toContain("line-clamp");
+    expect(list.getAttribute("data-max-lines")).toBe("3");
     specialties.forEach((s) => expect(screen.getByText(s)).toBeTruthy());
     expect(screen.queryByText(/^\+\d+$/)).toBeNull();
   });
