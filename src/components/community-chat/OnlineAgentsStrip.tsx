@@ -95,10 +95,10 @@ export function AgentActions({
   })();
 
   const ConnectIcon = connectProps.icon;
-  const btn = `h-7 px-2 text-[11px] gap-1 min-w-0 ${compact ? "" : "flex-1"}`;
+  const btn = `h-7 px-2 text-[11px] gap-1.5 whitespace-nowrap ${compact ? "min-w-fit" : "flex-1 min-w-fit"}`;
 
   return (
-    <div className={`flex flex-wrap items-center gap-1.5 ${compact ? "" : "mt-3"}`}>
+    <div className={`flex items-center gap-1.5 ${compact ? "flex-wrap" : "flex-nowrap"} ${compact ? "" : "mt-3"}`}>
       <Button
         size="sm"
         variant="default"
@@ -110,7 +110,7 @@ export function AgentActions({
         }}
       >
         <User className="h-3.5 w-3.5" />
-        <span className="truncate">Perfil</span>
+        <span>Perfil</span>
       </Button>
       <Button
         size="sm"
@@ -128,7 +128,7 @@ export function AgentActions({
         ) : (
           <MessageCircle className="h-3.5 w-3.5" />
         )}
-        <span className="truncate">Mensagem</span>
+        <span>Mensagem</span>
       </Button>
       <Button
         size="sm"
@@ -142,7 +142,7 @@ export function AgentActions({
         }}
       >
         <ConnectIcon className="h-3.5 w-3.5" />
-        <span className="truncate">{connectProps.label}</span>
+        <span>{connectProps.label}</span>
       </Button>
     </div>
   );
