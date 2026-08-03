@@ -12,6 +12,7 @@ import {
 import { LANGUAGE_LEVELS } from "@/i18n/cadastroGuia";
 import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
 import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
+import { SpecialtyList } from "@/components/mapa-turismo/SpecialtyChip";
 
 const levelLabel = (lv: string) => LANGUAGE_LEVELS.find((l) => l.value === lv)?.label || lv;
 
