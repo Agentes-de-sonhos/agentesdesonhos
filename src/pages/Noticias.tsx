@@ -333,7 +333,6 @@ export default function Noticias() {
   const [viewMode, setViewMode] = useState<"day" | "category">("day");
   const [portalFilter, setPortalFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<"recent" | "reads" | "likes" | "score">("recent");
-  const [visibleCount, setVisibleCount] = useState(20);
   const [categoryVisibleCounts, setCategoryVisibleCounts] = useState<Record<string, number>>({});
 
   // Reset per-category counts when filters change
@@ -443,13 +442,13 @@ export default function Noticias() {
   /* Notícias por categoria — destaque de cada categoria pelo score de engajamento */
   const byCategory = useMemo(() => {
     const map = new Map<string, Noticia[]>();
-    for (const n of filtered) {
+    for (const n of ordered) {
       const arr = map.get(n.categoria) ?? [];
       arr.push(n);
       map.set(n.categoria, arr);
     }
     return map;
-  }, [filtered]);
+  }, [ordered]);
 
   const highlights = highlightsQuery.data;
   const featured = highlights?.featured ?? null;
@@ -626,17 +625,6 @@ export default function Noticias() {
               className="pl-9 h-9"
             />
           </div>
-          <Select value={categoriaFilter} onValueChange={setCategoriaFilter}>
-            <SelectTrigger className="h-9 w-[190px]">
-              <SelectValue placeholder="Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as categorias</SelectItem>
-              {CATEGORIAS.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Select value={portalFilter} onValueChange={setPortalFilter}>
             <SelectTrigger className="h-9 w-[170px]">
               <SelectValue placeholder="Portal" />
@@ -687,7 +675,7 @@ export default function Noticias() {
               const items = byCategory.get(cat) ?? [];
               if (items.length === 0) return null;
               // Destaque da categoria = maior engajamento (visualizações + curtidas)
-              const sorted = sortByEngagement(items);
+              const sorted = orderBy === "score" ? sortByEngagement(items) : items;
               const visible = categoryVisibleCounts[cat] ?? 8;
               const preview = sorted.slice(0, visible);
               const remaining = sorted.length - preview.length;
@@ -736,31 +724,6 @@ export default function Noticias() {
               );
             })}
 
-            {/* Todas as notícias */}
-            <section className="space-y-3">
-              <h3 className="text-sm font-display font-bold text-foreground">Todas as notícias</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                {ordered.slice(0, visibleCount).map((item) => (
-                  <NewsCard
-                    key={item.id}
-                    item={item}
-                    onRead={handleRead}
-                    onLike={toggleLike}
-                    liked={isLiked(item.id)}
-                    likeCount={getLikeCount(item.id) || item.likes_count}
-                    onHide={isAdmin ? (id) => hideMutation.mutate(id) : undefined}
-                    isAdmin={isAdmin}
-                  />
-                ))}
-              </div>
-              {visibleCount < ordered.length && (
-                <div className="flex justify-center pt-4">
-                  <Button variant="outline" onClick={() => setVisibleCount((c) => c + 20)}>
-                    Carregar mais notícias
-                  </Button>
-                </div>
-              )}
-            </section>
           </div>
         )}
       </div>
