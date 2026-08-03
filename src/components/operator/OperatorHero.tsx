@@ -11,6 +11,8 @@ interface OperatorHeroProps {
   totalReviews?: number;
   onReviewClick?: () => void;
   hideRating?: boolean;
+  /** Categoria canônica do diretório para a moldura temática (default: `category`). */
+  themeCategory?: string | null;
 }
 
 export function OperatorHero({
@@ -21,8 +23,9 @@ export function OperatorHero({
   totalReviews = 0,
   onReviewClick,
   hideRating = false,
+  themeCategory,
 }: OperatorHeroProps) {
-  const theme = getDirectoryCategoryTheme(category);
+  const theme = getDirectoryCategoryTheme(themeCategory ?? category);
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-border/60 p-8 sm:p-10">
       {/* Decorative elements */}
@@ -35,7 +38,7 @@ export function OperatorHero({
           <SupplierLogoFrame
             name={name}
             logoUrl={logoUrl}
-            category={category}
+            category={themeCategory ?? category}
             className="h-20 w-20 rounded-2xl"
             testId="operator-hero-logo"
             fallback={
