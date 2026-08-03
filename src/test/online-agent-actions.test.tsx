@@ -98,4 +98,17 @@ describe("AgentActions (online users popover)", () => {
     setup();
     expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
+
+  it("renders full button labels without truncation classes", () => {
+    const { container } = render(<AgentActions agent={agent} onMessage={vi.fn()} onViewProfile={vi.fn()} />);
+    const labels = ["Perfil", "Mensagem", "Conectar"];
+    labels.forEach((label) => {
+      const el = screen.getByText(label);
+      expect(el).toBeTruthy();
+      expect(el.className).not.toMatch(/truncate|line-clamp/);
+      expect(el.className).toMatch(/whitespace-nowrap/);
+    });
+    const buttonContainer = container.querySelector("div.flex.items-center.gap-1\\.5");
+    expect(buttonContainer?.className).not.toMatch(/truncate|line-clamp/);
+  });
 });
