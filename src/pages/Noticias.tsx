@@ -19,7 +19,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
 import { useNewsHighlights, type Top5Item } from "@/hooks/useNewsHighlights";
-import { highlightLabel, sortByEngagement } from "@/lib/newsRanking";
+import { highlightLabel, sortByEngagement, isWithinNewsDayWindow } from "@/lib/newsRanking";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 import { cn } from "@/lib/utils";
 
@@ -330,6 +330,7 @@ export default function Noticias() {
 
   const [search, setSearch] = useState("");
   const [categoriaFilter, setCategoriaFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"day" | "category">("day");
   const [portalFilter, setPortalFilter] = useState<string>("all");
   const [orderBy, setOrderBy] = useState<"recent" | "reads" | "likes" | "score">("recent");
   const [visibleCount, setVisibleCount] = useState(20);
@@ -338,7 +339,12 @@ export default function Noticias() {
   // Reset per-category counts when filters change
   useEffect(() => {
     setCategoryVisibleCounts({});
-  }, [search, categoriaFilter, portalFilter, orderBy]);
+  }, [search, categoriaFilter, portalFilter, orderBy, viewMode]);
+
+  const selectDayMode = useCallback(() => {
+    setViewMode("day");
+    setCategoriaFilter("all");
+  }, []);
 
   /* Feed principal — últimas notícias */
   const feedQuery = useQuery({
@@ -397,10 +403,25 @@ export default function Noticias() {
     onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
   });
 
+  /* Janela diária (America/Sao_Paulo, 07:00–23:59:59 do dia atual) */
+  const dayNews = useMemo(
+    () => news.filter((n) => isWithinNewsDayWindow(n.data_publicacao)),
+    [news]
+  );
+
+  /* Categorias disponíveis no dia — derivadas dinamicamente dos dados */
+  const dayCategories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const n of dayNews) counts.set(n.categoria, (counts.get(n.categoria) ?? 0) + 1);
+    return [...counts.entries()]
+      .filter(([, c]) => c > 0)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [dayNews]);
+
   /* Filtragem + busca */
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return news.filter((n) => {
+    return dayNews.filter((n) => {
       if (categoriaFilter !== "all" && n.categoria !== categoriaFilter) return false;
       if (portalFilter !== "all" && n.fonte !== portalFilter) return false;
       if (q) {
@@ -409,7 +430,7 @@ export default function Noticias() {
       }
       return true;
     });
-  }, [news, search, categoriaFilter, portalFilter]);
+  }, [dayNews, search, categoriaFilter, portalFilter]);
 
   const ordered = useMemo(() => {
     const arr = [...filtered];
@@ -537,6 +558,63 @@ export default function Noticias() {
           )
         )}
 
+        {/* Seletor do dia: Todas do dia × Explorar por categoria */}
+        <section data-testid="news-day-selector" className="space-y-3">
+          <div data-testid="news-day-mode-group" className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={selectDayMode}
+              aria-pressed={viewMode === "day"}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+                viewMode === "day"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              )}
+            >
+              <Newspaper className="h-3.5 w-3.5" /> Todas do dia
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("category")}
+              aria-pressed={viewMode === "category"}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+                viewMode === "category"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              )}
+            >
+              <Filter className="h-3.5 w-3.5" /> Explorar por categoria
+            </button>
+          </div>
+
+          {viewMode === "category" && dayCategories.length > 0 && (
+            <div data-testid="news-day-categories" className="flex flex-wrap gap-2">
+              {dayCategories.map(([cat, count]) => {
+                const active = categoriaFilter === cat;
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setCategoriaFilter(active ? "all" : cat)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors",
+                      active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/60 bg-card hover:bg-muted hover:border-primary/40"
+                    )}
+                  >
+                    <span>{cat}</span>
+                    <span className="text-muted-foreground tabular-nums">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         {/* Filtros */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative flex-1 min-w-[200px] max-w-md">
@@ -593,35 +671,17 @@ export default function Noticias() {
         {!feedQuery.isLoading && filtered.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             <Newspaper className="h-10 w-10 mx-auto mb-3 opacity-40" />
-            <p className="text-sm">Nenhuma notícia encontrada com estes filtros.</p>
+            <p className="text-sm">
+              {dayNews.length === 0
+                ? "Ainda não há notícias publicadas hoje a partir das 07:00. Volte mais tarde — a próxima coleta já está agendada."
+                : "Nenhuma notícia encontrada com estes filtros."}
+            </p>
           </div>
         )}
 
         {/* Listagem única: exploração por categoria, destaques por categoria e todas as notícias */}
         {filtered.length > 0 && (
           <div id="todas-as-noticias" className="space-y-10 scroll-mt-24">
-            {/* Explorar por categoria */}
-            <section>
-              <h3 className="text-sm font-display font-bold text-foreground mb-2">Explorar por categoria</h3>
-              <div className="flex flex-wrap gap-2">
-                {CATEGORIAS.map((cat) => {
-                  const count = (byCategory.get(cat) ?? []).length;
-                  if (count === 0) return null;
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setCategoriaFilter(cat)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card hover:bg-muted hover:border-primary/40 px-3 py-1.5 text-xs transition-colors"
-                    >
-                      <span>{cat}</span>
-                      <span className="text-muted-foreground tabular-nums">({count})</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
             {/* Notícias organizadas por categoria — no máximo 4 por seção */}
             {CATEGORIAS.map((cat) => {
               const items = byCategory.get(cat) ?? [];
