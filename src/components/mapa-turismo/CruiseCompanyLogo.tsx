@@ -35,7 +35,10 @@ export function CruiseCompanyLogo({ nome, logoUrl, className, iconClassName }: C
   return (
     <div
       data-testid="cruise-company-logo"
-      className={cn("flex items-center justify-center overflow-hidden flex-shrink-0", className)}
+      className={cn(
+        "flex items-center justify-center overflow-hidden flex-shrink-0 bg-white border border-cyan-200 dark:border-cyan-800/70",
+        className,
+      )}
     >
       {showLogo ? (
         <img
@@ -47,7 +50,11 @@ export function CruiseCompanyLogo({ nome, logoUrl, className, iconClassName }: C
           className="h-full w-full object-contain p-1.5"
         />
       ) : (
-        <Ship data-testid="cruise-company-logo-fallback" aria-hidden="true" className={cn("h-7 w-7", iconClassName)} />
+        <Ship
+          data-testid="cruise-company-logo-fallback"
+          aria-hidden="true"
+          className={cn("h-7 w-7 text-cyan-600 dark:text-cyan-400", iconClassName)}
+        />
       )}
     </div>
   );

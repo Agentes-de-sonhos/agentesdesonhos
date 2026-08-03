@@ -1,10 +1,12 @@
-import { useEffect, useState, type ReactNode, type MouseEvent } from "react";
+import { type ReactNode, type MouseEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getDirectoryCategoryTheme } from "@/lib/directoryCategoryTheme";
 import { normalizeSpecialtyTags, type SpecialtyInput } from "@/lib/directorySpecialties";
+import { SpecialtyList } from "@/components/mapa-turismo/SpecialtyChip";
+import { SupplierLogoFrame } from "@/components/mapa-turismo/SupplierLogoFrame";
 
 interface DirectorySupplierLogoProps {
   name: string;
@@ -15,47 +17,22 @@ interface DirectorySupplierLogoProps {
 }
 
 /**
- * Container quadrado do logotipo com fallback para o ícone da categoria
- * (Ship em Cruzeiros, Hotel em Hospedagem, etc.).
+ * Moldura do logotipo no card: fundo branco + contorno temático da categoria,
+ * com fallback para o ícone da categoria (Ship em Cruzeiros, Hotel em Hospedagem).
  */
 export function DirectorySupplierLogo({
   name, logoUrl, category, className, iconClassName,
 }: DirectorySupplierLogoProps) {
-  const theme = getDirectoryCategoryTheme(category);
-  const [failed, setFailed] = useState(false);
-  useEffect(() => { setFailed(false); }, [logoUrl]);
-
-  const url = (logoUrl || "").trim();
-  const showLogo = !!url && !failed;
-  const Icon = theme.Icon;
-
   return (
-    <div
-      data-testid="directory-supplier-logo"
-      className={cn(
-        "flex items-center justify-center overflow-hidden flex-shrink-0 h-14 w-14 rounded-xl ring-1",
-        theme.logoBg,
-        theme.logoRing,
-        className,
-      )}
-    >
-      {showLogo ? (
-        <img
-          src={url}
-          alt={`Logotipo da ${name}`}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-          className="h-full w-full object-contain p-1.5"
-        />
-      ) : (
-        <Icon
-          data-testid="directory-supplier-logo-fallback"
-          aria-hidden="true"
-          className={cn("h-7 w-7", theme.iconColor, iconClassName)}
-        />
-      )}
-    </div>
+    <SupplierLogoFrame
+      name={name}
+      logoUrl={logoUrl}
+      category={category}
+      className={className}
+      iconClassName={iconClassName}
+      testId="directory-supplier-logo"
+      fallbackTestId="directory-supplier-logo-fallback"
+    />
   );
 }
 
@@ -120,8 +97,7 @@ export function DirectorySupplierCard({
             category={category}
             className={cn(
               "transition-transform duration-300 group-hover:scale-105",
-              highlighted &&
-                "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/60 dark:to-amber-950 ring-amber-200/50 dark:ring-amber-700/50",
+              highlighted && "border-amber-300 dark:border-amber-700/70",
             )}
             iconClassName={highlighted ? "text-amber-600 dark:text-amber-400" : undefined}
           />
@@ -133,20 +109,10 @@ export function DirectorySupplierCard({
 
         {children}
 
-        {/* Especialidades — todas visíveis, sem limite nem "+N" */}
+        {/* Especialidades — paleta compartilhada com o perfil, no máximo 3 linhas visuais */}
         {specialtyTags.length > 0 && (
-          <div data-testid="directory-supplier-specialties" className="mt-3 flex flex-wrap gap-1.5">
-            {specialtyTags.map((tag) => (
-              <span
-                key={tag}
-                className={cn(
-                  "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border break-words",
-                  theme.chip,
-                )}
-              >
-                {tag}
-              </span>
-            ))}
+          <div data-testid="directory-supplier-specialties" className="mt-3">
+            <SpecialtyList specialties={specialtyTags} variant="card" maxLines={3} />
           </div>
         )}
 

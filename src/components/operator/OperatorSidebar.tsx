@@ -14,6 +14,7 @@ import {
   UserCheck,
   Share2,
 } from "lucide-react";
+import { SpecialtyList } from "@/components/mapa-turismo/SpecialtyChip";
 
 interface OperatorSidebarProps {
   operator: {
@@ -35,15 +36,6 @@ const safeOpen = (url: string | null | undefined) => {
     url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
   window.open(sanitized, "_blank", "noopener,noreferrer");
 };
-
-const chipColors = [
-  "bg-sky-50 text-sky-700 border-sky-200",
-  "bg-amber-50 text-amber-700 border-amber-200",
-  "bg-emerald-50 text-emerald-700 border-emerald-200",
-  "bg-violet-50 text-violet-700 border-violet-200",
-  "bg-rose-50 text-rose-700 border-rose-200",
-  "bg-cyan-50 text-cyan-700 border-cyan-200",
-];
 
 const socialConfig: Record<string, { icon: React.ElementType; label: string; color: string }> = {
   website: { icon: Globe, label: "Website", color: "text-primary" },
@@ -110,16 +102,8 @@ export function OperatorSidebar({ operator }: OperatorSidebarProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag, i) => (
-                <span
-                  key={i}
-                  className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-all duration-200 hover:scale-105 cursor-default ${chipColors[i % chipColors.length]}`}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            {/* Perfil comercial: TODAS as especialidades, sem limite de linhas */}
+            <SpecialtyList specialties={operator.specialties} variant="profile" />
           </CardContent>
         </Card>
       )}

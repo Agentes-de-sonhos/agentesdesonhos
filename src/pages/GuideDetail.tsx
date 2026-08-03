@@ -12,6 +12,7 @@ import {
 import { LANGUAGE_LEVELS } from "@/i18n/cadastroGuia";
 import { BackToDirectoryButton } from "@/components/mapa-turismo/BackToDirectoryButton";
 import { CommunityRecognitionSection } from "@/components/mapa-turismo/CommunityRecognitionSection";
+import { SpecialtyList } from "@/components/mapa-turismo/SpecialtyChip";
 
 const levelLabel = (lv: string) => LANGUAGE_LEVELS.find((l) => l.value === lv)?.label || lv;
 
@@ -167,11 +168,7 @@ export default function GuideDetail() {
             {guide.specialties && guide.specialties.length > 0 && (
               <Card><CardContent className="p-5">
                 <h3 className="font-semibold mb-2 text-sm">Especialidades</h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {guide.specialties.map((s: string) => (
-                    <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
-                  ))}
-                </div>
+                <SpecialtyList specialties={guide.specialties} variant="profile" />
               </CardContent></Card>
             )}
             {guide.services && guide.services.length > 0 && (
