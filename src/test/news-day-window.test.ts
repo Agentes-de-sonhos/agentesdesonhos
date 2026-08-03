@@ -42,3 +42,20 @@ describe("seletor visual do dia", () => {
     expect(src).toContain("dayNews.filter");
   });
 });
+
+describe("sem listagem duplicada nem dropdown de categoria", () => {
+  const src = readFileSync(resolve(process.cwd(), "src/pages/Noticias.tsx"), "utf8");
+  it("não possui a listagem geral repetida ao final", () => {
+    expect(src).not.toContain("{/* Todas as notícias */}");
+    expect(src).not.toContain("setVisibleCount");
+  });
+  it("não possui o dropdown Todas as categorias", () => {
+    expect(src).not.toContain("Todas as categorias");
+    expect(src).not.toContain('placeholder="Categoria"');
+  });
+  it("preserva busca, portais e ordenação", () => {
+    expect(src).toContain('placeholder="Buscar notícias"');
+    expect(src).toContain("Todos os portais");
+    expect(src).toContain("Mais recentes");
+  });
+});
