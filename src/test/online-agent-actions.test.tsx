@@ -103,10 +103,12 @@ describe("AgentActions (online users popover)", () => {
     const { container } = render(<AgentActions agent={agent} onMessage={vi.fn()} onViewProfile={vi.fn()} />);
     const labels = ["Perfil", "Mensagem", "Conectar"];
     labels.forEach((label) => {
-      const el = screen.getByText(label);
-      expect(el).toBeTruthy();
-      expect(el.className).not.toMatch(/truncate|line-clamp/);
-      expect(el.className).toMatch(/whitespace-nowrap/);
+      const textEl = screen.getByText(label);
+      expect(textEl).toBeTruthy();
+      expect(textEl.className).not.toMatch(/truncate|line-clamp/);
+      const buttonEl = textEl.closest("button");
+      expect(buttonEl?.className).toMatch(/whitespace-nowrap/);
+      expect(buttonEl?.className).not.toMatch(/truncate|line-clamp/);
     });
     const buttonContainer = container.querySelector("div.flex.items-center.gap-1\\.5");
     expect(buttonContainer?.className).not.toMatch(/truncate|line-clamp/);
