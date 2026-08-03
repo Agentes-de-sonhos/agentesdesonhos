@@ -108,6 +108,7 @@ export default function CruiseDetailPage() {
         <OperatorHero
           name={company.nome}
           category={categoryLabel}
+          themeCategory="Cruzeiros"
           logoUrl={company.logo_url || op?.logo_url || null}
           hideRating
         />
