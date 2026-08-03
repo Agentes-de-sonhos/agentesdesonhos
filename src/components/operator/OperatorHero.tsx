@@ -1,5 +1,7 @@
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SupplierLogoFrame } from "@/components/mapa-turismo/SupplierLogoFrame";
+import { getDirectoryCategoryTheme } from "@/lib/directoryCategoryTheme";
 
 interface OperatorHeroProps {
   name: string;
@@ -20,6 +22,7 @@ export function OperatorHero({
   onReviewClick,
   hideRating = false,
 }: OperatorHeroProps) {
+  const theme = getDirectoryCategoryTheme(category);
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-card to-primary/10 border border-border/60 p-8 sm:p-10">
       {/* Decorative elements */}
@@ -29,15 +32,18 @@ export function OperatorHero({
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         {/* Left: Logo + Name */}
         <div className="flex items-center gap-5">
-          <div className="h-20 w-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 border border-primary/20 flex items-center justify-center shadow-sm overflow-hidden">
-            {logoUrl ? (
-              <img src={logoUrl} alt={name} className="h-full w-full object-contain p-2" />
-            ) : (
-              <span className="text-2xl font-bold text-primary">
+          <SupplierLogoFrame
+            name={name}
+            logoUrl={logoUrl}
+            category={category}
+            className="h-20 w-20 rounded-2xl"
+            testId="operator-hero-logo"
+            fallback={
+              <span data-testid="operator-hero-logo-fallback" className={`text-2xl font-bold ${theme.iconColor}`}>
                 {name.charAt(0)}
               </span>
-            )}
-          </div>
+            }
+          />
 
           <div>
             <h1 className="font-display text-2xl font-bold text-foreground sm:text-3xl tracking-tight">
