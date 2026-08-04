@@ -9720,6 +9720,8 @@ export type Database = {
         Row: {
           drawn_at: string
           id: string
+          position: number | null
+          prize: string | null
           raffle_id: string
           user_id: string
           winner_data: Json | null
@@ -9728,6 +9730,8 @@ export type Database = {
         Insert: {
           drawn_at?: string
           id?: string
+          position?: number | null
+          prize?: string | null
           raffle_id: string
           user_id: string
           winner_data?: Json | null
@@ -9736,6 +9740,8 @@ export type Database = {
         Update: {
           drawn_at?: string
           id?: string
+          position?: number | null
+          prize?: string | null
           raffle_id?: string
           user_id?: string
           winner_data?: Json | null
@@ -9753,28 +9759,49 @@ export type Database = {
       }
       raffles: {
         Row: {
+          academy_trail_id: string | null
+          academy_training_id: string | null
           created_at: string
+          draw_params: Json
+          eligible_count: number
+          event_label: string | null
+          filters: Json
           id: string
           participants: Json
           participants_count: number
+          source: string
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          academy_trail_id?: string | null
+          academy_training_id?: string | null
           created_at?: string
+          draw_params?: Json
+          eligible_count?: number
+          event_label?: string | null
+          filters?: Json
           id?: string
           participants?: Json
           participants_count?: number
+          source?: string
           title?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          academy_trail_id?: string | null
+          academy_training_id?: string | null
           created_at?: string
+          draw_params?: Json
+          eligible_count?: number
+          event_label?: string | null
+          filters?: Json
           id?: string
           participants?: Json
           participants_count?: number
+          source?: string
           title?: string
           updated_at?: string
           user_id?: string
@@ -13130,6 +13157,41 @@ export type Database = {
     }
     Functions: {
       _normalize_phone: { Args: { p: string }; Returns: string }
+      academy_event_participants: {
+        Args: { p_training_id: string }
+        Returns: {
+          agency_name: string
+          city: string
+          email: string
+          enrolled_at: string
+          events_participated: number
+          is_completed: boolean
+          name: string
+          participant_user_id: string
+          phone: string
+          state: string
+          survey_answered: boolean
+          survey_score: number
+          watched_minutes: number
+        }[]
+      }
+      academy_raffle_events: {
+        Args: never
+        Returns: {
+          attended_count: number
+          completed_count: number
+          destination: string
+          is_active: boolean
+          last_activity_at: string
+          registrations_count: number
+          scheduled_at: string
+          title: string
+          trail_id: string
+          trail_name: string
+          training_id: string
+          training_type: string
+        }[]
+      }
       admin_agency_activity_ranking: {
         Args: { _end: string; _start: string }
         Returns: Json
