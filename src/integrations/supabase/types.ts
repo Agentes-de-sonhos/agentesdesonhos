@@ -13864,6 +13864,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      rsvp_match_subscribers: {
+        Args: { _emails: string[] }
+        Returns: {
+          normalized_email: string
+          plan: string
+          status: string
+        }[]
+      }
       save_card_capture_via_token: {
         Args: { _data: Json; _token: string }
         Returns: string

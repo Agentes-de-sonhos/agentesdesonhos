@@ -100,3 +100,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.submit-lead-form]
 verify_jwt = false
+
+[functions.rsvp-subscriber-match]
+verify_jwt = false
