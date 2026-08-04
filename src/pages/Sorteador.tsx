@@ -53,7 +53,6 @@ import {
   computeDashboard,
   computeStats,
   evaluateEligibility,
-  normalizeText,
   participantKey,
 } from "@/lib/raffle/eligibility";
 import { pickWinners } from "@/lib/raffle/draw";
@@ -670,10 +669,6 @@ export default function Sorteador() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <span className="sr-only" aria-hidden="true">
-        {normalizeText("")}
-      </span>
     </div>
   );
 }
