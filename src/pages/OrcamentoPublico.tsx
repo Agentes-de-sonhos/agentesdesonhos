@@ -683,7 +683,7 @@ function InsuranceBody({ data }: { data: any }) {
 
 function CruiseBody({ data, service, quote }: { data: any; service?: QuoteService; quote?: Quote }) {
   const cabins = normalizeCruiseCabins(data, service?.amount);
-  const showPrices = !(quote as any)?.hide_prices;
+  const showPrices = quote ? (quote as any).show_detailed_prices !== false : true;
   return (
     <div className="space-y-3">
       <PeriodBody title={data.ship_name} sub={data.route} data={data} />
