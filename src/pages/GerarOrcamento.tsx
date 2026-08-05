@@ -1183,11 +1183,22 @@ export default function GerarOrcamento() {
                       Nenhum serviço adicionado ainda. Use a área acima para adicionar.
                     </p>
                   ) : (
-                    <ServiceList
+                    <QuoteServicesOrganizer
                       services={quote.services}
+                      sections={quote.sections || []}
                       onDeleteService={deleteService}
                       onEditService={handleEditService}
-                      onReorder={reorderServices}
+                      onReorderServices={reorderServices}
+                      onSaveLayout={saveServiceLayout}
+                      onCreateSection={createSection}
+                      onRenameSection={renameSection}
+                      onDeleteSection={deleteSection}
+                      onReorderSections={reorderSections}
+                      onAddServiceToSection={(sectionId) => {
+                        setPendingSectionId(sectionId);
+                        setSectionServicePickerOpen(true);
+                      }}
+                      isSaving={isSavingSections}
                       currency={quoteCurrencyCode}
                     />
                   )}
