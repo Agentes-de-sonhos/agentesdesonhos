@@ -601,11 +601,12 @@ export function usePublicQuote(token: string | undefined) {
         .eq("quote_id", quoteData.id)
         .order("sort_order", { ascending: true });
 
-      const { data: sectionsData } = await (supabase as any)
-        .from("quote_sections")
-        .select("*")
-        .eq("quote_id", quoteData.id)
-        .order("order_index", { ascending: true });
+      // Segurança: seções não são lidas diretamente da tabela no fluxo público legado.
+      // A RPC SECURITY DEFINER valida token, status e expiração e retorna apenas campos visuais.
+      const { data: sectionsData } = await (supabase as any).rpc(
+        "get_quote_sections_by_share_token",
+        { p_share_token: token },
+      );
 
       return {
         ...quoteData,
