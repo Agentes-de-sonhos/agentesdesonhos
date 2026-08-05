@@ -152,10 +152,14 @@ export function useQuotes() {
             }))
           )
           .select();
-        (newSections || []).forEach((created: any, idx: number) => {
-          const src = srcSections[idx];
-          if (src) sectionIdMap.set(src.id, created.id);
-        });
+        // Match by (order_index, title) instead of array position, since the
+        // returned row order is not guaranteed.
+        for (const src of srcSections) {
+          const created = (newSections || []).find(
+            (n: any) => n.order_index === src.order_index && n.title === src.title
+          );
+          if (created) sectionIdMap.set(src.id, created.id);
+        }
       }
 
       // Copy services
