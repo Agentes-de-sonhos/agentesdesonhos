@@ -802,6 +802,7 @@ export default function GerarOrcamento() {
         description,
         image_url,
         image_urls,
+        section_id: pendingSectionId,
       });
 
       // Save payment config for the newly created service
@@ -823,6 +824,7 @@ export default function GerarOrcamento() {
 
     setSelectedServiceType(null);
     setEditingService(null);
+    setPendingSectionId(null);
   };
 
   const handleDeleteQuote = async (qId: string) => {
