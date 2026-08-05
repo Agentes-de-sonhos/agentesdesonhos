@@ -229,6 +229,12 @@ export function useQuote(id: string | undefined) {
         .eq("quote_id", id)
         .order("sort_order", { ascending: true });
 
+      const { data: sectionsData } = await (supabase as any)
+        .from("quote_sections")
+        .select("*")
+        .eq("quote_id", id)
+        .order("order_index", { ascending: true });
+
       return {
         ...quoteData,
         services: servicesData.map((s) => ({
@@ -236,6 +242,7 @@ export function useQuote(id: string | undefined) {
           service_type: s.service_type as ServiceType,
           service_data: s.service_data as unknown as ServiceData,
         })),
+        sections: (sectionsData || []) as QuoteSection[],
         entry_extras: extrasData || [],
       } as Quote;
     },
