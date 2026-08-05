@@ -1274,6 +1274,7 @@ export default function GerarOrcamento() {
           if (!open) {
             setSelectedServiceType(null);
             setEditingService(null);
+            setPendingSectionId(null);
             setNewServicePaymentConfig({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
           }
         }}
