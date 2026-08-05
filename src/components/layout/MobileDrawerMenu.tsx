@@ -119,6 +119,7 @@ const clientesItem: MenuItem = {
   activePrefix: CLIENTES_DIRECT_ITEM.activePrefix,
   icon: Users,
   requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
+  anyPermission: CLIENTES_DIRECT_ITEM.anyPermission,
   sectionStyle: CLIENTES_DIRECT_ITEM.theme,
 };
 
@@ -129,6 +130,7 @@ const financeiroItem: MenuItem = {
   activePrefix: FINANCEIRO_DIRECT_ITEM.activePrefix,
   icon: DollarSign,
   requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
+  anyPermission: FINANCEIRO_DIRECT_ITEM.anyPermission,
   sectionStyle: FINANCEIRO_DIRECT_ITEM.theme,
 };
 
@@ -272,6 +274,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     for (const item of standaloneItems) {
       if (isSectionHiddenForUser(item.key, isAdmin, plan)) continue;
       if (isItemHiddenForUser(item.key, isAdmin, plan)) continue;
+      if (!isPermittedForTeam(item)) continue;
       entries.push({
         type: "item",
         item,
@@ -289,7 +292,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     }
 
     return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan, isAdmin, plan]);
+  }, [allSections, standaloneItems, orderMap, isStartPlan, isAdmin, plan, isPermittedForTeam]);
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
   const startPlanLockedUrls = ["/comunidade", "/cursos", "/beneficios"];
