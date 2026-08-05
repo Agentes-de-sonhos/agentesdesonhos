@@ -105,7 +105,7 @@ export function PermissionMatrix({ value, onChange, disabled }: Props) {
                         />
                         <span className="flex items-center gap-1.5">
                           {p.label}
-                          {p.sensitive && <ShieldAlert className="h-3.5 w-3.5 text-amber-500" title="Permissão sensível" />}
+                          {p.sensitive && <ShieldAlert aria-label="Permissão sensível" className="h-3.5 w-3.5 text-amber-500" />}
                         </span>
                       </label>
                     ))}
