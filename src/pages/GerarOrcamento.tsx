@@ -33,13 +33,14 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
-import { ServiceList } from "@/components/quote/ServiceCard";
+import { QuoteServicesOrganizer } from "@/components/quote/QuoteServicesOrganizer";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
@@ -389,7 +390,13 @@ export default function GerarOrcamento() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
-  const { quote, addService, updateService, deleteService, reorderServices, isAddingService } = useQuote(id);
+  const {
+    quote, addService, updateService, deleteService, reorderServices, isAddingService,
+    createSection, renameSection, deleteSection, reorderSections, saveServiceLayout, isSavingSections,
+  } = useQuote(id);
+  // Seção destino quando o usuário cria um serviço a partir de uma seção
+  const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
+  const [sectionServicePickerOpen, setSectionServicePickerOpen] = useState(false);
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
   // Persist UI state in sessionStorage so tab switches don't lose progress
@@ -796,6 +803,7 @@ export default function GerarOrcamento() {
         description,
         image_url,
         image_urls,
+        section_id: pendingSectionId,
       });
 
       // Save payment config for the newly created service
@@ -817,6 +825,7 @@ export default function GerarOrcamento() {
 
     setSelectedServiceType(null);
     setEditingService(null);
+    setPendingSectionId(null);
   };
 
   const handleDeleteQuote = async (qId: string) => {
@@ -1183,11 +1192,22 @@ export default function GerarOrcamento() {
                       Nenhum serviço adicionado ainda. Use a área acima para adicionar.
                     </p>
                   ) : (
-                    <ServiceList
+                    <QuoteServicesOrganizer
                       services={quote.services}
+                      sections={quote.sections || []}
                       onDeleteService={deleteService}
                       onEditService={handleEditService}
-                      onReorder={reorderServices}
+                      onReorderServices={reorderServices}
+                      onSaveLayout={saveServiceLayout}
+                      onCreateSection={createSection}
+                      onRenameSection={renameSection}
+                      onDeleteSection={deleteSection}
+                      onReorderSections={reorderSections}
+                      onAddServiceToSection={(sectionId) => {
+                        setPendingSectionId(sectionId);
+                        setSectionServicePickerOpen(true);
+                      }}
+                      isSaving={isSavingSections}
                       currency={quoteCurrencyCode}
                     />
                   )}
@@ -1250,6 +1270,29 @@ export default function GerarOrcamento() {
         </div>
       </div>
 
+      {/* Escolha do tipo de serviço ao adicionar a partir de uma seção */}
+      <Dialog
+        open={sectionServicePickerOpen}
+        onOpenChange={(open) => {
+          setSectionServicePickerOpen(open);
+          if (!open && !selectedServiceType) setPendingSectionId(null);
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Adicionar serviço à seção</DialogTitle>
+          </DialogHeader>
+          <ServiceCategoryGrid
+            countByType={serviceCountByType}
+            onSelect={(type) => {
+              setEditingService(null);
+              setSelectedServiceType(type);
+              setSectionServicePickerOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
       {/* Modal de serviço (criação/edição) */}
       <ServiceModal
         open={!!selectedServiceType}
@@ -1257,6 +1300,7 @@ export default function GerarOrcamento() {
           if (!open) {
             setSelectedServiceType(null);
             setEditingService(null);
+            setPendingSectionId(null);
             setNewServicePaymentConfig({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
           }
         }}

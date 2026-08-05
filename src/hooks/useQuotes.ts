@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
-import type { Quote, QuoteService, QuoteFormData, ServiceType, ServiceData } from "@/types/quote";
+import type { Quote, QuoteSection, QuoteService, QuoteFormData, ServiceType, ServiceData } from "@/types/quote";
 
 export function useQuotes() {
   const { user } = useAuth();
@@ -133,6 +133,35 @@ export function useQuotes() {
         .single();
       if (newErr || !newQuote) throw newErr || new Error("Failed to create quote");
 
+      // Copy sections first so services can keep their grouping
+      const sectionIdMap = new Map<string, string>();
+      const { data: srcSections } = await (supabase as any)
+        .from("quote_sections")
+        .select("*")
+        .eq("quote_id", sourceId)
+        .order("order_index", { ascending: true });
+      if (srcSections && srcSections.length > 0) {
+        const { data: newSections } = await (supabase as any)
+          .from("quote_sections")
+          .insert(
+            srcSections.map((sec: any) => ({
+              quote_id: newQuote.id,
+              user_id: user?.id,
+              title: sec.title,
+              order_index: sec.order_index,
+            }))
+          )
+          .select();
+        // Match by (order_index, title) instead of array position, since the
+        // returned row order is not guaranteed.
+        for (const src of srcSections) {
+          const created = (newSections || []).find(
+            (n: any) => n.order_index === src.order_index && n.title === src.title
+          );
+          if (created) sectionIdMap.set(src.id, created.id);
+        }
+      }
+
       // Copy services
       const { data: services } = await supabase
         .from("quote_services").select("*").eq("quote_id", sourceId).order("order_index");
@@ -158,6 +187,7 @@ export function useQuotes() {
           discount_type: s.discount_type ?? null,
           discount_value: s.discount_value ?? null,
           payment_method: s.payment_method ?? null,
+          section_id: s.section_id ? sectionIdMap.get(s.section_id) ?? null : null,
         }));
         await supabase.from("quote_services").insert(newServices as any);
       }
@@ -229,6 +259,12 @@ export function useQuote(id: string | undefined) {
         .eq("quote_id", id)
         .order("sort_order", { ascending: true });
 
+      const { data: sectionsData } = await (supabase as any)
+        .from("quote_sections")
+        .select("*")
+        .eq("quote_id", id)
+        .order("order_index", { ascending: true });
+
       return {
         ...quoteData,
         services: servicesData.map((s) => ({
@@ -236,6 +272,7 @@ export function useQuote(id: string | undefined) {
           service_type: s.service_type as ServiceType,
           service_data: s.service_data as unknown as ServiceData,
         })),
+        sections: (sectionsData || []) as QuoteSection[],
         entry_extras: extrasData || [],
       } as Quote;
     },
@@ -253,7 +290,7 @@ export function useQuote(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type, service_data, amount, option_label, description, image_url, image_urls,
+      service_type, service_data, amount, option_label, description, image_url, image_urls, section_id,
     }: {
       service_type: ServiceType;
       service_data: ServiceData;
@@ -262,6 +299,8 @@ export function useQuote(id: string | undefined) {
       description?: string;
       image_url?: string;
       image_urls?: string[];
+      /** Optional section the new service should be created into. */
+      section_id?: string | null;
     }) => {
       if (!id) throw new Error("Quote ID is required");
       // Read the latest order_index from the DB to avoid collisions when
@@ -288,6 +327,7 @@ export function useQuote(id: string | undefined) {
           description: description || null,
           image_url: image_url || null,
           image_urls: image_urls && image_urls.length > 0 ? image_urls : [],
+          section_id: section_id ?? null,
         } as any)
         .select()
         .single();
@@ -397,6 +437,128 @@ export function useQuote(id: string | undefined) {
     },
   });
 
+  // ---------------------------------------------------------------------------
+  // Seções do orçamento (organização visual)
+  // ---------------------------------------------------------------------------
+
+  const invalidateQuote = () => {
+    queryClient.invalidateQueries({ queryKey: ["quote", id] });
+  };
+
+  const createSectionMutation = useMutation({
+    mutationFn: async (title: string) => {
+      if (!id) throw new Error("Quote ID is required");
+      const clean = (title || "").trim();
+      if (!clean) throw new Error("Informe o nome da seção");
+      const { data: last } = await (supabase as any)
+        .from("quote_sections")
+        .select("order_index")
+        .eq("quote_id", id)
+        .order("order_index", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const nextOrder = ((last?.order_index as number | undefined) ?? -1) + 1;
+      const { data, error } = await (supabase as any)
+        .from("quote_sections")
+        .insert({ quote_id: id, user_id: user?.id, title: clean, order_index: nextOrder })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as QuoteSection;
+    },
+    onSuccess: () => {
+      invalidateQuote();
+      toast({ title: "Seção criada", description: "Arraste serviços para dentro dela." });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao criar seção", description: (error as Error).message, variant: "destructive" });
+    },
+  });
+
+  const renameSectionMutation = useMutation({
+    mutationFn: async ({ sectionId, title }: { sectionId: string; title: string }) => {
+      const clean = (title || "").trim();
+      if (!clean) throw new Error("Informe o nome da seção");
+      const { error } = await (supabase as any)
+        .from("quote_sections")
+        .update({ title: clean })
+        .eq("id", sectionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateQuote();
+      toast({ title: "Seção renomeada" });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao renomear seção", description: (error as Error).message, variant: "destructive" });
+    },
+  });
+
+  /** Deleting a section never deletes services — the FK sets section_id to null. */
+  const deleteSectionMutation = useMutation({
+    mutationFn: async (sectionId: string) => {
+      const { error } = await (supabase as any).from("quote_sections").delete().eq("id", sectionId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateQuote();
+      toast({
+        title: "Seção excluída",
+        description: "Os serviços foram mantidos e movidos para “Sem seção”.",
+      });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao excluir seção", description: (error as Error).message, variant: "destructive" });
+    },
+  });
+
+  const reorderSectionsMutation = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      if (!id) throw new Error("Quote ID is required");
+      await Promise.all(
+        orderedIds.map((sectionId, index) =>
+          (supabase as any)
+            .from("quote_sections")
+            .update({ order_index: index })
+            .eq("id", sectionId)
+            .eq("quote_id", id)
+        )
+      );
+    },
+    onSuccess: () => invalidateQuote(),
+    onError: (error) => {
+      toast({ title: "Erro ao reordenar seções", description: (error as Error).message, variant: "destructive" });
+    },
+  });
+
+  /**
+   * Persists the flattened service layout (section membership + global order).
+   * Called after any drag between/inside sections.
+   */
+  const saveServiceLayoutMutation = useMutation({
+    mutationFn: async (rows: { id: string; section_id: string | null; order_index: number }[]) => {
+      if (!id) throw new Error("Quote ID is required");
+      await Promise.all(
+        rows.map((row) =>
+          (supabase as any)
+            .from("quote_services")
+            .update({ section_id: row.section_id, order_index: row.order_index })
+            .eq("id", row.id)
+            .eq("quote_id", id)
+        )
+      );
+    },
+    onSuccess: () => invalidateQuote(),
+    onError: (error) => {
+      invalidateQuote();
+      toast({
+        title: "Erro ao salvar organização",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     quote,
     isLoading,
@@ -405,6 +567,17 @@ export function useQuote(id: string | undefined) {
     deleteService: deleteServiceMutation.mutateAsync,
     reorderServices: reorderServicesMutation.mutate,
     isAddingService: addServiceMutation.isPending,
+    createSection: createSectionMutation.mutateAsync,
+    renameSection: renameSectionMutation.mutateAsync,
+    deleteSection: deleteSectionMutation.mutateAsync,
+    reorderSections: reorderSectionsMutation.mutateAsync,
+    saveServiceLayout: saveServiceLayoutMutation.mutateAsync,
+    isSavingSections:
+      createSectionMutation.isPending ||
+      renameSectionMutation.isPending ||
+      deleteSectionMutation.isPending ||
+      reorderSectionsMutation.isPending ||
+      saveServiceLayoutMutation.isPending,
   };
 }
 
@@ -428,6 +601,12 @@ export function usePublicQuote(token: string | undefined) {
         .eq("quote_id", quoteData.id)
         .order("sort_order", { ascending: true });
 
+      const { data: sectionsData } = await (supabase as any)
+        .from("quote_sections")
+        .select("*")
+        .eq("quote_id", quoteData.id)
+        .order("order_index", { ascending: true });
+
       return {
         ...quoteData,
         services: servicesData.map((s) => ({
@@ -435,6 +614,7 @@ export function usePublicQuote(token: string | undefined) {
           service_type: s.service_type as ServiceType,
           service_data: s.service_data as unknown as ServiceData,
         })),
+        sections: (sectionsData || []) as QuoteSection[],
         entry_extras: extrasData || [],
       } as Quote;
     },
