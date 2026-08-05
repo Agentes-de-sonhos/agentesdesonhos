@@ -133,6 +133,31 @@ export function useQuotes() {
         .single();
       if (newErr || !newQuote) throw newErr || new Error("Failed to create quote");
 
+      // Copy sections first so services can keep their grouping
+      const sectionIdMap = new Map<string, string>();
+      const { data: srcSections } = await (supabase as any)
+        .from("quote_sections")
+        .select("*")
+        .eq("quote_id", sourceId)
+        .order("order_index", { ascending: true });
+      if (srcSections && srcSections.length > 0) {
+        const { data: newSections } = await (supabase as any)
+          .from("quote_sections")
+          .insert(
+            srcSections.map((sec: any) => ({
+              quote_id: newQuote.id,
+              user_id: user?.id,
+              title: sec.title,
+              order_index: sec.order_index,
+            }))
+          )
+          .select();
+        (newSections || []).forEach((created: any, idx: number) => {
+          const src = srcSections[idx];
+          if (src) sectionIdMap.set(src.id, created.id);
+        });
+      }
+
       // Copy services
       const { data: services } = await supabase
         .from("quote_services").select("*").eq("quote_id", sourceId).order("order_index");
@@ -158,6 +183,7 @@ export function useQuotes() {
           discount_type: s.discount_type ?? null,
           discount_value: s.discount_value ?? null,
           payment_method: s.payment_method ?? null,
+          section_id: s.section_id ? sectionIdMap.get(s.section_id) ?? null : null,
         }));
         await supabase.from("quote_services").insert(newServices as any);
       }
