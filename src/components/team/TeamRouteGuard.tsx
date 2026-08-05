@@ -1,51 +1,31 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTeamSession } from '@/contexts/TeamSessionContext'
-
-/** Rotas (prefixos) permitidas para subusuários da equipe. */
-const TEAM_ALLOWED_PREFIXES = [
-  '/gestao-clientes',
-  '/financeiro',
-  '/auth',
-  '/dashboard',
-  '/agenda',
-  '/meus-projetos',
-  '/perfil',
-  '/minha-conta',
-  '/ferramentas-ia/criar-roteiro',
-  '/ferramentas-ia/gerar-orcamento',
-  '/ferramentas-ia/trip-wallet',
-  '/ferramentas-ia/modelos-roteiros',
-]
-
-const TEAM_PUBLIC_PREFIXES = [
-  '/orcamento/', '/roteiro/', '/viagem/', '/c/', '/v/', '/cadastro/',
-  '/formulario/', '/lp/', '/pesquisa/', '/ativar-cartao',
-  '/politicasdeprivacidade', '/termosdeuso', '/reset-password', '/convite/',
-]
-
-function isAllowedForTeam(path: string) {
-  if (TEAM_PUBLIC_PREFIXES.some(p => path.startsWith(p))) return true
-  if (path === '/dashboard') return true
-  return TEAM_ALLOWED_PREFIXES.some(p => path === p || path.startsWith(p + '/') || path === p)
-}
+import { usePermissions } from '@/hooks/usePermissions'
+import { canAccessRoute, isPublicRoute, permissionsForRoute } from '@/lib/routePermissions'
 
 /**
- * Quando o usuário logado é membro da equipe, redireciona qualquer rota
- * fora do escopo permitido para o primeiro módulo liberado (clientes ou financeiro).
+ * Colaborador da equipe: rotas fora do escopo permitido voltam para a página
+ * inicial. Rotas mapeadas e negadas são tratadas pelo RoutePermissionGuard,
+ * que exibe a tela de acesso negado sem perder o endereço.
  */
 export function TeamRouteGuard() {
-  const { member, loading, hasModule } = useTeamSession()
+  const { member, loading } = useTeamSession()
+  const { can } = usePermissions()
   const location = useLocation()
   const navigate = useNavigate()
 
   useEffect(() => {
     if (loading || !member) return
-    const landing = '/dashboard'
-    if (!isAllowedForTeam(location.pathname)) {
-      navigate(landing, { replace: true })
+    const path = location.pathname
+    if (isPublicRoute(path) || path === '/' || path === '/dashboard') return
+    // Rota sem mapeamento de permissão: mantém o colaborador no painel.
+    if (permissionsForRoute(path).length === 0) {
+      navigate('/dashboard', { replace: true })
+      return
     }
-  }, [member, loading, location.pathname, navigate, hasModule])
+    if (!canAccessRoute(path, can)) return // guard visual assume o bloqueio
+  }, [member, loading, location.pathname, navigate, can])
 
   return null
 }

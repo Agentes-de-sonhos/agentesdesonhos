@@ -16,6 +16,8 @@ import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { usePermissions } from "@/hooks/usePermissions";
+import { canAccessRoute } from "@/lib/routePermissions";
 import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
@@ -36,6 +38,10 @@ interface MenuItem {
   /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
   activePrefix?: string;
   children?: MenuItem[];
+  /** Permissão de equipe exigida para exibir o item. */
+  requiredPermission?: string;
+  /** Basta uma destas permissões de equipe. */
+  anyPermission?: string[];
   /** Aparência de cabeçalho de seção (caixa alta + cor temática). */
   sectionStyle?: {
     headerBg: string;
@@ -113,6 +119,7 @@ const clientesItem: MenuItem = {
   activePrefix: CLIENTES_DIRECT_ITEM.activePrefix,
   icon: Users,
   requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
+  anyPermission: CLIENTES_DIRECT_ITEM.anyPermission,
   sectionStyle: CLIENTES_DIRECT_ITEM.theme,
 };
 
@@ -123,6 +130,7 @@ const financeiroItem: MenuItem = {
   activePrefix: FINANCEIRO_DIRECT_ITEM.activePrefix,
   icon: DollarSign,
   requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
+  anyPermission: FINANCEIRO_DIRECT_ITEM.anyPermission,
   sectionStyle: FINANCEIRO_DIRECT_ITEM.theme,
 };
 
@@ -191,6 +199,17 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
+  const { can: canPerm, isTeamMember } = usePermissions();
+
+  /** Colaborador da equipe: espelha as regras do menu desktop e do guard de rota. */
+  const isPermittedForTeam = useCallback((item: MenuItem): boolean => {
+    if (!isTeamMember) return true;
+    if (item.children?.length) return item.children.some(isPermittedForTeam);
+    if (item.anyPermission?.length) return item.anyPermission.some((p) => canPerm(p));
+    if (item.requiredPermission) return canPerm(item.requiredPermission);
+    if (item.url) return canAccessRoute(item.url.split("?")[0], canPerm);
+    return false;
+  }, [isTeamMember, canPerm]);
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
@@ -218,9 +237,12 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
 
     for (const section of allSections) {
       if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
-      const filteredItems = section.items.filter(
-        (it) => !isItemHiddenForUser(it.key, isAdmin, plan)
-      );
+      const filteredItems = section.items
+        .filter(isPermittedForTeam)
+        .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan))
+        .map((it) => (it.children?.length
+          ? { ...it, children: it.children.filter(isPermittedForTeam) }
+          : it));
       if (filteredItems.length === 0) continue;
       const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
@@ -252,6 +274,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     for (const item of standaloneItems) {
       if (isSectionHiddenForUser(item.key, isAdmin, plan)) continue;
       if (isItemHiddenForUser(item.key, isAdmin, plan)) continue;
+      if (!isPermittedForTeam(item)) continue;
       entries.push({
         type: "item",
         item,
@@ -269,7 +292,7 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
     }
 
     return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan, isAdmin, plan]);
+  }, [allSections, standaloneItems, orderMap, isStartPlan, isAdmin, plan, isPermittedForTeam]);
 
   const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
   const startPlanLockedUrls = ["/comunidade", "/cursos", "/beneficios"];

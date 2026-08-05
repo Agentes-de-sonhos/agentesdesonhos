@@ -7,6 +7,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
+import { RoutePermissionGuard } from "@/components/permissions/RoutePermissionGuard";
 import { TeamRouteGuard } from "@/components/team/TeamRouteGuard";
 import { DirectoryDetailScrollTop } from "@/components/mapa-turismo/DirectoryDetailScrollTop";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -181,6 +182,7 @@ const App = () => (
           <Suspense fallback={<LoadingScreen />}>
           <TeamRouteGuard />
           <DirectoryDetailScrollTop />
+          <RoutePermissionGuard>
           <Routes>
 
             <Route path="/auth" element={

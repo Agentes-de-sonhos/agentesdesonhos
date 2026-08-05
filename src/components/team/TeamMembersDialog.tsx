@@ -7,6 +7,7 @@ import { Plus, Pencil, Ban, Trash2, CircleCheck, Loader2, Users } from 'lucide-r
 import { useTeamMembers, useTeamQuota, useTeamAdminMutation, TeamMemberRow } from '@/hooks/useTeamMembers'
 import { TeamMemberForm } from './TeamMemberForm'
 import { TeamInvitesList } from './TeamInvitesList'
+import { AccessProfilesManager } from './AccessProfilesManager'
 import { AgencyCommunitySettings } from './AgencyCommunitySettings'
 import { TeamAuditLogView } from './TeamAuditLogView'
 import { toast } from 'sonner'
@@ -66,11 +67,12 @@ export function TeamMembersDialog({ open, onOpenChange }: Props) {
           </DialogHeader>
 
           <Tabs defaultValue="membros">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="membros">Colaboradores</TabsTrigger>
               <TabsTrigger value="convites">
                 Convites{quota?.pending ? ` (${quota.pending})` : ''}
               </TabsTrigger>
+              <TabsTrigger value="perfis">Perfis de acesso</TabsTrigger>
               <TabsTrigger value="comunidade">Comunidade</TabsTrigger>
               <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
             </TabsList>
@@ -144,6 +146,10 @@ export function TeamMembersDialog({ open, onOpenChange }: Props) {
 
             <TabsContent value="convites" className="pt-4">
               <TeamInvitesList disabledCreate={atLimit} />
+            </TabsContent>
+
+            <TabsContent value="perfis" className="pt-4">
+              <AccessProfilesManager />
             </TabsContent>
 
             <TabsContent value="comunidade" className="pt-4">
