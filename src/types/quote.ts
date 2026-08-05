@@ -225,10 +225,25 @@ export interface CruiseData {
   price: number;
   notes?: string;
   /**
+   * Opções alternativas de cabine (nunca somadas entre si).
+   * A opção marcada com `is_base` é a considerada no total do orçamento.
+   */
+  cabins?: CruiseCabinOptionData[];
+  /** URL opcional de vídeo do navio (YouTube ou Vimeo). */
+  ship_video_url?: string;
+  /**
    * Itinerário detalhado do cruzeiro (dia a dia).
    * Compatível com o renderizador `CruiseItineraryTimeline` da carteira pública.
    */
   itinerary?: CruiseItineraryStop[];
+}
+
+export interface CruiseCabinOptionData {
+  id?: string;
+  cabin_type: string;
+  custom_label?: string;
+  price: number;
+  is_base?: boolean;
 }
 
 export interface CruiseItineraryStop {

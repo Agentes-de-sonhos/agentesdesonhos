@@ -27,6 +27,9 @@ import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
 import CruiseItineraryTimeline from "@/components/quote/CruiseItineraryTimeline";
+import CruiseCabinOptions from "@/components/quote/CruiseCabinOptions";
+import ShipVideoEmbed from "@/components/quote/ShipVideoEmbed";
+import { normalizeCruiseCabins, cabinOptionLabel } from "@/lib/cruiseCabins";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
 import {
   computeExtrasTotal,
@@ -232,7 +235,11 @@ function getServiceDetails(service: QuoteService): string[] {
       details.push(`Navio: ${data.ship_name}`);
       details.push(`Rota: ${data.route}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
-      details.push(`Cabine: ${data.cabin_type}`);
+      {
+        const cabins = normalizeCruiseCabins(data, service.amount);
+        if (cabins.length === 1) details.push(`Cabine: ${cabinOptionLabel(cabins[0])}`);
+        else if (cabins.length > 1) details.push(`Cabines: ${cabins.map(cabinOptionLabel).join(" | ")}`);
+      }
       break;
     case "rail_transport": {
       const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
@@ -674,14 +681,21 @@ function InsuranceBody({ data }: { data: any }) {
   );
 }
 
-function CruiseBody({ data }: { data: any }) {
+function CruiseBody({ data, service, quote }: { data: any; service?: QuoteService; quote?: Quote }) {
+  const cabins = normalizeCruiseCabins(data, service?.amount);
+  const showPrices = quote ? (quote as any).show_detailed_prices !== false : true;
   return (
     <div className="space-y-3">
       <PeriodBody title={data.ship_name} sub={data.route} data={data} />
-      {data.cabin_type && (
-        <div className="text-sm text-foreground/80"><span className="text-muted-foreground">Cabine:</span> <span className="font-medium">{data.cabin_type}</span></div>
-      )}
+      <ShipVideoEmbed url={data.ship_video_url} title={data.ship_name} />
       <CruiseItineraryTimeline itinerary={data.itinerary} />
+      <CruiseCabinOptions
+        cabins={cabins}
+        service={service}
+        quote={quote}
+        showPrices={showPrices}
+        formatValue={(v) => formatCurrency(v)}
+      />
       {data.notes && (
         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
           <FormattedText>{data.notes}</FormattedText>
@@ -700,7 +714,7 @@ function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote 
     case "transfer": return <TransferBody data={data} />;
     case "attraction": return <AttractionBody data={data} />;
     case "insurance": return <InsuranceBody data={data} />;
-    case "cruise": return <CruiseBody data={data} />;
+    case "cruise": return <CruiseBody data={data} service={service} quote={quote} />;
     default: return null;
   }
 }
