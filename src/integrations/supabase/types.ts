@@ -13742,6 +13742,15 @@ export type Database = {
         Args: { p_agency_slug: string; p_code: string }
         Returns: Json
       }
+      get_quote_sections_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: {
+          id: string
+          order_index: number
+          quote_id: string
+          title: string
+        }[]
+      }
       get_registration_link: {
         Args: { _token: string }
         Returns: {
