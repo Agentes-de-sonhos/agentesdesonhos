@@ -40,6 +40,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
