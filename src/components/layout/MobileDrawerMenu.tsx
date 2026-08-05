@@ -38,6 +38,10 @@ interface MenuItem {
   /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
   activePrefix?: string;
   children?: MenuItem[];
+  /** Permissão de equipe exigida para exibir o item. */
+  requiredPermission?: string;
+  /** Basta uma destas permissões de equipe. */
+  anyPermission?: string[];
   /** Aparência de cabeçalho de seção (caixa alta + cor temática). */
   sectionStyle?: {
     headerBg: string;
