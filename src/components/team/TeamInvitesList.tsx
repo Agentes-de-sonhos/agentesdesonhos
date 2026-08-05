@@ -44,7 +44,9 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
         setOpen(false); setEmail(''); setFullName(''); setRoleTitle(''); setDepartment(''); setProfileId('')
         if (data?.invite_url) {
           void navigator.clipboard.writeText(data.invite_url).catch(() => {})
-          toast.success('Convite criado e link copiado para a área de transferência')
+          toast.success(data?.emailed
+            ? 'Convite enviado por e-mail e link copiado'
+            : 'Convite criado e link copiado (envie o link manualmente)')
         } else {
           toast.success('Convite criado')
         }
@@ -57,7 +59,7 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
     mutation.mutate({ action, id, origin: window.location.origin }, {
       onSuccess: (data: any) => {
         if (data?.invite_url) void navigator.clipboard.writeText(data.invite_url).catch(() => {})
-        toast.success(successMsg)
+        toast.success(data?.emailed ? 'Convite reenviado por e-mail e link copiado' : successMsg)
       },
       onError: (e: any) => toast.error(e.message),
     })
