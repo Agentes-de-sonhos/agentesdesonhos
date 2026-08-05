@@ -3198,7 +3198,7 @@ function GenericImportEntry({
     ? React.cloneElement(children, { initialData: injectedInitial })
     : children;
   // Services whose form already renders the photo slot internally
-  const FORMS_WITH_INTERNAL_PHOTO: GenericServiceKey[] = ["attraction", "other"];
+  const FORMS_WITH_INTERNAL_PHOTO: GenericServiceKey[] = ["attraction", "other", "cruise"];
   const showExternalPhoto = !FORMS_WITH_INTERNAL_PHOTO.includes(serviceKey) && !!props.photoSlot;
   return (
     <>
