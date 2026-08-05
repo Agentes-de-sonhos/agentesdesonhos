@@ -293,6 +293,87 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_access_profiles: {
+        Row: {
+          agency_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_native: boolean
+          key: string
+          name: string
+          permission_keys: string[]
+          scopes: Json
+          updated_at: string
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_native?: boolean
+          key: string
+          name: string
+          permission_keys?: string[]
+          scopes?: Json
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_native?: boolean
+          key?: string
+          name?: string
+          permission_keys?: string[]
+          scopes?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agency_community_settings: {
+        Row: {
+          agency_id: string
+          created_at: string
+          external_chat_enabled: boolean
+          internal_chat_enabled: boolean
+          internal_community_enabled: boolean
+          online_users_enabled: boolean
+          preset: string
+          public_community_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          external_chat_enabled?: boolean
+          internal_chat_enabled?: boolean
+          internal_community_enabled?: boolean
+          online_users_enabled?: boolean
+          preset?: string
+          public_community_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          external_chat_enabled?: boolean
+          internal_chat_enabled?: boolean
+          internal_community_enabled?: boolean
+          online_users_enabled?: boolean
+          preset?: string
+          public_community_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       agency_contract_template_sections: {
         Row: {
           body_html: string
@@ -718,30 +799,137 @@ export type Database = {
       agency_team_audit_log: {
         Row: {
           action: string
+          actor_user_id: string | null
           agency_id: string
           created_at: string
           details: Json | null
+          entity_id: string | null
+          entity_type: string | null
           id: string
           ip_address: string | null
+          module_key: string | null
           team_member_id: string | null
         }
         Insert: {
           action: string
+          actor_user_id?: string | null
           agency_id: string
           created_at?: string
           details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           ip_address?: string | null
+          module_key?: string | null
           team_member_id?: string | null
         }
         Update: {
           action?: string
+          actor_user_id?: string | null
           agency_id?: string
           created_at?: string
           details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
           ip_address?: string | null
+          module_key?: string | null
           team_member_id?: string | null
+        }
+        Relationships: []
+      }
+      agency_team_invites: {
+        Row: {
+          accepted_at: string | null
+          access_profile_id: string | null
+          agency_id: string
+          created_at: string
+          department: string | null
+          email: string
+          expires_at: string
+          full_name: string | null
+          id: string
+          invited_by: string
+          last_sent_at: string
+          member_id: string | null
+          permission_keys: string[]
+          revoked_at: string | null
+          role_title: string | null
+          scopes: Json
+          sent_count: number
+          team_name: string | null
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          access_profile_id?: string | null
+          agency_id: string
+          created_at?: string
+          department?: string | null
+          email: string
+          expires_at: string
+          full_name?: string | null
+          id?: string
+          invited_by: string
+          last_sent_at?: string
+          member_id?: string | null
+          permission_keys?: string[]
+          revoked_at?: string | null
+          role_title?: string | null
+          scopes?: Json
+          sent_count?: number
+          team_name?: string | null
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          access_profile_id?: string | null
+          agency_id?: string
+          created_at?: string
+          department?: string | null
+          email?: string
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          invited_by?: string
+          last_sent_at?: string
+          member_id?: string | null
+          permission_keys?: string[]
+          revoked_at?: string | null
+          role_title?: string | null
+          scopes?: Json
+          sent_count?: number
+          team_name?: string | null
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_team_invites_access_profile_id_fkey"
+            columns: ["access_profile_id"]
+            isOneToOne: false
+            referencedRelation: "agency_access_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_team_limit_overrides: {
+        Row: {
+          agency_id: string
+          created_at: string
+          max_members: number
+          reason: string | null
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          max_members: number
+          reason?: string | null
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          max_members?: number
+          reason?: string | null
         }
         Relationships: []
       }
@@ -773,54 +961,92 @@ export type Database = {
       }
       agency_team_members: {
         Row: {
+          access_profile_id: string | null
+          activated_at: string | null
           agency_id: string
           auth_user_id: string | null
+          avatar_url: string | null
           created_at: string
+          created_by: string | null
+          deactivated_at: string | null
+          department: string | null
+          email: string | null
           full_name: string
           id: string
+          invited_at: string | null
           last_login_at: string | null
           login: string
           login_normalized: string | null
           notification_email: string | null
           password_hash: string | null
+          phone: string | null
           role_title: string | null
           status: Database["public"]["Enums"]["team_member_status"]
           synthetic_email: string | null
+          team_name: string | null
           updated_at: string
         }
         Insert: {
+          access_profile_id?: string | null
+          activated_at?: string | null
           agency_id: string
           auth_user_id?: string | null
+          avatar_url?: string | null
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          department?: string | null
+          email?: string | null
           full_name: string
           id?: string
+          invited_at?: string | null
           last_login_at?: string | null
           login: string
           login_normalized?: string | null
           notification_email?: string | null
           password_hash?: string | null
+          phone?: string | null
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
           synthetic_email?: string | null
+          team_name?: string | null
           updated_at?: string
         }
         Update: {
+          access_profile_id?: string | null
+          activated_at?: string | null
           agency_id?: string
           auth_user_id?: string | null
+          avatar_url?: string | null
           created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          department?: string | null
+          email?: string | null
           full_name?: string
           id?: string
+          invited_at?: string | null
           last_login_at?: string | null
           login?: string
           login_normalized?: string | null
           notification_email?: string | null
           password_hash?: string | null
+          phone?: string | null
           role_title?: string | null
           status?: Database["public"]["Enums"]["team_member_status"]
           synthetic_email?: string | null
+          team_name?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agency_team_members_access_profile_fkey"
+            columns: ["access_profile_id"]
+            isOneToOne: false
+            referencedRelation: "agency_access_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agency_team_permissions: {
         Row: {
@@ -853,6 +1079,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "agency_team_permissions_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "agency_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_team_scopes: {
+        Row: {
+          agency_id: string
+          created_at: string
+          id: string
+          module_key: string
+          scope: Database["public"]["Enums"]["team_data_scope"]
+          team_member_id: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          id?: string
+          module_key: string
+          scope?: Database["public"]["Enums"]["team_data_scope"]
+          team_member_id: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          id?: string
+          module_key?: string
+          scope?: Database["public"]["Enums"]["team_data_scope"]
+          team_member_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_team_scopes_team_member_id_fkey"
             columns: ["team_member_id"]
             isOneToOne: false
             referencedRelation: "agency_team_members"
@@ -1909,12 +2173,14 @@ export type Database = {
       }
       clients: {
         Row: {
+          assigned_team_member_id: string | null
           birthday_day: number | null
           birthday_month: number | null
           birthday_year: number | null
           category_id: string | null
           city: string | null
           created_at: string
+          created_by_team_member_id: string | null
           email: string | null
           id: string
           internal_notes: string | null
@@ -1929,12 +2195,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_team_member_id?: string | null
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
           category_id?: string | null
           city?: string | null
           created_at?: string
+          created_by_team_member_id?: string | null
           email?: string | null
           id?: string
           internal_notes?: string | null
@@ -1949,12 +2217,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_team_member_id?: string | null
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
           category_id?: string | null
           city?: string | null
           created_at?: string
+          created_by_team_member_id?: string | null
           email?: string | null
           id?: string
           internal_notes?: string | null
@@ -2621,6 +2891,7 @@ export type Database = {
       }
       community_posts: {
         Row: {
+          agency_id: string | null
           comments_count: number | null
           content: string | null
           created_at: string | null
@@ -2636,8 +2907,10 @@ export type Database = {
           updated_at: string | null
           user_id: string
           video_url: string | null
+          visibility: string
         }
         Insert: {
+          agency_id?: string | null
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
@@ -2653,8 +2926,10 @@ export type Database = {
           updated_at?: string | null
           user_id: string
           video_url?: string | null
+          visibility?: string
         }
         Update: {
+          agency_id?: string | null
           comments_count?: number | null
           content?: string | null
           created_at?: string | null
@@ -2670,6 +2945,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           video_url?: string | null
+          visibility?: string
         }
         Relationships: []
       }
@@ -7772,9 +8048,11 @@ export type Database = {
       }
       operations: {
         Row: {
+          assigned_team_member_id: string | null
           assigned_user_id: string | null
           client_id: string
           created_at: string
+          created_by_team_member_id: string | null
           destination: string | null
           id: string
           itinerary_id: string | null
@@ -7797,9 +8075,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_team_member_id?: string | null
           assigned_user_id?: string | null
           client_id: string
           created_at?: string
+          created_by_team_member_id?: string | null
           destination?: string | null
           id?: string
           itinerary_id?: string | null
@@ -7822,9 +8102,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_team_member_id?: string | null
           assigned_user_id?: string | null
           client_id?: string
           created_at?: string
+          created_by_team_member_id?: string | null
           destination?: string | null
           id?: string
           itinerary_id?: string | null
@@ -7950,6 +8232,7 @@ export type Database = {
           children_count: number
           client_id: string
           created_at: string
+          created_by_team_member_id: string | null
           destination: string
           end_date: string | null
           estimated_value: number
@@ -7971,6 +8254,7 @@ export type Database = {
           children_count?: number
           client_id: string
           created_at?: string
+          created_by_team_member_id?: string | null
           destination: string
           end_date?: string | null
           estimated_value?: number
@@ -7992,6 +8276,7 @@ export type Database = {
           children_count?: number
           client_id?: string
           created_at?: string
+          created_by_team_member_id?: string | null
           destination?: string
           end_date?: string | null
           estimated_value?: number
@@ -8375,6 +8660,27 @@ export type Database = {
           place_id?: string
           place_type?: string | null
           raw_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      plan_team_limits: {
+        Row: {
+          max_members: number
+          owner_counts: boolean
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at: string
+        }
+        Insert: {
+          max_members?: number
+          owner_counts?: boolean
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string
+        }
+        Update: {
+          max_members?: number
+          owner_counts?: boolean
+          plan?: Database["public"]["Enums"]["subscription_plan"]
           updated_at?: string
         }
         Relationships: []
@@ -13357,10 +13663,48 @@ export type Database = {
           wallets_count: number
         }[]
       }
+      agency_community_flags: {
+        Args: { _agency: string }
+        Returns: {
+          external_chat_enabled: boolean
+          internal_chat_enabled: boolean
+          internal_community_enabled: boolean
+          online_users_enabled: boolean
+          public_community_enabled: boolean
+        }[]
+      }
+      agency_community_settings_get: { Args: never; Returns: Json }
+      agency_community_settings_save: {
+        Args: {
+          _external_chat: boolean
+          _internal: boolean
+          _internal_chat: boolean
+          _online: boolean
+          _preset: string
+          _public: boolean
+        }
+        Returns: Json
+      }
+      agency_team_directory: {
+        Args: never
+        Returns: {
+          auth_user_id: string
+          avatar_url: string
+          department: string
+          full_name: string
+          member_id: string
+          role_title: string
+          status: Database["public"]["Enums"]["team_member_status"]
+          team_name: string
+        }[]
+      }
+      can_chat_externally: { Args: { _uid: string }; Returns: boolean }
+      can_see_agency_user: { Args: { _target: string }; Returns: boolean }
       can_use_feature: {
         Args: { _feature: string; _user_id: string }
         Returns: boolean
       }
+      can_use_public_community: { Args: never; Returns: boolean }
       cast_monthly_vote: {
         Args: { _nominee_user_id: string }
         Returns: {
@@ -13852,6 +14196,7 @@ export type Database = {
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
       is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
+      is_team_subuser: { Args: { _uid: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
       is_within_office_hours_json: {
         Args: { p_at?: string; p_hours: Json; p_tz: string }
@@ -14058,7 +14403,54 @@ export type Database = {
         Returns: boolean
       }
       supplier_slug_exists: { Args: { p_slug: string }; Returns: boolean }
+      team_access_profiles: {
+        Args: never
+        Returns: {
+          agency_id: string
+          description: string
+          id: string
+          is_native: boolean
+          key: string
+          name: string
+          permission_keys: string[]
+          scopes: Json
+        }[]
+      }
+      team_audit_log: {
+        Args: { _limit?: number; _member_id?: string }
+        Returns: {
+          action: string
+          actor_user_id: string
+          created_at: string
+          details: Json
+          entity_id: string
+          entity_type: string
+          id: string
+          member_name: string
+          module_key: string
+          team_member_id: string
+        }[]
+      }
       team_get_member_detail: { Args: { _member_id: string }; Returns: Json }
+      team_list_invites: {
+        Args: never
+        Returns: {
+          accepted_at: string
+          access_profile_id: string
+          access_profile_name: string
+          created_at: string
+          department: string
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          last_sent_at: string
+          revoked_at: string
+          role_title: string
+          sent_count: number
+          team_name: string
+        }[]
+      }
       team_list_members: {
         Args: never
         Returns: {
@@ -14073,12 +14465,60 @@ export type Database = {
           status: Database["public"]["Enums"]["team_member_status"]
         }[]
       }
+      team_max_members: { Args: { _agency_id: string }; Returns: number }
       team_member_quota: {
         Args: never
         Returns: {
+          pending: number
+          plan: string
           total: number
           used: number
         }[]
+      }
+      team_member_row: {
+        Args: { _uid: string }
+        Returns: {
+          agency_id: string
+          department: string
+          id: string
+          status: Database["public"]["Enums"]["team_member_status"]
+          team_name: string
+        }[]
+      }
+      team_member_scopes: {
+        Args: { _member_id: string }
+        Returns: {
+          module_key: string
+          scope: Database["public"]["Enums"]["team_data_scope"]
+        }[]
+      }
+      team_members_overview: {
+        Args: never
+        Returns: {
+          access_profile_id: string
+          access_profile_key: string
+          access_profile_name: string
+          activated_at: string
+          avatar_url: string
+          created_at: string
+          department: string
+          email: string
+          full_name: string
+          id: string
+          invited_at: string
+          last_login_at: string
+          login: string
+          permissions_count: number
+          phone: string
+          role_title: string
+          stage_permissions_count: number
+          status: Database["public"]["Enums"]["team_member_status"]
+          team_name: string
+        }[]
+      }
+      team_record_visible: {
+        Args: { _assigned_to: string; _created_by: string; _module: string }
+        Returns: boolean
       }
       team_replace_permissions: {
         Args: {
@@ -14087,6 +14527,10 @@ export type Database = {
           _stage_permissions: Json
         }
         Returns: undefined
+      }
+      team_scope_for: {
+        Args: { _module: string }
+        Returns: Database["public"]["Enums"]["team_data_scope"]
       }
       team_self: { Args: never; Returns: Json }
       track_lead_form_view: {
@@ -14102,6 +14546,7 @@ export type Database = {
         Returns: undefined
       }
       unaccent: { Args: { "": string }; Returns: string }
+      user_agency_id: { Args: { _uid: string }; Returns: string }
       validate_quick_access_token: { Args: { _token: string }; Returns: string }
       verify_trip_access: {
         Args: { p_password: string; p_token: string }
@@ -14151,7 +14596,14 @@ export type Database = {
         | "fundador"
         | "start"
         | "fornecedor_parceiro"
-      team_member_status: "active" | "blocked"
+      team_data_scope:
+        | "own"
+        | "created"
+        | "assigned"
+        | "team"
+        | "department"
+        | "agency"
+      team_member_status: "active" | "blocked" | "pending" | "disabled"
       team_pipeline_type: "opportunities" | "operations"
       trade_event_status: "pendente" | "aprovado" | "recusado"
       trade_event_type:
@@ -14335,7 +14787,15 @@ export const Constants = {
         "start",
         "fornecedor_parceiro",
       ],
-      team_member_status: ["active", "blocked"],
+      team_data_scope: [
+        "own",
+        "created",
+        "assigned",
+        "team",
+        "department",
+        "agency",
+      ],
+      team_member_status: ["active", "blocked", "pending", "disabled"],
       team_pipeline_type: ["opportunities", "operations"],
       trade_event_status: ["pendente", "aprovado", "recusado"],
       trade_event_type: [
