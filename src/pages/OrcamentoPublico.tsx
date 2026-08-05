@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
+import { buildQuoteSectionLayout, visibleSectionGroups } from "@/lib/quoteSections";
+import { PublicSectionAccordion } from "@/components/quote/PublicSectionAccordion";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
