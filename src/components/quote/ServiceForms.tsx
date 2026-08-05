@@ -1832,15 +1832,36 @@ const cruiseSchema = z.object({
   cabin_type: z.string().optional(),
   price: z.number().min(0),
   notes: z.string().optional(),
+  ship_video_url: z.string().optional(),
 });
 
-function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof cruiseSchema>>({
     resolver: zodResolver(cruiseSchema),
-    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "" },
+    defaultValues: { ship_name: init?.ship_name || "", route: init?.route || "", cabin_type: init?.cabin_type || "", price: init?.price || initialData?.amount || 0, start_date: init?.start_date ? parseLocalDate(init.start_date) : tripStartDate, end_date: init?.end_date ? parseLocalDate(init.end_date) : tripEndDate, notes: init?.notes || "", ship_video_url: init?.ship_video_url || "" },
   });
+
+  /* ─── Opções de cabine (alternativas — nunca somadas) ─── */
+  const [cabins, setCabins] = useState<CruiseCabinOption[]>(() => {
+    const normalized = normalizeCruiseCabins(init, initialData?.amount);
+    return normalized.length
+      ? normalized
+      : [{ id: newCabinId(), cabin_type: "interna", price: Number(initialData?.amount) || 0, is_base: true }];
+  });
+  const basePrice = baseCabinPrice(cabins, 0);
+
+  const updateCabin = (idx: number, patch: Partial<CruiseCabinOption>) =>
+    setCabins((prev) => ensureSingleBase(prev.map((c, i) => (i === idx ? { ...c, ...patch } : c))));
+  const addCabin = () =>
+    setCabins((prev) => ensureSingleBase([...prev, { id: newCabinId(), cabin_type: "varanda", price: 0 }]));
+  const removeCabin = (idx: number) =>
+    setCabins((prev) => ensureSingleBase(prev.filter((_, i) => i !== idx)));
+  const setBaseCabin = (idx: number) => setCabins((prev) => ensureSingleBase(prev, idx));
+
+  const videoUrl = form.watch("ship_video_url") || "";
+  const videoInvalid = !!videoUrl.trim() && !parseShipVideoUrl(videoUrl);
 
   /* ─── Itinerário do cruzeiro (dia a dia) ─── */
   type Stop = {
@@ -1902,17 +1923,38 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
 
   const handleSubmit = (values: z.infer<typeof cruiseSchema>) => {
     const routeFinal = (values.route && values.route.trim()) || summaryFromStops(stops);
+    const cleanCabins = ensureSingleBase(
+      cabins.map((c) => ({
+        id: c.id || newCabinId(),
+        cabin_type: c.cabin_type || "outro",
+        ...(c.cabin_type === "outro" ? { custom_label: (c.custom_label || "").trim() } : {}),
+        price: Number(c.price) || 0,
+        is_base: !!c.is_base,
+      })),
+    );
+    const base = cleanCabins.find((c) => c.is_base) || cleanCabins[0];
+    const total = Number(base?.price) || 0;
+    if (videoInvalid) {
+      toast({ title: "URL de vídeo inválida", description: "Use um link do YouTube ou Vimeo.", variant: "destructive" });
+      return;
+    }
     onSubmit({
+      ...(init || {}),
       ship_name: values.ship_name, route: routeFinal,
       start_date: format(values.start_date, "yyyy-MM-dd"), end_date: format(values.end_date, "yyyy-MM-dd"),
-      cabin_type: values.cabin_type, price: values.price, notes: values.notes || "",
+      // `cabin_type`/`price` seguem espelhando a opção base (retrocompatibilidade: PDF e integrações antigas)
+      cabin_type: base?.cabin_type || values.cabin_type || "",
+      price: total,
+      cabins: cleanCabins,
+      ship_video_url: (values.ship_video_url || "").trim(),
+      notes: values.notes || "",
       itinerary: stops.map((s) => ({
         ...s,
         // duplicamos `notes` como `description` para que a Carteira Pública
         // (CruiseItineraryTimeline) exiba o texto sem precisar de mapeamento.
         description: s.notes || "",
       })),
-    }, values.price);
+    }, total);
   };
 
   return (
