@@ -16,6 +16,8 @@ import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { usePermissions } from "@/hooks/usePermissions";
+import { canAccessRoute } from "@/lib/routePermissions";
 import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { Feature } from "@/types/subscription";
@@ -191,6 +193,17 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { hasFeatureAccess } = useFeatureAccess();
   const { trackSectionVisit } = useGamificationLite();
+  const { can: canPerm, isTeamMember } = usePermissions();
+
+  /** Colaborador da equipe: espelha as regras do menu desktop e do guard de rota. */
+  const isPermittedForTeam = useCallback((item: MenuItem): boolean => {
+    if (!isTeamMember) return true;
+    if (item.children?.length) return item.children.some(isPermittedForTeam);
+    if (item.anyPermission?.length) return item.anyPermission.some((p) => canPerm(p));
+    if (item.requiredPermission) return canPerm(item.requiredPermission);
+    if (item.url) return canAccessRoute(item.url.split("?")[0], canPerm);
+    return false;
+  }, [isTeamMember, canPerm]);
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
@@ -218,9 +231,12 @@ export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
 
     for (const section of allSections) {
       if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
-      const filteredItems = section.items.filter(
-        (it) => !isItemHiddenForUser(it.key, isAdmin, plan)
-      );
+      const filteredItems = section.items
+        .filter(isPermittedForTeam)
+        .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan))
+        .map((it) => (it.children?.length
+          ? { ...it, children: it.children.filter(isPermittedForTeam) }
+          : it));
       if (filteredItems.length === 0) continue;
       const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
         const sectionKey = section.key?.replace("section_", "") || "";
