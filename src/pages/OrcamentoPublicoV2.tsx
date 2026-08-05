@@ -23,6 +23,7 @@ async function fetchQuoteByPublicCode(agencySlug: string, code: string) {
         service_type: s.service_type as ServiceType,
         service_data: s.service_data as unknown as ServiceData,
       })),
+      sections: result.sections || [],
     } as Quote,
     agentProfile: result.agent_profile as AgentProfile | null,
   };
