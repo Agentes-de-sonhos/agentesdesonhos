@@ -65,6 +65,7 @@ import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { canAccessRoute } from "@/lib/routePermissions";
 import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS, calculateAnchorScrollDelta } from "@/lib/sidebarAnchor";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -284,20 +285,15 @@ export function AppSidebar() {
   const { can: canPerm, isTeamMember } = usePermissions();
 
   // Filtra itens por permissão de equipe (master bypassa)
-  const isPermittedForTeam = useCallback((item: MenuItem) => {
+  const isPermittedForTeam = useCallback((item: MenuItem): boolean => {
     if (!isTeamMember) return true;
-    // Itens adicionais sempre liberados para subusuários da equipe
-    // (Criar: carteira digital, orçamento, roteiros)
-    const TEAM_ALLOWED_KEYS = new Set([
-      "carteira_digital",
-      "orcamento",
-      "roteiros",
-    ]);
-    if (item.key && TEAM_ALLOWED_KEYS.has(item.key)) return true;
+    // Grupos (ex.: "Outras") aparecem se pelo menos um filho estiver liberado.
+    if (item.children?.length) return item.children.some(isPermittedForTeam);
     if (item.anyPermission?.length) return item.anyPermission.some((p) => canPerm(p));
-    // Para team member: só mostra itens com requiredPermission liberado
-    if (!item.requiredPermission) return false;
-    return canPerm(item.requiredPermission);
+    if (item.requiredPermission) return canPerm(item.requiredPermission);
+    // Fallback central: mapa rota -> permissão (fonte única do guard de rota).
+    if (item.url) return canAccessRoute(item.url.split("?")[0], canPerm);
+    return false;
   }, [isTeamMember, canPerm]);
 
   // Hover-to-expand on desktop with delayed expand/collapse to avoid accidental open/close
@@ -407,6 +403,9 @@ export function AppSidebar() {
       if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
       const filteredItems = section.items
         .filter(isPermittedForTeam)
+        .map((it) => (it.children?.length
+          ? { ...it, children: it.children.filter(isPermittedForTeam) }
+          : it))
         .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan));
       if (filteredItems.length === 0) continue;
       // Ferramentas de Marketing tem hierarquia fixa (com o grupo "Outras"),
