@@ -18,7 +18,20 @@ export interface Quote {
   created_at: string;
   updated_at: string;
   services?: QuoteService[];
+  /** Manual, visual-only grouping of services (optional). */
+  sections?: QuoteSection[];
   entry_extras?: import("@/lib/quoteEntryExtras").QuoteEntryExtra[];
+}
+
+/** Named, expandable group of services inside a quote (organization only). */
+export interface QuoteSection {
+  id: string;
+  quote_id: string;
+  title: string;
+  order_index: number;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface QuoteService {
@@ -28,6 +41,8 @@ export interface QuoteService {
   service_data: ServiceData;
   amount: number;
   order_index: number;
+  /** Section this service belongs to, or null when unsectioned. */
+  section_id?: string | null;
   option_label: string | null;
   description: string | null;
   image_url: string | null;
