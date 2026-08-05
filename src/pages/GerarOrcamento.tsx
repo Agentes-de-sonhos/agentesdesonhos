@@ -33,7 +33,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
-import { ServiceList } from "@/components/quote/ServiceCard";
+import { QuoteServicesOrganizer } from "@/components/quote/QuoteServicesOrganizer";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
