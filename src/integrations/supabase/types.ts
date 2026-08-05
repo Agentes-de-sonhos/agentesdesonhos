@@ -11771,6 +11771,30 @@ export type Database = {
         }
         Relationships: []
       }
+      team_permission_catalog: {
+        Row: {
+          created_at: string
+          is_sensitive: boolean
+          label: string
+          module_key: string
+          permission_key: string
+        }
+        Insert: {
+          created_at?: string
+          is_sensitive?: boolean
+          label: string
+          module_key: string
+          permission_key: string
+        }
+        Update: {
+          created_at?: string
+          is_sensitive?: boolean
+          label?: string
+          module_key?: string
+          permission_key?: string
+        }
+        Relationships: []
+      }
       telegram_pending_chats: {
         Row: {
           chat_id: number
@@ -13699,11 +13723,14 @@ export type Database = {
         }[]
       }
       can_chat_externally: { Args: { _uid: string }; Returns: boolean }
+      can_chat_internally: { Args: { _uid: string }; Returns: boolean }
       can_see_agency_user: { Args: { _target: string }; Returns: boolean }
+      can_team: { Args: { _key: string }; Returns: boolean }
       can_use_feature: {
         Args: { _feature: string; _user_id: string }
         Returns: boolean
       }
+      can_use_internal_community: { Args: never; Returns: boolean }
       can_use_public_community: { Args: never; Returns: boolean }
       cast_monthly_vote: {
         Args: { _nominee_user_id: string }
@@ -14431,6 +14458,7 @@ export type Database = {
           team_member_id: string
         }[]
       }
+      team_can_manage_team: { Args: never; Returns: boolean }
       team_get_member_detail: { Args: { _member_id: string }; Returns: Json }
       team_list_invites: {
         Args: never
@@ -14532,7 +14560,13 @@ export type Database = {
         Args: { _module: string }
         Returns: Database["public"]["Enums"]["team_data_scope"]
       }
+      team_seats_taken: { Args: { _agency_id: string }; Returns: number }
       team_self: { Args: never; Returns: Json }
+      team_self_member_id: { Args: never; Returns: string }
+      team_valid_permission_keys: {
+        Args: { _keys: string[] }
+        Returns: string[]
+      }
       track_lead_form_view: {
         Args: { p_session_hash: string; p_token: string }
         Returns: undefined

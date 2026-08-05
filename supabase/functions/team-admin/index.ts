@@ -33,16 +33,32 @@ const str = (v: unknown, max = 180): string | null => {
 
 const SCOPE_VALUES = ['own', 'created', 'assigned', 'team', 'department', 'agency']
 
-/** Normaliza chaves de permissão contra o catálogo persistido nos perfis nativos. */
-async function validPermissionKeys(admin: any, requested: unknown): Promise<string[]> {
+let catalogCache: Set<string> | null = null
+
+/** Catálogo canônico de permissões (public.team_permission_catalog). */
+async function permissionCatalog(admin: any): Promise<Set<string>> {
+  if (catalogCache) return catalogCache
+  const { data } = await admin.from('team_permission_catalog').select('permission_key')
+  catalogCache = new Set<string>((data ?? []).map((r: any) => r.permission_key))
+  return catalogCache
+}
+
+/**
+ * Normaliza chaves de permissão contra o catálogo canônico do banco.
+ * Quando o solicitante é um administrador colaborador, ele não pode conceder
+ * permissões que ele mesmo não possui.
+ */
+async function validPermissionKeys(
+  admin: any, requested: unknown, allowedByCaller: Set<string> | null,
+): Promise<string[]> {
   if (!Array.isArray(requested)) return []
-  const { data } = await admin.from('agency_access_profiles')
-    .select('permission_keys').is('agency_id', null).eq('key', 'admin').maybeSingle()
-  const catalog = new Set<string>((data?.permission_keys ?? []) as string[])
+  const catalog = await permissionCatalog(admin)
   const out = new Set<string>()
   for (const k of requested) {
     const key = String(k)
-    if (catalog.has(key)) out.add(key)
+    if (!catalog.has(key)) continue
+    if (allowedByCaller && !allowedByCaller.has(key)) continue
+    out.add(key)
   }
   return Array.from(out)
 }
@@ -109,13 +125,49 @@ async function resolveProfileId(admin: any, ownerId: string, id: unknown): Promi
   return data.id
 }
 
-async function seatsAvailable(admin: any, ownerId: string): Promise<{ ok: boolean; allowed: number }> {
+/** Vagas: colaboradores ativos/bloqueados + convites pendentes (reservam vaga). */
+async function seatsAvailable(admin: any, ownerId: string): Promise<{ ok: boolean; allowed: number; used: number }> {
   const { data: allowed } = await admin.rpc('team_max_members', { _agency_id: ownerId })
   const max = Number(allowed ?? 3)
-  const { count } = await admin.from('agency_team_members')
-    .select('id', { count: 'exact', head: true })
-    .eq('agency_id', ownerId).in('status', ['active', 'blocked'])
-  return { ok: (count ?? 0) < max, allowed: max }
+  const { data: taken } = await admin.rpc('team_seats_taken', { _agency_id: ownerId })
+  const used = Number(taken ?? 0)
+  return { ok: used < max, allowed: max, used }
+}
+
+const INVITE_FROM = 'Agentes de Sonhos <fernando.nobre@agentesdesonhos.com.br>'
+
+/** Envia o convite por e-mail quando a infraestrutura estiver configurada. */
+async function sendInviteEmail(opts: {
+  to: string; name: string | null; agencyName: string; url: string; expiresAt: string
+}): Promise<boolean> {
+  const key = Deno.env.get('RESEND_API_KEY')
+  if (!key) return false
+  const validade = new Date(opts.expiresAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+  const html = `
+    <div style="font-family:Inter,Arial,sans-serif;max-width:520px;margin:0 auto;color:#111">
+      <h2 style="font-size:20px;margin:0 0 12px">Você foi convidado para a equipe de ${opts.agencyName}</h2>
+      <p style="font-size:14px;line-height:1.6">Olá${opts.name ? ` ${opts.name}` : ''}, use o link abaixo para criar o seu acesso.
+      Você mesmo definirá a sua senha — nenhuma senha é enviada por e-mail.</p>
+      <p style="margin:24px 0"><a href="${opts.url}"
+        style="background:#111;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-size:14px">
+        Criar meu acesso</a></p>
+      <p style="font-size:12px;color:#666">Este convite é válido até ${validade}. Se você não esperava este convite, ignore esta mensagem.</p>
+    </div>`
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: INVITE_FROM, to: [opts.to],
+        subject: `Convite para a equipe de ${opts.agencyName}`,
+        html,
+      }),
+    })
+    return res.ok
+  } catch (e) {
+    console.error('invite email error', e)
+    return false
+  }
 }
 
 Deno.serve(async (req) => {
@@ -140,11 +192,41 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Somente o proprietário da agência administra a equipe.
+    // Proprietário OU colaborador administrador com a permissão team.manage.
     const { data: callerMember } = await admin.from('agency_team_members')
-      .select('id').eq('auth_user_id', callerId).maybeSingle()
-    if (callerMember) return json({ error: 'Apenas o proprietário da agência pode gerenciar a equipe.' }, 403)
-    const ownerId = callerId
+      .select('id, agency_id, status').eq('auth_user_id', callerId).maybeSingle()
+
+    let ownerId = callerId
+    /** Chaves que o solicitante pode delegar (null = proprietário, sem limite). */
+    let allowedByCaller: Set<string> | null = null
+
+    if (callerMember) {
+      if (callerMember.status !== 'active') return json({ error: 'Acesso negado' }, 403)
+      const { data: mine } = await admin.from('agency_team_permissions')
+        .select('permission_key').eq('team_member_id', callerMember.id).eq('enabled', true)
+      const keys = new Set<string>((mine ?? []).map((r: any) => r.permission_key))
+      if (!keys.has('team.manage')) {
+        return json({ error: 'Você não possui permissão para gerenciar a equipe.' }, 403)
+      }
+      ownerId = callerMember.agency_id
+      allowedByCaller = keys
+    }
+
+    const { data: agencyProfile } = await admin.from('profiles')
+      .select('agency_name, name').eq('id', ownerId).maybeSingle()
+    const agencyName = agencyProfile?.agency_name || agencyProfile?.name || 'sua agência'
+
+    /** Bloqueia ações sobre o proprietário e sobre outros administradores de equipe. */
+    const assertTargetAllowed = async (memberId: string): Promise<string | null> => {
+      if (!allowedByCaller) return null
+      if (memberId === callerMember?.id) return 'Você não pode alterar o seu próprio acesso.'
+      const { data: perms } = await admin.from('agency_team_permissions')
+        .select('permission_key').eq('team_member_id', memberId).eq('enabled', true)
+      if ((perms ?? []).some((p: any) => p.permission_key === 'team.manage')) {
+        return 'Apenas o proprietário pode alterar outro administrador de equipe.'
+      }
+      return null
+    }
 
     const body = await req.json()
     const { action } = body
@@ -211,14 +293,14 @@ Deno.serve(async (req) => {
       }
 
       const keys = body.permission_keys
-        ? await validPermissionKeys(admin, body.permission_keys)
-        : await validPermissionKeys(admin, (body.permissions ?? []).map((p: any) => p.permission_key))
+        ? await validPermissionKeys(admin, body.permission_keys, allowedByCaller)
+        : await validPermissionKeys(admin, (body.permissions ?? []).map((p: any) => p.permission_key), allowedByCaller)
       await writePermissions(admin, ownerId, created.id, keys)
       await writeScopes(admin, ownerId, created.id, body.scopes)
       await writeStagePermissions(admin, ownerId, created.id, body.stage_permissions)
 
       await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: created.id, actor_user_id: ownerId,
+        agency_id: ownerId, team_member_id: created.id, actor_user_id: callerId,
         action: 'create_member', module_key: 'team', entity_type: 'team_member', entity_id: created.id,
         details: { login, permissions: keys.length },
       })
@@ -231,6 +313,7 @@ Deno.serve(async (req) => {
       const { data: member } = await admin.from('agency_team_members')
         .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
+      { const deny = await assertTargetAllowed(id); if (deny) return json({ error: deny }, 403) }
 
       const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
       if (body.full_name !== undefined) patch.full_name = str(body.full_name, 120)
@@ -269,8 +352,8 @@ Deno.serve(async (req) => {
 
       if (body.permission_keys !== undefined || body.permissions !== undefined) {
         const keys = body.permission_keys
-          ? await validPermissionKeys(admin, body.permission_keys)
-          : await validPermissionKeys(admin, (body.permissions ?? []).map((p: any) => p.permission_key))
+          ? await validPermissionKeys(admin, body.permission_keys, allowedByCaller)
+          : await validPermissionKeys(admin, (body.permissions ?? []).map((p: any) => p.permission_key), allowedByCaller)
         await writePermissions(admin, ownerId, id, keys)
       }
       if (body.scopes !== undefined) await writeScopes(admin, ownerId, id, body.scopes)
@@ -280,7 +363,7 @@ Deno.serve(async (req) => {
       await admin.from('agency_team_sessions').delete().eq('team_member_id', id)
 
       await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: id, actor_user_id: ownerId,
+        agency_id: ownerId, team_member_id: id, actor_user_id: callerId,
         action: 'update_member', module_key: 'team', entity_type: 'team_member', entity_id: id,
       })
       return json({ ok: true })
@@ -293,6 +376,7 @@ Deno.serve(async (req) => {
       const { data: member } = await admin.from('agency_team_members')
         .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
+      { const deny = await assertTargetAllowed(id); if (deny) return json({ error: deny }, 403) }
 
       const patch: Record<string, unknown> = { status }
       if (status !== 'active') patch.deactivated_at = new Date().toISOString()
@@ -311,7 +395,7 @@ Deno.serve(async (req) => {
         }
       }
       await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: id, actor_user_id: ownerId,
+        agency_id: ownerId, team_member_id: id, actor_user_id: callerId,
         action: `set_status_${status}`, module_key: 'team', entity_type: 'team_member', entity_id: id,
       })
       return json({ ok: true })
@@ -323,12 +407,13 @@ Deno.serve(async (req) => {
       const { data: member } = await admin.from('agency_team_members')
         .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
+      { const deny = await assertTargetAllowed(id); if (deny) return json({ error: deny }, 403) }
       await admin.from('agency_team_members').delete().eq('id', id)
       if (member.auth_user_id) {
         await admin.auth.admin.deleteUser(member.auth_user_id).catch(() => {})
       }
       await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: null, actor_user_id: ownerId,
+        agency_id: ownerId, team_member_id: null, actor_user_id: callerId,
         action: 'delete_member', module_key: 'team', entity_type: 'team_member', entity_id: id,
       })
       return json({ ok: true })
@@ -371,11 +456,20 @@ Deno.serve(async (req) => {
       }
 
       await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, actor_user_id: ownerId, action: 'invite_created',
+        agency_id: ownerId, actor_user_id: callerId, action: 'invite_created',
         module_key: 'team', entity_type: 'team_invite', details: { email },
       })
       const origin = str(body.origin, 200) ?? 'https://app.agentesdesonhos.com.br'
-      return json({ ok: true, invite_url: `${origin}/convite/${inviteToken}` })
+      const inviteUrl = `${origin}/convite/${inviteToken}`
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      const emailed = await sendInviteEmail({
+        to: email, name: str(body.full_name, 120), agencyName, url: inviteUrl, expiresAt,
+      })
+      if (emailed) {
+        await admin.from('agency_team_invites')
+          .update({ last_sent_at: new Date().toISOString() }).eq('token_hash', token_hash)
+      }
+      return json({ ok: true, invite_url: inviteUrl, emailed })
     }
 
     if (action === 'invite_revoke' || action === 'invite_resend') {
@@ -388,7 +482,7 @@ Deno.serve(async (req) => {
       if (action === 'invite_revoke') {
         await admin.from('agency_team_invites').update({ revoked_at: new Date().toISOString() }).eq('id', id)
         await admin.from('agency_team_audit_log').insert({
-          agency_id: ownerId, actor_user_id: ownerId, action: 'invite_revoked',
+          agency_id: ownerId, actor_user_id: callerId, action: 'invite_revoked',
           module_key: 'team', entity_type: 'team_invite', entity_id: id, details: { email: invite.email },
         })
         return json({ ok: true })
@@ -406,11 +500,113 @@ Deno.serve(async (req) => {
         last_sent_at: new Date().toISOString(),
       }).eq('id', id)
       await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, actor_user_id: ownerId, action: 'invite_resent',
+        agency_id: ownerId, actor_user_id: callerId, action: 'invite_resent',
         module_key: 'team', entity_type: 'team_invite', entity_id: id, details: { email: invite.email },
       })
       const origin = str(body.origin, 200) ?? 'https://app.agentesdesonhos.com.br'
-      return json({ ok: true, invite_url: `${origin}/convite/${inviteToken}` })
+      const resendUrl = `${origin}/convite/${inviteToken}`
+      const emailed = await sendInviteEmail({
+        to: invite.email, name: null, agencyName, url: resendUrl,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      })
+      return json({ ok: true, invite_url: resendUrl, emailed })
+    }
+
+    // ── Perfis de acesso personalizados ───────────────────────
+    if (action?.startsWith('profile_')) {
+      const loadProfile = async (id: string) => {
+        const { data } = await admin.from('agency_access_profiles')
+          .select('id, agency_id, key, name, is_native, permission_keys, scopes').eq('id', id).maybeSingle()
+        return data
+      }
+
+      if (action === 'profile_create' || action === 'profile_duplicate') {
+        const name = str(body.name, 120)
+        if (!name) return json({ error: 'Informe o nome do perfil.' }, 400)
+        let keys: string[] = []
+        let scopes: Record<string, string> = {}
+        if (action === 'profile_duplicate') {
+          const src = await loadProfile(String(body.source_id ?? ''))
+          if (!src) return json({ error: 'Perfil de origem não encontrado.' }, 404)
+          if (src.agency_id && src.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
+          keys = await validPermissionKeys(admin, src.permission_keys ?? [], allowedByCaller)
+          scopes = (src.scopes ?? {}) as Record<string, string>
+        } else {
+          keys = await validPermissionKeys(admin, body.permission_keys ?? [], allowedByCaller)
+          scopes = (body.scopes ?? {}) as Record<string, string>
+        }
+        const { data: created, error } = await admin.from('agency_access_profiles').insert({
+          agency_id: ownerId, key: `custom_${crypto.randomUUID().slice(0, 8)}`,
+          name, description: str(body.description, 240),
+          is_native: false, permission_keys: keys, scopes,
+        }).select('id').single()
+        if (error) return json({ error: error.message }, 400)
+        await admin.from('agency_team_audit_log').insert({
+          agency_id: ownerId, actor_user_id: callerId, action: 'access_profile_created',
+          module_key: 'team', entity_type: 'access_profile', entity_id: created.id, details: { name },
+        })
+        return json({ ok: true, id: created.id })
+      }
+
+      const target = await loadProfile(String(body.id ?? ''))
+      if (!target) return json({ error: 'Perfil não encontrado.' }, 404)
+      if (target.is_native || !target.agency_id) {
+        return json({ error: 'Perfis nativos não podem ser alterados ou excluídos.' }, 400)
+      }
+      if (target.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
+
+      if (action === 'profile_update') {
+        const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+        if (body.name !== undefined) {
+          const name = str(body.name, 120)
+          if (!name) return json({ error: 'Informe o nome do perfil.' }, 400)
+          patch.name = name
+        }
+        if (body.description !== undefined) patch.description = str(body.description, 240)
+        if (body.permission_keys !== undefined) {
+          patch.permission_keys = await validPermissionKeys(admin, body.permission_keys, allowedByCaller)
+        }
+        if (body.scopes !== undefined && body.scopes && typeof body.scopes === 'object') {
+          patch.scopes = Object.fromEntries(
+            Object.entries(body.scopes as Record<string, string>)
+              .filter(([, v]) => SCOPE_VALUES.includes(String(v)))
+          )
+        }
+        const { error } = await admin.from('agency_access_profiles').update(patch).eq('id', target.id)
+        if (error) return json({ error: error.message }, 400)
+        await admin.from('agency_team_audit_log').insert({
+          agency_id: ownerId, actor_user_id: callerId, action: 'access_profile_updated',
+          module_key: 'team', entity_type: 'access_profile', entity_id: target.id,
+        })
+        return json({ ok: true })
+      }
+
+      if (action === 'profile_delete') {
+        const { count } = await admin.from('agency_team_members')
+          .select('id', { count: 'exact', head: true }).eq('access_profile_id', target.id)
+        const migrateTo = body.migrate_to_profile_id
+          ? await resolveProfileId(admin, ownerId, body.migrate_to_profile_id) : null
+        if ((count ?? 0) > 0) {
+          if (!migrateTo) {
+            return json({
+              error: `Este perfil está em uso por ${count} colaborador(es). Escolha um perfil para migrar antes de excluir.`,
+              in_use: count,
+            }, 400)
+          }
+          await admin.from('agency_team_members')
+            .update({ access_profile_id: migrateTo }).eq('access_profile_id', target.id)
+        }
+        const { error } = await admin.from('agency_access_profiles').delete().eq('id', target.id)
+        if (error) return json({ error: error.message }, 400)
+        await admin.from('agency_team_audit_log').insert({
+          agency_id: ownerId, actor_user_id: callerId, action: 'access_profile_deleted',
+          module_key: 'team', entity_type: 'access_profile', entity_id: target.id,
+          details: { migrated_to: migrateTo, members: count ?? 0 },
+        })
+        return json({ ok: true })
+      }
+
+      return json({ error: 'Ação desconhecida' }, 400)
     }
 
     return json({ error: 'Ação desconhecida' }, 400)
