@@ -24,6 +24,7 @@ import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsInclude
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
+import CruiseItineraryTimeline from "@/components/quote/CruiseItineraryTimeline";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
 import {
   computeExtrasTotal,
