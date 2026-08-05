@@ -33,7 +33,7 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return toast.error('Informe um e-mail válido')
     if (!profileId) return toast.error('Selecione o perfil de acesso do convidado')
     mutation.mutate({
-      action: 'invite_create',
+      action: 'invite_create', origin: window.location.origin,
       email: email.trim(),
       full_name: fullName.trim() || null,
       role_title: roleTitle.trim() || null,
@@ -54,7 +54,7 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
   }
 
   const act = (action: string, id: string, successMsg: string) => {
-    mutation.mutate({ action, id }, {
+    mutation.mutate({ action, id, origin: window.location.origin }, {
       onSuccess: (data: any) => {
         if (data?.invite_url) void navigator.clipboard.writeText(data.invite_url).catch(() => {})
         toast.success(successMsg)

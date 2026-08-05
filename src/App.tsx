@@ -113,6 +113,7 @@ const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
 const Atualizacoes = lazy(() => import("./pages/Atualizacoes"));
 const PersonalizadorLaminas = lazy(() => import("./pages/PersonalizadorLaminas"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const AceitarConvite = lazy(() => import("./pages/AceitarConvite"));
 const CadastroLink = lazy(() => import("./pages/CadastroLink"));
 const LeadFormPublic = lazy(() => import("./pages/LeadFormPublic"));
 const MeusLeads = lazy(() => import("./pages/MeusLeads"));
@@ -232,6 +233,7 @@ const App = () => (
             <Route path="/lp/:slug" element={<SalesLandingPublic />} />
             <Route path="/ativar-cartao" element={<AtivarCartao />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/convite/:token" element={<AceitarConvite />} />
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/captura-cartao/:token" element={<CardCaptureQuickAccess />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
