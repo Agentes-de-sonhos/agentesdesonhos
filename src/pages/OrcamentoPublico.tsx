@@ -24,6 +24,7 @@ import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsInclude
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
+import CruiseItineraryTimeline from "@/components/quote/CruiseItineraryTimeline";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
 import {
   computeExtrasTotal,
@@ -678,6 +679,7 @@ function CruiseBody({ data }: { data: any }) {
       {data.cabin_type && (
         <div className="text-sm text-foreground/80"><span className="text-muted-foreground">Cabine:</span> <span className="font-medium">{data.cabin_type}</span></div>
       )}
+      <CruiseItineraryTimeline itinerary={data.itinerary} />
       {data.notes && (
         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
           <FormattedText>{data.notes}</FormattedText>
