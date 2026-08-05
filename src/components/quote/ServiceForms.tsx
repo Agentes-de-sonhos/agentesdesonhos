@@ -2011,15 +2011,97 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
               </Popover><FormMessage /></FormItem>
           )} />
         </div>
-        <FormField control={form.control} name="cabin_type" render={({ field }) => (
-          <FormItem><FormLabel>Tipo de Cabine</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger></FormControl>
-              <SelectContent>
-                <SelectItem value="interna">Interna</SelectItem><SelectItem value="externa">Externa</SelectItem>
-                <SelectItem value="varanda">Varanda</SelectItem><SelectItem value="suite">Suíte</SelectItem>
-              </SelectContent>
-            </Select><FormMessage /></FormItem>
-        )} />
+        {/* ─────────── Opções de cabine ─────────── */}
+        <div className="rounded-lg border bg-card/50 p-4 space-y-3">
+          <div>
+            <p className="text-sm font-semibold">🛏️ Opções de cabine</p>
+            <p className="text-[11px] text-muted-foreground">
+              Cadastre alternativas para o cliente escolher (ex.: Interna e Varanda). Os valores não são somados —
+              somente a opção marcada abaixo entra no total do orçamento.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            {cabins.map((cabin, i) => (
+              <div key={cabin.id || i} className="rounded-md border bg-background p-3 space-y-2">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Select value={cabin.cabin_type} onValueChange={(v) => updateCabin(i, { cabin_type: v })}>
+                    <SelectTrigger><SelectValue placeholder="Tipo de cabine" /></SelectTrigger>
+                    <SelectContent>
+                      {CRUISE_CABIN_TYPES.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number" min={0} step="0.01" placeholder="Valor total (R$)"
+                    value={cabin.price || ""}
+                    onChange={(e) => updateCabin(i, { price: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+                {cabin.cabin_type === "outro" && (
+                  <Input
+                    placeholder="Nome da cabine (ex.: Suíte Yacht Club)"
+                    value={cabin.custom_label || ""}
+                    onChange={(e) => updateCabin(i, { custom_label: e.target.value })}
+                  />
+                )}
+                <div className="flex items-center justify-between gap-2">
+                  <label className="flex items-center gap-2 text-[12px] text-muted-foreground cursor-pointer">
+                    <input
+                      type="radio" name="cruise-base-cabin" checked={!!cabin.is_base}
+                      onChange={() => setBaseCabin(i)} className="h-3.5 w-3.5 accent-primary"
+                    />
+                    Considerar no total do orçamento
+                  </label>
+                  <Button
+                    type="button" variant="ghost" size="icon" className="h-7 w-7"
+                    disabled={cabins.length <= 1} onClick={() => removeCabin(i)} aria-label="Remover cabine"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={addCabin}>
+              <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar outra cabine
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              Total do orçamento: <span className="font-semibold text-foreground">
+                {basePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              </span>{" "}
+              ({cabinOptionLabel(cabins.find((c) => c.is_base) || cabins[0] || { cabin_type: "" })})
+            </p>
+          </div>
+        </div>
+
+        {/* ─────────── Fotos e vídeo do navio ─────────── */}
+        <div className="rounded-lg border bg-card/50 p-4 space-y-3">
+          <div>
+            <p className="text-sm font-semibold">📸 Fotos e vídeo do navio</p>
+            <p className="text-[11px] text-muted-foreground">
+              Envie várias fotos do navio e, se quiser, um vídeo do YouTube ou Vimeo.
+            </p>
+          </div>
+          {photoSlot}
+          <FormField control={form.control} name="ship_video_url" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Vídeo do navio (opcional)</FormLabel>
+              <FormControl>
+                <Input placeholder="https://www.youtube.com/watch?v=... ou https://vimeo.com/123456789" {...field} />
+              </FormControl>
+              <p className={cn("text-[11px]", videoInvalid ? "text-destructive" : "text-muted-foreground")}>
+                {videoInvalid
+                  ? "Link não suportado. Use uma URL do YouTube (youtube.com/watch?v=... ou youtu.be/...) ou do Vimeo (vimeo.com/123456789)."
+                  : "Formatos aceitos: YouTube e Vimeo."}
+              </p>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
 
         {/* ─────────── Itinerário do cruzeiro ─────────── */}
         <div className="rounded-lg border bg-card/50 p-4 space-y-3">
@@ -2129,10 +2211,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndDate,
           </div>
         </div>
 
-        <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor Total (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-        )} />
-        {renderPaymentSlot(paymentSlot, form.watch("price"))}
+        {renderPaymentSlot(paymentSlot, basePrice)}
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
