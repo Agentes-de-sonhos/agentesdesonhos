@@ -9501,6 +9501,44 @@ export type Database = {
           },
         ]
       }
+      quote_sections: {
+        Row: {
+          created_at: string
+          id: string
+          order_index: number
+          quote_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          quote_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_index?: number
+          quote_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_sections_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_services: {
         Row: {
           amount: number
@@ -9519,6 +9557,7 @@ export type Database = {
           payment_method: string | null
           payment_type: string | null
           quote_id: string
+          section_id: string | null
           service_data: Json
           service_type: string
           updated_at: string
@@ -9540,6 +9579,7 @@ export type Database = {
           payment_method?: string | null
           payment_type?: string | null
           quote_id: string
+          section_id?: string | null
           service_data?: Json
           service_type: string
           updated_at?: string
@@ -9561,6 +9601,7 @@ export type Database = {
           payment_method?: string | null
           payment_type?: string | null
           quote_id?: string
+          section_id?: string | null
           service_data?: Json
           service_type?: string
           updated_at?: string
@@ -9571,6 +9612,13 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_services_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "quote_sections"
             referencedColumns: ["id"]
           },
         ]
