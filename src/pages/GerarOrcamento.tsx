@@ -1269,6 +1269,29 @@ export default function GerarOrcamento() {
         </div>
       </div>
 
+      {/* Escolha do tipo de serviço ao adicionar a partir de uma seção */}
+      <Dialog
+        open={sectionServicePickerOpen}
+        onOpenChange={(open) => {
+          setSectionServicePickerOpen(open);
+          if (!open && !selectedServiceType) setPendingSectionId(null);
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Adicionar serviço à seção</DialogTitle>
+          </DialogHeader>
+          <ServiceCategoryGrid
+            countByType={serviceCountByType}
+            onSelect={(type) => {
+              setEditingService(null);
+              setSelectedServiceType(type);
+              setSectionServicePickerOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
       {/* Modal de serviço (criação/edição) */}
       <ServiceModal
         open={!!selectedServiceType}
