@@ -260,7 +260,7 @@ export function useQuote(id: string | undefined) {
 
   const addServiceMutation = useMutation({
     mutationFn: async ({
-      service_type, service_data, amount, option_label, description, image_url, image_urls,
+      service_type, service_data, amount, option_label, description, image_url, image_urls, section_id,
     }: {
       service_type: ServiceType;
       service_data: ServiceData;
@@ -269,6 +269,8 @@ export function useQuote(id: string | undefined) {
       description?: string;
       image_url?: string;
       image_urls?: string[];
+      /** Optional section the new service should be created into. */
+      section_id?: string | null;
     }) => {
       if (!id) throw new Error("Quote ID is required");
       // Read the latest order_index from the DB to avoid collisions when
@@ -295,6 +297,7 @@ export function useQuote(id: string | undefined) {
           description: description || null,
           image_url: image_url || null,
           image_urls: image_urls && image_urls.length > 0 ? image_urls : [],
+          section_id: section_id ?? null,
         } as any)
         .select()
         .single();
