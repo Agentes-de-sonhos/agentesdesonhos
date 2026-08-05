@@ -1449,22 +1449,50 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Serviços incluídos</h2>
               <p className="text-sm text-muted-foreground">Toque em cada item para ver os detalhes completos.</p>
             </div>
-            <div className="space-y-3">
-              {quote.services.map((service, index) => (
-                <CollapsibleServiceCard
-                  key={service.id}
-                  service={service}
-                  showPrice={isNewLayout ? false : showDetailedPrices}
-                  isOpen={openServiceIndices.has(index)}
-                  onToggle={() => handleToggleService(index)}
-                  showPaymentPerService={isNewLayout ? false : useServicePayment}
-                  quote={quote}
-                  showInvestmentInline={
-                    investmentLayout === "ungrouped" && showDetailedPrices
-                  }
-                />
-              ))}
-            </div>
+            {(() => {
+              const renderCard = (service: QuoteService) => {
+                const index = quote.services!.findIndex((s) => s.id === service.id);
+                return (
+                  <CollapsibleServiceCard
+                    key={service.id}
+                    service={service}
+                    showPrice={isNewLayout ? false : showDetailedPrices}
+                    isOpen={openServiceIndices.has(index)}
+                    onToggle={() => handleToggleService(index)}
+                    showPaymentPerService={isNewLayout ? false : useServicePayment}
+                    quote={quote}
+                    showInvestmentInline={
+                      investmentLayout === "ungrouped" && showDetailedPrices
+                    }
+                  />
+                );
+              };
+
+              const layout = buildQuoteSectionLayout((quote as any).sections, quote.services);
+              const groups = visibleSectionGroups(layout);
+
+              // Sem seções manuais → comportamento atual, inalterado.
+              if (groups.length === 0) {
+                return <div className="space-y-3">{quote.services!.map(renderCard)}</div>;
+              }
+
+              return (
+                <div className="space-y-3">
+                  {groups.map((group) => (
+                    <PublicSectionAccordion
+                      key={group.section.id}
+                      title={group.section.title}
+                      count={group.services.length}
+                    >
+                      <div className="space-y-3">{group.services.map(renderCard)}</div>
+                    </PublicSectionAccordion>
+                  ))}
+                  {layout.unsectioned.length > 0 && (
+                    <div className="space-y-3 pt-1">{layout.unsectioned.map(renderCard)}</div>
+                  )}
+                </div>
+              );
+            })()}
           </section>
         )}
 
