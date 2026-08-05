@@ -21,7 +21,7 @@ const TEAM_ALLOWED_PREFIXES = [
 const TEAM_PUBLIC_PREFIXES = [
   '/orcamento/', '/roteiro/', '/viagem/', '/c/', '/v/', '/cadastro/',
   '/formulario/', '/lp/', '/pesquisa/', '/ativar-cartao',
-  '/politicasdeprivacidade', '/termosdeuso', '/reset-password',
+  '/politicasdeprivacidade', '/termosdeuso', '/reset-password', '/convite/',
 ]
 
 function isAllowedForTeam(path: string) {
