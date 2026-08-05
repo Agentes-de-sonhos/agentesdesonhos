@@ -389,7 +389,13 @@ export default function GerarOrcamento() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
-  const { quote, addService, updateService, deleteService, reorderServices, isAddingService } = useQuote(id);
+  const {
+    quote, addService, updateService, deleteService, reorderServices, isAddingService,
+    createSection, renameSection, deleteSection, reorderSections, saveServiceLayout, isSavingSections,
+  } = useQuote(id);
+  // Seção destino quando o usuário cria um serviço a partir de uma seção
+  const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
+  const [sectionServicePickerOpen, setSectionServicePickerOpen] = useState(false);
   const { canUse: canCreateQuote, remaining: quotesRemaining, hasLimit, incrementUsage } = useDailyLimit("quote_generator");
 
   // Persist UI state in sessionStorage so tab switches don't lose progress
