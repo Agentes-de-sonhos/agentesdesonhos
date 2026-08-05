@@ -37,6 +37,16 @@ import type {
   RailTransportData, RailTransportType, RailTransportClass,
 } from "@/types/quote";
 import { RAIL_TYPE_LABELS, RAIL_CLASS_LABELS } from "@/types/quote";
+import {
+  CRUISE_CABIN_TYPES,
+  baseCabinPrice,
+  cabinOptionLabel,
+  ensureSingleBase,
+  newCabinId,
+  normalizeCruiseCabins,
+  parseShipVideoUrl,
+  type CruiseCabinOption,
+} from "@/lib/cruiseCabins";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 import { HotelSmartImport } from "./hotel-import/HotelSmartImport";
