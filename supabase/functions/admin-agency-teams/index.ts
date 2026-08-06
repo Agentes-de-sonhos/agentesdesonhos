@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
       const { data: subusers } = await admin.from('agency_team_members').select('auth_user_id')
       const subuserIds = new Set((subusers ?? []).map((s: any) => s.auth_user_id).filter(Boolean))
 
-      // 3) E-mails em lote via listUsers (sem getUserById por linha).
+      // 3) E-mails em lote via listUsers (nunca uma consulta de usuário por linha).
       const emailById = new Map<string, string>()
       for (let p = 1; p <= 40; p++) {
         const { data, error } = await admin.auth.admin.listUsers({ page: p, perPage: 1000 })

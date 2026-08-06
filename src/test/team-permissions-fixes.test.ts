@@ -70,6 +70,7 @@ describe('Edge Function admin-agency-teams — listagem global', () => {
   it('resolve e-mails em lote com listUsers, sem getUserById por linha', () => {
     expect(agencies).toContain('admin.auth.admin.listUsers({ page: p, perPage: 1000 })')
     expect(agencies).not.toContain('getUserById')
+    expect(agencies).not.toMatch(/for \(const .* of .*\) \{[^}]*auth\.admin/)
   })
 
   it('busca por nome da agência, responsável, e-mail e UUID', () => {
