@@ -74,11 +74,11 @@ function LimitOverrideCard({ agencyId, agencyName }: { agencyId: string; agencyN
 
   const save = () => {
     mutation.mutate({ agencyId, maxMembers: Number(value), reason: reason.trim() }, {
-      onSuccess: (res: any) => {
-        toast.success(res?.warning ?? 'Limite administrativo atualizado.')
+      onSuccess: (res: { warning?: string | null } | unknown) => {
+        toast.success((res as { warning?: string | null })?.warning ?? 'Limite administrativo atualizado.')
         setValue(''); setReason(''); setConfirm(null)
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Não foi possível concluir a ação.'),
     })
   }
 
@@ -87,7 +87,7 @@ function LimitOverrideCard({ agencyId, agencyName }: { agencyId: string; agencyN
       toast.success('Limite administrativo removido. O limite do plano volta a valer.')
       setConfirm(null)
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Não foi possível concluir a ação.'),
   })
 
   return (
@@ -226,7 +226,7 @@ export function AdminAgencyTeamsManager() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={team} onValueChange={v => resetPage(setTeam)(v as any)}>
+            <Select value={team} onValueChange={v => resetPage(setTeam)(v as 'all' | 'with' | 'without')}>
               <SelectTrigger><SelectValue placeholder="Equipe" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Com ou sem equipe</SelectItem>
