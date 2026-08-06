@@ -57,11 +57,11 @@ const STATUS_ACTION_COPY: Record<StatusAction, { title: string; description: str
 export function TeamManagementCenter() {
   const scope = useTeamScope()
   const { can, isMaster } = usePermissions()
-  // Comunidade acompanha `team.manage` (validado também na RPC do servidor).
+  // Comunidade fica restrita ao proprietário (master) e ao administrador da plataforma.
   // Auditoria exige `audit.view` para colaborador; proprietário (master) e o
   // administrador da plataforma sempre veem.
   const canViewAudit = scope.isPlatformAdmin || isMaster || can('audit.view')
-  const canSeeCommunity = true
+  const canSeeCommunity = scope.isPlatformAdmin || isMaster
   const tabCount = 3 + (canSeeCommunity ? 1 : 0) + (canViewAudit ? 1 : 0)
   // Tailwind não gera classes dinâmicas: mapeamento explícito das colunas.
   const TAB_COLS: Record<number, string> = { 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-4', 5: 'sm:grid-cols-5' }
@@ -86,7 +86,7 @@ export function TeamManagementCenter() {
         )
         setConfirmStatus(null)
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Erro inesperado'),
     })
   }
 
@@ -94,7 +94,7 @@ export function TeamManagementCenter() {
     if (!confirmDelete) return
     mutation.mutate({ action: 'delete', id: confirmDelete.id }, {
       onSuccess: () => { toast.success('Colaborador excluído'); setConfirmDelete(null) },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Erro inesperado'),
     })
   }
 
