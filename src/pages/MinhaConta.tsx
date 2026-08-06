@@ -35,6 +35,9 @@ import {
   setWorkspacePref,
   isWorkspaceEligible,
 } from "@/workspace/featureFlag";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useTeamQuota } from "@/hooks/useTeamMembers";
+import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 
 export default function MinhaConta() {
   const { user } = useAuth();
@@ -43,6 +46,10 @@ export default function MinhaConta() {
   const [loadingPortal, setLoadingPortal] = useState<null | "manage" | "cancel">(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+  const { isMaster, can } = usePermissions();
+  const canManageTeam = isMaster || can("team.manage");
+  const { data: teamQuota } = useTeamQuota();
   // Default ON for eligible users; only "off" disables.
   const [tabsEnabled, setTabsEnabled] = useState<boolean>(() => getWorkspacePref() !== "off");
   useEffect(() => {
