@@ -348,6 +348,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           
 </Routes>
+          </RoutePermissionGuard>
           </Suspense>
           <WhatsAppSupportButton />
           </NewLeadAlertProvider>
