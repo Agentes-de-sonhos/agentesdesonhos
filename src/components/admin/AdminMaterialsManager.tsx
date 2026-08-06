@@ -48,6 +48,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SupplierCombobox } from "./SupplierCombobox";
 import { MultiFileUpload } from "./MultiFileUpload";
+import { MaterialsDriveImportPanel } from "./MaterialsDriveImportPanel";
 
 const CATEGORIES = [
   "Operadoras de turismo",
@@ -1308,7 +1309,15 @@ export function AdminMaterialsManager() {
               {renderGalleryGrid(manualGalleries)}
             </TabsContent>
             <TabsContent value="drive">
-              {renderDriveContent()}
+              <div className="space-y-8">
+                <MaterialsDriveImportPanel />
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Sincronização automática por operadora
+                  </h3>
+                  {renderDriveContent()}
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         )}
