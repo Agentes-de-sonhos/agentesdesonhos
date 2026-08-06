@@ -15,6 +15,8 @@ import {
 import {
   Building2, Users, MailWarning, ShieldCheck, Search, Loader2, Settings2, ChevronLeft, ChevronRight,
 } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { ShieldAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   useAdminAgencyDetail, useAdminAgencyLimitOverride, useAdminAgencyList,
@@ -46,7 +48,7 @@ function Kpi({ icon: Icon, label, value, hint }: {
 }
 
 /** Painel de limite administrativo por agência. */
-function LimitOverrideCard({ agencyId }: { agencyId: string }) {
+function LimitOverrideCard({ agencyId, agencyName }: { agencyId: string; agencyName: string }) {
   const { data, isLoading } = useAdminAgencyDetail(agencyId)
   const mutation = useAdminAgencyLimitOverride()
   const quota = data?.quota
@@ -138,8 +140,11 @@ function LimitOverrideCard({ agencyId }: { agencyId: string }) {
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {confirm === 'clear'
-                  ? 'O limite volta a seguir o plano da agência. Nenhum colaborador é desativado, mas novas inclusões passam a respeitar o limite do plano.'
-                  : `O limite passa a ser de ${value} acessos. Nenhum colaborador é desativado; se o novo limite for menor que o uso atual, apenas novas inclusões e convites ficam bloqueados. Esta ação é registrada na auditoria da agência.`}
+                  ? `Agência ${agencyName}. O limite administrativo atual (${current ?? effective} acessos) será removido e o limite do plano `
+                    + `(${quota?.plan_limit ?? 3} acessos) volta a valer. Nenhum colaborador é desativado; apenas novas inclusões e convites passam a respeitar o limite do plano.`
+                  : `Agência ${agencyName}. O limite passa de ${effective} para ${value} acessos (uso atual: ${quota?.used ?? 0}). `
+                    + 'Reduzir o limite abaixo do uso atual NÃO desativa nenhum usuário — apenas novas inclusões e convites ficam bloqueados. '
+                    + 'Esta ação é registrada na auditoria da agência como ação do administrador da plataforma.'}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -319,7 +324,21 @@ export function AdminAgencyTeamsManager() {
               }}
             >
               <div className="space-y-4">
-                <LimitOverrideCard agencyId={selected.agency_id} />
+                <Alert variant="destructive" className="border-amber-500/60 bg-amber-500/10 text-foreground">
+                  <ShieldAlert className="h-4 w-4 text-amber-600" />
+                  <AlertTitle className="text-sm">
+                    Você está administrando a equipe da agência {selected.agency_name} como administrador da plataforma.
+                  </AlertTitle>
+                  <AlertDescription className="space-y-0.5 text-xs">
+                    <p>
+                      Responsável: {selected.owner_name ?? '—'}
+                      {selected.owner_email ? ` · ${selected.owner_email}` : ''}
+                    </p>
+                    <p>Plano: {selected.plan} · Agência (UUID): <span className="font-mono">{selected.agency_id}</span></p>
+                    <p>Todas as alterações ficam registradas na auditoria desta agência.</p>
+                  </AlertDescription>
+                </Alert>
+                <LimitOverrideCard agencyId={selected.agency_id} agencyName={selected.agency_name} />
                 <TeamManagementCenter />
               </div>
             </TeamScopeProvider>
