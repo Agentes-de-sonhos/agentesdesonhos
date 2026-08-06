@@ -283,11 +283,14 @@ Deno.serve(async (req) => {
                    access_profile_id, status, last_login_at, invited_at, activated_at, created_at,
                    agency_access_profiles ( name, key )`)
           .eq('agency_id', agencyId).order('created_at', { ascending: false })
-        const ids = (data ?? []).map((m: any) => m.id)
-        const [{ data: perms }, { data: stages }] = await Promise.all([
-          admin.from('agency_team_permissions').select('team_member_id').in('team_member_id', uuidList(ids)).eq('enabled', true),
-          admin.from('agency_team_stage_permissions').select('team_member_id').in('team_member_id', uuidList(ids)),
-        ])
+        const ids = uuidList((data ?? []).map((m: any) => m.id))
+        // Lista vazia => nenhuma consulta (sem fallback de UUID falso).
+        const [{ data: perms }, { data: stages }] = ids.length
+          ? await Promise.all([
+            admin.from('agency_team_permissions').select('team_member_id').in('team_member_id', ids).eq('enabled', true),
+            admin.from('agency_team_stage_permissions').select('team_member_id').in('team_member_id', ids),
+          ])
+          : [{ data: [] as any[] }, { data: [] as any[] }]
         const countBy = (rows: any[] | null, id: string) => (rows ?? []).filter(r => r.team_member_id === id).length
         return json(sanitizeRows((data ?? []).map((m: any) => ({
           ...m,
@@ -385,9 +388,11 @@ Deno.serve(async (req) => {
         if (from) q = q.gte('created_at', from)
         if (to) q = q.lte('created_at', to)
         const { data } = await q.order('created_at', { ascending: false }).limit(300)
-        const ids = Array.from(new Set((data ?? []).map((r: any) => r.team_member_id).filter(Boolean)))
-        const { data: names } = await admin.from('agency_team_members')
-          .select('id, full_name').in('id', uuidList(ids))
+        const ids = uuidList(Array.from(new Set((data ?? []).map((r: any) => r.team_member_id))))
+        // Lista vazia => nenhuma consulta (sem fallback de UUID falso).
+        const { data: names } = ids.length
+          ? await admin.from('agency_team_members').select('id, full_name').in('id', ids)
+          : { data: [] as any[] }
         return json(sanitizeRows((data ?? []).map((r: any) => ({
           ...r,
           member_name: (names ?? []).find((n: any) => n.id === r.team_member_id)?.full_name ?? null,
