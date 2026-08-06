@@ -160,8 +160,9 @@ describe('identificadores seguros para consultas', () => {
   })
 
   it('nunca gera lista vazia nem valor inválido em consultas in()', () => {
-    expect(uuidList([])).toEqual([NIL_UUID])
-    expect(uuidList(['x', null, undefined])).toEqual([NIL_UUID])
+    // Lista vazia agora devolve [] — quem chama PULA a consulta (sem UUID falso).
+    expect(uuidList([])).toEqual([])
+    expect(uuidList(['x', null, undefined])).toEqual([])
     expect(uuidList([AGENCY, 'x', OTHER])).toEqual([AGENCY, OTHER])
     expect(NIL_UUID).toBe('00000000-0000-0000-0000-000000000000')
     // O UUID zero é válido para o Postgres (nunca causa erro 22P02).

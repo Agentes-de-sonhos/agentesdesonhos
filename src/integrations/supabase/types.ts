@@ -14620,7 +14620,14 @@ export type Database = {
         }[]
       }
       team_audit_log: {
-        Args: { _limit?: number; _member_id?: string }
+        Args: {
+          _action?: string
+          _from?: string
+          _limit?: number
+          _member_id?: string
+          _module_key?: string
+          _to?: string
+        }
         Returns: {
           action: string
           actor_is_platform_admin: boolean
