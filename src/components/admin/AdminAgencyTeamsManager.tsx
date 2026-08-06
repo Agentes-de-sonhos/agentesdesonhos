@@ -150,7 +150,11 @@ function LimitOverrideCard({ agencyId, agencyName }: { agencyId: string; agencyN
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction disabled={mutation.isPending}
-                onClick={e => { e.preventDefault(); confirm === 'clear' ? clear() : save() }}>
+                onClick={e => {
+                  e.preventDefault()
+                  if (confirm === 'clear') clear()
+                  else save()
+                }}>
                 {confirm === 'clear' ? 'Remover' : 'Confirmar'}
               </AlertDialogAction>
             </AlertDialogFooter>
