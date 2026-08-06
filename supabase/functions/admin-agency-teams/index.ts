@@ -89,25 +89,127 @@ Deno.serve(async (req) => {
       const pendingOnly = body.pending_invites === true
       const page = Math.max(1, Number(body.page ?? 1) || 1)
       const pageSize = Math.min(PAGE_MAX, Math.max(5, Number(body.page_size ?? 20) || 20))
+      const term = search?.trim().toLowerCase() ?? ''
 
-      // Listagem e paginação são resolvidas no banco (inclui agências sem equipe).
-      const { data, error } = await admin.rpc('admin_agency_teams_list', {
-        _search: search,
-        _plan: planFilter && planFilter !== 'all' ? planFilter : null,
-        _team: teamFilter,
-        _at_limit: atLimitOnly,
-        _pending: pendingOnly,
-        _limit: pageSize,
-        _offset: (page - 1) * pageSize,
-      })
-      if (error) {
-        console.error('admin_agency_teams_list error', error)
-        return json({ error: 'Não foi possível carregar as agências.' }, 400)
+      // 1) Todos os perfis proprietários (o UID da agência é profiles.user_id).
+      //    Perfis paginados em lote — nunca uma consulta por linha.
+      const profiles: any[] = []
+      const PROFILE_BATCH = 1000
+      for (let from = 0; from < 20_000; from += PROFILE_BATCH) {
+        const { data, error } = await admin.from('profiles')
+          .select('user_id, name, agency_name')
+          .not('user_id', 'is', null)
+          .order('user_id')
+          .range(from, from + PROFILE_BATCH - 1)
+        if (error) {
+          console.error('profiles batch error', error)
+          return json({ error: 'Não foi possível carregar as agências.' }, 400)
+        }
+        profiles.push(...(data ?? []))
+        if ((data ?? []).length < PROFILE_BATCH) break
       }
-      const rows = (data ?? []) as any[]
-      const total = Number(rows[0]?.total_count ?? 0)
-      const items = rows.map(({ total_count: _t, ...rest }) => rest)
-      return json({ items, total, page, page_size: pageSize })
+
+      // 2) Colaboradores nunca são agências.
+      const { data: subusers } = await admin.from('agency_team_members').select('auth_user_id')
+      const subuserIds = new Set((subusers ?? []).map((s: any) => s.auth_user_id).filter(Boolean))
+
+      // 3) E-mails em lote via listUsers (sem getUserById por linha).
+      const emailById = new Map<string, string>()
+      for (let p = 1; p <= 40; p++) {
+        const { data, error } = await admin.auth.admin.listUsers({ page: p, perPage: 1000 })
+        if (error) break
+        const users = (data?.users ?? []) as any[]
+        users.forEach(u => { if (u?.id && u?.email) emailById.set(u.id, String(u.email)) })
+        if (users.length < 1000) break
+      }
+
+      // 4) Equipe, convites, limites e assinaturas — sempre em lote.
+      const [membersRes, invitesRes, overridesRes, planLimitsRes, subsRes] = await Promise.all([
+        admin.from('agency_team_members').select('agency_id, status, last_login_at, updated_at'),
+        admin.from('agency_team_invites').select('agency_id, accepted_at, revoked_at, expires_at'),
+        admin.from('agency_team_limit_overrides').select('agency_id, max_members'),
+        admin.from('plan_team_limits').select('plan, max_members'),
+        admin.from('subscriptions').select('user_id, plan, is_active, expires_at').eq('is_active', true),
+      ])
+      const now = Date.now()
+      const memberAgg = new Map<string, { active: number; inactive: number; seats: number; last: string | null }>()
+      ;(membersRes.data ?? []).forEach((m: any) => {
+        const cur = memberAgg.get(m.agency_id) ?? { active: 0, inactive: 0, seats: 0, last: null }
+        if (m.status === 'active') cur.active += 1
+        if (m.status === 'blocked' || m.status === 'disabled') cur.inactive += 1
+        if (m.status === 'active' || m.status === 'blocked') cur.seats += 1
+        const stamp = m.last_login_at ?? m.updated_at ?? null
+        if (stamp && (!cur.last || stamp > cur.last)) cur.last = stamp
+        memberAgg.set(m.agency_id, cur)
+      })
+      const pendingAgg = new Map<string, number>()
+      ;(invitesRes.data ?? []).forEach((i: any) => {
+        if (i.accepted_at || i.revoked_at || new Date(i.expires_at).getTime() <= now) return
+        pendingAgg.set(i.agency_id, (pendingAgg.get(i.agency_id) ?? 0) + 1)
+      })
+      const overrideById = new Map<string, number>()
+      ;(overridesRes.data ?? []).forEach((o: any) => overrideById.set(o.agency_id, o.max_members))
+      const planLimit = new Map<string, number>()
+      ;(planLimitsRes.data ?? []).forEach((p: any) => planLimit.set(String(p.plan), p.max_members))
+      const planById = new Map<string, string>()
+      ;(subsRes.data ?? []).forEach((s: any) => {
+        if (s.expires_at && new Date(s.expires_at).getTime() <= now) return
+        if (!planById.has(s.user_id)) planById.set(s.user_id, String(s.plan))
+      })
+
+      // 5) Monta as linhas (inclui agências sem equipe por padrão).
+      const all = profiles
+        .filter(p => !subuserIds.has(p.user_id))
+        .map(p => {
+          const id = p.user_id as string
+          const agg = memberAgg.get(id) ?? { active: 0, inactive: 0, seats: 0, last: null }
+          const pending = pendingAgg.get(id) ?? 0
+          const plan = planById.get(id) ?? 'essencial'
+          const override = overrideById.get(id) ?? null
+          return {
+            agency_id: id,
+            agency_name: (p.agency_name?.trim() || p.name?.trim() || 'Agência sem nome') as string,
+            owner_name: p.name ?? null,
+            owner_email: emailById.get(id) ?? null,
+            plan,
+            active_members: agg.active,
+            inactive_members: agg.inactive,
+            pending_invites: pending,
+            seats_used: agg.seats + pending,
+            seats_limit: override ?? planLimit.get(plan) ?? 3,
+            limit_override: override,
+            last_activity: agg.last,
+          }
+        })
+
+      // 6) Filtros aplicados ANTES do total e da paginação.
+      const filtered = all.filter(r => {
+        if (term) {
+          const hit = r.agency_name.toLowerCase().includes(term)
+            || (r.owner_name ?? '').toLowerCase().includes(term)
+            || (r.owner_email ?? '').toLowerCase().includes(term)
+            || r.agency_id.toLowerCase() === term
+          if (!hit) return false
+        }
+        if (planFilter && planFilter !== 'all' && r.plan !== planFilter) return false
+        const hasTeam = r.active_members + r.inactive_members > 0
+        if (teamFilter === 'with' && !hasTeam) return false
+        if (teamFilter === 'without' && hasTeam) return false
+        if (atLimitOnly && r.seats_used < r.seats_limit) return false
+        if (pendingOnly && r.pending_invites < 1) return false
+        return true
+      })
+      filtered.sort((a, b) =>
+        (b.active_members + b.pending_invites) - (a.active_members + a.pending_invites)
+        || a.agency_name.localeCompare(b.agency_name, 'pt-BR'))
+
+      const start = (page - 1) * pageSize
+      return json({
+        items: filtered.slice(start, start + pageSize),
+        total: filtered.length,
+        page,
+        page_size: pageSize,
+      })
     }
 
     // ── A partir daqui é obrigatório informar a agência alvo ───
