@@ -84,12 +84,13 @@ export function useDriveMaterialImports() {
     }) => {
       const parsed = parseDriveFolderUrl(input.folder_url);
       if (!parsed.ok) throw new Error(parsed.error);
+      const { folderId, normalizedUrl } = parsed;
       const payload = {
         supplier_id: input.supplier_id,
         provider: "google_drive",
         label: input.label?.trim() || null,
-        folder_url: parsed.normalizedUrl,
-        folder_id: parsed.folderId,
+        folder_url: normalizedUrl,
+        folder_id: folderId,
         is_active: input.is_active,
       };
       if (input.id) {
