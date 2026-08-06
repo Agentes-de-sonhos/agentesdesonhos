@@ -212,19 +212,44 @@ export function useTeamMemberScopes(id: string | null) {
   })
 }
 
-export function useTeamAuditLog(memberId?: string | null, limit = 100) {
+export interface TeamAuditFilters {
+  memberId?: string | null
+  action?: string | null
+  moduleKey?: string | null
+  from?: string | null
+  to?: string | null
+}
+
+export function useTeamAuditLog(
+  memberIdOrFilters?: string | null | TeamAuditFilters,
+  limit = 100,
+) {
   const { agencyId } = useTeamScope()
+  const f: TeamAuditFilters =
+    memberIdOrFilters && typeof memberIdOrFilters === 'object'
+      ? memberIdOrFilters
+      : { memberId: (memberIdOrFilters as string | null) ?? null }
+  const memberId = f.memberId ?? null
+  const key = [memberId ?? 'all', f.action ?? 'all', f.moduleKey ?? 'all', f.from ?? '', f.to ?? '']
   return useQuery({
-    queryKey: ['team-audit-log', agencyId ?? 'self', memberId ?? 'all', limit],
+    queryKey: ['team-audit-log', agencyId ?? 'self', ...key, limit],
     queryFn: async () => {
       if (agencyId) {
         return await adminAgencyTeamsCall<TeamAuditRow[]>({
-          action: 'audit', target_agency_id: agencyId, member_id: memberId ?? null,
+          action: 'audit', target_agency_id: agencyId, member_id: memberId,
+          action_filter: f.action ?? null, module_filter: f.moduleKey ?? null,
+          from: f.from ?? null, to: f.to ?? null,
         })
       }
-      const { data, error } = await rpc('team_audit_log', { _limit: limit, _member_id: memberId ?? null })
+      const { data, error } = await rpc('team_audit_log', { _limit: limit, _member_id: memberId })
       if (error) throw error
-      return (data ?? []) as unknown as TeamAuditRow[]
+      let rows = (data ?? []) as unknown as TeamAuditRow[]
+      // Filtros locais para o fluxo da agência (a RPC devolve o histórico completo).
+      if (f.action) rows = rows.filter(r => r.action === f.action)
+      if (f.moduleKey) rows = rows.filter(r => r.module_key === f.moduleKey)
+      if (f.from) rows = rows.filter(r => r.created_at >= f.from!)
+      if (f.to) rows = rows.filter(r => r.created_at <= f.to!)
+      return rows
     },
     staleTime: 15_000,
   })

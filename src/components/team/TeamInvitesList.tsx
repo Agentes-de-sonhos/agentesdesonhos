@@ -8,6 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import { useAccessProfiles, useTeamAdminMutation, useTeamInvites, type TeamInviteRow } from '@/hooks/useTeamMembers'
 
@@ -28,6 +32,7 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
   const [roleTitle, setRoleTitle] = useState('')
   const [department, setDepartment] = useState('')
   const [profileId, setProfileId] = useState('')
+  const [confirmRevoke, setConfirmRevoke] = useState<TeamInviteRow | null>(null)
 
   const create = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return toast.error('Informe um e-mail válido')
@@ -60,6 +65,7 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
       onSuccess: (data: any) => {
         if (data?.invite_url) void navigator.clipboard.writeText(data.invite_url).catch(() => {})
         toast.success(data?.emailed ? 'Convite reenviado por e-mail e link copiado' : successMsg)
+        setConfirmRevoke(null)
       },
       onError: (e: any) => toast.error(e.message),
     })
@@ -107,7 +113,7 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
                         <RotateCw className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon" title="Cancelar convite"
-                        onClick={() => act('invite_revoke', i.id, 'Convite cancelado')}>
+                        onClick={() => setConfirmRevoke(i)}>
                         <Ban className="h-4 w-4" />
                       </Button>
                     </>
@@ -167,6 +173,28 @@ export function TeamInvitesList({ disabledCreate }: { disabledCreate?: boolean }
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!confirmRevoke} onOpenChange={v => { if (!v) setConfirmRevoke(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar convite</AlertDialogTitle>
+            <AlertDialogDescription>
+              O link enviado para <strong>{confirmRevoke?.email}</strong> deixa de funcionar imediatamente
+              e a vaga volta a ficar disponível. É possível enviar um novo convite depois.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction disabled={mutation.isPending}
+              onClick={e => {
+                e.preventDefault()
+                if (confirmRevoke) act('invite_revoke', confirmRevoke.id, 'Convite cancelado')
+              }}>
+              Cancelar convite
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

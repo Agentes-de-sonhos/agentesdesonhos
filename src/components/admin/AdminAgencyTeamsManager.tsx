@@ -9,6 +9,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Building2, Users, MailWarning, ShieldCheck, Search, Loader2, Settings2, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -51,28 +55,36 @@ function LimitOverrideCard({ agencyId }: { agencyId: string }) {
 
   const current = quota?.override?.max_members ?? null
   const effective = quota?.total ?? 3
+  const [confirm, setConfirm] = useState<'save' | 'clear' | null>(null)
 
-  const save = () => {
+  const validate = () => {
     const parsed = Number(value)
     if (!Number.isInteger(parsed) || parsed < 1) {
       toast.error('Informe um limite inteiro maior que zero.')
-      return
+      return false
     }
     if (reason.trim().length < 5) {
       toast.error('Descreva o motivo do ajuste (mínimo de 5 caracteres).')
-      return
+      return false
     }
-    mutation.mutate({ agencyId, maxMembers: parsed, reason: reason.trim() }, {
+    return true
+  }
+
+  const save = () => {
+    mutation.mutate({ agencyId, maxMembers: Number(value), reason: reason.trim() }, {
       onSuccess: (res: any) => {
         toast.success(res?.warning ?? 'Limite administrativo atualizado.')
-        setValue(''); setReason('')
+        setValue(''); setReason(''); setConfirm(null)
       },
       onError: (e: any) => toast.error(e.message),
     })
   }
 
   const clear = () => mutation.mutate({ agencyId, clear: true }, {
-    onSuccess: () => toast.success('Limite administrativo removido. O limite do plano volta a valer.'),
+    onSuccess: () => {
+      toast.success('Limite administrativo removido. O limite do plano volta a valer.')
+      setConfirm(null)
+    },
     onError: (e: any) => toast.error(e.message),
   })
 
@@ -105,16 +117,40 @@ function LimitOverrideCard({ agencyId }: { agencyId: string }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={save} disabled={mutation.isPending}>
+          <Button size="sm" disabled={mutation.isPending}
+            onClick={() => { if (validate()) setConfirm('save') }}>
             {mutation.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
             Salvar limite
           </Button>
           {current !== null && (
-            <Button size="sm" variant="outline" onClick={clear} disabled={mutation.isPending}>
+            <Button size="sm" variant="outline" disabled={mutation.isPending}
+              onClick={() => setConfirm('clear')}>
               Remover liberação
             </Button>
           )}
         </div>
+
+        <AlertDialog open={!!confirm} onOpenChange={v => { if (!v) setConfirm(null) }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {confirm === 'clear' ? 'Remover limite administrativo' : 'Confirmar novo limite de acessos'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {confirm === 'clear'
+                  ? 'O limite volta a seguir o plano da agência. Nenhum colaborador é desativado, mas novas inclusões passam a respeitar o limite do plano.'
+                  : `O limite passa a ser de ${value} acessos. Nenhum colaborador é desativado; se o novo limite for menor que o uso atual, apenas novas inclusões e convites ficam bloqueados. Esta ação é registrada na auditoria da agência.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction disabled={mutation.isPending}
+                onClick={e => { e.preventDefault(); confirm === 'clear' ? clear() : save() }}>
+                {confirm === 'clear' ? 'Remover' : 'Confirmar'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   )
@@ -156,7 +192,8 @@ export function AdminAgencyTeamsManager() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+        <Kpi icon={Building2} label="Agências cadastradas" value={stats?.agencies_total ?? '—'} />
         <Kpi icon={Building2} label="Agências com equipe" value={stats?.agencies_with_team ?? '—'} />
         <Kpi icon={Users} label="Colaboradores ativos" value={stats?.active_members ?? '—'} />
         <Kpi icon={Users} label="Inativos ou bloqueados" value={stats?.inactive_members ?? '—'} />
@@ -169,7 +206,7 @@ export function AdminAgencyTeamsManager() {
           <div className="grid gap-3 md:grid-cols-[1fr_180px_180px]">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input className="pl-9" placeholder="Buscar por agência, responsável ou ID"
+              <Input className="pl-9" placeholder="Buscar por agência, responsável, e-mail ou ID"
                 value={search} onChange={e => resetPage(setSearch)(e.target.value)} />
             </div>
             <Select value={plan} onValueChange={resetPage(setPlan)}>

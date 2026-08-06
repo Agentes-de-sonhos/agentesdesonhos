@@ -13,6 +13,22 @@ export interface GuardError {
 
 export const SCOPE_VALUES = ['own', 'created', 'assigned', 'team', 'department', 'agency'] as const
 
+/** UUID zero: usado em consultas `in()` vazias para nunca gerar UUID inválido. */
+export const NIL_UUID = '00000000-0000-0000-0000-000000000000'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** `true` apenas para UUIDs válidos. */
+export function isUuid(value: unknown): boolean {
+  return typeof value === 'string' && UUID_RE.test(value)
+}
+
+/** Lista segura para consultas `in()`: nunca vazia, nunca com valor não-UUID. */
+export function uuidList(values: unknown[]): string[] {
+  const list = values.filter(isUuid) as string[]
+  return list.length ? list : [NIL_UUID]
+}
+
 /** O ator precisa ter papel global `admin` (validado no servidor via user_roles/has_role). */
 export function assertPlatformAdmin(isAdmin: boolean): GuardError | null {
   if (isAdmin) return null
@@ -21,14 +37,19 @@ export function assertPlatformAdmin(isAdmin: boolean): GuardError | null {
 
 /** `target_agency_id` precisa ser um UUID explícito. */
 export function assertTargetAgencyId(value: unknown): GuardError | null {
-  const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  if (typeof value === 'string' && uuid.test(value)) return null
+  if (isUuid(value)) return null
   return { status: 400, error: 'Informe a agência de destino (target_agency_id).' }
+}
+
+/** Identificadores de registro (colaborador, convite, perfil) precisam ser UUID. */
+export function assertRecordId(value: unknown): GuardError | null {
+  if (isUuid(value)) return null
+  return { status: 400, error: 'Registro inválido.' }
 }
 
 /** A agência precisa existir e não pode ser um colaborador de outra agência. */
 export function assertAgencyExists(
-  agencyProfile: { id: string } | null,
+  agencyProfile: Record<string, unknown> | null,
   isTeamSubuser: boolean,
 ): GuardError | null {
   if (!agencyProfile) return { status: 404, error: 'Agência não encontrada.' }

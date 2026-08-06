@@ -13724,6 +13724,32 @@ export type Database = {
         Args: { _end: string; _start: string }
         Returns: Json
       }
+      admin_agency_teams_list: {
+        Args: {
+          _at_limit?: boolean
+          _limit?: number
+          _offset?: number
+          _pending?: boolean
+          _plan?: string
+          _search?: string
+          _team?: string
+        }
+        Returns: {
+          active_members: number
+          agency_id: string
+          agency_name: string
+          inactive_members: number
+          last_activity: string
+          limit_override: number
+          owner_email: string
+          owner_name: string
+          pending_invites: number
+          plan: string
+          seats_limit: number
+          seats_used: number
+          total_count: number
+        }[]
+      }
       admin_clear_news_curation: {
         Args: { p_period_start?: string }
         Returns: Json
@@ -14610,6 +14636,7 @@ export type Database = {
         }[]
       }
       team_can_manage_team: { Args: never; Returns: boolean }
+      team_can_read_team: { Args: { _uid: string }; Returns: boolean }
       team_get_member_detail: { Args: { _member_id: string }; Returns: Json }
       team_list_invites: {
         Args: never

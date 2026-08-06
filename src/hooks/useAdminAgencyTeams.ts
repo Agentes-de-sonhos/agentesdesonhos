@@ -8,6 +8,7 @@ import { adminAgencyTeamsCall } from '@/hooks/useTeamMembers'
  */
 
 export interface AdminAgencyTeamsStats {
+  agencies_total: number
   agencies_with_team: number
   active_members: number
   inactive_members: number
