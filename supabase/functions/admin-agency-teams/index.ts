@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import {
   assertAgencyExists, assertPlatformAdmin, assertTargetAgencyId, assertTargetInAgency,
-  buildAuditEntry, sanitizeRows, safeText, validateLimitOverride,
+  assertRecordId, buildAuditEntry, sanitizeRows, safeText, uuidList, validateLimitOverride,
 } from '../_shared/agencyTeamGuards.ts'
 
 const corsHeaders = {
@@ -59,10 +59,11 @@ Deno.serve(async (req) => {
 
     // ── KPIs gerais ───────────────────────────────────────────
     if (action === 'stats') {
-      const [members, invites, profiles] = await Promise.all([
+      const [members, invites, profiles, totalAgencies] = await Promise.all([
         admin.from('agency_team_members').select('agency_id, status'),
         admin.from('agency_team_invites').select('agency_id, accepted_at, revoked_at, expires_at'),
         admin.from('agency_access_profiles').select('id, agency_id, is_native'),
+        admin.from('profiles').select('user_id', { count: 'exact', head: true }),
       ])
       const rows = members.data ?? []
       const openInvites = (invites.data ?? []).filter((i: any) =>
@@ -70,6 +71,7 @@ Deno.serve(async (req) => {
       const agencies = new Set<string>(rows.map((r: any) => r.agency_id))
       openInvites.forEach((i: any) => agencies.add(i.agency_id))
       return json({
+        agencies_total: totalAgencies.count ?? 0,
         agencies_with_team: agencies.size,
         active_members: rows.filter((r: any) => r.status === 'active').length,
         inactive_members: rows.filter((r: any) => r.status === 'blocked' || r.status === 'disabled').length,
@@ -78,9 +80,9 @@ Deno.serve(async (req) => {
       })
     }
 
-    // ── Lista de agências com equipe ──────────────────────────
+    // ── Lista global de agências (todas, com ou sem equipe) ───
     if (action === 'agencies') {
-      const search = safeText(body.search, 120)?.toLowerCase() ?? null
+      const search = safeText(body.search, 120) ?? null
       const planFilter = safeText(body.plan, 40)
       const teamFilter = safeText(body.team, 20) ?? 'all'   // all | with | without
       const atLimitOnly = body.at_limit === true
@@ -88,103 +90,24 @@ Deno.serve(async (req) => {
       const page = Math.max(1, Number(body.page ?? 1) || 1)
       const pageSize = Math.min(PAGE_MAX, Math.max(5, Number(body.page_size ?? 20) || 20))
 
-      const [members, invites, overrides] = await Promise.all([
-        admin.from('agency_team_members').select('agency_id, status, last_login_at, updated_at'),
-        admin.from('agency_team_invites').select('agency_id, accepted_at, revoked_at, expires_at'),
-        admin.from('agency_team_limit_overrides').select('agency_id, max_members, reason'),
-      ])
-
-      const stat = new Map<string, {
-        active: number; inactive: number; pending: number
-        last_activity: string | null; override: number | null
-      }>()
-      const touch = (id: string) => {
-        if (!stat.has(id)) stat.set(id, { active: 0, inactive: 0, pending: 0, last_activity: null, override: null })
-        return stat.get(id)!
-      }
-      ;(members.data ?? []).forEach((m: any) => {
-        const s = touch(m.agency_id)
-        if (m.status === 'active') s.active++
-        else if (m.status === 'blocked' || m.status === 'disabled') s.inactive++
-        const ts = m.last_login_at ?? m.updated_at ?? null
-        if (ts && (!s.last_activity || ts > s.last_activity)) s.last_activity = ts
+      // Listagem e paginação são resolvidas no banco (inclui agências sem equipe).
+      const { data, error } = await admin.rpc('admin_agency_teams_list', {
+        _search: search,
+        _plan: planFilter && planFilter !== 'all' ? planFilter : null,
+        _team: teamFilter,
+        _at_limit: atLimitOnly,
+        _pending: pendingOnly,
+        _limit: pageSize,
+        _offset: (page - 1) * pageSize,
       })
-      ;(invites.data ?? []).forEach((i: any) => {
-        if (i.accepted_at || i.revoked_at || new Date(i.expires_at) <= new Date()) return
-        touch(i.agency_id).pending++
-      })
-      ;(overrides.data ?? []).forEach((o: any) => { touch(o.agency_id).override = o.max_members })
-
-      let ids = Array.from(stat.keys())
-
-      // Busca também permite alcançar agências que ainda não têm equipe.
-      if (search) {
-        const { data: found } = await admin.from('profiles')
-          .select('id')
-          .or(`name.ilike.%${search}%,agency_name.ilike.%${search}%`)
-          .limit(200)
-        ;(found ?? []).forEach((p: any) => { if (!stat.has(p.id)) { touch(p.id) } })
-        ids = Array.from(stat.keys())
+      if (error) {
+        console.error('admin_agency_teams_list error', error)
+        return json({ error: 'Não foi possível carregar as agências.' }, 400)
       }
-
-      const { data: profileRows } = await admin.from('profiles')
-        .select('id, name, agency_name, avatar_url').in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000'])
-      const { data: subs } = await admin.from('subscriptions')
-        .select('user_id, plan, is_active, expires_at')
-        .in('user_id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000'])
-
-      const planOf = (id: string) => {
-        const row = (subs ?? []).find((s: any) => s.user_id === id && s.is_active &&
-          (!s.expires_at || new Date(s.expires_at) > new Date()))
-        return (row as any)?.plan ?? 'essencial'
-      }
-      const profileOf = (id: string) => (profileRows ?? []).find((p: any) => p.id === id) as any
-
-      let list = ids.map(id => {
-        const s = stat.get(id)!
-        const p = profileOf(id)
-        const plan = planOf(id)
-        return {
-          agency_id: id,
-          agency_name: p?.agency_name || p?.name || 'Agência sem nome',
-          owner_name: p?.name ?? null,
-          plan,
-          active_members: s.active,
-          inactive_members: s.inactive,
-          pending_invites: s.pending,
-          seats_used: s.active + s.inactive + s.pending,
-          limit_override: s.override,
-          last_activity: s.last_activity,
-        }
-      })
-
-      if (search) {
-        list = list.filter(a =>
-          a.agency_name.toLowerCase().includes(search) ||
-          (a.owner_name ?? '').toLowerCase().includes(search) ||
-          a.agency_id.toLowerCase() === search)
-      }
-      if (planFilter && planFilter !== 'all') list = list.filter(a => a.plan === planFilter)
-      if (teamFilter === 'with') list = list.filter(a => a.active_members + a.inactive_members > 0)
-      if (teamFilter === 'without') list = list.filter(a => a.active_members + a.inactive_members === 0)
-      if (pendingOnly) list = list.filter(a => a.pending_invites > 0)
-
-      list.sort((a, b) => (b.active_members + b.pending_invites) - (a.active_members + a.pending_invites)
-        || a.agency_name.localeCompare(b.agency_name))
-
-      const total = list.length
-      const pageItems = list.slice((page - 1) * pageSize, page * pageSize)
-
-      // Limite real é resolvido apenas para a página exibida (consulta leve).
-      const withLimits = [] as any[]
-      for (const item of pageItems) {
-        const { data: max } = await admin.rpc('team_max_members', { _agency_id: item.agency_id })
-        const limit = Number(max ?? 3)
-        if (atLimitOnly && item.seats_used < limit) continue
-        withLimits.push({ ...item, seats_limit: limit, owner_email: await ownerEmail(item.agency_id) })
-      }
-
-      return json({ items: withLimits, total, page, page_size: pageSize })
+      const rows = (data ?? []) as any[]
+      const total = Number(rows[0]?.total_count ?? 0)
+      const items = rows.map(({ total_count: _t, ...rest }) => rest)
+      return json({ items, total, page, page_size: pageSize })
     }
 
     // ── A partir daqui é obrigatório informar a agência alvo ───
@@ -193,7 +116,7 @@ Deno.serve(async (req) => {
     const agencyId = String(body.target_agency_id)
 
     const { data: agencyProfile } = await admin.from('profiles')
-      .select('id, name, agency_name, phone, avatar_url').eq('id', agencyId).maybeSingle()
+      .select('user_id, name, agency_name, phone, avatar_url').eq('user_id', agencyId).maybeSingle()
     const { count: subuserCount } = await admin.from('agency_team_members')
       .select('id', { count: 'exact', head: true }).eq('auth_user_id', agencyId)
     const badAgency = assertAgencyExists(agencyProfile as any, (subuserCount ?? 0) > 0)
@@ -260,8 +183,8 @@ Deno.serve(async (req) => {
           .eq('agency_id', agencyId).order('created_at', { ascending: false })
         const ids = (data ?? []).map((m: any) => m.id)
         const [{ data: perms }, { data: stages }] = await Promise.all([
-          admin.from('agency_team_permissions').select('team_member_id').in('team_member_id', ids.length ? ids : ['x']).eq('enabled', true),
-          admin.from('agency_team_stage_permissions').select('team_member_id').in('team_member_id', ids.length ? ids : ['x']),
+          admin.from('agency_team_permissions').select('team_member_id').in('team_member_id', uuidList(ids)).eq('enabled', true),
+          admin.from('agency_team_stage_permissions').select('team_member_id').in('team_member_id', uuidList(ids)),
         ])
         const countBy = (rows: any[] | null, id: string) => (rows ?? []).filter(r => r.team_member_id === id).length
         return json(sanitizeRows((data ?? []).map((m: any) => ({
@@ -276,6 +199,8 @@ Deno.serve(async (req) => {
 
       case 'member_detail': {
         const id = String(body.member_id ?? '')
+        const badMember = assertRecordId(id)
+        if (badMember) return json({ error: badMember.error }, badMember.status)
         const { data: member } = await admin.from('agency_team_members')
           .select('*').eq('id', id).maybeSingle()
         const guard = assertTargetInAgency((member as any)?.agency_id, agencyId)
@@ -298,6 +223,8 @@ Deno.serve(async (req) => {
 
       case 'member_scopes': {
         const id = String(body.member_id ?? '')
+        const badScopeMember = assertRecordId(id)
+        if (badScopeMember) return json({ error: badScopeMember.error }, badScopeMember.status)
         const { data: member } = await admin.from('agency_team_members')
           .select('id, agency_id').eq('id', id).maybeSingle()
         const guard = assertTargetInAgency((member as any)?.agency_id, agencyId)
@@ -340,7 +267,8 @@ Deno.serve(async (req) => {
       }
 
       case 'audit': {
-        const memberId = safeText(body.member_id, 40)
+        const memberIdRaw = safeText(body.member_id, 40)
+        const memberId = memberIdRaw && !assertRecordId(memberIdRaw) ? memberIdRaw : null
         const actionFilter = safeText(body.action_filter, 60)
         const moduleFilter = safeText(body.module_filter, 60)
         const from = safeText(body.from, 40)
@@ -357,7 +285,7 @@ Deno.serve(async (req) => {
         const { data } = await q.order('created_at', { ascending: false }).limit(300)
         const ids = Array.from(new Set((data ?? []).map((r: any) => r.team_member_id).filter(Boolean)))
         const { data: names } = await admin.from('agency_team_members')
-          .select('id, full_name').in('id', ids.length ? ids : ['x'])
+          .select('id, full_name').in('id', uuidList(ids))
         return json(sanitizeRows((data ?? []).map((r: any) => ({
           ...r,
           member_name: (names ?? []).find((n: any) => n.id === r.team_member_id)?.full_name ?? null,

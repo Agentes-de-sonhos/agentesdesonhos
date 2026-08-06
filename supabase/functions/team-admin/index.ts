@@ -233,7 +233,7 @@ Deno.serve(async (req) => {
 
       const targetId = String(rawBody.target_agency_id)
       const { data: targetProfile } = await admin.from('profiles')
-        .select('id').eq('id', targetId).maybeSingle()
+        .select('user_id').eq('user_id', targetId).maybeSingle()
       const { count: subuserCount } = await admin.from('agency_team_members')
         .select('id', { count: 'exact', head: true }).eq('auth_user_id', targetId)
       const badAgency = assertAgencyExists(targetProfile as any, (subuserCount ?? 0) > 0)
@@ -248,7 +248,7 @@ Deno.serve(async (req) => {
     }
 
     const { data: agencyProfile } = await admin.from('profiles')
-      .select('agency_name, name').eq('id', ownerId).maybeSingle()
+      .select('agency_name, name').eq('user_id', ownerId).maybeSingle()
     const agencyName = agencyProfile?.agency_name || agencyProfile?.name || 'sua agência'
 
     /** Registro padronizado de auditoria (marca o administrador global). */

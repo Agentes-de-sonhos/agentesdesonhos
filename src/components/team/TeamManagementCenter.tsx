@@ -2,8 +2,12 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Pencil, Ban, Trash2, CircleCheck, Loader2, Users } from 'lucide-react'
+import {
+  Plus, Pencil, Ban, Trash2, CircleCheck, Loader2, Users, ShieldAlert, PauseCircle,
+} from 'lucide-react'
 import { useTeamMembers, useTeamQuota, useTeamAdminMutation, TeamMemberRow } from '@/hooks/useTeamMembers'
+import { useTeamScope } from './TeamScopeContext'
+import { usePermissions } from '@/hooks/usePermissions'
 import { TeamMemberForm } from './TeamMemberForm'
 import { TeamInvitesList } from './TeamInvitesList'
 import { AccessProfilesManager } from './AccessProfilesManager'
@@ -22,6 +26,26 @@ const STATUS_META: Record<string, { label: string; variant: 'default' | 'seconda
   disabled: { label: 'Desativado', variant: 'outline' },
 }
 
+type StatusAction = 'active' | 'blocked' | 'disabled'
+
+const STATUS_ACTION_COPY: Record<StatusAction, { title: string; description: string; confirm: string }> = {
+  blocked: {
+    title: 'Bloquear colaborador',
+    description: 'O acesso será bloqueado imediatamente e as sessões abertas serão encerradas. A vaga continua ocupada e o acesso pode ser reativado depois.',
+    confirm: 'Bloquear',
+  },
+  disabled: {
+    title: 'Desativar colaborador',
+    description: 'O colaborador deixa de acessar a plataforma e a vaga é liberada para outro acesso. O histórico e os registros criados por ele são preservados.',
+    confirm: 'Desativar',
+  },
+  active: {
+    title: 'Reativar colaborador',
+    description: 'O acesso volta a funcionar com as mesmas permissões já configuradas.',
+    confirm: 'Reativar',
+  },
+}
+
 /**
  * Central de equipe e permissões (Colaboradores, Convites, Perfis de acesso,
  * Comunidade e Auditoria).
@@ -31,29 +55,35 @@ const STATUS_META: Record<string, { label: string; variant: 'default' | 'seconda
  * hooks. Nenhum comportamento do fluxo do proprietário foi alterado.
  */
 export function TeamManagementCenter() {
+  const scope = useTeamScope()
+  const { isMaster } = usePermissions()
+  // Colaborador com `team.manage` administra a equipe, mas as configurações de
+  // comunidade continuam exclusivas do proprietário/master (e do admin global).
+  const canManageCommunity = scope.isPlatformAdmin || isMaster
   const { data: members = [], isLoading } = useTeamMembers()
   const { data: quota } = useTeamQuota()
   const mutation = useTeamAdminMutation()
   const [editing, setEditing] = useState<TeamMemberRow | null>(null)
   const [creating, setCreating] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<TeamMemberRow | null>(null)
+  const [confirmStatus, setConfirmStatus] = useState<{ member: TeamMemberRow; status: StatusAction } | null>(null)
 
   const used = quota?.used ?? 0
   const total = quota?.total ?? 3
   const atLimit = used >= total
 
-  const setStatus = (m: TeamMemberRow, status: 'active' | 'blocked' | 'disabled') => {
+  const setStatus = (m: TeamMemberRow, status: StatusAction) => {
     mutation.mutate({ action: 'set_status', id: m.id, status }, {
-      onSuccess: () => toast.success(
-        status === 'blocked' ? 'Colaborador bloqueado'
-          : status === 'disabled' ? 'Colaborador desativado' : 'Colaborador reativado',
-      ),
+      onSuccess: () => {
+        toast.success(
+          status === 'blocked' ? 'Colaborador bloqueado'
+            : status === 'disabled' ? 'Colaborador desativado' : 'Colaborador reativado',
+        )
+        setConfirmStatus(null)
+      },
       onError: (e: any) => toast.error(e.message),
     })
   }
-
-  const toggleStatus = (m: TeamMemberRow) =>
-    setStatus(m, m.status === 'active' ? 'blocked' : 'active')
 
   const doDelete = () => {
     if (!confirmDelete) return
@@ -65,14 +95,31 @@ export function TeamManagementCenter() {
 
   return (
     <>
+      {scope.isPlatformAdmin && scope.agencyId && (
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-900/60 dark:bg-amber-950/40">
+          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="text-xs text-amber-900 dark:text-amber-200">
+            <p className="font-semibold">
+              Você está administrando a agência {scope.agencyName || 'selecionada'} como administrador da plataforma.
+            </p>
+            <p>
+              Todas as alterações valem para esta agência
+              {scope.ownerName ? ` (responsável: ${scope.ownerName}` : ''}
+              {scope.ownerEmail ? `${scope.ownerName ? ' · ' : ' ('}${scope.ownerEmail}` : ''}
+              {scope.ownerName || scope.ownerEmail ? ')' : ''} e ficam registradas na auditoria como ação administrativa.
+            </p>
+          </div>
+        </div>
+      )}
+
       <Tabs defaultValue="membros">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+        <TabsList className={`grid w-full grid-cols-2 ${canManageCommunity ? 'sm:grid-cols-5' : 'sm:grid-cols-4'}`}>
           <TabsTrigger value="membros">Colaboradores</TabsTrigger>
           <TabsTrigger value="convites">
             Convites{quota?.pending ? ` (${quota.pending})` : ''}
           </TabsTrigger>
           <TabsTrigger value="perfis">Perfis de acesso</TabsTrigger>
-          <TabsTrigger value="comunidade">Comunidade</TabsTrigger>
+          {canManageCommunity && <TabsTrigger value="comunidade">Comunidade</TabsTrigger>}
           <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
         </TabsList>
 
@@ -128,13 +175,31 @@ export function TeamManagementCenter() {
                       <Button variant="ghost" size="icon" title="Editar" onClick={() => setEditing(m)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon"
-                        title={m.status === 'active' ? 'Bloquear' : 'Reativar'}
-                        onClick={() => toggleStatus(m)}>
-                        {m.status === 'active'
-                          ? <Ban className="h-4 w-4" />
-                          : <CircleCheck className="h-4 w-4 text-emerald-600" />}
-                      </Button>
+                      {m.status === 'active' ? (
+                        <>
+                          <Button variant="ghost" size="icon" title="Bloquear"
+                            onClick={() => setConfirmStatus({ member: m, status: 'blocked' })}>
+                            <Ban className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Desativar"
+                            onClick={() => setConfirmStatus({ member: m, status: 'disabled' })}>
+                            <PauseCircle className="h-4 w-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button variant="ghost" size="icon" title="Reativar"
+                            onClick={() => setConfirmStatus({ member: m, status: 'active' })}>
+                            <CircleCheck className="h-4 w-4 text-emerald-600" />
+                          </Button>
+                          {m.status !== 'disabled' && (
+                            <Button variant="ghost" size="icon" title="Desativar"
+                              onClick={() => setConfirmStatus({ member: m, status: 'disabled' })}>
+                              <PauseCircle className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </>
+                      )}
                       <Button variant="ghost" size="icon" title="Excluir" onClick={() => setConfirmDelete(m)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -154,9 +219,11 @@ export function TeamManagementCenter() {
           <AccessProfilesManager />
         </TabsContent>
 
-        <TabsContent value="comunidade" className="pt-4">
-          <AgencyCommunitySettings />
-        </TabsContent>
+        {canManageCommunity && (
+          <TabsContent value="comunidade" className="pt-4">
+            <AgencyCommunitySettings />
+          </TabsContent>
+        )}
 
         <TabsContent value="auditoria" className="pt-4">
           <TeamAuditLogView />
@@ -183,6 +250,31 @@ export function TeamManagementCenter() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={doDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmStatus} onOpenChange={v => { if (!v) setConfirmStatus(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmStatus ? STATUS_ACTION_COPY[confirmStatus.status].title : ''}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong>{confirmStatus?.member.full_name}</strong>{' '}
+              {confirmStatus ? STATUS_ACTION_COPY[confirmStatus.status].description : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={mutation.isPending}
+              onClick={(e) => {
+                e.preventDefault()
+                if (confirmStatus) setStatus(confirmStatus.member, confirmStatus.status)
+              }}>
+              {confirmStatus ? STATUS_ACTION_COPY[confirmStatus.status].confirm : ''}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

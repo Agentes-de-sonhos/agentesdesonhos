@@ -124,7 +124,9 @@ export default function MinhaConta() {
         <div>
           <h1 className="font-display text-3xl font-bold text-foreground">Minha Conta</h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie sua assinatura, pagamentos e dados de cobrança
+            {canManageTeam
+              ? "Gerencie sua assinatura, pagamentos, dados de cobrança e a equipe e permissões da sua agência"
+              : "Gerencie sua assinatura, pagamentos e dados de cobrança"}
           </p>
         </div>
 
