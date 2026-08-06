@@ -86,7 +86,7 @@ export function TeamManagementCenter() {
         )
         setConfirmStatus(null)
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Erro inesperado'),
     })
   }
 
@@ -94,7 +94,7 @@ export function TeamManagementCenter() {
     if (!confirmDelete) return
     mutation.mutate({ action: 'delete', id: confirmDelete.id }, {
       onSuccess: () => { toast.success('Colaborador excluído'); setConfirmDelete(null) },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(e instanceof Error ? e.message : 'Erro inesperado'),
     })
   }
 
