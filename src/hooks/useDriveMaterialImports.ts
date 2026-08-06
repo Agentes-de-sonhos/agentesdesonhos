@@ -83,7 +83,9 @@ export function useDriveMaterialImports() {
       is_active: boolean;
     }) => {
       const parsed = parseDriveFolderUrl(input.folder_url);
-      if (!parsed.ok) throw new Error(parsed.error);
+      if (parsed.ok !== true) {
+        throw new Error((parsed as { ok: false; error: string }).error);
+      }
       const { folderId, normalizedUrl } = parsed;
       const payload = {
         supplier_id: input.supplier_id,
