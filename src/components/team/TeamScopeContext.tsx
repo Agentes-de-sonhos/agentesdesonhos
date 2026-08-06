@@ -16,6 +16,7 @@ export interface TeamScope {
   agencyName?: string | null
   ownerName?: string | null
   ownerEmail?: string | null
+  plan?: string | null
 }
 
 const NEUTRAL_SCOPE: TeamScope = { agencyId: null, isPlatformAdmin: false }
@@ -25,7 +26,7 @@ const TeamScopeContext = createContext<TeamScope>(NEUTRAL_SCOPE)
 export function TeamScopeProvider({ scope, children }: { scope: TeamScope; children: ReactNode }) {
   const value = useMemo(
     () => scope,
-    [scope.agencyId, scope.isPlatformAdmin, scope.agencyName, scope.ownerName, scope.ownerEmail],
+    [scope.agencyId, scope.isPlatformAdmin, scope.agencyName, scope.ownerName, scope.ownerEmail, scope.plan],
   )
   return <TeamScopeContext.Provider value={value}>{children}</TeamScopeContext.Provider>
 }

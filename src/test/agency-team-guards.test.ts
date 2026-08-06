@@ -196,7 +196,7 @@ describe('leitura da equipe por colaborador com team.manage', () => {
   const center = readFileSync('src/components/team/TeamManagementCenter.tsx', 'utf8')
 
   it('mostra o alerta administrativo e as ações de status com confirmação', () => {
-    expect(center).toContain('Você está administrando a agência')
+    expect(center).toContain('Você está administrando a equipe da agência')
     expect(center).toContain("STATUS_ACTION_COPY")
     expect(center).toContain('confirmStatus')
     expect(center).toContain("'disabled'")

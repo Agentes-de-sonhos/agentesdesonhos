@@ -147,8 +147,13 @@ describe('interface — correções obrigatórias', () => {
 
   it('esconde Auditoria sem audit.view e mantém Comunidade para team.manage', () => {
     expect(center).toContain("can('audit.view')")
-    expect(center).toContain('{canSeeAudit && <TabsTrigger value="auditoria">Auditoria</TabsTrigger>}')
+    expect(center).toContain("const canViewAudit = scope.isPlatformAdmin || isMaster || can('audit.view')")
+    expect(center).toContain('{canViewAudit && <TabsTrigger value="auditoria">Auditoria</TabsTrigger>}')
+    expect(center).toContain('{canViewAudit && (')
     expect(center).toContain('<TabsTrigger value="comunidade">Comunidade</TabsTrigger>')
+    // colunas do TabsList calculadas dinamicamente
+    expect(center).toContain('const tabCount = 3 + (canSeeCommunity ? 1 : 0) + (canViewAudit ? 1 : 0)')
+    expect(center).toContain('TAB_COLS[tabCount]')
   })
 
   it('tem ações de Bloquear, Desativar e Reativar com confirmação', () => {
@@ -170,12 +175,21 @@ describe('interface — correções obrigatórias', () => {
     expect(adminMgr).toContain('Responsável:')
     expect(adminMgr).toContain('Plano: {selected.plan}')
     expect(adminMgr).toContain('{selected.agency_id}')
+    expect(adminMgr).toContain('plan: selected.plan,')
+    // alerta persistente também dentro da central de equipe, com dados completos
+    expect(center).toContain('Você está administrando a equipe da agência {scope.agencyName || \'selecionada\'} como administrador da plataforma.')
+    expect(center).toContain('Proprietário: {scope.ownerName')
+    expect(center).toContain('E-mail: {scope.ownerEmail')
+    expect(center).toContain('Plano: {scope.plan')
+    expect(center).toContain('Agência (UUID):')
   })
 
   it('confirma limite administrativo informando agência, valores e efeito', () => {
     expect(adminMgr).toContain('Agência ${agencyName}')
     expect(adminMgr).toContain('NÃO desativa nenhum usuário')
     expect(adminMgr).toContain('O limite passa de ${effective} para ${value} acessos')
+    expect(adminMgr).toContain('LimitOverrideCard agencyId={selected.agency_id} agencyName={selected.agency_name}')
+    expect(adminMgr).toContain('limite do plano ')
   })
 
   it('auditoria envia filtros para a Edge Function (admin) e para a RPC (agência)', () => {
@@ -221,5 +235,37 @@ describe('migration da auditoria de equipe', () => {
     expect(sql).toContain('REVOKE ALL ON FUNCTION public.team_audit_log(integer, uuid, text, text, timestamp with time zone, timestamp with time zone) FROM PUBLIC;')
     expect(sql).toContain('TO authenticated, service_role;')
     expect(sql).not.toContain('TO anon')
+  })
+})
+
+describe('patch final — revoke anon e KPI de agências', () => {
+  const sqls = readdirSync('supabase/migrations')
+    .filter(f => f.endsWith('.sql')).sort()
+    .map(f => readFileSync(`supabase/migrations/${f}`, 'utf8'))
+
+  it('remove EXECUTE de anon/PUBLIC em team_can_read_team', () => {
+    const sql = sqls.filter(t => t.includes('REVOKE EXECUTE ON FUNCTION public.team_can_read_team(uuid) FROM anon')).pop()
+    expect(sql).toBeTruthy()
+    expect(sql!).toContain('REVOKE EXECUTE ON FUNCTION public.team_can_read_team(uuid) FROM PUBLIC;')
+    expect(sql!).toContain('GRANT EXECUTE ON FUNCTION public.team_can_read_team(uuid) TO authenticated, service_role;')
+  })
+
+  it('cria contagem de proprietários/agências restrita ao service_role', () => {
+    const sql = sqls.filter(t => t.includes('FUNCTION public.admin_agency_owners_total()')).pop()
+    expect(sql).toBeTruthy()
+    expect(sql!).toContain('FROM public.profiles p')
+    expect(sql!).toContain('WHERE p.user_id IS NOT NULL')
+    expect(sql!).toContain('WHERE m.auth_user_id = p.user_id')
+    expect(sql!).toContain("SET search_path TO 'public'")
+    expect(sql!).toContain('GRANT EXECUTE ON FUNCTION public.admin_agency_owners_total() TO service_role;')
+    expect(sql!).not.toContain('TO anon')
+  })
+
+  it('stats usa a RPC de proprietários em vez do count bruto de profiles', () => {
+    const fn = readFileSync('supabase/functions/admin-agency-teams/index.ts', 'utf8')
+    const stats = fn.slice(fn.indexOf("if (action === 'stats')"), fn.indexOf("if (action === 'agencies')"))
+    expect(stats).toContain("admin.rpc('admin_agency_owners_total')")
+    expect(stats).toContain('agencies_total: Number(ownersTotal.data ?? 0)')
+    expect(stats).not.toContain("admin.from('profiles').select('user_id', { count: 'exact', head: true })")
   })
 })

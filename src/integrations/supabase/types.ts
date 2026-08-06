@@ -13724,6 +13724,7 @@ export type Database = {
         Args: { _end: string; _start: string }
         Returns: Json
       }
+      admin_agency_owners_total: { Args: never; Returns: number }
       admin_agency_teams_list: {
         Args: {
           _at_limit?: boolean

@@ -325,6 +325,7 @@ export function AdminAgencyTeamsManager() {
                 agencyName: selected.agency_name,
                 ownerName: selected.owner_name,
                 ownerEmail: selected.owner_email,
+                plan: selected.plan,
               }}
             >
               <div className="space-y-4">
