@@ -156,6 +156,12 @@ describe('interface — correções obrigatórias', () => {
     expect(center).toContain('TAB_COLS[tabCount]')
   })
 
+  it('restringe Comunidade a platform admin ou master', () => {
+    expect(center).toContain('const canSeeCommunity = scope.isPlatformAdmin || isMaster')
+    expect(center).toContain('{canSeeCommunity && <TabsTrigger value="comunidade">Comunidade</TabsTrigger>}')
+    expect(center).toContain('{canSeeCommunity && (')
+  })
+
   it('tem ações de Bloquear, Desativar e Reativar com confirmação', () => {
     for (const t of ['Bloquear', 'Desativar', 'Reativar']) expect(center).toContain(t)
     expect(center).toContain('setConfirmStatus({ member: m, status: \'blocked\' })')
