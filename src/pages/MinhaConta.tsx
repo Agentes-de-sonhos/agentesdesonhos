@@ -303,9 +303,12 @@ export default function MinhaConta() {
         )}
       </div>
 
+      {canManageTeam && (
+        <TeamMembersDialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
+      )}
+
       <Dialog
         open={confirmCancel}
-        // eslint-disable-next-line react/jsx-sort-props
         onOpenChange={(open) => {
           if (loadingPortal === "cancel") return;
           setConfirmCancel(open);
