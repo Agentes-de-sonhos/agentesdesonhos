@@ -56,10 +56,13 @@ const STATUS_ACTION_COPY: Record<StatusAction, { title: string; description: str
  */
 export function TeamManagementCenter() {
   const scope = useTeamScope()
-  const { can } = usePermissions()
+  const { can, isMaster } = usePermissions()
   // Comunidade acompanha `team.manage` (validado também na RPC do servidor).
-  // Auditoria exige `audit.view` para colaborador; o admin global sempre vê.
-  const canSeeAudit = scope.isPlatformAdmin || can('audit.view')
+  // Auditoria exige `audit.view` para colaborador; proprietário (master) e o
+  // administrador da plataforma sempre veem.
+  const canViewAudit = scope.isPlatformAdmin || isMaster || can('audit.view')
+  const canSeeCommunity = true
+  const tabCount = 3 + (canSeeCommunity ? 1 : 0) + (canViewAudit ? 1 : 0)
   const { data: members = [], isLoading } = useTeamMembers()
   const { data: quota } = useTeamQuota()
   const mutation = useTeamAdminMutation()
@@ -98,29 +101,28 @@ export function TeamManagementCenter() {
       {scope.isPlatformAdmin && scope.agencyId && (
         <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-900/60 dark:bg-amber-950/40">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-          <div className="text-xs text-amber-900 dark:text-amber-200">
+          <div className="space-y-0.5 text-xs text-amber-900 dark:text-amber-200">
             <p className="font-semibold">
-              Você está administrando a agência {scope.agencyName || 'selecionada'} como administrador da plataforma.
+              Você está administrando a equipe da agência {scope.agencyName || 'selecionada'} como administrador da plataforma.
             </p>
-            <p>
-              Todas as alterações valem para esta agência
-              {scope.ownerName ? ` (responsável: ${scope.ownerName}` : ''}
-              {scope.ownerEmail ? `${scope.ownerName ? ' · ' : ' ('}${scope.ownerEmail}` : ''}
-              {scope.ownerName || scope.ownerEmail ? ')' : ''} e ficam registradas na auditoria como ação administrativa.
-            </p>
+            <p>Proprietário: {scope.ownerName || '—'}</p>
+            <p>E-mail: {scope.ownerEmail || '—'}</p>
+            <p>Plano: {scope.plan || '—'}</p>
+            <p>Agência (UUID): <span className="font-mono">{scope.agencyId}</span></p>
+            <p>Todas as alterações ficam registradas na auditoria desta agência como ação administrativa.</p>
           </div>
         </div>
       )}
 
       <Tabs defaultValue="membros">
-        <TabsList className={`grid w-full grid-cols-2 ${canSeeAudit ? 'sm:grid-cols-5' : 'sm:grid-cols-4'}`}>
+        <TabsList className={`grid w-full grid-cols-2 sm:grid-cols-${tabCount}`}>
           <TabsTrigger value="membros">Colaboradores</TabsTrigger>
           <TabsTrigger value="convites">
             Convites{quota?.pending ? ` (${quota.pending})` : ''}
           </TabsTrigger>
           <TabsTrigger value="perfis">Perfis de acesso</TabsTrigger>
-          <TabsTrigger value="comunidade">Comunidade</TabsTrigger>
-          {canSeeAudit && <TabsTrigger value="auditoria">Auditoria</TabsTrigger>}
+          {canSeeCommunity && <TabsTrigger value="comunidade">Comunidade</TabsTrigger>}
+          {canViewAudit && <TabsTrigger value="auditoria">Auditoria</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="membros" className="space-y-3 pt-4">
@@ -219,11 +221,13 @@ export function TeamManagementCenter() {
           <AccessProfilesManager />
         </TabsContent>
 
-        <TabsContent value="comunidade" className="pt-4">
-          <AgencyCommunitySettings />
-        </TabsContent>
+        {canSeeCommunity && (
+          <TabsContent value="comunidade" className="pt-4">
+            <AgencyCommunitySettings />
+          </TabsContent>
+        )}
 
-        {canSeeAudit && (
+        {canViewAudit && (
           <TabsContent value="auditoria" className="pt-4">
             <TeamAuditLogView />
           </TabsContent>
