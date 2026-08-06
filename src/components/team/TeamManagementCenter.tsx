@@ -63,6 +63,8 @@ export function TeamManagementCenter() {
   const canViewAudit = scope.isPlatformAdmin || isMaster || can('audit.view')
   const canSeeCommunity = true
   const tabCount = 3 + (canSeeCommunity ? 1 : 0) + (canViewAudit ? 1 : 0)
+  // Tailwind não gera classes dinâmicas: mapeamento explícito das colunas.
+  const TAB_COLS: Record<number, string> = { 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-4', 5: 'sm:grid-cols-5' }
   const { data: members = [], isLoading } = useTeamMembers()
   const { data: quota } = useTeamQuota()
   const mutation = useTeamAdminMutation()
@@ -115,7 +117,7 @@ export function TeamManagementCenter() {
       )}
 
       <Tabs defaultValue="membros">
-        <TabsList className={`grid w-full grid-cols-2 sm:grid-cols-${tabCount}`}>
+        <TabsList className={`grid w-full grid-cols-2 ${TAB_COLS[tabCount] ?? 'sm:grid-cols-5'}`}>
           <TabsTrigger value="membros">Colaboradores</TabsTrigger>
           <TabsTrigger value="convites">
             Convites{quota?.pending ? ` (${quota.pending})` : ''}
