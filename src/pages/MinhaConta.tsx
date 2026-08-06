@@ -305,6 +305,7 @@ export default function MinhaConta() {
 
       <Dialog
         open={confirmCancel}
+        // eslint-disable-next-line react/jsx-sort-props
         onOpenChange={(open) => {
           if (loadingPortal === "cancel") return;
           setConfirmCancel(open);
