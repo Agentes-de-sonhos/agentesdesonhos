@@ -14036,6 +14036,7 @@ export type Database = {
         Args: { _review_id: string }
         Returns: boolean
       }
+      email_account_exists: { Args: { _email: string }; Returns: boolean }
       enqueue_lead_form_notifications: {
         Args: { p_lead_id: string }
         Returns: number
