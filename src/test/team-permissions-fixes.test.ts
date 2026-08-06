@@ -103,11 +103,13 @@ describe('team-admin — guardas do fluxo administrativo global', () => {
 
   it('valida chaves de permissão pelo catálogo', () => {
     expect(fn).toMatch(/team_permission_catalog/)
+    expect(fn).toContain('if (!catalog.has(key)) continue')
   })
 
   it('exige perfil nativo ou da agência alvo e isolamento por agência', () => {
-    expect(fn).toContain('assertTargetInAgency')
+    expect(fn).toContain("member.agency_id !== ownerId")
     expect(fn).toContain('is_native')
+    expect(fn).toContain("if (data.agency_id && data.agency_id !== ownerId) return null")
   })
 
   it('nunca edita o proprietário nem transfere propriedade', () => {
@@ -116,8 +118,11 @@ describe('team-admin — guardas do fluxo administrativo global', () => {
   })
 
   it('audita como admin da plataforma com origem admin_global', () => {
-    expect(fn).toContain('actor_is_platform_admin')
-    expect(fn).toContain('admin_global')
+    expect(fn).toContain('isPlatformAdmin = true')
+    expect(fn).toContain('buildAuditEntry({')
+    const guards = readFileSync('supabase/functions/_shared/agencyTeamGuards.ts', 'utf8')
+    expect(guards).toContain('actor_is_platform_admin: input.isPlatformAdmin')
+    expect(guards).toContain("origin: input.isPlatformAdmin ? 'admin_global' : 'agency'")
   })
 })
 
