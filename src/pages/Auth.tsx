@@ -209,6 +209,7 @@ export default function Auth() {
     // Sempre tenta resolver como login de membro da equipe primeiro
     // (o login pode ser um e-mail real diferente do e-mail sintético da auth)
     let effectiveEmail = data.email;
+    let resolvedTeamEmail: string | null = null;
     try {
       const { data: resolved } = await supabase.functions.invoke('team-resolve-login', {
         body: { login: data.email },
@@ -220,10 +221,24 @@ export default function Auth() {
           return;
         }
         effectiveEmail = (resolved as any).email as string;
+        resolvedTeamEmail = effectiveEmail;
       }
     } catch { /* segue com o valor digitado */ }
 
-    const { error: signInError } = await signIn(effectiveEmail, data.password);
+    let { error: signInError } = await signIn(effectiveEmail, data.password);
+
+    // Fallback: um login de equipe pode colidir com o e-mail de uma conta real
+    // (ex.: o próprio proprietário cadastrado como membro). Nesse caso, tenta
+    // novamente com o e-mail digitado.
+    if (
+      signInError &&
+      resolvedTeamEmail &&
+      resolvedTeamEmail !== data.email &&
+      /Invalid login credentials|user not found/i.test(signInError.message)
+    ) {
+      const retry = await signIn(data.email, data.password);
+      signInError = retry.error;
+    }
 
     if (signInError) {
       setIsLoading(false);
