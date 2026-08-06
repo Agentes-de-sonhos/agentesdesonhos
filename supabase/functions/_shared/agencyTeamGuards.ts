@@ -23,10 +23,13 @@ export function isUuid(value: unknown): boolean {
   return typeof value === 'string' && UUID_RE.test(value)
 }
 
-/** Lista segura para consultas `in()`: nunca vazia, nunca com valor não-UUID. */
+/**
+ * Lista segura de UUIDs para consultas `in()`.
+ * Devolve APENAS UUIDs válidos e pode devolver lista vazia: quem chama deve
+ * pular a consulta quando o resultado for vazio (nunca usar fallback fake).
+ */
 export function uuidList(values: unknown[]): string[] {
-  const list = values.filter(isUuid) as string[]
-  return list.length ? list : [NIL_UUID]
+  return values.filter(isUuid) as string[]
 }
 
 /** O ator precisa ter papel global `admin` (validado no servidor via user_roles/has_role). */
