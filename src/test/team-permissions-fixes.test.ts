@@ -147,8 +147,13 @@ describe('interface — correções obrigatórias', () => {
 
   it('esconde Auditoria sem audit.view e mantém Comunidade para team.manage', () => {
     expect(center).toContain("can('audit.view')")
-    expect(center).toContain('{canSeeAudit && <TabsTrigger value="auditoria">Auditoria</TabsTrigger>}')
+    expect(center).toContain("const canViewAudit = scope.isPlatformAdmin || isMaster || can('audit.view')")
+    expect(center).toContain('{canViewAudit && <TabsTrigger value="auditoria">Auditoria</TabsTrigger>}')
+    expect(center).toContain('{canViewAudit && (')
     expect(center).toContain('<TabsTrigger value="comunidade">Comunidade</TabsTrigger>')
+    // colunas do TabsList calculadas dinamicamente
+    expect(center).toContain('const tabCount = 3 + (canSeeCommunity ? 1 : 0) + (canViewAudit ? 1 : 0)')
+    expect(center).toContain('TAB_COLS[tabCount]')
   })
 
   it('tem ações de Bloquear, Desativar e Reativar com confirmação', () => {
@@ -170,12 +175,21 @@ describe('interface — correções obrigatórias', () => {
     expect(adminMgr).toContain('Responsável:')
     expect(adminMgr).toContain('Plano: {selected.plan}')
     expect(adminMgr).toContain('{selected.agency_id}')
+    expect(adminMgr).toContain('plan: selected.plan,')
+    // alerta persistente também dentro da central de equipe, com dados completos
+    expect(center).toContain('Você está administrando a equipe da agência {scope.agencyName || \'selecionada\'} como administrador da plataforma.')
+    expect(center).toContain('Proprietário: {scope.ownerName')
+    expect(center).toContain('E-mail: {scope.ownerEmail')
+    expect(center).toContain('Plano: {scope.plan')
+    expect(center).toContain('Agência (UUID):')
   })
 
   it('confirma limite administrativo informando agência, valores e efeito', () => {
     expect(adminMgr).toContain('Agência ${agencyName}')
     expect(adminMgr).toContain('NÃO desativa nenhum usuário')
     expect(adminMgr).toContain('O limite passa de ${effective} para ${value} acessos')
+    expect(adminMgr).toContain('LimitOverrideCard agencyId={selected.agency_id} agencyName={selected.agency_name}')
+    expect(adminMgr).toContain('limite do plano ')
   })
 
   it('auditoria envia filtros para a Edge Function (admin) e para a RPC (agência)', () => {
