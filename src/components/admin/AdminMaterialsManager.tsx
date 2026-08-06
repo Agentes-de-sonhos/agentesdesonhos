@@ -49,6 +49,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SupplierCombobox } from "./SupplierCombobox";
 import { MultiFileUpload } from "./MultiFileUpload";
 import { MaterialsDriveImportPanel } from "./MaterialsDriveImportPanel";
+import { useDriveMaterialImports } from "@/hooks/useDriveMaterialImports";
 
 const CATEGORIES = [
   "Operadoras de turismo",
@@ -1302,7 +1303,8 @@ export function AdminMaterialsManager() {
               </TabsTrigger>
               <TabsTrigger value="drive" className="gap-2" onClick={() => setOpenDriveFolder(null)}>
                 <CloudDownload className="h-4 w-4" />
-                Google Drive ({driveOperatorFolders.length} operadora{driveOperatorFolders.length !== 1 ? 's' : ''})
+                Google Drive ({driveSourceCount} fonte{driveSourceCount !== 1 ? "s" : ""}
+                {drivePendingCount > 0 ? ` • ${drivePendingCount} a revisar` : ""})
               </TabsTrigger>
             </TabsList>
             <TabsContent value="manual">
