@@ -241,15 +241,17 @@ export function useTeamAuditLog(
           from: f.from ?? null, to: f.to ?? null,
         })
       }
-      const { data, error } = await rpc('team_audit_log', { _limit: limit, _member_id: memberId })
+      // Fluxo da agência: os filtros são aplicados no banco (RPC), não no navegador.
+      const { data, error } = await rpc('team_audit_log', {
+        _limit: limit,
+        _member_id: memberId,
+        _action: f.action ?? null,
+        _module_key: f.moduleKey ?? null,
+        _from: f.from ?? null,
+        _to: f.to ?? null,
+      })
       if (error) throw error
-      let rows = (data ?? []) as unknown as TeamAuditRow[]
-      // Filtros locais para o fluxo da agência (a RPC devolve o histórico completo).
-      if (f.action) rows = rows.filter(r => r.action === f.action)
-      if (f.moduleKey) rows = rows.filter(r => r.module_key === f.moduleKey)
-      if (f.from) rows = rows.filter(r => r.created_at >= f.from!)
-      if (f.to) rows = rows.filter(r => r.created_at <= f.to!)
-      return rows
+      return (data ?? []) as unknown as TeamAuditRow[]
     },
     staleTime: 15_000,
   })
