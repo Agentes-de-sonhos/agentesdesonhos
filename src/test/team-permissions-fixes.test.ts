@@ -93,9 +93,14 @@ describe('Edge Function admin-agency-teams — listagem global', () => {
     expect(agencies).toContain("admin.from('subscriptions')")
   })
 
-  it('não usa nenhum fallback de UUID inválido', () => {
+  it('não usa fallback de UUID e pula a consulta quando a lista está vazia', () => {
     expect(fn).not.toContain("['x']")
-    expect(fn).toContain('uuidList(ids)')
+    expect(fn).not.toContain('NIL_UUID')
+    expect(fn).toContain("const ids = uuidList((data ?? []).map((m: any) => m.id))")
+    expect(fn).toContain('const [{ data: perms }, { data: stages }] = ids.length')
+    expect(fn).toContain('[{ data: [] as any[] }, { data: [] as any[] }]')
+    expect(fn).toContain("? await admin.from('agency_team_members').select('id, full_name').in('id', ids)")
+    expect(fn).toContain(': { data: [] as any[] }')
   })
 })
 
@@ -173,10 +178,48 @@ describe('interface — correções obrigatórias', () => {
     expect(adminMgr).toContain('O limite passa de ${effective} para ${value} acessos')
   })
 
-  it('auditoria admin envia filtros para a Edge Function', () => {
+  it('auditoria envia filtros para a Edge Function (admin) e para a RPC (agência)', () => {
     expect(hook).toContain('action_filter: f.action ?? null, module_filter: f.moduleKey ?? null')
     expect(hook).toContain('from: f.from ?? null, to: f.to ?? null')
+    expect(hook).toContain('_action: f.action ?? null')
+    expect(hook).toContain('_module_key: f.moduleKey ?? null')
+    expect(hook).toContain('_from: f.from ?? null')
+    expect(hook).toContain('_to: f.to ?? null')
+    // sem refiltragem no navegador
+    expect(hook).not.toContain('rows.filter(r => r.action === f.action)')
     expect(auditView).toContain('useTeamMembers()')
     expect(auditView).toContain('type="date"')
+  })
+})
+
+
+describe('migration da auditoria de equipe', () => {
+  const sql = readdirSync('supabase/migrations')
+    .filter(f => f.endsWith('.sql')).sort()
+    .map(f => readFileSync(`supabase/migrations/${f}`, 'utf8'))
+    .filter(t => t.includes('FUNCTION public.team_audit_log'))
+    .pop()!
+
+  it('aceita filtros de colaborador, ação, módulo e período no banco', () => {
+    for (const arg of ['_member_id uuid', '_action text', '_module_key text',
+      '_from timestamp with time zone', '_to timestamp with time zone']) {
+      expect(sql).toContain(arg)
+    }
+    expect(sql).toContain('(_action IS NULL OR a.action = _action)')
+    expect(sql).toContain('(_module_key IS NULL OR a.module_key = _module_key)')
+    expect(sql).toContain('(_from IS NULL OR a.created_at >= _from)')
+    expect(sql).toContain('(_to IS NULL OR a.created_at <= _to)')
+  })
+
+  it('exige audit.view (via can_team, que valida status ativo) e isola a agência', () => {
+    expect(sql).toContain("public.can_team('audit.view')")
+    expect(sql).toContain('a.agency_id = public.user_agency_id(auth.uid())')
+  })
+
+  it('remove a assinatura antiga sem filtros e restringe o EXECUTE', () => {
+    expect(sql).toContain('DROP FUNCTION IF EXISTS public.team_audit_log(integer, uuid);')
+    expect(sql).toContain('REVOKE ALL ON FUNCTION public.team_audit_log(integer, uuid, text, text, timestamp with time zone, timestamp with time zone) FROM PUBLIC;')
+    expect(sql).toContain('TO authenticated, service_role;')
+    expect(sql).not.toContain('TO anon')
   })
 })
