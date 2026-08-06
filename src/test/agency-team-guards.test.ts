@@ -173,8 +173,8 @@ describe('listagem administrativa de agências (SQL da migration)', () => {
   const sql = readFileSync('supabase/functions/admin-agency-teams/index.ts', 'utf8')
 
   it('resolve listagem e paginação no banco, sem fallback de UUID inválido', () => {
-    expect(sql).toContain("admin.rpc('admin_agency_teams_list'")
-    expect(sql).toContain('_offset')
+    expect(sql).toContain("admin.from('profiles')")
+    expect(sql).toContain('total: filtered.length')
     expect(sql).not.toContain("['x']")
     expect(sql).not.toContain("ids.length ? ids : [")
   })
