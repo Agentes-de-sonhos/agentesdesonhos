@@ -12,22 +12,34 @@ import { supabase } from '@/integrations/supabase/client'
 import { useQuery } from '@tanstack/react-query'
 import {
   useTeamAdminMutation, useTeamMemberDetail, useTeamMemberScopes, useAccessProfiles,
+  adminAgencyTeamsCall,
 } from '@/hooks/useTeamMembers'
 import { keysToPermissionRows, type DataScope } from '@/lib/teamPermissions'
 import { PermissionMatrix } from './PermissionMatrix'
 import { ScopeSelector } from './ScopeSelector'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
+import { useTeamScope } from './TeamScopeContext'
 
 type Mode = 'create' | 'edit'
 
 interface StageRow { id: string; name: string; color?: string | null }
 
-function useOwnerStages(ownerId?: string) {
+function useOwnerStages(ownerId?: string, targetAgencyId?: string | null) {
   return useQuery({
-    queryKey: ['team-form-stages', ownerId],
-    enabled: !!ownerId,
+    queryKey: ['team-form-stages', targetAgencyId ?? ownerId],
+    enabled: !!(targetAgencyId || ownerId),
     queryFn: async () => {
+      // Escopo administrativo: as etapas de outra agência só são legíveis via Edge Function.
+      if (targetAgencyId) {
+        const data = await adminAgencyTeamsCall<{ opportunities: StageRow[]; operations: StageRow[] }>({
+          action: 'stages', target_agency_id: targetAgencyId,
+        })
+        return {
+          opportunities: data?.opportunities ?? [],
+          operations: data?.operations ?? [],
+        }
+      }
       const [opps, ops] = await Promise.all([
         supabase.from('pipeline_stages').select('id, name, color, position').eq('user_id', ownerId!).order('position'),
         supabase.from('operation_pipeline_stages' as any).select('id, name, color, position').eq('user_id', ownerId!).order('position') as any,
@@ -50,7 +62,8 @@ interface Props {
 
 export function TeamMemberForm({ mode, memberId, open, onOpenChange }: Props) {
   const { user } = useAuth()
-  const { data: stages } = useOwnerStages(user?.id)
+  const { agencyId } = useTeamScope()
+  const { data: stages } = useOwnerStages(user?.id, agencyId)
   const { data: detail, isLoading: loadingDetail } = useTeamMemberDetail(mode === 'edit' ? memberId ?? null : null)
   const { data: savedScopes } = useTeamMemberScopes(mode === 'edit' ? memberId ?? null : null)
   const { data: profiles = [] } = useAccessProfiles()
