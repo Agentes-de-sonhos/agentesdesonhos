@@ -39,6 +39,7 @@ import {
   Send,
   FolderLock,
   FileSignature,
+  UsersRound,
 } from "lucide-react";
 
 interface AdminMenuItem {
@@ -58,6 +59,7 @@ const menuGroups: AdminMenuGroup[] = [
     items: [
       { id: "users", label: "Usuários", icon: Users },
       { id: "crm", label: "CRM", icon: Mail },
+      { id: "agency-teams", label: "Agências e Equipes", icon: UsersRound },
       { id: "card-capture", label: "Leitor Cartão", icon: CreditCard },
       { id: "agenda-events", label: "Agenda", icon: CalendarDays },
       { id: "business-cards", label: "Cartões Dig.", icon: CreditCard },

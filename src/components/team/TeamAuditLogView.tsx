@@ -15,6 +15,8 @@ const ACTION_LABELS: Record<string, string> = {
   invite_resent: 'Reenviou convite',
   invite_accepted: 'Convite aceito',
   community_settings_update: 'Alterou configurações de comunidade',
+  team_limit_override_set: 'Definiu limite administrativo de usuários',
+  team_limit_override_cleared: 'Removeu limite administrativo de usuários',
 }
 
 function label(action: string) {
@@ -44,12 +46,18 @@ export function TeamAuditLogView({ memberId }: { memberId?: string | null }) {
         <div key={row.id} className="flex items-start justify-between gap-3 rounded-lg border px-4 py-3">
           <div className="min-w-0">
             <p className="text-sm font-medium">{label(row.action)}</p>
+            {(row.details as any)?.message && (
+              <p className="text-xs text-foreground/80">{String((row.details as any).message)}</p>
+            )}
             <p className="text-xs text-muted-foreground">
               {row.member_name ?? 'Proprietário'}
               {row.entity_type ? ` · ${row.entity_type}` : ''}
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1">
+            {row.actor_is_platform_admin && (
+              <Badge variant="secondary" className="text-[10px]">Admin da plataforma</Badge>
+            )}
             {row.module_key && <Badge variant="outline" className="text-[10px]">{row.module_key}</Badge>}
             <span className="text-[11px] text-muted-foreground">
               {new Date(row.created_at).toLocaleString('pt-BR')}

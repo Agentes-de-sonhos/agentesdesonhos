@@ -55,6 +55,7 @@ import { AdminTelegramManager } from "@/components/admin/AdminTelegramManager";
 import { AdminTradeEventsManager } from "@/components/admin/AdminTradeEventsManager";
 import { AdminUserProjectsManager } from "@/components/admin/AdminUserProjectsManager";
 import { AdminContractTemplatesManager } from "@/components/admin/AdminContractTemplatesManager";
+import { AdminAgencyTeamsManager } from "@/components/admin/AdminAgencyTeamsManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TAB_LABELS: Record<string, string> = {
@@ -95,6 +96,7 @@ const TAB_LABELS: Record<string, string> = {
   "trade-events": "Agenda do Trade",
   "user-projects": "Projetos dos Usuários",
   "agency-contracts": "Contratos das Agências",
+  "agency-teams": "Agências e Equipes",
 };
 
 function AdminContent({ tab }: { tab: string }) {
@@ -224,6 +226,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminUserProjectsManager />;
     case "agency-contracts":
       return <AdminContractTemplatesManager />;
+    case "agency-teams":
+      return <AdminAgencyTeamsManager />;
     default:
       return <AdminUserManager />;
   }

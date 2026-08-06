@@ -35,6 +35,9 @@ import {
   setWorkspacePref,
   isWorkspaceEligible,
 } from "@/workspace/featureFlag";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useTeamQuota } from "@/hooks/useTeamMembers";
+import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 
 export default function MinhaConta() {
   const { user } = useAuth();
@@ -43,6 +46,10 @@ export default function MinhaConta() {
   const [loadingPortal, setLoadingPortal] = useState<null | "manage" | "cancel">(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
+  const { isMaster, can } = usePermissions();
+  const canManageTeam = isMaster || can("team.manage");
+  const { data: teamQuota } = useTeamQuota();
   // Default ON for eligible users; only "off" disables.
   const [tabsEnabled, setTabsEnabled] = useState<boolean>(() => getWorkspacePref() !== "off");
   useEffect(() => {
@@ -159,6 +166,48 @@ export default function MinhaConta() {
           </CardContent>
         </Card>
 
+        {/* Equipe e Permissões */}
+        {canManageTeam && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Equipe e Permissões
+              </CardTitle>
+              <CardDescription>
+                Cadastre colaboradores com login próprio e defina o que cada um acessa,
+                quais dados enxerga e em quais etapas do funil pode atuar.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg border p-3">
+                  <p className="text-xl font-semibold leading-none">
+                    {teamQuota ? `${teamQuota.used}/${teamQuota.total}` : "—"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Acessos utilizados</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <p className="text-xl font-semibold leading-none">{teamQuota?.pending ?? "—"}</p>
+                  <p className="text-xs text-muted-foreground">Convites pendentes</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <p className="text-xl font-semibold leading-none">{getPlanLabel(plan)}</p>
+                  <p className="text-xs text-muted-foreground">Limite conforme o plano</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Também disponível em Gestão de Clientes e Gestão Financeira.
+                </p>
+                <Button onClick={() => setTeamDialogOpen(true)}>
+                  Gerenciar equipe e permissões
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Preferências de Navegação */}
         {workspaceEligible && (
           <Card>
@@ -253,6 +302,10 @@ export default function MinhaConta() {
           </Card>
         )}
       </div>
+
+      {canManageTeam && (
+        <TeamMembersDialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
+      )}
 
       <Dialog
         open={confirmCancel}
