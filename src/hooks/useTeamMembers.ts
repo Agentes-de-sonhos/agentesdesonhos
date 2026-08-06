@@ -76,6 +76,7 @@ export interface TeamAuditRow {
   team_member_id: string | null
   member_name: string | null
   actor_user_id: string | null
+  actor_is_platform_admin?: boolean | null
   details: Record<string, unknown> | null
   created_at: string
 }
