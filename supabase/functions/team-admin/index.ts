@@ -303,6 +303,19 @@ Deno.serve(async (req) => {
         .select('id').eq('login_normalized', login.toLowerCase()).maybeSingle()
       if (existing) return json({ error: 'Este login já está em uso' }, 400)
 
+      // Um login não pode ser igual ao e-mail de uma conta já existente na
+      // plataforma: isso impediria o dono daquela conta de entrar.
+      if (EMAIL_RE.test(login)) {
+        const { data: clash } = await admin.rpc('email_account_exists', {
+          _email: login.toLowerCase(),
+        })
+        if (clash === true) {
+          return json({
+            error: 'Este e-mail já pertence a uma conta da plataforma. Use outro login para o membro da equipe.',
+          }, 400)
+        }
+      }
+
       const email = syntheticEmail(login, ownerId)
       const { data: authCreated, error: authErr } = await admin.auth.admin.createUser({
         email, password, email_confirm: true,
