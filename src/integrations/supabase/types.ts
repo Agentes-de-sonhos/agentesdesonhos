@@ -6664,6 +6664,147 @@ export type Database = {
           },
         ]
       }
+      material_import_sources: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          folder_id: string
+          folder_url: string
+          id: string
+          is_active: boolean
+          label: string | null
+          last_sync_at: string | null
+          last_sync_result: Json | null
+          provider: string
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          folder_id: string
+          folder_url: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          last_sync_at?: string | null
+          last_sync_result?: Json | null
+          provider?: string
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          folder_id?: string
+          folder_url?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          last_sync_at?: string | null
+          last_sync_result?: Json | null
+          provider?: string
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_import_sources_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      material_imported_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          imported_at: string
+          imported_by: string | null
+          material_id: string | null
+          mime_type: string | null
+          provider: string
+          provider_file_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number | null
+          source_id: string | null
+          source_url: string | null
+          status: string
+          storage_bucket: string
+          storage_path: string
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          material_id?: string | null
+          mime_type?: string | null
+          provider?: string
+          provider_file_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          source_id?: string | null
+          source_url?: string | null
+          status?: string
+          storage_bucket?: string
+          storage_path: string
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          imported_at?: string
+          imported_by?: string | null
+          material_id?: string | null
+          mime_type?: string | null
+          provider?: string
+          provider_file_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          source_id?: string | null
+          source_url?: string | null
+          status?: string
+          storage_bucket?: string
+          storage_path?: string
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_imported_files_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_imported_files_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "material_import_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_imported_files_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           batch_id: string | null
