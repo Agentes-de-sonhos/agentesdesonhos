@@ -59,11 +59,13 @@ Deno.serve(async (req) => {
 
     // ── KPIs gerais ───────────────────────────────────────────
     if (action === 'stats') {
-      const [members, invites, profiles, totalAgencies] = await Promise.all([
+      const [members, invites, profiles, ownersTotal] = await Promise.all([
         admin.from('agency_team_members').select('agency_id, status'),
         admin.from('agency_team_invites').select('agency_id, accepted_at, revoked_at, expires_at'),
         admin.from('agency_access_profiles').select('id, agency_id, is_native'),
-        admin.from('profiles').select('user_id', { count: 'exact', head: true }),
+        // Mesmo universo de proprietários/agências de admin_agency_teams_list:
+        // perfis com user_id não nulo que não são colaboradores de equipe.
+        admin.rpc('admin_agency_owners_total'),
       ])
       const rows = members.data ?? []
       const openInvites = (invites.data ?? []).filter((i: any) =>
@@ -71,7 +73,7 @@ Deno.serve(async (req) => {
       const agencies = new Set<string>(rows.map((r: any) => r.agency_id))
       openInvites.forEach((i: any) => agencies.add(i.agency_id))
       return json({
-        agencies_total: totalAgencies.count ?? 0,
+        agencies_total: Number(ownersTotal.data ?? 0),
         agencies_with_team: agencies.size,
         active_members: rows.filter((r: any) => r.status === 'active').length,
         inactive_members: rows.filter((r: any) => r.status === 'blocked' || r.status === 'disabled').length,
