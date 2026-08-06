@@ -1,5 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import bcrypt from 'npm:bcryptjs@2.4.3'
+import {
+  assertAgencyExists, assertNoOwnershipTransfer, assertNotAgencyOwner, assertPlatformAdmin,
+  assertTargetAgencyId, buildAuditEntry,
+} from '../_shared/agencyTeamGuards.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -212,12 +216,56 @@ Deno.serve(async (req) => {
       allowedByCaller = keys
     }
 
+    const rawBody = await req.json()
+
+    /**
+     * Administração global: o administrador da plataforma pode operar a equipe de
+     * qualquer agência informando `target_agency_id`, sem impersonar o proprietário.
+     * Todas as validações abaixo continuam idênticas, apenas com outro `ownerId`.
+     */
+    let isPlatformAdmin = false
+    if (rawBody?.target_agency_id !== undefined) {
+      const badId = assertTargetAgencyId(rawBody.target_agency_id)
+      if (badId) return json({ error: badId.error }, badId.status)
+      const { data: isAdminRole } = await admin.rpc('has_role', { _user_id: callerId, _role: 'admin' })
+      const notAdmin = assertPlatformAdmin(!!isAdminRole)
+      if (notAdmin) return json({ error: notAdmin.error }, notAdmin.status)
+
+      const targetId = String(rawBody.target_agency_id)
+      const { data: targetProfile } = await admin.from('profiles')
+        .select('id').eq('id', targetId).maybeSingle()
+      const { count: subuserCount } = await admin.from('agency_team_members')
+        .select('id', { count: 'exact', head: true }).eq('auth_user_id', targetId)
+      const badAgency = assertAgencyExists(targetProfile as any, (subuserCount ?? 0) > 0)
+      if (badAgency) return json({ error: badAgency.error }, badAgency.status)
+
+      const ownership = assertNoOwnershipTransfer(rawBody)
+      if (ownership) return json({ error: ownership.error }, ownership.status)
+
+      isPlatformAdmin = true
+      ownerId = targetId
+      allowedByCaller = null
+    }
+
     const { data: agencyProfile } = await admin.from('profiles')
       .select('agency_name, name').eq('id', ownerId).maybeSingle()
     const agencyName = agencyProfile?.agency_name || agencyProfile?.name || 'sua agência'
 
+    /** Registro padronizado de auditoria (marca o administrador global). */
+    const audit = (input: {
+      action: string; entityType?: string; entityId?: string | null
+      teamMemberId?: string | null; subject?: string | null; details?: Record<string, unknown>
+    }) => admin.from('agency_team_audit_log').insert(buildAuditEntry({
+      agencyId: ownerId, actorUserId: callerId, isPlatformAdmin,
+      action: input.action, entityType: input.entityType, entityId: input.entityId ?? null,
+      teamMemberId: input.teamMemberId ?? null, agencyName, subject: input.subject ?? null,
+      details: input.details,
+    }))
+
     /** Bloqueia ações sobre o proprietário e sobre outros administradores de equipe. */
     const assertTargetAllowed = async (memberId: string): Promise<string | null> => {
+      const ownerGuard = assertNotAgencyOwner(memberId, ownerId)
+      if (ownerGuard) return ownerGuard.error
       if (!allowedByCaller) return null
       if (memberId === callerMember?.id) return 'Você não pode alterar o seu próprio acesso.'
       const { data: perms } = await admin.from('agency_team_permissions')
@@ -228,7 +276,7 @@ Deno.serve(async (req) => {
       return null
     }
 
-    const body = await req.json()
+    const body = rawBody
     const { action } = body
 
     // ── Criação direta de colaborador ─────────────────────────
@@ -299,10 +347,9 @@ Deno.serve(async (req) => {
       await writeScopes(admin, ownerId, created.id, body.scopes)
       await writeStagePermissions(admin, ownerId, created.id, body.stage_permissions)
 
-      await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: created.id, actor_user_id: callerId,
-        action: 'create_member', module_key: 'team', entity_type: 'team_member', entity_id: created.id,
-        details: { login, permissions: keys.length },
+      await audit({
+        action: 'create_member', entityType: 'team_member', entityId: created.id,
+        teamMemberId: created.id, subject: full_name, details: { login, permissions: keys.length },
       })
       return json({ id: created.id })
     }
@@ -310,8 +357,9 @@ Deno.serve(async (req) => {
     // ── Atualização ───────────────────────────────────────────
     if (action === 'update') {
       const { id } = body
+      { const g = assertNotAgencyOwner(String(id ?? ''), ownerId); if (g) return json({ error: g.error }, g.status) }
       const { data: member } = await admin.from('agency_team_members')
-        .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
+        .select('id, agency_id, auth_user_id, full_name').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
       { const deny = await assertTargetAllowed(id); if (deny) return json({ error: deny }, 403) }
 
@@ -362,9 +410,9 @@ Deno.serve(async (req) => {
       // Invalida sessões dedicadas para refletir mudanças imediatamente
       await admin.from('agency_team_sessions').delete().eq('team_member_id', id)
 
-      await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: id, actor_user_id: callerId,
-        action: 'update_member', module_key: 'team', entity_type: 'team_member', entity_id: id,
+      await audit({
+        action: 'update_member', entityType: 'team_member', entityId: id,
+        teamMemberId: id, subject: (member as any).full_name,
       })
       return json({ ok: true })
     }
@@ -374,7 +422,7 @@ Deno.serve(async (req) => {
       const { id, status } = body
       if (!['active', 'blocked', 'disabled'].includes(status)) return json({ error: 'Status inválido' }, 400)
       const { data: member } = await admin.from('agency_team_members')
-        .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
+        .select('id, agency_id, auth_user_id, full_name').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
       { const deny = await assertTargetAllowed(id); if (deny) return json({ error: deny }, 403) }
 
@@ -394,9 +442,9 @@ Deno.serve(async (req) => {
           await admin.auth.admin.updateUserById(member.auth_user_id, { ban_duration: '876000h' }).catch(() => {})
         }
       }
-      await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: id, actor_user_id: callerId,
-        action: `set_status_${status}`, module_key: 'team', entity_type: 'team_member', entity_id: id,
+      await audit({
+        action: `set_status_${status}`, entityType: 'team_member', entityId: id,
+        teamMemberId: id, subject: (member as any).full_name,
       })
       return json({ ok: true })
     }
@@ -405,16 +453,16 @@ Deno.serve(async (req) => {
     if (action === 'delete') {
       const { id } = body
       const { data: member } = await admin.from('agency_team_members')
-        .select('id, agency_id, auth_user_id').eq('id', id).maybeSingle()
+        .select('id, agency_id, auth_user_id, full_name').eq('id', id).maybeSingle()
       if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
       { const deny = await assertTargetAllowed(id); if (deny) return json({ error: deny }, 403) }
       await admin.from('agency_team_members').delete().eq('id', id)
       if (member.auth_user_id) {
         await admin.auth.admin.deleteUser(member.auth_user_id).catch(() => {})
       }
-      await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, team_member_id: null, actor_user_id: callerId,
-        action: 'delete_member', module_key: 'team', entity_type: 'team_member', entity_id: id,
+      await audit({
+        action: 'delete_member', entityType: 'team_member', entityId: id,
+        subject: (member as any).full_name,
       })
       return json({ ok: true })
     }
@@ -455,10 +503,7 @@ Deno.serve(async (req) => {
         return json({ error: error.message }, 400)
       }
 
-      await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, actor_user_id: callerId, action: 'invite_created',
-        module_key: 'team', entity_type: 'team_invite', details: { email },
-      })
+      await audit({ action: 'invite_created', entityType: 'team_invite', subject: email, details: { email } })
       const origin = str(body.origin, 200) ?? 'https://app.agentesdesonhos.com.br'
       const inviteUrl = `${origin}/convite/${inviteToken}`
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -481,9 +526,9 @@ Deno.serve(async (req) => {
 
       if (action === 'invite_revoke') {
         await admin.from('agency_team_invites').update({ revoked_at: new Date().toISOString() }).eq('id', id)
-        await admin.from('agency_team_audit_log').insert({
-          agency_id: ownerId, actor_user_id: callerId, action: 'invite_revoked',
-          module_key: 'team', entity_type: 'team_invite', entity_id: id, details: { email: invite.email },
+        await audit({
+          action: 'invite_revoked', entityType: 'team_invite', entityId: id,
+          subject: invite.email, details: { email: invite.email },
         })
         return json({ ok: true })
       }
@@ -499,9 +544,9 @@ Deno.serve(async (req) => {
         sent_count: (current?.sent_count ?? 1) + 1,
         last_sent_at: new Date().toISOString(),
       }).eq('id', id)
-      await admin.from('agency_team_audit_log').insert({
-        agency_id: ownerId, actor_user_id: callerId, action: 'invite_resent',
-        module_key: 'team', entity_type: 'team_invite', entity_id: id, details: { email: invite.email },
+      await audit({
+        action: 'invite_resent', entityType: 'team_invite', entityId: id,
+        subject: invite.email, details: { email: invite.email },
       })
       const origin = str(body.origin, 200) ?? 'https://app.agentesdesonhos.com.br'
       const resendUrl = `${origin}/convite/${inviteToken}`
@@ -541,9 +586,9 @@ Deno.serve(async (req) => {
           is_native: false, permission_keys: keys, scopes,
         }).select('id').single()
         if (error) return json({ error: error.message }, 400)
-        await admin.from('agency_team_audit_log').insert({
-          agency_id: ownerId, actor_user_id: callerId, action: 'access_profile_created',
-          module_key: 'team', entity_type: 'access_profile', entity_id: created.id, details: { name },
+        await audit({
+          action: 'access_profile_created', entityType: 'access_profile', entityId: created.id,
+          subject: name, details: { name },
         })
         return json({ ok: true, id: created.id })
       }
@@ -574,9 +619,9 @@ Deno.serve(async (req) => {
         }
         const { error } = await admin.from('agency_access_profiles').update(patch).eq('id', target.id)
         if (error) return json({ error: error.message }, 400)
-        await admin.from('agency_team_audit_log').insert({
-          agency_id: ownerId, actor_user_id: callerId, action: 'access_profile_updated',
-          module_key: 'team', entity_type: 'access_profile', entity_id: target.id,
+        await audit({
+          action: 'access_profile_updated', entityType: 'access_profile', entityId: target.id,
+          subject: target.name,
         })
         return json({ ok: true })
       }
@@ -598,10 +643,9 @@ Deno.serve(async (req) => {
         }
         const { error } = await admin.from('agency_access_profiles').delete().eq('id', target.id)
         if (error) return json({ error: error.message }, 400)
-        await admin.from('agency_team_audit_log').insert({
-          agency_id: ownerId, actor_user_id: callerId, action: 'access_profile_deleted',
-          module_key: 'team', entity_type: 'access_profile', entity_id: target.id,
-          details: { migrated_to: migrateTo, members: count ?? 0 },
+        await audit({
+          action: 'access_profile_deleted', entityType: 'access_profile', entityId: target.id,
+          subject: target.name, details: { migrated_to: migrateTo, members: count ?? 0 },
         })
         return json({ ok: true })
       }

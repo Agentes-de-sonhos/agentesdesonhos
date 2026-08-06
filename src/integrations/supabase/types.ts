@@ -799,6 +799,7 @@ export type Database = {
       agency_team_audit_log: {
         Row: {
           action: string
+          actor_is_platform_admin: boolean
           actor_user_id: string | null
           agency_id: string
           created_at: string
@@ -812,6 +813,7 @@ export type Database = {
         }
         Insert: {
           action: string
+          actor_is_platform_admin?: boolean
           actor_user_id?: string | null
           agency_id: string
           created_at?: string
@@ -825,6 +827,7 @@ export type Database = {
         }
         Update: {
           action?: string
+          actor_is_platform_admin?: boolean
           actor_user_id?: string | null
           agency_id?: string
           created_at?: string
@@ -916,20 +919,26 @@ export type Database = {
         Row: {
           agency_id: string
           created_at: string
+          created_by: string | null
           max_members: number
           reason: string | null
+          updated_at: string
         }
         Insert: {
           agency_id: string
           created_at?: string
+          created_by?: string | null
           max_members: number
           reason?: string | null
+          updated_at?: string
         }
         Update: {
           agency_id?: string
           created_at?: string
+          created_by?: string | null
           max_members?: number
           reason?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -14588,6 +14597,7 @@ export type Database = {
         Args: { _limit?: number; _member_id?: string }
         Returns: {
           action: string
+          actor_is_platform_admin: boolean
           actor_user_id: string
           created_at: string
           details: Json
