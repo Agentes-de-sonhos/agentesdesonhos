@@ -237,3 +237,35 @@ describe('migration da auditoria de equipe', () => {
     expect(sql).not.toContain('TO anon')
   })
 })
+
+describe('patch final — revoke anon e KPI de agências', () => {
+  const sqls = readdirSync('supabase/migrations')
+    .filter(f => f.endsWith('.sql')).sort()
+    .map(f => readFileSync(`supabase/migrations/${f}`, 'utf8'))
+
+  it('remove EXECUTE de anon/PUBLIC em team_can_read_team', () => {
+    const sql = sqls.filter(t => t.includes('REVOKE EXECUTE ON FUNCTION public.team_can_read_team(uuid) FROM anon')).pop()
+    expect(sql).toBeTruthy()
+    expect(sql!).toContain('REVOKE EXECUTE ON FUNCTION public.team_can_read_team(uuid) FROM PUBLIC;')
+    expect(sql!).toContain('GRANT EXECUTE ON FUNCTION public.team_can_read_team(uuid) TO authenticated, service_role;')
+  })
+
+  it('cria contagem de proprietários/agências restrita ao service_role', () => {
+    const sql = sqls.filter(t => t.includes('FUNCTION public.admin_agency_owners_total()')).pop()
+    expect(sql).toBeTruthy()
+    expect(sql!).toContain('FROM public.profiles p')
+    expect(sql!).toContain('WHERE p.user_id IS NOT NULL')
+    expect(sql!).toContain('WHERE m.auth_user_id = p.user_id')
+    expect(sql!).toContain("SET search_path TO 'public'")
+    expect(sql!).toContain('GRANT EXECUTE ON FUNCTION public.admin_agency_owners_total() TO service_role;')
+    expect(sql!).not.toContain('TO anon')
+  })
+
+  it('stats usa a RPC de proprietários em vez do count bruto de profiles', () => {
+    const fn = readFileSync('supabase/functions/admin-agency-teams/index.ts', 'utf8')
+    const stats = fn.slice(fn.indexOf("if (action === 'stats')"), fn.indexOf("if (action === 'agencies')"))
+    expect(stats).toContain("admin.rpc('admin_agency_owners_total')")
+    expect(stats).toContain('agencies_total: Number(ownersTotal.data ?? 0)')
+    expect(stats).not.toContain("admin.from('profiles').select('user_id', { count: 'exact', head: true })")
+  })
+})
