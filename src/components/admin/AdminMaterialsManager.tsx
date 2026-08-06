@@ -152,6 +152,9 @@ export function AdminMaterialsManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { categoryNames: vitrineCategories } = useVitrineCategories();
+  const { sources: driveSources, files: driveImportedFiles } = useDriveMaterialImports();
+  const driveSourceCount = driveSources.length;
+  const drivePendingCount = driveImportedFiles.filter((f) => f.status === "a_revisar").length;
 
   const { data: materials, isLoading } = useQuery({
     queryKey: ["admin-materials"],
