@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,12 +77,25 @@ export function MaterialsDriveImportPanel() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [deleteTarget, setDeleteTarget] = useState<MaterialImportSource | null>(null);
   const [selectedSourceId, setSelectedSourceId] = useState<string>("todas");
   const [statusFilter, setStatusFilter] = useState<string>("a_revisar");
   const [approveTarget, setApproveTarget] = useState<MaterialImportedFile | null>(null);
   const [approveCategory, setApproveCategory] = useState("Operadoras de turismo");
   const [approveTitle, setApproveTitle] = useState("");
+
+  const { data: supplierOptions = [] } = useQuery({
+    queryKey: ["drive-import-supplier-options"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tour_operators")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   const visibleFiles = useMemo(() => {
     return files.filter((f) => {
@@ -206,15 +221,15 @@ export function MaterialsDriveImportPanel() {
                     <Button size="icon" variant="ghost" onClick={() => openEdit(source)} aria-label="Editar fonte">
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="text-destructive"
-                      onClick={() => setDeleteTarget(source)}
-                      aria-label="Remover fonte"
+                    <ConfirmDeleteDialog
+                      onConfirm={() => deleteSource.mutate(source.id)}
+                      title="Remover fonte de importação?"
+                      description="Os arquivos já importados continuam na galeria. Apenas a configuração da pasta será removida."
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      <Button size="icon" variant="ghost" className="text-destructive" aria-label="Remover fonte">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </ConfirmDeleteDialog>
                   </div>
                 </div>
               );
@@ -377,6 +392,7 @@ export function MaterialsDriveImportPanel() {
             <div className="space-y-2">
               <Label>Fornecedor / operadora *</Label>
               <SupplierCombobox
+                suppliers={supplierOptions}
                 value={form.supplier_id}
                 onChange={(v) => setForm((f) => ({ ...f, supplier_id: v || "" }))}
               />
@@ -473,16 +489,6 @@ export function MaterialsDriveImportPanel() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDeleteDialog
-        open={!!deleteTarget}
-        onOpenChange={(v) => !v && setDeleteTarget(null)}
-        onConfirm={() => {
-          if (deleteTarget) deleteSource.mutate(deleteTarget.id);
-          setDeleteTarget(null);
-        }}
-        title="Remover fonte de importação?"
-        description="Os arquivos já importados continuam na galeria. Apenas a configuração da pasta será removida."
-      />
     </div>
   );
 }
