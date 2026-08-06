@@ -56,10 +56,10 @@ const STATUS_ACTION_COPY: Record<StatusAction, { title: string; description: str
  */
 export function TeamManagementCenter() {
   const scope = useTeamScope()
-  const { isMaster } = usePermissions()
-  // Colaborador com `team.manage` administra a equipe, mas as configurações de
-  // comunidade continuam exclusivas do proprietário/master (e do admin global).
-  const canManageCommunity = scope.isPlatformAdmin || isMaster
+  const { can } = usePermissions()
+  // Comunidade acompanha `team.manage` (validado também na RPC do servidor).
+  // Auditoria exige `audit.view` para colaborador; o admin global sempre vê.
+  const canSeeAudit = scope.isPlatformAdmin || can('audit.view')
   const { data: members = [], isLoading } = useTeamMembers()
   const { data: quota } = useTeamQuota()
   const mutation = useTeamAdminMutation()
@@ -113,14 +113,14 @@ export function TeamManagementCenter() {
       )}
 
       <Tabs defaultValue="membros">
-        <TabsList className={`grid w-full grid-cols-2 ${canManageCommunity ? 'sm:grid-cols-5' : 'sm:grid-cols-4'}`}>
+        <TabsList className={`grid w-full grid-cols-2 ${canSeeAudit ? 'sm:grid-cols-5' : 'sm:grid-cols-4'}`}>
           <TabsTrigger value="membros">Colaboradores</TabsTrigger>
           <TabsTrigger value="convites">
             Convites{quota?.pending ? ` (${quota.pending})` : ''}
           </TabsTrigger>
           <TabsTrigger value="perfis">Perfis de acesso</TabsTrigger>
-          {canManageCommunity && <TabsTrigger value="comunidade">Comunidade</TabsTrigger>}
-          <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
+          <TabsTrigger value="comunidade">Comunidade</TabsTrigger>
+          {canSeeAudit && <TabsTrigger value="auditoria">Auditoria</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="membros" className="space-y-3 pt-4">
@@ -219,15 +219,15 @@ export function TeamManagementCenter() {
           <AccessProfilesManager />
         </TabsContent>
 
-        {canManageCommunity && (
-          <TabsContent value="comunidade" className="pt-4">
-            <AgencyCommunitySettings />
+        <TabsContent value="comunidade" className="pt-4">
+          <AgencyCommunitySettings />
+        </TabsContent>
+
+        {canSeeAudit && (
+          <TabsContent value="auditoria" className="pt-4">
+            <TeamAuditLogView />
           </TabsContent>
         )}
-
-        <TabsContent value="auditoria" className="pt-4">
-          <TeamAuditLogView />
-        </TabsContent>
       </Tabs>
 
       {creating && (
