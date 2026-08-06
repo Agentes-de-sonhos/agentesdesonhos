@@ -48,6 +48,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SupplierCombobox } from "./SupplierCombobox";
 import { MultiFileUpload } from "./MultiFileUpload";
+import { MaterialsDriveImportPanel } from "./MaterialsDriveImportPanel";
+import { useDriveMaterialImports } from "@/hooks/useDriveMaterialImports";
 
 const CATEGORIES = [
   "Operadoras de turismo",
@@ -150,6 +152,9 @@ export function AdminMaterialsManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { categoryNames: vitrineCategories } = useVitrineCategories();
+  const { sources: driveSources, files: driveImportedFiles } = useDriveMaterialImports();
+  const driveSourceCount = driveSources.length;
+  const drivePendingCount = driveImportedFiles.filter((f) => f.status === "a_revisar").length;
 
   const { data: materials, isLoading } = useQuery({
     queryKey: ["admin-materials"],
@@ -1301,14 +1306,23 @@ export function AdminMaterialsManager() {
               </TabsTrigger>
               <TabsTrigger value="drive" className="gap-2" onClick={() => setOpenDriveFolder(null)}>
                 <CloudDownload className="h-4 w-4" />
-                Google Drive ({driveOperatorFolders.length} operadora{driveOperatorFolders.length !== 1 ? 's' : ''})
+                Google Drive ({driveSourceCount} fonte{driveSourceCount !== 1 ? "s" : ""}
+                {drivePendingCount > 0 ? ` • ${drivePendingCount} a revisar` : ""})
               </TabsTrigger>
             </TabsList>
             <TabsContent value="manual">
               {renderGalleryGrid(manualGalleries)}
             </TabsContent>
             <TabsContent value="drive">
-              {renderDriveContent()}
+              <div className="space-y-8">
+                <MaterialsDriveImportPanel />
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Sincronização automática por operadora
+                  </h3>
+                  {renderDriveContent()}
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         )}
