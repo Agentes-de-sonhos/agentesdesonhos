@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useTeamMembers, useTeamQuota, useTeamAdminMutation, TeamMemberRow } from '@/hooks/useTeamMembers'
 import { useTeamScope } from './TeamScopeContext'
+import { usePermissions } from '@/hooks/usePermissions'
 import { TeamMemberForm } from './TeamMemberForm'
 import { TeamInvitesList } from './TeamInvitesList'
 import { AccessProfilesManager } from './AccessProfilesManager'
@@ -55,6 +56,10 @@ const STATUS_ACTION_COPY: Record<StatusAction, { title: string; description: str
  */
 export function TeamManagementCenter() {
   const scope = useTeamScope()
+  const { isMaster } = usePermissions()
+  // Colaborador com `team.manage` administra a equipe, mas as configurações de
+  // comunidade continuam exclusivas do proprietário/master (e do admin global).
+  const canManageCommunity = scope.isPlatformAdmin || isMaster
   const { data: members = [], isLoading } = useTeamMembers()
   const { data: quota } = useTeamQuota()
   const mutation = useTeamAdminMutation()
@@ -108,13 +113,13 @@ export function TeamManagementCenter() {
       )}
 
       <Tabs defaultValue="membros">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5">
+        <TabsList className={`grid w-full grid-cols-2 ${canManageCommunity ? 'sm:grid-cols-5' : 'sm:grid-cols-4'}`}>
           <TabsTrigger value="membros">Colaboradores</TabsTrigger>
           <TabsTrigger value="convites">
             Convites{quota?.pending ? ` (${quota.pending})` : ''}
           </TabsTrigger>
           <TabsTrigger value="perfis">Perfis de acesso</TabsTrigger>
-          <TabsTrigger value="comunidade">Comunidade</TabsTrigger>
+          {canManageCommunity && <TabsTrigger value="comunidade">Comunidade</TabsTrigger>}
           <TabsTrigger value="auditoria">Auditoria</TabsTrigger>
         </TabsList>
 
@@ -214,9 +219,11 @@ export function TeamManagementCenter() {
           <AccessProfilesManager />
         </TabsContent>
 
-        <TabsContent value="comunidade" className="pt-4">
-          <AgencyCommunitySettings />
-        </TabsContent>
+        {canManageCommunity && (
+          <TabsContent value="comunidade" className="pt-4">
+            <AgencyCommunitySettings />
+          </TabsContent>
+        )}
 
         <TabsContent value="auditoria" className="pt-4">
           <TeamAuditLogView />
