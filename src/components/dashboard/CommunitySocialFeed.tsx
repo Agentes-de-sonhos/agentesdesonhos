@@ -12,7 +12,6 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import {
-  ArrowRight,
   Heart,
   Loader2,
   MessageCircle,
