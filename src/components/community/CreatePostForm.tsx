@@ -308,6 +308,7 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
   };
 
   const cleanupOrphans = async (urls: string[]) => {
+    // no-op marker
     const paths = urls
       .map((u) => u.split("/community-feed/")[1])
       .filter(Boolean) as string[];
