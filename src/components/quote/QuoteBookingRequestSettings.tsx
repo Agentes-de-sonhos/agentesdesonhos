@@ -23,6 +23,7 @@ import {
   SELECTION_MODE_LABELS,
 } from "@/hooks/useQuoteBookingConfig";
 import type { QuoteSelectionMode, QuoteService } from "@/types/quote";
+import { groupHint, requiresGroup, validateBookingConfig } from "@/lib/quoteBookingRules";
 
 interface Props {
   quote: any;
@@ -71,6 +72,15 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
   };
 
   const handleToggle = async (checked: boolean) => {
+    if (checked) {
+      const errors = validateBookingConfig(services as any, groups);
+      if (errors.length > 0) {
+        toast.error("Corrija a configuração dos serviços antes de ativar", {
+          description: errors.slice(0, 3).join(" • "),
+        });
+        return;
+      }
+    }
     setEnabled(checked);
     // Desativar preserva grupos e modos dos serviços para reativação futura.
     await persist({ booking_requests_enabled: checked });
@@ -226,9 +236,7 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
                   className="h-8 text-sm"
                 />
                 <Badge variant="secondary" className="shrink-0 text-[10px]">
-                  {g.group_type === "alternative"
-                    ? "cliente escolherá 1 opção"
-                    : "cliente poderá escolher várias opções"}
+                  {groupHint(g.group_type)}
                 </Badge>
                 <Button
                   type="button"
@@ -260,7 +268,7 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
               const compatible = groups.filter(
                 (g) => g.group_type === (mode === "free" ? "free" : "alternative")
               );
-              const needsGroup = mode === "alternative" || mode === "free";
+              const needsGroup = requiresGroup(mode);
               return (
                 <div
                   key={s.id}
