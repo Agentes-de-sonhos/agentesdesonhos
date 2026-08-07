@@ -441,13 +441,26 @@ export default function GerarOrcamento() {
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
   const [openSections, setOpenSections] = useState<
-    Record<"services" | "summary", boolean>
+    Record<"add" | "services" | "settings" | "summary" | "signature", boolean>
   >({
+    add: false,
     services: false,
-    summary: true,
+    settings: false,
+    summary: false,
+    signature: false,
   });
-  const toggleSection = (key: "services" | "summary") =>
+  const toggleSection = (key: "add" | "services" | "settings" | "summary" | "signature") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  const STEP_KEYS = ["add", "services", "settings", "summary", "signature"] as const;
+  const openStep = (step: number) => {
+    const key = STEP_KEYS[step - 1];
+    setOpenSections((prev) => ({ ...prev, [key]: true }));
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`quote-step-${step}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      el?.querySelector("button")?.focus();
+    });
+  };
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
