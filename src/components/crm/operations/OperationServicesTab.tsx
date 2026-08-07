@@ -114,35 +114,46 @@ export function OperationServicesTab({ operation }: Props) {
       {services.length > 0 && (
         <>
           {/* Desktop matrix */}
-          <div className="hidden md:block overflow-x-auto rounded-xl border">
-            <table className="w-full min-w-[860px] text-sm">
+          <div className="hidden md:block rounded-xl border">
+            <table className="w-full table-fixed text-sm">
+              <colgroup>
+                <col className="w-[24%]" />
+                <col className="w-[13%]" />
+                <col className="w-[21%]" />
+                <col className="w-[11%]" />
+                <col className="w-[7%]" />
+                <col className="w-[5%]" />
+                <col className="w-[6%]" />
+                <col className="w-[7%]" />
+                <col className="w-[6%]" />
+              </colgroup>
               <thead className="bg-muted/50">
                 <tr className="text-left">
-                  <th className="px-3 py-2 font-semibold">Serviço</th>
-                  <th className="px-3 py-2 font-semibold">Tipo</th>
-                  <th className="px-3 py-2 font-semibold">Fornecedor / Destino</th>
-                  <th className="px-3 py-2 font-semibold text-right">Valor</th>
+                  <th className="px-2 py-2 font-semibold">Serviço</th>
+                  <th className="px-2 py-2 font-semibold">Tipo</th>
+                  <th className="px-2 py-2 font-semibold">Fornecedor / Destino</th>
+                  <th className="px-2 py-2 font-semibold text-right">Valor</th>
                   {FLAGS.map((f) => (
-                    <th key={f.key} scope="col" className="px-3 py-2 font-semibold text-center whitespace-nowrap">
+                    <th key={f.key} scope="col" className="px-1 py-2 text-center text-xs font-semibold leading-tight break-words">
                       {f.label}
                     </th>
                   ))}
-                  <th className="px-3 py-2" />
+                  <th className="px-1 py-2" />
                 </tr>
               </thead>
               <tbody>
                 {services.map((s) => (
                   <tr key={s.id} className="border-t">
-                    <td className="px-3 py-2 font-medium">{s.name}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{serviceTypeLabel(s.service_type)}</td>
-                    <td className="px-3 py-2 text-muted-foreground">
+                    <td className="px-2 py-2 font-medium break-words">{s.name}</td>
+                    <td className="px-2 py-2 text-muted-foreground break-words">{serviceTypeLabel(s.service_type)}</td>
+                    <td className="px-2 py-2 text-muted-foreground break-words">
                       {[s.supplier, s.destination].filter(Boolean).join(" · ") || "—"}
                     </td>
-                    <td className="px-3 py-2 text-right">{brl(s.amount)}</td>
+                    <td className="px-2 py-2 text-right whitespace-nowrap">{brl(s.amount)}</td>
                     {FLAGS.map((f) => (
-                      <td key={f.key} className="px-3 py-2 text-center">{renderFlag(s, f.key, f.label)}</td>
+                      <td key={f.key} className="px-1 py-2 text-center">{renderFlag(s, f.key, f.label)}</td>
                     ))}
-                    <td className="px-3 py-2">
+                    <td className="px-1 py-2">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Editar serviço" onClick={() => setDraft(s)}>
                           <Pencil className="h-3.5 w-3.5" />
@@ -157,8 +168,8 @@ export function OperationServicesTab({ operation }: Props) {
               </tbody>
               <tfoot>
                 <tr className="border-t bg-muted/30">
-                  <td className="px-3 py-2 font-semibold" colSpan={3}>Total</td>
-                  <td className="px-3 py-2 text-right font-semibold">{brl(total)}</td>
+                  <td className="px-2 py-2 font-semibold" colSpan={3}>Total</td>
+                  <td className="px-2 py-2 text-right font-semibold whitespace-nowrap">{brl(total)}</td>
                   <td colSpan={5} />
                 </tr>
               </tfoot>

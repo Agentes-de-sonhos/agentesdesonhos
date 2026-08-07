@@ -116,7 +116,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-[calc(100vw-1.5rem)] p-4 sm:p-6">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[1560px] lg:w-[93vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
         <DialogHeader>
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
