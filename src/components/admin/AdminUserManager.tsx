@@ -955,8 +955,8 @@ export function AdminUserManager() {
           <AgencyEntitlementsDialog
             open={!!entitlementsUser}
             onOpenChange={(open) => !open && setEntitlementsUser(null)}
-            agencyId={entitlementsUser.user_id}
-            agencyName={entitlementsUser.agency_name || entitlementsUser.name}
+            userId={entitlementsUser.user_id}
+            userName={entitlementsUser.agency_name || entitlementsUser.name}
           />
         )}
 

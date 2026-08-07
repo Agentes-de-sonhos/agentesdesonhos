@@ -15,12 +15,35 @@ export interface Quote {
   payment_terms: string | null;
   valid_until: string | null;
   validity_disclaimer: string;
+  /** VIP (entitlement `booking_requests`): libera seleção de serviços pelo cliente. */
+  booking_requests_enabled?: boolean;
+  booking_disclaimer?: string;
+  booking_deadline?: string | null;
   created_at: string;
   updated_at: string;
   services?: QuoteService[];
   /** Manual, visual-only grouping of services (optional). */
   sections?: QuoteSection[];
+  /** Grupos de escolha (alternativa/livre) usados no pedido de reserva. */
+  choice_groups?: QuoteChoiceGroup[];
   entry_extras?: import("@/lib/quoteEntryExtras").QuoteEntryExtra[];
+}
+
+/** Modo de seleção do serviço no pedido de reserva do cliente. */
+export type QuoteSelectionMode = 'optional' | 'required' | 'alternative' | 'free';
+
+/** Grupo de escolha de serviços dentro de um orçamento. */
+export interface QuoteChoiceGroup {
+  id: string;
+  quote_id?: string;
+  user_id?: string;
+  title: string;
+  group_type: 'alternative' | 'free';
+  min_select: number;
+  max_select: number | null;
+  order_index: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /** Named, expandable group of services inside a quote (organization only). */
@@ -43,6 +66,10 @@ export interface QuoteService {
   order_index: number;
   /** Section this service belongs to, or null when unsectioned. */
   section_id?: string | null;
+  /** VIP: como o cliente pode selecionar este serviço no pedido de reserva. */
+  selection_mode?: QuoteSelectionMode;
+  /** Grupo de escolha quando selection_mode é 'alternative' ou 'free'. */
+  choice_group_id?: string | null;
   option_label: string | null;
   description: string | null;
   image_url: string | null;

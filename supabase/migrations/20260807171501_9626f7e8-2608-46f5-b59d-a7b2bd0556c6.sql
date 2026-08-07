@@ -1,0 +1,1 @@
+REVOKE ALL ON TABLE public.quote_service_choice_groups FROM anon;

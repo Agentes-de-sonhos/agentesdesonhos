@@ -24,9 +24,14 @@ import {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** user_id do TITULAR da agência (agency_id). */
-  agencyId: string;
-  agencyName: string;
+  /**
+   * user_id do usuário selecionado na lista — pode ser titular OU colaborador.
+   * O titular real (agency_id) é resolvido no servidor via
+   * `admin_resolve_agency_owner`, garantindo que o entitlement nunca seja
+   * criado para o user_id de um membro de equipe.
+   */
+  userId: string;
+  userName: string;
 }
 
 interface Row {
@@ -42,19 +47,45 @@ const KEYS = Object.values(AGENCY_ENTITLEMENTS) as AgencyEntitlementKey[];
 
 const toDateInput = (v: string | null) => (v ? v.slice(0, 10) : "");
 
-export function AgencyEntitlementsDialog({ open, onOpenChange, agencyId, agencyName }: Props) {
+interface ResolvedOwner {
+  agency_owner_id: string;
+  agency_name: string | null;
+  owner_name: string | null;
+  owner_email: string | null;
+}
+
+export function AgencyEntitlementsDialog({ open, onOpenChange, userId, userName }: Props) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // 1) Resolve SEMPRE o titular da agência antes de qualquer escrita.
+  const { data: owner, isLoading: resolvingOwner } = useQuery({
+    queryKey: ["admin-resolve-agency-owner", userId],
+    enabled: open && !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_resolve_agency_owner" as any, {
+        _user_id: userId,
+      });
+      if (error) throw error;
+      const row = (Array.isArray(data) ? data[0] : data) as ResolvedOwner | undefined;
+      return row ?? null;
+    },
+  });
+
+  const agencyId = owner?.agency_owner_id ?? null;
+  const isTeamMember = !!agencyId && agencyId !== userId;
+  const agencyName =
+    owner?.agency_name || owner?.owner_name || userName;
   const queryKey = ["admin-agency-entitlements", agencyId];
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey,
-    enabled: open,
+    enabled: open && !!agencyId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("agency_entitlements" as any)
         .select("id, entitlement_key, is_active, starts_at, ends_at, notes")
-        .eq("agency_id", agencyId);
+        .eq("agency_id", agencyId!);
       if (error) throw error;
       return (data || []) as unknown as Row[];
     },
@@ -70,6 +101,7 @@ export function AgencyEntitlementsDialog({ open, onOpenChange, agencyId, agencyN
       ends_at?: string | null;
       notes?: string | null;
     }) => {
+      if (!agencyId) throw new Error("Titular da agência não resolvido");
       const existing = byKey.get(payload.key);
       const values = {
         agency_id: agencyId,
@@ -106,7 +138,14 @@ export function AgencyEntitlementsDialog({ open, onOpenChange, agencyId, agencyN
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading ? (
+        {isTeamMember && (
+          <p className="text-xs rounded-md border border-amber-300/60 bg-amber-50/60 dark:bg-amber-500/10 p-2 text-amber-700 dark:text-amber-400">
+            <strong>{userName}</strong> é membro de equipe. O pacote será concedido ao titular da
+            agência ({owner?.owner_name || owner?.owner_email || agencyId}), valendo para todos.
+          </p>
+        )}
+
+        {resolvingOwner || isLoading || !agencyId ? (
           <div className="flex justify-center py-8">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
