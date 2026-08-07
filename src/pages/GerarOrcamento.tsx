@@ -75,6 +75,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
+import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
@@ -1682,10 +1683,16 @@ export default function GerarOrcamento() {
           />
         )}
         renderAdvanced={() => (
-          <QuoteAdvancedSettings
-            quote={quote}
-            onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-          />
+          <div className="space-y-6">
+            <QuoteAdvancedSettings
+              quote={quote}
+              onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+            />
+            <QuoteBookingRequestSettings
+              quote={quote}
+              onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+            />
+          </div>
         )}
       />
 

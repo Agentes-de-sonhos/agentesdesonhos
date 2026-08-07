@@ -10114,9 +10114,57 @@ export type Database = {
           },
         ]
       }
+      quote_service_choice_groups: {
+        Row: {
+          created_at: string
+          group_type: string
+          id: string
+          max_select: number | null
+          min_select: number
+          order_index: number
+          quote_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_type: string
+          id?: string
+          max_select?: number | null
+          min_select?: number
+          order_index?: number
+          quote_id: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_type?: string
+          id?: string
+          max_select?: number | null
+          min_select?: number
+          order_index?: number
+          quote_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_service_choice_groups_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_services: {
         Row: {
           amount: number
+          choice_group_id: string | null
           created_at: string
           description: string | null
           discount_type: string | null
@@ -10133,12 +10181,14 @@ export type Database = {
           payment_type: string | null
           quote_id: string
           section_id: string | null
+          selection_mode: string
           service_data: Json
           service_type: string
           updated_at: string
         }
         Insert: {
           amount?: number
+          choice_group_id?: string | null
           created_at?: string
           description?: string | null
           discount_type?: string | null
@@ -10155,12 +10205,14 @@ export type Database = {
           payment_type?: string | null
           quote_id: string
           section_id?: string | null
+          selection_mode?: string
           service_data?: Json
           service_type: string
           updated_at?: string
         }
         Update: {
           amount?: number
+          choice_group_id?: string | null
           created_at?: string
           description?: string | null
           discount_type?: string | null
@@ -10177,11 +10229,19 @@ export type Database = {
           payment_type?: string | null
           quote_id?: string
           section_id?: string | null
+          selection_mode?: string
           service_data?: Json
           service_type?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "quote_services_choice_group_id_fkey"
+            columns: ["choice_group_id"]
+            isOneToOne: false
+            referencedRelation: "quote_service_choice_groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quote_services_quote_id_fkey"
             columns: ["quote_id"]
@@ -10201,6 +10261,9 @@ export type Database = {
       quotes: {
         Row: {
           adults_count: number
+          booking_deadline: string | null
+          booking_disclaimer: string
+          booking_requests_enabled: boolean
           children_count: number
           client_id: string | null
           client_name: string
@@ -10242,6 +10305,9 @@ export type Database = {
         }
         Insert: {
           adults_count?: number
+          booking_deadline?: string | null
+          booking_disclaimer?: string
+          booking_requests_enabled?: boolean
           children_count?: number
           client_id?: string | null
           client_name: string
@@ -10283,6 +10349,9 @@ export type Database = {
         }
         Update: {
           adults_count?: number
+          booking_deadline?: string | null
+          booking_disclaimer?: string
+          booking_requests_enabled?: boolean
           children_count?: number
           client_id?: string | null
           client_name?: string
@@ -13933,6 +14002,15 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_resolve_agency_owner: {
+        Args: { _user_id: string }
+        Returns: {
+          agency_name: string
+          agency_owner_id: string
+          owner_email: string
+          owner_name: string
+        }[]
+      }
       admin_set_news_curation: {
         Args: {
           p_curation_type: string
@@ -14631,6 +14709,10 @@ export type Database = {
       report_supplier_review: {
         Args: { _details?: string; _reason: string; _review_id: string }
         Returns: Json
+      }
+      resolve_agency_id_for_user: {
+        Args: { _user_id: string }
+        Returns: string
       }
       resolve_trip_short_code: { Args: { p_code: string }; Returns: Json }
       revert_award_confirmation: {
