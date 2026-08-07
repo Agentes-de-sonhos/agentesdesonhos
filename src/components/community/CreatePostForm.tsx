@@ -39,6 +39,8 @@ interface CreatePostPayload {
 interface CreatePostFormProps {
   onSubmit: (data: CreatePostPayload) => void;
   isCreating: boolean;
+  /** Starts as a single-line box and expands on focus (used in the dashboard). */
+  collapsible?: boolean;
 }
 
 type PickedImage = { file: File; previewUrl: string };
@@ -64,9 +66,10 @@ function extOf(name: string) {
   return name.split(".").pop()?.toLowerCase() || "";
 }
 
-export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
+export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: CreatePostFormProps) {
   const { user } = useAuth();
   const [content, setContent] = useState("");
+  const [expanded, setExpanded] = useState(!collapsible);
   const [images, setImages] = useState<PickedImage[]>([]);
   const [video, setVideo] = useState<PickedVideo | null>(null);
   const [docs, setDocs] = useState<PickedDoc[]>([]);
