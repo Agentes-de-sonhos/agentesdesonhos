@@ -15047,6 +15047,21 @@ export type Database = {
         }
         Returns: Json
       }
+      submit_quote_booking_request: {
+        Args: {
+          p_agency_slug: string
+          p_client_email: string
+          p_client_name: string
+          p_client_notes?: string
+          p_client_whatsapp: string
+          p_code: string
+          p_disclaimer_accepted?: boolean
+          p_idempotency_key?: string
+          p_selected_service_ids: string[]
+          p_source_ip_hash?: string
+        }
+        Returns: Json
+      }
       submit_sales_landing_lead: {
         Args: { p_lead_name: string; p_lead_phone: string; p_slug: string }
         Returns: Json
