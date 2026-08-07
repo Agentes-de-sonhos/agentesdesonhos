@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useCommunityMembership } from "@/hooks/useCommunityMembership";
+import { useCommunityUnread } from "@/hooks/useCommunityUnread";
 import { CommunityFeedSection } from "@/components/community/CommunityFeedSection";
 import { CommunityLeftSidebar } from "@/components/community/CommunityLeftSidebar";
 import { MemberDirectory } from "@/components/community/MemberDirectory";
@@ -43,6 +44,10 @@ function CommunityContent() {
   const {
     whatsappCommunity, isLoading,
   } = useCommunity(activeSection);
+  const { markSeen } = useCommunityUnread(false);
+  useEffect(() => {
+    markSeen();
+  }, [markSeen]);
   const [filterSpecialty, setFilterSpecialty] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<CommunityMember | null>(null);
 
