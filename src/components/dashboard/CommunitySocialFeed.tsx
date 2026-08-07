@@ -298,13 +298,9 @@ function PostCard({
             <span>{post.likes_count} {post.likes_count === 1 ? "curtida" : "curtidas"}</span>
           )}
           {post.comments_count > 0 && (
-            <button
-              type="button"
-              onClick={onToggleComments}
-              className="hover:underline"
-            >
+            <Link to="/comunidade" className="hover:underline">
               {post.comments_count} {post.comments_count === 1 ? "comentário" : "comentários"}
-            </button>
+            </Link>
           )}
         </div>
       )}
@@ -322,84 +318,66 @@ function PostCard({
         <Button
           variant="ghost"
           size="sm"
-          onClick={onToggleComments}
+          asChild
           className="flex-1 basis-1/2 gap-2 text-muted-foreground"
         >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-xs sm:text-sm">Comentar</span>
+          <Link to="/comunidade">
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-xs sm:text-sm">Comentar</span>
+          </Link>
         </Button>
       </div>
 
-      {commentsOpen && (
-        <div className="px-4 pb-4 pt-2 space-y-3 bg-muted/20 border-t border-border/40">
-          {loadingComments ? (
-            <div className="flex items-center justify-center py-3 text-xs text-muted-foreground">
-              <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> Carregando comentários...
+      {(latestComment || loadingComments || newCount > 1) && (
+        <div className="px-4 pb-3 pt-2 space-y-2 bg-muted/20 border-t border-border/40">
+          {loadingComments && !latestComment ? (
+            <div className="flex items-center py-1 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> Carregando comentário...
             </div>
-          ) : comments.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-2">Seja o primeiro a comentar.</p>
-          ) : (
-            <ul className="space-y-3 pt-2">
-              {comments.map((c) => (
-                <li key={c.id} className="flex gap-2.5">
-                  <Avatar className="h-7 w-7 flex-shrink-0">
-                    <AvatarImage src={c.profile?.avatar_url || undefined} alt={c.profile?.name || "Autor"} />
-                    <AvatarFallback className="text-[10px] bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
-                      {initials(c.profile?.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="rounded-2xl bg-background border border-border/50 px-3 py-2">
-                      <p className="text-xs font-semibold text-foreground">
-                        {toTitleCase(c.profile?.name) || "Membro"}
-                      </p>
-                      <LinkifiedText
-                        text={c.content}
-                        className="text-sm text-foreground whitespace-pre-wrap break-words mt-0.5"
-                      />
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 px-2">
-                      <span className="text-[11px] text-muted-foreground">{timeAgo(c.created_at)}</span>
-                      {(currentUserId === c.user_id || isAdmin) && (
-                        <button
-                          onClick={() => {
-                            if (confirm("Excluir comentário?")) deleteComment(c.id);
-                          }}
-                          className="text-[11px] text-muted-foreground hover:text-destructive"
-                        >
-                          Excluir
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          ) : latestComment ? (
+            <div className="flex gap-2.5 pt-1">
+              <Avatar className="h-7 w-7 flex-shrink-0">
+                <AvatarImage
+                  src={latestComment.profile?.avatar_url || undefined}
+                  alt={latestComment.profile?.name || "Autor"}
+                />
+                <AvatarFallback className="text-[10px] bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
+                  {initials(latestComment.profile?.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="rounded-2xl bg-background border border-border/50 px-3 py-2">
+                  <p className="text-xs font-semibold text-foreground">
+                    {toTitleCase(latestComment.profile?.name) || "Membro"}
+                  </p>
+                  <LinkifiedText
+                    text={latestComment.content}
+                    className="text-sm text-foreground whitespace-pre-wrap break-words mt-0.5 line-clamp-3"
+                  />
+                </div>
+                <span className="text-[11px] text-muted-foreground mt-1 px-2 block">
+                  {timeAgo(latestComment.created_at)}
+                </span>
+              </div>
+            </div>
+          ) : null}
 
-          <div className="flex gap-2 pt-1">
-            <Textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Escreva um comentário..."
-              className="resize-none min-h-[40px] max-h-32 text-sm bg-background"
-              maxLength={2000}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleAddComment();
-                }
-              }}
-            />
-            <Button
-              size="icon"
-              onClick={handleAddComment}
-              disabled={!commentText.trim() || isAddingComment}
-              className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white flex-shrink-0"
-            >
-              {isAddingComment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            </Button>
-          </div>
+          {newCount > 1 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                to="/comunidade"
+                className="text-xs font-medium text-[hsl(var(--section-community))] hover:underline"
+              >
+                Ver mais
+              </Link>
+              <Link
+                to="/comunidade"
+                className="inline-flex items-center rounded-full bg-[hsl(var(--section-community))]/12 px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--section-community))] ring-1 ring-[hsl(var(--section-community))]/25"
+              >
+                {unreadLabel(newCount)}
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </article>
