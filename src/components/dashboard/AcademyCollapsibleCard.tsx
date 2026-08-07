@@ -1,5 +1,6 @@
 import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import {
   Award,
   Play,
   ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
 import type { TrailWithProgress } from "@/types/academy";
@@ -179,6 +181,42 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
     navigate("/educa-academy", { state: { trailId: trail.id } });
   };
 
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    updateArrows();
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateArrows) : null;
+    ro?.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+      ro?.disconnect();
+    };
+  }, [updateArrows, visibleTrails.length]);
+
+  const scrollByCards = (dir: "left" | "right") => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const first = el.querySelector<HTMLElement>("[data-trail-card]");
+    const cardWidth = first ? first.offsetWidth + 12 : 280;
+    const perView = Math.max(1, Math.floor(el.clientWidth / cardWidth));
+    const amount = cardWidth * perView;
+    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
+
   return (
     <>
       <Card className="border-0 shadow-card overflow-hidden">
@@ -208,10 +246,45 @@ export function AcademyCollapsibleCard({ limit }: AcademyCollapsibleCardProps) {
                 Nenhuma trilha disponível no momento.
               </div>
             ) : (
-              <div className="grid gap-3 auto-rows-fr grid-cols-1 @[30rem]:grid-cols-2 @[52rem]:grid-cols-3 @[72rem]:grid-cols-4 justify-center">
-                {visibleTrails.map((trail) => (
-                  <TrailCard key={trail.id} trail={trail} onSelect={openTrail} />
-                ))}
+              <div className="relative">
+                {canScrollLeft && (
+                  <button
+                    type="button"
+                    aria-label="Ver treinamentos anteriores"
+                    onClick={() => scrollByCards("left")}
+                    className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                )}
+                {canScrollRight && (
+                  <button
+                    type="button"
+                    aria-label="Ver mais treinamentos"
+                    onClick={() => scrollByCards("right")}
+                    className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-background/95 shadow-md border border-border hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                )}
+
+                <div
+                  ref={scrollerRef}
+                  role="group"
+                  aria-label="Galeria de treinamentos"
+                  tabIndex={0}
+                  className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-1 sm:px-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
+                >
+                  {visibleTrails.map((trail) => (
+                    <div
+                      key={trail.id}
+                      data-trail-card
+                      className="snap-start shrink-0 basis-[86%] @[30rem]:basis-[46%] @[52rem]:basis-[31%] @[72rem]:basis-[23%] @[92rem]:basis-[19%]"
+                    >
+                      <TrailCard trail={trail} onSelect={openTrail} />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
