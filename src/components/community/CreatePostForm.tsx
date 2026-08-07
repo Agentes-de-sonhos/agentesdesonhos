@@ -305,6 +305,7 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
     setPollOpen(false);
     setPollQuestion("");
     setPollOptions([]);
+    if (collapsible) setExpanded(false);
   };
 
   const cleanupOrphans = async (urls: string[]) => {
