@@ -13,11 +13,11 @@ import { OPERATION_SERVICE_LABELS, serviceTypeLabel, mapServiceDataToOperationSe
 import { AIImportServiceModal } from "@/components/shared/AIImportServiceModal";
 import type { Operation } from "@/types/operations";
 
-const FLAGS: { key: OperationServiceFlag; label: string; short: string }[] = [
-  { key: "is_confirmed", label: "Confirmado", short: "Conf." },
-  { key: "is_paid", label: "Pago", short: "Pago" },
-  { key: "is_issued", label: "Emitido", short: "Emit." },
-  { key: "is_delivered", label: "Entregue", short: "Entr." },
+const FLAGS: { key: OperationServiceFlag; label: string }[] = [
+  { key: "is_confirmed", label: "Confirmado" },
+  { key: "is_paid", label: "Pago" },
+  { key: "is_issued", label: "Emitido" },
+  { key: "is_delivered", label: "Entregue" },
 ];
 
 const brl = (v: number) =>
@@ -78,23 +78,22 @@ export function OperationServicesTab({ operation }: Props) {
   return (
     <div className="space-y-3 mt-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground flex items-start gap-1.5 max-w-md">
-          <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-          Marque Confirmado, Pago, Emitido e Entregue conforme a operação avança. Cada marcação é independente.
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setAiOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/40 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:text-violet-300 transition-colors hover:bg-violet-100 dark:hover:bg-violet-900/50"
-          >
-            <Sparkles className="h-3.5 w-3.5" /> Importar com IA
-          </button>
-          <Button size="sm" onClick={() => setDraft({ service_type: "other", amount: 0 })}>
-            <Plus className="h-4 w-4 mr-1.5" /> Adicionar serviço
-          </Button>
-        </div>
+        <Button size="sm" onClick={() => setDraft({ service_type: "other", amount: 0 })}>
+          <Plus className="h-4 w-4 mr-1.5" /> Adicionar serviço
+        </Button>
+        <button
+          type="button"
+          onClick={() => setAiOpen(true)}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/40 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:text-violet-300 transition-colors hover:bg-violet-100 dark:hover:bg-violet-900/50"
+        >
+          <Sparkles className="h-3.5 w-3.5" /> Importar com IA
+        </button>
       </div>
+
+      <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+        <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+        Marque Confirmado, Pago, Emitido e Entregue conforme a operação avança. Cada marcação é independente.
+      </p>
 
       {(isLoading || isImporting) && services.length === 0 && (
         <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
@@ -116,7 +115,7 @@ export function OperationServicesTab({ operation }: Props) {
         <>
           {/* Desktop matrix */}
           <div className="hidden md:block overflow-x-auto rounded-xl border">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[860px] text-sm">
               <thead className="bg-muted/50">
                 <tr className="text-left">
                   <th className="px-3 py-2 font-semibold">Serviço</th>
@@ -124,7 +123,9 @@ export function OperationServicesTab({ operation }: Props) {
                   <th className="px-3 py-2 font-semibold">Fornecedor / Destino</th>
                   <th className="px-3 py-2 font-semibold text-right">Valor</th>
                   {FLAGS.map((f) => (
-                    <th key={f.key} className="px-2 py-2 font-semibold text-center whitespace-nowrap">{f.short}</th>
+                    <th key={f.key} scope="col" className="px-3 py-2 font-semibold text-center whitespace-nowrap">
+                      {f.label}
+                    </th>
                   ))}
                   <th className="px-3 py-2" />
                 </tr>
@@ -139,7 +140,7 @@ export function OperationServicesTab({ operation }: Props) {
                     </td>
                     <td className="px-3 py-2 text-right">{brl(s.amount)}</td>
                     {FLAGS.map((f) => (
-                      <td key={f.key} className="px-2 py-2 text-center">{renderFlag(s, f.key, f.label)}</td>
+                      <td key={f.key} className="px-3 py-2 text-center">{renderFlag(s, f.key, f.label)}</td>
                     ))}
                     <td className="px-3 py-2">
                       <div className="flex justify-end gap-1">
