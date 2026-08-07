@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { QuoteChoiceGroup, QuoteSelectionMode } from "@/types/quote";
+import { normalizeGroupLimits, requiresGroup } from "@/lib/quoteBookingRules";
 
 /**
  * FASE 2 VIP — configuração de seleção de serviços do orçamento.
@@ -63,7 +64,7 @@ export function useQuoteBookingConfig(quoteId?: string) {
   const createGroup = useMutation({
     mutationFn: async (payload: { title: string; group_type: "alternative" | "free" }) => {
       if (!quoteId) throw new Error("Orçamento inválido");
-      const isAlternative = payload.group_type === "alternative";
+      const limits = normalizeGroupLimits(payload.group_type);
       const { data, error } = await supabase
         .from("quote_service_choice_groups")
         .insert({
@@ -72,8 +73,8 @@ export function useQuoteBookingConfig(quoteId?: string) {
           user_id: "00000000-0000-0000-0000-000000000000",
           title: payload.title.trim(),
           group_type: payload.group_type,
-          min_select: isAlternative ? 1 : 0,
-          max_select: isAlternative ? 1 : null,
+          min_select: limits.min_select,
+          max_select: limits.max_select,
           order_index: groups.length,
         } as any)
         .select("id, quote_id, user_id, title, group_type, min_select, max_select, order_index")
@@ -110,8 +111,7 @@ export function useQuoteBookingConfig(quoteId?: string) {
       selection_mode: QuoteSelectionMode;
       choice_group_id?: string | null;
     }) => {
-      const needsGroup =
-        payload.selection_mode === "alternative" || payload.selection_mode === "free";
+      const needsGroup = requiresGroup(payload.selection_mode);
       if (needsGroup && !payload.choice_group_id) {
         throw new Error("Escolha ou crie um grupo para este serviço.");
       }
