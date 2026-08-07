@@ -99,7 +99,7 @@ export function ImportQuoteAsNewWalletDialog({
   }, [quotes, search]);
 
   async function handleImport() {
-    if (!selectedQuoteId) return;
+    if (!selectedQuoteId || busy) return;
     const quote = quotes.find((q: any) => q.id === selectedQuoteId);
     if (!quote) return;
     setBusy(true);
