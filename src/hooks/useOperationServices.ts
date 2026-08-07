@@ -59,7 +59,11 @@ export function useOperationServices({ operationId, quoteId, opportunityId, enab
     },
   });
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: key });
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: key });
+    // O status financeiro da operação é derivado dos serviços (calculado no backend)
+    qc.invalidateQueries({ queryKey: ["operations"] });
+  };
 
   /** Idempotent import of the linked quote's services into this operation. */
   const importFromQuote = useMutation({
