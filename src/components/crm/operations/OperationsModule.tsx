@@ -136,7 +136,12 @@ export function OperationsModule() {
   };
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        isFullscreen && "fixed inset-0 z-40 bg-background overflow-y-auto p-4"
+      )}
+    >
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -152,15 +157,13 @@ export function OperationsModule() {
             <Plus className="mr-2 h-4 w-4" /> Nova Operação
           </Button>
         )}
+        <Button variant="outline" size="sm" className="gap-2 ml-auto" onClick={toggleFullscreen}>
+          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          {isFullscreen ? "Sair da tela cheia" : "Maximizar"}
+        </Button>
       </div>
 
-      <Tabs defaultValue="kanban">
-        <TabsList>
-          <TabsTrigger value="kanban" className="gap-1.5"><KanbanIcon className="h-4 w-4" />Kanban</TabsTrigger>
-          <TabsTrigger value="calendar" className="gap-1.5"><CalendarDays className="h-4 w-4" />Calendário</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="kanban" className="mt-4">
+      <div>
           {isLoading ? (
             <div className="text-sm text-muted-foreground p-6 text-center">Carregando operações...</div>
           ) : filtered.length === 0 ? (
@@ -241,52 +244,7 @@ export function OperationsModule() {
               </div>
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="calendar" className="mt-4">
-          <div className="grid md:grid-cols-[auto_1fr] gap-6">
-            <div>
-              <Calendar
-                mode="single"
-                selected={calDate}
-                onSelect={setCalDate}
-                locale={ptBR}
-                modifiers={{
-                  hasEvent: (date) => eventsByDate.has(format(date, "yyyy-MM-dd")),
-                }}
-                modifiersClassNames={{
-                  hasEvent: "font-bold bg-primary/10 text-primary",
-                }}
-                className="rounded-md border"
-              />
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold">
-                {calDate ? format(calDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) : "Selecione uma data"}
-              </h3>
-              {eventsOnSelected.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhuma operação neste dia.</p>
-              ) : (
-                eventsOnSelected.map(({ op, type }) => (
-                  <div
-                    key={`${op.id}-${type}`}
-                    onClick={() => setSelected(op)}
-                    className="cursor-pointer p-3 rounded-lg border bg-card hover:border-primary/40 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">{op.client?.name}</span>
-                      <Badge variant={type === "embarque" ? "default" : "secondary"} className="text-[10px]">
-                        {type === "embarque" ? "Embarque" : "Retorno"}
-                      </Badge>
-                    </div>
-                    {op.destination && <p className="text-xs text-muted-foreground mt-1">{op.destination}</p>}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+      </div>
 
       <CreateOperationDialog open={createOpen} onOpenChange={setCreateOpen} />
       <OperationDetailDialog
