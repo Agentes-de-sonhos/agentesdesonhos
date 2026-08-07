@@ -1194,7 +1194,7 @@ export default function GerarOrcamento() {
                       </p>
                     )}
                     <QuoteServicesOrganizer
-                      services={quote.services}
+                      services={quote.services || []}
                       sections={quote.sections || []}
                       onDeleteService={deleteService}
                       onEditService={handleEditService}
