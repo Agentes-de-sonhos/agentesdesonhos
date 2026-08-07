@@ -1,14 +1,12 @@
 import { useMemo, useState } from "react";
-import { Plus, Kanban as KanbanIcon, CalendarDays, Search } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useOperations } from "@/hooks/useOperations";
 import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useKanbanFullscreen } from "@/hooks/useKanbanFullscreen";
 import { toast } from "sonner";
 import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import { getStageTokens } from "@/types/crm";
@@ -21,10 +19,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { parseLocalDate } from "@/lib/dateParsing";
-import { format, isSameDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
 export function OperationsModule() {
   const { operations, isLoading, moveStage, reorderOperations } = useOperations();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
@@ -37,8 +31,8 @@ export function OperationsModule() {
   const [selectedTab, setSelectedTab] = useState<OperationCardTab>("overview");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageKey: string; targetId: string | null; before: boolean } | null>(null);
-  const [calDate, setCalDate] = useState<Date | undefined>(new Date());
   const [deleteStageTarget, setDeleteStageTarget] = useState<{ id: string; name: string } | null>(null);
+  const { isFullscreen, toggle: toggleFullscreen } = useKanbanFullscreen();
 
   const filtered = useMemo(
     () =>
@@ -63,28 +57,6 @@ export function OperationsModule() {
     });
     return m;
   }, [filtered, stages]);
-
-  // Calendar events: travel_start_date (embarque) + travel_end_date (retorno)
-  const eventsByDate = useMemo(() => {
-    const m = new Map<string, { op: Operation; type: "embarque" | "retorno" }[]>();
-    filtered.forEach((o) => {
-      if (o.travel_start_date) {
-        const k = o.travel_start_date;
-        m.set(k, [...(m.get(k) || []), { op: o, type: "embarque" }]);
-      }
-      if (o.travel_end_date) {
-        const k = o.travel_end_date;
-        m.set(k, [...(m.get(k) || []), { op: o, type: "retorno" }]);
-      }
-    });
-    return m;
-  }, [filtered]);
-
-  const eventsOnSelected = useMemo(() => {
-    if (!calDate) return [];
-    const key = format(calDate, "yyyy-MM-dd");
-    return eventsByDate.get(key) || [];
-  }, [calDate, eventsByDate]);
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     if (isTeamMember && !canEdit) {
@@ -164,7 +136,12 @@ export function OperationsModule() {
   };
 
   return (
-    <div className="space-y-4">
+    <div
+      className={cn(
+        "space-y-4",
+        isFullscreen && "fixed inset-0 z-40 bg-background overflow-y-auto p-4"
+      )}
+    >
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -180,15 +157,13 @@ export function OperationsModule() {
             <Plus className="mr-2 h-4 w-4" /> Nova Operação
           </Button>
         )}
+        <Button variant="outline" size="sm" className="gap-2 ml-auto" onClick={toggleFullscreen}>
+          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          {isFullscreen ? "Sair da tela cheia" : "Maximizar"}
+        </Button>
       </div>
 
-      <Tabs defaultValue="kanban">
-        <TabsList>
-          <TabsTrigger value="kanban" className="gap-1.5"><KanbanIcon className="h-4 w-4" />Kanban</TabsTrigger>
-          <TabsTrigger value="calendar" className="gap-1.5"><CalendarDays className="h-4 w-4" />Calendário</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="kanban" className="mt-4">
+      <div>
           {isLoading ? (
             <div className="text-sm text-muted-foreground p-6 text-center">Carregando operações...</div>
           ) : filtered.length === 0 ? (
@@ -269,52 +244,7 @@ export function OperationsModule() {
               </div>
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="calendar" className="mt-4">
-          <div className="grid md:grid-cols-[auto_1fr] gap-6">
-            <div>
-              <Calendar
-                mode="single"
-                selected={calDate}
-                onSelect={setCalDate}
-                locale={ptBR}
-                modifiers={{
-                  hasEvent: (date) => eventsByDate.has(format(date, "yyyy-MM-dd")),
-                }}
-                modifiersClassNames={{
-                  hasEvent: "font-bold bg-primary/10 text-primary",
-                }}
-                className="rounded-md border"
-              />
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold">
-                {calDate ? format(calDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) : "Selecione uma data"}
-              </h3>
-              {eventsOnSelected.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhuma operação neste dia.</p>
-              ) : (
-                eventsOnSelected.map(({ op, type }) => (
-                  <div
-                    key={`${op.id}-${type}`}
-                    onClick={() => setSelected(op)}
-                    className="cursor-pointer p-3 rounded-lg border bg-card hover:border-primary/40 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm">{op.client?.name}</span>
-                      <Badge variant={type === "embarque" ? "default" : "secondary"} className="text-[10px]">
-                        {type === "embarque" ? "Embarque" : "Retorno"}
-                      </Badge>
-                    </div>
-                    {op.destination && <p className="text-xs text-muted-foreground mt-1">{op.destination}</p>}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+      </div>
 
       <CreateOperationDialog open={createOpen} onOpenChange={setCreateOpen} />
       <OperationDetailDialog

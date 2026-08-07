@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Filter, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { Plus, Search, Filter, ChevronLeft, ChevronRight, Info, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,6 +45,7 @@ import { QuickAddClientDialog } from "./QuickAddClientDialog";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useKanbanFullscreen } from "@/hooks/useKanbanFullscreen";
 import { toast } from "sonner";
 import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import {
@@ -108,6 +109,7 @@ export function KanbanBoard() {
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const { isFullscreen, toggle: toggleFullscreen } = useKanbanFullscreen();
 
   // Drag-to-scroll state
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -322,7 +324,12 @@ export function KanbanBoard() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-4">
+      <div
+        className={cn(
+          "space-y-4",
+          isFullscreen && "fixed inset-0 z-40 bg-background overflow-y-auto p-4"
+        )}
+      >
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -368,6 +375,15 @@ export function KanbanBoard() {
               />
             </DialogContent>
           </Dialog>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 ml-auto"
+            onClick={toggleFullscreen}
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isFullscreen ? "Sair da tela cheia" : "Maximizar"}
+          </Button>
         </div>
 
         {/* Scroll navigation arrows */}

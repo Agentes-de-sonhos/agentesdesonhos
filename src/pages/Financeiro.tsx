@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,8 +91,6 @@ export default function Financeiro() {
   const isTeam = useIsTeamMember();
   const { can } = usePermissions();
   const navigate = useNavigate();
-  const canShowTeamMembers = !!user && !isTeam;
-  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
 
   // Bloqueio total para team member sem financial.access
   const hasFinancialAccess = can('financial.access');
@@ -225,15 +222,6 @@ export default function Financeiro() {
                       </DropdownMenuItem>
                     );
                   })}
-                  {canShowTeamMembers && (
-                    <DropdownMenuItem
-                      onClick={() => setTeamDialogOpen(true)}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <Users className="h-4 w-4" />
-                      <span>Usuários da Equipe</span>
-                    </DropdownMenuItem>
-                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -256,9 +244,6 @@ export default function Financeiro() {
               )}
             </div>
           </div>
-        )}
-        {canShowTeamMembers && (
-          <TeamMembersDialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
         )}
         </PermissionGate>
       </div>

@@ -1,8 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Kanban, Target, Briefcase, LayoutDashboard, UserCog } from "lucide-react";
+import { Users, Kanban, Target, Briefcase, LayoutDashboard } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
 import { SalesGoalsModule } from "@/components/crm/SalesGoalsModule";
@@ -12,7 +11,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PermissionGate } from "@/components/permissions/PermissionGate";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function GestaoClientes() {
   return (
@@ -26,7 +25,6 @@ function GestaoClientesContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const { can, isTeamMember } = usePermissions();
-  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
 
   const tabPermission: Record<string, string> = {
     dashboard: 'dashboard.view',
@@ -42,14 +40,10 @@ function GestaoClientesContent() {
     if (location.pathname.includes('/metas')) return 'metas';
     if (location.pathname.includes('/operacoes')) return 'operacoes';
     if (location.pathname.includes('/clientes')) return 'clientes';
-    return 'dashboard';
+    return 'funil';
   };
 
   const handleTabChange = (value: string) => {
-    if (value === 'equipe') {
-      setTeamDialogOpen(true);
-      return;
-    }
     const routes: Record<string, string> = {
       dashboard: '/gestao-clientes/dashboard',
       clientes: '/gestao-clientes/clientes',
@@ -60,7 +54,7 @@ function GestaoClientesContent() {
     navigate(routes[value] || '/gestao-clientes/dashboard');
   };
 
-  const visibleTabs = (['dashboard','clientes','funil','operacoes','metas'] as const).filter(t => can(tabPermission[t]));
+  const visibleTabs = (['funil','operacoes','clientes','dashboard','metas'] as const).filter(t => can(tabPermission[t]));
   const currentTab = getCurrentTab();
 
   // Redireciona para a primeira tab permitida se a atual estiver bloqueada
@@ -87,27 +81,15 @@ function GestaoClientesContent() {
       <div className="space-y-6 animate-fade-in">
         <PageHeader
           pageKey="gestao-clientes"
-          title="Clientes"
+          title="Gestão de Clientes"
           subtitle="Gerencie clientes, oportunidades e metas de vendas"
           icon={Users}
         />
 
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          {/* Mobile: horizontal scroll; Desktop: grid 6 cols */}
+          {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
           <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
-            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-5xl md:grid-cols-6">
-              {can('dashboard.view') && (
-                <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
-                  <LayoutDashboard className="h-4 w-4 shrink-0" />
-                  Visão Geral
-                </TabsTrigger>
-              )}
-              {can('clients.view') && (
-                <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-3">
-                  <Users className="h-4 w-4 shrink-0" />
-                  Clientes
-                </TabsTrigger>
-              )}
+            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-5xl md:grid-cols-5">
               {can('opportunities.view') && (
                 <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-3">
                   <Kanban className="h-4 w-4 shrink-0" />
@@ -120,6 +102,18 @@ function GestaoClientesContent() {
                   Operações
                 </TabsTrigger>
               )}
+              {can('clients.view') && (
+                <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-3">
+                  <Users className="h-4 w-4 shrink-0" />
+                  Clientes
+                </TabsTrigger>
+              )}
+              {can('dashboard.view') && (
+                <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
+                  <LayoutDashboard className="h-4 w-4 shrink-0" />
+                  Visão Geral
+                </TabsTrigger>
+              )}
               {can('goals.view') && (
                 <TabsTrigger value="metas" className="gap-1.5 whitespace-nowrap px-3">
                   <Target className="h-4 w-4 shrink-0" />
@@ -127,33 +121,25 @@ function GestaoClientesContent() {
                   <span className="hidden md:inline">Meta de Vendas</span>
                 </TabsTrigger>
               )}
-              {!isTeamMember && (
-                <TabsTrigger value="equipe" className="gap-1.5 whitespace-nowrap px-3">
-                  <UserCog className="h-4 w-4 shrink-0" />
-                  <span className="md:hidden">Equipe</span>
-                  <span className="hidden md:inline">Usuários da Equipe</span>
-                </TabsTrigger>
-              )}
             </TabsList>
           </div>
-          <TabsContent value="dashboard" className="mt-6">
-            <PermissionGate permission="dashboard.view"><DashboardModule /></PermissionGate>
-          </TabsContent>
-          <TabsContent value="clientes" className="mt-6">
-            <PermissionGate permission="clients.view"><ClientsModule /></PermissionGate>
-          </TabsContent>
           <TabsContent value="funil" className="mt-6">
             <PermissionGate permission="opportunities.view"><KanbanBoard /></PermissionGate>
           </TabsContent>
           <TabsContent value="operacoes" className="mt-6">
             <PermissionGate permission="operations.view"><OperationsModule /></PermissionGate>
           </TabsContent>
+          <TabsContent value="clientes" className="mt-6">
+            <PermissionGate permission="clients.view"><ClientsModule /></PermissionGate>
+          </TabsContent>
+          <TabsContent value="dashboard" className="mt-6">
+            <PermissionGate permission="dashboard.view"><DashboardModule /></PermissionGate>
+          </TabsContent>
           <TabsContent value="metas" className="mt-6">
             <PermissionGate permission="goals.view"><SalesGoalsModule /></PermissionGate>
           </TabsContent>
         </Tabs>
 
-        <TeamMembersDialog open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
       </div>
     </DashboardLayout>
   );
