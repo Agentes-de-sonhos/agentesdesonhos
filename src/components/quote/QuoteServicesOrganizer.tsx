@@ -142,72 +142,89 @@ export function QuoteServicesOrganizer({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">
-          Organize os serviços em seções (ex.: Orlando, Miami). É apenas organização visual — não altera valores.
-        </p>
-        <div className="flex items-center gap-2">
-          {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+      {services.length === 0 && !hasSections ? (
+        <div className="flex flex-col items-center justify-center py-10 text-center gap-4">
           {addSectionButton}
+          <p className="text-sm text-muted-foreground">
+            Organize os serviços em seções (ex.: Orlando, Miami).
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Você pode criar seções agora e adicionar os serviços depois.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Nenhum serviço adicionado ainda.
+          </p>
         </div>
-      </div>
-
-      {!hasSections ? (
-        <ServiceList
-          services={services}
-          onDeleteService={onDeleteService}
-          onEditService={onEditService}
-          onReorder={onReorderServices}
-          currency={currency}
-        />
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-          <SortableContext
-            items={layout.groups.map((g) => `section:${g.section.id}`)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-3">
-              {layout.groups.map((group) => (
-                <SortableSection
-                  key={group.section.id}
-                  section={group.section}
-                  count={group.services.length}
-                  collapsed={!!collapsed[group.section.id]}
-                  onToggle={() =>
-                    setCollapsed((prev) => ({ ...prev, [group.section.id]: !prev[group.section.id] }))
-                  }
-                  onRename={() => { setRenaming(group.section); setRenameTitle(group.section.title); }}
-                  onDelete={() => setDeleting(group.section)}
-                  onAddService={onAddServiceToSection ? () => onAddServiceToSection(group.section.id) : undefined}
-                >
-                  <ServiceDropArea
-                    containerId={group.section.id}
-                    services={group.services}
-                    emptyLabel="Arraste serviços para esta seção"
-                    onDeleteService={onDeleteService}
-                    onEditService={onEditService}
-                    currency={currency}
-                  />
-                </SortableSection>
-              ))}
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              Organize os serviços em seções (ex.: Orlando, Miami).
+            </p>
+            <div className="flex items-center gap-2">
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+              {addSectionButton}
             </div>
-          </SortableContext>
+          </div>
 
-          <div className="mt-4 rounded-xl border border-dashed border-border p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-foreground">Sem seção</span>
-              <Badge variant="secondary" className="text-xs">{layout.unsectioned.length}</Badge>
-            </div>
-            <ServiceDropArea
-              containerId={UNSECTIONED}
-              services={layout.unsectioned}
-              emptyLabel="Nenhum serviço fora das seções"
+          {!hasSections ? (
+            <ServiceList
+              services={services}
               onDeleteService={onDeleteService}
               onEditService={onEditService}
+              onReorder={onReorderServices}
               currency={currency}
             />
-          </div>
-        </DndContext>
+          ) : (
+            <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+              <SortableContext
+                items={layout.groups.map((g) => `section:${g.section.id}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {layout.groups.map((group) => (
+                    <SortableSection
+                      key={group.section.id}
+                      section={group.section}
+                      count={group.services.length}
+                      collapsed={!!collapsed[group.section.id]}
+                      onToggle={() =>
+                        setCollapsed((prev) => ({ ...prev, [group.section.id]: !prev[group.section.id] }))
+                      }
+                      onRename={() => { setRenaming(group.section); setRenameTitle(group.section.title); }}
+                      onDelete={() => setDeleting(group.section)}
+                      onAddService={onAddServiceToSection ? () => onAddServiceToSection(group.section.id) : undefined}
+                    >
+                      <ServiceDropArea
+                        containerId={group.section.id}
+                        services={group.services}
+                        emptyLabel="Arraste serviços para esta seção"
+                        onDeleteService={onDeleteService}
+                        onEditService={onEditService}
+                        currency={currency}
+                      />
+                    </SortableSection>
+                  ))}
+                </div>
+              </SortableContext>
+
+              <div className="mt-4 rounded-xl border border-dashed border-border p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium text-foreground">Sem seção</span>
+                  <Badge variant="secondary" className="text-xs">{layout.unsectioned.length}</Badge>
+                </div>
+                <ServiceDropArea
+                  containerId={UNSECTIONED}
+                  services={layout.unsectioned}
+                  emptyLabel="Nenhum serviço fora das seções"
+                  onDeleteService={onDeleteService}
+                  onEditService={onEditService}
+                  currency={currency}
+                />
+              </div>
+            </DndContext>
+          )}
+        </>
       )}
 
       {/* Criar seção */}
