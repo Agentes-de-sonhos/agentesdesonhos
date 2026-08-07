@@ -213,6 +213,14 @@ export function OperationServicesTab({ operation }: Props) {
         </>
       )}
 
+      {!isLoading && !isImporting && (
+        <div className="flex justify-start pt-1">
+          <Button size="sm" onClick={() => setDraft({ service_type: "other", amount: 0 })}>
+            <Plus className="h-4 w-4 mr-1.5" /> Adicionar serviço
+          </Button>
+        </div>
+      )}
+
       {/* Add / edit dialog */}
       <Dialog open={!!draft} onOpenChange={(o) => !o && setDraft(null)}>
         <DialogContent className="max-w-lg">
