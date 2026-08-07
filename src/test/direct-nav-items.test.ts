@@ -7,7 +7,7 @@ const drawer = readFileSync("src/components/layout/MobileDrawerMenu.tsx", "utf8"
 
 describe("menu principal: Gestão de Clientes e Gestão Financeira como links diretos", () => {
   it("aponta para as visões gerais corretas", () => {
-    expect(CLIENTES_DIRECT_ITEM.url).toBe("/gestao-clientes/dashboard");
+    expect(CLIENTES_DIRECT_ITEM.url).toBe("/gestao-clientes/funil");
     expect(FINANCEIRO_DIRECT_ITEM.url).toBe("/financeiro?tab=dashboard");
     expect(CLIENTES_DIRECT_ITEM.activePrefix).toBe("/gestao-clientes");
     expect(FINANCEIRO_DIRECT_ITEM.activePrefix).toBe("/financeiro");
