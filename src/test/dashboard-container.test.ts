@@ -74,7 +74,7 @@ describe("inner sections keep their approved rules", () => {
 
   it("academy shows at most four cards per row via container queries", () => {
     const academy = read("src/components/dashboard/AcademyCollapsibleCard.tsx");
-    expect(academy).toContain("@[72rem]:grid-cols-4");
+    expect(academy).toContain("@[72rem]:basis-[23%]");
     expect(academy).not.toContain("@[90rem]:grid-cols-5");
     expect(academy).not.toContain("repeat(auto-fit,minmax(min(100%,260px),1fr))");
   });
