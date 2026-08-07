@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, CloudOff, Cloud } from "lucide-react";
+import { ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
@@ -76,7 +76,7 @@ import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEdito
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
-import { Sparkles, Wallet } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
 import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
 import { MultiSelect } from "@/components/ui/multi-select";
@@ -1082,7 +1082,8 @@ export default function GerarOrcamento() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0 flex-wrap">
+          <div className="flex flex-col items-stretch gap-2 sm:items-end sm:ml-auto">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:justify-end">
             {saveStatus === "saving" && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -1101,26 +1102,34 @@ export default function GerarOrcamento() {
                 Erro ao salvar
               </span>
             )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <Button variant="outline" size="sm" className="sm:size-default" onClick={handleGeneratePDF}>
-            <FileText className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Gerar PDF</span><span className="sm:hidden">Gerar PDF</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="sm:size-default"
-            onClick={() => setShowExportWallet(true)}
-            disabled={!quote.services || quote.services.length === 0}
-            title="Reaproveitar serviços numa Carteira Digital"
-          >
-            <Wallet className="mr-1 sm:mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Gerar Carteira</span>
-            <span className="sm:hidden">Carteira</span>
-          </Button>
-          {quote.share_token ? (
+            <TooltipProvider delayDuration={150}>
+              <div className="flex items-center gap-2 flex-wrap sm:justify-end">
+                {!quote.share_token && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
+                        <Globe className="mr-1 sm:mr-2 h-4 w-4" />
+                        <span className="hidden sm:inline">Gerar orçamento web</span>
+                        <span className="sm:hidden">Orçamento web</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Cria um link para você enviar ao cliente.</TooltipContent>
+                  </Tooltip>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
+                      <FileText className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">Gerar orçamento PDF</span>
+                      <span className="sm:hidden">Orçamento PDF</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Gera uma versão em PDF para compartilhar ou imprimir.</TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+            </div>
+          {quote.share_token && (
             (() => {
               const accessCode = (quote as any).public_access_code;
               const agencyName = agentProfile?.agency_name;
@@ -1160,11 +1169,8 @@ export default function GerarOrcamento() {
                 </div>
               );
             })()
-          ) : (
-            <Button size="sm" className="sm:size-default" onClick={handlePublish} disabled={isPublishing}>
-              <LinkIcon className="mr-1 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">Gerar Link</span><span className="sm:hidden">Gerar Link</span>
-            </Button>
           )}
+          </div>
         </div>
 
         <div className="grid gap-4 sm:gap-6">
