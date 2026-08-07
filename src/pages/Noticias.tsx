@@ -19,7 +19,13 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useNewsLikes } from "@/hooks/useNewsLikes";
 import { useNewsHighlights, type Top5Item } from "@/hooks/useNewsHighlights";
-import { highlightLabel, sortByEngagement, isWithinNewsDayWindow } from "@/lib/newsRanking";
+import {
+  highlightLabel,
+  sortByEngagement,
+  selectDayNewsWithFallback,
+  NEWS_FALLBACK_TITLE,
+  NEWS_FALLBACK_NOTE,
+} from "@/lib/newsRanking";
 import { NewsLikeButton } from "@/components/news/NewsLikeButton";
 import { cn } from "@/lib/utils";
 
@@ -402,11 +408,13 @@ export default function Noticias() {
     onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
   });
 
-  /* Janela diária (America/Sao_Paulo, 07:00–23:59:59 do dia atual) */
-  const dayNews = useMemo(
-    () => news.filter((n) => isWithinNewsDayWindow(n.data_publicacao)),
+  /* Janela diária (America/Sao_Paulo, 07:00–23:59:59 do dia atual) com fallback 24h→48h */
+  const { items: dayNews, windowMode } = useMemo(
+    () => selectDayNewsWithFallback(news),
     [news]
   );
+  const isFallbackWindow = windowMode !== "day";
+  const dayListTitle = isFallbackWindow ? NEWS_FALLBACK_TITLE : "Todas do dia";
 
   /* Categorias disponíveis no dia — derivadas dinamicamente dos dados */
   const dayCategories = useMemo(() => {
@@ -453,7 +461,9 @@ export default function Noticias() {
   const highlights = highlightsQuery.data;
   const featured = highlights?.featured ?? null;
   const top5: RankingRow[] = highlights?.top5 ?? [];
-  const featuredLabel = highlightLabel(highlights?.mode ?? "daily");
+  const featuredLabel = highlights?.featured_fallback
+    ? NEWS_FALLBACK_TITLE
+    : highlightLabel(highlights?.mode ?? "daily");
 
   // Métricas do cabeçalho
   const news24hCount = useMemo(() => {
@@ -571,7 +581,7 @@ export default function Noticias() {
                   : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
               )}
             >
-              <Newspaper className="h-3.5 w-3.5" /> Todas do dia
+              <Newspaper className="h-3.5 w-3.5" /> {dayListTitle}
             </button>
             <button
               type="button"
@@ -587,6 +597,12 @@ export default function Noticias() {
               <Filter className="h-3.5 w-3.5" /> Explorar por categoria
             </button>
           </div>
+
+          {isFallbackWindow && (
+            <p data-testid="news-fallback-note" className="text-xs text-muted-foreground">
+              {NEWS_FALLBACK_NOTE}
+            </p>
+          )}
 
           {viewMode === "category" && dayCategories.length > 0 && (
             <div data-testid="news-day-categories" className="flex flex-wrap gap-2">
@@ -661,7 +677,7 @@ export default function Noticias() {
             <Newspaper className="h-10 w-10 mx-auto mb-3 opacity-40" />
             <p className="text-sm">
               {dayNews.length === 0
-                ? "Ainda não há notícias publicadas hoje a partir das 07:00. Volte mais tarde — a próxima coleta já está agendada."
+                ? "Ainda não há notícias recentes disponíveis. Volte mais tarde — a próxima coleta já está agendada."
                 : "Nenhuma notícia encontrada com estes filtros."}
             </p>
           </div>

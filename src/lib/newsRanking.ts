@@ -172,3 +172,36 @@ export function isWithinNewsDayWindow(publishedAt: string, ref: Date = new Date(
   if (spDateKey(d) !== spDateKey(ref)) return false;
   return spParts(d).hour >= NEWS_DAY_START_HOUR;
 }
+
+/** Janelas de fallback quando não há publicações do dia. */
+export const NEWS_FALLBACK_HOURS = [24, 48] as const;
+
+export type NewsWindowMode = "day" | "24h" | "48h";
+
+/**
+ * Lista do dia com fallback automático: se não houver publicações do dia local,
+ * retorna as mais recentes das últimas 24h e, se ainda vazio, das últimas 48h.
+ */
+export function selectDayNewsWithFallback<T extends { data_publicacao: string }>(
+  items: T[],
+  ref: Date = new Date()
+): { items: T[]; windowMode: NewsWindowMode } {
+  const day = items.filter((n) => isWithinNewsDayWindow(n.data_publicacao, ref));
+  if (day.length > 0) return { items: day, windowMode: "day" };
+
+  for (const hours of NEWS_FALLBACK_HOURS) {
+    const cutoff = +ref - hours * 3_600_000;
+    const recent = items.filter((n) => {
+      const t = +new Date(n.data_publicacao);
+      return !Number.isNaN(t) && t >= cutoff;
+    });
+    if (recent.length > 0) {
+      return { items: recent, windowMode: hours === 24 ? "24h" : "48h" };
+    }
+  }
+  return { items: [], windowMode: "day" };
+}
+
+export const NEWS_FALLBACK_TITLE = "Últimas notícias";
+export const NEWS_FALLBACK_NOTE =
+  "Ainda não há publicações de hoje. Exibindo as notícias mais recentes.";

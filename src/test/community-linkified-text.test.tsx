@@ -68,7 +68,7 @@ describe("uso do componente compartilhado", () => {
     const src = read("src/components/dashboard/CommunitySocialFeed.tsx");
     expect(src).toContain("LinkifiedText");
     expect(src).toContain("text={post.content}");
-    expect(src).toContain("text={c.content}");
+    expect(src).toContain("text={latestComment.content}");
   });
 
   it("nao usa dangerouslySetInnerHTML nem migracao de dados", () => {

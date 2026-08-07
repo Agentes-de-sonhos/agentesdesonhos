@@ -28,6 +28,8 @@ export interface NewsHighlights {
   week_start: string;
   today: string;
   featured: HighlightNews | null;
+  /** true quando o destaque veio do fallback de 24h/48h (sem publicações do dia). */
+  featured_fallback: boolean;
   top5: Top5Item[];
 }
 
@@ -52,6 +54,7 @@ export function useNewsHighlights() {
         week_start: payload.week_start ?? weekStart,
         today: payload.today ?? today,
         featured: payload.featured ?? null,
+        featured_fallback: payload.featured_fallback ?? false,
         top5: (payload.top5 ?? []).slice(0, 5),
       };
     },
