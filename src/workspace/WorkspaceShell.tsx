@@ -6,6 +6,7 @@ import { useWorkspace, MAX_TABS } from "./WorkspaceProvider";
 import { HomeTabRouter } from "./HomeTabRouter";
 import { isExitRoute, shouldInterceptAnchor } from "./homeNavigation";
 import { titleForPath } from "./routeTitle";
+import { isMultiInstanceRoute } from "./multiInstanceRoutes";
 
 interface Props {
   /** Same JSX subtree used when Workspace is off (typically the app's <Routes/>). */
@@ -104,7 +105,8 @@ export function WorkspaceShell({ children }: Props) {
 
       // If a tab for this path already exists, we'll just activate it and
       // never hit the tab-limit ceiling.
-      const hasExisting = (tabsRef.current ?? []).some((t) => t.path === href);
+      const hasExisting =
+        !isMultiInstanceRoute(href) && (tabsRef.current ?? []).some((t) => t.path === href);
       if (!hasExisting && !canOpenRef.current) {
         toast.error(`Limite de ${MAX_TABS} abas atingido. Feche uma aba para abrir outra.`);
         return;
@@ -147,7 +149,8 @@ export function WorkspaceShell({ children }: Props) {
                 <HomeTabRouter
                   homePath={ws.homePath}
                   onNavigateAway={(path, title, state) => {
-                    const hasExisting = (tabsRef.current ?? []).some((t) => t.path === path);
+                    const hasExisting =
+                      !isMultiInstanceRoute(path) && (tabsRef.current ?? []).some((t) => t.path === path);
                     if (!hasExisting && !canOpenRef.current) {
                       toast.error(`Limite de ${MAX_TABS} abas atingido. Feche uma aba para abrir outra.`);
                       return;
