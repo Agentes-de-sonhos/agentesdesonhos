@@ -76,7 +76,7 @@ import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEdito
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
-import { Sparkles, Wallet } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
 import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
 import { MultiSelect } from "@/components/ui/multi-select";
