@@ -1,109 +1,92 @@
-# Solicitação de reserva pelo orçamento web
+# Jornada VIP: site integrado, Área do Cliente e Pedido de Reserva pelo orçamento web
 
-Permitir que o cliente, no link público do orçamento, selecione apenas os itens que deseja e envie um **Pedido de reserva** (não é compra, pagamento nem reserva garantida). A agência recebe notificação, analisa, reconfirma com fornecedores e, ao fechar a oportunidade, a aba Serviços da Operação recebe **somente os itens escolhidos**.
+## 1. Diagnóstico da arquitetura atual (verificado)
 
-## 1. Fluxo do cliente na página pública
+- `quotes`: dono em `user_id`, publicação por `status='published'` + `share_token` + `public_access_code`; flags de apresentação (`show_detailed_prices`, `use_service_payment`, `hide_investment_total`, `investment_summary_layout`). Não existe hoje nenhum campo/tabela de reserva.
+- `quote_services`: `quote_id`, `service_type`, `service_data jsonb`, `amount`, `order_index`, `section_id`, `option_label`, campos de pagamento por serviço. Não há campos de obrigatoriedade nem agrupamento de alternativas.
+- `quote_sections`: agrupamento visual por seção, com RLS pública de leitura para orçamentos publicados.
+- Leitura pública é feita pela RPC `get_quote_by_public_code(p_agency_slug, p_code)` (SECURITY DEFINER), consumida por `src/pages/OrcamentoPublicoV2.tsx` → `OrcamentoPublico.tsx`.
+- `opportunities` → trigger `auto_create_operation_on_close` cria `operations` quando a oportunidade entra em `closed` (payment_status `pendente`).
+- `operations` referencia `quote_id`/`opportunity_id`; `operation_services` guarda `source_quote_service_id` e os status de execução `is_confirmed/is_paid/is_issued/is_delivered`. `useOperationServices.ts` já faz import idempotente do orçamento por `source_quote_service_id`.
+- Entitlement hoje: `subscriptions.plan` (enum `subscription_plan`), `user_feature_access` (grants por usuário, aditivos, lidos em `useFeatureAccess`), e equipe via `agency_membership`/`current_agency_id()` + `agency_team_members`. `useSubscription.hasFeature` libera tudo para admin, promotor e membros de equipe.
+- Padrão de escrita pública já existente: Edge Function `verify_jwt = false` + `_shared/rate-limiter.ts` + RPC SECURITY DEFINER + `idempotency_key` (ver `submit-lead-form`). E-mails por Edge Function (`product-landing-lead-emails`).
 
-1. Página pública do orçamento (rota atual `/orcamento/:token` e domínios white-label) ganha um modo de seleção opcional, ligado por configuração da agência no orçamento.
-2. Cada card de serviço recebe um controle **"Selecionar"** (checkbox/switch discreto). Itens marcados como obrigatórios aparecem já selecionados e bloqueados.
-3. Barra fixa inferior (resumo flutuante): quantidade de itens selecionados, subtotal estimado e botão **"Solicitar reserva"**.
-4. Etapa de resumo (drawer/modal): lista dos itens escolhidos, aviso destacado — "Esta é uma solicitação. Valores e disponibilidade serão reconfirmados pela agência." — com checkbox de aceite obrigatório.
-5. Identificação do cliente: nome, e-mail, WhatsApp e observações. Validação de formato e consentimento LGPD (mesmo padrão do Formulário Conversacional).
-6. Botão final **"Enviar pedido de reserva"**, com bloqueio contra duplo clique.
-7. Tela de protocolo: número do pedido, data/hora, itens solicitados, aviso de que a agência responderá, e opção de copiar o protocolo. Ao reabrir o link, o cliente vê o pedido já enviado e seu status.
+Conclusão: o novo domínio encaixa como camada entre `quotes` e `operations`, reaproveitando RPC pública, rate limiter e o import idempotente já existente em `operation_services`.
 
-## 2. Nomenclatura recomendada
+## 2. Decisões arquiteturais recomendadas
 
-- Ação por item: **Selecionar** / Remover seleção.
-- Ação principal: **Solicitar reserva**; confirmação: **Enviar pedido de reserva**.
-- Objeto: **Pedido de reserva** (nunca "compra", "checkout", "reserva confirmada").
-- Painel do agente: **Pedidos de reserva** com status **Recebido / Em análise / Aguardando reconfirmação / Aprovado / Parcialmente aprovado / Indisponível / Cancelado**.
-- Evitar: comprar, pagar, confirmar reserva, garantido, disponível.
+1. **Entitlement VIP em nível de agência, não de plano.** Nova tabela `agency_entitlements` (chave `agency_id` + `entitlement_key`, ex.: `vip_client_portal`, `booking_requests`), com vigência e concessão por admin. Motivo: `subscription_plan` é por usuário e alterar Premium contaminaria assinantes atuais; `user_feature_access` também é por usuário e não herda para equipe. A checagem passa por uma função `public.agency_has_entitlement(_agency_id, _key)` (SECURITY DEFINER) e um hook `useAgencyEntitlements`, aditivo a `hasFeature`. Membros de equipe herdam via `current_agency_id()`.
+2. **Pedido como entidade própria e imutável** (`quote_booking_requests` + itens), com snapshot completo de serviço e valor. Nada de recomputar a partir de `quote_services`.
+3. **Versionamento por novo pedido**, nunca update destrutivo: cada envio cria `version = max+1` e mantém os anteriores; a versão anterior vira `superseded`.
+4. **Proposta revisada como nova versão do mesmo pedido-raiz** (`root_request_id`), exigindo aceite explícito do cliente registrado em campo dedicado + evento.
+5. **Portal único VIP**: rota `/{agency_slug}/area-do-cliente/{portal_token}` resolvendo por token de cliente, agregando orçamentos, pedidos, propostas e operação. Os links por orçamento continuam funcionando (fallback não-VIP).
+6. **Escrita pública sempre via Edge Function sem JWT + RPC SECURITY DEFINER**, com rate limit e idempotência — nunca INSERT direto do anon.
+7. **Transição para Operações somente por RPC dedicada**, chamada quando o item está `approved` e (se houve revisão) aceito.
 
-## 3. Regras de seleção
+## 3. Modelo de dados proposto
 
-- Marcação por serviço: `obrigatório`, `opcional` (padrão) ou `alternativa`.
-- **Alternativas mutuamente exclusivas**: agrupadas por `choice_group`; selecionar uma desmarca as outras do grupo (ex.: 3 opções de hotel na mesma cidade).
-- Seções/destinos já existentes (`quote_sections`) organizam a seleção; opcionalmente a agência define "escolha 1 item nesta seção".
-- Obrigatórios não podem ser desmarcados e entram sempre no pedido.
-- Quantidade: no MVP o pedido herda os passageiros do orçamento (fonte da verdade atual). Ajuste de quantidade por item fica para a fase 2, restrito a itens que já tenham quantidade própria.
-- Validações antes de enviar: pelo menos 1 item, todos os grupos exclusivos resolvidos, aceite do aviso marcado.
+- `agency_entitlements(id, agency_id, entitlement_key text, is_active bool, starts_at, ends_at, granted_by, notes, created_at, updated_at)` — unique `(agency_id, entitlement_key)`.
+- `quote_booking_settings` (ou colunas em `quotes`): `booking_requests_enabled bool`, `booking_disclaimer text`, `booking_deadline date`. Recomendação: colunas em `quotes` (menos joins na RPC pública).
+- `quote_services` (aditivo, defaults seguros): `selection_mode text default 'optional'` (`optional|required|free`), `choice_group_id uuid null`, `min_qty int`, `max_qty int`.
+- `quote_service_choice_groups(id, quote_id, title, order_index, min_select int default 1, max_select int default 1)` — modela “alternativa: escolha 1 de N”.
+- `quote_booking_requests(id, root_request_id, version int, quote_id, user_id (agência), agency_id, client_id null, opportunity_id null, protocol text unique, status text, client_name, client_email, client_whatsapp, client_notes, disclaimer_accepted_at, disclaimer_text_snapshot, currency, total_estimated numeric, revised_total numeric null, client_final_accepted_at null, expires_at, idempotency_key text, source_ip_hash, created_at, updated_at)` — unique `(root_request_id, version)`, unique `idempotency_key`, índices em `quote_id`, `agency_id, status`, `protocol`.
+- `quote_booking_request_items(id, request_id, source_quote_service_id null, service_type, name, supplier, destination, start_date, end_date, snapshot jsonb, amount_snapshot numeric, quantity int default 1, choice_group_id null, review_status text default 'pending', revised_amount numeric null, replacement_snapshot jsonb null, agency_note text, client_accepted bool null, operation_service_id uuid null, created_at, updated_at)` — unique `(request_id, source_quote_service_id)` quando não nulo; unique parcial em `operation_service_id` evita duplicidade em Operações.
+- `quote_booking_request_events(id, request_id, item_id null, actor_type text (client|agency|system), actor_user_id null, actor_team_member_id null, event_type text, payload jsonb, created_at)` — append-only, sem UPDATE/DELETE.
+- `quote_booking_notifications(id, request_id, channel text default 'email', recipient text, template text, status text, provider_message_id, dedupe_key text unique, created_at)` — canal preparado para WhatsApp na fase 2.
+- `client_portal_access(id, agency_id, client_id, portal_token text unique, last_seen_at, revoked_at, created_at)` — Área do Cliente.
 
-## 4. Estados
+## 4. Máquinas de estado
 
-Pedido: `draft` (seleção em andamento, só no navegador) → `submitted` → `received` → `in_review` → `awaiting_reconfirmation` → `approved` | `partially_approved` | `unavailable` | `cancelled` / `expired`.
+Pedido: `received → under_review → awaiting_reconfirmation → (approved | partially_approved | unavailable) → awaiting_client_acceptance → accepted → converted` e ainda `cancelled`, `expired`, `superseded`. Transições apenas por RPC, cada uma gravando evento.
 
-Item do pedido: `requested` → `in_review` → `available` | `unavailable` | `price_changed` | `replaced` | `withdrawn`.
+Item: `pending → available | unavailable | repriced | replaced`; depois `approved`/`rejected`; e, quando exigir aceite, `client_accepted true/false`. Só `approved` + (aceite quando necessário) habilita conversão.
 
-Esses estados são **do pedido do cliente** e ficam totalmente separados de Confirmado / Pago / Emitido / Entregue da aba Serviços da Operação, que continuam representando execução interna.
+Execução operacional continua separada em `operation_services` (`is_confirmed/is_paid/is_issued/is_delivered`) — sem mistura com status de solicitação.
 
-## 5. Modelo de dados (idempotente e auditável)
+## 5. Fluxos UX
 
-Três tabelas novas, sem alterar `quotes`/`quote_services`:
+- **Agência (montagem)**: nova etapa/painel no editor de orçamento (`GerarOrcamento.tsx` + `QuoteAdvancedSettings.tsx`) para ligar o recurso, definir modo por serviço e criar grupos de alternativa. Visível somente com entitlement VIP.
+- **Cliente (orçamento web/portal)**: checkbox/radio nos cards (`ServiceCard.tsx`), validação de obrigatórios e de grupos, barra fixa “N selecionados · Revisar pedido”, tela de revisão com valores, dados de contato, observações, aceite obrigatório do aviso e CTA “Enviar pedido de reserva”, seguida de tela de protocolo.
+- **Agência (análise)**: nova aba em Gestão de Clientes → “Pedidos de reserva”, com lista por status e um painel item a item (disponível/indisponível/valor alterado/substituído), aprovação total ou parcial, geração de proposta revisada e botão “Enviar para Operações”.
+- **Área do Cliente**: timeline por versões — orçamento inicial → pedido enviado → análise → proposta revisada → aceite final → viagem confirmada → documentos —, com badges explícitos “Solicitação” vs “Confirmado” e versões antigas em modo somente leitura.
 
-- `quote_booking_requests`: `id`, `quote_id`, `user_id` (dono do orçamento), `client_id` (opcional), `opportunity_id`, `protocol_code` (curto e único), `status`, `requester_name/email/phone`, `notes`, `consent_at`, `terms_version`, `selection_hash` (idempotência), `submitted_ip`, `user_agent`, `totals_snapshot`, `expires_at`, timestamps.
-- `quote_booking_request_items`: `id`, `request_id`, `quote_service_id` (referência, sem cascata destrutiva), `service_type`, `name`, `amount_snapshot`, `currency`, `service_data_snapshot` (JSONB), `section_label`, `choice_group`, `item_status`, `agent_note`, `position`.
-- `quote_booking_request_events`: trilha de auditoria (criado, notificado, status alterado, importado para operação), com autor (cliente público ou usuário/membro de equipe).
+## 6. Integração com Oportunidades e Operações
 
-Pontos-chave:
-- **Snapshot obrigatório** de preço e conteúdo no momento do envio: alterações posteriores no orçamento não reescrevem o pedido.
-- **Idempotência**: unique em (`quote_id`, `selection_hash`) para janela recente + `protocol_code` único; reenvio do mesmo payload retorna o mesmo protocolo.
-- Metadados de seleção (`is_required`, `choice_group`) ficam em `quote_services.service_data` para não exigir mudança estrutural do orçamento.
+Ao receber o pedido: vincula à `opportunity` do orçamento (sem mover estágio) e registra evento. Na aprovação final aceita: RPC `convert_booking_request_to_operation` garante a `operation` (reaproveitando a existente por `opportunity_id`/`quote_id`, ou criando) e insere em `operation_services` só os itens elegíveis, gravando `operation_service_id` no item — idempotente, e alinhado ao dedup por `source_quote_service_id` já usado em `useOperationServices.ts`.
 
-## 6. Integração com Oportunidade e Operações
+## 7. Segurança, RLS, idempotência e auditoria
 
-- O pedido é vinculado à `opportunity_id` já existente no orçamento (coluna real em `quotes`).
-- A importação automática hoje existente em `useOperationServices` (cópia de `quote_services` → `operation_services`) passa a ser condicional: **se o orçamento tiver um pedido de reserva aprovado ou parcialmente aprovado, importar apenas os itens desse pedido** (usando `source_quote_service_id` já presente em `operation_services`); sem pedido, mantém o comportamento atual (todos os itens).
-- Importação permanece idempotente: nada é duplicado ao reabrir a aba.
-- Nova seleção/alteração do cliente cria um **novo pedido** (versionado), nunca sobrescreve o anterior. Na Operação, os novos itens aparecem como sugestão "itens de um novo pedido de reserva" que o agente adiciona com um clique; itens retirados não são apagados automaticamente — apenas sinalizados.
+- Leitura pública por RPC SECURITY DEFINER estendida (`get_quote_by_public_code` passa a expor config de seleção) e nova `get_booking_request_by_protocol`; sem GRANT de `anon` nas novas tabelas.
+- Escrita pública por Edge Functions `verify_jwt=false`: `submit-booking-request`, `accept-revised-proposal`, usando `_shared/rate-limiter.ts` e `idempotency_key` único (replay retorna o mesmo protocolo).
+- RLS autenticada por agência: `user_id = auth.uid() OR agency_id = current_agency_id()`, respeitando permissões de equipe já existentes; eventos com policy só de INSERT/SELECT.
+- Imutabilidade: trigger que bloqueia UPDATE de itens/pedidos em versões `superseded` ou já convertidas.
+- Auditoria: todo evento em `quote_booking_request_events`; e-mails com `dedupe_key`.
 
-## 7. Notificações
+## 8. Fases de implementação
 
-- **E-mail** (canal primário): reutilizar o padrão já usado nas landings de produto (Edge Function + tabelas de configuração, destinatários e entregas), com fila/tentativas, deduplicação por pedido e ação de reenvio manual pelo agente.
-- Destinatários configuráveis por agência; conteúdo com protocolo, cliente, itens escolhidos e link direto para o pedido no app.
-- **WhatsApp Utility**: hoje **não existe integração de envio de WhatsApp no projeto** (nenhum provedor configurado). Proposta: manter como fase 2, atrás de flag por agência, disparado só quando houver template Utility aprovado e número/opt-in válidos; e-mail sempre como fallback.
-- Confirmação ao cliente: e-mail simples de "pedido recebido" com o protocolo, sem prometer disponibilidade.
-- Todo envio registrado com status e erro, visível ao agente.
+1. **Fase 0** — Entitlement VIP (tabela, função, hook, admin) e gate de UI.
+2. **Fase 1** — Configuração de seleção no orçamento (colunas, grupos, editor).
+3. **Fase 2** — Domínio do pedido (3 tabelas + protocolo + RPCs) e Edge Function de envio com idempotência.
+4. **Fase 3** — Seleção e revisão no orçamento público + tela de protocolo.
+5. **Fase 4** — E-mails cliente/agência com log.
+6. **Fase 5** — Painel de análise da agência, aprovação parcial, proposta revisada.
+7. **Fase 6** — Aceite final do cliente e conversão para Operações.
+8. **Fase 7** — Área do Cliente com timeline e versionamento.
+9. **Fase 8** — Preparo (sem ativar) do canal WhatsApp.
 
-## 8. Segurança do link público
+## 9. Critérios de aceite do MVP
 
-- Escrita pública **somente** via Edge Function `verify_jwt = false` + RPC `SECURITY DEFINER`, como já é feito no envio de leads — sem INSERT direto do cliente anônimo.
-- Validação do `share_token`/`public_access_code` e de `share_expires_at`/`valid_until` antes de aceitar o pedido; orçamento expirado bloqueia o envio com mensagem clara.
-- Rate limit por IP no mesmo utilitário `rate-limiter` já existente (ex.: 5 pedidos/10 min) e limite por orçamento.
-- Validação de payload (tamanhos, e-mail, telefone) e recusa de itens que não pertençam ao orçamento.
-- RLS: leitura/edição do pedido apenas pelo dono do orçamento e pela equipe da agência, seguindo as políticas de equipe já usadas em `operation_services`; nenhum acesso anônimo de leitura além do próprio protocolo via função.
-- Consentimento com timestamp, versão do texto, IP e user agent gravados; auditoria completa na tabela de eventos.
-- Proteção contra duplo envio: idempotência por hash + trava de UI + protocolo único.
+Recurso invisível para não-VIP; obrigatórios e grupos de alternativa validados; aceite obrigatório antes do envio; protocolo único e reenvio idempotente; e-mails únicos para as duas pontas; aprovação parcial funcional; proposta revisada exigindo aceite; nenhum item entra em Operações sem aprovação (e aceite quando houver mudança); histórico íntegro e versões antigas imutáveis; membros da equipe da agência VIP com acesso correto.
 
-## 9. UX do agente
+## 10. Riscos e mitigação
 
-- Aviso do novo pedido no app (badge no orçamento e na oportunidade) e página **Pedidos de reserva** com filtros por status.
-- Detalhe do pedido: dados do cliente, itens com snapshot de preço, aviso do que ele aceitou, e ações por item: **Disponível**, **Indisponível**, **Preço alterado** (com novo valor), **Substituir por outra alternativa**.
-- Ações do pedido: Em análise, Aguardando reconfirmação, Aprovar, Aprovar parcialmente, Recusar, Cancelar.
-- Atalhos: abrir WhatsApp do cliente com mensagem pronta (padrão de compartilhamento já existente), gerar novo orçamento ajustado, criar/atualizar oportunidade.
-- Ao fechar a oportunidade, a aba Serviços já vem filtrada pelos itens aprovados, e o agente segue marcando Confirmado / Pago / Emitido / Entregue normalmente.
+- **Contaminação de planos** → entitlement por agência separado do enum de plano.
+- **Duplicidade em Operações** → dedup por `source_quote_service_id` + `operation_service_id` único.
+- **Divergência de valores** → snapshot obrigatório e proibição de recomputar.
+- **Abuso do endpoint público** → rate limit por IP, deadline/`expires_at`, idempotência.
+- **Confusão “solicitado vs confirmado”** → vocabulário e badges padronizados no portal.
+- **Crescimento de RPC pública** → payload versionado, mantendo compatibilidade com o link atual.
 
-## 10. Fases
+## 11. Testes essenciais
 
-**Fase 1 (MVP seguro)**: seleção por item com obrigatórios e alternativas, resumo + aviso + identificação, envio via Edge Function com rate limit e idempotência, tela de protocolo, tabelas + RLS, e-mail de notificação, painel do agente com aprovar/aprovar parcialmente/recusar, importação filtrada para `operation_services`.
-
-**Fase 2**: quantidades por item, WhatsApp Utility, expiração automática e lembretes, novo pedido versionado com diff visual, metas/relatórios de conversão do orçamento web, resposta do cliente a contrapropostas.
-
-## 11. Riscos, decisões abertas e recomendação
-
-Riscos: cliente entender como reserva garantida (mitigar com linguagem e aviso obrigatório); divergência de preço entre snapshot e reconfirmação; pedidos duplicados; spam no link público; WhatsApp Utility fora de política.
-
-Decisões abertas:
-- A seleção deve vir ligada por padrão ou por orçamento? (recomendação: por orçamento, desligada por padrão)
-- Exigir e-mail ou também validação por código enviado ao cliente? (recomendação: só e-mail no MVP)
-- Prazo de expiração do pedido (sugestão: mesma validade do orçamento)
-
-**Recomendação**: implementar a Fase 1 como "pedido de reserva" imutável com snapshot, canal único de escrita via Edge Function, e-mail como notificação obrigatória e WhatsApp apenas depois; manter os estados do pedido separados dos flags operacionais, e alimentar a Operação exclusivamente com itens aprovados.
-
-## Detalhes técnicos verificados
-
-- `quotes` possui `share_token`, `public_access_code`, `share_expires_at`, `valid_until`, `opportunity_id`, `currency`; `quote_services` possui `service_data`, `amount`, `section_id`, `option_label`.
-- `quote_services` e `quotes` já têm políticas de leitura pública com token válido — nenhuma política de escrita pública existe, e o plano não cria nenhuma.
-- `operation_services` já possui `source_quote_service_id` e os flags `is_confirmed`, `is_paid`, `is_issued`, `is_delivered`, com políticas por agência/equipe.
-- Padrão público de escrita a reutilizar: `submit-lead-form` (rate limit compartilhado + RPC SECURITY DEFINER). Padrão de e-mail a reutilizar: `product-landing-lead-emails`.
-- Nenhuma Edge Function de WhatsApp existe hoje no projeto.
+E2E: seleção com obrigatório/alternativa → envio → protocolo; reenvio duplicado devolve mesmo protocolo; novo envio cria versão 2 sem alterar a 1; aprovação parcial + revisão + aceite → só itens elegíveis em Operações; segunda conversão não duplica; acesso ao portal de outro cliente é negado; e-mails não duplicam.
