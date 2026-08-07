@@ -47,6 +47,7 @@ import {
   CreditCard,
   UserPlus,
   KeyRound,
+  Crown,
   Trash2,
   Eye,
   EyeOff,
@@ -64,6 +65,7 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { clearImpersonationData, setImpersonationData, type ImpersonationData } from "@/lib/impersonation";
 import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
+import { AgencyEntitlementsDialog } from "./AgencyEntitlementsDialog";
 import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
 import { AdminUserUsageReport } from "./AdminUserUsageReport";
 
@@ -110,6 +112,7 @@ export function AdminUserManager() {
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial", password: "" });
   const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [featureAccessUser, setFeatureAccessUser] = useState<UserWithDetails | null>(null);
+  const [entitlementsUser, setEntitlementsUser] = useState<UserWithDetails | null>(null);
   const [setupLinkUser, setSetupLinkUser] = useState<UserWithDetails | null>(null);
   const [setupLinkUrl, setSetupLinkUrl] = useState<string>("");
   const { toast } = useToast();
@@ -679,6 +682,15 @@ export function AdminUserManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          title="Pacote VIP da agência"
+                          className="text-amber-500 hover:text-amber-600"
+                          onClick={() => setEntitlementsUser(user)}
+                        >
+                          <Crown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           title="Resetar senha"
                           onClick={() => resetPasswordMutation.mutate(user.user_id)}
                           disabled={resetPasswordMutation.isPending}
@@ -935,6 +947,16 @@ export function AdminUserManager() {
             onOpenChange={(open) => !open && setFeatureAccessUser(null)}
             userId={featureAccessUser.user_id}
             userName={featureAccessUser.name}
+          />
+        )}
+
+        {/* Agency VIP Entitlements Dialog */}
+        {entitlementsUser && (
+          <AgencyEntitlementsDialog
+            open={!!entitlementsUser}
+            onOpenChange={(open) => !open && setEntitlementsUser(null)}
+            agencyId={entitlementsUser.user_id}
+            agencyName={entitlementsUser.agency_name || entitlementsUser.name}
           />
         )}
 

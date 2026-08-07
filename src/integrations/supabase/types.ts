@@ -487,6 +487,45 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_entitlements: {
+        Row: {
+          agency_id: string
+          created_at: string
+          ends_at: string | null
+          entitlement_key: string
+          granted_by: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          ends_at?: string | null
+          entitlement_key: string
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          ends_at?: string | null
+          entitlement_key?: string
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agency_events: {
         Row: {
           client_id: string | null
@@ -13966,6 +14005,10 @@ export type Database = {
         }
         Returns: Json
       }
+      agency_has_entitlement: {
+        Args: { _agency_id: string; _key: string }
+        Returns: boolean
+      }
       agency_team_directory: {
         Args: never
         Returns: {
@@ -14110,6 +14153,17 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      current_agency_entitlements: {
+        Args: never
+        Returns: {
+          ends_at: string
+          entitlement_key: string
+        }[]
+      }
+      current_agency_has_entitlement: {
+        Args: { _key: string }
+        Returns: boolean
       }
       current_agency_id: { Args: never; Returns: string }
       delete_my_supplier_review: {
