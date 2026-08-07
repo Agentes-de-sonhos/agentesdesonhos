@@ -9985,6 +9985,251 @@ export type Database = {
           },
         ]
       }
+      quote_booking_request_events: {
+        Row: {
+          actor_team_member_id: string | null
+          actor_type: string
+          actor_user_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          item_id: string | null
+          payload: Json
+          request_id: string
+        }
+        Insert: {
+          actor_team_member_id?: string | null
+          actor_type: string
+          actor_user_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          item_id?: string | null
+          payload?: Json
+          request_id: string
+        }
+        Update: {
+          actor_team_member_id?: string | null
+          actor_type?: string
+          actor_user_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          item_id?: string | null
+          payload?: Json
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_booking_request_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "quote_booking_request_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_booking_request_events_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "quote_booking_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_booking_request_items: {
+        Row: {
+          agency_note: string | null
+          amount_snapshot: number
+          choice_group_snapshot: Json | null
+          client_accepted: boolean | null
+          created_at: string
+          id: string
+          operation_service_id: string | null
+          quantity: number
+          replacement_snapshot: Json | null
+          request_id: string
+          review_status: string
+          revised_amount: number | null
+          selection_mode_snapshot: string
+          service_name: string
+          service_type: string
+          snapshot: Json
+          source_quote_service_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_note?: string | null
+          amount_snapshot?: number
+          choice_group_snapshot?: Json | null
+          client_accepted?: boolean | null
+          created_at?: string
+          id?: string
+          operation_service_id?: string | null
+          quantity?: number
+          replacement_snapshot?: Json | null
+          request_id: string
+          review_status?: string
+          revised_amount?: number | null
+          selection_mode_snapshot?: string
+          service_name: string
+          service_type: string
+          snapshot: Json
+          source_quote_service_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_note?: string | null
+          amount_snapshot?: number
+          choice_group_snapshot?: Json | null
+          client_accepted?: boolean | null
+          created_at?: string
+          id?: string
+          operation_service_id?: string | null
+          quantity?: number
+          replacement_snapshot?: Json | null
+          request_id?: string
+          review_status?: string
+          revised_amount?: number | null
+          selection_mode_snapshot?: string
+          service_name?: string
+          service_type?: string
+          snapshot?: Json
+          source_quote_service_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_booking_request_items_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "quote_booking_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_booking_request_items_source_quote_service_id_fkey"
+            columns: ["source_quote_service_id"]
+            isOneToOne: false
+            referencedRelation: "quote_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_booking_requests: {
+        Row: {
+          agency_id: string
+          client_email: string
+          client_final_accepted_at: string | null
+          client_id: string | null
+          client_name: string
+          client_notes: string | null
+          client_whatsapp: string
+          created_at: string
+          currency: string
+          disclaimer_accepted_at: string
+          disclaimer_text_snapshot: string
+          expires_at: string | null
+          id: string
+          idempotency_key: string
+          opportunity_id: string | null
+          protocol: string
+          public_access_token: string
+          quote_id: string
+          revised_total: number | null
+          root_request_id: string | null
+          source_ip_hash: string | null
+          status: string
+          total_estimated: number
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          agency_id: string
+          client_email: string
+          client_final_accepted_at?: string | null
+          client_id?: string | null
+          client_name: string
+          client_notes?: string | null
+          client_whatsapp: string
+          created_at?: string
+          currency?: string
+          disclaimer_accepted_at?: string
+          disclaimer_text_snapshot: string
+          expires_at?: string | null
+          id?: string
+          idempotency_key: string
+          opportunity_id?: string | null
+          protocol: string
+          public_access_token?: string
+          quote_id: string
+          revised_total?: number | null
+          root_request_id?: string | null
+          source_ip_hash?: string | null
+          status?: string
+          total_estimated?: number
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          agency_id?: string
+          client_email?: string
+          client_final_accepted_at?: string | null
+          client_id?: string | null
+          client_name?: string
+          client_notes?: string | null
+          client_whatsapp?: string
+          created_at?: string
+          currency?: string
+          disclaimer_accepted_at?: string
+          disclaimer_text_snapshot?: string
+          expires_at?: string | null
+          id?: string
+          idempotency_key?: string
+          opportunity_id?: string | null
+          protocol?: string
+          public_access_token?: string
+          quote_id?: string
+          revised_total?: number | null
+          root_request_id?: string | null
+          source_ip_hash?: string | null
+          status?: string
+          total_estimated?: number
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_booking_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_booking_requests_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_booking_requests_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_booking_requests_root_request_id_fkey"
+            columns: ["root_request_id"]
+            isOneToOne: false
+            referencedRelation: "quote_booking_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_documents: {
         Row: {
           created_at: string
@@ -14293,6 +14538,7 @@ export type Database = {
         }
         Returns: string
       }
+      generate_booking_request_protocol: { Args: never; Returns: string }
       generate_certificate_number: { Args: never; Returns: string }
       generate_invoice_access_code: { Args: never; Returns: string }
       generate_invoice_number: { Args: { _user_id: string }; Returns: string }
@@ -14798,6 +15044,21 @@ export type Database = {
           p_payload: Json
           p_product_key: string
           p_slug: string
+        }
+        Returns: Json
+      }
+      submit_quote_booking_request: {
+        Args: {
+          p_agency_slug: string
+          p_client_email: string
+          p_client_name: string
+          p_client_notes?: string
+          p_client_whatsapp: string
+          p_code: string
+          p_disclaimer_accepted?: boolean
+          p_idempotency_key?: string
+          p_selected_service_ids: string[]
+          p_source_ip_hash?: string
         }
         Returns: Json
       }
