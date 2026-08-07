@@ -11,7 +11,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PermissionGate } from "@/components/permissions/PermissionGate";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function GestaoClientes() {
   return (
@@ -87,7 +87,7 @@ function GestaoClientesContent() {
         />
 
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          {/* Mobile: horizontal scroll; Desktop: grid 6 cols */}
+          {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
           <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
             <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-5xl md:grid-cols-5">
               {can('opportunities.view') && (

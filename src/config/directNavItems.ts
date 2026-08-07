@@ -24,7 +24,7 @@ export interface DirectNavItemConfig {
 export const CLIENTES_DIRECT_ITEM: DirectNavItemConfig = {
   key: "section_clientes",
   title: "GESTÃO DE CLIENTES",
-  url: "/gestao-clientes/dashboard",
+  url: "/gestao-clientes/funil",
   activePrefix: "/gestao-clientes",
   requiredFeature: "crm_basic",
   anyPermission: [
