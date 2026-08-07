@@ -232,6 +232,11 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
             </div>
           </TabsContent>
 
+          {/* SERVICES */}
+          <TabsContent value="services">
+            <OperationServicesTab operation={operation} />
+          </TabsContent>
+
           {/* CHECKLIST */}
           <TabsContent value="checklist" className="space-y-3 mt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
