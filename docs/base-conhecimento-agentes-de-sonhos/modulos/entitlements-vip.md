@@ -68,3 +68,9 @@ Entitlement usado: `booking_requests`. Sem ele, nada muda para a agência.
 
 ### Correção da Fase 1
 O dialog de VIP no admin passou a receber `userId` e resolver o titular real via RPC `admin_resolve_agency_owner` (usa `agency_membership` e `agency_team_members.auth_user_id`). Se o usuário selecionado for membro de equipe, o entitlement é concedido ao titular e o dialog avisa isso — nunca cria entitlement para user_id de membro.
+
+### Hardening da Fase 2
+
+- `admin_resolve_agency_owner` não referencia mais `profiles.email` (coluna inexistente). O `owner_email` é lido de `auth.users` por subselect explícito, apenas dentro dessa RPC admin `SECURITY DEFINER` (checagem `has_role(auth.uid(),'admin')` no topo). Se o titular não tiver `profiles`, a função ainda retorna o `agency_owner_id` resolvido com nome/agência nulos. Não há sessão admin disponível no ambiente de exec (psql roda em role restrita que não executa funções), então a validação foi feita por inspeção da definição — a execução real precisa de uma sessão de admin no app.
+- Equipe autorizada: adicionadas policies escopadas por agência em `quote_service_choice_groups` e `quote_services`. Leitura exige `can_team('quotes.view')`, escrita exige `can_team('quotes.edit')`, e ambas exigem `quotes.user_id = resolve_agency_id_for_user(auth.uid())` — nunca `can_team()` isolado. Somente role `authenticated`; nenhuma escrita para `anon`. Policies do proprietário permanecem intactas. `quote_sections` não foi alterado.
+- Trigger de entitlement revisado: valida somente a transição `false -> true` (e inserts com `true`). Se o entitlement expirar depois, a flag persistida continua, mas `get_quote_by_public_code` já devolve a flag efetiva `false` — o público não expõe o recurso.
