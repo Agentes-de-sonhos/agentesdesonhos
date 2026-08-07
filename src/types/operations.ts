@@ -75,7 +75,7 @@ export interface OperationAttachment {
 }
 
 export const OPERATION_STAGES: { key: OperationStage; label: string; color: string; bg: string; border: string; text: string }[] = [
-  { key: 'venda_confirmada', label: 'Pagamento Confirmado', color: 'bg-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/40', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-300' },
+  { key: 'venda_confirmada', label: 'Confirmação do pagamento', color: 'bg-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/40', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-300' },
   { key: 'emissao',          label: 'Emissão / Reservas', color: 'bg-blue-600',  bg: 'bg-blue-50 dark:bg-blue-950/40',   border: 'border-blue-200 dark:border-blue-800',   text: 'text-blue-700 dark:text-blue-300' },
   { key: 'documentacao',     label: 'Documentação',       color: 'bg-amber-500', bg: 'bg-amber-50 dark:bg-amber-950/40', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-300' },
   { key: 'entrega',          label: 'Entrega da Viagem',  color: 'bg-violet-600',bg: 'bg-violet-50 dark:bg-violet-950/40',border: 'border-violet-200 dark:border-violet-800',text: 'text-violet-700 dark:text-violet-300' },
@@ -87,7 +87,7 @@ export const OPERATION_STAGES: { key: OperationStage; label: string; color: stri
 
 export const STAGE_CHECKLISTS: Record<OperationStage, string[]> = {
   venda_confirmada: [
-    'Pagamento confirmado',
+    'Pagamentos dos serviços confirmados',
     'Passageiros conferidos',
     'Nomes corretos',
     'Datas conferidas',

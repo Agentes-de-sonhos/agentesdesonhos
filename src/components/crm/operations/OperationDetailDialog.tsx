@@ -38,6 +38,8 @@ import { STAGE_CHECKLISTS } from "@/types/operations";
 import type { Operation, OperationStage } from "@/types/operations";
 import { OPERATION_STAGES, getStageMeta } from "@/types/operations";
 import { OperationServicesTab } from "./OperationServicesTab";
+import { useOperationServices } from "@/hooks/useOperationServices";
+import { computeOperationPaymentStatus, PAYMENT_STATUS_LABELS } from "@/lib/operationPaymentStatus";
 
 function StageChip({ stage }: { stage: OperationStage }) {
   const meta = getStageMeta(stage);
@@ -63,6 +65,11 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   const { events, addNote } = useOperationTimeline(operation?.id ?? null);
   const { attachments, uploadFile, removeAttachment } = useOperationAttachments(operation?.id ?? null);
   const { saveTemplate, resetTemplate, isSaving } = useChecklistTemplates();
+  const { services: opServices } = useOperationServices({
+    operationId: operation?.id ?? null,
+    quoteId: operation?.quote_id ?? null,
+    opportunityId: operation?.opportunity_id ?? null,
+  });
 
   const [form, setForm] = useState<Partial<Operation>>({});
   const [newTaskLabel, setNewTaskLabel] = useState("");
@@ -88,7 +95,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   const handleSave = async () => {
     const editable = [
       "title", "destination", "travel_start_date", "travel_end_date",
-      "passengers_count", "sale_amount", "priority", "payment_status",
+      "passengers_count", "sale_amount", "priority",
       "stage", "notes", "assigned_user_id",
     ] as const;
     const patch: Record<string, any> = {};
@@ -113,6 +120,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
 
   const phone = operation.client?.phone?.replace(/\D/g, "");
   const whatsappLink = phone ? `https://wa.me/55${phone}` : null;
+  const computedPaymentStatus = computeOperationPaymentStatus(opServices as any[]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -180,14 +188,12 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
               </div>
               <div>
                 <Label>Status financeiro</Label>
-                <Select value={form.payment_status ?? "pendente"} onValueChange={(v) => setForm({ ...form, payment_status: v as any })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="parcial">Parcial</SelectItem>
-                    <SelectItem value="pago">Pago</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex h-10 items-center rounded-md border bg-muted/40 px-3">
+                  <span className="text-sm font-medium">{PAYMENT_STATUS_LABELS[computedPaymentStatus]}</span>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Calculado automaticamente conforme os pagamentos marcados na aba Serviços.
+                </p>
               </div>
               <div className="sm:col-span-2">
                 <Label>Etapa</Label>

@@ -14449,6 +14449,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      compute_operation_payment_status: {
+        Args: { _operation_id: string }
+        Returns: string
+      }
       confirm_award_winner: {
         Args: {
           _award_id: string
