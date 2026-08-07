@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, ReactNode } from "react";
 import { toTabTitleCase } from "@/lib/tabTitle";
+import { isMultiInstanceRoute } from "./multiInstanceRoutes";
 
 /** Maximum number of *content* windows (the pinned home tab does not count). */
 export const MAX_TABS = 10;
@@ -57,23 +58,36 @@ export function countContentTabs(tabs: WorkspaceTab[]): number {
   return tabs.filter((t) => !t.pinned).length;
 }
 
+/**
+ * Janelas de criação podem ser abertas várias vezes; nesse caso numeramos o
+ * título ("Orçamento 2") para o usuário distinguir as instâncias.
+ */
+function uniqueTitle(tabs: WorkspaceTab[], path: string, title: string): string {
+  const base = toTabTitleCase(title);
+  if (!isMultiInstanceRoute(path)) return base;
+  const samePath = tabs.filter((t) => !t.pinned && t.path === path).length;
+  return samePath === 0 ? base : `${base} ${samePath + 1}`;
+}
+
 function reducer(state: WorkspaceState, action: Action): WorkspaceState {
   switch (action.type) {
     case "OPEN": {
       if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
-      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title), state: action.state };
+      const tab: WorkspaceTab = { id: newId(), path: action.path, title: uniqueTitle(state.tabs, action.path, action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "OPEN_OR_ACTIVATE": {
       if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
-      const existing = state.tabs.find((t) => t.path === action.path);
+      const existing = isMultiInstanceRoute(action.path)
+        ? undefined
+        : state.tabs.find((t) => t.path === action.path);
       if (existing) {
         if (state.activeId === existing.id) return state;
         return { ...state, activeId: existing.id };
       }
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
-      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title), state: action.state };
+      const tab: WorkspaceTab = { id: newId(), path: action.path, title: uniqueTitle(state.tabs, action.path, action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "CLOSE": {

@@ -77,3 +77,45 @@ describe("toTabTitleCase", () => {
     expect(state.tabs[1].title).toBe("CRM");
   });
 });
+
+describe("janelas de criação (múltiplas instâncias)", () => {
+  const NEW_QUOTE = "/ferramentas-ia/gerar-orcamento";
+  const NEW_WALLET = "/ferramentas-ia/trip-wallet";
+  const NEW_ITINERARY = "/ferramentas-ia/criar-roteiro";
+
+  it("abre uma nova janela a cada clique nas rotas de criação", () => {
+    let state = base([]);
+    for (const path of [NEW_QUOTE, NEW_QUOTE, NEW_WALLET, NEW_ITINERARY, NEW_ITINERARY]) {
+      state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path, title: "Orçamento" });
+    }
+    expect(countContentTabs(state.tabs)).toBe(5);
+    expect(state.tabs.filter((t) => t.path === NEW_QUOTE)).toHaveLength(2);
+  });
+
+  it("numera títulos duplicados das janelas de criação", () => {
+    let state = base([]);
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: NEW_QUOTE, title: "Orçamento" });
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: NEW_QUOTE, title: "Orçamento" });
+    const titles = state.tabs.filter((t) => t.path === NEW_QUOTE).map((t) => t.title);
+    expect(titles[1]).toBe(`${titles[0]} 2`);
+  });
+
+  it("mantém uma única janela para listagem e para edição de um registro existente", () => {
+    let state = base([]);
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: "/meus-projetos", title: "Meus Projetos" });
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: "/meus-projetos", title: "Meus Projetos" });
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: `${NEW_QUOTE}/abc`, title: "Orçamento" });
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: `${NEW_QUOTE}/abc`, title: "Orçamento" });
+    expect(countContentTabs(state.tabs)).toBe(2);
+  });
+
+  it("fecha uma janela de criação sem afetar as outras", () => {
+    let state = base([]);
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: NEW_QUOTE, title: "Orçamento" });
+    state = workspaceReducer(state, { type: "OPEN_OR_ACTIVATE", path: NEW_QUOTE, title: "Orçamento" });
+    const [first, second] = state.tabs.filter((t) => t.path === NEW_QUOTE);
+    state = workspaceReducer(state, { type: "CLOSE", id: second.id });
+    expect(state.tabs.some((t) => t.id === first.id)).toBe(true);
+    expect(countContentTabs(state.tabs)).toBe(1);
+  });
+});

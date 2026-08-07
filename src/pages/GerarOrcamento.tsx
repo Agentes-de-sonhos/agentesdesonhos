@@ -1187,13 +1187,14 @@ export default function GerarOrcamento() {
               </button>
               {openSections.services && (
                 <CardContent className="pt-0">
-                  {(!quote.services || quote.services.length === 0) ? (
-                    <p className="text-sm text-muted-foreground text-center py-6">
-                      Nenhum serviço adicionado ainda. Use a área acima para adicionar.
-                    </p>
-                  ) : (
+                  <>
+                    {(!quote.services || quote.services.length === 0) && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Nenhum serviço adicionado ainda. Você já pode criar seções agora e adicionar os serviços depois.
+                      </p>
+                    )}
                     <QuoteServicesOrganizer
-                      services={quote.services}
+                      services={quote.services || []}
                       sections={quote.sections || []}
                       onDeleteService={deleteService}
                       onEditService={handleEditService}
@@ -1210,7 +1211,7 @@ export default function GerarOrcamento() {
                       isSaving={isSavingSections}
                       currency={quoteCurrencyCode}
                     />
-                  )}
+                  </>
                 </CardContent>
               )}
             </Card>
