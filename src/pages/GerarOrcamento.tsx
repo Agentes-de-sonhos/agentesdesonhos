@@ -1159,48 +1159,42 @@ export default function GerarOrcamento() {
 
         <div className="grid gap-4 sm:gap-6">
           <div className="space-y-4">
-            {/* Adicionar Serviços */}
-            <Card className="shadow-card">
-              <CardContent className="pt-5 pb-5 space-y-4">
-                <div className="w-fit">
-                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                    <Plus className="h-5 w-5 text-sky-500" />
-                    Adicionar Serviços
-                  </h2>
-                  <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
-                </div>
-                <ServiceCategoryGrid
-                  countByType={serviceCountByType}
-                  onSelect={(type) => { setEditingService(null); setSelectedServiceType(type); }}
-                  onOpenFullPackage={() => setShowFullPackage(true)}
-                  showFullPackage
-                />
-              </CardContent>
-            </Card>
+            <QuoteStepsGuide steps={QUOTE_STEPS} onSelect={openStep} />
 
-            {/* Serviços adicionados (lista colapsável) */}
-            <Card className="shadow-card">
-              <button
-                type="button"
-                onClick={() => toggleSection("services")}
-                className="w-full flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 text-left"
-                aria-expanded={openSections.services}
-              >
-                <div className="w-fit">
-                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-emerald-500" />
-                    Serviços adicionados
-                    {quote.services && quote.services.length > 0 && (
-                      <Badge variant="secondary" className="text-xs ml-1">{quote.services.length}</Badge>
-                    )}
-                  </h2>
-                  <div className="mt-2 h-1 w-full rounded-full bg-emerald-500" />
-                </div>
-                <ChevronDown className={cn("h-5 w-5 mt-1 text-muted-foreground transition-transform duration-200 flex-shrink-0", openSections.services && "rotate-180")} />
-              </button>
-              {openSections.services && (
-                <CardContent className="pt-0">
-                  <QuoteServicesOrganizer
+            {/* 1. Adicionar serviços */}
+            <QuoteStepCard
+              step={1}
+              id="quote-step-1"
+              title="Adicionar serviços"
+              hint={QUOTE_STEPS[0].hint}
+              accentClass="bg-sky-500"
+              icon={<Plus className="h-5 w-5 text-sky-500" />}
+              open={openSections.add}
+              onToggle={() => toggleSection("add")}
+            >
+              <ServiceCategoryGrid
+                countByType={serviceCountByType}
+                onSelect={(type) => { setEditingService(null); setSelectedServiceType(type); }}
+                onOpenFullPackage={() => setShowFullPackage(true)}
+                showFullPackage
+              />
+            </QuoteStepCard>
+
+            {/* 2. Organizar serviços */}
+            <QuoteStepCard
+              step={2}
+              id="quote-step-2"
+              title="Organizar serviços"
+              hint={QUOTE_STEPS[1].hint}
+              accentClass="bg-emerald-500"
+              icon={<FileText className="h-5 w-5 text-emerald-500" />}
+              badge={quote.services && quote.services.length > 0 ? (
+                <Badge variant="secondary" className="text-xs ml-1">{quote.services.length}</Badge>
+              ) : undefined}
+              open={openSections.services}
+              onToggle={() => toggleSection("services")}
+            >
+              <QuoteServicesOrganizer
                     services={quote.services || []}
                     sections={quote.sections || []}
                     onDeleteService={deleteService}
@@ -1217,62 +1211,68 @@ export default function GerarOrcamento() {
                     }}
                     isSaving={isSavingSections}
                     currency={quoteCurrencyCode}
-                  />
-                </CardContent>
-              )}
-            </Card>
+              />
+            </QuoteStepCard>
 
-            {/* Configurações do Orçamento — clique em qualquer lugar abre o modal */}
-            <Card className="shadow-card">
+            {/* 3. Configurar apresentação */}
+            <QuoteStepCard
+              step={3}
+              id="quote-step-3"
+              title="Configurar apresentação"
+              hint={QUOTE_STEPS[2].hint}
+              accentClass="bg-violet-500"
+              icon={<CreditCard className="h-5 w-5 text-violet-500" />}
+              open={openSections.settings}
+              onToggle={() => toggleSection("settings")}
+            >
               <button
                 type="button"
                 onClick={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
-                className="w-full text-left px-5 sm:px-6 pt-5 pb-5 hover:bg-muted/30 transition-colors rounded-lg flex items-center justify-between gap-4"
+                className="w-full text-left rounded-lg border border-border px-4 py-4 hover:bg-muted/30 transition-colors flex items-center justify-between gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <div>
-                  <div className="w-fit">
-                    <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                      <CreditCard className="h-5 w-5 text-violet-500" />
-                      Configurações do Orçamento
-                    </h2>
-                    <div className="mt-2 h-1 w-full rounded-full bg-violet-500" />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    Destino, investimento, validade e documentos — em etapas guiadas.
-                  </p>
-                </div>
-                <div className="shrink-0 h-10 w-10 rounded-full bg-violet-500 flex items-center justify-center shadow-md">
+                <span className="text-sm font-medium text-foreground">
+                  Abrir configurações em etapas guiadas
+                </span>
+                <span className="shrink-0 h-10 w-10 rounded-full bg-violet-500 flex items-center justify-center shadow-md">
                   <Play className="h-5 w-5 text-white fill-white" />
-                </div>
+                </span>
               </button>
-            </Card>
+            </QuoteStepCard>
 
-            {/* Resumo do Orçamento */}
-            <Card className="shadow-card">
-              <button
-                type="button"
-                onClick={() => toggleSection("summary")}
-                className="w-full flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 text-left"
-                aria-expanded={openSections.summary}
-              >
-                <div className="w-fit">
-                  <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-amber-500" />
-                    Resumo do Orçamento
-                  </h2>
-                  <div className="mt-2 h-1 w-full rounded-full bg-amber-500" />
-                </div>
-                <ChevronDown className={cn("h-5 w-5 mt-1 text-muted-foreground transition-transform duration-200 flex-shrink-0", openSections.summary && "rotate-180")} />
-              </button>
-              {openSections.summary && (
-                <CardContent className="pt-0">
-                  <QuoteSummary quote={quote} />
-                </CardContent>
-              )}
-            </Card>
+            {/* 4. Revisar orçamento */}
+            <QuoteStepCard
+              step={4}
+              id="quote-step-4"
+              title="Revisar orçamento"
+              hint={QUOTE_STEPS[3].hint}
+              accentClass="bg-amber-500"
+              icon={<FileText className="h-5 w-5 text-amber-500" />}
+              open={openSections.summary}
+              onToggle={() => toggleSection("summary")}
+            >
+              <QuoteSummary quote={quote} />
+            </QuoteStepCard>
 
-            {/* Escolha uma Assinatura */}
-            <QuoteSignatureCard quote={quote} onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })} />
+            {/* 5. Escolher assinatura */}
+            <QuoteStepCard
+              step={5}
+              id="quote-step-5"
+              title="Escolher assinatura"
+              hint={QUOTE_STEPS[4].hint}
+              accentClass="bg-sky-600"
+              icon={<UserCircle2 className="h-5 w-5 text-sky-600" />}
+              open={openSections.signature}
+              onToggle={() => toggleSection("signature")}
+            >
+              <DocumentSignatureCard
+                table="quotes"
+                docId={quote.id}
+                initialSnapshot={(quote as any).signature_snapshot ?? null}
+                onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+                unwrapped
+                hideHeader
+              />
+            </QuoteStepCard>
           </div>
         </div>
       </div>
