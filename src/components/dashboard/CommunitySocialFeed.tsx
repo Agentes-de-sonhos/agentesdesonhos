@@ -64,7 +64,7 @@ interface CommunitySocialFeedProps {
   defaultExpanded?: boolean;
 }
 
-const PREVIEW_LIMIT = 3;
+const PREVIEW_LIMIT = 1;
 
 export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const { user } = useAuth();
@@ -80,25 +80,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     updatePost,
     isUpdating,
     fetchComments,
-    addComment,
-    isAddingComment,
-    deleteComment,
     votePoll,
     isVoting,
   } = useCommunityFeed();
 
-  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
-
-  const toggleCommentsOpen = (postId: string) => {
-    setExpandedComments((prev) => {
-      const next = new Set(prev);
-      if (next.has(postId)) next.delete(postId);
-      else next.add(postId);
-      return next;
-    });
-  };
+  const { newCount } = useCommunityUnread();
 
   const visiblePosts = posts.slice(0, PREVIEW_LIMIT);
 
@@ -124,7 +112,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
         {/* Coluna central (padrão LinkedIn) */}
         <div className="mx-auto w-full max-w-[780px] min-w-0 space-y-3">
         {/* Composer */}
-        <CreatePostForm onSubmit={createPost} isCreating={isCreating} />
+        <CreatePostForm onSubmit={createPost} isCreating={isCreating} collapsible />
 
         {/* Feed preview */}
         {loadingPosts ? (
@@ -155,28 +143,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                   if (confirm("Excluir esta publicação?")) deletePost(post.id);
                 }}
                 onEdit={() => setEditingPost(post)}
-                commentsOpen={expandedComments.has(post.id)}
-                onToggleComments={() => toggleCommentsOpen(post.id)}
                 fetchComments={fetchComments}
-                addComment={addComment}
-                deleteComment={deleteComment}
-                isAddingComment={isAddingComment}
                 onOpenImage={(url) => setLightboxUrl(url)}
                 onVotePoll={votePoll}
                 isVoting={isVoting}
+                newCount={newCount}
               />
             ))}
-            {posts.length > PREVIEW_LIMIT && (
-              <div className="flex justify-center pt-1">
-                <Link
-                  to="/comunidade"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-[hsl(var(--section-community))] hover:underline"
-                >
-                  Ver mais publicações
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            )}
           </div>
         )}
         </div>
