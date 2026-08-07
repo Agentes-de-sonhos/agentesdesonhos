@@ -12,13 +12,11 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import {
-  ArrowRight,
   Heart,
   Loader2,
   MessageCircle,
   MoreHorizontal,
   Pencil,
-  Send,
   Trash2,
   Users,
 } from "lucide-react";
@@ -27,6 +25,7 @@ import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
+import { useCommunityUnread, unreadLabel } from "@/hooks/useCommunityUnread";
 import { useQuery } from "@tanstack/react-query";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 import { EditPostDialog } from "@/components/community/EditPostDialog";
@@ -34,7 +33,6 @@ import { PostImageGallery, postImages } from "@/components/community/PostImageGa
 import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
 function timeAgo(date: string) {
   try {
@@ -65,7 +63,7 @@ interface CommunitySocialFeedProps {
   defaultExpanded?: boolean;
 }
 
-const PREVIEW_LIMIT = 3;
+const PREVIEW_LIMIT = 1;
 
 export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const { user } = useAuth();
@@ -81,25 +79,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     updatePost,
     isUpdating,
     fetchComments,
-    addComment,
-    isAddingComment,
-    deleteComment,
     votePoll,
     isVoting,
   } = useCommunityFeed();
 
-  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
-
-  const toggleCommentsOpen = (postId: string) => {
-    setExpandedComments((prev) => {
-      const next = new Set(prev);
-      if (next.has(postId)) next.delete(postId);
-      else next.add(postId);
-      return next;
-    });
-  };
+  const { newCount } = useCommunityUnread();
 
   const visiblePosts = posts.slice(0, PREVIEW_LIMIT);
 
@@ -125,7 +111,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
         {/* Coluna central (padrão LinkedIn) */}
         <div className="mx-auto w-full max-w-[780px] min-w-0 space-y-3">
         {/* Composer */}
-        <CreatePostForm onSubmit={createPost} isCreating={isCreating} />
+        <CreatePostForm onSubmit={createPost} isCreating={isCreating} collapsible />
 
         {/* Feed preview */}
         {loadingPosts ? (
@@ -156,28 +142,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                   if (confirm("Excluir esta publicação?")) deletePost(post.id);
                 }}
                 onEdit={() => setEditingPost(post)}
-                commentsOpen={expandedComments.has(post.id)}
-                onToggleComments={() => toggleCommentsOpen(post.id)}
                 fetchComments={fetchComments}
-                addComment={addComment}
-                deleteComment={deleteComment}
-                isAddingComment={isAddingComment}
                 onOpenImage={(url) => setLightboxUrl(url)}
                 onVotePoll={votePoll}
                 isVoting={isVoting}
+                newCount={newCount}
               />
             ))}
-            {posts.length > PREVIEW_LIMIT && (
-              <div className="flex justify-center pt-1">
-                <Link
-                  to="/comunidade"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-[hsl(var(--section-community))] hover:underline"
-                >
-                  Ver mais publicações
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            )}
           </div>
         )}
         </div>
@@ -214,15 +185,11 @@ interface PostCardProps {
   onLike: () => void;
   onDelete: () => void;
   onEdit: () => void;
-  commentsOpen: boolean;
-  onToggleComments: () => void;
   fetchComments: (postId: string) => Promise<PostComment[]>;
-  addComment: (vars: { postId: string; content: string }) => void;
-  deleteComment: (commentId: string) => void;
-  isAddingComment: boolean;
   onOpenImage: (url: string) => void;
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
   isVoting?: boolean;
+  newCount?: number;
 }
 
 function PostCard({
@@ -232,15 +199,11 @@ function PostCard({
   onLike,
   onDelete,
   onEdit,
-  commentsOpen,
-  onToggleComments,
   fetchComments,
-  addComment,
-  deleteComment,
-  isAddingComment,
   onOpenImage,
   onVotePoll,
   isVoting,
+  newCount = 0,
 }: PostCardProps) {
   const isAuthor = currentUserId === post.user_id;
   const canDelete = isAuthor || isAdmin;
@@ -251,18 +214,11 @@ function PostCard({
   const { data: comments = [], isLoading: loadingComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
     queryFn: () => fetchComments(post.id),
-    enabled: commentsOpen,
+    enabled: post.comments_count > 0,
     staleTime: 30 * 1000,
   });
 
-  const [commentText, setCommentText] = useState("");
-
-  const handleAddComment = () => {
-    const trimmed = commentText.trim();
-    if (!trimmed) return;
-    addComment({ postId: post.id, content: trimmed });
-    setCommentText("");
-  };
+  const latestComment = comments.length > 0 ? comments[comments.length - 1] : null;
 
   return (
     <article className="rounded-2xl bg-card border border-border/60 overflow-hidden">
@@ -341,13 +297,9 @@ function PostCard({
             <span>{post.likes_count} {post.likes_count === 1 ? "curtida" : "curtidas"}</span>
           )}
           {post.comments_count > 0 && (
-            <button
-              type="button"
-              onClick={onToggleComments}
-              className="hover:underline"
-            >
+            <Link to="/comunidade" className="hover:underline">
               {post.comments_count} {post.comments_count === 1 ? "comentário" : "comentários"}
-            </button>
+            </Link>
           )}
         </div>
       )}
@@ -365,84 +317,66 @@ function PostCard({
         <Button
           variant="ghost"
           size="sm"
-          onClick={onToggleComments}
+          asChild
           className="flex-1 basis-1/2 gap-2 text-muted-foreground"
         >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-xs sm:text-sm">Comentar</span>
+          <Link to="/comunidade">
+            <MessageCircle className="h-4 w-4" />
+            <span className="text-xs sm:text-sm">Comentar</span>
+          </Link>
         </Button>
       </div>
 
-      {commentsOpen && (
-        <div className="px-4 pb-4 pt-2 space-y-3 bg-muted/20 border-t border-border/40">
-          {loadingComments ? (
-            <div className="flex items-center justify-center py-3 text-xs text-muted-foreground">
-              <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> Carregando comentários...
+      {(latestComment || loadingComments || newCount > 1) && (
+        <div className="px-4 pb-3 pt-2 space-y-2 bg-muted/20 border-t border-border/40">
+          {loadingComments && !latestComment ? (
+            <div className="flex items-center py-1 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> Carregando comentário...
             </div>
-          ) : comments.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-2">Seja o primeiro a comentar.</p>
-          ) : (
-            <ul className="space-y-3 pt-2">
-              {comments.map((c) => (
-                <li key={c.id} className="flex gap-2.5">
-                  <Avatar className="h-7 w-7 flex-shrink-0">
-                    <AvatarImage src={c.profile?.avatar_url || undefined} alt={c.profile?.name || "Autor"} />
-                    <AvatarFallback className="text-[10px] bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
-                      {initials(c.profile?.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="rounded-2xl bg-background border border-border/50 px-3 py-2">
-                      <p className="text-xs font-semibold text-foreground">
-                        {toTitleCase(c.profile?.name) || "Membro"}
-                      </p>
-                      <LinkifiedText
-                        text={c.content}
-                        className="text-sm text-foreground whitespace-pre-wrap break-words mt-0.5"
-                      />
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 px-2">
-                      <span className="text-[11px] text-muted-foreground">{timeAgo(c.created_at)}</span>
-                      {(currentUserId === c.user_id || isAdmin) && (
-                        <button
-                          onClick={() => {
-                            if (confirm("Excluir comentário?")) deleteComment(c.id);
-                          }}
-                          className="text-[11px] text-muted-foreground hover:text-destructive"
-                        >
-                          Excluir
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          ) : latestComment ? (
+            <div className="flex gap-2.5 pt-1">
+              <Avatar className="h-7 w-7 flex-shrink-0">
+                <AvatarImage
+                  src={latestComment.profile?.avatar_url || undefined}
+                  alt={latestComment.profile?.name || "Autor"}
+                />
+                <AvatarFallback className="text-[10px] bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
+                  {initials(latestComment.profile?.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="rounded-2xl bg-background border border-border/50 px-3 py-2">
+                  <p className="text-xs font-semibold text-foreground">
+                    {toTitleCase(latestComment.profile?.name) || "Membro"}
+                  </p>
+                  <LinkifiedText
+                    text={latestComment.content}
+                    className="text-sm text-foreground whitespace-pre-wrap break-words mt-0.5 line-clamp-3"
+                  />
+                </div>
+                <span className="text-[11px] text-muted-foreground mt-1 px-2 block">
+                  {timeAgo(latestComment.created_at)}
+                </span>
+              </div>
+            </div>
+          ) : null}
 
-          <div className="flex gap-2 pt-1">
-            <Textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Escreva um comentário..."
-              className="resize-none min-h-[40px] max-h-32 text-sm bg-background"
-              maxLength={2000}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleAddComment();
-                }
-              }}
-            />
-            <Button
-              size="icon"
-              onClick={handleAddComment}
-              disabled={!commentText.trim() || isAddingComment}
-              className="bg-[hsl(var(--section-community))] hover:bg-[hsl(var(--section-community))]/90 text-white flex-shrink-0"
-            >
-              {isAddingComment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            </Button>
-          </div>
+          {newCount > 1 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link
+                to="/comunidade"
+                className="text-xs font-medium text-[hsl(var(--section-community))] hover:underline"
+              >
+                Ver mais
+              </Link>
+              <Link
+                to="/comunidade"
+                className="inline-flex items-center rounded-full bg-[hsl(var(--section-community))]/12 px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--section-community))] ring-1 ring-[hsl(var(--section-community))]/25"
+              >
+                {unreadLabel(newCount)}
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </article>

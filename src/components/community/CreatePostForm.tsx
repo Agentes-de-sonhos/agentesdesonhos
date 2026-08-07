@@ -39,6 +39,8 @@ interface CreatePostPayload {
 interface CreatePostFormProps {
   onSubmit: (data: CreatePostPayload) => void;
   isCreating: boolean;
+  /** Starts as a single-line box and expands on focus (used in the dashboard). */
+  collapsible?: boolean;
 }
 
 type PickedImage = { file: File; previewUrl: string };
@@ -64,9 +66,10 @@ function extOf(name: string) {
   return name.split(".").pop()?.toLowerCase() || "";
 }
 
-export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
+export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: CreatePostFormProps) {
   const { user } = useAuth();
   const [content, setContent] = useState("");
+  const [expanded, setExpanded] = useState(!collapsible);
   const [images, setImages] = useState<PickedImage[]>([]);
   const [video, setVideo] = useState<PickedVideo | null>(null);
   const [docs, setDocs] = useState<PickedDoc[]>([]);
@@ -302,6 +305,7 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
     setPollOpen(false);
     setPollQuestion("");
     setPollOptions([]);
+    if (collapsible) setExpanded(false);
   };
 
   const cleanupOrphans = async (urls: string[]) => {
@@ -363,15 +367,17 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
 
   return (
     <Card className="border-primary/30 shadow-sm ring-1 ring-primary/10">
-      <CardContent className="pt-4 pb-3 space-y-3">
+      <CardContent className={expanded ? "pt-4 pb-3 space-y-3" : "py-2.5 space-y-0"}>
+        {expanded && (
         <div>
           <p className="text-sm font-semibold text-foreground">Compartilhe com a comunidade</p>
           <p className="text-xs text-muted-foreground">
             Uma dúvida, experiência, dica, oportunidade ou conteúdo — todo mundo aprende junto.
           </p>
         </div>
+        )}
         <div
-          className={`flex gap-3 rounded-lg transition ${dragOver ? "ring-2 ring-primary/40 bg-primary/[0.03]" : ""}`}
+          className={`flex items-center gap-3 rounded-lg transition-all duration-200 ${dragOver ? "ring-2 ring-primary/40 bg-primary/[0.03]" : ""}`}
           onDragOver={(e) => {
             e.preventDefault();
             if (!dragOver) setDragOver(true);
@@ -379,21 +385,31 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
         >
-          <Avatar className="h-10 w-10 shrink-0">
+          <Avatar className={`shrink-0 transition-all ${expanded ? "h-10 w-10" : "h-8 w-8"}`}>
             <AvatarImage src={profile?.avatar_url || ""} />
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
           <Textarea
-            placeholder="O que você quer compartilhar hoje? Dúvida, experiência, dica, oportunidade..."
+            placeholder={
+              expanded
+                ? "O que você quer compartilhar hoje? Dúvida, experiência, dica, oportunidade..."
+                : "O que você quer compartilhar hoje?"
+            }
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onPaste={handlePaste}
-            rows={3}
-            className="resize-none text-sm"
+            rows={expanded ? 3 : 1}
+            onFocus={() => setExpanded(true)}
+            onBlur={() => {
+              if (collapsible && !content.trim() && !hasMedia && !pollOpen) setExpanded(false);
+            }}
+            className={`resize-none text-sm transition-all duration-200 ${expanded ? "min-h-[76px]" : "min-h-[38px] h-[38px] py-2 overflow-hidden"}`}
           />
         </div>
+        {expanded && (
+        <>
 
         {images.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -619,6 +635,8 @@ export function CreatePostForm({ onSubmit, isCreating }: CreatePostFormProps) {
           className="hidden"
           onChange={handleDocInput}
         />
+        </>
+        )}
       </CardContent>
     </Card>
   );
