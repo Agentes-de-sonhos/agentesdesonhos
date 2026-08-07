@@ -186,15 +186,11 @@ interface PostCardProps {
   onLike: () => void;
   onDelete: () => void;
   onEdit: () => void;
-  commentsOpen: boolean;
-  onToggleComments: () => void;
   fetchComments: (postId: string) => Promise<PostComment[]>;
-  addComment: (vars: { postId: string; content: string }) => void;
-  deleteComment: (commentId: string) => void;
-  isAddingComment: boolean;
   onOpenImage: (url: string) => void;
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
   isVoting?: boolean;
+  newCount?: number;
 }
 
 function PostCard({
@@ -204,15 +200,11 @@ function PostCard({
   onLike,
   onDelete,
   onEdit,
-  commentsOpen,
-  onToggleComments,
   fetchComments,
-  addComment,
-  deleteComment,
-  isAddingComment,
   onOpenImage,
   onVotePoll,
   isVoting,
+  newCount = 0,
 }: PostCardProps) {
   const isAuthor = currentUserId === post.user_id;
   const canDelete = isAuthor || isAdmin;
@@ -223,18 +215,11 @@ function PostCard({
   const { data: comments = [], isLoading: loadingComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
     queryFn: () => fetchComments(post.id),
-    enabled: commentsOpen,
+    enabled: post.comments_count > 0,
     staleTime: 30 * 1000,
   });
 
-  const [commentText, setCommentText] = useState("");
-
-  const handleAddComment = () => {
-    const trimmed = commentText.trim();
-    if (!trimmed) return;
-    addComment({ postId: post.id, content: trimmed });
-    setCommentText("");
-  };
+  const latestComment = comments.length > 0 ? comments[comments.length - 1] : null;
 
   return (
     <article className="rounded-2xl bg-card border border-border/60 overflow-hidden">
