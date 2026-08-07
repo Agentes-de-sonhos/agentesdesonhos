@@ -58,6 +58,17 @@ export function countContentTabs(tabs: WorkspaceTab[]): number {
   return tabs.filter((t) => !t.pinned).length;
 }
 
+/**
+ * Janelas de criação podem ser abertas várias vezes; nesse caso numeramos o
+ * título ("Orçamento 2") para o usuário distinguir as instâncias.
+ */
+function uniqueTitle(tabs: WorkspaceTab[], path: string, title: string): string {
+  const base = toTabTitleCase(title);
+  if (!isMultiInstanceRoute(path)) return base;
+  const samePath = tabs.filter((t) => !t.pinned && t.path === path).length;
+  return samePath === 0 ? base : `${base} ${samePath + 1}`;
+}
+
 function reducer(state: WorkspaceState, action: Action): WorkspaceState {
   switch (action.type) {
     case "OPEN": {
