@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { useToast } from "@/hooks/use-toast";
 import { useTrips } from "@/hooks/useTrips";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,10 +35,20 @@ function fmtDate(s?: string | null) {
 const STATUS_LABEL: Record<string, string> = {
   draft: "Rascunho",
   sent: "Enviado",
+  published: "Publicado",
   approved: "Aprovado",
   rejected: "Rejeitado",
   expired: "Expirado",
 };
+
+function fmtMoney(v?: number | null, currency?: string | null) {
+  if (v == null) return null;
+  try {
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: currency || "BRL" }).format(v);
+  } catch {
+    return String(v);
+  }
+}
 
 export function ImportQuoteAsNewWalletDialog({
   open, onOpenChange,
@@ -46,6 +57,7 @@ export function ImportQuoteAsNewWalletDialog({
   onOpenChange: (v: boolean) => void;
 }) {
   const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { createTrip } = useTrips();
@@ -53,23 +65,27 @@ export function ImportQuoteAsNewWalletDialog({
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const { data: quotes = [], isLoading } = useQuery({
-    queryKey: ["quotes-for-new-wallet", user?.id],
+  const { data: quotes = [], isLoading, isError, error: queryError, refetch } = useQuery({
+    queryKey: ["quotes-for-new-wallet", agencyOwnerId],
     queryFn: async () => {
-      if (!user) return [] as any[];
+      if (!agencyOwnerId) return [] as any[];
       const { data, error } = await supabase
         .from("quotes")
-        .select("id, client_id, client_name, destination, start_date, end_date, created_at, status, quote_number, quote_services(id)")
-        .eq("user_id", user.id)
+        .select("id, client_id, client_name, trip_title, destination, start_date, end_date, created_at, status, total_amount, currency, quote_services(id)")
+        .eq("user_id", agencyOwnerId)
         .order("created_at", { ascending: false })
         .limit(300);
-      if (error) throw error;
+      if (error) {
+        console.error("[ImportQuoteAsNewWallet] falha ao carregar orçamentos:", error.message);
+        throw error;
+      }
       return (data || []).map((q: any) => ({
         ...q,
         services_count: q.quote_services?.length || 0,
       }));
     },
-    enabled: !!user && open,
+    enabled: !!user && !!agencyOwnerId && open,
+    refetchOnMount: "always",
   });
 
   const filtered = useMemo(() => {
@@ -78,12 +94,12 @@ export function ImportQuoteAsNewWalletDialog({
     return quotes.filter((q: any) =>
       q.client_name?.toLowerCase().includes(s) ||
       q.destination?.toLowerCase().includes(s) ||
-      String(q.quote_number || "").toLowerCase().includes(s)
+      String(q.trip_title || "").toLowerCase().includes(s)
     );
   }, [quotes, search]);
 
   async function handleImport() {
-    if (!selectedQuoteId) return;
+    if (!selectedQuoteId || busy) return;
     const quote = quotes.find((q: any) => q.id === selectedQuoteId);
     if (!quote) return;
     setBusy(true);
@@ -151,9 +167,21 @@ export function ImportQuoteAsNewWalletDialog({
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
+            ) : isError ? (
+              <div className="flex flex-col items-center gap-3 py-12 text-center">
+                <p className="text-sm text-destructive">
+                  Não foi possível carregar seus orçamentos.
+                </p>
+                <p className="text-xs text-muted-foreground max-w-xs">
+                  {(queryError as any)?.message || "Tente novamente em instantes."}
+                </p>
+                <Button type="button" variant="outline" size="sm" onClick={() => refetch()}>
+                  Tentar novamente
+                </Button>
+              </div>
             ) : filtered.length === 0 ? (
               <p className="text-center text-sm text-muted-foreground py-12">
-                {search ? "Nenhum orçamento encontrado." : "Você ainda não tem orçamentos."}
+                {search ? "Nenhum orçamento encontrado." : "Nenhum orçamento disponível para importar"}
               </p>
             ) : filtered.map((q: any) => (
               <button
@@ -170,12 +198,12 @@ export function ImportQuoteAsNewWalletDialog({
                     <User className="h-4 w-4 text-muted-foreground shrink-0" />
                     <p className="font-medium truncate">{q.client_name || "Sem cliente"}</p>
                   </div>
-                  {q.quote_number && (
-                    <Badge variant="outline" className="shrink-0 text-xs">#{q.quote_number}</Badge>
+                  {fmtMoney(q.total_amount, q.currency) && (
+                    <Badge variant="outline" className="shrink-0 text-xs">{fmtMoney(q.total_amount, q.currency)}</Badge>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{q.destination || "—"}</span>
+                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{q.trip_title || q.destination || "—"}</span>
                   <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{fmtDate(q.start_date)} – {fmtDate(q.end_date)}</span>
                   <span>{q.services_count} serviço{q.services_count !== 1 ? "s" : ""}</span>
                   {q.status && (
