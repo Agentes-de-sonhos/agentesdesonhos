@@ -19,6 +19,7 @@ import {
   Plus, Trash2, Upload, FileText, Clock, ListChecks, Paperclip,
   Info, Copy, ExternalLink, MessageCircle, ArrowRight, MoreVertical, Save, RotateCcw,
 } from "lucide-react";
+import { Luggage } from "lucide-react";
 import { toast } from "sonner";
 import {
   useOperationTasks,
@@ -36,6 +37,7 @@ import {
 import { STAGE_CHECKLISTS } from "@/types/operations";
 import type { Operation, OperationStage } from "@/types/operations";
 import { OPERATION_STAGES, getStageMeta } from "@/types/operations";
+import { OperationServicesTab } from "./OperationServicesTab";
 
 function StageChip({ stage }: { stage: OperationStage }) {
   const meta = getStageMeta(stage);
@@ -52,7 +54,7 @@ interface Props {
   operation: Operation | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultTab?: "overview" | "checklist" | "timeline" | "attachments";
+  defaultTab?: "overview" | "services" | "checklist" | "timeline" | "attachments";
 }
 
 export function OperationDetailDialog({ operation, open, onOpenChange, defaultTab = "overview" }: Props) {
@@ -84,7 +86,22 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   const currentStageTasks = tasks.filter((t) => t.stage === operation.stage);
 
   const handleSave = async () => {
-    await updateOperation({ id: operation.id, ...form });
+    const editable = [
+      "title", "destination", "travel_start_date", "travel_end_date",
+      "passengers_count", "sale_amount", "priority", "payment_status",
+      "stage", "notes", "assigned_user_id",
+    ] as const;
+    const patch: Record<string, any> = {};
+    editable.forEach((k) => {
+      if (k in form) {
+        const v = (form as any)[k];
+        patch[k] = v === "" ? null : v;
+      }
+    });
+    if (patch.passengers_count != null) patch.passengers_count = Number(patch.passengers_count) || 1;
+    if (patch.sale_amount != null) patch.sale_amount = Number(patch.sale_amount) || 0;
+    if (patch.title != null && !String(patch.title).trim()) delete patch.title;
+    await updateOperation({ id: operation.id, ...patch } as any);
     toast.success("Operação atualizada");
   };
 
@@ -114,8 +131,9 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
 
         <Tabs key={`${operation.id}-${defaultTab}`} defaultValue={defaultTab} className="mt-2">
           <div className="-mx-1 overflow-x-auto sm:mx-0 sm:overflow-visible">
-            <TabsList className="inline-flex w-max gap-1 sm:grid sm:w-full sm:grid-cols-4">
+            <TabsList className="inline-flex w-max gap-1 sm:grid sm:w-full sm:grid-cols-5">
               <TabsTrigger value="overview" className="gap-1 whitespace-nowrap px-3"><Info className="h-3.5 w-3.5 shrink-0" />Visão geral</TabsTrigger>
+              <TabsTrigger value="services" className="gap-1 whitespace-nowrap px-3"><Luggage className="h-3.5 w-3.5 shrink-0" />Serviços</TabsTrigger>
               <TabsTrigger value="checklist" className="gap-1 whitespace-nowrap px-3"><ListChecks className="h-3.5 w-3.5 shrink-0" />Checklist</TabsTrigger>
               <TabsTrigger value="timeline" className="gap-1 whitespace-nowrap px-3"><Clock className="h-3.5 w-3.5 shrink-0" />Anotações</TabsTrigger>
               <TabsTrigger value="attachments" className="gap-1 whitespace-nowrap px-3"><Paperclip className="h-3.5 w-3.5 shrink-0" />Anexos</TabsTrigger>
