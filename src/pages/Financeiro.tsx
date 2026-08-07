@@ -91,8 +91,6 @@ export default function Financeiro() {
   const isTeam = useIsTeamMember();
   const { can } = usePermissions();
   const navigate = useNavigate();
-  const canShowTeamMembers = !!user && !isTeam;
-  const [teamDialogOpen, setTeamDialogOpen] = useState(false);
 
   // Bloqueio total para team member sem financial.access
   const hasFinancialAccess = can('financial.access');
