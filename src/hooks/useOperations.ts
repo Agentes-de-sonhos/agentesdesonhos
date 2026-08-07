@@ -13,6 +13,22 @@ import type {
 } from "@/types/operations";
 import { STAGE_CHECKLISTS } from "@/types/operations";
 
+const OPERATION_UPDATABLE_COLUMNS = [
+  "client_id", "opportunity_id", "quote_id", "itinerary_id", "trip_id", "title",
+  "destination", "travel_start_date", "travel_end_date", "passengers_count",
+  "sale_amount", "stage", "priority", "payment_status", "assigned_user_id",
+  "notes", "position", "notification_preferences", "assigned_team_member_id",
+] as const;
+
+/** Strips nested relations (e.g. `client`) and unknown keys from an update payload. */
+function sanitizeOperationPatch(patch: Record<string, any>) {
+  const out: Record<string, any> = {};
+  OPERATION_UPDATABLE_COLUMNS.forEach((k) => {
+    if (k in patch && patch[k] !== undefined) out[k] = patch[k];
+  });
+  return out;
+}
+
 export function useOperations() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -78,7 +94,7 @@ export function useOperations() {
       if (!ensurePermission('operations.edit')) denyAction();
       const { error } = await supabase
         .from("operations" as any)
-        .update(patch as any)
+        .update(sanitizeOperationPatch(patch as any) as any)
         .eq("id", id);
       if (error) throw error;
       return id;
