@@ -63,7 +63,7 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
     case "OPEN": {
       if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
-      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title), state: action.state };
+      const tab: WorkspaceTab = { id: newId(), path: action.path, title: uniqueTitle(state.tabs, action.path, action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "OPEN_OR_ACTIVATE": {
@@ -76,7 +76,7 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
         return { ...state, activeId: existing.id };
       }
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
-      const tab: WorkspaceTab = { id: newId(), path: action.path, title: toTabTitleCase(action.title), state: action.state };
+      const tab: WorkspaceTab = { id: newId(), path: action.path, title: uniqueTitle(state.tabs, action.path, action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "CLOSE": {
