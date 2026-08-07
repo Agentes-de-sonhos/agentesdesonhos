@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, ReactNode } from "react";
 import { toTabTitleCase } from "@/lib/tabTitle";
+import { isMultiInstanceRoute } from "./multiInstanceRoutes";
 
 /** Maximum number of *content* windows (the pinned home tab does not count). */
 export const MAX_TABS = 10;
@@ -67,7 +68,9 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
     }
     case "OPEN_OR_ACTIVATE": {
       if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
-      const existing = state.tabs.find((t) => t.path === action.path);
+      const existing = isMultiInstanceRoute(action.path)
+        ? undefined
+        : state.tabs.find((t) => t.path === action.path);
       if (existing) {
         if (state.activeId === existing.id) return state;
         return { ...state, activeId: existing.id };
