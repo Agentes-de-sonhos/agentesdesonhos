@@ -77,10 +77,7 @@ export function OperationServicesTab({ operation }: Props) {
 
   return (
     <div className="space-y-3 mt-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button size="sm" onClick={() => setDraft({ service_type: "other", amount: 0 })}>
-          <Plus className="h-4 w-4 mr-1.5" /> Adicionar serviço
-        </Button>
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <button
           type="button"
           onClick={() => setAiOpen(true)}
@@ -117,15 +114,15 @@ export function OperationServicesTab({ operation }: Props) {
           <div className="hidden md:block rounded-xl border">
             <table className="w-full table-fixed text-sm">
               <colgroup>
-                <col className="w-[24%]" />
-                <col className="w-[13%]" />
-                <col className="w-[21%]" />
+                <col className="w-[20%]" />
+                <col className="w-[11%]" />
+                <col className="w-[16%]" />
+                <col className="w-[10%]" />
                 <col className="w-[11%]" />
                 <col className="w-[7%]" />
-                <col className="w-[5%]" />
-                <col className="w-[6%]" />
-                <col className="w-[7%]" />
-                <col className="w-[6%]" />
+                <col className="w-[8%]" />
+                <col className="w-[9%]" />
+                <col className="w-[8%]" />
               </colgroup>
               <thead className="bg-muted/50">
                 <tr className="text-left">
@@ -134,7 +131,7 @@ export function OperationServicesTab({ operation }: Props) {
                   <th className="px-2 py-2 font-semibold">Fornecedor / Destino</th>
                   <th className="px-2 py-2 font-semibold text-right">Valor</th>
                   {FLAGS.map((f) => (
-                    <th key={f.key} scope="col" className="px-1 py-2 text-center text-xs font-semibold leading-tight break-words">
+                    <th key={f.key} scope="col" className="px-1 py-2 text-center text-xs font-semibold leading-tight whitespace-nowrap">
                       {f.label}
                     </th>
                   ))}
@@ -214,6 +211,14 @@ export function OperationServicesTab({ operation }: Props) {
             </div>
           </div>
         </>
+      )}
+
+      {!isLoading && !isImporting && (
+        <div className="flex justify-start pt-1">
+          <Button size="sm" onClick={() => setDraft({ service_type: "other", amount: 0 })}>
+            <Plus className="h-4 w-4 mr-1.5" /> Adicionar serviço
+          </Button>
+        </div>
       )}
 
       {/* Add / edit dialog */}
