@@ -1,14 +1,12 @@
 import { useMemo, useState } from "react";
-import { Plus, Kanban as KanbanIcon, CalendarDays, Search } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useOperations } from "@/hooks/useOperations";
 import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useKanbanFullscreen } from "@/hooks/useKanbanFullscreen";
 import { toast } from "sonner";
 import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import { getStageTokens } from "@/types/crm";
@@ -21,10 +19,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { parseLocalDate } from "@/lib/dateParsing";
-import { format, isSameDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
 export function OperationsModule() {
   const { operations, isLoading, moveStage, reorderOperations } = useOperations();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
@@ -37,8 +31,8 @@ export function OperationsModule() {
   const [selectedTab, setSelectedTab] = useState<OperationCardTab>("overview");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageKey: string; targetId: string | null; before: boolean } | null>(null);
-  const [calDate, setCalDate] = useState<Date | undefined>(new Date());
   const [deleteStageTarget, setDeleteStageTarget] = useState<{ id: string; name: string } | null>(null);
+  const { isFullscreen, toggle: toggleFullscreen } = useKanbanFullscreen();
 
   const filtered = useMemo(
     () =>
@@ -63,28 +57,6 @@ export function OperationsModule() {
     });
     return m;
   }, [filtered, stages]);
-
-  // Calendar events: travel_start_date (embarque) + travel_end_date (retorno)
-  const eventsByDate = useMemo(() => {
-    const m = new Map<string, { op: Operation; type: "embarque" | "retorno" }[]>();
-    filtered.forEach((o) => {
-      if (o.travel_start_date) {
-        const k = o.travel_start_date;
-        m.set(k, [...(m.get(k) || []), { op: o, type: "embarque" }]);
-      }
-      if (o.travel_end_date) {
-        const k = o.travel_end_date;
-        m.set(k, [...(m.get(k) || []), { op: o, type: "retorno" }]);
-      }
-    });
-    return m;
-  }, [filtered]);
-
-  const eventsOnSelected = useMemo(() => {
-    if (!calDate) return [];
-    const key = format(calDate, "yyyy-MM-dd");
-    return eventsByDate.get(key) || [];
-  }, [calDate, eventsByDate]);
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     if (isTeamMember && !canEdit) {
