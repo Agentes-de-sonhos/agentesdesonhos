@@ -8075,6 +8075,86 @@ export type Database = {
         }
         Relationships: []
       }
+      operation_services: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by_team_member_id: string | null
+          destination: string | null
+          end_date: string | null
+          id: string
+          is_confirmed: boolean
+          is_delivered: boolean
+          is_issued: boolean
+          is_paid: boolean
+          name: string
+          notes: string | null
+          operation_id: string
+          position: number
+          service_data: Json
+          service_type: string
+          source_quote_service_id: string | null
+          start_date: string | null
+          supplier: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by_team_member_id?: string | null
+          destination?: string | null
+          end_date?: string | null
+          id?: string
+          is_confirmed?: boolean
+          is_delivered?: boolean
+          is_issued?: boolean
+          is_paid?: boolean
+          name?: string
+          notes?: string | null
+          operation_id: string
+          position?: number
+          service_data?: Json
+          service_type?: string
+          source_quote_service_id?: string | null
+          start_date?: string | null
+          supplier?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by_team_member_id?: string | null
+          destination?: string | null
+          end_date?: string | null
+          id?: string
+          is_confirmed?: boolean
+          is_delivered?: boolean
+          is_issued?: boolean
+          is_paid?: boolean
+          name?: string
+          notes?: string | null
+          operation_id?: string
+          position?: number
+          service_data?: Json
+          service_type?: string
+          source_quote_service_id?: string | null
+          start_date?: string | null
+          supplier?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operation_services_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operation_stage_checklist_templates: {
         Row: {
           created_at: string
