@@ -17,7 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal, Play,
+  Pencil, MoreHorizontal, Play, UserCircle2,
 } from "lucide-react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -44,7 +44,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
-import { QuoteSignatureCard } from "@/components/quote/QuoteSignatureCard";
+import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
+import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
+import { QuoteStepsGuide, type QuoteStepMeta } from "@/components/quote/QuoteStepsGuide";
+
+const QUOTE_STEPS: QuoteStepMeta[] = [
+  { step: 1, short: "Adicionar serviços", hint: "Inclua passagens, hospedagens e os demais itens da viagem.", accentClass: "bg-sky-500" },
+  { step: 2, short: "Organizar serviços", hint: "Revise, edite e agrupe os serviços por destino ou seção.", accentClass: "bg-emerald-500" },
+  { step: 3, short: "Configurar apresentação", hint: "Defina capa, detalhes, valores, condições e documentos.", accentClass: "bg-violet-500" },
+  { step: 4, short: "Revisar orçamento", hint: "Confira cliente, viagem, passageiros, destino, datas e total.", accentClass: "bg-amber-500" },
+  { step: 5, short: "Escolher assinatura", hint: "Selecione o responsável que aparecerá no orçamento.", accentClass: "bg-sky-600" },
+];
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
