@@ -18,7 +18,6 @@ import {
   MessageCircle,
   MoreHorizontal,
   Pencil,
-  Send,
   Trash2,
   Users,
 } from "lucide-react";
@@ -27,6 +26,7 @@ import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
+import { useCommunityUnread, unreadLabel } from "@/hooks/useCommunityUnread";
 import { useQuery } from "@tanstack/react-query";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 import { EditPostDialog } from "@/components/community/EditPostDialog";
@@ -34,7 +34,6 @@ import { PostImageGallery, postImages } from "@/components/community/PostImageGa
 import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
 function timeAgo(date: string) {
   try {
