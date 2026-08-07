@@ -28,8 +28,8 @@ describe("validateBookingRequestPayload", () => {
 
   it("exige aceite do disclaimer", () => {
     const r = validateBookingRequestPayload({ ...base, disclaimer_accepted: false });
-    expect(r).toMatchObject({ ok: false });
-    if (!r.ok) expect(r.error).toMatch(/não confirma a reserva/i);
+    expect(r.ok).toBe(false);
+    expect(r.ok === false && r.error).toMatch(/não confirma a reserva/i);
   });
 
   it("rejeita e-mail e whatsapp inválidos", () => {
