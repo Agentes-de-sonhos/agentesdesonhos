@@ -5,7 +5,7 @@ import { Newspaper, Loader2, ExternalLink, Eye, ThumbsUp, Crown, ShieldCheck, Al
 import { Card, CardContent } from "@/components/ui/card";
 import { DashboardSectionHeader } from "@/components/dashboard/DashboardSectionHeader";
 import { useNewsHighlights, type HighlightNews, type Top5Item } from "@/hooks/useNewsHighlights";
-import { highlightLabel } from "@/lib/newsRanking";
+import { highlightLabel, NEWS_FALLBACK_TITLE, NEWS_FALLBACK_NOTE } from "@/lib/newsRanking";
 import { cn } from "@/lib/utils";
 
 const CATEGORIA_COLORS: Record<string, string> = {
@@ -73,7 +73,8 @@ export function CuratedNewsFeed() {
 
   const featured = data?.featured ?? null;
   const top5 = data?.top5 ?? [];
-  const label = highlightLabel(data?.mode ?? "daily");
+  const isFallback = !!data?.featured_fallback;
+  const label = isFallback ? NEWS_FALLBACK_TITLE : highlightLabel(data?.mode ?? "daily");
 
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
@@ -99,6 +100,11 @@ export function CuratedNewsFeed() {
           <div className="grid gap-4 @[42rem]:gap-5 grid-cols-1 @[42rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-stretch min-w-0">
             {/* Destaque do período */}
             <div className="min-w-0">
+              {isFallback && featured && (
+                <p data-testid="news-dashboard-fallback-note" className="mb-2 text-[11px] text-muted-foreground">
+                  {NEWS_FALLBACK_NOTE}
+                </p>
+              )}
               {featured ? (
                 <button
                   type="button"

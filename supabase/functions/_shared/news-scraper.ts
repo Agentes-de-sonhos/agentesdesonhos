@@ -144,16 +144,67 @@ export function isProbablyArticleUrl(u: string): boolean {
 }
 
 // ── RSS fetch ───────────────────────────────────────────────
+// Cabeçalhos legítimos de navegador: alguns portais rejeitam User-Agents genéricos.
+// Não há qualquer tentativa de burlar CAPTCHA, login, paywall ou desafio anti-bot.
+const FEED_HEADERS: Record<string, string> = {
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+  "Accept":
+    "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8, text/html;q=0.7, */*;q=0.5",
+  "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+  "Cache-Control": "no-cache",
+  "Pragma": "no-cache",
+};
+
+const FEED_TIMEOUT_MS = 20_000;
+const FEED_MAX_ATTEMPTS = 3;
+
+function isAntiBotChallenge(body: string): boolean {
+  return /just a moment|cf-browser-verification|challenge-platform|attention required/i.test(
+    body.slice(0, 2000),
+  );
+}
+
+/** Busca o XML do feed com cabeçalhos de navegador, timeout e retry moderado. */
+export async function fetchFeedXml(portal: PortalConfig): Promise<string> {
+  let lastError = "";
+  for (let attempt = 1; attempt <= FEED_MAX_ATTEMPTS; attempt++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), FEED_TIMEOUT_MS);
+    try {
+      const origin = new URL(portal.feedUrl).origin;
+      const res = await fetch(portal.feedUrl, {
+        headers: { ...FEED_HEADERS, Referer: `${origin}/` },
+        redirect: "follow",
+        signal: ctrl.signal,
+      });
+      const body = await res.text();
+      if (!res.ok) {
+        lastError = isAntiBotChallenge(body)
+          ? `HTTP ${res.status} from ${portal.feedUrl} — bloqueio anti-bot do portal (desafio de navegador); não contornado por decisão de conformidade`
+          : `HTTP ${res.status} from ${portal.feedUrl}`;
+        // 403/503 de desafio anti-bot não melhora com retry
+        if (isAntiBotChallenge(body)) break;
+      } else if (!body || body.length < 100) {
+        lastError = `Empty feed body (${body?.length ?? 0} bytes) from ${portal.feedUrl}`;
+      } else if (isAntiBotChallenge(body)) {
+        lastError = `Resposta de desafio anti-bot em ${portal.feedUrl}; não contornado por decisão de conformidade`;
+        break;
+      } else {
+        return body;
+      }
+    } catch (e) {
+      lastError = `${(e as Error).name === "AbortError" ? "Timeout" : "Falha de rede"} em ${portal.feedUrl}: ${(e as Error).message}`;
+    } finally {
+      clearTimeout(timer);
+    }
+    if (attempt < FEED_MAX_ATTEMPTS) await new Promise((r) => setTimeout(r, attempt * 1500));
+  }
+  throw new Error(lastError || `Falha ao buscar ${portal.feedUrl}`);
+}
+
 export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
-  const res = await fetch(portal.feedUrl, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; AgentesdeSonhosBot/1.0; +https://agentesdesonhos.com.br)",
-      "Accept": "application/rss+xml, application/xml, text/xml, */*",
-    },
-    redirect: "follow",
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} from ${portal.feedUrl}`);
-  const xml = await res.text();
+  const xml = await fetchFeedXml(portal);
   if (!xml || xml.length < 100) throw new Error(`Empty feed body (${xml.length} bytes)`);
 
   const items = extractItems(xml).slice(0, portal.maxItems);
@@ -378,7 +429,7 @@ export async function finishRun(
 // ── Main collect flow (per portal) ──────────────────────────
 export interface CollectResult {
   portal: PortalKey;
-  status: "success" | "partial" | "error";
+  status: "success" | "partial" | "error" | "skipped";
   counters: RunCounters;
   run_id: string | null;
   message?: string;
@@ -392,6 +443,26 @@ export async function runCollectPortal(portalKey: PortalKey, trigger: "cron" | "
   const sb = createClient(url, sr);
 
   const counters = newCounters();
+
+  // Guarda de concorrência: evita execuções simultâneas do mesmo portal
+  // (cron sobreposto ou disparo manual durante uma coleta em andamento).
+  const { data: running } = await sb
+    .from("news_collector_runs")
+    .select("id, started_at")
+    .eq("portal", portalKey)
+    .eq("status", "running")
+    .gte("started_at", new Date(Date.now() - 10 * 60_000).toISOString())
+    .limit(1);
+  if (running && running.length > 0) {
+    return {
+      portal: portalKey,
+      status: "skipped",
+      counters,
+      run_id: running[0].id as string,
+      message: "Coleta já em andamento para este portal — execução ignorada.",
+    };
+  }
+
   const runId = await startRun(sb, portalKey, trigger);
 
   let items: RawItem[] = [];

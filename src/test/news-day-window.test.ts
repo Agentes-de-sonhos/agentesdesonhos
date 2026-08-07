@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { isWithinNewsDayWindow, NEWS_DAY_START_HOUR } from "@/lib/newsRanking";
+import { isWithinNewsDayWindow, NEWS_DAY_START_HOUR, selectDayNewsWithFallback } from "@/lib/newsRanking";
 
 const ref = new Date("2026-08-03T18:00:00Z"); // 15:00 em SP
 
@@ -38,8 +38,13 @@ describe("seletor visual do dia", () => {
     expect(src).not.toContain("overflow-x-auto");
   });
   it("listagem usa a janela diária", () => {
-    expect(src).toContain("isWithinNewsDayWindow");
+    expect(src).toContain("selectDayNewsWithFallback");
     expect(src).toContain("dayNews.filter");
+  });
+  it("faz fallback para as notícias mais recentes com aviso discreto", () => {
+    expect(src).toContain("NEWS_FALLBACK_TITLE");
+    expect(src).toContain("NEWS_FALLBACK_NOTE");
+    expect(src).toContain('data-testid="news-fallback-note"');
   });
 });
 
@@ -57,5 +62,28 @@ describe("sem listagem duplicada nem dropdown de categoria", () => {
     expect(src).toContain('placeholder="Buscar notícias"');
     expect(src).toContain("Todos os portais");
     expect(src).toContain("Mais recentes");
+  });
+});
+
+describe("fallback 24h → 48h da listagem", () => {
+  const ref = new Date("2026-08-07T12:00:00Z"); // 09:00 SP
+  const mk = (iso: string) => ({ id: iso, data_publicacao: iso });
+  it("usa o dia quando há publicações do dia", () => {
+    const r = selectDayNewsWithFallback([mk("2026-08-07T11:00:00Z"), mk("2026-08-06T20:00:00Z")], ref);
+    expect(r.windowMode).toBe("day");
+    expect(r.items).toHaveLength(1);
+  });
+  it("cai para 24h quando não há publicações do dia", () => {
+    const r = selectDayNewsWithFallback([mk("2026-08-06T21:53:00Z"), mk("2026-08-05T21:00:00Z")], ref);
+    expect(r.windowMode).toBe("24h");
+    expect(r.items.map((i) => i.id)).toEqual(["2026-08-06T21:53:00Z"]);
+  });
+  it("cai para 48h quando nada nas últimas 24h", () => {
+    const r = selectDayNewsWithFallback([mk("2026-08-06T02:00:00Z")], ref);
+    expect(r.windowMode).toBe("48h");
+    expect(r.items).toHaveLength(1);
+  });
+  it("sem notícias recentes retorna vazio", () => {
+    expect(selectDayNewsWithFallback([mk("2026-07-01T12:00:00Z")], ref).items).toHaveLength(0);
   });
 });

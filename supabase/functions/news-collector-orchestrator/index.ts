@@ -56,9 +56,10 @@ serve(async (req) => {
       acc.invalid += r.counters.invalid;
       acc.others += r.counters.others;
       if (r.status === "error") acc.portals_failed++;
+      if (r.status === "skipped") acc.portals_skipped++;
       return acc;
     },
-    { found: 0, inserted: 0, skipped_duplicates: 0, invalid: 0, others: 0, portals_failed: 0 },
+    { found: 0, inserted: 0, skipped_duplicates: 0, invalid: 0, others: 0, portals_failed: 0, portals_skipped: 0 },
   );
 
   return new Response(JSON.stringify({
