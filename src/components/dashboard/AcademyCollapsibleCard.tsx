@@ -1,5 +1,6 @@
 import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import {
   Award,
   Play,
   ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { useAcademy } from "@/hooks/useAcademy";
 import type { TrailWithProgress } from "@/types/academy";
