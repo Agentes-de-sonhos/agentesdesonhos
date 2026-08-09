@@ -179,10 +179,6 @@ export const DEFAULT_FAQ = [
     a: "Não. A solicitação é gratuita e sem compromisso: você conta o que imagina e recebe uma proposta personalizada para avaliar.",
   },
   {
-    q: "Solicitar um orçamento tem algum custo?",
-    a: "Não. A solicitação é gratuita e sem compromisso: você conta o que imagina e recebe uma proposta personalizada para avaliar.",
-  },
-  {
     q: "Em quanto tempo recebo a resposta?",
     a: "O retorno acontece dentro do horário de atendimento, pelo canal que você escolher no formulário. Pedidos mais complexos podem levar um pouco mais para serem montados com calma.",
   },
