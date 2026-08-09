@@ -108,7 +108,9 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
 
   const publicUrl = (inv: Invoice) =>
     inv.public_access_code && inv.agency_slug
-      ? `${window.location.origin}/fatura/${inv.agency_slug}/${inv.public_access_code}`
+      ? (customDomain
+          ? `https://${customDomain}/fatura/${inv.public_access_code}`
+          : `${window.location.origin}/fatura/${inv.agency_slug}/${inv.public_access_code}`)
       : null;
 
   const handleDownloadPdf = async (inv: Invoice) => {
