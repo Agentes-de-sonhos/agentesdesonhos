@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildCarteiraLink } from "@/lib/carteira-domain";
+import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { useNavigate } from "react-router-dom";
@@ -230,6 +231,7 @@ function TripRow({
 
 export function TripWalletList({ agencyName }: { agencyName?: string }) {
   const navigate = useNavigate();
+  const { customDomain } = useAgencyCustomDomain();
   const { toast } = useToast();
   const { trips, isLoading, deleteTrip } = useTrips();
   const [filter, setFilter] = useState<FilterType>("all");
@@ -246,7 +248,7 @@ export function TripWalletList({ agencyName }: { agencyName?: string }) {
 
   const handleCopyLink = (trip: Trip & { public_access_code?: string | null }) => {
     if (trip.public_access_code && agencyName) {
-      const url = buildCarteiraLink(agencyName, trip.public_access_code);
+      const url = buildCarteiraLink(agencyName, trip.public_access_code, customDomain);
       copyTextToClipboard(url).then((ok) => {
         if (ok) toast({ title: "Link copiado!", description: "Link da carteira copiado para a área de transferência." });
         else toast({ title: "Não foi possível copiar automaticamente. Tente novamente.", variant: "destructive" });

@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
+import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
 import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -430,6 +431,7 @@ export default function GerarOrcamento() {
     persisted?.editingService || null
   );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const { customDomain } = useAgencyCustomDomain();
   const [showAIImport, setShowAIImport] = useState(false);
   const [showFullPackage, setShowFullPackage] = useState(false);
   const [showExportWallet, setShowExportWallet] = useState(false);
@@ -781,7 +783,7 @@ export default function GerarOrcamento() {
     const accessCode = (quote as any).public_access_code;
     const agencyName = agentProfile?.agency_name;
     const publicUrl = accessCode && agencyName
-      ? buildOrcamentoLink(agencyName, accessCode)
+      ? buildOrcamentoLink(agencyName, accessCode, customDomain)
       : `${ORCAMENTO_DOMAIN}/orcamento/${token}`;
 
     clearLocalDraft();
@@ -1135,7 +1137,7 @@ export default function GerarOrcamento() {
               const accessCode = (quote as any).public_access_code;
               const agencyName = agentProfile?.agency_name;
               const publicUrl = accessCode && agencyName
-                ? buildOrcamentoLink(agencyName, accessCode)
+                ? buildOrcamentoLink(agencyName, accessCode, customDomain)
                 : `${ORCAMENTO_DOMAIN}/orcamento/${quote.share_token}`;
               const serviceTypes = (quote.services || []).map((s: any) => s.service_type).filter(Boolean);
               return (

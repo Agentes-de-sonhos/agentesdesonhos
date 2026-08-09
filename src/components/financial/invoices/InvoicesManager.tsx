@@ -23,6 +23,7 @@ import {
   type Invoice, type InvoiceStatus, type InvoicePayment,
 } from "@/types/invoice";
 import { useToast } from "@/hooks/use-toast";
+import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
 import { isInMonth } from "@/utils/monthFilter";
 
 const fmt = (v: number) =>
@@ -40,6 +41,7 @@ const STATUS_COLOR: Record<InvoiceStatus, string> = {
 export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { customDomain } = useAgencyCustomDomain();
   const { invoices: allInvoices, isLoading, getInvoiceDetail, deleteInvoice, updateInvoiceStatus } = useInvoices();
   const invoices = useMemo(() => {
     if (!viewMonth || !viewYear) return allInvoices;
@@ -108,7 +110,9 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
 
   const publicUrl = (inv: Invoice) =>
     inv.public_access_code && inv.agency_slug
-      ? `${window.location.origin}/fatura/${inv.agency_slug}/${inv.public_access_code}`
+      ? (customDomain
+          ? `https://${customDomain}/fatura/${inv.public_access_code}`
+          : `${window.location.origin}/fatura/${inv.agency_slug}/${inv.public_access_code}`)
       : null;
 
   const handleDownloadPdf = async (inv: Invoice) => {

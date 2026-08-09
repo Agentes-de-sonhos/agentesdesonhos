@@ -24,9 +24,14 @@ const fmtDate = (d?: string | null) => {
   return new Date(y, m - 1, day).toLocaleDateString("pt-BR");
 };
 
-export default function FaturaPublica() {
+export default function FaturaPublica({
+  agencySlugOverride,
+  codeOverride,
+}: { agencySlugOverride?: string; codeOverride?: string } = {}) {
   useNoindex();
-  const { agencySlug, code } = useParams();
+  const params = useParams();
+  const agencySlug = agencySlugOverride ?? params.agencySlug;
+  const code = codeOverride ?? params.code;
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

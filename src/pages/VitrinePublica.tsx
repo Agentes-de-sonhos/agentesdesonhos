@@ -14,8 +14,9 @@ import { ShowcaseHeader } from "@/components/showcase/ShowcaseHeader";
 import { ShowcaseFloatingCTA } from "@/components/showcase/ShowcaseFloatingCTA";
 
 /* ─── Main Component ─── */
-export default function VitrinePublica() {
-  const { slug } = useParams<{ slug: string }>();
+export default function VitrinePublica({ slugOverride }: { slugOverride?: string } = {}) {
+  const params = useParams<{ slug: string }>();
+  const slug = slugOverride ?? params.slug;
   const { showcase, profile, items, loadingShowcase, trackEvent } = usePublicShowcase(slug);
   const [selectedCategory, setSelectedCategory] = useState("todas");
   const [lightboxItem, setLightboxItem] = useState<ShowcaseItem | null>(null);

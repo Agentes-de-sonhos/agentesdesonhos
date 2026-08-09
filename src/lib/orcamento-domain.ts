@@ -7,7 +7,12 @@ export const ORCAMENTO_DOMAIN = "https://seuorcamento.tur.br";
 /**
  * Builds the new-format quote link.
  */
-export function buildOrcamentoLink(agencyName: string, publicAccessCode: string): string {
+export function buildOrcamentoLink(
+  agencyName: string,
+  publicAccessCode: string,
+  customDomain?: string | null,
+): string {
+  if (customDomain) return `https://${customDomain}/orcamento/${publicAccessCode}`;
   const slug = agencyNameToSlug(agencyName);
   return `${ORCAMENTO_DOMAIN}/${slug}/${publicAccessCode}`;
 }

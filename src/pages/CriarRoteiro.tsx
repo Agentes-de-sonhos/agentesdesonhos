@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildRoteiroLink } from "@/lib/roteiro-domain";
+import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
 import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
 import { copyTextToClipboard } from "@/lib/public-share-message";
 import { useAuth } from "@/hooks/useAuth";
@@ -97,6 +98,7 @@ export default function CriarRoteiro() {
   const [editIntroText, setEditIntroText] = useState("");
   const [savingIntro, setSavingIntro] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const { customDomain } = useAgencyCustomDomain();
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
   const [approvalPromptOpen, setApprovalPromptOpen] = useState(false);
@@ -375,7 +377,7 @@ export default function CriarRoteiro() {
     const code = itinerary.publicAccessCode;
     const agencyName = agentProfile?.agency_name;
     if (code && agencyName) {
-      return buildRoteiroLink(agencyName, code);
+      return buildRoteiroLink(agencyName, code, customDomain);
     }
     return `${PUBLIC_DOMAIN}/roteiro/${itinerary.shareToken}`;
   };
@@ -412,7 +414,7 @@ export default function CriarRoteiro() {
     const code = (refreshed as any)?.public_access_code;
     const agencyName = agentProfile?.agency_name;
     const url = code && agencyName
-      ? buildRoteiroLink(agencyName, code)
+      ? buildRoteiroLink(agencyName, code, customDomain)
       : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
 
     await navigator.clipboard.writeText(url);

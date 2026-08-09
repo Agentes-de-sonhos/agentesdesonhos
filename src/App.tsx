@@ -23,6 +23,7 @@ import { NewLeadAlertProvider } from "./components/leads/NewLeadAlertProvider";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { WorkspaceGate } from "@/workspace/WorkspaceGate";
 import { AppUpdateModal } from "./components/common/AppUpdateModal";
+import { AgencyDomainGate } from "@/components/routing/AgencyDomainGate";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -173,6 +174,7 @@ const App = () => (
       <Sonner />
       <AppUpdateModal />
         <ErrorBoundary>
+        <AgencyDomainGate>
         <AuthProvider>
           <TeamSessionProvider>
           <SubscriptionProvider>
@@ -356,6 +358,7 @@ const App = () => (
           </SubscriptionProvider>
           </TeamSessionProvider>
         </AuthProvider>
+        </AgencyDomainGate>
         </ErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>

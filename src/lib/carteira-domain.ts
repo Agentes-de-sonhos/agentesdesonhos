@@ -28,7 +28,12 @@ export function agencyNameToSlug(agencyName: string): string {
 /**
  * Builds the new-format carteira link for a trip.
  */
-export function buildCarteiraLink(agencyName: string, publicAccessCode: string): string {
+export function buildCarteiraLink(
+  agencyName: string,
+  publicAccessCode: string,
+  customDomain?: string | null,
+): string {
+  if (customDomain) return `https://${customDomain}/carteira/${publicAccessCode}`;
   const slug = agencyNameToSlug(agencyName);
   return `${CARTEIRA_DOMAIN}/${slug}/${publicAccessCode}`;
 }
