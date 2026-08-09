@@ -135,6 +135,36 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
   const [requestOpen, setRequestOpen] = useState(false);
   const requestCenterRef = useRef<HTMLDivElement | null>(null);
+  const quoteCardRef = useRef<HTMLDivElement | null>(null);
+  /**
+   * Sobreposição 50/50 exata: metade da altura REAL do card de cotação.
+   * O card recebe margin-top negativo dessa metade e o fundo areia começa
+   * exatamente no eixo central do card, então a linha final da fotografia
+   * do hero atravessa o centro vertical do card em qualquer breakpoint.
+   */
+  const [quoteHalf, setQuoteHalf] = useState(0);
+  useEffect(() => {
+    if (!editorial) return;
+    const el = quoteCardRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let raf = 0;
+    const measure = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const h = el.getBoundingClientRect().height;
+        if (h > 0) setQuoteHalf((prev) => (Math.abs(prev - h / 2) > 0.5 ? h / 2 : prev));
+      });
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    measure();
+    (document as Document & { fonts?: FontFaceSet }).fonts?.ready?.then(measure).catch(() => {});
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [editorial]);
+  const halfPx = `${Math.round(quoteHalf)}px`;
 
   const openRequest = useCallback((key: string) => {
     setService(key);
@@ -183,8 +213,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section
             key={key}
             id="destaques"
-            className={editorial ? `${container} py-20 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}
+            className={editorial ? "bg-background" : "mx-auto max-w-6xl px-4 py-14 md:py-16"}
           >
+            <div className={editorial ? `${container} py-14 md:py-24` : undefined}>
             <SectionHeading
               title="Destaques"
               subtitle="Três formas de começar agora o planejamento da sua próxima viagem."
@@ -197,7 +228,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   return (
                     <article
                       key={h.title}
-                      className="group flex h-full flex-col rounded-xl bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.06)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
+                      className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
                       <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
                       <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
@@ -227,14 +258,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 ))}
               </div>
             )}
+            </div>
           </section>
         );
 
       case "modules":
         if (editorial) {
           return (
-            <section key={key} id="campanhas" className="bg-background">
-              <div className={`${container} py-20 md:py-24`}>
+            <section key={key} id="campanhas" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title="Experiências e campanhas"
                   subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
