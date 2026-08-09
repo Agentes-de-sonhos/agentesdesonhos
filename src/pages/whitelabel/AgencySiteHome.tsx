@@ -142,26 +142,36 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
    * exatamente no eixo central do card, então a linha final da fotografia
    * do hero atravessa o centro vertical do card em qualquer breakpoint.
    */
-  const [quoteHalf, setQuoteHalf] = useState(0);
-  useEffect(() => {
+  const [quoteHalf, setQuoteHalf] = useState(() => {
+    // Palpite responsivo APENAS para evitar um frame com 0 antes da medição real
+    // (o valor é substituído pela altura medida ainda antes da primeira pintura).
+    if (typeof window === "undefined") return 0;
+    return window.innerWidth < 768 ? 300 : 128;
+  });
+  useLayoutEffect(() => {
     if (!editorial) return;
     const el = quoteCardRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
+    if (!el) return;
     let raf = 0;
+    const apply = () => {
+      const h = el.getBoundingClientRect().height;
+      if (h > 0) setQuoteHalf((prev) => (Math.abs(prev - h / 2) > 0.5 ? h / 2 : prev));
+    };
+    // Medição inicial síncrona: acontece antes da primeira pintura visível,
+    // então altura, paddingBottom do hero e marginTop negativo já saem corretos.
+    apply();
     const measure = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const h = el.getBoundingClientRect().height;
-        if (h > 0) setQuoteHalf((prev) => (Math.abs(prev - h / 2) > 0.5 ? h / 2 : prev));
-      });
+      raf = requestAnimationFrame(apply);
     };
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    measure();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    ro?.observe(el);
+    window.addEventListener("resize", measure);
     (document as Document & { fonts?: FontFaceSet }).fonts?.ready?.then(measure).catch(() => {});
     return () => {
       cancelAnimationFrame(raf);
-      ro.disconnect();
+      ro?.disconnect();
+      window.removeEventListener("resize", measure);
     };
   }, [editorial]);
   const halfPx = `${Math.round(quoteHalf)}px`;
