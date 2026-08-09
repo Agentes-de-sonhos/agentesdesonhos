@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { sanitizeText } from "../_shared/input-validator.ts";
+import { isAllowedServiceKey, originAllowed } from "./validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,75 +25,6 @@ function clean(value: unknown, max: number): string | null {
   return out.length ? out : null;
 }
 
-/** Only these service keys exist in the Central de Solicitações (mirrors the SQL allowlist). */
-const ALLOWED_SERVICE_KEYS = [
-  "aereo",
-  "hospedagem",
-  "carro",
-  "transfer",
-  "ingressos",
-  "seguro",
-  "cruzeiros",
-  "pacotes",
-];
-
-/** Platform hosts used by the Lovable preview/dev environment. */
-const PREVIEW_HOST_SUFFIXES = ["lovable.app", "lovableproject.com", "lovableproject-dev.com", "localhost"];
-
-const normalizeHost = (host: string) =>
-  host.trim().toLowerCase().replace(/:\d+$/, "").replace(/^www\./, "");
-
-function hostOf(raw: string | null): string | null {
-  if (!raw) return null;
-  try {
-    return normalizeHost(new URL(raw).hostname);
-  } catch {
-    return null;
-  }
-}
-
-const isPreviewHost = (host: string) =>
-  PREVIEW_HOST_SUFFIXES.some((s) => host === s || host.endsWith(`.${s}`));
-
-/**
- * The tenant is ALWAYS resolved from the hostname against active
- * agency_public_domains (never from the payload). This check adds a second
- * barrier: on a real agency domain, the page Origin/Referer must match the
- * hostname being submitted, so a page served by agency A can never post a lead
- * to agency B (root/www are treated as the same site).
- *
- * DOCUMENTED EXCEPTION: when the request comes from a Lovable preview/dev host
- * (`*.lovable.app`, `*.lovableproject.com`, `localhost`), the white-label site is
- * reached via `?__agency_host=...`, so the Origin can never match the agency
- * domain. Only in that case the comparison is skipped — this is NOT a general
- * production bypass: any other Origin mismatch is rejected.
- */
-function originAllowed(req: Request, hostname: string): boolean {
-  const origin = hostOf(req.headers.get("origin")) ?? hostOf(req.headers.get("referer"));
-  if (!origin) return false;
-  if (isPreviewHost(origin)) return true;
-  return origin === normalizeHost(hostname);
-}
-
-/** Flat record of short strings — the per-service answers. */
-function cleanDetails(value: unknown): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!value || typeof value !== "object") return out;
-  const entries = Object.entries(value as Record<string, unknown>).slice(0, 40);
-  for (const [rawKey, rawVal] of entries) {
-    const key = rawKey.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
-    if (!key) continue;
-    const val =
-      typeof rawVal === "string"
-        ? clean(rawVal, 400)
-        : typeof rawVal === "number" || typeof rawVal === "boolean"
-          ? String(rawVal)
-          : null;
-    if (val) out[key] = val;
-  }
-  return out;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
@@ -110,13 +42,13 @@ Deno.serve(async (req) => {
 
   const hostname = (clean(body.hostname, 120) || "").toLowerCase().replace(/:\d+$/, "");
   if (!hostname || !hostname.includes(".")) return json({ error: "Site não encontrado." }, 400);
-  if (!originAllowed(req, hostname)) {
+  if (!originAllowed({ origin: req.headers.get("origin"), referer: req.headers.get("referer") }, hostname)) {
     console.warn("[submit-agency-site-request] origin-mismatch", hostname);
     return json({ error: "Não foi possível validar a origem do envio." }, 403);
   }
 
   const serviceKey = (clean(body.service_key, 40) || "").toLowerCase();
-  if (!ALLOWED_SERVICE_KEYS.includes(serviceKey)) {
+  if (!isAllowedServiceKey(serviceKey)) {
     return json({ error: "Selecione o serviço desejado." }, 400);
   }
 
