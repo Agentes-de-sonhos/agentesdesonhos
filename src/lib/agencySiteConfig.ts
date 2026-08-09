@@ -87,6 +87,79 @@ export interface AgencyHighlight {
   cta: string;
 }
 
+/* ------------------------------- HERO / BANNERS ------------------------------ */
+
+export interface AgencyHeroSlide {
+  title: string;
+  /** `{agency}` is replaced by the agency display name. */
+  subtitle: string;
+  order: number;
+  enabled: boolean;
+}
+
+/** Hard limits of the hero carousel: 1 to 5 banners per agency. */
+export const HERO_MIN_SLIDES = 1;
+export const HERO_MAX_SLIDES = 5;
+
+/**
+ * Default banners of the white-label hero. Kept here (single source of truth) so
+ * the home component has no hardcoded copy.
+ *
+ * KNOWN LIMITATION (MVP): there is no admin panel yet to persist per-agency
+ * banners; `resolveHeroSlides` already accepts overrides, so a future settings
+ * table/panel only needs to feed them in.
+ */
+export const DEFAULT_HERO_SLIDES: AgencyHeroSlide[] = [
+  {
+    title: "Sua próxima viagem começa com quem entende de viagem",
+    subtitle: "Planejamento completo, atendimento humano e acompanhamento em cada etapa com a {agency}.",
+    order: 1,
+    enabled: true,
+  },
+  {
+    title: "Roteiros sob medida, do primeiro voo ao último passeio",
+    subtitle: "Aéreo, hospedagem, transfers, ingressos e seguro organizados em um só lugar.",
+    order: 2,
+    enabled: true,
+  },
+  {
+    title: "Solicite seu atendimento personalizado",
+    subtitle: "Conte o que você imagina e receba uma proposta clara, com valores e condições.",
+    order: 3,
+    enabled: true,
+  },
+];
+
+export interface ResolvedHeroSlide {
+  title: string;
+  subtitle: string;
+  image?: string | null;
+}
+
+/**
+ * Resolves the hero slides for one agency: applies optional overrides, keeps the
+ * 1–5 range and interpolates the agency name. `coverImageUrl` is the real agency
+ * cover when the profile has one (never an invented asset).
+ */
+export function resolveHeroSlides(
+  agencyName: string,
+  coverImageUrl?: string | null,
+  overrides?: AgencyHeroSlide[],
+): ResolvedHeroSlide[] {
+  const source = (overrides?.length ? overrides : DEFAULT_HERO_SLIDES)
+    .filter((s) => s.enabled && s.title.trim())
+    .sort((a, b) => a.order - b.order)
+    .slice(0, HERO_MAX_SLIDES);
+
+  const list = source.length ? source : DEFAULT_HERO_SLIDES.slice(0, HERO_MIN_SLIDES);
+
+  return list.map((s) => ({
+    title: s.title.replace(/\{agency\}/g, agencyName),
+    subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
+    image: coverImageUrl ?? null,
+  }));
+}
+
 export const DEFAULT_HIGHLIGHTS: AgencyHighlight[] = [
   { title: "Roteiro sob medida", text: "Você conta a ideia da viagem e recebe uma proposta desenhada para o seu perfil.", service: "pacotes", cta: "Solicitar roteiro" },
   { title: "Aéreo com estratégia", text: "Comparação de rotas, datas e tarifas para encontrar a melhor combinação.", service: "aereo", cta: "Cotar passagens" },
