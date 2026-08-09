@@ -3,8 +3,12 @@ import {
   REQUEST_SERVICES, EMPTY_CONTACT, buildDetailsPayload, buildRequestSummary,
   initialServiceValues, resolveDestination, serviceByKey,
   validateContactStep, validateServiceStep,
+  ALLOWED_SERVICE_KEYS, isAllowedServiceKey, validateServiceDates,
 } from "@/lib/agencySiteRequests";
-import { resolveModules, resolveSections } from "@/lib/agencySiteConfig";
+import {
+  resolveModules, resolveSections, resolveHeroSlides,
+  HERO_MAX_SLIDES, HERO_MIN_SLIDES, DEFAULT_HERO_SLIDES,
+} from "@/lib/agencySiteConfig";
 
 describe("central de solicitações — catálogo", () => {
   it("expõe exatamente os oito serviços aprovados", () => {
@@ -118,5 +122,94 @@ describe("configuração de seções", () => {
   it("módulos temáticos apontam para serviços válidos", () => {
     const valid = new Set(REQUEST_SERVICES.map((s) => s.key));
     for (const m of resolveModules()) expect(valid.has(m.service)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Revisão corretiva: allowlist, datas, idempotência por tenant e origem
+// ---------------------------------------------------------------------------
+describe("revisão corretiva da home white label", () => {
+  it("allowlist cobre exatamente os 8 serviços do catálogo", () => {
+    expect([...ALLOWED_SERVICE_KEYS].sort()).toEqual(
+      REQUEST_SERVICES.map((s) => s.key).sort(),
+    );
+    expect(isAllowedServiceKey("aereo")).toBe(true);
+    expect(isAllowedServiceKey("newsletter")).toBe(false);
+    expect(isAllowedServiceKey("../admin")).toBe(false);
+  });
+
+  it("bloqueia check-out anterior ou igual ao check-in", () => {
+    const svc = serviceByKey("hospedagem");
+    const base = { ...initialServiceValues(svc), destino: "Salvador", quartos: "1", adultos: "2" };
+    expect(validateServiceDates(svc, { ...base, check_in: "2026-10-10", check_out: "2026-10-09" }).check_out).toBeTruthy();
+    expect(validateServiceDates(svc, { ...base, check_in: "2026-10-10", check_out: "2026-10-10" }).check_out).toBeTruthy();
+    expect(validateServiceDates(svc, { ...base, check_in: "2026-10-10", check_out: "2026-10-14" }).check_out).toBeUndefined();
+  });
+
+  it("bloqueia devolução antes da retirada (data e hora no mesmo dia)", () => {
+    const svc = serviceByKey("carro");
+    const base = initialServiceValues(svc);
+    expect(validateServiceDates(svc, { ...base, retirada_data: "2026-05-10", devolucao_data: "2026-05-09" }).devolucao_data).toBeTruthy();
+    expect(
+      validateServiceDates(svc, {
+        ...base,
+        retirada_data: "2026-05-10",
+        devolucao_data: "2026-05-10",
+        retirada_hora: "14:00",
+        devolucao_hora: "10:00",
+      }).devolucao_hora,
+    ).toBeTruthy();
+    expect(validateServiceDates(svc, { ...base, retirada_data: "2026-05-10", devolucao_data: "2026-05-12" })).toEqual({});
+  });
+
+  it("bloqueia fim do seguro antes do início e volta aérea antes da ida", () => {
+    const seguro = serviceByKey("seguro");
+    expect(validateServiceDates(seguro, { inicio: "2026-03-10", fim: "2026-03-01" }).fim).toBeTruthy();
+    const aereo = serviceByKey("aereo");
+    expect(validateServiceDates(aereo, { data_ida: "2026-03-10", data_volta: "2026-03-05" }).data_volta).toBeTruthy();
+    expect(validateServiceDates(aereo, { data_ida: "2026-03-10", data_volta: "" }).data_volta).toBeUndefined();
+  });
+
+  it("validateServiceStep agrega os erros de data", () => {
+    const svc = serviceByKey("hospedagem");
+    const errors = validateServiceStep(svc, {
+      ...initialServiceValues(svc),
+      destino: "Gramado",
+      quartos: "1",
+      adultos: "2",
+      check_in: "2026-07-10",
+      check_out: "2026-07-05",
+    });
+    expect(errors.check_out).toBeTruthy();
+  });
+});
+
+describe("hero configurável (1 a 5 banners)", () => {
+  it("usa os defaults centralizados e interpola o nome da agência", () => {
+    const slides = resolveHeroSlides("100 Limites Viagens", null);
+    expect(slides.length).toBe(DEFAULT_HERO_SLIDES.length);
+    expect(slides.length).toBeGreaterThanOrEqual(HERO_MIN_SLIDES);
+    expect(slides.length).toBeLessThanOrEqual(HERO_MAX_SLIDES);
+    expect(slides[0].subtitle).toContain("100 Limites Viagens");
+    expect(slides[0].subtitle).not.toContain("{agency}");
+    expect(slides.every((s) => s.image === null)).toBe(true);
+  });
+
+  it("respeita override por agência, ordem, desativação e limite de 5", () => {
+    const overrides = Array.from({ length: 8 }, (_, i) => ({
+      title: `Banner ${i + 1}`,
+      subtitle: "Sub",
+      order: i + 1,
+      enabled: i !== 0,
+    }));
+    const slides = resolveHeroSlides("Agência X", "https://cdn/cover.jpg", overrides);
+    expect(slides.length).toBe(HERO_MAX_SLIDES);
+    expect(slides[0].title).toBe("Banner 2");
+    expect(slides[0].image).toBe("https://cdn/cover.jpg");
+  });
+
+  it("nunca devolve lista vazia", () => {
+    const slides = resolveHeroSlides("Agência X", null, []);
+    expect(slides.length).toBeGreaterThanOrEqual(HERO_MIN_SLIDES);
   });
 });

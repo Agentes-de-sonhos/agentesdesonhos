@@ -20,7 +20,7 @@ import {
 import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
-  resolveModules, resolveSections, type AgencySectionKey,
+  resolveHeroSlides, resolveModules, resolveSections, type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 
@@ -35,12 +35,6 @@ export const AGENCY_SERVICES = [
   { key: "cruzeiros", title: "Cruzeiros", icon: Ship },
   { key: "pacotes", title: "Pacotes e Circuitos", icon: Compass },
 ] as const;
-
-interface HeroSlide {
-  title: string;
-  subtitle: string;
-  image?: string | null;
-}
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
@@ -90,25 +84,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     requestCenterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // Hero supports 1 to 5 banners. Uses the agency cover when available.
-  const slides = useMemo<HeroSlide[]>(
-    () => [
-      {
-        title: "Sua próxima viagem começa com quem entende de viagem",
-        subtitle: `Planejamento completo, atendimento humano e acompanhamento em cada etapa com a ${name}.`,
-        image: info.cover_image_url,
-      },
-      {
-        title: "Roteiros sob medida, do primeiro voo ao último passeio",
-        subtitle: "Aéreo, hospedagem, transfers, ingressos e seguro organizados em um só lugar.",
-        image: info.cover_image_url,
-      },
-      {
-        title: "Solicite seu atendimento personalizado",
-        subtitle: "Conte o que você imagina e receba uma proposta clara, com valores e condições.",
-        image: info.cover_image_url,
-      },
-    ],
+  // Hero banners (1 to 5) come from the central config — no hardcoded copy here.
+  const slides = useMemo(
+    () => resolveHeroSlides(name, info.cover_image_url),
     [name, info.cover_image_url],
   );
 

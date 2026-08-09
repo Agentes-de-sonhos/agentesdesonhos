@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { sanitizeText } from "../_shared/input-validator.ts";
+import { isAllowedServiceKey, originAllowed } from "./validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,25 +25,6 @@ function clean(value: unknown, max: number): string | null {
   return out.length ? out : null;
 }
 
-/** Flat record of short strings — the per-service answers. */
-function cleanDetails(value: unknown): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!value || typeof value !== "object") return out;
-  const entries = Object.entries(value as Record<string, unknown>).slice(0, 40);
-  for (const [rawKey, rawVal] of entries) {
-    const key = rawKey.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 40);
-    if (!key) continue;
-    const val =
-      typeof rawVal === "string"
-        ? clean(rawVal, 400)
-        : typeof rawVal === "number" || typeof rawVal === "boolean"
-          ? String(rawVal)
-          : null;
-    if (val) out[key] = val;
-  }
-  return out;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
@@ -60,6 +42,15 @@ Deno.serve(async (req) => {
 
   const hostname = (clean(body.hostname, 120) || "").toLowerCase().replace(/:\d+$/, "");
   if (!hostname || !hostname.includes(".")) return json({ error: "Site não encontrado." }, 400);
+  if (!originAllowed({ origin: req.headers.get("origin"), referer: req.headers.get("referer") }, hostname)) {
+    console.warn("[submit-agency-site-request] origin-mismatch", hostname);
+    return json({ error: "Não foi possível validar a origem do envio." }, 403);
+  }
+
+  const serviceKey = (clean(body.service_key, 40) || "").toLowerCase();
+  if (!isAllowedServiceKey(serviceKey)) {
+    return json({ error: "Selecione o serviço desejado." }, 400);
+  }
 
   // Honeypot + minimum interaction time: silent bot filters.
   if (clean(body.honeypot, 100)) return json({ error: "Não foi possível enviar." }, 400);
@@ -78,7 +69,7 @@ Deno.serve(async (req) => {
   }
 
   const payload: Record<string, unknown> = {
-    service_key: clean(body.service_key, 40),
+    service_key: serviceKey,
     service_label: clean(body.service_label, 120),
     lead_name: clean(body.lead_name, 200),
     lead_phone: clean(body.lead_phone, 40),

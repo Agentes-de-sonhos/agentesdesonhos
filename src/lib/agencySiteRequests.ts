@@ -217,6 +217,78 @@ export function initialServiceValues(service: RequestService): ServiceValues {
 const digits = (value: string) => value.replace(/\D/g, "");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Valid service keys — mirrors the server-side (Edge) and SQL allowlists. */
+export const ALLOWED_SERVICE_KEYS = [
+  "aereo",
+  "hospedagem",
+  "carro",
+  "transfer",
+  "ingressos",
+  "seguro",
+  "cruzeiros",
+  "pacotes",
+] as const;
+
+export function isAllowedServiceKey(key: string): boolean {
+  return (ALLOWED_SERVICE_KEYS as readonly string[]).includes(key);
+}
+
+const asDate = (values: ServiceValues, name: string): string => {
+  const raw = values[name];
+  return typeof raw === "string" ? raw.trim() : "";
+};
+
+/**
+ * Cross-field date coherence, mirroring the essential server expectations:
+ * check-out after check-in, drop-off after pick-up, insurance end after start,
+ * and return flight not before departure when informed.
+ */
+export function validateServiceDates(service: RequestService, values: ServiceValues): Record<string, string> {
+  const errors: Record<string, string> = {};
+
+  if (service.key === "hospedagem") {
+    const inDate = asDate(values, "check_in");
+    const outDate = asDate(values, "check_out");
+    if (inDate && outDate && outDate <= inDate) {
+      errors.check_out = "O check-out deve ser depois do check-in.";
+    }
+  }
+
+  if (service.key === "carro") {
+    const pick = asDate(values, "retirada_data");
+    const drop = asDate(values, "devolucao_data");
+    if (pick && drop) {
+      if (drop < pick) {
+        errors.devolucao_data = "A devolução deve ser depois da retirada.";
+      } else if (drop === pick) {
+        const pickTime = asDate(values, "retirada_hora");
+        const dropTime = asDate(values, "devolucao_hora");
+        if (pickTime && dropTime && dropTime <= pickTime) {
+          errors.devolucao_hora = "No mesmo dia, a devolução deve ser depois da retirada.";
+        }
+      }
+    }
+  }
+
+  if (service.key === "seguro") {
+    const start = asDate(values, "inicio");
+    const end = asDate(values, "fim");
+    if (start && end && end < start) {
+      errors.fim = "O fim da viagem deve ser depois do início.";
+    }
+  }
+
+  if (service.key === "aereo") {
+    const out = asDate(values, "data_ida");
+    const back = asDate(values, "data_volta");
+    if (out && back && back < out) {
+      errors.data_volta = "A volta não pode ser antes da ida.";
+    }
+  }
+
+  return errors;
+}
+
 /** Step 1 validation: required fields of the selected service. */
 export function validateServiceStep(service: RequestService, values: ServiceValues): Record<string, string> {
   const errors: Record<string, string> = {};
@@ -233,7 +305,7 @@ export function validateServiceStep(service: RequestService, values: ServiceValu
       errors[field.name] = "Informe um número válido.";
     }
   }
-  return errors;
+  return { ...errors, ...validateServiceDates(service, values) };
 }
 
 /** Step 2 validation: shared contact block. WhatsApp OR e-mail is enough. */
