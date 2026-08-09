@@ -224,6 +224,9 @@ export function normalizeInstitutionalText(text?: string | null): string {
   if (!text) return "";
   return foldStyledUnicode(text)
     .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu, "")
+    // Espaços finos/estilizados removidos junto com os pictogramas: recompõe
+    // a separação entre número e palavra (ex.: "+15anos" -> "+15 anos").
+    .replace(/(\d)(?=[a-zà-ú]{3,})/gi, "$1 ")
     .replace(/[ \t]{2,}/g, " ")
     .replace(/^[ \t]+|[ \t]+$/gm, "")
     .replace(/\n{3,}/g, "\n\n")
