@@ -864,7 +864,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         <div
           className={`relative ${container} ${
             editorial
-              ? "pb-6 pt-20 md:max-w-none md:pb-8 md:pt-24"
+              ? "pb-6 pt-20 md:pb-8 md:pt-24"
               : "pb-10 pt-20 md:pt-32"
           }`}
         >
