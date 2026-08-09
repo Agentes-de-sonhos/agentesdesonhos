@@ -112,6 +112,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
+  const editorial = isEditorialTheme(hostname);
+  const container = siteContainer(editorial);
 
   // Faixa B2B/DMC: exclusiva das agências configuradas por hostname.
   const dmc = useMemo(() => resolveDmc(hostname), [hostname]);
@@ -160,6 +162,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <AgencyDmcSection
             key={key}
             config={dmc}
+            hostname={hostname}
             whatsappNumber={wa}
             onFallbackContact={() => openRequest("transfer")}
           />
@@ -167,13 +170,44 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
       case "highlights":
         return (
-          <section key={key} id="destaques" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+          <section
+            key={key}
+            id="destaques"
+            className={editorial ? `${container} py-20 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}
+          >
             <SectionHeading
               title="Destaques"
               subtitle="Três formas de começar agora o planejamento da sua próxima viagem."
+              editorial={editorial}
             />
-            <div className="grid gap-4 md:grid-cols-3">
-              {DEFAULT_HIGHLIGHTS.map((h) => (
+            {editorial ? (
+              <div className="grid gap-5 md:grid-cols-3">
+                {DEFAULT_HIGHLIGHTS.map((h, i) => {
+                  const Icon = HIGHLIGHT_ICONS[h.title] ?? Compass;
+                  return (
+                    <article
+                      key={h.title}
+                      className={`flex h-full flex-col rounded-xl p-8 ${
+                        i === 1 ? "bg-[hsl(var(--wl-sand))]" : "bg-card"
+                      } shadow-[0_1px_2px_hsl(213_48%_15%/0.05)]`}
+                    >
+                      <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
+                      <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
+                      <p className="mt-3 flex-1 text-[15px] leading-relaxed text-muted-foreground">{h.text}</p>
+                      <button
+                        type="button"
+                        onClick={() => openRequest(h.service)}
+                        className="mt-7 inline-flex w-fit items-center border-b border-foreground/25 pb-1 text-[15px] font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                      >
+                        {h.cta} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-3">
+                {DEFAULT_HIGHLIGHTS.map((h) => (
                 <Card key={h.title} className="flex h-full flex-col p-6 transition-shadow hover:shadow-lg">
                   <Sparkles className="mb-4 h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="text-base font-semibold text-foreground">{h.title}</h3>
@@ -182,8 +216,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     {h.cta} <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Card>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         );
 
