@@ -17,12 +17,29 @@ import {
   agencyDisplayName,
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
+import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
-  resolveHeroSlides, resolveModules, resolveSections, type AgencySectionKey,
+  resolveDestinations, resolveHeroSlides, resolveModules, resolveSections,
+  type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
+import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
+import destinoLitoral from "@/assets/whitelabel/destino-litoral.jpg";
+import destinoResort from "@/assets/whitelabel/destino-resort.jpg";
+import destinoCruzeiro from "@/assets/whitelabel/destino-cruzeiro.jpg";
+import destinoEuropa from "@/assets/whitelabel/destino-europa.jpg";
+import destinoParques from "@/assets/whitelabel/destino-parques.jpg";
+
+/** Image slots referenced by the editorial config (config stays asset-free). */
+const DESTINATION_IMAGES: Record<string, string> = {
+  litoral: destinoLitoral,
+  resort: destinoResort,
+  cruzeiro: destinoCruzeiro,
+  europa: destinoEuropa,
+  parques: destinoParques,
+};
 
 /** Kept exported: other white-label surfaces import this service list. */
 export const AGENCY_SERVICES = [
@@ -74,19 +91,21 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   const sections = useMemo(() => resolveSections(), []);
   const modules = useMemo(() => resolveModules(), []);
+  const destinations = useMemo(() => resolveDestinations(), []);
   const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
+  const [requestOpen, setRequestOpen] = useState(false);
   const requestCenterRef = useRef<HTMLDivElement | null>(null);
 
   const openRequest = useCallback((key: string) => {
     setService(key);
-    requestCenterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setRequestOpen(true);
   }, []);
 
   // Hero banners (1 to 5) come from the central config — no hardcoded copy here.
   const slides = useMemo(
-    () => resolveHeroSlides(name, info.cover_image_url),
+    () => resolveHeroSlides(name, info.cover_image_url, undefined, heroPraia),
     [name, info.cover_image_url],
   );
 
