@@ -9,8 +9,13 @@ const RoteiroPublico = lazy(() => import("@/pages/RoteiroPublico"));
  * Resolves itinerary by agency slug + public access code,
  * then delegates rendering to RoteiroPublico with tokenOverride.
  */
-export default function RoteiroPublicoV2() {
-  const { agencySlug, accessCode } = useParams<{ agencySlug: string; accessCode: string }>();
+export default function RoteiroPublicoV2({
+  agencySlugOverride,
+  accessCodeOverride,
+}: { agencySlugOverride?: string; accessCodeOverride?: string } = {}) {
+  const params = useParams<{ agencySlug: string; accessCode: string }>();
+  const agencySlug = agencySlugOverride ?? params.agencySlug;
+  const accessCode = accessCodeOverride ?? params.accessCode;
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
