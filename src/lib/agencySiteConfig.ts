@@ -168,7 +168,10 @@ export const DEFAULT_HIGHLIGHTS: AgencyHighlight[] = [
 
 export const DEFAULT_DIFFERENTIALS = [
   { title: "Atendimento consultivo", text: "Cada proposta nasce do seu perfil, do seu momento e do seu orçamento." },
-] as const as { title: string; text: string }[];
+  { title: "Reservas conferidas", text: "Documentos, prazos e coberturas revisados antes de qualquer confirmação." },
+  { title: "Acompanhamento na viagem", text: "Suporte no período da viagem, com todos os dados sempre à mão." },
+  { title: "Fornecedores selecionados", text: "Operadoras e serviços escolhidos com critério, não por catálogo." },
+];
 
 /* --------------------------- DESTINOS / INSPIRAÇÕES -------------------------- */
 
@@ -204,13 +207,6 @@ export function resolveDestinations(
     .filter((d) => d.enabled)
     .sort((a, b) => a.order - b.order);
 }
-
-const _LEGACY_DIFFERENTIALS = [
-  { title: "Atendimento consultivo", text: "Cada proposta nasce do seu perfil, do seu momento e do seu orçamento." },
-  { title: "Reservas conferidas", text: "Documentos, prazos e coberturas revisados antes de qualquer confirmação." },
-  { title: "Acompanhamento na viagem", text: "Suporte no período da viagem, com todos os dados sempre à mão." },
-  { title: "Fornecedores selecionados", text: "Operadoras e serviços escolhidos com critério, não por catálogo." },
-];
 
 export const DEFAULT_FAQ = [
   {
