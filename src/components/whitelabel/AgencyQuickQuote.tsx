@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass, ArrowRight,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,38 @@ export function AgencyQuickQuote({
   });
   const values = valuesByService[service.key] ?? initialServiceValues(service);
 
+  // Rail horizontal das categorias (preset editorial): linha única, sem barra
+  // de rolagem visível e setas discretas quando os rótulos não couberem.
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const [railOverflow, setRailOverflow] = useState(false);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  const syncRail = useCallback(() => {
+    const el = railRef.current;
+    if (!el) return;
+    setRailOverflow(el.scrollWidth - el.clientWidth > 4);
+    setAtStart(el.scrollLeft <= 4);
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    if (!editorial) return;
+    syncRail();
+    window.addEventListener("resize", syncRail);
+    return () => window.removeEventListener("resize", syncRail);
+  }, [editorial, syncRail]);
+
+  const scrollRail = useCallback((direction: -1 | 1) => {
+    const el = railRef.current;
+    if (!el) return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    el.scrollBy({
+      left: direction * el.clientWidth * 0.8,
+      behavior: reduced ? "auto" : "smooth",
+    });
+  }, []);
+
   const setValue = useCallback(
     (name: string, value: string) => {
       setValuesByService((prev) => ({ ...prev, [service.key]: { ...prev[service.key], [name]: value } }));
@@ -77,48 +110,74 @@ export function AgencyQuickQuote({
       <div
         className={
           editorial
-            ? "rounded-xl bg-card p-5 shadow-[0_18px_48px_-24px_hsl(213_48%_15%/0.35)] md:p-7"
+            ? "rounded-xl border border-border/70 bg-card p-5 shadow-[0_14px_40px_-28px_hsl(220_12%_10%/0.3)] md:p-7"
             : "rounded-[18px] border border-border/60 bg-card/95 p-4 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-card/90 md:p-6"
         }
       >
-        <div
-          role="tablist"
-          aria-label="Serviços para cotação"
-          className={
-            editorial
-              ? "-mx-1 flex gap-1 overflow-x-auto pb-4 [scrollbar-width:thin] md:flex-wrap md:gap-2 md:overflow-visible"
-              : "-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:thin]"
-          }
-        >
-          {REQUEST_SERVICES.map((item) => {
-            const Icon = ICONS[item.key] ?? Compass;
-            const selected = item.key === service.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => onServiceChange(item.key)}
-                className={
-                  editorial
-                    ? `flex min-h-[52px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-[13px] font-semibold transition-colors sm:flex-row sm:gap-2 sm:text-sm ${
-                        selected
-                          ? "bg-foreground text-background"
-                          : "text-foreground/70 hover:bg-muted hover:text-foreground"
-                      }`
-                    : `flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                        selected
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      }`
-                }
-              >
-                <Icon className={editorial ? "h-5 w-5" : "h-4 w-4"} aria-hidden="true" />
-                <span className="whitespace-nowrap">{item.label}</span>
-              </button>
-            );
-          })}
+        <div className={editorial ? "relative flex items-start gap-1" : undefined}>
+          {editorial && railOverflow && (
+            <button
+              type="button"
+              aria-label="Categorias anteriores"
+              onClick={() => scrollRail(-1)}
+              disabled={atStart}
+              className="mt-1 hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-border disabled:hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:grid"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+          <div
+            ref={editorial ? railRef : undefined}
+            onScroll={editorial ? syncRail : undefined}
+            role="tablist"
+            aria-label="Serviços para cotação"
+            className={
+              editorial
+                ? "wl-rail flex min-w-0 flex-1 flex-nowrap snap-x snap-mandatory gap-1.5 overflow-x-auto px-1 pb-4"
+                : "-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:thin]"
+            }
+          >
+            {REQUEST_SERVICES.map((item) => {
+              const Icon = ICONS[item.key] ?? Compass;
+              const selected = item.key === service.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => onServiceChange(item.key)}
+                  className={
+                    editorial
+                      ? `flex h-[46px] shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-lg border px-3.5 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                          selected
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-transparent text-foreground/70 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                        }`
+                      : `flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                          selected
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`
+                  }
+                >
+                  <Icon className={editorial ? "h-[18px] w-[18px] shrink-0" : "h-4 w-4"} aria-hidden="true" />
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {editorial && railOverflow && (
+            <button
+              type="button"
+              aria-label="Próximas categorias"
+              onClick={() => scrollRail(1)}
+              disabled={atEnd}
+              className="mt-1 hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-border disabled:hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:grid"
+            >
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
         </div>
 
         <div

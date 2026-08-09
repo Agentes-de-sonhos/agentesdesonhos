@@ -214,33 +214,49 @@ img {
    Nenhum outro tenant ou página da plataforma é afetado. */
 .wl-editorial {
   --background: 36 38% 97%;
-  --foreground: 213 46% 14%;
+  --foreground: 220 12% 13%;
 
   --card: 0 0% 100%;
-  --card-foreground: 213 46% 14%;
+  --card-foreground: 220 12% 13%;
   --popover: 0 0% 100%;
-  --popover-foreground: 213 46% 14%;
+  --popover-foreground: 220 12% 13%;
 
-  --primary: 194 82% 36%;
+  /* Vermelho de marca extraído do logotipo (#F40000), escurecido para AA
+     com texto branco (contraste ~6.5:1). */
+  --primary: 0 72% 42%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 36 30% 93%;
-  --secondary-foreground: 213 46% 14%;
+  --secondary-foreground: 220 12% 13%;
   --muted: 36 30% 94%;
-  --muted-foreground: 213 16% 40%;
+  --muted-foreground: 220 8% 38%;
   --accent: 36 30% 93%;
-  --accent-foreground: 213 46% 14%;
+  --accent-foreground: 220 12% 13%;
 
   --border: 34 18% 88%;
   --input: 34 18% 86%;
-  --ring: 194 82% 36%;
+  --ring: 0 72% 42%;
   --radius: 0.625rem;
 
-  /* Azul-marinho institucional (faixas B2B / superfícies escuras) */
-  --wl-navy: 213 48% 15%;
+  /* Vermelho de marca + superfícies neutras do preset */
+  --wl-red: 0 72% 42%;
+  /* Grafite neutro para faixas escuras (antes azul-marinho) */
+  --wl-navy: 220 10% 14%;
+  --wl-ink: 220 12% 10%;
   --wl-sand: 36 32% 92%;
 
   font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+}
+
+/* Rails horizontais do preset editorial: rolagem preservada, indicador oculto. */
+.wl-editorial .wl-rail {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.wl-editorial .wl-rail::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .wl-editorial h1,
