@@ -690,6 +690,55 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "faq":
+        if (editorial) {
+          return (
+            <section key={key} id="faq" className="bg-background">
+              <div className={`${container} grid gap-12 py-20 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
+                <div className="md:sticky md:top-28 md:self-start">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                    Antes de solicitar
+                  </p>
+                  <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                    Perguntas frequentes
+                  </h2>
+                  <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
+                    Se a sua dúvida não estiver aqui, fale com um consultor da{" "}
+                    <BrandText>{name}</BrandText>.
+                  </p>
+                  <div className="mt-7 flex flex-wrap gap-3">
+                    {waHref ? (
+                      <Button asChild variant="outline" size="lg">
+                        <a href={waHref} target="_blank" rel="noopener noreferrer">
+                          <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar no WhatsApp
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="lg" onClick={() => openRequest("pacotes")}>
+                        Enviar uma solicitação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <Accordion type="single" collapsible className="w-full border-t border-border/70">
+                  {DEFAULT_FAQ.map((item, index) => (
+                    <AccordionItem
+                      key={item.q}
+                      value={`faq-${index}`}
+                      className="border-b border-border/70"
+                    >
+                      <AccordionTrigger className="py-6 text-left text-[17px] font-semibold leading-snug text-foreground hover:no-underline md:text-lg">
+                        {item.q}
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-7 pr-6 text-[15px] leading-relaxed text-muted-foreground">
+                        {item.a}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="faq" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-4xl px-4 py-14 md:py-16">
@@ -707,6 +756,39 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "newsletter":
+        if (editorial) {
+          return (
+            <section key={key} id="novidades" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} py-16 md:py-20`}>
+                <div className="overflow-hidden rounded-2xl bg-[hsl(var(--wl-navy))] px-8 py-12 md:px-14 md:py-16">
+                  <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
+                    <div>
+                      <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Novidades da agência
+                      </p>
+                      <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
+                        Receba novidades e oportunidades
+                      </h2>
+                      <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/80 md:text-base">
+                        Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar
+                        quando surgirem oportunidades no seu perfil de viagem.
+                      </p>
+                    </div>
+                    <div className="md:justify-self-end">
+                      <Button
+                        size="lg"
+                        className="h-12 w-full px-7 md:w-auto"
+                        onClick={() => openRequest("pacotes")}
+                      >
+                        Quero receber novidades <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="novidades" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
             <Card className="flex flex-col items-start gap-6 p-8 md:flex-row md:items-center md:justify-between">

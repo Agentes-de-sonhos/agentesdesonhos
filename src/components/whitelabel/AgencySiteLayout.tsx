@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MessageCircle, MapPin, Menu, X } from "lucide-react";
+import { MessageCircle, MapPin, Menu, X, Phone, UserRound } from "lucide-react";
 import { useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
@@ -180,6 +180,111 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   const name = agencyDisplayName(info);
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
+  const editorial = isEditorialTheme(info.hostname);
+
+  if (editorial) {
+    const navLinks = NAV_LINKS.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
+    const legalLinks = [
+      { label: "Política de Privacidade", to: "/politicasdeprivacidade" },
+      { label: "Termos de Uso", to: "/termosdeuso" },
+    ];
+    return (
+      <footer id="rodape" className="bg-[hsl(var(--wl-navy))] text-white">
+        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
+          <div>
+            {info.logo_url ? (
+              <img
+                src={info.logo_url}
+                alt={`Logo ${name}`}
+                loading="lazy"
+                className="h-11 w-auto max-w-[190px] object-contain"
+              />
+            ) : (
+              <p className="text-lg font-bold tracking-tight">
+                <BrandText>{name}</BrandText>
+              </p>
+            )}
+            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/70">
+              Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
+            </p>
+            {location && (
+              <p className="mt-6 flex items-center gap-2 text-sm text-white/70">
+                <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" /> {location}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">Navegação</p>
+            <ul className="mt-5 space-y-3">
+              {navLinks.map((l) => (
+                <li key={l.to}>
+                  <a
+                    href={l.to}
+                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">Atendimento</p>
+            <ul className="mt-5 space-y-3">
+              {wa ? (
+                <li>
+                  <a
+                    href={`https://wa.me/${wa}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" /> Falar no WhatsApp
+                  </a>
+                </li>
+              ) : null}
+              {info.phone ? (
+                <li className="flex items-center gap-2 text-[15px] text-white/75">
+                  <Phone className="h-4 w-4 shrink-0" aria-hidden="true" /> {info.phone}
+                </li>
+              ) : null}
+              <li>
+                <a
+                  href="/area-do-cliente"
+                  className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <UserRound className="h-4 w-4 shrink-0" aria-hidden="true" /> Área do Cliente
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">Legal</p>
+            <ul className="mt-5 space-y-3">
+              {legalLinks.map((l) => (
+                <li key={l.to}>
+                  <a
+                    href={l.to}
+                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-white/10">
+          <div className={`${siteContainer(true)} py-6 text-xs text-white/50`}>
+            © {new Date().getFullYear()} <BrandText>{name}</BrandText>. Todos os direitos reservados.
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer id="rodape" className="border-t border-border/60 bg-muted/30">
