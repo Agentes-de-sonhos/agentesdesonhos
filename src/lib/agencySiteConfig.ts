@@ -168,6 +168,45 @@ export const DEFAULT_HIGHLIGHTS: AgencyHighlight[] = [
 
 export const DEFAULT_DIFFERENTIALS = [
   { title: "Atendimento consultivo", text: "Cada proposta nasce do seu perfil, do seu momento e do seu orçamento." },
+] as const as { title: string; text: string }[];
+
+/* --------------------------- DESTINOS / INSPIRAÇÕES -------------------------- */
+
+export interface AgencyDestination {
+  key: string;
+  /** Image slot resolved by the presentation layer (no asset imports here). */
+  image: "litoral" | "resort" | "cruzeiro" | "europa" | "parques";
+  title: string;
+  label: string;
+  text: string;
+  service: string;
+  enabled: boolean;
+  order: number;
+}
+
+/**
+ * Editorial inspiration cards (NEVER prices or commercial promises). Used for the
+ * discovery section and as an elegant fallback while the agency has no published
+ * showcase offers.
+ */
+export const DEFAULT_DESTINATIONS: AgencyDestination[] = [
+  { key: "litoral", image: "litoral", label: "Praias", title: "Litoral brasileiro", text: "Do Nordeste ao Sul, com hospedagens escolhidas a dedo.", service: "pacotes", enabled: true, order: 1 },
+  { key: "resorts", image: "resort", label: "All inclusive", title: "Resorts e all inclusive", text: "Descanso com tudo incluído e programação para todas as idades.", service: "hospedagem", enabled: true, order: 2 },
+  { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros marítimos", text: "Itinerários, cabines e categorias explicados com clareza.", service: "cruzeiros", enabled: true, order: 3 },
+  { key: "europa", image: "europa", label: "Multidestinos", title: "Europa e circuitos", text: "Vários destinos em uma viagem, com logística resolvida.", service: "pacotes", enabled: true, order: 4 },
+  { key: "parques", image: "parques", label: "Família", title: "Parques e atrações", text: "Ingressos, filas e deslocamentos organizados dia a dia.", service: "ingressos", enabled: true, order: 5 },
+];
+
+export function resolveDestinations(
+  overrides?: Partial<Record<string, boolean>>,
+): AgencyDestination[] {
+  return DEFAULT_DESTINATIONS.map((d) => ({ ...d, enabled: overrides?.[d.key] ?? d.enabled }))
+    .filter((d) => d.enabled)
+    .sort((a, b) => a.order - b.order);
+}
+
+const _LEGACY_DIFFERENTIALS = [
+  { title: "Atendimento consultivo", text: "Cada proposta nasce do seu perfil, do seu momento e do seu orçamento." },
   { title: "Reservas conferidas", text: "Documentos, prazos e coberturas revisados antes de qualquer confirmação." },
   { title: "Acompanhamento na viagem", text: "Suporte no período da viagem, com todos os dados sempre à mão." },
   { title: "Fornecedores selecionados", text: "Operadoras e serviços escolhidos com critério, não por catálogo." },
