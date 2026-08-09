@@ -574,18 +574,45 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/90 via-primary to-primary/70" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
+          <div
+            className={
+              editorial
+                ? "absolute inset-0 bg-gradient-to-t from-[hsl(213_48%_8%/0.85)] via-[hsl(213_48%_8%/0.45)] to-[hsl(213_48%_8%/0.15)]"
+                : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
+            }
+          />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-20 md:pt-32">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
-          </p>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl">
+        <div className={`relative ${container} pb-10 ${editorial ? "pt-24 md:pt-36" : "pt-20 md:pt-32"}`}>
+          {editorial ? (
+            <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary-foreground/85">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
+            </p>
+          ) : (
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
+            </p>
+          )}
+          <h1
+            className={
+              editorial
+                ? "max-w-[16ch] text-4xl font-extrabold leading-[1.05] tracking-tight text-primary-foreground md:text-[3.75rem]"
+                : "max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
+            }
+          >
             {current.title}
           </h1>
-          <p className="mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg">{current.subtitle}</p>
+          <p
+            className={
+              editorial
+                ? "mt-5 max-w-xl text-[15px] leading-relaxed text-primary-foreground/85 md:text-lg"
+                : "mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg"
+            }
+          >
+            {current.subtitle}
+          </p>
 
           {slides.length > 1 && (
             <div className="mt-8 flex items-center gap-3">
@@ -624,7 +651,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       </section>
 
-      <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28">
+      <div
+        ref={requestCenterRef}
+        className={
+          editorial
+            ? "relative z-10 mx-auto -mt-24 w-full max-w-[1140px] px-5 md:-mt-28 md:px-8"
+            : "relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28"
+        }
+      >
         <AgencyQuickQuote
           hostname={hostname}
           agencyName={name}
