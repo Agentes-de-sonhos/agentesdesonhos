@@ -7,7 +7,12 @@ export const ROTEIRO_DOMAIN = "https://seuroteiro.tur.br";
 /**
  * Builds the new-format itinerary link.
  */
-export function buildRoteiroLink(agencyName: string, publicAccessCode: string): string {
+export function buildRoteiroLink(
+  agencyName: string,
+  publicAccessCode: string,
+  customDomain?: string | null,
+): string {
+  if (customDomain) return `https://${customDomain}/roteiro/${publicAccessCode}`;
   const slug = agencyNameToSlug(agencyName);
   return `${ROTEIRO_DOMAIN}/${slug}/${publicAccessCode}`;
 }
