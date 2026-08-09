@@ -224,7 +224,10 @@ img {
   /* Vermelho vivo do logotipo (#F40000). Usado em ícones, bordas, estados
      ativos e detalhes; CTAs principais usam grafite (--wl-ink). */
   --primary: 0 100% 48%;
-  --primary-foreground: 0 0% 100%;
+  /* Branco sobre #F40000 fica em 4.33:1 (abaixo de AA para texto normal).
+     Grafite quase preto sobre o mesmo vermelho dá ~4.65:1, preservando o
+     vermelho exato do logotipo. */
+  --primary-foreground: 220 12% 3%;
 
   --secondary: 36 30% 93%;
   --secondary-foreground: 220 12% 13%;
