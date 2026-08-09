@@ -183,3 +183,33 @@ describe("revisão corretiva da home white label", () => {
     expect(errors.check_out).toBeTruthy();
   });
 });
+
+describe("hero configurável (1 a 5 banners)", () => {
+  it("usa os defaults centralizados e interpola o nome da agência", () => {
+    const slides = resolveHeroSlides("100 Limites Viagens", null);
+    expect(slides.length).toBe(DEFAULT_HERO_SLIDES.length);
+    expect(slides.length).toBeGreaterThanOrEqual(HERO_MIN_SLIDES);
+    expect(slides.length).toBeLessThanOrEqual(HERO_MAX_SLIDES);
+    expect(slides[0].subtitle).toContain("100 Limites Viagens");
+    expect(slides[0].subtitle).not.toContain("{agency}");
+    expect(slides.every((s) => s.image === null)).toBe(true);
+  });
+
+  it("respeita override por agência, ordem, desativação e limite de 5", () => {
+    const overrides = Array.from({ length: 8 }, (_, i) => ({
+      title: `Banner ${i + 1}`,
+      subtitle: "Sub",
+      order: i + 1,
+      enabled: i !== 0,
+    }));
+    const slides = resolveHeroSlides("Agência X", "https://cdn/cover.jpg", overrides);
+    expect(slides.length).toBe(HERO_MAX_SLIDES);
+    expect(slides[0].title).toBe("Banner 2");
+    expect(slides[0].image).toBe("https://cdn/cover.jpg");
+  });
+
+  it("nunca devolve lista vazia", () => {
+    const slides = resolveHeroSlides("Agência X", null, []);
+    expect(slides.length).toBeGreaterThanOrEqual(HERO_MIN_SLIDES);
+  });
+});
