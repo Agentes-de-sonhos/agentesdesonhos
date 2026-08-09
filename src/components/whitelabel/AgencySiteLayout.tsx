@@ -72,7 +72,11 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
               Área do Cliente
             </a>
             {wa && (
-              <Button asChild size="lg" className="h-11 rounded-lg px-5">
+              <Button
+                asChild
+                size="lg"
+                className="h-11 rounded-lg bg-[hsl(var(--wl-ink))] px-5 text-white hover:bg-[hsl(var(--wl-ink))]/90"
+              >
                 <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
                 </a>
@@ -105,7 +109,11 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
                 </a>
               ))}
               {wa && (
-                <Button asChild size="lg" className="my-3 h-12 rounded-lg">
+                <Button
+                  asChild
+                  size="lg"
+                  className="my-3 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90"
+                >
                   <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
                   </a>
@@ -189,11 +197,11 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
       { label: "Termos de Uso", to: "/termosdeuso" },
     ];
     return (
-      <footer id="rodape" className="border-t border-border/70 bg-[hsl(var(--wl-sand))] text-foreground">
+      <footer id="rodape" className="bg-[hsl(var(--wl-ink))] text-white">
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             {info.logo_url ? (
-              <span className="inline-flex rounded-lg bg-card p-3 shadow-[0_1px_2px_hsl(220_12%_10%/0.08)]">
+              <span className="inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]">
                 <img
                   src={info.logo_url}
                   alt={`Logo ${name}`}
@@ -202,28 +210,28 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                 />
               </span>
             ) : (
-              <p className="text-lg font-bold tracking-tight text-foreground">
+              <p className="text-lg font-bold tracking-tight text-white">
                 <BrandText>{name}</BrandText>
               </p>
             )}
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/70">
               Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
             </p>
             {location && (
-              <p className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> {location}
+              <p className="mt-6 flex items-center gap-2 text-sm text-white/70">
+                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> {location}
               </p>
             )}
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Navegação</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">Navegação</p>
             <ul className="mt-5 space-y-3">
               {navLinks.map((l) => (
                 <li key={l.to}>
                   <a
                     href={l.to}
-                    className="inline-block py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     {l.label}
                   </a>
@@ -233,7 +241,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Atendimento</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">Atendimento</p>
             <ul className="mt-5 space-y-3">
               {wa ? (
                 <li>
@@ -241,36 +249,36 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                     href={`https://wa.me/${wa}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
-                    <MessageCircle className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> Falar no WhatsApp
+                    <MessageCircle className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> Falar no WhatsApp
                   </a>
                 </li>
               ) : null}
               {info.phone ? (
-                <li className="flex items-center gap-2 text-[15px] text-foreground/75">
-                  <Phone className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> {info.phone}
+                <li className="flex items-center gap-2 text-[15px] text-white/75">
+                  <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> {info.phone}
                 </li>
               ) : null}
               <li>
                 <a
                   href="/area-do-cliente"
-                  className="inline-flex items-center gap-2 py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
-                  <UserRound className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> Área do Cliente
+                  <UserRound className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> Área do Cliente
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Legal</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">Legal</p>
             <ul className="mt-5 space-y-3">
               {legalLinks.map((l) => (
                 <li key={l.to}>
                   <a
                     href={l.to}
-                    className="inline-block py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
                     {l.label}
                   </a>
@@ -279,8 +287,8 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
             </ul>
           </div>
         </div>
-        <div className="border-t border-foreground/10">
-          <div className={`${siteContainer(true)} py-6 text-xs text-muted-foreground`}>
+        <div className="border-t border-white/12">
+          <div className={`${siteContainer(true)} py-6 text-xs text-white/60`}>
             © {new Date().getFullYear()} <BrandText>{name}</BrandText>. Todos os direitos reservados.
           </div>
         </div>

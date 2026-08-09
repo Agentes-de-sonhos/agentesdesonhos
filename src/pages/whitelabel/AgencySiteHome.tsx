@@ -192,14 +192,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             />
             {editorial ? (
               <div className="grid gap-5 md:grid-cols-3">
-                {DEFAULT_HIGHLIGHTS.map((h, i) => {
+                {DEFAULT_HIGHLIGHTS.map((h) => {
                   const Icon = HIGHLIGHT_ICONS[h.title] ?? Compass;
                   return (
                     <article
                       key={h.title}
-                      className={`flex h-full flex-col rounded-xl p-8 ${
-                        i === 1 ? "bg-[hsl(var(--wl-sand))]" : "bg-card"
-                      } shadow-[0_1px_2px_hsl(220_12%_10%/0.06)]`}
+                      className="group flex h-full flex-col rounded-xl bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.06)] transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
                       <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
                       <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
@@ -588,7 +586,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                     {waHref && (
-                      <Button asChild size="lg" variant="outline">
+                      <Button
+                        asChild
+                        size="lg"
+                        className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
+                      >
                         <a href={waHref} target="_blank" rel="noopener noreferrer">
                           <MessageCircle className="mr-2 h-4 w-4" /> Falar no WhatsApp
                         </a>
@@ -707,7 +709,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </p>
                   <div className="mt-7 flex flex-wrap gap-3">
                     {waHref ? (
-                      <Button asChild variant="outline" size="lg">
+                      <Button
+                        asChild
+                        size="lg"
+                        className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
+                      >
                         <a href={waHref} target="_blank" rel="noopener noreferrer">
                           <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar no WhatsApp
                         </a>
@@ -763,7 +769,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 <div className="overflow-hidden rounded-2xl bg-[hsl(var(--wl-navy))] px-8 py-12 md:px-14 md:py-16">
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
-                      <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                      <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                         <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Novidades da agência
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
