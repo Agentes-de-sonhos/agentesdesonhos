@@ -520,7 +520,7 @@ export function AgencyRequestCenter({
   );
 
   if (variant === "plain") {
-    return <div id="solicitacoes">{body}</div>;
+    return <div id="solicitacoes" className="w-full min-w-0">{body}</div>;
   }
 
   return (
