@@ -197,9 +197,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   return (
                     <article
                       key={h.title}
-                      className={`flex h-full flex-col rounded-xl p-8 ${
-                        i === 1 ? "bg-[hsl(var(--wl-sand))]" : "bg-card"
-                      } shadow-[0_1px_2px_hsl(220_12%_10%/0.06)]`}
+                      className="group flex h-full flex-col rounded-xl bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.06)] transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
                       <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
                       <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
