@@ -237,7 +237,7 @@ export function AgencyQuickQuote({
             size="lg"
             className={
               editorial
-                ? "mt-2 h-12 w-full rounded-lg px-6 text-[15px] font-semibold md:w-auto"
+                ? "mt-2 h-12 w-full rounded-lg bg-[hsl(var(--wl-ink))] px-6 text-[15px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:w-auto"
                 : "mt-1.5 h-11 w-full rounded-xl md:w-auto"
             }
             onClick={() => onOpenChange(true)}

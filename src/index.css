@@ -221,9 +221,9 @@ img {
   --popover: 0 0% 100%;
   --popover-foreground: 220 12% 13%;
 
-  /* Vermelho de marca extraído do logotipo (#F40000), escurecido para AA
-     com texto branco (contraste ~6.5:1). */
-  --primary: 0 72% 42%;
+  /* Vermelho vivo do logotipo (#F40000). Usado em ícones, bordas, estados
+     ativos e detalhes; CTAs principais usam grafite (--wl-ink). */
+  --primary: 0 100% 48%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 36 30% 93%;
@@ -235,15 +235,17 @@ img {
 
   --border: 34 18% 88%;
   --input: 34 18% 86%;
-  --ring: 0 72% 42%;
+  --ring: 0 100% 48%;
   --radius: 0.625rem;
 
   /* Vermelho de marca + superfícies neutras do preset */
-  --wl-red: 0 72% 42%;
+  --wl-red: 0 100% 48%;
   /* Grafite neutro para faixas escuras (antes azul-marinho) */
   --wl-navy: 220 10% 14%;
   --wl-ink: 220 12% 10%;
   --wl-sand: 36 32% 92%;
+  /* Verde WhatsApp acessível com texto branco */
+  --wl-whatsapp: 152 62% 30%;
 
   font-family: 'Manrope', 'Inter', system-ui, sans-serif;
 }
