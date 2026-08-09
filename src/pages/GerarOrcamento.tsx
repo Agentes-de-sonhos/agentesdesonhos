@@ -430,6 +430,7 @@ export default function GerarOrcamento() {
     persisted?.editingService || null
   );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
+  const { customDomain } = useAgencyCustomDomain();
   const [showAIImport, setShowAIImport] = useState(false);
   const [showFullPackage, setShowFullPackage] = useState(false);
   const [showExportWallet, setShowExportWallet] = useState(false);
