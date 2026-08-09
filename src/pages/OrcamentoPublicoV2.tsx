@@ -29,8 +29,13 @@ async function fetchQuoteByPublicCode(agencySlug: string, code: string) {
   };
 }
 
-export default function OrcamentoPublicoV2() {
-  const { agencySlug, accessCode } = useParams<{ agencySlug: string; accessCode: string }>();
+export default function OrcamentoPublicoV2({
+  agencySlugOverride,
+  accessCodeOverride,
+}: { agencySlugOverride?: string; accessCodeOverride?: string } = {}) {
+  const params = useParams<{ agencySlug: string; accessCode: string }>();
+  const agencySlug = agencySlugOverride ?? params.agencySlug;
+  const accessCode = accessCodeOverride ?? params.accessCode;
   const [quote, setQuote] = useState<Quote | null>(null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [loading, setLoading] = useState(true);
