@@ -214,6 +214,35 @@ export function initialServiceValues(service: RequestService): ServiceValues {
   return out;
 }
 
+/**
+ * Essential fields shown in the compact "Cotação rápida" card of the home.
+ * Required fields come first (never textareas/checkboxes) and, when the service
+ * has fewer than `max` required fields, simple optional fields complete the row.
+ * The full form (AgencyRequestCenter) keeps every field — this is presentation only.
+ */
+export function quickQuoteFields(service: RequestService, max = 4): RequestField[] {
+  const usable = service.fields.filter((f) => f.type !== "textarea" && f.type !== "checkbox");
+  const required = usable.filter((f) => f.required);
+  const optional = usable.filter((f) => !f.required);
+  return [...required, ...optional].slice(0, max);
+}
+
+/** Merges a partial prefill (from the quick card) into a full service value bag. */
+export function mergeServiceValues(
+  service: RequestService,
+  prefill?: ServiceValues | null,
+): ServiceValues {
+  const base = initialServiceValues(service);
+  if (!prefill) return base;
+  for (const field of service.fields) {
+    const value = prefill[field.name];
+    if (value === undefined) continue;
+    if (field.type === "checkbox") base[field.name] = value === true;
+    else if (typeof value === "string" && value.trim()) base[field.name] = value;
+  }
+  return base;
+}
+
 const digits = (value: string) => value.replace(/\D/g, "");
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
