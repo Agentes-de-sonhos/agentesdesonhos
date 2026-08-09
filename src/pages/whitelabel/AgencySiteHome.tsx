@@ -359,7 +359,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="destinos" className="bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-20 md:py-24`}>
+              <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title="Descubra o seu próximo destino"
                   subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
@@ -458,7 +458,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           const years = bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
-              <div className={`${container} grid items-center gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Quem planeja a sua viagem
@@ -554,7 +554,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="diferenciais" className="bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-20 md:py-24`}>
+              <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title="Diferenciais"
                   subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe."
@@ -601,7 +601,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="atendimento" className="bg-background">
-              <div className={`${container} grid gap-12 py-20 md:grid-cols-2 md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-stretch gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-24`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Gente cuidando de gente
@@ -730,8 +730,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       case "faq":
         if (editorial) {
           return (
-            <section key={key} id="faq" className="bg-background">
-              <div className={`${container} grid gap-12 py-20 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
+            <section key={key} id="faq" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Antes de solicitar
@@ -800,8 +800,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       case "newsletter":
         if (editorial) {
           return (
-            <section key={key} id="novidades" className="bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-16 md:py-20`}>
+            <section key={key} id="novidades" className="bg-background">
+              <div className={`${container} py-14 md:py-24`}>
                 <div className="overflow-hidden rounded-2xl bg-[hsl(var(--wl-navy))] px-8 py-12 md:px-14 md:py-16">
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
