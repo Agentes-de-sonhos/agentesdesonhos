@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
-  MapPin, CheckCircle2, Quote, Route,
+  MapPin, CheckCircle2, Quote, Route, UserRound, FileCheck2, LifeBuoy, Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,8 +19,10 @@ import {
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
+import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
+  normalizeInstitutionalText,
   resolveDestinations, resolveDmc, resolveHeroSlides, resolveModules, resolveSections,
   type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
@@ -59,6 +61,14 @@ const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
   "Roteiro sob medida": Route,
   "Aéreo com estratégia": Plane,
   "Viagem protegida": ShieldCheck,
+};
+
+/** Ícone semântico por diferencial (um símbolo distinto para cada um). */
+const DIFFERENTIAL_ICONS: Record<string, typeof Route> = {
+  consultivo: UserRound,
+  conferido: FileCheck2,
+  acompanhamento: LifeBuoy,
+  fornecedores: Handshake,
 };
 
 function SectionHeading({
@@ -223,6 +233,29 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "modules":
+        if (editorial) {
+          return (
+            <section key={key} id="campanhas" className="bg-background">
+              <div className={`${container} py-20 md:py-24`}>
+                <SectionHeading
+                  title="Experiências e campanhas"
+                  subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
+                  editorial
+                />
+                <AgencyCampaignRail
+                  items={modules.map((m) => ({
+                    key: m.key,
+                    title: m.title,
+                    text: m.text,
+                    service: m.service,
+                    imageSrc: DESTINATION_IMAGES[m.image],
+                  }))}
+                  onSelect={openRequest}
+                />
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="campanhas" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
@@ -388,6 +421,62 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "about":
+        if (editorial) {
+          const bio = normalizeInstitutionalText(info.bio) ||
+            `A ${name} cuida de cada viagem com atenção aos detalhes: entende o momento de cada cliente, apresenta opções claras e acompanha a experiência do planejamento ao retorno.`;
+          // Só destaca um número que JÁ existe no conteúdo resolvido (nunca inventado).
+          const years = bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
+          return (
+            <section key={key} id="sobre" className="bg-background">
+              <div className={`${container} grid items-center gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                    Quem planeja a sua viagem
+                  </p>
+                  <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                    Sobre a <BrandText>{name}</BrandText>
+                  </h2>
+                  {years && (
+                    <p className="mt-8 flex items-baseline gap-3">
+                      <span className="text-5xl font-extrabold leading-none text-primary md:text-6xl">
+                        +{years}
+                      </span>
+                      <span className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        anos de estrada
+                      </span>
+                    </p>
+                  )}
+                  <p className="mt-8 whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base">
+                    {bio}
+                  </p>
+                  <div className="mt-8 space-y-2 border-t border-foreground/10 pt-6">
+                    {info.owner_name && (
+                      <p className="text-sm text-muted-foreground">
+                        Atendimento com{" "}
+                        <span className="font-semibold text-foreground">{info.owner_name}</span>
+                      </p>
+                    )}
+                    {location && (
+                      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" aria-hidden="true" /> {location}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-xl">
+                  <img
+                    src={info.cover_image_url || destinoEuropa}
+                    alt={`Viagens acompanhadas pela ${name}`}
+                    loading="lazy"
+                    width={900}
+                    height={1100}
+                    className="aspect-[4/5] w-full object-cover"
+                  />
+                </div>
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="sobre" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-2 md:py-16">
@@ -432,6 +521,37 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "differentials":
+        if (editorial) {
+          return (
+            <section key={key} id="diferenciais" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} py-20 md:py-24`}>
+                <SectionHeading
+                  title="Diferenciais"
+                  subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe."
+                  editorial
+                />
+                <ul className="grid gap-x-14 gap-y-10 md:grid-cols-2">
+                  {DEFAULT_DIFFERENTIALS.map((d) => {
+                    const Icon = DIFFERENTIAL_ICONS[d.icon] ?? CheckCircle2;
+                    return (
+                      <li key={d.title} className="flex gap-5 border-t border-foreground/10 pt-6">
+                        <Icon
+                          className="mt-1 h-7 w-7 shrink-0 text-primary"
+                          aria-hidden="true"
+                          strokeWidth={1.6}
+                        />
+                        <div>
+                          <h3 className="text-lg font-bold text-foreground">{d.title}</h3>
+                          <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{d.text}</p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="diferenciais" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
             <SectionHeading title="Diferenciais" subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe." />
@@ -448,6 +568,58 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "concierge":
+        if (editorial) {
+          return (
+            <section key={key} id="atendimento" className="bg-background">
+              <div className={`${container} grid gap-12 py-20 md:grid-cols-2 md:gap-16 md:py-24`}>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                    Gente cuidando de gente
+                  </p>
+                  <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                    Atendimento humano
+                  </h2>
+                  <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
+                    Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação,
+                    monta as melhores opções e explica cada detalhe antes de você decidir.
+                  </p>
+                  <div className="mt-9 flex flex-wrap gap-3">
+                    <Button size="lg" onClick={() => openRequest("pacotes")}>
+                      Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    {waHref && (
+                      <Button asChild size="lg" variant="outline">
+                        <a href={waHref} target="_blank" rel="noopener noreferrer">
+                          <MessageCircle className="mr-2 h-4 w-4" /> Falar no WhatsApp
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-[hsl(var(--wl-sand))] p-8 md:p-10">
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                    Como funciona
+                  </h3>
+                  <ol className="mt-7 space-y-6">
+                    {[
+                      "Você envia a solicitação pela Central.",
+                      "Montamos as melhores opções para o seu perfil.",
+                      "Você recebe um orçamento claro para decidir.",
+                      "Reservado, tudo fica na sua Área do Cliente.",
+                    ].map((step, i) => (
+                      <li key={step} className="flex gap-4">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/12 text-sm font-bold text-primary">
+                          {i + 1}
+                        </span>
+                        <p className="pt-1.5 text-[15px] leading-relaxed text-foreground">{step}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="atendimento" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
