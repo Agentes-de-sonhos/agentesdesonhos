@@ -436,7 +436,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </h2>
                   {years && (
                     <p className="mt-8 flex items-baseline gap-3">
-                      <span className="text-5xl font-extrabold leading-none text-primary md:text-6xl">
+                      <span className="text-5xl font-extrabold leading-none text-[hsl(var(--wl-ink))] md:text-6xl">
                         +{years}
                       </span>
                       <span className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -584,7 +584,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <div className="mt-9 flex flex-wrap gap-3">
                      <Button
                        size="lg"
-                       className="text-white [&_svg]:text-white"
+                       className="bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
                        onClick={() => openRequest("pacotes")}
                      >
                        Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
