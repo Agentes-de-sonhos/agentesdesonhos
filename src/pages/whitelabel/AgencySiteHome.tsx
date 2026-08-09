@@ -309,7 +309,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       type="button"
                       onClick={() => openRequest(d.service)}
                       className={`group relative w-[80vw] shrink-0 snap-start overflow-hidden rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[58vw] md:w-auto ${
-                        i === 0 ? "md:col-span-2 md:row-span-2" : ""
+                        i === 0
+                          ? "md:col-span-2 md:row-span-2"
+                          : i === destinations.length - 1 && destinations.length % 2 === 1
+                            ? "md:col-span-2"
+                            : ""
                       }`}
                     >
                       <img
