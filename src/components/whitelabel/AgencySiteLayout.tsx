@@ -72,7 +72,11 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
               Área do Cliente
             </a>
             {wa && (
-              <Button asChild size="lg" className="h-11 rounded-lg px-5">
+              <Button
+                asChild
+                size="lg"
+                className="h-11 rounded-lg bg-[hsl(var(--wl-ink))] px-5 text-white hover:bg-[hsl(var(--wl-ink))]/90"
+              >
                 <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
                 </a>
@@ -105,7 +109,11 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
                 </a>
               ))}
               {wa && (
-                <Button asChild size="lg" className="my-3 h-12 rounded-lg">
+                <Button
+                  asChild
+                  size="lg"
+                  className="my-3 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90"
+                >
                   <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
                   </a>
