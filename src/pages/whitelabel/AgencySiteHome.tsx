@@ -933,17 +933,6 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       </section>
 
-      {/* legacy-block-removed */}
-      {false && (
-        <div
-          className={
-            editorial
-              ? "absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.85)] via-[hsl(220_12%_7%/0.45)] to-[hsl(220_12%_7%/0.15)]"
-                : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
-            }
-          />
-      )}
-
       {editorial ? (
         /* Faixa própria: HERO → COTAÇÃO → DMC, sem sobreposição. */
         <section id="cotacao" className="bg-[hsl(var(--wl-sand))]">
