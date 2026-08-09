@@ -9,6 +9,7 @@
 
 export type AgencySectionKey =
   | "highlights"
+  | "dmc"
   | "destinations"
   | "modules"
   | "offers"
@@ -29,6 +30,8 @@ export interface AgencySectionConfig {
 
 /** MVP defaults — optional sections (team, testimonials) stay off until real data exists. */
 export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
+  // Faixa editorial B2B (DMC): exclusiva/configurável por agência — desativada por padrão.
+  { key: "dmc", label: "Seção B2B / DMC", enabled: false, order: 0 },
   { key: "offers", label: "Ofertas em destaque", enabled: true, order: 1 },
   { key: "destinations", label: "Descoberta de destinos", enabled: true, order: 2 },
   { key: "highlights", label: "Destaques", enabled: true, order: 3 },
