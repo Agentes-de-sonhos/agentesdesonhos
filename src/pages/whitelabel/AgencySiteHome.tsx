@@ -438,7 +438,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     <>
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
-        className="relative overflow-hidden pb-40 md:pb-56"
+        className="relative overflow-hidden pb-32 md:pb-40"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -450,32 +450,21 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/90 via-primary to-primary/70" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 md:pt-24">
+        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-20 md:pt-32">
           <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
           </p>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-primary-foreground md:text-5xl">
+          <h1 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl">
             {current.title}
           </h1>
           <p className="mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg">{current.subtitle}</p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => openRequest("pacotes")}>
-              Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            {showcasePublished && (
-              <Button asChild size="lg" variant="secondary">
-                <a href="/ofertas">Ver ofertas</a>
-              </Button>
-            )}
-          </div>
-
           {slides.length > 1 && (
-            <div className="mt-10 flex items-center gap-3">
+            <div className="mt-8 flex items-center gap-3">
               <button
                 type="button"
                 aria-label="Destaque anterior"
@@ -511,12 +500,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       </section>
 
-      <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-36 max-w-6xl px-4 md:-mt-48">
-        <AgencyRequestCenter
+      <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28">
+        <AgencyQuickQuote
           hostname={hostname}
           agencyName={name}
           service={service}
           onServiceChange={setService}
+          open={requestOpen}
+          onOpenChange={setRequestOpen}
         />
       </div>
 
