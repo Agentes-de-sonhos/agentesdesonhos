@@ -9,6 +9,7 @@
 
 export type AgencySectionKey =
   | "highlights"
+  | "destinations"
   | "modules"
   | "offers"
   | "about"
@@ -28,9 +29,10 @@ export interface AgencySectionConfig {
 
 /** MVP defaults — optional sections (team, testimonials) stay off until real data exists. */
 export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
-  { key: "highlights", label: "Destaques", enabled: true, order: 1 },
-  { key: "modules", label: "Módulos temáticos", enabled: true, order: 2 },
-  { key: "offers", label: "Ofertas em destaque", enabled: true, order: 3 },
+  { key: "offers", label: "Ofertas em destaque", enabled: true, order: 1 },
+  { key: "destinations", label: "Descoberta de destinos", enabled: true, order: 2 },
+  { key: "highlights", label: "Destaques", enabled: true, order: 3 },
+  { key: "modules", label: "Módulos temáticos", enabled: true, order: 4 },
   { key: "about", label: "Apresentação da agência", enabled: true, order: 4 },
   { key: "differentials", label: "Diferenciais", enabled: true, order: 5 },
   { key: "concierge", label: "Atendimento concierge", enabled: true, order: 6 },
@@ -145,6 +147,7 @@ export function resolveHeroSlides(
   agencyName: string,
   coverImageUrl?: string | null,
   overrides?: AgencyHeroSlide[],
+  fallbackImage?: string | null,
 ): ResolvedHeroSlide[] {
   const source = (overrides?.length ? overrides : DEFAULT_HERO_SLIDES)
     .filter((s) => s.enabled && s.title.trim())
@@ -156,7 +159,7 @@ export function resolveHeroSlides(
   return list.map((s) => ({
     title: s.title.replace(/\{agency\}/g, agencyName),
     subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
-    image: coverImageUrl ?? null,
+    image: coverImageUrl ?? fallbackImage ?? null,
   }));
 }
 
