@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
-  MapPin, CheckCircle2, Quote,
+  MapPin, CheckCircle2, Quote, Route,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,7 @@ import {
   type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
+import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
 import destinoLitoral from "@/assets/whitelabel/destino-litoral.jpg";
 import destinoResort from "@/assets/whitelabel/destino-resort.jpg";
@@ -53,7 +54,30 @@ export const AGENCY_SERVICES = [
   { key: "pacotes", title: "Pacotes e Circuitos", icon: Compass },
 ] as const;
 
-function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+/** Ícone semântico por destaque (nunca o mesmo ícone repetido). */
+const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
+  "Roteiro sob medida": Route,
+  "Aéreo com estratégia": Plane,
+  "Viagem protegida": ShieldCheck,
+};
+
+function SectionHeading({
+  title,
+  subtitle,
+  editorial,
+}: {
+  title: string;
+  subtitle?: string;
+  editorial?: boolean;
+}) {
+  if (editorial) {
+    return (
+      <div className="mb-10 max-w-2xl">
+        <h2 className="text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">{title}</h2>
+        {subtitle && <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground md:text-base">{subtitle}</p>}
+      </div>
+    );
+  }
   return (
     <div className="mb-8 max-w-2xl">
       <h2 className="text-2xl font-semibold text-foreground md:text-3xl">{title}</h2>
