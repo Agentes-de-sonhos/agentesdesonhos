@@ -3,8 +3,12 @@ import {
   REQUEST_SERVICES, EMPTY_CONTACT, buildDetailsPayload, buildRequestSummary,
   initialServiceValues, resolveDestination, serviceByKey,
   validateContactStep, validateServiceStep,
+  ALLOWED_SERVICE_KEYS, isAllowedServiceKey, validateServiceDates,
 } from "@/lib/agencySiteRequests";
-import { resolveModules, resolveSections } from "@/lib/agencySiteConfig";
+import {
+  resolveModules, resolveSections, resolveHeroSlides,
+  HERO_MAX_SLIDES, HERO_MIN_SLIDES, DEFAULT_HERO_SLIDES,
+} from "@/lib/agencySiteConfig";
 
 describe("central de solicitações — catálogo", () => {
   it("expõe exatamente os oito serviços aprovados", () => {
