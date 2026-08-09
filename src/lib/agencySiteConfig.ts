@@ -33,13 +33,13 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   { key: "destinations", label: "Descoberta de destinos", enabled: true, order: 2 },
   { key: "highlights", label: "Destaques", enabled: true, order: 3 },
   { key: "modules", label: "Módulos temáticos", enabled: true, order: 4 },
-  { key: "about", label: "Apresentação da agência", enabled: true, order: 4 },
-  { key: "differentials", label: "Diferenciais", enabled: true, order: 5 },
-  { key: "concierge", label: "Atendimento concierge", enabled: true, order: 6 },
-  { key: "team", label: "Equipe e consultores", enabled: false, order: 7 },
-  { key: "testimonials", label: "Depoimentos", enabled: false, order: 8 },
-  { key: "faq", label: "Perguntas frequentes", enabled: true, order: 9 },
-  { key: "newsletter", label: "Newsletter", enabled: true, order: 10 },
+  { key: "about", label: "Apresentação da agência", enabled: true, order: 5 },
+  { key: "differentials", label: "Diferenciais", enabled: true, order: 6 },
+  { key: "concierge", label: "Atendimento concierge", enabled: true, order: 7 },
+  { key: "team", label: "Equipe e consultores", enabled: false, order: 8 },
+  { key: "testimonials", label: "Depoimentos", enabled: false, order: 9 },
+  { key: "faq", label: "Perguntas frequentes", enabled: true, order: 10 },
+  { key: "newsletter", label: "Newsletter", enabled: true, order: 11 },
 ];
 
 export function resolveSections(
