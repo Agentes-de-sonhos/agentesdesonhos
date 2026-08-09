@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { buildRoteiroLink } from "@/lib/roteiro-domain";
 import { buildOrcamentoLink } from "@/lib/orcamento-domain";
 import { buildCarteiraLink } from "@/lib/carteira-domain";
+import { useAgencyDomainsMap } from "@/hooks/useAgencyCustomDomain";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ResponsiveContainer,
@@ -766,7 +767,7 @@ export function AdminUserProjectsManager() {
                 )}
                 {trips.slice((page.trips - 1) * PAGE_SIZE, page.trips * PAGE_SIZE).map((t) => {
                   const link = t.public_access_code && t.owner_agency
-                    ? buildCarteiraLink(t.owner_agency, t.public_access_code)
+                    ? buildCarteiraLink(t.owner_agency, t.public_access_code, domainsByOwner[t.user_id])
                     : null;
                   const shown = revealed[`t-${t.id}`];
                   return (
@@ -849,7 +850,7 @@ export function AdminUserProjectsManager() {
                 )}
                 {quotes.slice((page.quotes - 1) * PAGE_SIZE, page.quotes * PAGE_SIZE).map((q) => {
                   const link = q.public_access_code && q.owner_agency
-                    ? buildOrcamentoLink(q.owner_agency, q.public_access_code)
+                    ? buildOrcamentoLink(q.owner_agency, q.public_access_code, domainsByOwner[q.user_id])
                     : null;
                   return (
                     <TableRow key={q.id}>
@@ -914,7 +915,7 @@ export function AdminUserProjectsManager() {
                 )}
                 {itineraries.slice((page.itineraries - 1) * PAGE_SIZE, page.itineraries * PAGE_SIZE).map((i) => {
                   const link = i.public_access_code && i.owner_agency
-                    ? buildRoteiroLink(i.owner_agency, i.public_access_code)
+                    ? buildRoteiroLink(i.owner_agency, i.public_access_code, domainsByOwner[i.user_id])
                     : null;
                   return (
                     <TableRow key={i.id}>
