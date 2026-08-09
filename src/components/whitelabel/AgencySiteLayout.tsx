@@ -189,39 +189,41 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
       { label: "Termos de Uso", to: "/termosdeuso" },
     ];
     return (
-      <footer id="rodape" className="bg-[hsl(var(--wl-navy))] text-white">
+      <footer id="rodape" className="border-t border-border/70 bg-[hsl(var(--wl-sand))] text-foreground">
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             {info.logo_url ? (
-              <img
-                src={info.logo_url}
-                alt={`Logo ${name}`}
-                loading="lazy"
-                className="h-11 w-auto max-w-[190px] object-contain"
-              />
+              <span className="inline-flex rounded-lg bg-card p-3 shadow-[0_1px_2px_hsl(220_12%_10%/0.08)]">
+                <img
+                  src={info.logo_url}
+                  alt={`Logo ${name}`}
+                  loading="lazy"
+                  className="h-12 w-auto max-w-[200px] object-contain"
+                />
+              </span>
             ) : (
-              <p className="text-lg font-bold tracking-tight">
+              <p className="text-lg font-bold tracking-tight text-foreground">
                 <BrandText>{name}</BrandText>
               </p>
             )}
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/70">
+            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-muted-foreground">
               Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
             </p>
             {location && (
-              <p className="mt-6 flex items-center gap-2 text-sm text-white/70">
-                <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" /> {location}
+              <p className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> {location}
               </p>
             )}
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">Navegação</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Navegação</p>
             <ul className="mt-5 space-y-3">
               {navLinks.map((l) => (
                 <li key={l.to}>
                   <a
                     href={l.to}
-                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="inline-block py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     {l.label}
                   </a>
@@ -231,7 +233,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">Atendimento</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Atendimento</p>
             <ul className="mt-5 space-y-3">
               {wa ? (
                 <li>
@@ -239,36 +241,36 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                     href={`https://wa.me/${wa}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
-                    <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" /> Falar no WhatsApp
+                    <MessageCircle className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> Falar no WhatsApp
                   </a>
                 </li>
               ) : null}
               {info.phone ? (
-                <li className="flex items-center gap-2 text-[15px] text-white/75">
-                  <Phone className="h-4 w-4 shrink-0" aria-hidden="true" /> {info.phone}
+                <li className="flex items-center gap-2 text-[15px] text-foreground/75">
+                  <Phone className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> {info.phone}
                 </li>
               ) : null}
               <li>
                 <a
                   href="/area-do-cliente"
-                  className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-flex items-center gap-2 py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
-                  <UserRound className="h-4 w-4 shrink-0" aria-hidden="true" /> Área do Cliente
+                  <UserRound className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" /> Área do Cliente
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/50">Legal</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Legal</p>
             <ul className="mt-5 space-y-3">
               {legalLinks.map((l) => (
                 <li key={l.to}>
                   <a
                     href={l.to}
-                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="inline-block py-0.5 text-[15px] text-foreground/75 transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     {l.label}
                   </a>
@@ -277,8 +279,8 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
             </ul>
           </div>
         </div>
-        <div className="border-t border-white/10">
-          <div className={`${siteContainer(true)} py-6 text-xs text-white/50`}>
+        <div className="border-t border-foreground/10">
+          <div className={`${siteContainer(true)} py-6 text-xs text-muted-foreground`}>
             © {new Date().getFullYear()} <BrandText>{name}</BrandText>. Todos os direitos reservados.
           </div>
         </div>

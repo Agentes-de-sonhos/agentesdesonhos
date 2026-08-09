@@ -199,7 +199,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       key={h.title}
                       className={`flex h-full flex-col rounded-xl p-8 ${
                         i === 1 ? "bg-[hsl(var(--wl-sand))]" : "bg-card"
-                      } shadow-[0_1px_2px_hsl(213_48%_15%/0.05)]`}
+                      } shadow-[0_1px_2px_hsl(220_12%_10%/0.06)]`}
                     >
                       <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
                       <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
@@ -355,7 +355,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         loading="lazy"
                         className="h-[360px] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03] md:h-full"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[hsl(213_48%_10%/0.82)] via-[hsl(213_48%_10%/0.2)] to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_8%/0.82)] via-[hsl(220_12%_8%/0.2)] to-transparent" />
                       <div className="absolute inset-x-0 bottom-0 p-6">
                         <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-background/80">
                           {d.label}
@@ -820,7 +820,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     <>
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
-        className="relative overflow-hidden pb-32 md:pb-40"
+        className={
+          editorial
+            ? "relative overflow-hidden pb-16 md:pb-20"
+            : "relative overflow-hidden pb-32 md:pb-40"
+        }
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -835,7 +839,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <div
             className={
               editorial
-                ? "absolute inset-0 bg-gradient-to-t from-[hsl(213_48%_8%/0.85)] via-[hsl(213_48%_8%/0.45)] to-[hsl(213_48%_8%/0.15)]"
+                ? "absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.85)] via-[hsl(220_12%_7%/0.45)] to-[hsl(220_12%_7%/0.15)]"
                 : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
             }
           />
@@ -909,23 +913,35 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       </section>
 
-      <div
-        ref={requestCenterRef}
-        className={
-          editorial
-            ? "relative z-10 mx-auto -mt-24 w-full max-w-[1140px] px-5 md:-mt-28 md:px-8"
-            : "relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28"
-        }
-      >
-        <AgencyQuickQuote
-          hostname={hostname}
-          agencyName={name}
-          service={service}
-          onServiceChange={setService}
-          open={requestOpen}
-          onOpenChange={setRequestOpen}
-        />
-      </div>
+      {editorial ? (
+        /* Faixa própria: HERO → COTAÇÃO → DMC, sem sobreposição. */
+        <section id="cotacao" className="bg-[hsl(var(--wl-sand))]">
+          <div
+            ref={requestCenterRef}
+            className="mx-auto w-full max-w-[1140px] px-5 py-10 md:px-8 md:py-14"
+          >
+            <AgencyQuickQuote
+              hostname={hostname}
+              agencyName={name}
+              service={service}
+              onServiceChange={setService}
+              open={requestOpen}
+              onOpenChange={setRequestOpen}
+            />
+          </div>
+        </section>
+      ) : (
+        <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28">
+          <AgencyQuickQuote
+            hostname={hostname}
+            agencyName={name}
+            service={service}
+            onServiceChange={setService}
+            open={requestOpen}
+            onOpenChange={setRequestOpen}
+          />
+        </div>
+      )}
 
       {sections.map((section) => renderSection(section.key))}
     </>

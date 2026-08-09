@@ -73,7 +73,7 @@ export function AgencyCampaignRail({
       <div
         ref={railRef}
         onScroll={sync}
-        className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 md:mx-0 md:px-0"
+        className="wl-rail -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 md:mx-0 md:px-0"
       >
         {items.map((item) => (
           <button
@@ -91,7 +91,7 @@ export function AgencyCampaignRail({
                 height={1000}
                 className="h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.04]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(213_48%_10%/0.88)] via-[hsl(213_48%_10%/0.3)] to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_8%/0.88)] via-[hsl(220_12%_8%/0.3)] to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6">
                 <h3 className="text-xl font-bold leading-tight text-background">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-background/80">{item.text}</p>
