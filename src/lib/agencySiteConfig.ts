@@ -236,3 +236,51 @@ export const DEFAULT_FAQ = [
     a: "Sim. Os dados informados são usados apenas para o atendimento da sua solicitação, conforme a Política de Privacidade.",
   },
 ];
+
+/* ------------------------------ SEÇÃO B2B / DMC ------------------------------ */
+
+export interface AgencyDmcConfig {
+  kicker: string;
+  title: string;
+  text: string;
+  /** Lista de serviços B2B (ícone resolvido pela camada de apresentação). */
+  services: { key: string; label: string }[];
+  cta: string;
+  /** Mensagem enviada ao WhatsApp real da agência (nunca telefone hardcoded). */
+  whatsappMessage: string;
+  note: string;
+}
+
+/**
+ * Conteúdo B2B por hostname. Seção exclusiva: só aparece nos sites white label
+ * cujos hostnames estiverem listados aqui (hoje, apenas a 100 Limites Viagens).
+ */
+export const DMC_BY_HOSTNAME: Record<string, AgencyDmcConfig> = (() => {
+  const cemLimites: AgencyDmcConfig = {
+    kicker: "EXCLUSIVO PARA AGÊNCIAS DE VIAGENS",
+    title: "Sua DMC em Portugal",
+    text: "Conte com apoio local para criar experiências personalizadas para seus clientes em Portugal. Transfers privativos, passeios, roteiros sob medida, acompanhamento e serviços de concierge, coordenados com atenção a cada detalhe da viagem.",
+    services: [
+      { key: "transfers", label: "Transfers privativos" },
+      { key: "passeios", label: "Passeios e experiências" },
+      { key: "roteiros", label: "Roteiros personalizados" },
+      { key: "acompanhamento", label: "Acompanhamento local" },
+      { key: "guias", label: "Guias e parceiros especializados" },
+      { key: "concierge", label: "Concierge em Portugal" },
+    ],
+    cta: "Falar sobre uma parceria",
+    whatsappMessage:
+      "Olá! Sou agente de viagens e gostaria de conhecer os serviços DMC da 100 Limites em Portugal.",
+    note: "Atuamos como parceira receptiva da sua agência: o cliente final continua sendo seu.",
+  };
+  return {
+    "100limites.tur.br": cemLimites,
+    "www.100limites.tur.br": cemLimites,
+  };
+})();
+
+/** Config B2B/DMC da agência do hostname atual, ou null quando não habilitada. */
+export function resolveDmc(hostname?: string | null): AgencyDmcConfig | null {
+  const host = (hostname || "").trim().toLowerCase().replace(/:\d+$/, "");
+  return DMC_BY_HOSTNAME[host] ?? null;
+}
