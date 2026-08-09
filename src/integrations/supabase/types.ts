@@ -725,6 +725,39 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_public_domains: {
+        Row: {
+          agency_slug: string
+          created_at: string
+          hostname: string
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agency_slug: string
+          created_at?: string
+          hostname: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agency_slug?: string
+          created_at?: string
+          hostname?: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agency_showcases: {
         Row: {
           auto_categories: string[] | null
@@ -14565,6 +14598,7 @@ export type Database = {
         Returns: string
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
+      get_agency_domain: { Args: { p_hostname: string }; Returns: Json }
       get_agency_slug_for_user: { Args: { p_user_id: string }; Returns: string }
       get_agency_wallet_settings: {
         Args: { _user_id: string }
