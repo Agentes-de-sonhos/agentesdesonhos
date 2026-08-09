@@ -192,7 +192,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             />
             {editorial ? (
               <div className="grid gap-5 md:grid-cols-3">
-                {DEFAULT_HIGHLIGHTS.map((h, i) => {
+                {DEFAULT_HIGHLIGHTS.map((h) => {
                   const Icon = HIGHLIGHT_ICONS[h.title] ?? Compass;
                   return (
                     <article
@@ -761,7 +761,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 <div className="overflow-hidden rounded-2xl bg-[hsl(var(--wl-navy))] px-8 py-12 md:px-14 md:py-16">
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
-                      <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                      <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                         <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Novidades da agência
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
