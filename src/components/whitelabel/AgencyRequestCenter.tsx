@@ -224,17 +224,18 @@ export function AgencyRequestCenter({
 
   const review = describeServiceValues(service, values);
 
-  return (
-    <Card
-      id="solicitacoes"
-      className="overflow-hidden border-border/60 bg-card/95 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90"
-    >
-      <div className="border-b border-border/60 px-5 pt-5 md:px-7">
-        <h2 className="text-lg font-semibold text-foreground md:text-xl">Central de Solicitações</h2>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Escolha o serviço, conte os detalhes e receba uma proposta personalizada da nossa equipe.
-          Não é uma busca automática: cada pedido é analisado por um consultor.
-        </p>
+  const body = (
+    <>
+      <div className={variant === "card" ? "border-b border-border/60 px-5 pt-5 md:px-7" : "border-b border-border/60 pb-1"}>
+        {!hideHeading && (
+          <>
+            <h2 className="text-lg font-semibold text-foreground md:text-xl">Central de Solicitações</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Escolha o serviço, conte os detalhes e receba uma proposta personalizada da nossa equipe.
+              Não é uma busca automática: cada pedido é analisado por um consultor.
+            </p>
+          </>
+        )}
 
         <Tabs
           value={activeKey}
@@ -267,7 +268,7 @@ export function AgencyRequestCenter({
         </Tabs>
       </div>
 
-      <div className="px-5 py-6 md:px-7">
+      <div className={variant === "card" ? "px-5 py-6 md:px-7" : "py-6"}>
         {state === "success" ? (
           <div className="mx-auto max-w-lg py-6 text-center" role="status">
             <span className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
@@ -515,6 +516,19 @@ export function AgencyRequestCenter({
           </>
         )}
       </div>
+    </>
+  );
+
+  if (variant === "plain") {
+    return <div id="solicitacoes">{body}</div>;
+  }
+
+  return (
+    <Card
+      id="solicitacoes"
+      className="overflow-hidden rounded-2xl border-border/60 bg-card/95 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-card/90"
+    >
+      {body}
     </Card>
   );
 }
