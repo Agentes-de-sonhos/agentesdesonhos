@@ -11,7 +11,8 @@ import {
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
-  { label: "Serviços", to: "/#servicos" },
+  { label: "Solicitações", to: "/#solicitacoes" },
+  { label: "Experiências", to: "/#campanhas" },
   { label: "Ofertas", to: "/ofertas" },
   { label: "Sobre", to: "/#sobre" },
   { label: "Atendimento", to: "/#atendimento" },
