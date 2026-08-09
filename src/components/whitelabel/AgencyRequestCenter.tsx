@@ -117,6 +117,9 @@ export interface AgencyRequestCenterProps {
   /** Optional privacy/terms links shown next to the consent checkbox. */
   privacyUrl?: string;
   termsUrl?: string;
+  /** Controlled service tab (used by the campaign modules CTAs). */
+  service?: string;
+  onServiceChange?: (key: string) => void;
 }
 
 export function AgencyRequestCenter({
@@ -124,8 +127,18 @@ export function AgencyRequestCenter({
   agencyName,
   privacyUrl = "/politicasdeprivacidade",
   termsUrl = "/termosdeuso",
+  service: controlledService,
+  onServiceChange,
 }: AgencyRequestCenterProps) {
-  const [activeKey, setActiveKey] = useState(REQUEST_SERVICES[0].key);
+  const [internalKey, setInternalKey] = useState(REQUEST_SERVICES[0].key);
+  const activeKey = controlledService ?? internalKey;
+  const setActiveKey = useCallback(
+    (key: string) => {
+      setInternalKey(key);
+      onServiceChange?.(key);
+    },
+    [onServiceChange],
+  );
   const [step, setStep] = useState<1 | 2>(1);
   const [serviceErrors, setServiceErrors] = useState<Record<string, string>>({});
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
