@@ -989,7 +989,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           />
           <div
             ref={requestCenterRef}
-            className="relative mx-auto w-full max-w-[1140px] px-5 pb-14 md:px-8 md:pb-20"
+            className={`relative ${container} pb-14 md:pb-20`}
           >
             <div ref={quoteCardRef} className="drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
               <AgencyQuickQuote
