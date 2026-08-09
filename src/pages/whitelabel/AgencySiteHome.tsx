@@ -293,6 +293,57 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "destinations":
+        if (editorial) {
+          return (
+            <section key={key} id="destinos" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} py-20 md:py-24`}>
+                <SectionHeading
+                  title="Descubra o seu próximo destino"
+                  subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+                  editorial
+                />
+                <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:auto-rows-[236px] md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
+                  {destinations.map((d, i) => (
+                    <button
+                      key={d.key}
+                      type="button"
+                      onClick={() => openRequest(d.service)}
+                      className={`group relative w-[80vw] shrink-0 snap-start overflow-hidden rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[58vw] md:w-auto ${
+                        i === 0 ? "md:col-span-2 md:row-span-2" : ""
+                      }`}
+                    >
+                      <img
+                        src={DESTINATION_IMAGES[d.image]}
+                        alt={d.title}
+                        loading="lazy"
+                        className="h-[360px] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03] md:h-full"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[hsl(213_48%_10%/0.82)] via-[hsl(213_48%_10%/0.2)] to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-6">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-background/80">
+                          {d.label}
+                        </span>
+                        <h3
+                          className={`mt-2 font-bold leading-tight text-background ${
+                            i === 0 ? "text-2xl md:text-3xl" : "text-xl"
+                          }`}
+                        >
+                          {d.title}
+                        </h3>
+                        {i === 0 && (
+                          <p className="mt-2 max-w-md text-sm text-background/80">{d.text}</p>
+                        )}
+                        <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
+                          Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
