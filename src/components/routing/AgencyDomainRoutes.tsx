@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
@@ -58,7 +58,8 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
 
 export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
   return (
-    <AgencySiteLayout info={info}>
+    <BrowserRouter>
+      <AgencySiteLayout info={info}>
       <Suspense fallback={<Fallback />}>
         <Routes>
           <Route path="/" element={<AgencySiteHome info={info} />} />
@@ -73,6 +74,7 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
           <Route path="*" element={<LinkUnavailable />} />
         </Routes>
       </Suspense>
-    </AgencySiteLayout>
+      </AgencySiteLayout>
+    </BrowserRouter>
   );
 }
