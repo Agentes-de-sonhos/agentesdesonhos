@@ -1,0 +1,124 @@
+/**
+ * Central configuration of the white-label agency home.
+ *
+ * Everything the agency will be able to enable/hide/reorder in the future lives
+ * here (single source of truth), so no section is hardcoded across components.
+ * Copy is institutional and never invents agency data (CNPJ, address, prices,
+ * testimonials, team names): those only render when the profile provides them.
+ */
+
+export type AgencySectionKey =
+  | "highlights"
+  | "modules"
+  | "offers"
+  | "about"
+  | "differentials"
+  | "concierge"
+  | "team"
+  | "testimonials"
+  | "faq"
+  | "newsletter";
+
+export interface AgencySectionConfig {
+  key: AgencySectionKey;
+  label: string;
+  enabled: boolean;
+  order: number;
+}
+
+/** MVP defaults — optional sections (team, testimonials) stay off until real data exists. */
+export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
+  { key: "highlights", label: "Destaques", enabled: true, order: 1 },
+  { key: "modules", label: "Módulos temáticos", enabled: true, order: 2 },
+  { key: "offers", label: "Ofertas em destaque", enabled: true, order: 3 },
+  { key: "about", label: "Apresentação da agência", enabled: true, order: 4 },
+  { key: "differentials", label: "Diferenciais", enabled: true, order: 5 },
+  { key: "concierge", label: "Atendimento concierge", enabled: true, order: 6 },
+  { key: "team", label: "Equipe e consultores", enabled: false, order: 7 },
+  { key: "testimonials", label: "Depoimentos", enabled: false, order: 8 },
+  { key: "faq", label: "Perguntas frequentes", enabled: true, order: 9 },
+  { key: "newsletter", label: "Newsletter", enabled: true, order: 10 },
+];
+
+export function resolveSections(
+  overrides?: Partial<Record<AgencySectionKey, boolean>>,
+): AgencySectionConfig[] {
+  return DEFAULT_SECTIONS.map((section) => ({
+    ...section,
+    enabled: overrides?.[section.key] ?? section.enabled,
+  }))
+    .filter((section) => section.enabled)
+    .sort((a, b) => a.order - b.order);
+}
+
+export interface AgencyModule {
+  key: string;
+  title: string;
+  text: string;
+  /** Pre-selected service tab of the Central de Solicitações. */
+  service: string;
+  enabled: boolean;
+  order: number;
+}
+
+/** Thematic/campaign modules — ready to be enabled, hidden and reordered per agency. */
+export const DEFAULT_MODULES: AgencyModule[] = [
+  { key: "resorts", title: "Resorts e all inclusive", text: "Estadias com tudo incluído, ideais para descansar sem se preocupar com nada.", service: "hospedagem", enabled: true, order: 1 },
+  { key: "cruzeiros", title: "Cruzeiros", text: "Itinerários pelo Caribe, Mediterrâneo, Europa e costa brasileira.", service: "cruzeiros", enabled: true, order: 2 },
+  { key: "circuitos", title: "Circuitos e multidestinos", text: "Vários destinos em uma só viagem, com logística resolvida.", service: "pacotes", enabled: true, order: 3 },
+  { key: "orlando", title: "Orlando", text: "Parques, ingressos, hotéis e transfers organizados dia a dia.", service: "ingressos", enabled: true, order: 4 },
+  { key: "parques", title: "Parques e ingressos", text: "Atrações, shows e experiências com datas e horários conferidos.", service: "ingressos", enabled: true, order: 5 },
+  { key: "lua-de-mel", title: "Lua de mel", text: "Roteiros românticos com mimos e detalhes combinados antecipadamente.", service: "pacotes", enabled: true, order: 6 },
+  { key: "familia", title: "Viagens em família", text: "Hospedagens e roteiros pensados para crianças e diferentes idades.", service: "pacotes", enabled: true, order: 7 },
+  { key: "disney-universal", title: "Disney e Universal", text: "Planejamento completo de parques, filas, refeições e deslocamentos.", service: "ingressos", enabled: true, order: 8 },
+  { key: "comandatuba", title: "Comandatuba", text: "Experiência all inclusive no litoral da Bahia, com apoio na programação.", service: "hospedagem", enabled: true, order: 9 },
+];
+
+export function resolveModules(overrides?: Partial<Record<string, boolean>>): AgencyModule[] {
+  return DEFAULT_MODULES.map((m) => ({ ...m, enabled: overrides?.[m.key] ?? m.enabled }))
+    .filter((m) => m.enabled)
+    .sort((a, b) => a.order - b.order);
+}
+
+export interface AgencyHighlight {
+  title: string;
+  text: string;
+  service: string;
+  cta: string;
+}
+
+export const DEFAULT_HIGHLIGHTS: AgencyHighlight[] = [
+  { title: "Roteiro sob medida", text: "Você conta a ideia da viagem e recebe uma proposta desenhada para o seu perfil.", service: "pacotes", cta: "Solicitar roteiro" },
+  { title: "Aéreo com estratégia", text: "Comparação de rotas, datas e tarifas para encontrar a melhor combinação.", service: "aereo", cta: "Cotar passagens" },
+  { title: "Viagem protegida", text: "Seguro adequado ao destino e à duração, explicado antes de contratar.", service: "seguro", cta: "Cotar seguro" },
+];
+
+export const DEFAULT_DIFFERENTIALS = [
+  { title: "Atendimento consultivo", text: "Cada proposta nasce do seu perfil, do seu momento e do seu orçamento." },
+  { title: "Reservas conferidas", text: "Documentos, prazos e coberturas revisados antes de qualquer confirmação." },
+  { title: "Acompanhamento na viagem", text: "Suporte no período da viagem, com todos os dados sempre à mão." },
+  { title: "Fornecedores selecionados", text: "Operadoras e serviços escolhidos com critério, não por catálogo." },
+];
+
+export const DEFAULT_FAQ = [
+  {
+    q: "Solicitar um orçamento tem algum custo?",
+    a: "Não. A solicitação é gratuita e sem compromisso: você conta o que imagina e recebe uma proposta personalizada para avaliar.",
+  },
+  {
+    q: "Em quanto tempo recebo a resposta?",
+    a: "O retorno acontece dentro do horário de atendimento, pelo canal que você escolher no formulário. Pedidos mais complexos podem levar um pouco mais para serem montados com calma.",
+  },
+  {
+    q: "Posso pedir mais de um serviço?",
+    a: "Sim. Você pode enviar solicitações diferentes (aéreo, hospedagem, transfer, seguro, entre outros) ou pedir um pacote completo em uma única solicitação.",
+  },
+  {
+    q: "Como acompanho a minha viagem depois de fechar?",
+    a: "Tudo fica reunido na Área do Cliente: orçamento, roteiro, carteira de viagem com vouchers e faturas, sempre pelos links enviados pelo seu consultor.",
+  },
+  {
+    q: "Meus dados estão protegidos?",
+    a: "Sim. Os dados informados são usados apenas para o atendimento da sua solicitação, conforme a Política de Privacidade.",
+  },
+];
