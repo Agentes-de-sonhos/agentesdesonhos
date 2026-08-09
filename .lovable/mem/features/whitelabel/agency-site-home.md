@@ -29,3 +29,10 @@ type: feature
 - O tenant vem SEMPRE do hostname no servidor; o browser nunca escolhe `agency_id`/`user_id` nem grava em `clients`/`opportunities`.
 - Persistência em `agency_site_requests`; cliente/oportunidade criados por `ensure_client_and_opportunity_for_lead` (dedupe por telefone normalizado, oportunidade na primeira coluna do funil).
 - Limitação atual: não há e-mail automático de notificação para este canal (as tabelas de notificação existentes são vinculadas a `form_id`/landing).
+
+## Rodada 5 (ajustes finais de cor)
+- Vermelho do preset editorial = `#F40000` (`hsl(0 100% 48%)`) em `--primary`/`--ring`/`--wl-red`; usado em ícones, kickers, estados ativos e CTAs secundários.
+- CTAs de comando ("Atendimento" no header, "Solicitar cotação") em grafite `--wl-ink` com texto branco.
+- Botões "Falar no WhatsApp" em verde acessível `--wl-whatsapp: 152 62% 30%` com texto branco.
+- Rodapé editorial voltou ao grafite escuro com texto branco e logo dentro de cartão branco.
+- Cards de "Destaques" todos brancos (sem alternância de cinza) com hover de elevação/sombra (motion-safe, md+).
