@@ -192,12 +192,42 @@ export const DEFAULT_DIFFERENTIALS: AgencyDifferential[] = [
 ];
 
 /**
+ * Converte caracteres Unicode estilizados (matemáticos negrito/itálico, sans,
+ * monoespaçado e fullwidth) de volta para letras e números ASCII, sem alterar
+ * acentuação normal nem o conteúdo do texto.
+ */
+function foldStyledUnicode(text: string): string {
+  const ranges: Array<[number, number, number, number]> = [
+    // [inícioBloco, fimBloco, códigoBaseASCII, tamanhoAlfabeto]
+    [0x1d400, 0x1d7ff, 0, 0],
+  ];
+  void ranges;
+  return Array.from(text)
+    .map((ch) => {
+      const cp = ch.codePointAt(0)!;
+      // Dígitos e letras de largura total.
+      if (cp >= 0xff21 && cp <= 0xff3a) return String.fromCharCode(cp - 0xff21 + 65);
+      if (cp >= 0xff41 && cp <= 0xff5a) return String.fromCharCode(cp - 0xff41 + 97);
+      if (cp >= 0xff10 && cp <= 0xff19) return String.fromCharCode(cp - 0xff10 + 48);
+      if (cp < 0x1d400 || cp > 0x1d7ff) return ch;
+      // Blocos de dígitos matemáticos (5 variantes de 10 dígitos).
+      if (cp >= 0x1d7ce) return String.fromCharCode(((cp - 0x1d7ce) % 10) + 48);
+      // Blocos alfabéticos de 52 caracteres (A-Z seguido de a-z).
+      const offset = (cp - 0x1d400) % 52;
+      return offset < 26
+        ? String.fromCharCode(offset + 65)
+        : String.fromCharCode(offset - 26 + 97);
+    })
+    .join("");
+}
+
+/**
  * Normaliza texto institucional resolvido do perfil: remove emojis/pictogramas e
  * caracteres Unicode estilizados, preservando integralmente o conteúdo factual.
  */
 export function normalizeInstitutionalText(text?: string | null): string {
   if (!text) return "";
-  return text
+  return foldStyledUnicode(text)
     .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu, "")
     .replace(/[ \t]{2,}/g, " ")
     .replace(/^[ \t]+|[ \t]+$/gm, "")
