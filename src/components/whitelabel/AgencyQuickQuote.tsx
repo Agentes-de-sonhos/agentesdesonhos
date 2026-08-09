@@ -151,7 +151,7 @@ export function AgencyQuickQuote({
                     editorial
                       ? `flex h-[46px] shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-lg border px-3.5 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                           selected
-                            ? "border-primary bg-primary text-primary-foreground"
+                            ? "border-primary bg-primary text-white [&_svg]:text-white hover:text-white focus-visible:text-white"
                             : "border-transparent text-foreground/70 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                         }`
                       : `flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
