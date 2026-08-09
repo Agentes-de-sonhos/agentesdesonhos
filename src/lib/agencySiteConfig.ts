@@ -62,21 +62,26 @@ export interface AgencyModule {
   text: string;
   /** Pre-selected service tab of the Central de Solicitações. */
   service: string;
+  /**
+   * Image slot resolved by the presentation layer (config stays asset-free).
+   * Central mapping of campaign artwork — change here, not in components.
+   */
+  image: "litoral" | "resort" | "cruzeiro" | "europa" | "parques";
   enabled: boolean;
   order: number;
 }
 
 /** Thematic/campaign modules — ready to be enabled, hidden and reordered per agency. */
 export const DEFAULT_MODULES: AgencyModule[] = [
-  { key: "resorts", title: "Resorts e all inclusive", text: "Estadias com tudo incluído, ideais para descansar sem se preocupar com nada.", service: "hospedagem", enabled: true, order: 1 },
-  { key: "cruzeiros", title: "Cruzeiros", text: "Itinerários pelo Caribe, Mediterrâneo, Europa e costa brasileira.", service: "cruzeiros", enabled: true, order: 2 },
-  { key: "circuitos", title: "Circuitos e multidestinos", text: "Vários destinos em uma só viagem, com logística resolvida.", service: "pacotes", enabled: true, order: 3 },
-  { key: "orlando", title: "Orlando", text: "Parques, ingressos, hotéis e transfers organizados dia a dia.", service: "ingressos", enabled: true, order: 4 },
-  { key: "parques", title: "Parques e ingressos", text: "Atrações, shows e experiências com datas e horários conferidos.", service: "ingressos", enabled: true, order: 5 },
-  { key: "lua-de-mel", title: "Lua de mel", text: "Roteiros românticos com mimos e detalhes combinados antecipadamente.", service: "pacotes", enabled: true, order: 6 },
-  { key: "familia", title: "Viagens em família", text: "Hospedagens e roteiros pensados para crianças e diferentes idades.", service: "pacotes", enabled: true, order: 7 },
-  { key: "disney-universal", title: "Disney e Universal", text: "Planejamento completo de parques, filas, refeições e deslocamentos.", service: "ingressos", enabled: true, order: 8 },
-  { key: "comandatuba", title: "Comandatuba", text: "Experiência all inclusive no litoral da Bahia, com apoio na programação.", service: "hospedagem", enabled: true, order: 9 },
+  { key: "resorts", title: "Resorts e all inclusive", text: "Estadias com tudo incluído, ideais para descansar sem se preocupar com nada.", service: "hospedagem", image: "resort", enabled: true, order: 1 },
+  { key: "cruzeiros", title: "Cruzeiros", text: "Itinerários pelo Caribe, Mediterrâneo, Europa e costa brasileira.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 2 },
+  { key: "circuitos", title: "Circuitos e multidestinos", text: "Vários destinos em uma só viagem, com logística resolvida.", service: "pacotes", image: "europa", enabled: true, order: 3 },
+  { key: "orlando", title: "Orlando", text: "Parques, ingressos, hotéis e transfers organizados dia a dia.", service: "ingressos", image: "parques", enabled: true, order: 4 },
+  { key: "parques", title: "Parques e ingressos", text: "Atrações, shows e experiências com datas e horários conferidos.", service: "ingressos", image: "parques", enabled: true, order: 5 },
+  { key: "lua-de-mel", title: "Lua de mel", text: "Roteiros românticos com mimos e detalhes combinados antecipadamente.", service: "pacotes", image: "litoral", enabled: true, order: 6 },
+  { key: "familia", title: "Viagens em família", text: "Hospedagens e roteiros pensados para crianças e diferentes idades.", service: "pacotes", image: "resort", enabled: true, order: 7 },
+  { key: "disney-universal", title: "Disney e Universal", text: "Planejamento completo de parques, filas, refeições e deslocamentos.", service: "ingressos", image: "parques", enabled: true, order: 8 },
+  { key: "comandatuba", title: "Comandatuba", text: "Experiência all inclusive no litoral da Bahia, com apoio na programação.", service: "hospedagem", image: "litoral", enabled: true, order: 9 },
 ];
 
 export function resolveModules(overrides?: Partial<Record<string, boolean>>): AgencyModule[] {
@@ -172,12 +177,33 @@ export const DEFAULT_HIGHLIGHTS: AgencyHighlight[] = [
   { title: "Viagem protegida", text: "Seguro adequado ao destino e à duração, explicado antes de contratar.", service: "seguro", cta: "Cotar seguro" },
 ];
 
-export const DEFAULT_DIFFERENTIALS = [
-  { title: "Atendimento consultivo", text: "Cada proposta nasce do seu perfil, do seu momento e do seu orçamento." },
-  { title: "Reservas conferidas", text: "Documentos, prazos e coberturas revisados antes de qualquer confirmação." },
-  { title: "Acompanhamento na viagem", text: "Suporte no período da viagem, com todos os dados sempre à mão." },
-  { title: "Fornecedores selecionados", text: "Operadoras e serviços escolhidos com critério, não por catálogo." },
+export interface AgencyDifferential {
+  title: string;
+  text: string;
+  /** Semantic icon slot (resolved by the presentation layer, never repeated). */
+  icon: "consultivo" | "conferido" | "acompanhamento" | "fornecedores";
+}
+
+export const DEFAULT_DIFFERENTIALS: AgencyDifferential[] = [
+  { title: "Atendimento consultivo", text: "Cada proposta nasce do seu perfil, do seu momento e do seu orçamento.", icon: "consultivo" },
+  { title: "Reservas conferidas", text: "Documentos, prazos e coberturas revisados antes de qualquer confirmação.", icon: "conferido" },
+  { title: "Acompanhamento na viagem", text: "Suporte no período da viagem, com todos os dados sempre à mão.", icon: "acompanhamento" },
+  { title: "Fornecedores selecionados", text: "Operadoras e serviços escolhidos com critério, não por catálogo.", icon: "fornecedores" },
 ];
+
+/**
+ * Normaliza texto institucional resolvido do perfil: remove emojis/pictogramas e
+ * caracteres Unicode estilizados, preservando integralmente o conteúdo factual.
+ */
+export function normalizeInstitutionalText(text?: string | null): string {
+  if (!text) return "";
+  return text
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/^[ \t]+|[ \t]+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 /* --------------------------- DESTINOS / INSPIRAÇÕES -------------------------- */
 
