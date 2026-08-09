@@ -832,7 +832,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       <section
         className={
           editorial
-            ? "relative overflow-hidden pb-16 md:pb-20"
+            ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
         onMouseEnter={() => setPaused(true)}
@@ -849,19 +849,26 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <div
             className={
               editorial
-                ? "absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.85)] via-[hsl(220_12%_7%/0.45)] to-[hsl(220_12%_7%/0.15)]"
+                ? "absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.9)] via-[hsl(220_12%_7%/0.6)] to-[hsl(220_12%_7%/0.05)]"
                 : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
             }
           />
           {editorial && (
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.55)] via-[hsl(220_12%_7%/0.3)] to-[hsl(220_12%_7%/0.25)]"
+              className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:bg-gradient-to-t md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent"
             />
           )}
         </div>
 
-        <div className={`relative ${container} pb-10 ${editorial ? "pt-24 md:pt-36" : "pt-20 md:pt-32"}`}>
+        <div
+          className={`relative ${container} ${
+            editorial
+              ? "pb-6 pt-20 md:pb-8 md:pt-24"
+              : "pb-10 pt-20 md:pt-32"
+          }`}
+        >
+          <div className={editorial ? "md:max-w-[60%]" : undefined}>
           {editorial ? (
             <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
@@ -876,7 +883,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <h1
             className={
               editorial
-                ? "max-w-[22ch] text-4xl font-extrabold leading-[1.06] tracking-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.45)] md:text-[3.4rem]"
+                ? "max-w-[24ch] text-[2rem] font-extrabold leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.45)] md:text-[2.75rem]"
                 : "max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >
@@ -885,7 +892,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <p
             className={
               editorial
-                ? "mt-5 max-w-xl text-[15px] leading-relaxed text-white/90 md:text-lg"
+                ? "mt-4 max-w-xl text-[15px] leading-relaxed text-white/90 md:text-base"
                 : "mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg"
             }
           >
@@ -893,7 +900,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           </p>
 
           {slides.length > 1 && (
-            <div className="mt-8 flex items-center gap-3">
+            <div className={`flex items-center gap-3 ${editorial ? "mt-6" : "mt-8"}`}>
               <button
                 type="button"
                 aria-label="Destaque anterior"
@@ -930,15 +937,16 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               </button>
             </div>
           )}
+          </div>
         </div>
       </section>
 
       {editorial ? (
-        /* Faixa própria: HERO → COTAÇÃO → DMC, sem sobreposição. */
-        <section id="cotacao" className="bg-[hsl(var(--wl-sand))]">
+        /* HERO COMPACTO → CARD SOBREPOSTO (90–110px) → próxima seção. */
+        <section id="cotacao" className="relative z-10 bg-[hsl(var(--wl-sand))]">
           <div
             ref={requestCenterRef}
-            className="mx-auto w-full max-w-[1140px] px-5 py-10 md:px-8 md:py-14"
+            className="mx-auto -mt-10 w-full max-w-[1140px] px-5 pb-10 sm:-mt-14 md:-mt-[80px] md:px-8 md:pb-14 lg:-mt-[100px]"
           >
             <AgencyQuickQuote
               hostname={hostname}

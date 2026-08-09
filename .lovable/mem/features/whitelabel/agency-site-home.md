@@ -31,6 +31,10 @@ type: feature
 - Limitação atual: não há e-mail automático de notificação para este canal (as tabelas de notificação existentes são vinculadas a `form_id`/landing).
 
 ## Rodada 5 (ajustes finais de cor)
+## Rodada 6 (primeira dobra editorial)
+- Hero compacto (`md:min-h-[500px]`), conteúdo em bloco à esquerda `md:max-w-[60%]`, scrim horizontal (esquerda escura, direita da foto visível) + leve gradiente inferior.
+- Central de Solicitações sobrepõe a base do hero: `-mt-10 sm:-mt-14 md:-mt-[80px] lg:-mt-[100px]` com `z-10` na faixa areia; sem faixa areia vazia entre hero e card.
+
 - Vermelho do preset editorial = `#F40000` (`hsl(0 100% 48%)`) em `--primary`/`--ring`/`--wl-red`; usado em ícones, kickers, estados ativos e CTAs secundários.
 - CTAs de comando ("Atendimento" no header, "Solicitar cotação") em grafite `--wl-ink` com texto branco.
 - Botões "Falar no WhatsApp" em verde acessível `--wl-whatsapp: 152 62% 30%` com texto branco.
