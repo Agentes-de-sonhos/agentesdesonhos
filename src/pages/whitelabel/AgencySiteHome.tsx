@@ -18,7 +18,6 @@ import {
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
-import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   resolveDestinations, resolveHeroSlides, resolveModules, resolveSections,
@@ -181,18 +180,82 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (!showcasePublished) return null;
         return (
           <section key={key} id="ofertas" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <Card className="flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center">
-              <div>
-                <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Ofertas em destaque</h2>
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl">
+                <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Ofertas selecionadas</h2>
                 <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
-                <p className="mt-4 max-w-xl text-muted-foreground">
+                <p className="mt-4 text-muted-foreground">
                   Nossa vitrine reúne as oportunidades do momento, atualizadas pela equipe.
                 </p>
               </div>
-              <Button asChild size="lg">
-                <a href="/ofertas">Ver ofertas <ArrowRight className="ml-2 h-4 w-4" /></a>
+              <Button asChild variant="outline">
+                <a href="/ofertas">Ver todas as ofertas <ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
-            </Card>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {destinations.slice(0, 3).map((d) => (
+                <a
+                  key={d.key}
+                  href="/ofertas"
+                  className="group relative block overflow-hidden rounded-2xl border border-border/60"
+                >
+                  <img
+                    src={DESTINATION_IMAGES[d.image]}
+                    alt={d.title}
+                    loading="lazy"
+                    className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <span className="inline-flex rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+                      {d.label}
+                    </span>
+                    <h3 className="mt-3 text-lg font-semibold text-primary-foreground">{d.title}</h3>
+                    <p className="mt-1 text-sm text-primary-foreground/85">{d.text}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        );
+
+      case "destinations":
+        return (
+          <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
+            <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+              <SectionHeading
+                title="Descubra o seu próximo destino"
+                subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+              />
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {destinations.map((d) => (
+                  <button
+                    key={d.key}
+                    type="button"
+                    onClick={() => openRequest(d.service)}
+                    className="group relative block overflow-hidden rounded-2xl border border-border/60 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  >
+                    <img
+                      src={DESTINATION_IMAGES[d.image]}
+                      alt={d.title}
+                      loading="lazy"
+                      className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-5">
+                      <span className="inline-flex rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+                        {d.label}
+                      </span>
+                      <h3 className="mt-3 text-lg font-semibold text-primary-foreground">{d.title}</h3>
+                      <p className="mt-1 text-sm text-primary-foreground/85">{d.text}</p>
+                      <span className="mt-3 inline-flex items-center text-sm font-medium text-primary-foreground">
+                        Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" />
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </section>
         );
 
