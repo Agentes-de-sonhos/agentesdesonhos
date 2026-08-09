@@ -233,6 +233,29 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "modules":
+        if (editorial) {
+          return (
+            <section key={key} id="campanhas" className="bg-background">
+              <div className={`${container} py-20 md:py-24`}>
+                <SectionHeading
+                  title="Experiências e campanhas"
+                  subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
+                  editorial
+                />
+                <AgencyCampaignRail
+                  items={modules.map((m) => ({
+                    key: m.key,
+                    title: m.title,
+                    text: m.text,
+                    service: m.service,
+                    imageSrc: DESTINATION_IMAGES[m.image],
+                  }))}
+                  onSelect={openRequest}
+                />
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="campanhas" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
