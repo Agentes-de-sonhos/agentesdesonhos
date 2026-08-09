@@ -853,12 +853,18 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
             }
           />
+          {editorial && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.55)] via-[hsl(220_12%_7%/0.3)] to-[hsl(220_12%_7%/0.25)]"
+            />
+          )}
         </div>
 
         <div className={`relative ${container} pb-10 ${editorial ? "pt-24 md:pt-36" : "pt-20 md:pt-32"}`}>
           {editorial ? (
-            <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary-foreground/85">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+            <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
+              <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
               {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
             </p>
           ) : (
@@ -870,7 +876,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <h1
             className={
               editorial
-                ? "max-w-[22ch] text-4xl font-extrabold leading-[1.06] tracking-tight text-primary-foreground md:text-[3.4rem]"
+                ? "max-w-[22ch] text-4xl font-extrabold leading-[1.06] tracking-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.45)] md:text-[3.4rem]"
                 : "max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >
@@ -879,7 +885,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <p
             className={
               editorial
-                ? "mt-5 max-w-xl text-[15px] leading-relaxed text-primary-foreground/85 md:text-lg"
+                ? "mt-5 max-w-xl text-[15px] leading-relaxed text-white/90 md:text-lg"
                 : "mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg"
             }
           >
@@ -892,7 +898,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 type="button"
                 aria-label="Destaque anterior"
                 onClick={() => setSlide((s) => (s - 1 + slides.length) % slides.length)}
-                className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-primary-foreground backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className={`grid h-9 w-9 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                  editorial ? "text-white [&_svg]:text-white" : "text-primary-foreground"
+                }`}
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -914,7 +922,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 type="button"
                 aria-label="Próximo destaque"
                 onClick={() => setSlide((s) => (s + 1) % slides.length)}
-                className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-primary-foreground backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className={`grid h-9 w-9 place-items-center rounded-full bg-white/15 backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                  editorial ? "text-white [&_svg]:text-white" : "text-primary-foreground"
+                }`}
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -922,6 +932,17 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           )}
         </div>
       </section>
+
+      {/* legacy-block-removed */}
+      {false && (
+        <div
+          className={
+            editorial
+              ? "absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.85)] via-[hsl(220_12%_7%/0.45)] to-[hsl(220_12%_7%/0.15)]"
+                : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
+            }
+          />
+      )}
 
       {editorial ? (
         /* Faixa própria: HERO → COTAÇÃO → DMC, sem sobreposição. */
