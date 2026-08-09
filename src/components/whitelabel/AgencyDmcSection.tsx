@@ -74,14 +74,22 @@ export function AgencyDmcSection({
 
             <div className="mt-9 flex flex-wrap items-center gap-4">
               {href ? (
-                <Button asChild size="lg" className="h-12 rounded-lg px-6 text-[15px] font-semibold">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 rounded-lg px-6 text-[15px] font-semibold text-white [&_svg]:text-white"
+                >
                   <a href={href} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                     {config.cta}
                   </a>
                 </Button>
               ) : (
-                <Button size="lg" className="h-12 rounded-lg px-6 text-[15px] font-semibold" onClick={onFallbackContact}>
+                <Button
+                  size="lg"
+                  className="h-12 rounded-lg px-6 text-[15px] font-semibold text-white [&_svg]:text-white"
+                  onClick={onFallbackContact}
+                >
                   {config.cta} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               )}
