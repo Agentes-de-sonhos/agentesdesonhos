@@ -173,6 +173,7 @@ const App = () => (
       <Sonner />
       <AppUpdateModal />
         <ErrorBoundary>
+        <AgencyDomainGate>
         <AuthProvider>
           <TeamSessionProvider>
           <SubscriptionProvider>
@@ -356,6 +357,7 @@ const App = () => (
           </SubscriptionProvider>
           </TeamSessionProvider>
         </AuthProvider>
+        </AgencyDomainGate>
         </ErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
