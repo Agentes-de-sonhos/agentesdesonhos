@@ -16,6 +16,11 @@ type: feature
 - Schemas declarativos + validação em `src/lib/agencySiteRequests.ts`. Exige nome, consentimento e **WhatsApp OU e-mail**. Valores preservados por serviço ao trocar aba/etapa.
 
 ## Integração CRM (segura)
+## Preset visual (Rodada 1)
+- `src/lib/agencySiteTheme.ts`: `resolveSiteTheme(hostname)` → `classic` (todos os tenants) ou `travelEditorial` (apenas `100limites.tur.br` / `www.100limites.tur.br`).
+- Tokens do preset em `src/index.css` (`.wl-editorial`, `--wl-navy`, `--wl-sand`, fonte Manrope); a classe é aplicada na raiz por `AgencySiteLayout`.
+- No preset editorial: cabeçalho alto sem bordas, hero editorial, cotação rápida com abas maiores, DMC como faixa navy em 2 colunas, destinos em grid editorial e Destaques com ícone semântico por card (rota/avião/escudo). Sem "título + tracinho".
+
 - Envio via Edge Function `submit-agency-site-request` (rate limit por IP, honeypot, tempo mínimo 3s, idempotência) → RPC `submit_agency_site_request(p_hostname, p_payload)` (apenas `service_role`).
 - O tenant vem SEMPRE do hostname no servidor; o browser nunca escolhe `agency_id`/`user_id` nem grava em `clients`/`opportunities`.
 - Persistência em `agency_site_requests`; cliente/oportunidade criados por `ensure_client_and_opportunity_for_lead` (dedupe por telefone normalizado, oportunidade na primeira coluna do funil).

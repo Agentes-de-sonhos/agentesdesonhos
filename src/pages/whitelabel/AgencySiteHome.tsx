@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
-  MapPin, CheckCircle2, Quote,
+  MapPin, CheckCircle2, Quote, Route,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,7 @@ import {
   type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
+import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
 import destinoLitoral from "@/assets/whitelabel/destino-litoral.jpg";
 import destinoResort from "@/assets/whitelabel/destino-resort.jpg";
@@ -53,7 +54,30 @@ export const AGENCY_SERVICES = [
   { key: "pacotes", title: "Pacotes e Circuitos", icon: Compass },
 ] as const;
 
-function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+/** Ícone semântico por destaque (nunca o mesmo ícone repetido). */
+const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
+  "Roteiro sob medida": Route,
+  "Aéreo com estratégia": Plane,
+  "Viagem protegida": ShieldCheck,
+};
+
+function SectionHeading({
+  title,
+  subtitle,
+  editorial,
+}: {
+  title: string;
+  subtitle?: string;
+  editorial?: boolean;
+}) {
+  if (editorial) {
+    return (
+      <div className="mb-10 max-w-2xl">
+        <h2 className="text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">{title}</h2>
+        {subtitle && <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground md:text-base">{subtitle}</p>}
+      </div>
+    );
+  }
   return (
     <div className="mb-8 max-w-2xl">
       <h2 className="text-2xl font-semibold text-foreground md:text-3xl">{title}</h2>
@@ -88,6 +112,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
+  const editorial = isEditorialTheme(hostname);
+  const container = siteContainer(editorial);
 
   // Faixa B2B/DMC: exclusiva das agências configuradas por hostname.
   const dmc = useMemo(() => resolveDmc(hostname), [hostname]);
@@ -136,6 +162,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <AgencyDmcSection
             key={key}
             config={dmc}
+            hostname={hostname}
             whatsappNumber={wa}
             onFallbackContact={() => openRequest("transfer")}
           />
@@ -143,13 +170,44 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
       case "highlights":
         return (
-          <section key={key} id="destaques" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+          <section
+            key={key}
+            id="destaques"
+            className={editorial ? `${container} py-20 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}
+          >
             <SectionHeading
               title="Destaques"
               subtitle="Três formas de começar agora o planejamento da sua próxima viagem."
+              editorial={editorial}
             />
-            <div className="grid gap-4 md:grid-cols-3">
-              {DEFAULT_HIGHLIGHTS.map((h) => (
+            {editorial ? (
+              <div className="grid gap-5 md:grid-cols-3">
+                {DEFAULT_HIGHLIGHTS.map((h, i) => {
+                  const Icon = HIGHLIGHT_ICONS[h.title] ?? Compass;
+                  return (
+                    <article
+                      key={h.title}
+                      className={`flex h-full flex-col rounded-xl p-8 ${
+                        i === 1 ? "bg-[hsl(var(--wl-sand))]" : "bg-card"
+                      } shadow-[0_1px_2px_hsl(213_48%_15%/0.05)]`}
+                    >
+                      <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
+                      <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
+                      <p className="mt-3 flex-1 text-[15px] leading-relaxed text-muted-foreground">{h.text}</p>
+                      <button
+                        type="button"
+                        onClick={() => openRequest(h.service)}
+                        className="mt-7 inline-flex w-fit items-center border-b border-foreground/25 pb-1 text-[15px] font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                      >
+                        {h.cta} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-3">
+                {DEFAULT_HIGHLIGHTS.map((h) => (
                 <Card key={h.title} className="flex h-full flex-col p-6 transition-shadow hover:shadow-lg">
                   <Sparkles className="mb-4 h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="text-base font-semibold text-foreground">{h.title}</h3>
@@ -158,8 +216,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     {h.cta} <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Card>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         );
 
@@ -234,6 +293,61 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "destinations":
+        if (editorial) {
+          return (
+            <section key={key} id="destinos" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} py-20 md:py-24`}>
+                <SectionHeading
+                  title="Descubra o seu próximo destino"
+                  subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+                  editorial
+                />
+                <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:auto-rows-[236px] md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
+                  {destinations.map((d, i) => (
+                    <button
+                      key={d.key}
+                      type="button"
+                      onClick={() => openRequest(d.service)}
+                      className={`group relative w-[80vw] shrink-0 snap-start overflow-hidden rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[58vw] md:w-auto ${
+                        i === 0
+                          ? "md:col-span-2 md:row-span-2"
+                          : i === destinations.length - 1 && destinations.length % 2 === 1
+                            ? "md:col-span-2"
+                            : ""
+                      }`}
+                    >
+                      <img
+                        src={DESTINATION_IMAGES[d.image]}
+                        alt={d.title}
+                        loading="lazy"
+                        className="h-[360px] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03] md:h-full"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[hsl(213_48%_10%/0.82)] via-[hsl(213_48%_10%/0.2)] to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 p-6">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-background/80">
+                          {d.label}
+                        </span>
+                        <h3
+                          className={`mt-2 font-bold leading-tight text-background ${
+                            i === 0 ? "text-2xl md:text-3xl" : "text-xl"
+                          }`}
+                        >
+                          {d.title}
+                        </h3>
+                        {i === 0 && (
+                          <p className="mt-2 max-w-md text-sm text-background/80">{d.text}</p>
+                        )}
+                        <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
+                          Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        }
         return (
           <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
@@ -464,18 +578,45 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/90 via-primary to-primary/70" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
+          <div
+            className={
+              editorial
+                ? "absolute inset-0 bg-gradient-to-t from-[hsl(213_48%_8%/0.85)] via-[hsl(213_48%_8%/0.45)] to-[hsl(213_48%_8%/0.15)]"
+                : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
+            }
+          />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-20 md:pt-32">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
-          </p>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl">
+        <div className={`relative ${container} pb-10 ${editorial ? "pt-24 md:pt-36" : "pt-20 md:pt-32"}`}>
+          {editorial ? (
+            <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-primary-foreground/85">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
+            </p>
+          ) : (
+            <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
+            </p>
+          )}
+          <h1
+            className={
+              editorial
+                ? "max-w-[22ch] text-4xl font-extrabold leading-[1.06] tracking-tight text-primary-foreground md:text-[3.4rem]"
+                : "max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
+            }
+          >
             {current.title}
           </h1>
-          <p className="mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg">{current.subtitle}</p>
+          <p
+            className={
+              editorial
+                ? "mt-5 max-w-xl text-[15px] leading-relaxed text-primary-foreground/85 md:text-lg"
+                : "mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg"
+            }
+          >
+            {current.subtitle}
+          </p>
 
           {slides.length > 1 && (
             <div className="mt-8 flex items-center gap-3">
@@ -514,7 +655,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       </section>
 
-      <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28">
+      <div
+        ref={requestCenterRef}
+        className={
+          editorial
+            ? "relative z-10 mx-auto -mt-24 w-full max-w-[1140px] px-5 md:-mt-28 md:px-8"
+            : "relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28"
+        }
+      >
         <AgencyQuickQuote
           hostname={hostname}
           agencyName={name}

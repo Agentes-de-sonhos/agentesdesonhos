@@ -8,6 +8,11 @@ import {
   agencyDisplayName,
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
+import {
+  EDITORIAL_ROOT_CLASS,
+  isEditorialTheme,
+  siteContainer,
+} from "@/lib/agencySiteTheme";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
@@ -22,6 +27,96 @@ export const NAV_LINKS = [
 export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
+  const editorial = isEditorialTheme(info.hostname);
+  const wa = agencyWhatsappNumber(info);
+
+  if (editorial) {
+    const mainLinks = NAV_LINKS.filter((l) => l.to !== "/area-do-cliente");
+    return (
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
+        <div className={`${siteContainer(true)} flex h-20 items-center justify-between gap-6`}>
+          <Link to="/" className="flex min-w-0 items-center gap-3">
+            {info.logo_url ? (
+              <img
+                src={info.logo_url}
+                alt={`Logo ${name}`}
+                className="h-12 w-auto max-w-[200px] object-contain"
+              />
+            ) : (
+              <span className="grid h-12 w-12 place-items-center rounded-lg bg-foreground text-lg font-bold text-background">
+                {name.slice(0, 1).toUpperCase()}
+              </span>
+            )}
+            <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
+              <BrandText>{name}</BrandText>
+            </span>
+          </Link>
+
+          <nav className="hidden items-center gap-8 lg:flex">
+            {mainLinks.map((l) => (
+              <a
+                key={l.to}
+                href={l.to}
+                className="text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="hidden items-center gap-5 md:flex">
+            <a
+              href="/area-do-cliente"
+              className="whitespace-nowrap text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Área do Cliente
+            </a>
+            {wa && (
+              <Button asChild size="lg" className="h-11 rounded-lg px-5">
+                <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
+                </a>
+              </Button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="-mr-2 rounded-lg p-3 text-foreground lg:hidden"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Abrir menu"
+            aria-expanded={open}
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {open && (
+          <div className="border-t border-border/60 bg-background lg:hidden">
+            <nav className={`${siteContainer(true)} flex flex-col py-2`}>
+              {NAV_LINKS.map((l) => (
+                <a
+                  key={l.to}
+                  href={l.to}
+                  onClick={() => setOpen(false)}
+                  className="min-h-[52px] py-3.5 text-[15px] font-medium text-foreground/80"
+                >
+                  {l.label}
+                </a>
+              ))}
+              {wa && (
+                <Button asChild size="lg" className="my-3 h-12 rounded-lg">
+                  <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
+                  </a>
+                </Button>
+              )}
+            </nav>
+          </div>
+        )}
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
@@ -145,8 +240,9 @@ export function AgencySiteLayout({
   info: AgencyDomainInfo;
   children: React.ReactNode;
 }) {
+  const editorial = isEditorialTheme(info.hostname);
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${editorial ? EDITORIAL_ROOT_CLASS : ""}`}>
       <AgencyBrandBar info={info} />
       <main>{children}</main>
       <AgencyFooter info={info} />
