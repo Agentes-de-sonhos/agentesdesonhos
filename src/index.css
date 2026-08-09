@@ -207,6 +207,50 @@ img {
   }
 }
 
+/* ===== Preset visual "travelEditorial" (sites White Label em avaliação) =====
+   Escopo: aplicado APENAS na raiz do site white label das agências habilitadas
+   em src/lib/agencySiteTheme.ts. Sobrescreve somente tokens semânticos, então
+   os componentes continuam usando --background/--primary/--muted normalmente.
+   Nenhum outro tenant ou página da plataforma é afetado. */
+.wl-editorial {
+  --background: 36 38% 97%;
+  --foreground: 213 46% 14%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 213 46% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 213 46% 14%;
+
+  --primary: 194 82% 36%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 36 30% 93%;
+  --secondary-foreground: 213 46% 14%;
+  --muted: 36 30% 94%;
+  --muted-foreground: 213 16% 40%;
+  --accent: 36 30% 93%;
+  --accent-foreground: 213 46% 14%;
+
+  --border: 34 18% 88%;
+  --input: 34 18% 86%;
+  --ring: 194 82% 36%;
+  --radius: 0.625rem;
+
+  /* Azul-marinho institucional (faixas B2B / superfícies escuras) */
+  --wl-navy: 213 48% 15%;
+  --wl-sand: 36 32% 92%;
+
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+}
+
+.wl-editorial h1,
+.wl-editorial h2,
+.wl-editorial h3,
+.wl-editorial h4 {
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
 /* Wizard – Cadastro assistido por etapas (Carteira Digital)
    Neutral inputs with the category color reserved for the focus state.
    The category color is provided via the --wizard-accent CSS variable
