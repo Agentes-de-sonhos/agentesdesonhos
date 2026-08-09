@@ -16,7 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   REQUEST_SERVICES, CONTACT_CHANNELS, CONTACT_TIMES, EMPTY_CONTACT,
   buildDetailsPayload, buildRequestSummary, describeServiceValues,
-  initialServiceValues, resolveDestination, serviceByKey,
+  initialServiceValues, mergeServiceValues, resolveDestination, serviceByKey,
   validateContactStep, validateServiceStep,
   type ContactValues, type RequestField, type ServiceValues,
 } from "@/lib/agencySiteRequests";
@@ -120,6 +120,14 @@ export interface AgencyRequestCenterProps {
   /** Controlled service tab (used by the campaign modules CTAs). */
   service?: string;
   onServiceChange?: (key: string) => void;
+  /** Uncontrolled initial tab (used when opened from the quick quote card). */
+  initialService?: string;
+  /** Values already typed in the compact card, carried into step 1. */
+  prefill?: ServiceValues | null;
+  /** `plain` removes the card chrome so it can live inside a modal/drawer. */
+  variant?: "card" | "plain";
+  /** Hides the internal heading when the container already provides one. */
+  hideHeading?: boolean;
 }
 
 export function AgencyRequestCenter({
@@ -129,8 +137,14 @@ export function AgencyRequestCenter({
   termsUrl = "/termosdeuso",
   service: controlledService,
   onServiceChange,
+  initialService,
+  prefill,
+  variant = "card",
+  hideHeading = false,
 }: AgencyRequestCenterProps) {
-  const [internalKey, setInternalKey] = useState(REQUEST_SERVICES[0].key);
+  const [internalKey, setInternalKey] = useState(
+    () => serviceByKey(initialService ?? REQUEST_SERVICES[0].key).key,
+  );
   const activeKey = controlledService ?? internalKey;
   const setActiveKey = useCallback(
     (key: string) => {
@@ -149,6 +163,11 @@ export function AgencyRequestCenter({
   const [valuesByService, setValuesByService] = useState<Record<string, ServiceValues>>(() => {
     const initial: Record<string, ServiceValues> = {};
     for (const service of REQUEST_SERVICES) initial[service.key] = initialServiceValues(service);
+    const prefillKey = initialService ?? controlledService;
+    if (prefill && prefillKey) {
+      const target = serviceByKey(prefillKey);
+      initial[target.key] = mergeServiceValues(target, prefill);
+    }
     return initial;
   });
 
