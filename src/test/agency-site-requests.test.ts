@@ -109,7 +109,7 @@ describe("configuração de seções", () => {
   it("mantém a ordem aprovada e oculta opcionais por padrão", () => {
     const keys = resolveSections().map((s) => s.key);
     expect(keys).toEqual([
-      "highlights", "modules", "offers", "about", "differentials", "concierge", "faq", "newsletter",
+      "offers", "destinations", "highlights", "modules", "about", "differentials", "concierge", "faq", "newsletter",
     ]);
   });
 

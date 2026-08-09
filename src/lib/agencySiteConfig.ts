@@ -9,6 +9,7 @@
 
 export type AgencySectionKey =
   | "highlights"
+  | "destinations"
   | "modules"
   | "offers"
   | "about"
@@ -28,16 +29,17 @@ export interface AgencySectionConfig {
 
 /** MVP defaults — optional sections (team, testimonials) stay off until real data exists. */
 export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
-  { key: "highlights", label: "Destaques", enabled: true, order: 1 },
-  { key: "modules", label: "Módulos temáticos", enabled: true, order: 2 },
-  { key: "offers", label: "Ofertas em destaque", enabled: true, order: 3 },
-  { key: "about", label: "Apresentação da agência", enabled: true, order: 4 },
-  { key: "differentials", label: "Diferenciais", enabled: true, order: 5 },
-  { key: "concierge", label: "Atendimento concierge", enabled: true, order: 6 },
-  { key: "team", label: "Equipe e consultores", enabled: false, order: 7 },
-  { key: "testimonials", label: "Depoimentos", enabled: false, order: 8 },
-  { key: "faq", label: "Perguntas frequentes", enabled: true, order: 9 },
-  { key: "newsletter", label: "Newsletter", enabled: true, order: 10 },
+  { key: "offers", label: "Ofertas em destaque", enabled: true, order: 1 },
+  { key: "destinations", label: "Descoberta de destinos", enabled: true, order: 2 },
+  { key: "highlights", label: "Destaques", enabled: true, order: 3 },
+  { key: "modules", label: "Módulos temáticos", enabled: true, order: 4 },
+  { key: "about", label: "Apresentação da agência", enabled: true, order: 5 },
+  { key: "differentials", label: "Diferenciais", enabled: true, order: 6 },
+  { key: "concierge", label: "Atendimento concierge", enabled: true, order: 7 },
+  { key: "team", label: "Equipe e consultores", enabled: false, order: 8 },
+  { key: "testimonials", label: "Depoimentos", enabled: false, order: 9 },
+  { key: "faq", label: "Perguntas frequentes", enabled: true, order: 10 },
+  { key: "newsletter", label: "Newsletter", enabled: true, order: 11 },
 ];
 
 export function resolveSections(
@@ -145,6 +147,7 @@ export function resolveHeroSlides(
   agencyName: string,
   coverImageUrl?: string | null,
   overrides?: AgencyHeroSlide[],
+  fallbackImage?: string | null,
 ): ResolvedHeroSlide[] {
   const source = (overrides?.length ? overrides : DEFAULT_HERO_SLIDES)
     .filter((s) => s.enabled && s.title.trim())
@@ -156,7 +159,7 @@ export function resolveHeroSlides(
   return list.map((s) => ({
     title: s.title.replace(/\{agency\}/g, agencyName),
     subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
-    image: coverImageUrl ?? null,
+    image: coverImageUrl ?? fallbackImage ?? null,
   }));
 }
 
@@ -172,6 +175,41 @@ export const DEFAULT_DIFFERENTIALS = [
   { title: "Acompanhamento na viagem", text: "Suporte no período da viagem, com todos os dados sempre à mão." },
   { title: "Fornecedores selecionados", text: "Operadoras e serviços escolhidos com critério, não por catálogo." },
 ];
+
+/* --------------------------- DESTINOS / INSPIRAÇÕES -------------------------- */
+
+export interface AgencyDestination {
+  key: string;
+  /** Image slot resolved by the presentation layer (no asset imports here). */
+  image: "litoral" | "resort" | "cruzeiro" | "europa" | "parques";
+  title: string;
+  label: string;
+  text: string;
+  service: string;
+  enabled: boolean;
+  order: number;
+}
+
+/**
+ * Editorial inspiration cards (NEVER prices or commercial promises). Used for the
+ * discovery section and as an elegant fallback while the agency has no published
+ * showcase offers.
+ */
+export const DEFAULT_DESTINATIONS: AgencyDestination[] = [
+  { key: "litoral", image: "litoral", label: "Praias", title: "Litoral brasileiro", text: "Do Nordeste ao Sul, com hospedagens escolhidas a dedo.", service: "pacotes", enabled: true, order: 1 },
+  { key: "resorts", image: "resort", label: "All inclusive", title: "Resorts e all inclusive", text: "Descanso com tudo incluído e programação para todas as idades.", service: "hospedagem", enabled: true, order: 2 },
+  { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros marítimos", text: "Itinerários, cabines e categorias explicados com clareza.", service: "cruzeiros", enabled: true, order: 3 },
+  { key: "europa", image: "europa", label: "Multidestinos", title: "Europa e circuitos", text: "Vários destinos em uma viagem, com logística resolvida.", service: "pacotes", enabled: true, order: 4 },
+  { key: "parques", image: "parques", label: "Família", title: "Parques e atrações", text: "Ingressos, filas e deslocamentos organizados dia a dia.", service: "ingressos", enabled: true, order: 5 },
+];
+
+export function resolveDestinations(
+  overrides?: Partial<Record<string, boolean>>,
+): AgencyDestination[] {
+  return DEFAULT_DESTINATIONS.map((d) => ({ ...d, enabled: overrides?.[d.key] ?? d.enabled }))
+    .filter((d) => d.enabled)
+    .sort((a, b) => a.order - b.order);
+}
 
 export const DEFAULT_FAQ = [
   {

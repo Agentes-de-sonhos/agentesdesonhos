@@ -17,12 +17,28 @@ import {
   agencyDisplayName,
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
-import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
+import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
-  resolveHeroSlides, resolveModules, resolveSections, type AgencySectionKey,
+  resolveDestinations, resolveHeroSlides, resolveModules, resolveSections,
+  type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
+import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
+import destinoLitoral from "@/assets/whitelabel/destino-litoral.jpg";
+import destinoResort from "@/assets/whitelabel/destino-resort.jpg";
+import destinoCruzeiro from "@/assets/whitelabel/destino-cruzeiro.jpg";
+import destinoEuropa from "@/assets/whitelabel/destino-europa.jpg";
+import destinoParques from "@/assets/whitelabel/destino-parques.jpg";
+
+/** Image slots referenced by the editorial config (config stays asset-free). */
+const DESTINATION_IMAGES: Record<string, string> = {
+  litoral: destinoLitoral,
+  resort: destinoResort,
+  cruzeiro: destinoCruzeiro,
+  europa: destinoEuropa,
+  parques: destinoParques,
+};
 
 /** Kept exported: other white-label surfaces import this service list. */
 export const AGENCY_SERVICES = [
@@ -74,19 +90,21 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   const sections = useMemo(() => resolveSections(), []);
   const modules = useMemo(() => resolveModules(), []);
+  const destinations = useMemo(() => resolveDestinations(), []);
   const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
+  const [requestOpen, setRequestOpen] = useState(false);
   const requestCenterRef = useRef<HTMLDivElement | null>(null);
 
   const openRequest = useCallback((key: string) => {
     setService(key);
-    requestCenterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setRequestOpen(true);
   }, []);
 
   // Hero banners (1 to 5) come from the central config — no hardcoded copy here.
   const slides = useMemo(
-    () => resolveHeroSlides(name, info.cover_image_url),
+    () => resolveHeroSlides(name, info.cover_image_url, undefined, heroPraia),
     [name, info.cover_image_url],
   );
 
@@ -162,18 +180,82 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (!showcasePublished) return null;
         return (
           <section key={key} id="ofertas" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <Card className="flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center">
-              <div>
-                <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Ofertas em destaque</h2>
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+              <div className="max-w-2xl">
+                <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Ofertas selecionadas</h2>
                 <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
-                <p className="mt-4 max-w-xl text-muted-foreground">
+                <p className="mt-4 text-muted-foreground">
                   Nossa vitrine reúne as oportunidades do momento, atualizadas pela equipe.
                 </p>
               </div>
-              <Button asChild size="lg">
-                <a href="/ofertas">Ver ofertas <ArrowRight className="ml-2 h-4 w-4" /></a>
+              <Button asChild variant="outline">
+                <a href="/ofertas">Ver todas as ofertas <ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
-            </Card>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {destinations.slice(0, 3).map((d) => (
+                <a
+                  key={d.key}
+                  href="/ofertas"
+                  className="group relative block overflow-hidden rounded-2xl border border-border/60"
+                >
+                  <img
+                    src={DESTINATION_IMAGES[d.image]}
+                    alt={d.title}
+                    loading="lazy"
+                    className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <span className="inline-flex rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+                      {d.label}
+                    </span>
+                    <h3 className="mt-3 text-lg font-semibold text-primary-foreground">{d.title}</h3>
+                    <p className="mt-1 text-sm text-primary-foreground/85">{d.text}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        );
+
+      case "destinations":
+        return (
+          <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
+            <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+              <SectionHeading
+                title="Descubra o seu próximo destino"
+                subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+              />
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {destinations.map((d) => (
+                  <button
+                    key={d.key}
+                    type="button"
+                    onClick={() => openRequest(d.service)}
+                    className="group relative block overflow-hidden rounded-2xl border border-border/60 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  >
+                    <img
+                      src={DESTINATION_IMAGES[d.image]}
+                      alt={d.title}
+                      loading="lazy"
+                      className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-5">
+                      <span className="inline-flex rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+                        {d.label}
+                      </span>
+                      <h3 className="mt-3 text-lg font-semibold text-primary-foreground">{d.title}</h3>
+                      <p className="mt-1 text-sm text-primary-foreground/85">{d.text}</p>
+                      <span className="mt-3 inline-flex items-center text-sm font-medium text-primary-foreground">
+                        Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" />
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </section>
         );
 
@@ -356,7 +438,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     <>
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
-        className="relative overflow-hidden pb-40 md:pb-56"
+        className="relative overflow-hidden pb-32 md:pb-40"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -368,32 +450,21 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/90 via-primary to-primary/70" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 md:pt-24">
+        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-20 md:pt-32">
           <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
           </p>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-primary-foreground md:text-5xl">
+          <h1 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl">
             {current.title}
           </h1>
           <p className="mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg">{current.subtitle}</p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" onClick={() => openRequest("pacotes")}>
-              Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            {showcasePublished && (
-              <Button asChild size="lg" variant="secondary">
-                <a href="/ofertas">Ver ofertas</a>
-              </Button>
-            )}
-          </div>
-
           {slides.length > 1 && (
-            <div className="mt-10 flex items-center gap-3">
+            <div className="mt-8 flex items-center gap-3">
               <button
                 type="button"
                 aria-label="Destaque anterior"
@@ -429,12 +500,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       </section>
 
-      <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-36 max-w-6xl px-4 md:-mt-48">
-        <AgencyRequestCenter
+      <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-24 max-w-5xl px-4 md:-mt-28">
+        <AgencyQuickQuote
           hostname={hostname}
           agencyName={name}
           service={service}
           onServiceChange={setService}
+          open={requestOpen}
+          onOpenChange={setRequestOpen}
         />
       </div>
 
