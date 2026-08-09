@@ -20,6 +20,8 @@ type: feature
 - `src/lib/agencySiteTheme.ts`: `resolveSiteTheme(hostname)` → `classic` (todos os tenants) ou `travelEditorial` (apenas `100limites.tur.br` / `www.100limites.tur.br`).
 - Tokens do preset em `src/index.css` (`.wl-editorial`, `--wl-navy`, `--wl-sand`, fonte Manrope); a classe é aplicada na raiz por `AgencySiteLayout`.
 - No preset editorial: cabeçalho alto sem bordas, hero editorial, cotação rápida com abas maiores, DMC como faixa navy em 2 colunas, destinos em grid editorial e Destaques com ícone semântico por card (rota/avião/escudo). Sem "título + tracinho".
+- Rodada 2 (editorial): Experiências e campanhas viraram rail fotográfico 4:5 com scroll-snap (`AgencyCampaignRail`, imagem por módulo definida em `DEFAULT_MODULES.image`); Sobre em 2 colunas com número destacado extraído do próprio bio; Diferenciais em lista editorial 2 colunas com ícone semântico único (`DEFAULT_DIFFERENTIALS.icon`); Atendimento humano em 2 colunas com passos numerados sobre faixa areia.
+- Textos institucionais vindos do perfil passam por `normalizeInstitutionalText` (remove emojis e converte Unicode estilizado para ASCII) antes de aparecer no site.
 
 - Envio via Edge Function `submit-agency-site-request` (rate limit por IP, honeypot, tempo mínimo 3s, idempotência) → RPC `submit_agency_site_request(p_hostname, p_payload)` (apenas `service_role`).
 - O tenant vem SEMPRE do hostname no servidor; o browser nunca escolhe `agency_id`/`user_id` nem grava em `clients`/`opportunities`.
