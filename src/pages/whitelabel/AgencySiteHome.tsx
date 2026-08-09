@@ -582,9 +582,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     monta as melhores opções e explica cada detalhe antes de você decidir.
                   </p>
                   <div className="mt-9 flex flex-wrap gap-3">
-                    <Button size="lg" onClick={() => openRequest("pacotes")}>
-                      Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                     <Button
+                       size="lg"
+                       className="text-white [&_svg]:text-white"
+                       onClick={() => openRequest("pacotes")}
+                     >
+                       Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
+                     </Button>
                     {waHref && (
                       <Button
                         asChild
@@ -783,7 +787,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     <div className="md:justify-self-end">
                       <Button
                         size="lg"
-                        className="h-12 w-full px-7 md:w-auto"
+                        className="h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
                         onClick={() => openRequest("pacotes")}
                       >
                         Quero receber novidades <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
