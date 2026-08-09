@@ -946,7 +946,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         <section id="cotacao" className="relative z-10 bg-[hsl(var(--wl-sand))]">
           <div
             ref={requestCenterRef}
-            className="mx-auto -mt-10 w-full max-w-[1140px] px-5 pb-10 sm:-mt-14 md:-mt-[100px] md:px-8 md:pb-14"
+            className="mx-auto -mt-10 w-full max-w-[1140px] px-5 pb-10 sm:-mt-14 md:-mt-[80px] md:px-8 md:pb-14 lg:-mt-[100px]"
           >
             <AgencyQuickQuote
               hostname={hostname}
