@@ -809,6 +809,90 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_site_requests: {
+        Row: {
+          agency_user_id: string
+          best_time: string | null
+          client_id: string | null
+          consent_at: string | null
+          consent_version: string | null
+          created_at: string
+          destination: string | null
+          details: Json
+          hostname: string
+          id: string
+          idempotency_key: string | null
+          is_read: boolean
+          lead_email: string | null
+          lead_name: string
+          lead_phone: string | null
+          notes: string | null
+          opportunity_id: string | null
+          preferred_channel: string | null
+          service_key: string
+          service_label: string | null
+          session_id: string | null
+          source_url: string | null
+          status: string
+          summary: string | null
+          utm: Json | null
+        }
+        Insert: {
+          agency_user_id: string
+          best_time?: string | null
+          client_id?: string | null
+          consent_at?: string | null
+          consent_version?: string | null
+          created_at?: string
+          destination?: string | null
+          details?: Json
+          hostname: string
+          id?: string
+          idempotency_key?: string | null
+          is_read?: boolean
+          lead_email?: string | null
+          lead_name: string
+          lead_phone?: string | null
+          notes?: string | null
+          opportunity_id?: string | null
+          preferred_channel?: string | null
+          service_key: string
+          service_label?: string | null
+          session_id?: string | null
+          source_url?: string | null
+          status?: string
+          summary?: string | null
+          utm?: Json | null
+        }
+        Update: {
+          agency_user_id?: string
+          best_time?: string | null
+          client_id?: string | null
+          consent_at?: string | null
+          consent_version?: string | null
+          created_at?: string
+          destination?: string | null
+          details?: Json
+          hostname?: string
+          id?: string
+          idempotency_key?: string | null
+          is_read?: boolean
+          lead_email?: string | null
+          lead_name?: string
+          lead_phone?: string | null
+          notes?: string | null
+          opportunity_id?: string | null
+          preferred_channel?: string | null
+          service_key?: string
+          service_label?: string | null
+          session_id?: string | null
+          source_url?: string | null
+          status?: string
+          summary?: string | null
+          utm?: Json | null
+        }
+        Relationships: []
+      }
       agency_supplier_terms: {
         Row: {
           agency_id: string
@@ -15072,6 +15156,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      submit_agency_site_request: {
+        Args: { p_hostname: string; p_payload: Json }
+        Returns: Json
+      }
       submit_conversational_lead: {
         Args: { p_payload: Json; p_token: string }
         Returns: Json
