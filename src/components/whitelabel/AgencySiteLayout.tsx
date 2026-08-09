@@ -67,7 +67,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
           <div className="hidden items-center gap-5 md:flex">
             <a
               href="/area-do-cliente"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="whitespace-nowrap text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Área do Cliente
             </a>

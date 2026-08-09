@@ -598,7 +598,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <h1
             className={
               editorial
-                ? "max-w-[16ch] text-4xl font-extrabold leading-[1.05] tracking-tight text-primary-foreground md:text-[3.75rem]"
+                ? "max-w-[22ch] text-4xl font-extrabold leading-[1.06] tracking-tight text-primary-foreground md:text-[3.4rem]"
                 : "max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >

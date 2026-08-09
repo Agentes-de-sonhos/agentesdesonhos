@@ -86,7 +86,7 @@ export function AgencyQuickQuote({
           aria-label="Serviços para cotação"
           className={
             editorial
-              ? "-mx-1 flex gap-1 overflow-x-auto pb-4 [scrollbar-width:thin] md:gap-2"
+              ? "-mx-1 flex gap-1 overflow-x-auto pb-4 [scrollbar-width:thin] md:flex-wrap md:gap-2 md:overflow-visible"
               : "-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:thin]"
           }
         >
