@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildCarteiraLink } from "@/lib/carteira-domain";
+import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
 import { Copy, Check, Link, Share2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,7 @@ interface ShareTripModalProps {
 
 export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTripModalProps) {
   const { toast } = useToast();
+  const { customDomain } = useAgencyCustomDomain();
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -27,7 +29,7 @@ export function ShareTripModal({ trip, agencyName, open, onOpenChange }: ShareTr
   
   // New format link (for trips with public_access_code)
   const newFormatLink = (trip.public_access_code && agencyName)
-    ? buildCarteiraLink(agencyName, trip.public_access_code)
+    ? buildCarteiraLink(agencyName, trip.public_access_code, customDomain)
     : null;
   
   // Legacy links
