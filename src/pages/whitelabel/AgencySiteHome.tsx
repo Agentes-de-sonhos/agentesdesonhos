@@ -135,6 +135,36 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
   const [requestOpen, setRequestOpen] = useState(false);
   const requestCenterRef = useRef<HTMLDivElement | null>(null);
+  const quoteCardRef = useRef<HTMLDivElement | null>(null);
+  /**
+   * Sobreposição 50/50 exata: metade da altura REAL do card de cotação.
+   * O card recebe margin-top negativo dessa metade e o fundo areia começa
+   * exatamente no eixo central do card, então a linha final da fotografia
+   * do hero atravessa o centro vertical do card em qualquer breakpoint.
+   */
+  const [quoteHalf, setQuoteHalf] = useState(0);
+  useEffect(() => {
+    if (!editorial) return;
+    const el = quoteCardRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let raf = 0;
+    const measure = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const h = el.getBoundingClientRect().height;
+        if (h > 0) setQuoteHalf((prev) => (Math.abs(prev - h / 2) > 0.5 ? h / 2 : prev));
+      });
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    measure();
+    (document as Document & { fonts?: FontFaceSet }).fonts?.ready?.then(measure).catch(() => {});
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [editorial]);
+  const halfPx = `${Math.round(quoteHalf)}px`;
 
   const openRequest = useCallback((key: string) => {
     setService(key);
@@ -183,8 +213,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section
             key={key}
             id="destaques"
-            className={editorial ? `${container} py-20 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}
+            className={editorial ? "bg-background" : "mx-auto max-w-6xl px-4 py-14 md:py-16"}
           >
+            <div className={editorial ? `${container} py-14 md:py-24` : undefined}>
             <SectionHeading
               title="Destaques"
               subtitle="Três formas de começar agora o planejamento da sua próxima viagem."
@@ -197,7 +228,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   return (
                     <article
                       key={h.title}
-                      className="group flex h-full flex-col rounded-xl bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.06)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
+                      className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
                       <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
                       <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
@@ -227,14 +258,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 ))}
               </div>
             )}
+            </div>
           </section>
         );
 
       case "modules":
         if (editorial) {
           return (
-            <section key={key} id="campanhas" className="bg-background">
-              <div className={`${container} py-20 md:py-24`}>
+            <section key={key} id="campanhas" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title="Experiências e campanhas"
                   subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
@@ -327,7 +359,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="destinos" className="bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-20 md:py-24`}>
+              <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title="Descubra o seu próximo destino"
                   subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
@@ -426,7 +458,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           const years = bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
-              <div className={`${container} grid items-center gap-12 py-20 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Quem planeja a sua viagem
@@ -522,7 +554,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="diferenciais" className="bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-20 md:py-24`}>
+              <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title="Diferenciais"
                   subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe."
@@ -569,7 +601,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="atendimento" className="bg-background">
-              <div className={`${container} grid gap-12 py-20 md:grid-cols-2 md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-stretch gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-24`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Gente cuidando de gente
@@ -698,8 +730,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       case "faq":
         if (editorial) {
           return (
-            <section key={key} id="faq" className="bg-background">
-              <div className={`${container} grid gap-12 py-20 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
+            <section key={key} id="faq" className="bg-[hsl(var(--wl-sand))]">
+              <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                     Antes de solicitar
@@ -768,8 +800,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       case "newsletter":
         if (editorial) {
           return (
-            <section key={key} id="novidades" className="bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-16 md:py-20`}>
+            <section key={key} id="novidades" className="bg-background">
+              <div className={`${container} py-14 md:py-24`}>
                 <div className="overflow-hidden rounded-2xl bg-[hsl(var(--wl-navy))] px-8 py-12 md:px-14 md:py-16">
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
@@ -835,6 +867,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
+        style={editorial ? { paddingBottom: `calc(${halfPx} + 1.5rem)` } : undefined}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -942,20 +975,32 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       </section>
 
       {editorial ? (
-        /* HERO COMPACTO → CARD SOBREPOSTO (90–110px) → próxima seção. */
-        <section id="cotacao" className="relative z-10 bg-[hsl(var(--wl-sand))]">
+        /* 50/50 EXATO: o card sobe metade da própria altura e o fundo areia
+           começa no eixo central dele, então a base da foto corta o card ao meio. */
+        <section
+          id="cotacao"
+          className="relative z-10"
+          style={{ marginTop: `calc(-1 * ${halfPx})` }}
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 bg-[hsl(var(--wl-sand))]"
+            style={{ top: halfPx }}
+          />
           <div
             ref={requestCenterRef}
-            className="mx-auto -mt-10 w-full max-w-[1140px] px-5 pb-10 sm:-mt-14 md:-mt-[80px] md:px-8 md:pb-14 lg:-mt-[100px]"
+            className={`relative ${container} pb-14 md:pb-20`}
           >
-            <AgencyQuickQuote
-              hostname={hostname}
-              agencyName={name}
-              service={service}
-              onServiceChange={setService}
-              open={requestOpen}
-              onOpenChange={setRequestOpen}
-            />
+            <div ref={quoteCardRef} className="drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
+              <AgencyQuickQuote
+                hostname={hostname}
+                agencyName={name}
+                service={service}
+                onServiceChange={setService}
+                open={requestOpen}
+                onOpenChange={setRequestOpen}
+              />
+            </div>
           </div>
         </section>
       ) : (
