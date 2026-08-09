@@ -18,9 +18,10 @@ import {
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
+import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
-  resolveDestinations, resolveHeroSlides, resolveModules, resolveSections,
+  resolveDestinations, resolveDmc, resolveHeroSlides, resolveModules, resolveSections,
   type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
@@ -88,7 +89,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const location = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
 
-  const sections = useMemo(() => resolveSections(), []);
+  // Faixa B2B/DMC: exclusiva das agências configuradas por hostname.
+  const dmc = useMemo(() => resolveDmc(hostname), [hostname]);
+  const sections = useMemo(() => resolveSections({ dmc: !!dmc }), [dmc]);
   const modules = useMemo(() => resolveModules(), []);
   const destinations = useMemo(() => resolveDestinations(), []);
   const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
@@ -127,6 +130,17 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   const renderSection = (key: AgencySectionKey) => {
     switch (key) {
+      case "dmc":
+        if (!dmc) return null;
+        return (
+          <AgencyDmcSection
+            key={key}
+            config={dmc}
+            whatsappNumber={wa}
+            onFallbackContact={() => openRequest("transfer")}
+          />
+        );
+
       case "highlights":
         return (
           <section key={key} id="destaques" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
