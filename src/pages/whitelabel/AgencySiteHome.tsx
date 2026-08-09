@@ -586,7 +586,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                     {waHref && (
-                      <Button asChild size="lg" variant="outline">
+                      <Button
+                        asChild
+                        size="lg"
+                        className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
+                      >
                         <a href={waHref} target="_blank" rel="noopener noreferrer">
                           <MessageCircle className="mr-2 h-4 w-4" /> Falar no WhatsApp
                         </a>
@@ -705,7 +709,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </p>
                   <div className="mt-7 flex flex-wrap gap-3">
                     {waHref ? (
-                      <Button asChild variant="outline" size="lg">
+                      <Button
+                        asChild
+                        size="lg"
+                        className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
+                      >
                         <a href={waHref} target="_blank" rel="noopener noreferrer">
                           <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar no WhatsApp
                         </a>
