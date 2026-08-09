@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
-  MapPin, CheckCircle2, Quote, Route,
+  MapPin, CheckCircle2, Quote, Route, UserRound, FileCheck2, LifeBuoy, Handshake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,8 +19,10 @@ import {
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
+import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
+  normalizeInstitutionalText,
   resolveDestinations, resolveDmc, resolveHeroSlides, resolveModules, resolveSections,
   type AgencySectionKey,
 } from "@/lib/agencySiteConfig";
@@ -59,6 +61,14 @@ const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
   "Roteiro sob medida": Route,
   "Aéreo com estratégia": Plane,
   "Viagem protegida": ShieldCheck,
+};
+
+/** Ícone semântico por diferencial (um símbolo distinto para cada um). */
+const DIFFERENTIAL_ICONS: Record<string, typeof Route> = {
+  consultivo: UserRound,
+  conferido: FileCheck2,
+  acompanhamento: LifeBuoy,
+  fornecedores: Handshake,
 };
 
 function SectionHeading({
