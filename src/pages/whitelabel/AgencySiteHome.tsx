@@ -867,6 +867,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
+        style={editorial ? { paddingBottom: `calc(${halfPx} + 1.5rem)` } : undefined}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -974,20 +975,32 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       </section>
 
       {editorial ? (
-        /* HERO COMPACTO → CARD SOBREPOSTO (90–110px) → próxima seção. */
-        <section id="cotacao" className="relative z-10 bg-[hsl(var(--wl-sand))]">
+        /* 50/50 EXATO: o card sobe metade da própria altura e o fundo areia
+           começa no eixo central dele, então a base da foto corta o card ao meio. */
+        <section
+          id="cotacao"
+          className="relative z-10"
+          style={{ marginTop: `calc(-1 * ${halfPx})` }}
+        >
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 bg-[hsl(var(--wl-sand))]"
+            style={{ top: halfPx }}
+          />
           <div
             ref={requestCenterRef}
-            className="mx-auto -mt-10 w-full max-w-[1140px] px-5 pb-10 sm:-mt-14 md:-mt-[80px] md:px-8 md:pb-14 lg:-mt-[100px]"
+            className="relative mx-auto w-full max-w-[1140px] px-5 pb-14 md:px-8 md:pb-20"
           >
-            <AgencyQuickQuote
-              hostname={hostname}
-              agencyName={name}
-              service={service}
-              onServiceChange={setService}
-              open={requestOpen}
-              onOpenChange={setRequestOpen}
-            />
+            <div ref={quoteCardRef} className="drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
+              <AgencyQuickQuote
+                hostname={hostname}
+                agencyName={name}
+                service={service}
+                onServiceChange={setService}
+                open={requestOpen}
+                onOpenChange={setRequestOpen}
+              />
+            </div>
           </div>
         </section>
       ) : (
