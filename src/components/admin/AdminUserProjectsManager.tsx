@@ -233,6 +233,7 @@ function matches(q: string, ...fields: (string | null | undefined)[]) {
 }
 
 export function AdminUserProjectsManager() {
+  const domainsByOwner = useAgencyDomainsMap();
   const [unlocked, setUnlocked] = useState(false);
   const [pwd, setPwd] = useState("");
   const [showPwd, setShowPwd] = useState(false);
