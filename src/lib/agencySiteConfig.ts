@@ -197,11 +197,6 @@ export const DEFAULT_DIFFERENTIALS: AgencyDifferential[] = [
  * acentuação normal nem o conteúdo do texto.
  */
 function foldStyledUnicode(text: string): string {
-  const ranges: Array<[number, number, number, number]> = [
-    // [inícioBloco, fimBloco, códigoBaseASCII, tamanhoAlfabeto]
-    [0x1d400, 0x1d7ff, 0, 0],
-  ];
-  void ranges;
   return Array.from(text)
     .map((ch) => {
       const cp = ch.codePointAt(0)!;
