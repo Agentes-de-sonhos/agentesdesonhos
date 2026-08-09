@@ -1,26 +1,39 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
-  MessageCircle, ArrowRight, Sparkles, Users, Clock,
+  MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
+  MapPin, CheckCircle2, Quote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BrandText } from "@/components/ui/brand-text";
 import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
+import { supabase } from "@/integrations/supabase/client";
+import {
   type AgencyDomainInfo,
   agencyDisplayName,
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
+import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
+import {
+  DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
+  resolveModules, resolveSections, type AgencySectionKey,
+} from "@/lib/agencySiteConfig";
+import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 
+/** Kept exported: other white-label surfaces import this service list. */
 export const AGENCY_SERVICES = [
-  { key: "aereo", title: "Aéreo", icon: Plane, text: "Passagens nacionais e internacionais com as melhores combinações de rota e tarifa." },
-  { key: "hospedagem", title: "Hospedagem", icon: BedDouble, text: "Hotéis, resorts e pousadas selecionados de acordo com o seu estilo de viagem." },
-  { key: "carro", title: "Aluguel de Carro", icon: Car, text: "Locação com cobertura, categorias e retiradas conferidas antes da reserva." },
-  { key: "transfer", title: "Transfer", icon: Bus, text: "Traslados privativos e compartilhados para chegar tranquilo ao destino." },
-  { key: "ingressos", title: "Ingressos e Atrações", icon: Ticket, text: "Parques, passeios e experiências com organização de datas e horários." },
-  { key: "seguro", title: "Seguro Viagem", icon: ShieldCheck, text: "Coberturas adequadas ao destino, à duração e ao perfil dos viajantes." },
-  { key: "cruzeiros", title: "Cruzeiros", icon: Ship, text: "Itinerários, cabines e categorias explicados com clareza antes de decidir." },
-  { key: "pacotes", title: "Pacotes e Circuitos", icon: Compass, text: "Roteiros completos, sob medida ou prontos, com apoio do início ao fim." },
+  { key: "aereo", title: "Aéreo", icon: Plane },
+  { key: "hospedagem", title: "Hospedagem", icon: BedDouble },
+  { key: "carro", title: "Aluguel de Carro", icon: Car },
+  { key: "transfer", title: "Transfer", icon: Bus },
+  { key: "ingressos", title: "Ingressos e Atrações", icon: Ticket },
+  { key: "seguro", title: "Seguro Viagem", icon: ShieldCheck },
+  { key: "cruzeiros", title: "Cruzeiros", icon: Ship },
+  { key: "pacotes", title: "Pacotes e Circuitos", icon: Compass },
 ] as const;
 
 interface HeroSlide {
@@ -29,11 +42,55 @@ interface HeroSlide {
   image?: string | null;
 }
 
+function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-8 max-w-2xl">
+      <h2 className="text-2xl font-semibold text-foreground md:text-3xl">{title}</h2>
+      <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
+      {subtitle && <p className="mt-4 text-muted-foreground">{subtitle}</p>}
+    </div>
+  );
+}
+
+/** Only shows the offers teaser when this agency actually has a published showcase. */
+function useAgencyShowcasePublished(slug: string | null | undefined) {
+  const { data } = useQuery({
+    queryKey: ["agency-site-showcase-published", slug],
+    enabled: !!slug,
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("agency_showcases")
+        .select("id")
+        .eq("slug", slug as string)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (error) return null;
+      return data?.id ?? null;
+    },
+  });
+  return !!data;
+}
+
 export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const name = agencyDisplayName(info);
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
+  const hostname = info.hostname;
 
+  const sections = useMemo(() => resolveSections(), []);
+  const modules = useMemo(() => resolveModules(), []);
+  const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
+
+  const [service, setService] = useState(REQUEST_SERVICES[0].key);
+  const requestCenterRef = useRef<HTMLDivElement | null>(null);
+
+  const openRequest = useCallback((key: string) => {
+    setService(key);
+    requestCenterRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  // Hero supports 1 to 5 banners. Uses the agency cover when available.
   const slides = useMemo<HeroSlide[]>(
     () => [
       {
@@ -47,7 +104,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         image: info.cover_image_url,
       },
       {
-        title: "Solicite seu orçamento sem compromisso",
+        title: "Solicite seu atendimento personalizado",
         subtitle: "Conte o que você imagina e receba uma proposta clara, com valores e condições.",
         image: info.cover_image_url,
       },
@@ -56,18 +113,277 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   );
 
   const [slide, setSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
   useEffect(() => {
-    const t = window.setInterval(() => setSlide((s) => (s + 1) % slides.length), 7000);
-    return () => window.clearInterval(t);
-  }, [slides.length]);
+    if (paused || slides.length < 2) return;
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduced) return;
+    const timer = window.setInterval(() => setSlide((s) => (s + 1) % slides.length), 7000);
+    return () => window.clearInterval(timer);
+  }, [paused, slides.length]);
 
   const current = slides[slide];
-  const waHref = wa ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um orçamento de viagem.`)}` : null;
+  const waHref = wa
+    ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um atendimento personalizado.`)}`
+    : null;
+
+  const renderSection = (key: AgencySectionKey) => {
+    switch (key) {
+      case "highlights":
+        return (
+          <section key={key} id="destaques" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+            <SectionHeading
+              title="Destaques"
+              subtitle="Três formas de começar agora o planejamento da sua próxima viagem."
+            />
+            <div className="grid gap-4 md:grid-cols-3">
+              {DEFAULT_HIGHLIGHTS.map((h) => (
+                <Card key={h.title} className="flex h-full flex-col p-6 transition-shadow hover:shadow-lg">
+                  <Sparkles className="mb-4 h-5 w-5 text-primary" aria-hidden="true" />
+                  <h3 className="text-base font-semibold text-foreground">{h.title}</h3>
+                  <p className="mt-2 flex-1 text-sm text-muted-foreground">{h.text}</p>
+                  <Button variant="outline" className="mt-5 w-fit" onClick={() => openRequest(h.service)}>
+                    {h.cta} <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </section>
+        );
+
+      case "modules":
+        return (
+          <section key={key} id="campanhas" className="border-y border-border/60 bg-muted/30">
+            <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+              <SectionHeading
+                title="Experiências e campanhas"
+                subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
+              />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {modules.map((m) => (
+                  <Card key={m.key} className="group h-full p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                    <h3 className="text-base font-semibold text-foreground">{m.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{m.text}</p>
+                    <Button
+                      variant="ghost"
+                      className="mt-4 h-auto p-0 text-primary hover:bg-transparent"
+                      onClick={() => openRequest(m.service)}
+                    >
+                      Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+
+      case "offers":
+        if (!showcasePublished) return null;
+        return (
+          <section key={key} id="ofertas" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+            <Card className="flex flex-col items-start justify-between gap-6 p-8 md:flex-row md:items-center">
+              <div>
+                <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Ofertas em destaque</h2>
+                <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
+                <p className="mt-4 max-w-xl text-muted-foreground">
+                  Nossa vitrine reúne as oportunidades do momento, atualizadas pela equipe.
+                </p>
+              </div>
+              <Button asChild size="lg">
+                <a href="/ofertas">Ver ofertas <ArrowRight className="ml-2 h-4 w-4" /></a>
+              </Button>
+            </Card>
+          </section>
+        );
+
+      case "about":
+        return (
+          <section key={key} id="sobre" className="border-y border-border/60 bg-muted/30">
+            <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-2 md:py-16">
+              <div>
+                <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
+                  Sobre a <BrandText>{name}</BrandText>
+                </h2>
+                <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
+                <p className="mt-6 whitespace-pre-line text-muted-foreground">
+                  {info.bio?.trim() ||
+                    `A ${name} cuida de cada viagem com atenção aos detalhes: entende o momento de cada cliente, apresenta opções claras e acompanha a experiência do planejamento ao retorno.`}
+                </p>
+                {info.owner_name && (
+                  <p className="mt-6 text-sm text-muted-foreground">
+                    Atendimento com <span className="font-medium text-foreground">{info.owner_name}</span>
+                  </p>
+                )}
+                {location && (
+                  <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" aria-hidden="true" /> {location}
+                  </p>
+                )}
+              </div>
+              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+                {info.cover_image_url ? (
+                  <img
+                    src={info.cover_image_url}
+                    alt={`Ambiente de atendimento da ${name}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="grid h-full min-h-56 place-items-center bg-gradient-to-br from-primary/15 to-primary/5 p-8 text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Atendimento personalizado, do planejamento ao retorno da viagem.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        );
+
+      case "differentials":
+        return (
+          <section key={key} id="diferenciais" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+            <SectionHeading title="Diferenciais" subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe." />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {DEFAULT_DIFFERENTIALS.map((d) => (
+                <Card key={d.title} className="h-full p-5">
+                  <CheckCircle2 className="mb-3 h-5 w-5 text-primary" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-foreground">{d.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{d.text}</p>
+                </Card>
+              ))}
+            </div>
+          </section>
+        );
+
+      case "concierge":
+        return (
+          <section key={key} id="atendimento" className="border-y border-border/60 bg-muted/30">
+            <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+              <Card className="grid gap-8 p-8 md:grid-cols-2 md:p-10">
+                <div>
+                  <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Atendimento humano</h2>
+                  <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
+                  <p className="mt-4 text-muted-foreground">
+                    Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação,
+                    monta as melhores opções e explica cada detalhe antes de você decidir.
+                  </p>
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <Button size="lg" onClick={() => openRequest("pacotes")}>
+                      Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                    {waHref && (
+                      <Button asChild size="lg" variant="outline">
+                        <a href={waHref} target="_blank" rel="noopener noreferrer">
+                          <MessageCircle className="mr-2 h-4 w-4" /> Falar no WhatsApp
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-muted/50 p-6">
+                  <h3 className="text-sm font-semibold text-foreground">Como funciona</h3>
+                  <ol className="mt-4 space-y-4 text-sm text-muted-foreground">
+                    <li><span className="font-medium text-foreground">1.</span> Você envia a solicitação pela Central.</li>
+                    <li><span className="font-medium text-foreground">2.</span> Montamos as melhores opções para o seu perfil.</li>
+                    <li><span className="font-medium text-foreground">3.</span> Você recebe um orçamento claro para decidir.</li>
+                    <li><span className="font-medium text-foreground">4.</span> Reservado, tudo fica na sua Área do Cliente.</li>
+                  </ol>
+                </div>
+              </Card>
+            </div>
+          </section>
+        );
+
+      case "team":
+        return (
+          <section key={key} id="equipe" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+            <SectionHeading title="Equipe" />
+            {info.owner_name ? (
+              <Card className="flex items-center gap-4 p-6">
+                <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
+                  {info.owner_name.slice(0, 1).toUpperCase()}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{info.owner_name}</p>
+                  <p className="text-sm text-muted-foreground">Consultoria de viagens</p>
+                </div>
+              </Card>
+            ) : null}
+          </section>
+        );
+
+      case "testimonials":
+        return (
+          <section key={key} id="depoimentos" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+            <SectionHeading title="Depoimentos" />
+            <Card className="p-6">
+              <Quote className="h-5 w-5 text-primary" aria-hidden="true" />
+              <p className="mt-3 text-sm text-muted-foreground">
+                Espaço reservado para depoimentos reais de clientes, publicados pela agência.
+              </p>
+            </Card>
+          </section>
+        );
+
+      case "faq":
+        return (
+          <section key={key} id="faq" className="border-y border-border/60 bg-muted/30">
+            <div className="mx-auto max-w-4xl px-4 py-14 md:py-16">
+              <SectionHeading title="Perguntas frequentes" />
+              <Accordion type="single" collapsible className="w-full">
+                {DEFAULT_FAQ.map((item, index) => (
+                  <AccordionItem key={item.q} value={`faq-${index}`}>
+                    <AccordionTrigger className="text-left text-base">{item.q}</AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </section>
+        );
+
+      case "newsletter":
+        return (
+          <section key={key} id="novidades" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+            <Card className="flex flex-col items-start gap-6 p-8 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-4">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <Mail className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">Receba novidades e oportunidades</h2>
+                  <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
+                    Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar
+                    quando surgirem oportunidades no seu perfil de viagem.
+                  </p>
+                </div>
+              </div>
+              <Button size="lg" variant="outline" onClick={() => openRequest("pacotes")}>
+                Quero receber novidades
+              </Button>
+            </Card>
+          </section>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden">
+      {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
+      <section
+        className="relative overflow-hidden pb-40 md:pb-56"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        aria-roledescription="carrossel"
+        aria-label="Destaques da agência"
+      >
         <div className="absolute inset-0">
           {current.image ? (
             <img src={current.image} alt="" className="h-full w-full object-cover" />
@@ -77,149 +393,74 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/25" />
         </div>
 
-        <div className="relative mx-auto max-w-6xl px-4 py-24 md:py-32">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5" />
+        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-16 md:pt-24">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
             {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
           </p>
-          <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-white md:text-5xl">
+          <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-primary-foreground md:text-5xl">
             {current.title}
           </h1>
-          <p className="mt-4 max-w-2xl text-base text-white/85 md:text-lg">{current.subtitle}</p>
+          <p className="mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg">{current.subtitle}</p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <a href="#atendimento">Solicitar orçamento <ArrowRight className="ml-2 h-4 w-4" /></a>
+            <Button size="lg" onClick={() => openRequest("pacotes")}>
+              Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button asChild size="lg" variant="secondary">
-              <a href="/ofertas">Ver ofertas</a>
-            </Button>
-          </div>
-
-          <div className="mt-10 flex gap-2">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Ir para o destaque ${i + 1}`}
-                onClick={() => setSlide(i)}
-                className={`h-1.5 rounded-full transition-all ${i === slide ? "w-8 bg-white" : "w-4 bg-white/40"}`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SERVIÇOS */}
-      <section id="servicos" className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-        <div className="mb-10 max-w-2xl">
-          <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Serviços</h2>
-          <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
-          <p className="mt-4 text-muted-foreground">
-            Tudo o que a sua viagem precisa, organizado por quem acompanha cada detalhe.
-          </p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {AGENCY_SERVICES.map((s) => (
-            <Card key={s.key} className="group h-full p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-              <span className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
-                <s.icon className="h-5 w-5" />
-              </span>
-              <h3 className="text-base font-semibold text-foreground">{s.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{s.text}</p>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* INSTITUCIONAL */}
-      <section id="sobre" className="border-y border-border/60 bg-muted/30">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:py-20">
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
-              Sobre a <BrandText>{name}</BrandText>
-            </h2>
-            <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
-            <p className="mt-6 whitespace-pre-line text-muted-foreground">
-              {info.bio?.trim() ||
-                `A ${name} cuida de cada viagem com atenção aos detalhes: entende o momento de cada cliente, apresenta opções claras e acompanha a experiência do planejamento ao retorno.`}
-            </p>
-            {info.owner_name && (
-              <p className="mt-6 text-sm text-muted-foreground">
-                Atendimento com <span className="font-medium text-foreground">{info.owner_name}</span>
-              </p>
+            {showcasePublished && (
+              <Button asChild size="lg" variant="secondary">
+                <a href="/ofertas">Ver ofertas</a>
+              </Button>
             )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {[
-              { icon: Users, title: "Atendimento consultivo", text: "Cada proposta é montada a partir do seu perfil e do seu orçamento." },
-              { icon: ShieldCheck, title: "Reservas conferidas", text: "Documentos, prazos e coberturas revisados antes da confirmação." },
-              { icon: Clock, title: "Acompanhamento na viagem", text: "Suporte durante o período da viagem, com todos os dados à mão." },
-              { icon: Compass, title: "Experiências selecionadas", text: "Fornecedores e passeios escolhidos com critério, não por catálogo." },
-            ].map((b) => (
-              <Card key={b.title} className="p-5">
-                <b.icon className="mb-3 h-5 w-5 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">{b.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{b.text}</p>
-              </Card>
-            ))}
-          </div>
+          {slides.length > 1 && (
+            <div className="mt-10 flex items-center gap-3">
+              <button
+                type="button"
+                aria-label="Destaque anterior"
+                onClick={() => setSlide((s) => (s - 1 + slides.length) % slides.length)}
+                className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-primary-foreground backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="flex gap-2">
+                {slides.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Ir para o destaque ${i + 1}`}
+                    aria-current={i === slide}
+                    onClick={() => setSlide(i)}
+                    className={`h-1.5 rounded-full transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                      i === slide ? "w-8 bg-white" : "w-4 bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                aria-label="Próximo destaque"
+                onClick={() => setSlide((s) => (s + 1) % slides.length)}
+                className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-primary-foreground backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ATENDIMENTO / CTA */}
-      <section id="atendimento" className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-        <Card className="overflow-hidden">
-          <div className="grid gap-8 p-8 md:grid-cols-2 md:p-12">
-            <div>
-              <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
-                Vamos planejar a sua viagem?
-              </h2>
-              <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
-              <p className="mt-4 text-muted-foreground">
-                Conte o destino, as datas aproximadas e quem viaja. A partir disso enviamos um
-                orçamento personalizado, com valores e condições de pagamento.
-              </p>
+      <div ref={requestCenterRef} className="relative z-10 mx-auto -mt-36 max-w-6xl px-4 md:-mt-48">
+        <AgencyRequestCenter
+          hostname={hostname}
+          agencyName={name}
+          service={service}
+          onServiceChange={setService}
+        />
+      </div>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                {waHref ? (
-                  <Button asChild size="lg">
-                    <a href={waHref} target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="mr-2 h-4 w-4" /> Solicitar orçamento no WhatsApp
-                    </a>
-                  </Button>
-                ) : (
-                  <Button asChild size="lg">
-                    <a href="/ofertas">Ver ofertas disponíveis</a>
-                  </Button>
-                )}
-                <Button asChild size="lg" variant="outline">
-                  <a href="/area-do-cliente">Acessar Área do Cliente</a>
-                </Button>
-              </div>
-
-              {!waHref && (
-                <p className="mt-4 text-xs text-muted-foreground">
-                  Canal de WhatsApp em configuração. Enquanto isso, utilize o contato informado
-                  pelo seu consultor.
-                </p>
-              )}
-            </div>
-
-            <div className="rounded-2xl bg-muted/40 p-6">
-              <h3 className="text-sm font-semibold text-foreground">Como funciona</h3>
-              <ol className="mt-4 space-y-4 text-sm text-muted-foreground">
-                <li><span className="font-medium text-foreground">1.</span> Você conta a ideia da viagem.</li>
-                <li><span className="font-medium text-foreground">2.</span> Recebemos e montamos as melhores opções.</li>
-                <li><span className="font-medium text-foreground">3.</span> Você recebe um orçamento claro para decidir.</li>
-                <li><span className="font-medium text-foreground">4.</span> Reservado, tudo fica na sua Área do Cliente.</li>
-              </ol>
-            </div>
-          </div>
-        </Card>
-      </section>
+      {sections.map((section) => renderSection(section.key))}
     </>
   );
 }
