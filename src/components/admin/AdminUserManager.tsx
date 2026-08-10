@@ -447,8 +447,11 @@ export function AdminUserManager() {
         user.city?.toLowerCase().includes(searchTerm.toLowerCase());
 
       let matchesStat = true;
-      if (statFilter === "admins") matchesStat = user.role === "admin";
-      else if (statFilter !== "all") matchesStat = user.role !== "admin" && user.plan === statFilter;
+      const kind = user.kind ?? "master";
+      if (statFilter === "members") matchesStat = kind === "member";
+      else if (statFilter === "invites") matchesStat = kind === "invite";
+      else if (statFilter === "admins") matchesStat = kind === "master" && user.role === "admin";
+      else if (statFilter !== "all") matchesStat = kind === "master" && user.role !== "admin" && user.plan === statFilter;
 
       return matchesSearch && matchesStat;
     });
