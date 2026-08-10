@@ -861,18 +861,29 @@ Deno.serve(async (req) => {
     }
 
     // 1b. Delete-from-Google: events soft-deleted locally with an active mapping
-    console.log(`[calendar-sync] delete-google-start count=${deletedLocalEvents.length}`);
+    console.log(
+      `[calendar-sync] delete-google-start count=${deletedLocalEvents.length} resumed=${deletedCursor.event_id ? "yes" : "no"} deleted_scan_complete=${deletedScanComplete}`,
+    );
+    // Cursor advances only over rows really processed and stops at the first
+    // failure so a pending deletion is retried instead of being skipped.
+    const processedDeleted: any[] = [];
+    let deletedAdvanceBlocked = false;
+    const markDeletedProcessed = (event: any) => {
+      if (!deletedAdvanceBlocked) processedDeleted.push(event);
+    };
     for (const event of deletedLocalEvents) {
       const mapping = syncMap.get(event.id);
       if (!mapping) {
         // No mapping → nothing to delete on Google. Safe to physically remove the row now.
         await supabase.from("agency_events").delete().eq("id", event.id).eq("user_id", userId);
         console.log(`[calendar-sync] delete-local-cleanup event=${event.id} reason=no-mapping`);
+        markDeletedProcessed(event);
         continue;
       }
       if (mapping.deleted_at) {
         deletedSkipped++;
         console.log(`[calendar-sync] skipped-deleted event=${event.id} reason=already-deleted-on-google google=${mapping.google_event_id}`);
+        markDeletedProcessed(event);
         continue;
       }
       try {
@@ -901,25 +912,30 @@ Deno.serve(async (req) => {
             deleteErrors++;
             console.error(`[calendar-sync] delete-google-error tombstone event=${event.id} err=${tombErr.message}`);
             pushErrors.push({ event_id: event.id, error: tombErr.message });
+            deletedAdvanceBlocked = true;
             continue;
           }
           mapping.deleted_at = tombstoneAt;
           syncMap.set(event.id, mapping);
           reverseSyncMap.set(mapping.google_event_id, mapping);
           deletedGoogle++;
+          markDeletedProcessed(event);
           console.log(`[calendar-sync] delete-google-success event=${event.id} google=${mapping.google_event_id} status=${res.status}${isEventTypeRestriction ? " reason=event-type-restriction-skipped" : ""}`);
         } else {
           const errText = await res.text();
           deleteErrors++;
           console.error(`[calendar-sync] delete-google-error event=${event.id} google=${mapping.google_event_id} status=${res.status} body=${errText.slice(0, 300)}`);
           pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+          deletedAdvanceBlocked = true;
         }
       } catch (e: any) {
         deleteErrors++;
         console.error(`[calendar-sync] delete-google-error exception event=${event.id} err=${e?.message || e}`);
         pushErrors.push({ event_id: event.id, error: String(e?.message || e) });
+        deletedAdvanceBlocked = true;
       }
     }
+    const advancedDeletedCursor = nextDeletedCursor(processedDeleted, deletedCursor);
 
     // 2. Pull Google events → local
     console.log(`[calendar-sync] pull-start range=${windowStart}..${windowEnd}`);
