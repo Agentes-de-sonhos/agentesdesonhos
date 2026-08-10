@@ -57,7 +57,9 @@ export const REQUEST_SERVICES: RequestService[] = [
       { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou aeroporto de chegada", origin: "quick" },
       { name: "data_ida", label: "Data de ida", type: "date", required: true, origin: "quick" },
       { name: "data_volta", label: "Data de volta", type: "date", origin: "quick" },
-      { name: "rota_multidestinos", label: "Destinos da viagem", type: "textarea", span: 2, origin: "always", help: "Obrigatório para multidestinos: liste os trechos na ordem desejada." },
+      // Serialização da rota estruturada montada na primeira dobra (nunca digitada
+      // como texto livre): mantida para compatibilidade do payload/CRM.
+      { name: "rota_multidestinos", label: "Destinos da viagem", type: "textarea", span: 2, origin: "context" },
       { name: "classe", label: "Classe", type: "select", options: ["Econômica", "Econômica premium", "Executiva", "Primeira classe", "Indiferente"] },
       { name: "adultos", label: "Adultos", type: "number", required: true, min: 1, max: 30 },
       { name: "criancas", label: "Crianças", type: "number", min: 0, max: 12 },
@@ -253,20 +255,42 @@ export function quickQuoteFields(service: RequestService, max = 4): RequestField
   return [...required, ...optional].slice(0, max);
 }
 
+/** O valor informado para o campo é utilizável? */
+export function fieldHasValue(field: RequestField, values: ServiceValues): boolean {
+  const raw = values[field.name];
+  if (field.type === "checkbox") return raw === true;
+  const value = typeof raw === "string" ? raw.trim() : raw ? String(raw) : "";
+  if (!value) return false;
+  if (field.type === "number" && Number(value) <= 0) return false;
+  return true;
+}
+
 /**
  * Campos renderizados no formulário FOCADO do modal.
- * `quick` sai quando o serviço é o principal (já veio da primeira dobra e é
- * mostrado num resumo editável), `standalone` sai quando o serviço entrou como
- * complemento (herda do contexto) e `context` nunca é digitado.
+ *
+ * Para o serviço PRINCIPAL, esconde apenas os campos da cotação rápida que
+ * chegaram REALMENTE preenchidos e válidos (eles aparecem no resumo editável).
+ * Qualquer campo inicial ausente ou inválido — típico de um CTA externo que
+ * abre a jornada sem passar pela primeira dobra — volta a ser editável aqui.
+ * `standalone` sai quando o serviço entrou como complemento (herda do
+ * contexto) e `context` nunca é digitado.
  */
 export function formFields(
   service: RequestService,
-  options: { isPrimary?: boolean; isComplement?: boolean } = {},
+  options: { isPrimary?: boolean; isComplement?: boolean; values?: ServiceValues } = {},
 ): RequestField[] {
+  const values = options.values ?? {};
+  const quickNames = new Set(quickQuoteFields(service, 6).map((f) => f.name));
+  const quickErrors = options.isPrimary ? validateQuickStep(service, values) : {};
+
   return service.fields.filter((field) => {
     if (field.origin === "context") return false;
-    if (field.origin === "quick" && options.isPrimary) return false;
     if (field.origin === "standalone" && options.isComplement) return false;
+    if (options.isPrimary && quickNames.has(field.name)) {
+      const satisfied = fieldHasValue(field, values) && !quickErrors[field.name];
+      return !satisfied;
+    }
+    if (field.origin === "quick" && options.isPrimary) return false;
     return true;
   });
 }
@@ -336,16 +360,9 @@ export function validateServiceDates(service: RequestService, values: ServiceVal
   if (service.key === "carro") {
     const pick = asDate(values, "retirada_data");
     const drop = asDate(values, "devolucao_data");
-    if (pick && drop) {
-      if (drop < pick) {
-        errors.devolucao_data = "A devolução deve ser depois da retirada.";
-      } else if (drop === pick) {
-        const pickTime = asDate(values, "retirada_hora");
-        const dropTime = asDate(values, "devolucao_hora");
-        if (pickTime && dropTime && dropTime <= pickTime) {
-          errors.devolucao_hora = "No mesmo dia, a devolução deve ser depois da retirada.";
-        }
-      }
+    // Horários foram removidos do formulário: a regra é só de datas.
+    if (pick && drop && drop < pick) {
+      errors.devolucao_data = "A devolução deve ser depois da retirada.";
     }
   }
 
@@ -376,12 +393,23 @@ export function validateServiceDates(service: RequestService, values: ServiceVal
   return errors;
 }
 
+/** Campos ignorados na validação porque vêm da rota estruturada do multidestinos. */
+function skipForMultiRoute(name: string): boolean {
+  return name === "destino" || name === "data_ida" || name === "data_volta";
+}
+
+export function isMultiRoute(service: RequestService, values: ServiceValues): boolean {
+  return service.key === "aereo" && values.tipo_viagem === "Multidestinos";
+}
+
 /** Step 1 validation: required fields of the selected service. */
 export function validateServiceStep(service: RequestService, values: ServiceValues): Record<string, string> {
   const errors: Record<string, string> = {};
+  const multi = isMultiRoute(service, values);
   for (const field of service.fields) {
     if (!field.required) continue;
     if (!fieldIsVisible(field, values)) continue;
+    if (multi && skipForMultiRoute(field.name)) continue;
     const raw = values[field.name];
     const value = typeof raw === "string" ? raw.trim() : raw;
     if (field.type === "checkbox") continue;
@@ -403,12 +431,11 @@ export function validateServiceStep(service: RequestService, values: ServiceValu
  */
 export function validateQuickStep(service: RequestService, values: ServiceValues): Record<string, string> {
   const errors: Record<string, string> = {};
-  const tipo = typeof values.tipo_viagem === "string" ? values.tipo_viagem : "";
-  const multi = service.key === "aereo" && tipo === "Multidestinos";
+  const multi = isMultiRoute(service, values);
 
-  for (const field of quickQuoteFields(service)) {
+  for (const field of quickQuoteFields(service, 6)) {
     if (!field.required) continue;
-    if (multi && (field.name === "destino" || field.name === "data_ida")) continue;
+    if (multi && skipForMultiRoute(field.name)) continue;
     const raw = values[field.name];
     const value = typeof raw === "string" ? raw.trim() : raw;
     if (!value) errors[field.name] = "Campo obrigatório.";
@@ -416,7 +443,7 @@ export function validateQuickStep(service: RequestService, values: ServiceValues
 
   const dateErrors = validateServiceDates(service, values);
   for (const [name, message] of Object.entries(dateErrors)) {
-    if (multi && (name === "data_volta" || name === "data_ida" || name === "rota_multidestinos")) continue;
+    if (multi && (skipForMultiRoute(name) || name === "rota_multidestinos")) continue;
     errors[name] = message;
   }
   return errors;

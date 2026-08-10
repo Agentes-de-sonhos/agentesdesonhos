@@ -147,19 +147,14 @@ describe("revisão corretiva da home white label", () => {
     expect(validateServiceDates(svc, { ...base, check_in: "2026-10-10", check_out: "2026-10-14" }).check_out).toBeUndefined();
   });
 
-  it("bloqueia devolução antes da retirada (data e hora no mesmo dia)", () => {
+  it("bloqueia devolução antes da retirada (regra apenas de datas)", () => {
     const svc = serviceByKey("carro");
     const base = initialServiceValues(svc);
     expect(validateServiceDates(svc, { ...base, retirada_data: "2026-05-10", devolucao_data: "2026-05-09" }).devolucao_data).toBeTruthy();
+    // Os horários saíram do formulário: mesmo dia é permitido.
     expect(
-      validateServiceDates(svc, {
-        ...base,
-        retirada_data: "2026-05-10",
-        devolucao_data: "2026-05-10",
-        retirada_hora: "14:00",
-        devolucao_hora: "10:00",
-      }).devolucao_hora,
-    ).toBeTruthy();
+      validateServiceDates(svc, { ...base, retirada_data: "2026-05-10", devolucao_data: "2026-05-10" }),
+    ).toEqual({});
     expect(validateServiceDates(svc, { ...base, retirada_data: "2026-05-10", devolucao_data: "2026-05-12" })).toEqual({});
   });
 

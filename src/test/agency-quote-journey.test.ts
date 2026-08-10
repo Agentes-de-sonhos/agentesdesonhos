@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   applyContextToService, buildJourneyPayload, contextFromService, eligibleComplements,
-  emptyTripContext, syncChildAges, totalTravelers,
+  emptyRouteLegs, emptyTripContext, rebuildContext, syncChildAges, totalTravelers,
+  validateChildAges, validateRouteLegs, applyRouteToContext, type RouteLeg,
 } from "@/lib/agencyQuoteJourney";
 import {
   formFields, initialServiceValues, quickQuoteFields, serviceByKey, validateQuickStep, validateServiceStep,
@@ -41,11 +42,16 @@ describe("cotação rápida (primeira dobra)", () => {
 });
 
 describe("jornada contextual", () => {
-  it("não repete no modal o que já veio da cotação rápida", () => {
-    const names = formFields(aereo, { isPrimary: true }).map((f) => f.name);
+  it("não repete no modal o que já veio preenchido na cotação rápida", () => {
+    const names = formFields(aereo, { isPrimary: true, values: quick }).map((f) => f.name);
     for (const field of quickQuoteFields(aereo, 5)) expect(names).not.toContain(field.name);
     expect(names).toContain("adultos");
-    expect(names).toContain("rota_multidestinos");
+  });
+
+  it("expõe no modal os campos iniciais que faltam (CTA externo sem cotação rápida)", () => {
+    const names = formFields(aereo, { isPrimary: true, values: initialServiceValues(aereo) }).map((f) => f.name);
+    expect(names).toContain("origem");
+    expect(names).toContain("destino");
   });
 
   it("complemento herda contexto e não pede destino/pax de novo", () => {
@@ -93,5 +99,41 @@ describe("jornada contextual", () => {
     expect(payload.details.hospedagem_check_in).toBe("2026-10-01");
     expect(payload.summary).toContain("Hospedagem");
     expect(payload.summary.length).toBeLessThanOrEqual(2000);
+  });
+});
+describe("rota multidestinos e idades obrigatórias", () => {
+  it("exige ao menos 2 destinos com data e ordem crescente", () => {
+    expect(validateRouteLegs("", emptyRouteLegs()).origem).toBeTruthy();
+    const ok: RouteLeg[] = [
+      { destino: "Lisboa", data: "2026-10-01" },
+      { destino: "Madri", data: "2026-10-06" },
+    ];
+    expect(validateRouteLegs("São Paulo", ok)).toEqual({});
+    const invertido = [ok[0], { destino: "Madri", data: "2026-09-20" }];
+    expect(validateRouteLegs("São Paulo", invertido).leg_1_data).toBeTruthy();
+    expect(validateRouteLegs("São Paulo", [ok[0], { destino: "", data: "" }]).rota).toBeTruthy();
+  });
+
+  it("deriva destino e datas do contexto a partir da rota", () => {
+    const ctx = applyRouteToContext(emptyTripContext(), "São Paulo", [
+      { destino: "Lisboa", data: "2026-10-01" },
+      { destino: "Madri", data: "2026-10-06" },
+    ]);
+    expect(ctx.destino).toBe("Madri");
+    expect(ctx.data_inicio).toBe("2026-10-01");
+    expect(ctx.data_fim).toBe("2026-10-06");
+  });
+
+  it("idade de cada criança é obrigatória e válida", () => {
+    expect(validateChildAges([], 2).child_age_0).toBeTruthy();
+    expect(validateChildAges(["5", "22"], 2).child_age_1).toBeTruthy();
+    expect(validateChildAges(["5", "7"], 2)).toEqual({});
+  });
+
+  it("remover serviço recalcula o contexto somente com o que restou", () => {
+    const ctx = contextFromService("aereo", quick, emptyTripContext());
+    const rebuilt = rebuildContext([{ key: "hospedagem", values: { destino: "Porto", check_in: "2026-11-02", check_out: "2026-11-08" } }], ctx);
+    expect(rebuilt.destino).toBe("Porto");
+    expect(rebuilt.adultos).toBe(ctx.adultos);
   });
 });

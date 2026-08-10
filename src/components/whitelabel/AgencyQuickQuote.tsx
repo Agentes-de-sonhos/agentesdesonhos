@@ -10,11 +10,16 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { AgencyQuoteJourney } from "@/components/whitelabel/AgencyQuoteJourney";
+import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
+import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
 import { isEditorialTheme } from "@/lib/agencySiteTheme";
 import {
-  REQUEST_SERVICES, initialServiceValues, quickQuoteFields, serviceByKey, validateQuickStep,
+  REQUEST_SERVICES, initialServiceValues, isMultiRoute, quickQuoteFields, serviceByKey, validateQuickStep,
   type ServiceValues,
 } from "@/lib/agencySiteRequests";
+import {
+  emptyRouteLegs, routeIsActionable, serializeRoute, validateRouteLegs, type RouteLeg,
+} from "@/lib/agencyQuoteJourney";
 
 const ICONS: Record<string, typeof Plane> = {
   aereo: Plane,
@@ -39,10 +44,11 @@ export interface AgencyQuickQuoteProps {
 }
 
 /**
- * Compact "Cotação rápida" card of the home: horizontal service tabs plus the
- * 3–4 essential fields of the selected service. The CTA opens the existing
- * AgencyRequestCenter in a modal, preserving the service and the typed values —
- * all validation, hooks, RPC and CRM integration stay in that component.
+ * Cartão compacto "Cotação rápida" da home: rail horizontal de serviços mais os
+ * campos essenciais do serviço escolhido. O aéreo usa um único calendário de
+ * período (ou data única em "Somente ida") e um editor estruturado de destinos
+ * em "Multidestinos". O CTA abre a jornada contextual (`AgencyQuoteJourney`),
+ * que herda tudo o que foi digitado aqui e faz o envio.
  */
 export function AgencyQuickQuote({
   hostname,
@@ -56,6 +62,7 @@ export function AgencyQuickQuote({
   const editorial = isEditorialTheme(hostname);
   const railWrapRef = useRef<HTMLDivElement | null>(null);
   const [quickErrors, setQuickErrors] = useState<Record<string, string>>({});
+  const [legsByService, setLegsByService] = useState<Record<string, RouteLeg[]>>({});
 
   const [valuesByService, setValuesByService] = useState<Record<string, ServiceValues>>(() => {
     const initial: Record<string, ServiceValues> = {};
@@ -63,14 +70,21 @@ export function AgencyQuickQuote({
     return initial;
   });
   const values = valuesByService[service.key] ?? initialServiceValues(service);
+  const tripType = String(values.tipo_viagem ?? "");
+  const isAereo = service.key === "aereo";
+  const multi = isMultiRoute(service, values);
+  const legs = legsByService[service.key] ?? emptyRouteLegs();
 
-  // Aéreo: a volta só faz sentido em "Ida e volta".
+  // No aéreo, datas e destino saem dos controles dedicados (calendário/rota).
   const fields = useMemo(() => {
-    const list = quickQuoteFields(service, 5);
+    const list = quickQuoteFields(service, 6);
     if (service.key !== "aereo") return list;
-    const tipo = String(values.tipo_viagem ?? "");
-    return list.filter((f) => (f.name === "data_volta" ? tipo === "Ida e volta" : true));
-  }, [service, values.tipo_viagem]);
+    return list.filter((f) => {
+      if (f.name === "data_ida" || f.name === "data_volta") return false;
+      if (f.name === "destino") return !multi;
+      return true;
+    });
+  }, [service, multi]);
 
   // Rail horizontal das categorias (preset editorial): linha única, sem barra
   // de rolagem visível e setas discretas quando os rótulos não couberem.
@@ -112,6 +126,33 @@ export function AgencyQuickQuote({
     [service.key],
   );
 
+  const setDates = useCallback(
+    (next: { start: string; end: string }) => {
+      setValuesByService((prev) => ({
+        ...prev,
+        [service.key]: { ...prev[service.key], data_ida: next.start, data_volta: next.end },
+      }));
+      setQuickErrors((prev) => ({ ...prev, data_ida: "", data_volta: "", periodo: "" }));
+    },
+    [service.key],
+  );
+
+  /** Rota estruturada: mantém `rota_multidestinos` serializado por compatibilidade. */
+  const setLegs = useCallback(
+    (next: RouteLeg[]) => {
+      setLegsByService((prev) => ({ ...prev, [service.key]: next }));
+      setValuesByService((prev) => ({
+        ...prev,
+        [service.key]: {
+          ...prev[service.key],
+          rota_multidestinos: serializeRoute(String(prev[service.key]?.origem ?? ""), next),
+        },
+      }));
+      setQuickErrors({});
+    },
+    [service.key],
+  );
+
   /** Abre a jornada única já com o contexto digitado aqui. */
   const startJourney = useCallback(() => {
     const found = validateQuickStep(service, values);
@@ -120,10 +161,19 @@ export function AgencyQuickQuote({
     for (const [name, message] of Object.entries(found)) {
       if (visible.has(name)) relevant[name] = message;
     }
+
+    if (isAereo && multi) {
+      const routeErrors = validateRouteLegs(String(values.origem ?? ""), legs);
+      Object.assign(relevant, routeErrors);
+    } else if (isAereo) {
+      if (found.data_ida) relevant.periodo = "Selecione a data de ida.";
+      else if (found.data_volta) relevant.periodo = found.data_volta;
+    }
+
     setQuickErrors(relevant);
     if (Object.keys(relevant).length) return;
     onOpenChange(true);
-  }, [service, values, fields, onOpenChange]);
+  }, [service, values, fields, onOpenChange, isAereo, multi, legs]);
 
   return (
     <>
@@ -262,6 +312,21 @@ export function AgencyQuickQuote({
             );
           })}
 
+          {isAereo && !multi && (
+            <TripDatePicker
+              id="quick-periodo"
+              label={tripType === "Somente ida" ? "Data da ida" : "Ida e volta"}
+              mode={tripType === "Somente ida" ? "single" : "range"}
+              start={String(values.data_ida ?? "")}
+              end={String(values.data_volta ?? "")}
+              onChange={setDates}
+              editorial={editorial}
+              required
+              error={quickErrors.periodo || quickErrors.data_ida || quickErrors.data_volta}
+              className="md:col-span-2"
+            />
+          )}
+
           <Button
             size="lg"
             className={
@@ -275,6 +340,17 @@ export function AgencyQuickQuote({
           </Button>
         </div>
 
+        {isAereo && multi && (
+          <RouteLegsEditor
+            legs={legs}
+            onChange={setLegs}
+            errors={quickErrors}
+            editorial={editorial}
+            idPrefix="quick-rota"
+            className="mt-4 border-t border-border/70 pt-4"
+          />
+        )}
+
         <p className={editorial ? "mt-4 text-[13px] text-muted-foreground" : "mt-3 text-xs text-muted-foreground"}>
           Não é uma busca automática: cada pedido é analisado por um consultor da equipe.
         </p>
@@ -287,6 +363,7 @@ export function AgencyQuickQuote({
         onOpenChange={onOpenChange}
         primaryService={service.key}
         quickValues={values}
+        quickRoute={isAereo && multi ? legs : undefined}
         onEditQuickValues={() =>
           railWrapRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
         }
