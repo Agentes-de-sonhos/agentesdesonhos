@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { isReconnectResponse, type ConnectionState } from "@/lib/googleCalendarConnection";
 
 interface GoogleCalendarStatus {
   connected: boolean;
@@ -12,6 +13,9 @@ interface GoogleCalendarStatus {
   last_sync_status?: "idle" | "syncing" | "synced" | "error" | null;
   last_sync_error?: string | null;
   last_sync_duration_ms?: number | null;
+  connection_state?: ConnectionState | null;
+  last_auth_error?: string | null;
+  last_auth_error_at?: string | null;
 }
 
 export interface SyncSkipSample {
@@ -111,7 +115,7 @@ export function useGoogleCalendar() {
       });
       if (error) throw error;
       setStatus({ connected: false });
-      toast.success("Google Calendar desconectado");
+      toast.success("Google Calendar desconectado. Seus eventos foram preservados.");
     } catch {
       toast.error("Erro ao desconectar");
     } finally {
@@ -126,8 +130,24 @@ export function useGoogleCalendar() {
       const { data, error } = await supabase.functions.invoke("google-calendar-sync", {
         body: { action: "sync", force: true },
       });
-      if (error) throw error;
-      if (data?.success && data?.skipped) {
+      if (error) {
+        // A 401 carries the reconnect signal in the response body.
+        const raw = (error as { context?: { text?: () => Promise<string> } })?.context?.text
+          ? await (error as { context: { text: () => Promise<string> } }).context.text()
+          : "";
+        let parsed: unknown = null;
+        try { parsed = raw ? JSON.parse(raw) : null; } catch { /* ignore */ }
+        if (isReconnectResponse(parsed)) {
+          toast.error("Reconexão necessária. Conecte novamente o Google Calendar.");
+          await checkStatus();
+          return;
+        }
+        throw error;
+      }
+      if (isReconnectResponse(data)) {
+        toast.error("Reconexão necessária. Conecte novamente o Google Calendar.");
+        await checkStatus();
+      } else if (data?.success && data?.skipped) {
         toast.info(
           data.skipped === "rate-limit"
             ? "Sincronização recente. Aguarde alguns segundos para forçar de novo."

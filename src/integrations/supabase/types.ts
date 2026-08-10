@@ -4715,57 +4715,75 @@ export type Database = {
       google_calendar_tokens: {
         Row: {
           access_token: string
+          access_token_enc: string | null
           auto_sync_enabled: boolean
           calendar_id: string | null
+          connection_state: string
           created_at: string | null
           id: string
+          last_auth_error: string | null
+          last_auth_error_at: string | null
           last_sync_at: string | null
           last_sync_duration_ms: number | null
           last_sync_error: string | null
           last_sync_status: string | null
           refresh_token: string
+          refresh_token_enc: string | null
           sync_enabled: boolean | null
           sync_in_progress: boolean
           sync_lock_at: string | null
           sync_token: string | null
+          token_enc_version: number
           token_expires_at: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
           access_token: string
+          access_token_enc?: string | null
           auto_sync_enabled?: boolean
           calendar_id?: string | null
+          connection_state?: string
           created_at?: string | null
           id?: string
+          last_auth_error?: string | null
+          last_auth_error_at?: string | null
           last_sync_at?: string | null
           last_sync_duration_ms?: number | null
           last_sync_error?: string | null
           last_sync_status?: string | null
           refresh_token: string
+          refresh_token_enc?: string | null
           sync_enabled?: boolean | null
           sync_in_progress?: boolean
           sync_lock_at?: string | null
           sync_token?: string | null
+          token_enc_version?: number
           token_expires_at: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
           access_token?: string
+          access_token_enc?: string | null
           auto_sync_enabled?: boolean
           calendar_id?: string | null
+          connection_state?: string
           created_at?: string | null
           id?: string
+          last_auth_error?: string | null
+          last_auth_error_at?: string | null
           last_sync_at?: string | null
           last_sync_duration_ms?: number | null
           last_sync_error?: string | null
           last_sync_status?: string | null
           refresh_token?: string
+          refresh_token_enc?: string | null
           sync_enabled?: boolean | null
           sync_in_progress?: boolean
           sync_lock_at?: string | null
           sync_token?: string | null
+          token_enc_version?: number
           token_expires_at?: string
           updated_at?: string | null
           user_id?: string
@@ -4801,6 +4819,36 @@ export type Database = {
           refresh_token?: string | null
           token_expires_at?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_oauth_states: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          nonce_hash: string
+          redirect_origin: string | null
+          user_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          nonce_hash: string
+          redirect_origin?: string | null
+          user_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          nonce_hash?: string
+          redirect_origin?: string | null
           user_id?: string
         }
         Relationships: []
@@ -14545,6 +14593,7 @@ export type Database = {
           utm_source: string
         }[]
       }
+      cleanup_google_oauth_states: { Args: never; Returns: number }
       clone_itinerary_for_trip: {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
@@ -14598,6 +14647,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      consume_google_oauth_state: {
+        Args: { p_id: string; p_nonce_hash: string }
+        Returns: string
       }
       current_agency_entitlements: {
         Args: never
@@ -14728,6 +14781,7 @@ export type Database = {
           won_previous_month: boolean
         }[]
       }
+      get_calendar_cron_secret: { Args: never; Returns: string }
       get_current_month_award: {
         Args: never
         Returns: {
@@ -15393,6 +15447,7 @@ export type Database = {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined
       }
+      trigger_google_calendar_cron: { Args: never; Returns: number }
       unaccent: { Args: { "": string }; Returns: string }
       user_agency_id: { Args: { _uid: string }; Returns: string }
       validate_quick_access_token: { Args: { _token: string }; Returns: string }

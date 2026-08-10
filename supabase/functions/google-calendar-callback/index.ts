@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { hashNonce, parseState } from "../_shared/googleOAuthState.ts";
+import { buildTokenColumns, getTokenEncKey } from "../_shared/googleTokenCrypto.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -19,18 +21,36 @@ Deno.serve(async (req) => {
       });
     }
 
-    const state = JSON.parse(atob(stateParam));
-    const userId = state.user_id;
+    const clientId = Deno.env.get("GOOGLE_CLIENT_ID")!;
+    const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET")!;
+    const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-callback`;
 
-    if (!userId) {
-      return new Response(redirectHtml("Usuário não identificado.", false), {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Atomic single-use consumption of the cryptographic state.
+    const parsed = parseState(stateParam);
+    if (!parsed) {
+      console.error("callback rejected: malformed state");
+      return new Response(redirectHtml("Requisição de conexão inválida ou expirada.", false), {
         headers: { "Content-Type": "text/html" },
       });
     }
 
-    const clientId = Deno.env.get("GOOGLE_CLIENT_ID")!;
-    const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET")!;
-    const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-callback`;
+    const { data: consumedUserId, error: consumeError } = await supabase.rpc("consume_google_oauth_state", {
+      p_id: parsed.stateId,
+      p_nonce_hash: await hashNonce(parsed.nonce),
+    });
+
+    if (consumeError || !consumedUserId) {
+      console.error("callback rejected: state not consumable", consumeError?.message);
+      return new Response(redirectHtml("Requisição de conexão inválida ou expirada.", false), {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    const userId = consumedUserId as string;
 
     // Exchange code for tokens
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
@@ -54,21 +74,41 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
+
+    // Reuse the stored refresh token when Google omits it on re-consent, so a
+    // reconnect never downgrades an existing connection.
+    const { data: existing } = await supabase
+      .from("google_calendar_tokens")
+      .select("refresh_token")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const refreshToken: string | undefined = tokenData.refresh_token || existing?.refresh_token || undefined;
+    if (!refreshToken) {
+      console.error("callback rejected: no refresh token available");
+      return new Response(redirectHtml("O Google não retornou permissão de acesso contínuo. Tente novamente.", false), {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+
+    const tokenColumns = await buildTokenColumns(
+      { access_token: tokenData.access_token, refresh_token: refreshToken },
+      getTokenEncKey(),
+    );
 
     const { error: upsertError } = await supabase
       .from("google_calendar_tokens")
       .upsert({
         user_id: userId,
-        access_token: tokenData.access_token,
-        refresh_token: tokenData.refresh_token,
+        ...tokenColumns,
         token_expires_at: expiresAt,
         sync_enabled: true,
+        connection_state: "connected",
+        last_auth_error: null,
+        last_auth_error_at: null,
+        sync_in_progress: false,
+        sync_lock_at: null,
         updated_at: new Date().toISOString(),
       }, { onConflict: "user_id" });
 

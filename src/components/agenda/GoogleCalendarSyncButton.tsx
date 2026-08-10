@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Link2, Unlink, Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
+import { RefreshCw, Link2, Unlink, Loader2, CheckCircle2, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { SyncReportDialog } from "./SyncReportDialog";
+import {
+  needsReconnect,
+  reconnectMessage,
+  resolveStatusKey,
+  statusDotClass,
+  statusLabel,
+} from "@/lib/googleCalendarConnection";
 
 interface GoogleCalendarSyncButtonProps {
   onSyncComplete?: () => void;
@@ -34,28 +41,48 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
     );
   }
 
-  const statusKey = isSyncing || status.sync_in_progress
-    ? "syncing"
-    : status.last_sync_status || (status.last_sync_at ? "synced" : "idle");
-  const dotColor =
-    statusKey === "syncing" ? "bg-amber-500 animate-pulse"
-    : statusKey === "error" ? "bg-rose-500"
-    : statusKey === "synced" ? "bg-emerald-500"
-    : "bg-muted-foreground";
-  const statusLabel =
-    statusKey === "syncing" ? "Sincronizando…"
-    : statusKey === "error" ? "Erro de sincronização"
-    : statusKey === "synced" ? "Sincronizado"
-    : "Aguardando";
+  const statusKey = resolveStatusKey(status, isSyncing);
+  const dotColor = statusDotClass(statusKey);
+  const label = statusLabel(statusKey);
+  const mustReconnect = needsReconnect(status);
+
+  // Re-consent required: the connection is kept, but only reconnecting fixes it.
+  if (mustReconnect) {
+    return (
+      <div className="flex items-center gap-2">
+        <div
+          className="hidden sm:flex items-center gap-1.5 text-xs text-amber-600"
+          title={reconnectMessage(status)}
+        >
+          <AlertTriangle className="h-3.5 w-3.5" />
+          <span>{label}</span>
+        </div>
+        <Button variant="default" size="sm" onClick={connect} disabled={isLoading} className="gap-2">
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Link2 className="h-4 w-4" />}
+          Reconectar Google Calendar
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={disconnect}
+          disabled={isLoading}
+          className="gap-1 text-destructive hover:text-destructive"
+        >
+          <Unlink className="h-3 w-3" />
+          <span className="hidden sm:inline">Desconectar</span>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2">
       <div
         className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground"
-        title={status.last_sync_error || statusLabel}
+        title={status.last_sync_error || label}
       >
         <span className={`inline-block h-2 w-2 rounded-full ${dotColor}`} />
-        <span>{statusLabel}</span>
+        <span>{label}</span>
         {status.last_sync_at && statusKey !== "syncing" && (
           <span>· {formatDistanceToNow(new Date(status.last_sync_at), { addSuffix: true, locale: ptBR })}</span>
         )}
