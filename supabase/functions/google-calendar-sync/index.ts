@@ -347,13 +347,15 @@ Deno.serve(async (req) => {
     if (action === "status") {
       const { data: token } = await supabase
         .from("google_calendar_tokens")
-        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at")
+        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at, incremental_page_token, incremental_pages_done, incremental_items_done, push_deleted_cursor_completed_at")
         .eq("user_id", userId)
         .maybeSingle();
 
       // Bootstrap progress is exposed as a boolean plus counters so the UI can
       // say "initial sync running" without ever claiming completion.
       const bootstrapInProgress = !!token && (!!token.bootstrap_page_token || !token.bootstrap_completed_at);
+      // An incremental walk with a pending pageToken is also unfinished work.
+      const incrementalInProgress = !!token?.incremental_page_token;
       return new Response(
         JSON.stringify({
           connected: !!token,
@@ -363,6 +365,10 @@ Deno.serve(async (req) => {
                 bootstrap_in_progress: bootstrapInProgress,
                 bootstrap_pages_done: token.bootstrap_pages_done ?? 0,
                 bootstrap_items_done: token.bootstrap_items_done ?? 0,
+                incremental_in_progress: incrementalInProgress,
+                incremental_pages_done: token.incremental_pages_done ?? 0,
+                incremental_items_done: token.incremental_items_done ?? 0,
+                resume_pending: bootstrapInProgress || incrementalInProgress,
               }
             : {}),
         }),
