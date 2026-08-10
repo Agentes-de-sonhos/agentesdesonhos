@@ -1,8 +1,18 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  CRON_SECRET_HEADER,
+  fetchCronSecret,
+  isAuthorizedInternalCall,
+} from "../_shared/calendarCronAuth.ts";
+import {
+  buildTokenColumns,
+  getTokenEncKey,
+  readTokenField,
+} from "../_shared/googleTokenCrypto.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 interface GoogleEvent {
@@ -104,24 +114,84 @@ async function refreshAccessToken(refreshToken: string): Promise<{ access_token:
   return await res.json();
 }
 
-async function getValidToken(supabase: any, tokenRecord: any): Promise<string | null> {
+/**
+ * Marks a connection as needing user re-consent. Never deletes the token row
+ * and never touches google_calendar_sync mappings or agency_events.
+ */
+async function markReconnectRequired(supabase: any, userId: string, reason: string) {
+  const { error } = await supabase
+    .from("google_calendar_tokens")
+    .update({
+      connection_state: "reconnect_required",
+      last_auth_error: reason,
+      last_auth_error_at: new Date().toISOString(),
+      sync_in_progress: false,
+      sync_lock_at: null,
+      last_sync_status: "error",
+      last_sync_error: reason,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+  if (error) {
+    console.error(`[calendar-sync] reconnect-flag-error user=${userId} err=${error.message}`);
+  } else {
+    console.warn(`[calendar-sync] reconnect-required user=${userId} reason=${reason}`);
+  }
+}
+
+async function persistRefreshedToken(supabase: any, userId: string, accessToken: string, expiresIn: number) {
+  const columns = await buildTokenColumns({ access_token: accessToken }, getTokenEncKey());
+  await supabase
+    .from("google_calendar_tokens")
+    .update({
+      ...columns,
+      token_expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
+      connection_state: "connected",
+      last_auth_error: null,
+      last_auth_error_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId);
+}
+
+async function getValidToken(
+  supabase: any,
+  tokenRecord: any,
+  refreshToken: string | null,
+  currentAccessToken: string | null,
+): Promise<string | null> {
   const now = new Date();
   const expiresAt = new Date(tokenRecord.token_expires_at);
 
-  if (expiresAt > new Date(now.getTime() + 60000)) {
-    return tokenRecord.access_token;
+  if (currentAccessToken && expiresAt > new Date(now.getTime() + 60000)) {
+    return currentAccessToken;
   }
 
-  const refreshed = await refreshAccessToken(tokenRecord.refresh_token);
+  if (!refreshToken) return null;
+
+  const refreshed = await refreshAccessToken(refreshToken);
   if (!refreshed) return null;
 
-  const newExpiry = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
-  await supabase
-    .from("google_calendar_tokens")
-    .update({ access_token: refreshed.access_token, token_expires_at: newExpiry, updated_at: new Date().toISOString() })
-    .eq("user_id", tokenRecord.user_id);
-
+  await persistRefreshedToken(supabase, tokenRecord.user_id, refreshed.access_token, refreshed.expires_in);
   return refreshed.access_token;
+}
+
+/** Best-effort revocation of the Google grant. Never blocks disconnect. */
+async function revokeGoogleToken(token: string | null): Promise<"revoked" | "failed" | "skipped"> {
+  if (!token) return "skipped";
+  try {
+    const res = await fetch("https://oauth2.googleapis.com/revoke", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ token }),
+    });
+    if (res.ok) return "revoked";
+    console.warn(`[calendar-sync] revoke-failed status=${res.status}`);
+    return "failed";
+  } catch (e) {
+    console.warn(`[calendar-sync] revoke-error err=${(e as Error)?.message}`);
+    return "failed";
+  }
 }
 
 Deno.serve(async (req) => {
@@ -130,8 +200,20 @@ Deno.serve(async (req) => {
   }
 
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const internalKey = req.headers.get("x-internal-key");
-  const isInternal = !!internalKey && internalKey === serviceRoleKey;
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, serviceRoleKey);
+
+  // Internal (cron) calls authenticate with the vault-held shared secret.
+  // Fail-closed: without a configured secret no internal call is accepted.
+  const presentedCronSecret = req.headers.get(CRON_SECRET_HEADER);
+  let isInternal = false;
+  if (presentedCronSecret) {
+    const expectedSecret = await fetchCronSecret(admin);
+    isInternal = isAuthorizedInternalCall(presentedCronSecret, expectedSecret);
+    if (!isInternal) {
+      console.warn(`[calendar-sync] internal-call-rejected`);
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+    }
+  }
 
   try {
     const body = await req.json().catch(() => ({}));
@@ -162,16 +244,30 @@ Deno.serve(async (req) => {
       userId = claimsData.claims.sub;
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      serviceRoleKey
-    );
+    const supabase = admin;
+    const encKey = getTokenEncKey();
 
     // Handle disconnect
     if (action === "disconnect") {
+      const { data: existingToken } = await supabase
+        .from("google_calendar_tokens")
+        .select("access_token, refresh_token, access_token_enc, refresh_token_enc, token_enc_version")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      // Revoke the grant at Google before dropping the local credentials.
+      let revocation: "revoked" | "failed" | "skipped" = "skipped";
+      if (existingToken) {
+        const refresh = await readTokenField(existingToken, "refresh_token", encKey);
+        const access = await readTokenField(existingToken, "access_token", encKey);
+        revocation = await revokeGoogleToken(refresh || access);
+      }
+
+      // Credentials are removed; event mappings and calendar events are preserved.
       await supabase.from("google_calendar_tokens").delete().eq("user_id", userId);
-      await supabase.from("google_calendar_sync").delete().eq("user_id", userId);
-      return new Response(JSON.stringify({ success: true, message: "Desconectado" }), {
+      console.log(`[calendar-sync] disconnected user=${userId} revocation=${revocation} mappings=preserved`);
+
+      return new Response(JSON.stringify({ success: true, message: "Desconectado", revocation }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -180,9 +276,9 @@ Deno.serve(async (req) => {
     if (action === "status") {
       const { data: token } = await supabase
         .from("google_calendar_tokens")
-        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms")
+        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
       return new Response(JSON.stringify({ connected: !!token, ...(token || {}) }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -194,10 +290,29 @@ Deno.serve(async (req) => {
       .from("google_calendar_tokens")
       .select("*")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
     if (!tokenRecord) {
       return new Response(JSON.stringify({ error: "Google Calendar não conectado" }), { status: 400, headers: corsHeaders });
+    }
+
+    if (tokenRecord.connection_state === "reconnect_required") {
+      console.log(`[calendar-sync] reconnect-required-skip user=${userId}`);
+      return new Response(
+        JSON.stringify({ success: true, skipped: "reconnect-required", connection_state: "reconnect_required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const storedRefreshToken = await readTokenField(tokenRecord, "refresh_token", encKey);
+    const storedAccessToken = await readTokenField(tokenRecord, "access_token", encKey);
+
+    if (!storedRefreshToken) {
+      await markReconnectRequired(supabase, userId, "Credencial ausente. Reconecte o Google Calendar.");
+      return new Response(
+        JSON.stringify({ error: "Reconexão necessária. Conecte novamente o Google Calendar.", code: "reconnect_required" }),
+        { status: 401, headers: corsHeaders },
+      );
     }
 
     // Auto-sync disabled blocks only cron triggers; manual sync still works.
@@ -267,12 +382,15 @@ Deno.serve(async (req) => {
     };
 
     try {
-    let accessToken = await getValidToken(supabase, tokenRecord);
+    let accessToken = await getValidToken(supabase, tokenRecord, storedRefreshToken, storedAccessToken);
     if (!accessToken) {
-      // Token refresh failed, remove stale record
-      await releaseLock("error", "Token expirado");
-      await supabase.from("google_calendar_tokens").delete().eq("user_id", userId);
-      return new Response(JSON.stringify({ error: "Token expirado. Reconecte o Google Calendar." }), { status: 401, headers: corsHeaders });
+      // Refresh failed: keep the token row AND every mapping intact, flag the
+      // connection for re-consent and release the lock.
+      await markReconnectRequired(supabase, userId, "Autorização do Google expirada ou revogada.");
+      return new Response(
+        JSON.stringify({ error: "Reconexão necessária. Conecte novamente o Google Calendar.", code: "reconnect_required" }),
+        { status: 401, headers: corsHeaders },
+      );
     }
 
     // Wrapper: on 401, refresh token once and retry the request.
@@ -284,16 +402,13 @@ Deno.serve(async (req) => {
       let res = await fetch(url, withAuth(accessToken!));
       if (res.status !== 401) return res;
       console.warn(`[calendar-sync] token-refresh-retry user=${userId} url=${url.split("?")[0]}`);
-      const refreshed = await refreshAccessToken(tokenRecord.refresh_token);
+      const refreshed = await refreshAccessToken(storedRefreshToken);
       if (!refreshed) {
         console.error(`[calendar-sync] token-refresh-failed user=${userId}`);
+        await markReconnectRequired(supabase, userId, "Autorização do Google expirada ou revogada.");
         return res;
       }
-      const newExpiry = new Date(Date.now() + refreshed.expires_in * 1000).toISOString();
-      await supabase
-        .from("google_calendar_tokens")
-        .update({ access_token: refreshed.access_token, token_expires_at: newExpiry, updated_at: new Date().toISOString() })
-        .eq("user_id", userId);
+      await persistRefreshedToken(supabase, userId, refreshed.access_token, refreshed.expires_in);
       accessToken = refreshed.access_token;
       console.log(`[calendar-sync] token-refresh-success user=${userId}`);
       res = await fetch(url, withAuth(accessToken!));
