@@ -595,7 +595,15 @@ Deno.serve(async (req) => {
 
     const liveLocalEvents = (pushBatch || []) as any[];
 
-    const { data: deletedBatch, error: deletedErr } = await supabase
+    // 1a. Deletion queue — same keyset technique so a batch larger than the
+    // per-run limit never reprocesses the first N rows forever. Ordered by
+    // (deleted_at, id) so identical timestamps with different UUIDs still
+    // advance. Tombstones and mappings are preserved; no extra deletion rule.
+    const deletedCursor: DeletedPushCursor = {
+      deleted_at: tokenRecord.push_deleted_cursor_at ?? null,
+      event_id: tokenRecord.push_deleted_cursor_event_id ?? null,
+    };
+    let deletedQuery = supabase
       .from("agency_events")
       .select("*")
       .eq("user_id", userId)
@@ -603,11 +611,21 @@ Deno.serve(async (req) => {
       .lte("event_date", windowEndDay)
       .not("deleted_at", "is", null)
       .order("deleted_at", { ascending: true })
+      .order("id", { ascending: true })
       .limit(limits.maxPushItems);
+    if (deletedCursor.deleted_at && deletedCursor.event_id) {
+      deletedQuery = deletedQuery.or(
+        buildKeysetOrFilter("deleted_at", deletedCursor.deleted_at, deletedCursor.event_id),
+      );
+    } else if (deletedCursor.deleted_at) {
+      deletedQuery = deletedQuery.gt("deleted_at", deletedCursor.deleted_at);
+    }
+    const { data: deletedBatch, error: deletedErr } = await deletedQuery;
     if (deletedErr) {
       console.error(`[calendar-sync] deleted-fetch-error err=${deletedErr.message}`);
     }
     const deletedLocalEvents = (deletedBatch || []) as any[];
+    const deletedScanComplete = isPushScanComplete(deletedLocalEvents.length, limits.maxPushItems);
 
     // Mappings are fetched only for the events in this batch — never the whole
     // google_calendar_sync table.
