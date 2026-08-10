@@ -18,6 +18,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { parseFunctionsError, formatCancelDate } from "@/lib/subscriptionCancel";
 import {
   CreditCard,
   ExternalLink,
@@ -94,20 +95,25 @@ export default function MinhaConta() {
         body: { reason: cancelReason.trim() },
       });
       if (error) {
-        const msg = (error as any)?.context?.error || error.message;
-        throw new Error(msg || "Erro ao cancelar assinatura.");
+        throw new Error(await parseFunctionsError(error));
       }
       if (!data?.success) {
-        throw new Error(data?.error || "Não foi possível cancelar a assinatura.");
+        throw new Error(await parseFunctionsError({ context: data }));
       }
-      const endDate = data.cancel_at
-        ? new Date(data.cancel_at * 1000).toLocaleDateString("pt-BR")
-        : null;
-      toast.success(
-        endDate
-          ? `Assinatura cancelada. Seu acesso permanece ativo até ${endDate}.`
-          : "Assinatura cancelada com sucesso."
-      );
+      const endDate = formatCancelDate(data.cancel_at);
+      if (data.already_scheduled) {
+        toast.info(
+          endDate
+            ? `Seu cancelamento já estava agendado. O acesso vai até ${endDate}.`
+            : "Seu cancelamento já estava agendado."
+        );
+      } else {
+        toast.success(
+          endDate
+            ? `Assinatura cancelada. Seu acesso permanece ativo até ${endDate}.`
+            : "Assinatura cancelada. Seu acesso permanece ativo até o fim do período já pago."
+        );
+      }
       setConfirmCancel(false);
       setCancelReason("");
       await refetch();

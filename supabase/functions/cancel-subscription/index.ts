@@ -12,71 +12,223 @@ const log = (step: string, details?: unknown) => {
   console.log(`[CANCEL-SUBSCRIPTION] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+const ELIGIBLE_STATUSES = ["active", "trialing", "past_due", "unpaid"];
+
+const json = (body: unknown, status: number) =>
+  new Response(JSON.stringify(body), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    status,
+  });
+
+/**
+ * Extrai o fim do período vigente de forma compatível com a API atual do Stripe
+ * (2025-08-27.basil), onde `current_period_end` vive nos itens da assinatura.
+ * Retorna epoch em segundos ou null quando não houver valor utilizável.
+ */
+export function extractPeriodEnd(sub: any): number | null {
+  const candidates = [
+    sub?.items?.data?.[0]?.current_period_end,
+    sub?.cancel_at,
+    sub?.current_period_end,
+    sub?.trial_end,
+    sub?.ended_at,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  }
+  return null;
+}
+
+const toIsoOrNull = (epochSeconds: number | null): string | null => {
+  if (epochSeconds === null) return null;
+  const date = new Date(epochSeconds * 1000);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY não configurada");
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+  if (!stripeKey) {
+    log("missing STRIPE_SECRET_KEY");
+    return json(
+      { error: "Serviço de pagamento indisponível no momento.", code: "stripe_error" },
+      502,
     );
+  }
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("Sessão não encontrada. Faça login novamente.");
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData.user?.email) throw new Error("Não foi possível validar sua sessão.");
-    const user = userData.user;
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } },
+  );
 
-    let reason = "";
-    try {
-      const body = await req.json();
+  // 1) Autenticação
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return json(
+      { error: "Sessão não encontrada. Entre novamente e tente cancelar.", code: "not_authenticated" },
+      401,
+    );
+  }
+  const token = authHeader.replace("Bearer ", "");
+  const { data: userData, error: userError } = await supabase.auth.getUser(token);
+  const user = userData?.user;
+  if (userError || !user) {
+    return json(
+      { error: "Sua sessão expirou. Entre novamente e tente cancelar.", code: "not_authenticated" },
+      401,
+    );
+  }
+
+  // 2) Payload (opcional)
+  let reason = "";
+  try {
+    const raw = await req.text();
+    if (raw) {
+      const body = JSON.parse(raw);
+      if (body?.reason !== undefined && typeof body.reason !== "string") {
+        return json({ error: "Motivo do cancelamento inválido.", code: "invalid_payload" }, 400);
+      }
       reason = typeof body?.reason === "string" ? body.reason.slice(0, 1000) : "";
-    } catch (_) {
-      // body opcional
+    }
+  } catch (_) {
+    return json({ error: "Não foi possível ler os dados enviados.", code: "invalid_payload" }, 400);
+  }
+
+  const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+  try {
+    // 3) Assinatura local (fonte prioritária dos IDs do Stripe)
+    const { data: localSub } = await supabase
+      .from("subscriptions")
+      .select("id, plan, stripe_customer_id, stripe_subscription_id")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    log("local subscription", {
+      found: !!localSub,
+      has_subscription_id: !!localSub?.stripe_subscription_id,
+      has_customer_id: !!localSub?.stripe_customer_id,
+    });
+
+    let sub: any = null;
+    let strategy = "none";
+
+    const pickEligible = (list: any[]) =>
+      list.find((s) => ELIGIBLE_STATUSES.includes(s?.status)) ?? null;
+
+    const listForCustomer = async (customerId: string) => {
+      const res = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 20,
+      });
+      return pickEligible(res.data);
+    };
+
+    // a) stripe_subscription_id
+    if (localSub?.stripe_subscription_id) {
+      try {
+        const retrieved = await stripe.subscriptions.retrieve(localSub.stripe_subscription_id);
+        if (ELIGIBLE_STATUSES.includes(retrieved?.status)) {
+          sub = retrieved;
+          strategy = "stripe_subscription_id";
+        } else {
+          log("stored subscription not eligible", { status: retrieved?.status });
+        }
+      } catch (e) {
+        log("retrieve by stored subscription id failed", String(e));
+      }
     }
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    // b) stripe_customer_id
+    if (!sub && localSub?.stripe_customer_id) {
+      sub = await listForCustomer(localSub.stripe_customer_id);
+      if (sub) strategy = "stripe_customer_id";
+    }
 
-    // Localiza customer por e-mail; fallback metadata.supabase_user_id
-    let customerId: string | null = null;
-    const byEmail = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (byEmail.data.length > 0) {
-      customerId = byEmail.data[0].id;
-    } else {
+    // c) fallback por e-mail (todos os customers) e por metadata
+    if (!sub && user.email) {
+      const byEmail = await stripe.customers.list({ email: user.email, limit: 20 });
+      for (const customer of byEmail.data) {
+        sub = await listForCustomer(customer.id);
+        if (sub) {
+          strategy = "customer_email";
+          break;
+        }
+      }
+    }
+
+    if (!sub) {
       try {
         const search = await stripe.customers.search({
           query: `metadata['supabase_user_id']:'${user.id}'`,
-          limit: 1,
+          limit: 10,
         });
-        if (search.data.length > 0) customerId = search.data[0].id;
+        for (const customer of search.data) {
+          sub = await listForCustomer(customer.id);
+          if (sub) {
+            strategy = "customer_metadata";
+            break;
+          }
+        }
       } catch (e) {
         log("customer search fallback failed", String(e));
       }
     }
 
-    if (!customerId) {
-      throw new Error(
-        "Nenhuma assinatura encontrada para este e-mail. Verifique se você usou o mesmo e-mail no pagamento ou fale com o suporte."
+    if (!sub) {
+      log("subscription not found", { user_id: user.id });
+      return json(
+        {
+          error:
+            "Não localizamos uma assinatura ativa vinculada à sua conta. Fale com o suporte informando o e-mail usado no pagamento.",
+          code: "subscription_not_found",
+        },
+        404,
       );
     }
 
-    const subs = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
-    if (subs.data.length === 0) {
-      throw new Error("Não encontramos uma assinatura ativa para cancelar.");
-    }
-    const sub = subs.data[0];
+    log("subscription resolved", { strategy, status: sub.status, id: sub.id });
 
+    // Autocura dos IDs + expires_at
+    const persist = async (periodEndIso: string | null, customerId: string, subscriptionId: string) => {
+      const payload: Record<string, unknown> = {
+        stripe_customer_id: customerId,
+        stripe_subscription_id: subscriptionId,
+      };
+      if (periodEndIso) payload.expires_at = periodEndIso;
+      const { error } = await supabase
+        .from("subscriptions")
+        .update(payload)
+        .eq("user_id", user.id)
+        .eq("is_active", true);
+      if (error) log("subscriptions update failed (non-blocking)", error.message);
+    };
+
+    const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id ?? "";
+
+    // 4) Idempotência: já agendada
+    if (sub.cancel_at_period_end === true) {
+      const periodEnd = extractPeriodEnd(sub);
+      await persist(toIsoOrNull(periodEnd), customerId, sub.id);
+      log("already scheduled", { id: sub.id });
+      return json(
+        {
+          success: true,
+          already_scheduled: true,
+          cancel_at: periodEnd,
+          subscription_id: sub.id,
+        },
+        200,
+      );
+    }
+
+    // 5) Agenda o cancelamento
     const updated = await stripe.subscriptions.update(sub.id, {
       cancel_at_period_end: true,
       cancellation_details: reason ? { comment: reason } : undefined,
@@ -89,38 +241,33 @@ serve(async (req) => {
       },
     });
 
-    log("subscription scheduled for cancellation", { id: updated.id, period_end: updated.current_period_end });
+    const periodEnd = extractPeriodEnd(updated);
+    await persist(toIsoOrNull(periodEnd), customerId, updated.id);
 
-    // Registra na tabela de assinaturas se existir expires_at
-    try {
-      await supabase
-        .from("subscriptions")
-        .update({
-          expires_at: new Date(updated.current_period_end * 1000).toISOString(),
-        })
-        .eq("user_id", user.id)
-        .eq("is_active", true);
-    } catch (e) {
-      log("subscriptions table update failed (non-blocking)", String(e));
-    }
+    log("subscription scheduled for cancellation", {
+      id: updated.id,
+      strategy,
+      has_period_end: periodEnd !== null,
+    });
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        cancel_at: updated.current_period_end,
-        subscription_id: updated.id,
-      }),
+    return json(
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
+        success: true,
+        already_scheduled: false,
+        cancel_at: periodEnd,
+        subscription_id: updated.id,
+      },
+      200,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    log("ERROR", message);
-    return new Response(JSON.stringify({ error: message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
-    });
+    log("STRIPE/UNEXPECTED ERROR", message);
+    return json(
+      {
+        error: "O provedor de pagamento não respondeu. Tente novamente em alguns minutos.",
+        code: "stripe_error",
+      },
+      502,
+    );
   }
 });
