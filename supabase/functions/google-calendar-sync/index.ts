@@ -542,12 +542,16 @@ Deno.serve(async (req) => {
       return res;
     };
 
-    // Sync window: 30 days back → 730 days forward
+    // Local (push) window: 30 days back → 730 days forward, always current.
+    // The pull window for a resumed bootstrap is separate and immutable —
+    // see pullBootstrapWindow below.
     const now = new Date();
     const windowStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const windowEndDate = new Date(now.getTime() + 730 * 24 * 60 * 60 * 1000);
-    const windowStart = windowStartDate.toISOString();
-    const windowEnd = windowEndDate.toISOString();
+    const localWindow = {
+      windowStart: windowStartDate.toISOString(),
+      windowEnd: windowEndDate.toISOString(),
+    };
     const windowStartDay = windowStartDate.toISOString().slice(0, 10);
     const windowEndDay = windowEndDate.toISOString().slice(0, 10);
 
@@ -556,7 +560,7 @@ Deno.serve(async (req) => {
 
     const calendarId = "primary";
     console.log(
-      `[calendar-sync] boot user=${userId} agency=${agencyId ?? "n/a"} calendar=${calendarId} window=${windowStartDay}..${windowEndDay} window_iso=${windowStart}..${windowEnd}`
+      `[calendar-sync] boot user=${userId} agency=${agencyId ?? "n/a"} calendar=${calendarId} window=${windowStartDay}..${windowEndDay} window_iso=${localWindow.windowStart}..${localWindow.windowEnd}`
     );
 
     // Per-run budgets (configurable, clamped). They replace the old silent
