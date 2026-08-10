@@ -175,7 +175,24 @@ export default function MinhaConta() {
               </div>
             )}
 
-            {isPaid && subscription?.expires_at && (
+            {isPaid && cancellation.scheduled && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex flex-col gap-3 rounded-lg border border-amber-300/60 bg-amber-50 p-4 text-amber-900 sm:flex-row sm:items-start dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+              >
+                <CalendarClock className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold leading-none">Cancelamento agendado</p>
+                  <p className="text-sm opacity-90">
+                    Seu plano permanece ativo até {cancellation.endDateLabel}. Não haverá novas
+                    cobranças.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {isPaid && !cancellation.scheduled && subscription?.expires_at && (
               <p className="text-sm text-muted-foreground">
                 Próxima renovação: {new Date(subscription.expires_at).toLocaleDateString("pt-BR")}
               </p>
