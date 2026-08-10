@@ -12,6 +12,7 @@ import {
 } from "../_shared/googleTokenCrypto.ts";
 import {
   buildEventsListUrl,
+  buildKeysetOrFilter,
   computeBootstrapUpdate,
   computeCursorResetUpdate,
   computeIncrementalUpdate,
@@ -20,9 +21,12 @@ import {
   isCursorGoneStatus,
   isPushScanComplete,
   isTransientSyncError,
+  nextDeletedCursor,
   nextPushCursor,
   resolvePullMode,
+  resolveResumePageToken,
   resolveSyncStatus,
+  type DeletedPushCursor,
   type PushCursor,
   type SyncLifecycleStatus,
 } from "../_shared/calendarSyncPaging.ts";
@@ -343,13 +347,15 @@ Deno.serve(async (req) => {
     if (action === "status") {
       const { data: token } = await supabase
         .from("google_calendar_tokens")
-        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at")
+        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at, incremental_page_token, incremental_pages_done, incremental_items_done, push_deleted_cursor_completed_at")
         .eq("user_id", userId)
         .maybeSingle();
 
       // Bootstrap progress is exposed as a boolean plus counters so the UI can
       // say "initial sync running" without ever claiming completion.
       const bootstrapInProgress = !!token && (!!token.bootstrap_page_token || !token.bootstrap_completed_at);
+      // An incremental walk with a pending pageToken is also unfinished work.
+      const incrementalInProgress = !!token?.incremental_page_token;
       return new Response(
         JSON.stringify({
           connected: !!token,
@@ -359,6 +365,10 @@ Deno.serve(async (req) => {
                 bootstrap_in_progress: bootstrapInProgress,
                 bootstrap_pages_done: token.bootstrap_pages_done ?? 0,
                 bootstrap_items_done: token.bootstrap_items_done ?? 0,
+                incremental_in_progress: incrementalInProgress,
+                incremental_pages_done: token.incremental_pages_done ?? 0,
+                incremental_items_done: token.incremental_items_done ?? 0,
+                resume_pending: bootstrapInProgress || incrementalInProgress,
               }
             : {}),
         }),
@@ -585,7 +595,15 @@ Deno.serve(async (req) => {
 
     const liveLocalEvents = (pushBatch || []) as any[];
 
-    const { data: deletedBatch, error: deletedErr } = await supabase
+    // 1a. Deletion queue — same keyset technique so a batch larger than the
+    // per-run limit never reprocesses the first N rows forever. Ordered by
+    // (deleted_at, id) so identical timestamps with different UUIDs still
+    // advance. Tombstones and mappings are preserved; no extra deletion rule.
+    const deletedCursor: DeletedPushCursor = {
+      deleted_at: tokenRecord.push_deleted_cursor_at ?? null,
+      event_id: tokenRecord.push_deleted_cursor_event_id ?? null,
+    };
+    let deletedQuery = supabase
       .from("agency_events")
       .select("*")
       .eq("user_id", userId)
@@ -593,11 +611,21 @@ Deno.serve(async (req) => {
       .lte("event_date", windowEndDay)
       .not("deleted_at", "is", null)
       .order("deleted_at", { ascending: true })
+      .order("id", { ascending: true })
       .limit(limits.maxPushItems);
+    if (deletedCursor.deleted_at && deletedCursor.event_id) {
+      deletedQuery = deletedQuery.or(
+        buildKeysetOrFilter("deleted_at", deletedCursor.deleted_at, deletedCursor.event_id),
+      );
+    } else if (deletedCursor.deleted_at) {
+      deletedQuery = deletedQuery.gt("deleted_at", deletedCursor.deleted_at);
+    }
+    const { data: deletedBatch, error: deletedErr } = await deletedQuery;
     if (deletedErr) {
       console.error(`[calendar-sync] deleted-fetch-error err=${deletedErr.message}`);
     }
     const deletedLocalEvents = (deletedBatch || []) as any[];
+    const deletedScanComplete = isPushScanComplete(deletedLocalEvents.length, limits.maxPushItems);
 
     // Mappings are fetched only for the events in this batch — never the whole
     // google_calendar_sync table.
@@ -833,18 +861,29 @@ Deno.serve(async (req) => {
     }
 
     // 1b. Delete-from-Google: events soft-deleted locally with an active mapping
-    console.log(`[calendar-sync] delete-google-start count=${deletedLocalEvents.length}`);
+    console.log(
+      `[calendar-sync] delete-google-start count=${deletedLocalEvents.length} resumed=${deletedCursor.event_id ? "yes" : "no"} deleted_scan_complete=${deletedScanComplete}`,
+    );
+    // Cursor advances only over rows really processed and stops at the first
+    // failure so a pending deletion is retried instead of being skipped.
+    const processedDeleted: any[] = [];
+    let deletedAdvanceBlocked = false;
+    const markDeletedProcessed = (event: any) => {
+      if (!deletedAdvanceBlocked) processedDeleted.push(event);
+    };
     for (const event of deletedLocalEvents) {
       const mapping = syncMap.get(event.id);
       if (!mapping) {
         // No mapping → nothing to delete on Google. Safe to physically remove the row now.
         await supabase.from("agency_events").delete().eq("id", event.id).eq("user_id", userId);
         console.log(`[calendar-sync] delete-local-cleanup event=${event.id} reason=no-mapping`);
+        markDeletedProcessed(event);
         continue;
       }
       if (mapping.deleted_at) {
         deletedSkipped++;
         console.log(`[calendar-sync] skipped-deleted event=${event.id} reason=already-deleted-on-google google=${mapping.google_event_id}`);
+        markDeletedProcessed(event);
         continue;
       }
       try {
@@ -873,25 +912,30 @@ Deno.serve(async (req) => {
             deleteErrors++;
             console.error(`[calendar-sync] delete-google-error tombstone event=${event.id} err=${tombErr.message}`);
             pushErrors.push({ event_id: event.id, error: tombErr.message });
+            deletedAdvanceBlocked = true;
             continue;
           }
           mapping.deleted_at = tombstoneAt;
           syncMap.set(event.id, mapping);
           reverseSyncMap.set(mapping.google_event_id, mapping);
           deletedGoogle++;
+          markDeletedProcessed(event);
           console.log(`[calendar-sync] delete-google-success event=${event.id} google=${mapping.google_event_id} status=${res.status}${isEventTypeRestriction ? " reason=event-type-restriction-skipped" : ""}`);
         } else {
           const errText = await res.text();
           deleteErrors++;
           console.error(`[calendar-sync] delete-google-error event=${event.id} google=${mapping.google_event_id} status=${res.status} body=${errText.slice(0, 300)}`);
           pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+          deletedAdvanceBlocked = true;
         }
       } catch (e: any) {
         deleteErrors++;
         console.error(`[calendar-sync] delete-google-error exception event=${event.id} err=${e?.message || e}`);
         pushErrors.push({ event_id: event.id, error: String(e?.message || e) });
+        deletedAdvanceBlocked = true;
       }
     }
+    const advancedDeletedCursor = nextDeletedCursor(processedDeleted, deletedCursor);
 
     // 2. Pull Google events → local
     console.log(`[calendar-sync] pull-start range=${windowStart}..${windowEnd}`);
@@ -916,8 +960,8 @@ Deno.serve(async (req) => {
     let receivedSyncToken: string | null = null;
     let cursorReset = false;
     {
-      let pageToken: string | null =
-        pullMode === "bootstrap" ? (tokenRecord.bootstrap_page_token ?? null) : null;
+      // Both modes resume from their own persisted pageToken.
+      let pageToken: string | null = resolveResumePageToken(pullMode, tokenRecord);
       const syncToken = pullMode === "incremental" ? tokenRecord.sync_token : null;
       console.log(
         `[calendar-sync] pull-start mode=${pullMode} resumed=${pageToken ? "yes" : "no"} max_pages=${limits.maxPages} max_items=${limits.maxItems}`,
@@ -1234,7 +1278,11 @@ Deno.serve(async (req) => {
     // reported as "bootstrap" — never as a finished sync.
     let progressColumns: Record<string, unknown> = {};
     let bootstrapInProgress = false;
+    let incrementalInProgress = false;
     if (cursorReset) {
+      // Only a real HTTP 410 reaches here: cursors (sync_token,
+      // bootstrap_page_token, incremental_page_token) are cleared; events,
+      // mappings and tombstones are untouched.
       progressColumns = computeCursorResetUpdate();
       bootstrapInProgress = true;
     } else if (!pullPageError) {
@@ -1254,7 +1302,11 @@ Deno.serve(async (req) => {
           nextPageToken: pendingPageToken,
           nextSyncToken: receivedSyncToken,
           currentSyncToken: tokenRecord.sync_token,
+          pagesDone: (tokenRecord.incremental_pages_done || 0) + pagesThisRun,
+          itemsDone: (tokenRecord.incremental_items_done || 0) + itemsThisRun,
+          startedAt: tokenRecord.incremental_started_at,
         });
+        incrementalInProgress = !!pendingPageToken;
       }
     }
     // Local push cursor advances only over rows actually processed.
@@ -1266,9 +1318,20 @@ Deno.serve(async (req) => {
         ...(pushScanComplete ? { push_cursor_completed_at: new Date().toISOString() } : {}),
       };
     }
+    // Deletion cursor advances independently from the live scan.
+    if (!deletedErr) {
+      progressColumns = {
+        ...progressColumns,
+        push_deleted_cursor_at: advancedDeletedCursor.deleted_at,
+        push_deleted_cursor_event_id: advancedDeletedCursor.event_id,
+        ...(deletedScanComplete && !deletedAdvanceBlocked
+          ? { push_deleted_cursor_completed_at: new Date().toISOString() }
+          : {}),
+      };
+    }
 
     await releaseLock(
-      resolveSyncStatus({ bootstrapInProgress, errors: totalErrors }),
+      resolveSyncStatus({ bootstrapInProgress, incrementalInProgress, errors: totalErrors }),
       totalErrors > 0 ? `${totalErrors} erro(s) durante a sincronização` : null,
       progressColumns,
     );
@@ -1294,10 +1357,14 @@ Deno.serve(async (req) => {
         bootstrap_in_progress: bootstrapInProgress,
         pages_this_run: pagesThisRun,
         items_this_run: itemsThisRun,
-        resume_pending: !!pendingPageToken,
+        incremental_in_progress: incrementalInProgress,
+        resume_pending: !!pendingPageToken || bootstrapInProgress || incrementalInProgress,
         cursor_reset: cursorReset,
         push_scan_complete: pushScanComplete,
         push_batch_size: liveLocalEvents.length,
+        deleted_scan_complete: deletedScanComplete && !deletedAdvanceBlocked,
+        deleted_batch_size: deletedLocalEvents.length,
+        deleted_processed: processedDeleted.length,
         limits,
         push_errors: pushErrors,
         pull_errors: pullErrors,

@@ -44,6 +44,7 @@ export interface TokenPagingState {
   sync_token?: string | null;
   bootstrap_page_token?: string | null;
   bootstrap_completed_at?: string | null;
+  incremental_page_token?: string | null;
 }
 
 /**
@@ -56,6 +57,19 @@ export function resolvePullMode(state: TokenPagingState | null | undefined): Pul
   if (state.bootstrap_page_token) return "bootstrap";
   if (state.sync_token && state.bootstrap_completed_at) return "incremental";
   return "bootstrap";
+}
+
+/**
+ * Resolved page token for the current run. Bootstrap resumes from
+ * bootstrap_page_token, incremental from incremental_page_token, so a partial
+ * incremental run never restarts from the first page.
+ */
+export function resolveResumePageToken(
+  mode: PullMode,
+  state: TokenPagingState | null | undefined,
+): string | null {
+  if (!state) return null;
+  return (mode === "bootstrap" ? state.bootstrap_page_token : state.incremental_page_token) ?? null;
 }
 
 export interface ListUrlParams {
@@ -148,17 +162,44 @@ export interface IncrementalProgressInput {
   nextPageToken?: string | null;
   nextSyncToken?: string | null;
   currentSyncToken?: string | null;
+  pagesDone?: number;
+  itemsDone?: number;
+  startedAt?: string | null;
+  now?: string;
 }
 
 /**
- * Incremental bookkeeping: while more pages remain, the previous sync token is
- * kept so the next run re-walks from a valid cursor (no data is lost or reset).
+ * Incremental bookkeeping. While more pages remain, the base sync token is kept
+ * AND the pending pageToken is persisted, so the next run resumes exactly where
+ * this one stopped instead of restarting the first page. Only on the last page
+ * is incremental_page_token cleared and nextSyncToken adopted.
  */
 export function computeIncrementalUpdate(input: IncrementalProgressInput): Record<string, unknown> {
+  const now = input.now ?? new Date().toISOString();
+  const counters: Record<string, unknown> = {
+    incremental_pages_done: input.pagesDone ?? 0,
+    incremental_items_done: input.itemsDone ?? 0,
+  };
   if (input.nextPageToken) {
-    return { sync_token: input.currentSyncToken ?? null };
+    return {
+      ...counters,
+      // Base cursor preserved: never replaced mid-walk.
+      sync_token: input.currentSyncToken ?? null,
+      incremental_page_token: input.nextPageToken,
+      incremental_started_at: input.startedAt || now,
+    };
   }
-  return input.nextSyncToken ? { sync_token: input.nextSyncToken } : {};
+  return {
+    ...counters,
+    incremental_page_token: null,
+    incremental_started_at: null,
+    ...(input.nextSyncToken ? { sync_token: input.nextSyncToken } : {}),
+  };
+}
+
+/** True while an incremental walk still has pages pending. */
+export function isIncrementalInProgress(state: { incremental_page_token?: string | null } | null | undefined): boolean {
+  return !!state?.incremental_page_token;
 }
 
 /**
@@ -169,6 +210,10 @@ export function computeCursorResetUpdate(now = new Date().toISOString()): Record
   return {
     sync_token: null,
     bootstrap_page_token: null,
+    incremental_page_token: null,
+    incremental_started_at: null,
+    incremental_pages_done: 0,
+    incremental_items_done: 0,
     bootstrap_started_at: now,
     bootstrap_completed_at: null,
     bootstrap_pages_done: 0,
@@ -177,12 +222,17 @@ export function computeCursorResetUpdate(now = new Date().toISOString()): Record
   };
 }
 
-export type SyncLifecycleStatus = "synced" | "bootstrap" | "error";
+export type SyncLifecycleStatus = "synced" | "bootstrap" | "incremental" | "error";
 
 /** A partial bootstrap must never be reported as a finished sync. */
-export function resolveSyncStatus(opts: { bootstrapInProgress: boolean; errors: number }): SyncLifecycleStatus {
+export function resolveSyncStatus(opts: {
+  bootstrapInProgress: boolean;
+  incrementalInProgress?: boolean;
+  errors: number;
+}): SyncLifecycleStatus {
   if (opts.errors > 0) return "error";
-  return opts.bootstrapInProgress ? "bootstrap" : "synced";
+  if (opts.bootstrapInProgress) return "bootstrap";
+  return opts.incrementalInProgress ? "incremental" : "synced";
 }
 
 /** Transient aborts/timeouts must not flag the connection for re-consent. */
@@ -211,6 +261,30 @@ export function nextPushCursor(rows: Array<{ id: string; updated_at?: string | n
 /** Local scan finished when Google-side page size wasn't filled. */
 export function isPushScanComplete(rowCount: number, limit: number): boolean {
   return rowCount < limit;
+}
+
+export interface DeletedPushCursor {
+  deleted_at: string | null;
+  event_id: string | null;
+}
+
+/**
+ * Composite cursor for the deletion queue. Advances only over rows actually
+ * processed, and the (deleted_at, id) tiebreaker keeps identical timestamps
+ * with different UUIDs from starving the queue.
+ */
+export function nextDeletedCursor(
+  processed: Array<{ id: string; deleted_at?: string | null }>,
+  previous: DeletedPushCursor,
+): DeletedPushCursor {
+  if (!processed.length) return previous;
+  const last = processed[processed.length - 1];
+  return { deleted_at: last.deleted_at ?? previous.deleted_at, event_id: last.id };
+}
+
+/** PostgREST filter for "(deleted_at, id) > cursor" keyset pagination. */
+export function buildKeysetOrFilter(column: string, value: string, id: string): string {
+  return `${column}.gt.${value},and(${column}.eq.${value},id.gt.${id})`;
 }
 
 export interface CronEligibleToken {
@@ -249,8 +323,24 @@ export function getCronBudget(env: Record<string, string | undefined> = {}): Cro
   };
 }
 
-/** Stop dispatching when the elapsed time leaves no room for another user. */
+/** Safety margin reserved for bookkeeping/response after the last dispatch. */
+export const CRON_SAFETY_MARGIN_MS = 2_000;
+/** A dispatch is pointless below this window. */
+export const CRON_MIN_SLICE_MS = 3_000;
+
+/**
+ * Effective per-user timeout: never allowed to exceed the remaining run budget
+ * minus the safety margin, so the whole cron respects GCAL_CRON_TOTAL_MS.
+ * Returns 0 when there is no usable window left.
+ */
+export function effectiveUserTimeoutMs(elapsedMs: number, budget: CronBudget): number {
+  const remaining = budget.totalMs - elapsedMs - CRON_SAFETY_MARGIN_MS;
+  if (remaining < CRON_MIN_SLICE_MS) return 0;
+  return Math.min(budget.perUserMs, remaining);
+}
+
+/** Stop dispatching when the user cap is reached or no minimum window is left. */
 export function hasCronBudgetLeft(elapsedMs: number, processed: number, budget: CronBudget): boolean {
   if (processed >= budget.maxUsers) return false;
-  return elapsedMs + Math.min(budget.perUserMs, 5_000) < budget.totalMs;
+  return effectiveUserTimeoutMs(elapsedMs, budget) > 0;
 }

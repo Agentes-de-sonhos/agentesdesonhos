@@ -10,7 +10,7 @@ interface GoogleCalendarStatus {
   auto_sync_enabled?: boolean;
   last_sync_at?: string | null;
   sync_in_progress?: boolean;
-  last_sync_status?: "idle" | "syncing" | "synced" | "error" | "bootstrap" | null;
+  last_sync_status?: "idle" | "syncing" | "synced" | "error" | "bootstrap" | "incremental" | null;
   last_sync_error?: string | null;
   last_sync_duration_ms?: number | null;
   connection_state?: ConnectionState | null;
@@ -19,6 +19,9 @@ interface GoogleCalendarStatus {
   bootstrap_in_progress?: boolean | null;
   bootstrap_pages_done?: number | null;
   bootstrap_items_done?: number | null;
+  incremental_in_progress?: boolean | null;
+  incremental_pages_done?: number | null;
+  incremental_items_done?: number | null;
 }
 
 export interface SyncSkipSample {
@@ -58,9 +61,13 @@ export interface SyncReport {
   duration_ms: number;
   pull_mode?: "bootstrap" | "incremental";
   bootstrap_in_progress?: boolean;
+  incremental_in_progress?: boolean;
   pages_this_run?: number;
   items_this_run?: number;
   resume_pending?: boolean;
+  deleted_scan_complete?: boolean;
+  deleted_batch_size?: number;
+  deleted_processed?: number;
 }
 
 export function useGoogleCalendar() {
@@ -195,9 +202,13 @@ export function useGoogleCalendar() {
           duration_ms: data.duration_ms ?? 0,
           pull_mode: data.pull_mode,
           bootstrap_in_progress: !!data.bootstrap_in_progress,
+          incremental_in_progress: !!data.incremental_in_progress,
           pages_this_run: data.pages_this_run ?? 0,
           items_this_run: data.items_this_run ?? 0,
           resume_pending: !!data.resume_pending,
+          deleted_scan_complete: data.deleted_scan_complete !== false,
+          deleted_batch_size: data.deleted_batch_size ?? 0,
+          deleted_processed: data.deleted_processed ?? 0,
         });
         const summary =
           `Enviados: ${pCreated} criados, ${pUpdated} atualizados, ${pSkipped} ignorados · ` +
@@ -211,6 +222,11 @@ export function useGoogleCalendar() {
           // Partial bootstrap: report progress, never completion.
           toast.info(
             `Sincronização inicial em andamento · ${data.items_this_run ?? 0} eventos em ${data.pages_this_run ?? 0} páginas nesta rodada. Continua automaticamente.`,
+          );
+        } else if (data.incremental_in_progress) {
+          // Partial incremental walk: resumes from the persisted page token.
+          toast.info(
+            `Sincronização em andamento · ${data.items_this_run ?? 0} eventos em ${data.pages_this_run ?? 0} páginas nesta rodada. Continua automaticamente.`,
           );
         } else {
           toast.success(`Sincronizado! ${summary}`);

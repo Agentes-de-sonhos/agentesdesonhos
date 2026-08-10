@@ -8,11 +8,14 @@ export interface CalendarConnectionStatus {
   last_auth_error?: string | null;
   last_auth_error_at?: string | null;
   sync_in_progress?: boolean;
-  last_sync_status?: "idle" | "syncing" | "synced" | "error" | "bootstrap" | null;
+  last_sync_status?: "idle" | "syncing" | "synced" | "error" | "bootstrap" | "incremental" | null;
   last_sync_at?: string | null;
   bootstrap_in_progress?: boolean | null;
   bootstrap_pages_done?: number | null;
   bootstrap_items_done?: number | null;
+  incremental_in_progress?: boolean | null;
+  incremental_pages_done?: number | null;
+  incremental_items_done?: number | null;
 }
 
 /** True when the user must run the Google consent flow again. */
@@ -25,6 +28,7 @@ export type CalendarStatusKey =
   | "reconnect_required"
   | "syncing"
   | "bootstrap"
+  | "incremental"
   | "error"
   | "synced"
   | "idle";
@@ -35,6 +39,12 @@ export function isBootstrapInProgress(status: CalendarConnectionStatus | null | 
   return status.bootstrap_in_progress === true || status.last_sync_status === "bootstrap";
 }
 
+/** True while an incremental (syncToken) walk still has pages pending. */
+export function isIncrementalInProgress(status: CalendarConnectionStatus | null | undefined): boolean {
+  if (!status?.connected) return false;
+  return status.incremental_in_progress === true || status.last_sync_status === "incremental";
+}
+
 export function resolveStatusKey(
   status: CalendarConnectionStatus | null | undefined,
   isSyncing: boolean,
@@ -43,6 +53,8 @@ export function resolveStatusKey(
   if (isSyncing || status?.sync_in_progress) return "syncing";
   // A partial bootstrap must never be presented as "Sincronizado".
   if (isBootstrapInProgress(status)) return "bootstrap";
+  // A partial incremental walk is unfinished work too.
+  if (isIncrementalInProgress(status)) return "incremental";
   if (status?.last_sync_status === "error") return "error";
   if (status?.last_sync_status === "synced" || status?.last_sync_at) return "synced";
   return "idle";
@@ -56,6 +68,8 @@ export function statusLabel(key: CalendarStatusKey): string {
       return "Sincronizando…";
     case "bootstrap":
       return "Sincronização inicial em andamento";
+    case "incremental":
+      return "Sincronização em andamento";
     case "error":
       return "Erro de sincronização";
     case "synced":
@@ -72,6 +86,8 @@ export function statusDotClass(key: CalendarStatusKey): string {
     case "syncing":
       return "bg-amber-500 animate-pulse";
     case "bootstrap":
+      return "bg-sky-500 animate-pulse";
+    case "incremental":
       return "bg-sky-500 animate-pulse";
     case "error":
       return "bg-rose-500";
@@ -98,9 +114,17 @@ export function isReconnectResponse(payload: unknown): boolean {
 
 /** Progress text for the initial sync — never claims completion. */
 export function bootstrapProgressLabel(status: CalendarConnectionStatus | null | undefined): string | null {
-  if (!isBootstrapInProgress(status)) return null;
-  const items = status?.bootstrap_items_done ?? 0;
-  const pages = status?.bootstrap_pages_done ?? 0;
-  if (!items && !pages) return "Sincronização inicial em andamento…";
-  return `Sincronização inicial em andamento · ${items} eventos em ${pages} páginas`;
+  if (isBootstrapInProgress(status)) {
+    const items = status?.bootstrap_items_done ?? 0;
+    const pages = status?.bootstrap_pages_done ?? 0;
+    if (!items && !pages) return "Sincronização inicial em andamento…";
+    return `Sincronização inicial em andamento · ${items} eventos em ${pages} páginas`;
+  }
+  if (isIncrementalInProgress(status)) {
+    const items = status?.incremental_items_done ?? 0;
+    const pages = status?.incremental_pages_done ?? 0;
+    if (!items && !pages) return "Sincronização em andamento…";
+    return `Sincronização em andamento · ${items} eventos em ${pages} páginas`;
+  }
+  return null;
 }
