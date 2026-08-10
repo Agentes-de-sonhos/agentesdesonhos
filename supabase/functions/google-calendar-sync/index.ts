@@ -651,18 +651,19 @@ Deno.serve(async (req) => {
         .from("google_calendar_conflicts")
         .select("id")
         .eq("user_id", userId)
-        .eq("status", "open")
         .eq("google_event_id", record.google_event_id as string)
+        // Exact version match only: a different Google etag/updated or a newer
+        // local marker is a NEW conflict version and must keep its own row so
+        // the history is preserved.
+        .eq("google_etag", (record.google_etag as string) ?? "")
+        .eq("local_updated_at", record.local_updated_at as string)
+        .eq("sync_id", (input.syncId as string) ?? null)
         .maybeSingle();
       if (!existingErr && existing) {
-        // Refresh the versions of the already-open conflict instead of
-        // inserting a duplicate row for the same mapping.
+        // Same version seen again: refresh only the diagnostic snapshots.
         await supabase
           .from("google_calendar_conflicts")
           .update({
-            google_etag: record.google_etag,
-            google_updated: record.google_updated,
-            local_updated_at: record.local_updated_at,
             google_snapshot: record.google_snapshot,
             local_snapshot: record.local_snapshot,
             conflict_type: record.conflict_type,
