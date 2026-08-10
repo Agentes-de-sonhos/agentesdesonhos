@@ -224,7 +224,7 @@ describe("push payload — non-destructive and correctly built", () => {
     });
     expect(Object.keys(payload).sort()).toEqual(["description", "end", "location", "start", "summary"]);
     for (const forbidden of FORBIDDEN_PUSH_FIELDS) {
-      expect(payload as Record<string, unknown>).not.toHaveProperty(forbidden);
+      expect(payload as unknown as Record<string, unknown>).not.toHaveProperty(forbidden);
     }
     expect(() =>
       assertControlledPayload(payload as unknown as Record<string, unknown>),
