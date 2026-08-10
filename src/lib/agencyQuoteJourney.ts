@@ -287,15 +287,19 @@ export function contextFromService(
  */
 export function rebuildContext(entries: JourneyEntry[], previous: TripContext): TripContext {
   if (!entries.length) return previous;
+  // A rota estruturada só sobrevive se ainda houver um aéreo multidestinos.
+  const keepsRoute = entries.some(
+    (entry) => entry.key === "aereo" && entry.values.tipo_viagem === "Multidestinos",
+  );
   let next: TripContext = {
     ...emptyTripContext(),
     adultos: previous.adultos,
     criancas: previous.criancas,
     idades_criancas: [...previous.idades_criancas],
-    rota: previous.rota.map((leg) => ({ ...leg })),
+    rota: keepsRoute ? previous.rota.map((leg) => ({ ...leg })) : [],
   };
   for (const entry of entries) next = contextFromService(entry.key, entry.values, next);
-  if (next.rota.length) next = applyRouteToContext(next, next.origem, next.rota);
+  if (keepsRoute && next.rota.length) next = applyRouteToContext(next, next.origem, next.rota);
   return next;
 }
 
