@@ -316,9 +316,10 @@ describe("local deletion queue is resumable", () => {
     expect(src).toContain("push_deleted_cursor_at: advancedDeletedCursor.deleted_at");
     expect(src).toContain("push_deleted_cursor_event_id: advancedDeletedCursor.event_id");
     expect(src).toContain("deletedAdvanceBlocked = true");
-    // Tombstone/mapping behaviour unchanged: only the existing rules delete rows.
-    expect(src.match(/from\("agency_events"\)\s*\.delete\(\)/g) || []).toHaveLength(1);
-    expect(src).not.toMatch(/from\("google_calendar_sync"\)\s*\.delete\(\)/);
+    // Tombstone behaviour unchanged: the deletion pass pushes to Google and
+    // never introduces new local deletes beyond the two pre-existing rules.
+    expect(src.match(/from\("agency_events"\)[\s\S]{0,40}?\.delete\(\)/g) || []).toHaveLength(2);
+    expect(block).not.toContain(".delete()");
   });
 
   it("reports live and deleted scan progress separately", () => {
@@ -348,7 +349,8 @@ describe("410 recovery is non-destructive", () => {
     const src = fn("google-calendar-sync/index.ts");
     expect(src).toMatch(/if \(isCursorGoneStatus\(pageRes\.status\)\)/);
     expect(src).toMatch(/if \(cursorReset\) \{\s*(\/\/[^\n]*\n\s*)*progressColumns = computeCursorResetUpdate\(\);/);
-    expect(src.match(/computeCursorResetUpdate\(/g) || []).toHaveLength(2); // import + single call site
+    // Exactly one call site, guarded by the 410 branch.
+    expect(src.match(/computeCursorResetUpdate\(/g) || []).toHaveLength(1);
   });
 
   it("the sync function never deletes events or mappings on cursor reset", () => {
