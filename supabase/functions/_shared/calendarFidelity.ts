@@ -316,6 +316,48 @@ export function buildMappingMetadata(
     primaryCalendarId?: string;
   },
 ): Record<string, unknown> {
+  return buildMappingMetadataInternal(gEvent, opts);
+}
+
+/**
+ * Legacy backfill escape hatch.
+ *
+ * The Block 3 backfill marked every pre-existing mapping as
+ * `is_read_only = true` for safety. That must not be permanent: on the first
+ * successful pull we reclassify the event against Google's real state and
+ * release the read-only flag for plain editable events. `origin` stays
+ * 'google' so remote DELETE remains blocked.
+ *
+ * Returns null when nothing needs to change.
+ */
+export function buildReadOnlyReclassification(
+  gEvent: GoogleEventLike,
+  mapping: { is_read_only?: boolean | null; is_google_managed?: boolean | null; origin?: string | null },
+  opts: { calendarId?: string; primaryCalendarId?: string } = {},
+): { is_read_only: boolean; is_google_managed: boolean; event_type: string } | null {
+  const classification = classifyGoogleEvent(gEvent, opts);
+  const currentReadOnly = mapping.is_read_only === true;
+  const currentManaged = mapping.is_google_managed === true;
+  if (currentReadOnly === classification.isReadOnly && currentManaged === classification.isGoogleManaged) {
+    return null;
+  }
+  return {
+    is_read_only: classification.isReadOnly,
+    is_google_managed: classification.isGoogleManaged,
+    event_type: gEvent.eventType || "default",
+  };
+}
+
+function buildMappingMetadataInternal(
+  gEvent: GoogleEventLike,
+  opts: {
+    origin: EventOrigin;
+    calendarId?: string;
+    localUpdatedAt?: string | null;
+    now?: string;
+    primaryCalendarId?: string;
+  },
+): Record<string, unknown> {
   const classification = classifyGoogleEvent(gEvent, {
     calendarId: opts.calendarId,
     primaryCalendarId: opts.primaryCalendarId,
@@ -368,11 +410,48 @@ export interface LocalEventLike {
   event_time?: string | null;
   end_date?: string | null;
   end_time?: string | null;
+  start_at?: string | null;
   end_at?: string | null;
   time_zone?: string | null;
   all_day?: boolean | null;
   location?: string | null;
   updated_at?: string | null;
+}
+
+/**
+ * Converts an absolute instant (ISO/UTC) into the wall date and time observed
+ * in an IANA zone. Uses Intl.formatToParts, so DST transitions are handled by
+ * the timezone database instead of a fixed offset. An ISO UTC string is NEVER
+ * treated as local wall time.
+ */
+export function wallTimeInZone(
+  instant: string,
+  timeZone: string,
+): { date: string; time: string } | null {
+  const ms = Date.parse(instant);
+  if (!Number.isFinite(ms)) return null;
+  let parts: Intl.DateTimeFormatPart[];
+  try {
+    parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).formatToParts(new Date(ms));
+  } catch {
+    // Unknown zone: fall back to the platform zone rather than breaking sync.
+    if (timeZone === FALLBACK_TIME_ZONE) return null;
+    return wallTimeInZone(instant, FALLBACK_TIME_ZONE);
+  }
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  const hour = get("hour") === "24" ? "00" : get("hour");
+  const date = `${get("year")}-${get("month")}-${get("day")}`;
+  const time = `${hour}:${get("minute")}`;
+  if (date.length !== 10 || time.length !== 5) return null;
+  return { date, time };
 }
 
 /**
@@ -411,7 +490,6 @@ export function buildGooglePushPayload(
     defaultDurationMinutes?: number;
   } = {},
 ): GooglePushPayload {
-  const startDay = String(localEvent.event_date);
   const payload: GooglePushPayload = {
     summary: localEvent.title || "Sem título",
     start: {},
@@ -425,7 +503,16 @@ export function buildGooglePushPayload(
   }
 
   const allDay = localEvent.all_day === true || !localEvent.event_time;
-  if (allDay) {
+  const timeZone = resolvePushTimeZone(localEvent, opts.profileTimeZone);
+
+  // Start: wall fields win; otherwise the stored instant converted into the
+  // resolved IANA zone (never read as local wall time).
+  const startFromInstant = !localEvent.event_date && localEvent.start_at
+    ? wallTimeInZone(localEvent.start_at, timeZone)
+    : null;
+  const startDay = String(localEvent.event_date || startFromInstant?.date || "");
+
+  if (allDay && !startFromInstant) {
     const inclusiveEnd = localEvent.end_date && localEvent.end_date >= startDay
       ? localEvent.end_date
       : startDay;
@@ -434,12 +521,21 @@ export function buildGooglePushPayload(
     return payload;
   }
 
-  const timeZone = resolvePushTimeZone(localEvent, opts.profileTimeZone);
-  const startTime = String(localEvent.event_time).slice(0, 5);
+  const startTime = localEvent.event_time
+    ? String(localEvent.event_time).slice(0, 5)
+    : (startFromInstant?.time ?? "00:00");
   payload.start = { dateTime: `${startDay}T${startTime}:00`, timeZone };
 
   let endDay = localEvent.end_date || null;
   let endTime = localEvent.end_time ? String(localEvent.end_time).slice(0, 5) : null;
+  if (!endTime && localEvent.end_at) {
+    // Real end recorded as an instant: convert it, do not invent a duration.
+    const wall = wallTimeInZone(localEvent.end_at, timeZone);
+    if (wall) {
+      endDay = wall.date;
+      endTime = wall.time;
+    }
+  }
   if (!endTime) {
     const minutes = opts.defaultDurationMinutes ?? DEFAULT_DURATION_MINUTES;
     const shifted = shiftWallTime(startTime, minutes);

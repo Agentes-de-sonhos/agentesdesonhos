@@ -224,7 +224,7 @@ describe("push payload — non-destructive and correctly built", () => {
     });
     expect(Object.keys(payload).sort()).toEqual(["description", "end", "location", "start", "summary"]);
     for (const forbidden of FORBIDDEN_PUSH_FIELDS) {
-      expect(payload as Record<string, unknown>).not.toHaveProperty(forbidden);
+      expect(payload as unknown as Record<string, unknown>).not.toHaveProperty(forbidden);
     }
     expect(() =>
       assertControlledPayload(payload as unknown as Record<string, unknown>),
@@ -442,7 +442,8 @@ describe("pull really precedes push in the sync function", () => {
 
   it("does not advance cursors when a needed step failed", () => {
     // Pull page error → no bootstrap/incremental progress is written.
-    expect(SYNC).toContain("} else if (!pullPageError) {");
+    expect(SYNC).toContain("} else if (!pullBlocked) {");
+    expect(SYNC).toContain("pullPageError || pullInventoryFailed");
     expect(SYNC).toContain("(mappingFetchFailed ? 1 : 0)");
   });
 });

@@ -38,6 +38,7 @@ import {
   buildConflictRecord,
   buildGooglePushPayload,
   buildMappingMetadata,
+  buildReadOnlyReclassification,
   buildPatchHeaders,
   canDeleteRemotely,
   canPushUpdate,
@@ -569,10 +570,61 @@ Deno.serve(async (req) => {
       return res;
     };
 
+    // Safe baseline read used when Google answers 412: we want the CURRENT
+    // remote etag/snapshot recorded in the conflict. A failure here never
+    // overwrites anything — the conflict is recorded without the baseline.
+    const safeGetGoogleEvent = async (googleEventId: string): Promise<Record<string, unknown> | null> => {
+      if (!googleEventId) return null;
+      try {
+        const res = await fetchGoogle(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodeURIComponent(googleEventId)}`
+        );
+        if (!res.ok) {
+          await res.text().catch(() => "");
+          console.warn(`[calendar-sync] conflict-baseline-get-failed google=${googleEventId} status=${res.status}`);
+          return null;
+        }
+        return (await res.json().catch(() => null)) as Record<string, unknown> | null;
+      } catch (e: any) {
+        console.warn(`[calendar-sync] conflict-baseline-get-error google=${googleEventId} err=${String(e?.message || e).slice(0, 120)}`);
+        return null;
+      }
+    };
+
     // Local (push) window: 30 days back → 730 days forward, always current.
     // The pull window for a resumed bootstrap is separate and immutable —
     // see pullBootstrapWindow below.
     const now = new Date();
+
+    // Calendar time zone: cached on the connection. Discovered lazily and
+    // non-destructively — a failure never breaks the sync, it just falls back
+    // to the fidelity helper's own IANA fallback.
+    let calendarTimeZone: string | null = tokenRecord.calendar_time_zone ?? null;
+    const ensureCalendarTimeZone = async () => {
+      if (calendarTimeZone) return;
+      try {
+        const res = await fetchGoogle(
+          "https://www.googleapis.com/calendar/v3/calendars/primary?fields=timeZone"
+        );
+        if (!res.ok) {
+          await res.text().catch(() => "");
+          console.warn(`[calendar-sync] calendar-timezone-fetch-skipped status=${res.status}`);
+          return;
+        }
+        const body = await res.json().catch(() => ({} as any));
+        const tz = typeof body?.timeZone === "string" ? body.timeZone.trim() : "";
+        if (!tz) return;
+        calendarTimeZone = tz;
+        await supabase
+          .from("google_calendar_tokens")
+          .update({ calendar_time_zone: tz, calendar_time_zone_checked_at: new Date().toISOString() })
+          .eq("user_id", userId);
+        console.log(`[calendar-sync] calendar-timezone-resolved tz=${tz}`);
+      } catch (e: any) {
+        console.warn(`[calendar-sync] calendar-timezone-error err=${String(e?.message || e).slice(0, 120)}`);
+      }
+    };
+
     const windowStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const windowEndDate = new Date(now.getTime() + 730 * 24 * 60 * 60 * 1000);
     const localWindow = {
@@ -643,26 +695,39 @@ Deno.serve(async (req) => {
     }> = [];
     const seenConflictKeys = new Set<string>();
     const recordConflict = async (input: Parameters<typeof buildConflictRecord>[0]) => {
+      // (see safeGetGoogleEvent below for the 412 baseline read)
       const record = buildConflictRecord(input);
       const key = conflictDedupKey(record as any);
       if (seenConflictKeys.has(key)) return;
       seenConflictKeys.add(key);
-      const { error: existingErr, data: existing } = await supabase
+      // Exact version match only: a different Google etag/updated or a newer
+      // local marker is a NEW conflict version and keeps its own row, so the
+      // version history is preserved instead of being overwritten.
+      let versionQuery = supabase
         .from("google_calendar_conflicts")
         .select("id")
         .eq("user_id", userId)
-        .eq("status", "open")
         .eq("google_event_id", record.google_event_id as string)
-        .maybeSingle();
+        .limit(1);
+      versionQuery = record.google_etag
+        ? versionQuery.eq("google_etag", record.google_etag as string)
+        : versionQuery.is("google_etag", null);
+      versionQuery = record.google_updated
+        ? versionQuery.eq("google_updated", record.google_updated as string)
+        : versionQuery.is("google_updated", null);
+      versionQuery = record.local_updated_at
+        ? versionQuery.eq("local_updated_at", record.local_updated_at as string)
+        : versionQuery.is("local_updated_at", null);
+      versionQuery = input.syncId
+        ? versionQuery.eq("sync_id", input.syncId)
+        : versionQuery.is("sync_id", null);
+      const { error: existingErr, data: existingRows } = await versionQuery;
+      const existing = (existingRows || [])[0];
       if (!existingErr && existing) {
-        // Refresh the versions of the already-open conflict instead of
-        // inserting a duplicate row for the same mapping.
+        // Same version seen again: refresh only the diagnostic snapshots.
         await supabase
           .from("google_calendar_conflicts")
           .update({
-            google_etag: record.google_etag,
-            google_updated: record.google_updated,
-            local_updated_at: record.local_updated_at,
             google_snapshot: record.google_snapshot,
             local_snapshot: record.local_snapshot,
             conflict_type: record.conflict_type,
@@ -764,9 +829,14 @@ Deno.serve(async (req) => {
     }
 
     // Reverse mappings for exactly the Google ids of this run (chunked in-lists).
+    // FAIL-CLOSED: if any chunk of the reverse mapping or of the mapped local
+    // rows fails, the whole pull for this run is cancelled. Continuing would
+    // read a partial inventory, treat already-mapped events as new (duplicates)
+    // and drop mappings as `local_reference_missing`.
+    let pullInventoryFailed = false;
     if (googleEvents.length > 0) {
       const ids = [...new Set(googleEvents.map((e) => e.id).filter(Boolean))];
-      for (let i = 0; i < ids.length; i += 200) {
+      for (let i = 0; i < ids.length && !pullInventoryFailed; i += 200) {
         const chunk = ids.slice(i, i + 200);
         const { data: chunkMaps, error: chunkErr } = await supabase
           .from("google_calendar_sync")
@@ -775,7 +845,9 @@ Deno.serve(async (req) => {
           .in("google_event_id", chunk);
         if (chunkErr) {
           console.error(`[calendar-sync] reverse-map-fetch-error err=${chunkErr.message}`);
-          continue;
+          pullErrors.push({ status: 0, error: `reverse_mapping_fetch_failed: ${chunkErr.message}`.slice(0, 200) });
+          pullInventoryFailed = true;
+          break;
         }
         for (const m of chunkMaps || []) {
           reverseSyncMap.set(m.google_event_id, m);
@@ -784,25 +856,40 @@ Deno.serve(async (req) => {
       }
       // Local rows for mapped ids: existence AND updated_at, needed by the
       // conflict policy (local side vs the marker saved at the last sync).
-      const mappedLocalIds = [...new Set((googleEvents
-        .map((e) => reverseSyncMap.get(e.id)?.agency_event_id)
-        .filter(Boolean) as string[]))];
-      for (let i = 0; i < mappedLocalIds.length; i += 200) {
-        const chunk = mappedLocalIds.slice(i, i + 200);
-        const { data: liveRows } = await supabase
-          .from("agency_events")
-          .select("id, title, updated_at, event_date, event_time, end_date, end_time, all_day, time_zone, location")
-          .eq("user_id", userId)
-          .is("deleted_at", null)
-          .in("id", chunk);
-        for (const r of liveRows || []) {
-          localIds.add(r.id);
-          localRowsById.set(r.id, r);
+      if (!pullInventoryFailed) {
+        const mappedLocalIds = [...new Set((googleEvents
+          .map((e) => reverseSyncMap.get(e.id)?.agency_event_id)
+          .filter(Boolean) as string[]))];
+        for (let i = 0; i < mappedLocalIds.length && !pullInventoryFailed; i += 200) {
+          const chunk = mappedLocalIds.slice(i, i + 200);
+          const { data: liveRows, error: liveErr } = await supabase
+            .from("agency_events")
+            .select("id, title, updated_at, event_date, event_time, end_date, end_time, all_day, time_zone, location")
+            .eq("user_id", userId)
+            .is("deleted_at", null)
+            .in("id", chunk);
+          if (liveErr) {
+            console.error(`[calendar-sync] mapped-local-fetch-error err=${liveErr.message}`);
+            pullErrors.push({ status: 0, error: `mapped_local_fetch_failed: ${liveErr.message}`.slice(0, 200) });
+            pullInventoryFailed = true;
+            break;
+          }
+          for (const r of liveRows || []) {
+            localIds.add(r.id);
+            localRowsById.set(r.id, r);
+          }
         }
       }
     }
+    if (pullInventoryFailed) {
+      // Transient error: no local write, no cursor advance, lock released by the
+      // normal end-of-run path. The same pages are re-read next run.
+      console.error(
+        `[calendar-sync] pull-aborted reason=inventory_fetch_failed google_events=${googleEvents.length} cursor_preserved=true`,
+      );
+    }
 
-    if (!pullPageError) {
+    if (!pullPageError && !pullInventoryFailed) {
       console.log(`[calendar-sync] reverse-map-before-pull mappings=${reverseSyncMap.size} just_pushed=${justPushedGoogleIds.size}`);
 
       let skipCancelled = 0;
@@ -948,6 +1035,28 @@ Deno.serve(async (req) => {
           if (decision !== "pull") {
             // Nothing changed on Google, or only the local side did — the push
             // phase below handles it. No local overwrite here.
+            // Legacy safety backfill release: the conservative
+            // is_read_only = true applied to pre-existing mappings must not be
+            // permanent. Reclassify against Google's real state (origin stays
+            // 'google', so remote deletion remains blocked).
+            const reclass = buildReadOnlyReclassification(gEvent as any, mapped, { calendarId });
+            if (reclass) {
+              const { error: reclassErr } = await supabase
+                .from("google_calendar_sync")
+                .update(reclass)
+                .eq("id", mapped.id);
+              if (!reclassErr) {
+                Object.assign(mapped, reclass);
+                if (mapped.agency_event_id) {
+                  await supabase
+                    .from("agency_events")
+                    .update({ is_read_only: reclass.is_read_only })
+                    .eq("id", mapped.agency_event_id)
+                    .eq("user_id", userId);
+                }
+                console.log(`[calendar-sync] read-only-reclassified google=${gEvent.id} read_only=${reclass.is_read_only}`);
+              }
+            }
             pulledSkipped++; skipAlreadyMapped++;
             recordPullSkip("already_synced_unchanged", gEvent, {
               agency_event_id: mapped.agency_event_id,
@@ -1199,8 +1308,9 @@ Deno.serve(async (req) => {
     );
 
     const pushDefaultDuration = parseInt(Deno.env.get("CALENDAR_DEFAULT_DURATION_MINUTES") || "", 10);
+    await ensureCalendarTimeZone();
     const pushOptions = {
-      profileTimeZone: tokenRecord.calendar_time_zone ?? null,
+      profileTimeZone: calendarTimeZone,
       defaultDurationMinutes: Number.isFinite(pushDefaultDuration) && pushDefaultDuration > 0
         ? pushDefaultDuration
         : DEFAULT_DURATION_MINUTES,
@@ -1305,12 +1415,14 @@ Deno.serve(async (req) => {
             // Stale etag: Google changed under us. Record a conflict instead of
             // retrying blindly with the local version.
             await res.text().catch(() => "");
+            const currentGoogle = await safeGetGoogleEvent(existing.google_event_id);
             await recordConflict({
               userId,
               syncId: existing.id,
               agencyEventId: event.id,
               googleEventId: existing.google_event_id,
               conflictType: "precondition_failed",
+              googleEvent: (currentGoogle as any) ?? undefined,
               localEvent: event,
               localUpdatedAt: event.updated_at ?? null,
             });
@@ -1483,12 +1595,14 @@ Deno.serve(async (req) => {
         if (isPreconditionFailed(res.status)) {
           // Changed on Google since our last read → treat as a conflict.
           await res.text().catch(() => "");
+          const currentGoogle = await safeGetGoogleEvent(mapping.google_event_id);
           await recordConflict({
             userId,
             syncId: mapping.id,
             agencyEventId: event.id,
             googleEventId: mapping.google_event_id,
             conflictType: "precondition_failed",
+            googleEvent: (currentGoogle as any) ?? undefined,
             localEvent: event,
             localUpdatedAt: event.updated_at ?? null,
           });
@@ -1554,6 +1668,10 @@ Deno.serve(async (req) => {
     const totalErrors =
       pushErrors.length + pullErrors.length + deleteErrors + (mappingFetchFailed ? 1 : 0);
 
+    // A failed pull inventory is fail-closed: no cursor may advance, otherwise
+    // the unprocessed pages would be skipped forever.
+    const pullBlocked = pullPageError || pullInventoryFailed;
+
     // Progress persistence. A partial bootstrap keeps its pageToken and is
     // reported as "bootstrap" — never as a finished sync.
     let progressColumns: Record<string, unknown> = {};
@@ -1566,7 +1684,7 @@ Deno.serve(async (req) => {
       // mappings and tombstones are untouched.
       progressColumns = computeCursorResetUpdate();
       bootstrapInProgress = true;
-    } else if (!pullPageError) {
+    } else if (!pullBlocked) {
       if (pullMode === "bootstrap") {
         bootstrapBlocked = isBootstrapCompletionBlocked({
           nextPageToken: pendingPageToken,
@@ -1668,6 +1786,7 @@ Deno.serve(async (req) => {
         read_only_skipped: readOnlySkipped,
         delete_skip_reasons: deleteSkipReasons,
         phase_order: "pull_then_push",
+        pull_inventory_failed: pullInventoryFailed,
         limits,
         push_errors: pushErrors,
         pull_errors: pullErrors,

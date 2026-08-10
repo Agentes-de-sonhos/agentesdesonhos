@@ -4726,6 +4726,7 @@ export type Database = {
           id: string
           local_snapshot: Json | null
           local_updated_at: string | null
+          resolution: string | null
           resolved_at: string | null
           status: string
           sync_id: string | null
@@ -4744,6 +4745,7 @@ export type Database = {
           id?: string
           local_snapshot?: Json | null
           local_updated_at?: string | null
+          resolution?: string | null
           resolved_at?: string | null
           status?: string
           sync_id?: string | null
@@ -4762,6 +4764,7 @@ export type Database = {
           id?: string
           local_snapshot?: Json | null
           local_updated_at?: string | null
+          resolution?: string | null
           resolved_at?: string | null
           status?: string
           sync_id?: string | null
@@ -4872,6 +4875,8 @@ export type Database = {
           bootstrap_window_end: string | null
           bootstrap_window_start: string | null
           calendar_id: string | null
+          calendar_time_zone: string | null
+          calendar_time_zone_checked_at: string | null
           connection_state: string
           created_at: string | null
           id: string
@@ -4915,6 +4920,8 @@ export type Database = {
           bootstrap_window_end?: string | null
           bootstrap_window_start?: string | null
           calendar_id?: string | null
+          calendar_time_zone?: string | null
+          calendar_time_zone_checked_at?: string | null
           connection_state?: string
           created_at?: string | null
           id?: string
@@ -4958,6 +4965,8 @@ export type Database = {
           bootstrap_window_end?: string | null
           bootstrap_window_start?: string | null
           calendar_id?: string | null
+          calendar_time_zone?: string | null
+          calendar_time_zone_checked_at?: string | null
           connection_state?: string
           created_at?: string | null
           id?: string
