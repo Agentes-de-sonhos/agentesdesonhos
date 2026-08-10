@@ -1331,7 +1331,7 @@ Deno.serve(async (req) => {
     }
 
     await releaseLock(
-      resolveSyncStatus({ bootstrapInProgress, errors: totalErrors }),
+      resolveSyncStatus({ bootstrapInProgress, incrementalInProgress, errors: totalErrors }),
       totalErrors > 0 ? `${totalErrors} erro(s) durante a sincronização` : null,
       progressColumns,
     );
