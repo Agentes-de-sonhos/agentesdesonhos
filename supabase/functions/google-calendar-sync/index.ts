@@ -8,6 +8,7 @@ import {
   buildTokenColumns,
   getTokenEncKey,
   isCiphertext,
+  needsTokenMigration,
   readTokenField,
 } from "../_shared/googleTokenCrypto.ts";
 import {
