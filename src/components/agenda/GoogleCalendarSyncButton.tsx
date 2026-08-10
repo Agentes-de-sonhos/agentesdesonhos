@@ -20,6 +20,7 @@ import {
   needsReconnect,
   reconnectMessage,
   legacyScopeNotice,
+  timeZoneScopeNotice,
   resolveStatusKey,
   statusDotClass,
   statusLabel,
