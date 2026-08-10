@@ -74,6 +74,7 @@ import {
   type AdminAccountRow,
   type TeamOverview,
 } from "@/lib/adminUserAccounts";
+import { parseDeleteUserError } from "@/lib/adminDeleteGuard";
 
 const ROLE_OPTIONS: { value: "admin" | "agente" | "promotor" | "fornecedor"; label: string }[] = [
   { value: "agente", label: "Agente" },
@@ -372,7 +373,7 @@ export function AdminUserManager() {
       const resp = await supabase.functions.invoke("admin-delete-user", {
         body: { user_id: userId },
       });
-      if (resp.error) throw new Error(resp.error.message || "Erro ao excluir usuário");
+      if (resp.error) throw new Error(await parseDeleteUserError(resp.error));
       if (resp.data?.error) throw new Error(resp.data.error);
       return resp.data;
     },
