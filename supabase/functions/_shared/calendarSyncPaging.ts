@@ -45,6 +45,11 @@ export interface TokenPagingState {
   bootstrap_page_token?: string | null;
   bootstrap_completed_at?: string | null;
   incremental_page_token?: string | null;
+  incremental_started_at?: string | null;
+  incremental_pages_done?: number | null;
+  incremental_items_done?: number | null;
+  bootstrap_window_start?: string | null;
+  bootstrap_window_end?: string | null;
 }
 
 /**
@@ -78,6 +83,40 @@ export interface ListUrlParams {
   pageToken?: string | null;
   syncToken?: string | null;
   pageSize?: number;
+}
+
+export interface PullWindow {
+  windowStart: string;
+  windowEnd: string;
+  /** True when the window came from the persisted bootstrap cursor. */
+  persisted: boolean;
+}
+
+/**
+ * The bootstrap window is immutable for the whole walk: a pageToken is only
+ * valid for the exact query that produced it. On the first page the dynamic
+ * window is used (and persisted by computeBootstrapUpdate); on every resume the
+ * persisted bootstrap_window_start/end are replayed verbatim.
+ * Incremental runs use the syncToken, so the window is irrelevant there.
+ */
+export function resolvePullWindow(
+  mode: PullMode,
+  state: TokenPagingState | null | undefined,
+  dynamic: { windowStart: string; windowEnd: string },
+): PullWindow {
+  if (
+    mode === "bootstrap" &&
+    state?.bootstrap_page_token &&
+    state.bootstrap_window_start &&
+    state.bootstrap_window_end
+  ) {
+    return {
+      windowStart: state.bootstrap_window_start,
+      windowEnd: state.bootstrap_window_end,
+      persisted: true,
+    };
+  }
+  return { ...dynamic, persisted: false };
 }
 
 const EVENTS_ENDPOINT = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
@@ -150,12 +189,36 @@ export function computeBootstrapUpdate(input: BootstrapProgressInput): Record<st
       bootstrap_completed_at: null,
     };
   }
+  // Last page without nextSyncToken: the bootstrap is NOT complete, because
+  // there is no cursor to run incrementally from. Record a recoverable error
+  // and retry the walk later. No data is deleted and no cursor is reset.
+  if (!input.nextSyncToken) {
+    return {
+      ...base,
+      bootstrap_page_token: null,
+      bootstrap_completed_at: null,
+      bootstrap_last_error: BOOTSTRAP_MISSING_SYNC_TOKEN,
+    };
+  }
   return {
     ...base,
     bootstrap_page_token: null,
     bootstrap_completed_at: now,
-    ...(input.nextSyncToken ? { sync_token: input.nextSyncToken } : {}),
+    sync_token: input.nextSyncToken,
   };
+}
+
+export const BOOTSTRAP_MISSING_SYNC_TOKEN = "bootstrap_missing_sync_token";
+
+/**
+ * True when the bootstrap reached its last page but Google returned no
+ * nextSyncToken — the run must be reported as unfinished/recoverable.
+ */
+export function isBootstrapCompletionBlocked(input: {
+  nextPageToken?: string | null;
+  nextSyncToken?: string | null;
+}): boolean {
+  return !input.nextPageToken && !input.nextSyncToken;
 }
 
 export interface IncrementalProgressInput {
@@ -194,6 +257,25 @@ export function computeIncrementalUpdate(input: IncrementalProgressInput): Recor
     incremental_page_token: null,
     incremental_started_at: null,
     ...(input.nextSyncToken ? { sync_token: input.nextSyncToken } : {}),
+  };
+}
+
+/**
+ * Counters for the incremental cycle being processed. A brand-new cycle starts
+ * at zero: the previous cycle's totals are never added to the first batch of
+ * the next one. A resumed cycle keeps accumulating.
+ */
+export function resolveIncrementalCycleBase(state: TokenPagingState | null | undefined): {
+  pagesDone: number;
+  itemsDone: number;
+  startedAt: string | null;
+} {
+  const resuming = !!(state?.incremental_page_token && state?.incremental_started_at);
+  if (!resuming) return { pagesDone: 0, itemsDone: 0, startedAt: null };
+  return {
+    pagesDone: state?.incremental_pages_done || 0,
+    itemsDone: state?.incremental_items_done || 0,
+    startedAt: state?.incremental_started_at ?? null,
   };
 }
 
