@@ -149,7 +149,7 @@ function localEventSignature(event: any): string {
   return `${title}|${date}|${time}|${description}`;
 }
 
-type RefreshOutcome = { access_token: string; expires_in: number } | null | "transient";
+type RefreshOutcome = { access_token: string; expires_in: number; scope?: string } | null | "transient";
 
 /**
  * Refreshes the access token. Returns "transient" for network aborts and
@@ -214,6 +214,7 @@ async function persistRefreshedToken(
   expiresIn: number,
   existing?: any,
   refreshTokenPlain?: string | null,
+  grantedScope?: string | null,
 ) {
   const encKey = getTokenEncKey();
   const payload: { access_token: string; refresh_token?: string } = { access_token: accessToken };
@@ -221,10 +222,21 @@ async function persistRefreshedToken(
     payload.refresh_token = refreshTokenPlain;
   }
   const columns = await buildTokenColumns(payload, encKey, existing ?? null);
+  // Google echoes the effective grant on refresh: keep the recorded scope set
+  // truthful so an overbroad legacy connection stays visible.
+  const scopeList = parseScopeString(grantedScope);
+  const scopeColumns = scopeList.length
+    ? {
+        granted_scopes: scopeList.join(" "),
+        oauth_scope_version: resolveScopeVersion(scopeList),
+        scopes_checked_at: new Date().toISOString(),
+      }
+    : {};
   await supabase
     .from("google_calendar_tokens")
     .update({
       ...columns,
+      ...scopeColumns,
       token_expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
       connection_state: "connected",
       last_auth_error: null,
@@ -260,6 +272,7 @@ async function getValidToken(
     refreshed.expires_in,
     tokenRecord,
     refreshToken,
+    refreshed.scope ?? null,
   );
   return refreshed.access_token;
 }
