@@ -1874,7 +1874,9 @@ Deno.serve(async (req) => {
         ...progressColumns,
         push_cursor_updated_at: advancedPushCursor.updated_at,
         push_cursor_event_id: advancedPushCursor.event_id,
-        ...(pushScanComplete ? { push_cursor_completed_at: new Date().toISOString() } : {}),
+        ...(pushScanComplete && !pushAdvanceBlocked
+          ? { push_cursor_completed_at: new Date().toISOString() }
+          : {}),
       };
     }
     // Deletion cursor advances independently from the live scan.
