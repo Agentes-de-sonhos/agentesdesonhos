@@ -16,12 +16,45 @@ export interface CalendarConnectionStatus {
   incremental_in_progress?: boolean | null;
   incremental_pages_done?: number | null;
   incremental_items_done?: number | null;
+  granted_scopes?: string | null;
+  oauth_scope_version?: number | null;
 }
 
 /** True when the user must run the Google consent flow again. */
 export function needsReconnect(status: CalendarConnectionStatus | null | undefined): boolean {
   if (!status?.connected) return false;
   return status.connection_state === "reconnect_required" || status.connection_state === "revoked";
+}
+
+export const SCOPE_EVENTS = "https://www.googleapis.com/auth/calendar.events";
+export const SCOPE_CALENDARS_READONLY =
+  "https://www.googleapis.com/auth/calendar.calendars.readonly";
+export const SCOPE_CALENDAR_FULL = "https://www.googleapis.com/auth/calendar";
+
+function grantedScopeList(status: CalendarConnectionStatus | null | undefined): string[] {
+  const raw = status?.granted_scopes;
+  if (typeof raw !== "string" || raw.trim().length === 0) return [];
+  return raw.split(/[\s,]+/).filter(Boolean);
+}
+
+/**
+ * True when the connection was authorized with the old broad scope instead of the
+ * current minimal pair. Non-fatal: sync keeps working, we only invite a voluntary
+ * reconnect so the grant shrinks to the minimum.
+ */
+export function hasLegacyBroadScope(status: CalendarConnectionStatus | null | undefined): boolean {
+  if (!status?.connected) return false;
+  const scopes = grantedScopeList(status);
+  if (scopes.length === 0) return false;
+  return scopes.includes(SCOPE_CALENDAR_FULL) && !scopes.includes(SCOPE_EVENTS);
+}
+
+/** Optional invitation text for a legacy broad grant. Never blocks the sync. */
+export function legacyScopeNotice(
+  status: CalendarConnectionStatus | null | undefined,
+): string | null {
+  if (!hasLegacyBroadScope(status)) return null;
+  return "Sua conexão usa a permissão antiga e ampla do Google Calendar. A sincronização continua funcionando normalmente. Se quiser, reconecte para reduzir o acesso ao mínimo necessário (apenas eventos e o fuso do calendário).";
 }
 
 export type CalendarStatusKey =
