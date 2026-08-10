@@ -19,7 +19,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { parseFunctionsError, formatCancelDate } from "@/lib/subscriptionCancel";
+import { parsePortalError } from "@/lib/customerPortal";
+import { getScheduledCancellation } from "@/lib/subscriptionState";
 import {
+  CalendarClock,
   CreditCard,
   ExternalLink,
   Loader2,
@@ -70,19 +73,27 @@ export default function MinhaConta() {
   };
 
   const isPaid = plan === "profissional" || plan === "premium" || plan === "fundador";
+  const cancellation = getScheduledCancellation(subscription as any);
 
   const openPortal = async (mode: "manage" | "cancel") => {
+    // Abre uma janela placeholder no gesto do clique para não ser bloqueada
+    // pelo navegador depois do await.
+    const placeholder = window.open("", "_blank");
     try {
       setLoadingPortal(mode);
       const { data, error } = await supabase.functions.invoke("customer-portal", {
         body: { mode },
       });
-      if (error) throw error;
-      if (!data?.url) throw new Error("Não foi possível abrir o portal de gerenciamento.");
-      window.open(data.url, "_blank");
+      if (error) throw new Error(await parsePortalError(error));
+      if (!data?.url) throw new Error(await parsePortalError({ context: data }));
+      if (placeholder && !placeholder.closed) {
+        placeholder.location.href = data.url;
+      } else {
+        window.location.href = data.url;
+      }
     } catch (err: any) {
-      const msg = err?.message || err?.context?.error || "Erro ao abrir o portal de assinatura.";
-      toast.error(msg);
+      if (placeholder && !placeholder.closed) placeholder.close();
+      toast.error(err?.message || (await parsePortalError(err)));
     } finally {
       setLoadingPortal(null);
     }
