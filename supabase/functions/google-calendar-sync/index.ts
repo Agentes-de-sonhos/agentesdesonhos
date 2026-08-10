@@ -1408,7 +1408,6 @@ Deno.serve(async (req) => {
 
     for (const e of pushEvents) localIds.add(e.id);
     const pushScanComplete = !mappingFetchFailed && isPushScanComplete(liveLocalEvents.length, limits.maxPushItems);
-    const advancedPushCursor = nextPushCursor(pushEvents, pushCursor);
     const mappedInWindow = liveLocalEvents.filter((e: any) => syncMap.has(e.id)).length;
     const unmappedInWindow = liveLocalEvents.length - mappedInWindow;
     const mappedLocalSignatures = new Map<string, string>();
