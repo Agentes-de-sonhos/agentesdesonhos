@@ -68,6 +68,12 @@ import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
 import { AgencyEntitlementsDialog } from "./AgencyEntitlementsDialog";
 import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
 import { AdminUserUsageReport } from "./AdminUserUsageReport";
+import {
+  buildAdminAccountRows,
+  allowedActions,
+  type AdminAccountRow,
+  type TeamOverview,
+} from "@/lib/adminUserAccounts";
 
 const ROLE_OPTIONS: { value: "admin" | "agente" | "promotor" | "fornecedor"; label: string }[] = [
   { value: "agente", label: "Agente" },
@@ -98,6 +104,14 @@ interface UserWithDetails {
   plan: SubscriptionPlan;
   is_active: boolean;
   monthly_paid: boolean;
+  kind?: "master" | "member" | "invite";
+  plan_inherited?: boolean;
+  is_orphan?: boolean;
+  access_profile_name?: string | null;
+  master_name?: string | null;
+  team_member_id?: string | null;
+  invite_id?: string | null;
+  team_status?: string | null;
 }
 
 export function AdminUserManager() {
