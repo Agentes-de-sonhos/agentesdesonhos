@@ -4729,6 +4729,10 @@ export type Database = {
           connection_state: string
           created_at: string | null
           id: string
+          incremental_items_done: number
+          incremental_page_token: string | null
+          incremental_pages_done: number
+          incremental_started_at: string | null
           last_auth_error: string | null
           last_auth_error_at: string | null
           last_sync_at: string | null
@@ -4738,6 +4742,9 @@ export type Database = {
           push_cursor_completed_at: string | null
           push_cursor_event_id: string | null
           push_cursor_updated_at: string | null
+          push_deleted_cursor_at: string | null
+          push_deleted_cursor_completed_at: string | null
+          push_deleted_cursor_event_id: string | null
           refresh_token: string
           refresh_token_enc: string | null
           sync_enabled: boolean | null
@@ -4765,6 +4772,10 @@ export type Database = {
           connection_state?: string
           created_at?: string | null
           id?: string
+          incremental_items_done?: number
+          incremental_page_token?: string | null
+          incremental_pages_done?: number
+          incremental_started_at?: string | null
           last_auth_error?: string | null
           last_auth_error_at?: string | null
           last_sync_at?: string | null
@@ -4774,6 +4785,9 @@ export type Database = {
           push_cursor_completed_at?: string | null
           push_cursor_event_id?: string | null
           push_cursor_updated_at?: string | null
+          push_deleted_cursor_at?: string | null
+          push_deleted_cursor_completed_at?: string | null
+          push_deleted_cursor_event_id?: string | null
           refresh_token: string
           refresh_token_enc?: string | null
           sync_enabled?: boolean | null
@@ -4801,6 +4815,10 @@ export type Database = {
           connection_state?: string
           created_at?: string | null
           id?: string
+          incremental_items_done?: number
+          incremental_page_token?: string | null
+          incremental_pages_done?: number
+          incremental_started_at?: string | null
           last_auth_error?: string | null
           last_auth_error_at?: string | null
           last_sync_at?: string | null
@@ -4810,6 +4828,9 @@ export type Database = {
           push_cursor_completed_at?: string | null
           push_cursor_event_id?: string | null
           push_cursor_updated_at?: string | null
+          push_deleted_cursor_at?: string | null
+          push_deleted_cursor_completed_at?: string | null
+          push_deleted_cursor_event_id?: string | null
           refresh_token?: string
           refresh_token_enc?: string | null
           sync_enabled?: boolean | null
