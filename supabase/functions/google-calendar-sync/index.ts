@@ -1034,6 +1034,28 @@ Deno.serve(async (req) => {
           if (decision !== "pull") {
             // Nothing changed on Google, or only the local side did — the push
             // phase below handles it. No local overwrite here.
+            // Legacy safety backfill release: the conservative
+            // is_read_only = true applied to pre-existing mappings must not be
+            // permanent. Reclassify against Google's real state (origin stays
+            // 'google', so remote deletion remains blocked).
+            const reclass = buildReadOnlyReclassification(gEvent as any, mapped, { calendarId });
+            if (reclass) {
+              const { error: reclassErr } = await supabase
+                .from("google_calendar_sync")
+                .update(reclass)
+                .eq("id", mapped.id);
+              if (!reclassErr) {
+                Object.assign(mapped, reclass);
+                if (mapped.agency_event_id) {
+                  await supabase
+                    .from("agency_events")
+                    .update({ is_read_only: reclass.is_read_only })
+                    .eq("id", mapped.agency_event_id)
+                    .eq("user_id", userId);
+                }
+                console.log(`[calendar-sync] read-only-reclassified google=${gEvent.id} read_only=${reclass.is_read_only}`);
+              }
+            }
             pulledSkipped++; skipAlreadyMapped++;
             recordPullSkip("already_synced_unchanged", gEvent, {
               agency_event_id: mapped.agency_event_id,
