@@ -68,6 +68,12 @@ import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
 import { AgencyEntitlementsDialog } from "./AgencyEntitlementsDialog";
 import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
 import { AdminUserUsageReport } from "./AdminUserUsageReport";
+import {
+  buildAdminAccountRows,
+  allowedActions,
+  type AdminAccountRow,
+  type TeamOverview,
+} from "@/lib/adminUserAccounts";
 
 const ROLE_OPTIONS: { value: "admin" | "agente" | "promotor" | "fornecedor"; label: string }[] = [
   { value: "agente", label: "Agente" },
@@ -98,6 +104,14 @@ interface UserWithDetails {
   plan: SubscriptionPlan;
   is_active: boolean;
   monthly_paid: boolean;
+  kind?: "master" | "member" | "invite";
+  plan_inherited?: boolean;
+  is_orphan?: boolean;
+  access_profile_name?: string | null;
+  master_name?: string | null;
+  team_member_id?: string | null;
+  invite_id?: string | null;
+  team_status?: string | null;
 }
 
 export function AdminUserManager() {
@@ -126,12 +140,13 @@ export function AdminUserManager() {
     queryKey: ["admin-users-full"],
     queryFn: async () => {
       // Fetch profiles, roles, subscriptions, emails, and monthly payments in parallel
-      const [profilesRes, rolesRes, subsRes, emailsRes, paymentsRes] = await Promise.all([
+      const [profilesRes, rolesRes, subsRes, emailsRes, paymentsRes, teamRes] = await Promise.all([
         supabase.from("profiles").select("*").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("user_id, role"),
         supabase.from("subscriptions").select("user_id, plan, is_active"),
         supabase.functions.invoke("admin-list-emails"),
         supabase.from("monthly_payments").select("user_id, is_paid").eq("month", currentMonth).eq("year", currentYear),
+        supabase.rpc("admin_team_accounts_overview"),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -142,8 +157,7 @@ export function AdminUserManager() {
       const paymentMap: Record<string, boolean> = {};
       (paymentsRes.data || []).forEach((p: any) => { paymentMap[p.user_id] = p.is_paid; });
 
-      // Combine data
-      return (profilesRes.data || []).map((profile) => {
+      const baseRows = (profilesRes.data || []).map((profile) => {
         const userRoles = rolesRes.data?.filter((r) => r.user_id === profile.user_id) || [];
         const hasAdmin = userRoles.some((r) => r.role === "admin");
         const userRole = hasAdmin ? "admin" : (userRoles[0]?.role || "agente");
@@ -163,8 +177,14 @@ export function AdminUserManager() {
           plan: (userSub?.plan as SubscriptionPlan) || "start",
           is_active: userSub?.is_active ?? true,
           monthly_paid: paymentMap[profile.user_id] ?? false,
-        } as UserWithDetails;
+        } as unknown as AdminAccountRow;
       });
+
+      // Sobrepõe colaboradores de equipe (e-mail real + plano herdado da master)
+      // e adiciona os convites pendentes como linhas próprias.
+      const overview = (teamRes.data as unknown as TeamOverview | null) ?? null;
+      if (teamRes.error) console.error("admin_team_accounts_overview error", teamRes.error);
+      return buildAdminAccountRows(baseRows, overview) as unknown as UserWithDetails[];
     },
   });
 
@@ -427,21 +447,26 @@ export function AdminUserManager() {
         user.city?.toLowerCase().includes(searchTerm.toLowerCase());
 
       let matchesStat = true;
-      if (statFilter === "admins") matchesStat = user.role === "admin";
-      else if (statFilter !== "all") matchesStat = user.role !== "admin" && user.plan === statFilter;
+      const kind = user.kind ?? "master";
+      if (statFilter === "members") matchesStat = kind === "member";
+      else if (statFilter === "invites") matchesStat = kind === "invite";
+      else if (statFilter === "admins") matchesStat = kind === "master" && user.role === "admin";
+      else if (statFilter !== "all") matchesStat = kind === "master" && user.role !== "admin" && user.plan === statFilter;
 
       return matchesSearch && matchesStat;
     });
   }, [users, searchTerm, statFilter]);
 
   const stats = {
-    total: users.length,
-    admins: users.filter((u) => u.role === "admin").length,
-    start: users.filter((u) => u.role !== "admin" && u.plan === "start").length,
-    profissional: users.filter((u) => u.role !== "admin" && u.plan === "profissional").length,
-    premium: users.filter((u) => u.role !== "admin" && u.plan === "premium").length,
-    fundador: users.filter((u) => u.role !== "admin" && u.plan === "fundador").length,
-    fornecedor_parceiro: users.filter((u) => u.role !== "admin" && u.plan === "fornecedor_parceiro").length,
+    // Estatísticas de plano consideram apenas contas comerciais (masters):
+    // colaboradores herdam o plano e convites ainda não são contas.
+    total: users.filter((u) => (u.kind ?? "master") === "master").length,
+    admins: users.filter((u) => (u.kind ?? "master") === "master" && u.role === "admin").length,
+    start: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "start").length,
+    profissional: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "profissional").length,
+    premium: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "premium").length,
+    fundador: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "fundador").length,
+    fornecedor_parceiro: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "fornecedor_parceiro").length,
   };
 
   const statCards: { key: string; label: string; value: number }[] = [
@@ -452,6 +477,8 @@ export function AdminUserManager() {
     { key: "premium", label: "Premium", value: stats.premium },
     { key: "fundador", label: "Fundador", value: stats.fundador },
     { key: "fornecedor_parceiro", label: "Fornecedor Parceiro", value: stats.fornecedor_parceiro },
+    { key: "members", label: "Colaboradores", value: users.filter((u) => u.kind === "member").length },
+    { key: "invites", label: "Convites pendentes", value: users.filter((u) => u.kind === "invite").length },
   ];
 
   const planColors: Record<string, string> = {
@@ -576,11 +603,14 @@ export function AdminUserManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className={user.role === "admin" ? "bg-amber-50/60 dark:bg-amber-950/20 border-l-4 border-l-amber-500" : ""}>
+                {filteredUsers.map((user) => {
+                  const kind = user.kind ?? "master";
+                  const can = allowedActions({ kind, is_orphan: !!user.is_orphan });
+                  return (
+                  <TableRow key={user.id} className={user.role === "admin" && kind === "master" ? "bg-amber-50/60 dark:bg-amber-950/20 border-l-4 border-l-amber-500" : ""}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {user.role === "admin" && (
+                        {user.role === "admin" && kind === "master" && (
                           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
                             <Shield className="h-4 w-4 text-white" />
                           </div>
@@ -589,6 +619,15 @@ export function AdminUserManager() {
                           <p className="font-medium">{user.name}</p>
                           {user.agency_name && (
                             <p className="text-sm text-muted-foreground">{user.agency_name}</p>
+                          )}
+                          {kind !== "master" && (
+                            <p className="text-xs text-muted-foreground">
+                              {kind === "invite" ? "Convite pendente" : "Colaborador"}
+                              {user.master_name ? ` · equipe de ${user.master_name}` : ""}
+                            </p>
+                          )}
+                          {user.access_profile_name && (
+                            <p className="text-xs text-muted-foreground">Perfil: {user.access_profile_name}</p>
                           )}
                         </div>
                       </div>
@@ -602,12 +641,25 @@ export function AdminUserManager() {
                     <TableCell>
                     </TableCell>
                     <TableCell>
-                      <Badge className={`${planColors[user.plan]} text-white border-0`}>
-                        {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
-                      </Badge>
+                      <div className="space-y-1">
+                        <Badge className={`${planColors[user.plan]} text-white border-0`}>
+                          {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                        </Badge>
+                        {user.plan_inherited && (
+                          <p className="text-xs text-muted-foreground">Herdado da conta master</p>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {user.role === "admin" ? (
+                      {kind === "invite" ? (
+                        <Badge variant="outline" className="gap-1 px-3 py-1 text-xs">
+                          <UserPlus className="h-3 w-3" /> Convite pendente
+                        </Badge>
+                      ) : kind === "member" ? (
+                        <Badge variant="secondary" className="gap-1 px-3 py-1 text-xs">
+                          <Users className="h-3 w-3" /> Colaborador
+                        </Badge>
+                      ) : user.role === "admin" ? (
                         <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0 gap-1 px-3 py-1 text-xs font-semibold">
                           <Shield className="h-3 w-3" /> Administrador
                         </Badge>
@@ -618,33 +670,45 @@ export function AdminUserManager() {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(user.created_at), "dd/MM/yyyy")}
+                      {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : "-"}
                     </TableCell>
                     <TableCell>
-                      <Switch
-                        checked={user.monthly_paid}
-                        onCheckedChange={(checked) =>
-                          togglePaymentMutation.mutate({
-                            userId: user.user_id,
-                            isPaid: checked,
-                          })
-                        }
-                      />
+                      {can.togglePayment ? (
+                        <Switch
+                          checked={user.monthly_paid}
+                          onCheckedChange={(checked) =>
+                            togglePaymentMutation.mutate({
+                              userId: user.user_id,
+                              isPaid: checked,
+                            })
+                          }
+                        />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <Switch
-                        checked={user.is_active}
-                        onCheckedChange={(checked) =>
-                          toggleActiveMutation.mutate({
-                            userId: user.user_id,
-                            isActive: checked,
-                          })
-                        }
-                      />
+                      {can.toggleActive ? (
+                        <Switch
+                          checked={user.is_active}
+                          onCheckedChange={(checked) =>
+                            toggleActiveMutation.mutate({
+                              userId: user.user_id,
+                              isActive: checked,
+                            })
+                          }
+                        />
+                      ) : user.is_orphan ? (
+                        <Badge variant="destructive" className="text-xs">Registro órfão</Badge>
+                      ) : (
+                        <Badge variant={user.is_active ? "secondary" : "outline"} className="text-xs">
+                          {kind === "invite" ? "Aguardando aceite" : user.is_active ? "Ativo" : "Inativo"}
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
+                        {can.toggleRole && <Button
                           variant={user.role === "admin" ? "destructive" : "default"}
                           size="sm"
                           className="text-xs gap-1"
@@ -660,8 +724,8 @@ export function AdminUserManager() {
                           ) : (
                             <><Shield className="h-3 w-3" /> Tornar Admin</>
                           )}
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.impersonate && <Button
                           variant="ghost"
                           size="icon"
                           title="Acessar como usuário"
@@ -670,16 +734,16 @@ export function AdminUserManager() {
                           disabled={impersonateMutation.isPending}
                         >
                           <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {kind === "master" && <Button
                           variant="ghost"
                           size="icon"
                           title="Permissões especiais"
                           onClick={() => setFeatureAccessUser(user)}
                         >
                           <Settings2 className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {kind === "master" && <Button
                           variant="ghost"
                           size="icon"
                           title="Pacote VIP da agência"
@@ -687,8 +751,8 @@ export function AdminUserManager() {
                           onClick={() => setEntitlementsUser(user)}
                         >
                           <Crown className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.resetPassword && <Button
                           variant="ghost"
                           size="icon"
                           title="Resetar senha"
@@ -696,8 +760,8 @@ export function AdminUserManager() {
                           disabled={resetPasswordMutation.isPending}
                         >
                           <KeyRound className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.resetPassword && <Button
                           variant="ghost"
                           size="icon"
                           title="Gerar link para criar senha"
@@ -706,8 +770,8 @@ export function AdminUserManager() {
                           disabled={generateSetupLinkMutation.isPending}
                         >
                           <Link2 className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.changePlan && <Button
                           variant="outline"
                           size="icon"
                           onClick={() => {
@@ -716,8 +780,8 @@ export function AdminUserManager() {
                           }}
                         >
                           <CreditCard className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.forceLogout && <Button
                           variant="ghost"
                           size="icon"
                           title="Forçar logout"
@@ -726,8 +790,8 @@ export function AdminUserManager() {
                           disabled={forceLogoutMutation.isPending}
                         >
                           <LogOut className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.delete && <Button
                           variant="ghost"
                           size="icon"
                           title="Excluir usuário"
@@ -735,11 +799,17 @@ export function AdminUserManager() {
                           onClick={() => setDeletingUser(user)}
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </Button>}
+                        {kind === "invite" && (
+                          <span className="text-xs text-muted-foreground">
+                            Gerencie em Equipe e Permissões
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

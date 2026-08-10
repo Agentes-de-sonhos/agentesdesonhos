@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { user_id } = await req.json();
+    const { user_id, confirm_master } = await req.json();
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: "user_id é obrigatório" }), {
@@ -68,21 +68,99 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Delete user from auth (cascades to profiles, user_roles, subscriptions via FK)
-    const { error: deleteError } = await adminClient.auth.admin.deleteUser(user_id);
+    // O usuário pode ser (a) um colaborador de equipe, (b) um proprietário/master
+    // de agência com equipe, ou (c) uma conta comum. Cada caso exige limpeza
+    // diferente para nunca deixar registros de equipe ativos órfãos.
+    const { data: memberRow } = await adminClient
+      .from("agency_team_members")
+      .select("id, agency_id, full_name, login")
+      .eq("auth_user_id", user_id)
+      .maybeSingle();
 
-    if (deleteError) {
-      console.error("Delete user error:", deleteError);
-      return new Response(JSON.stringify({ error: "Erro ao excluir usuário." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { count: ownedMembers } = await adminClient
+      .from("agency_team_members")
+      .select("id", { count: "exact", head: true })
+      .eq("agency_id", user_id);
+
+    // Proteção: excluir a conta master apaga toda a equipe da agência.
+    if (!memberRow && (ownedMembers ?? 0) > 0 && confirm_master !== true) {
+      return new Response(
+        JSON.stringify({
+          error: `Esta é a conta principal de uma agência com ${ownedMembers} colaborador(es). Confirme a exclusão para remover a agência e toda a equipe.`,
+          requires_master_confirmation: true,
+          team_members: ownedMembers ?? 0,
+        }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Limpeza do registro de equipe (permissões, scopes, stage permissions,
+    // segredos e sessões saem por cascade nos FKs de agency_team_members).
+    if (memberRow) {
+      await adminClient.from("agency_team_sessions").delete().eq("team_member_id", memberRow.id);
+      await adminClient.from("agency_team_member_secrets").delete().eq("member_id", memberRow.id);
+      await adminClient.from("agency_team_permissions").delete().eq("team_member_id", memberRow.id);
+      await adminClient.from("agency_team_scopes").delete().eq("team_member_id", memberRow.id);
+      await adminClient.from("agency_team_stage_permissions").delete().eq("team_member_id", memberRow.id);
+      const { error: memberDelErr } = await adminClient
+        .from("agency_team_members").delete().eq("id", memberRow.id);
+      if (memberDelErr) {
+        console.error("team member delete error:", memberDelErr);
+        return new Response(JSON.stringify({ error: "Erro ao remover o colaborador da equipe." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      await adminClient.from("agency_membership").delete().eq("user_id", user_id);
+      await adminClient.from("agency_team_audit_log").insert({
+        agency_id: memberRow.agency_id,
+        action: "delete_member",
+        module_key: "team",
+        entity_type: "team_member",
+        entity_id: memberRow.id,
+        details: {
+          via: "admin-delete-user",
+          admin_action: true,
+          actor_user_id: callerId,
+          subject: memberRow.full_name,
+          login: memberRow.login,
+        },
+      }).then(({ error }) => { if (error) console.error("audit insert error", error) });
+    }
+
+    // Assinatura técnica (Start criada pelo trigger) não tem FK para auth.users:
+    // precisa ser removida explicitamente para não ficar órfã.
+    await adminClient.from("subscriptions").delete().eq("user_id", user_id);
+
+    // Remove o auth user (perfis/roles saem por cascade). Se ele já não existir,
+    // o resultado ainda é sucesso: a limpeza acima é o objetivo.
+    const { data: existingAuth } = await adminClient.auth.admin.getUserById(user_id);
+    let authDeleted = false;
+    if (existingAuth?.user) {
+      const { error: deleteError } = await adminClient.auth.admin.deleteUser(user_id);
+      if (deleteError) {
+        console.error("Delete user error:", deleteError);
+        return new Response(JSON.stringify({ error: "Erro ao excluir usuário." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      authDeleted = true;
+    } else {
+      // Registro órfão: garante que perfil/roles residuais também saiam.
+      await adminClient.from("profiles").delete().eq("user_id", user_id);
+      await adminClient.from("user_roles").delete().eq("user_id", user_id);
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        auth_deleted: authDeleted,
+        team_member_removed: !!memberRow,
+        was_orphan: !authDeleted,
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (err) {
     console.error("admin-delete-user error:", err);
     return new Response(JSON.stringify({ error: "Erro ao processar solicitação." }), {
