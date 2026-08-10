@@ -764,9 +764,14 @@ Deno.serve(async (req) => {
     }
 
     // Reverse mappings for exactly the Google ids of this run (chunked in-lists).
+    // FAIL-CLOSED: if any chunk of the reverse mapping or of the mapped local
+    // rows fails, the whole pull for this run is cancelled. Continuing would
+    // read a partial inventory, treat already-mapped events as new (duplicates)
+    // and drop mappings as `local_reference_missing`.
+    let pullInventoryFailed = false;
     if (googleEvents.length > 0) {
       const ids = [...new Set(googleEvents.map((e) => e.id).filter(Boolean))];
-      for (let i = 0; i < ids.length; i += 200) {
+      for (let i = 0; i < ids.length && !pullInventoryFailed; i += 200) {
         const chunk = ids.slice(i, i + 200);
         const { data: chunkMaps, error: chunkErr } = await supabase
           .from("google_calendar_sync")
@@ -775,7 +780,9 @@ Deno.serve(async (req) => {
           .in("google_event_id", chunk);
         if (chunkErr) {
           console.error(`[calendar-sync] reverse-map-fetch-error err=${chunkErr.message}`);
-          continue;
+          pullErrors.push({ status: 0, error: `reverse_mapping_fetch_failed: ${chunkErr.message}`.slice(0, 200) });
+          pullInventoryFailed = true;
+          break;
         }
         for (const m of chunkMaps || []) {
           reverseSyncMap.set(m.google_event_id, m);
@@ -784,25 +791,40 @@ Deno.serve(async (req) => {
       }
       // Local rows for mapped ids: existence AND updated_at, needed by the
       // conflict policy (local side vs the marker saved at the last sync).
-      const mappedLocalIds = [...new Set((googleEvents
-        .map((e) => reverseSyncMap.get(e.id)?.agency_event_id)
-        .filter(Boolean) as string[]))];
-      for (let i = 0; i < mappedLocalIds.length; i += 200) {
-        const chunk = mappedLocalIds.slice(i, i + 200);
-        const { data: liveRows } = await supabase
-          .from("agency_events")
-          .select("id, title, updated_at, event_date, event_time, end_date, end_time, all_day, time_zone, location")
-          .eq("user_id", userId)
-          .is("deleted_at", null)
-          .in("id", chunk);
-        for (const r of liveRows || []) {
-          localIds.add(r.id);
-          localRowsById.set(r.id, r);
+      if (!pullInventoryFailed) {
+        const mappedLocalIds = [...new Set((googleEvents
+          .map((e) => reverseSyncMap.get(e.id)?.agency_event_id)
+          .filter(Boolean) as string[]))];
+        for (let i = 0; i < mappedLocalIds.length && !pullInventoryFailed; i += 200) {
+          const chunk = mappedLocalIds.slice(i, i + 200);
+          const { data: liveRows, error: liveErr } = await supabase
+            .from("agency_events")
+            .select("id, title, updated_at, event_date, event_time, end_date, end_time, all_day, time_zone, location")
+            .eq("user_id", userId)
+            .is("deleted_at", null)
+            .in("id", chunk);
+          if (liveErr) {
+            console.error(`[calendar-sync] mapped-local-fetch-error err=${liveErr.message}`);
+            pullErrors.push({ status: 0, error: `mapped_local_fetch_failed: ${liveErr.message}`.slice(0, 200) });
+            pullInventoryFailed = true;
+            break;
+          }
+          for (const r of liveRows || []) {
+            localIds.add(r.id);
+            localRowsById.set(r.id, r);
+          }
         }
       }
     }
+    if (pullInventoryFailed) {
+      // Transient error: no local write, no cursor advance, lock released by the
+      // normal end-of-run path. The same pages are re-read next run.
+      console.error(
+        `[calendar-sync] pull-aborted reason=inventory_fetch_failed google_events=${googleEvents.length} cursor_preserved=true`,
+      );
+    }
 
-    if (!pullPageError) {
+    if (!pullPageError && !pullInventoryFailed) {
       console.log(`[calendar-sync] reverse-map-before-pull mappings=${reverseSyncMap.size} just_pushed=${justPushedGoogleIds.size}`);
 
       let skipCancelled = 0;
