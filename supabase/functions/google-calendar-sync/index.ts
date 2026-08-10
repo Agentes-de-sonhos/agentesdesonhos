@@ -569,6 +569,27 @@ Deno.serve(async (req) => {
       return res;
     };
 
+    // Safe baseline read used when Google answers 412: we want the CURRENT
+    // remote etag/snapshot recorded in the conflict. A failure here never
+    // overwrites anything — the conflict is recorded without the baseline.
+    const safeGetGoogleEvent = async (googleEventId: string): Promise<Record<string, unknown> | null> => {
+      if (!googleEventId) return null;
+      try {
+        const res = await fetchGoogle(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodeURIComponent(googleEventId)}`
+        );
+        if (!res.ok) {
+          await res.text().catch(() => "");
+          console.warn(`[calendar-sync] conflict-baseline-get-failed google=${googleEventId} status=${res.status}`);
+          return null;
+        }
+        return (await res.json().catch(() => null)) as Record<string, unknown> | null;
+      } catch (e: any) {
+        console.warn(`[calendar-sync] conflict-baseline-get-error google=${googleEventId} err=${String(e?.message || e).slice(0, 120)}`);
+        return null;
+      }
+    };
+
     // Local (push) window: 30 days back → 730 days forward, always current.
     // The pull window for a resumed bootstrap is separate and immutable —
     // see pullBootstrapWindow below.
