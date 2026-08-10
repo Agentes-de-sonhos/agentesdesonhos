@@ -229,6 +229,7 @@ const App = () => (
             <Route path="/trade-connect/comunidades" element={<Navigate to="/comunidade/comunidades" replace />} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
+            <Route path="/google-calendar" element={<GoogleCalendarIntegracao />} />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/fatura/:agencySlug/:code" element={<FaturaPublica />} />
