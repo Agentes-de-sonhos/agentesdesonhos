@@ -183,9 +183,16 @@ export function needsTokenMigration(record: TokenRecordLike | null | undefined):
  * in the same write, so no readable credential is left at rest.
  *
  * Version 1 is only claimed when BOTH access_token_enc and refresh_token_enc
- * end up populated (either written now or already ciphertext on `existing`).
+ * end up populated AND every ciphertext this row will rely on has been proven
+ * readable: values written now must round-trip back to the exact plaintext, and
+ * values inherited from `existing` must decrypt successfully.
  * A partially migrated row stays at version 0, keeps its plaintext value and is
  * retried on the next refresh instead of losing the credential.
+ *
+ * NOTE: production credential writes go exclusively through
+ * `buildVerifiedEncryptedColumns`. This builder is retained for legacy/partial
+ * migration paths and tests, and can never promote a row to version 1 (nor
+ * clear plaintext) without the verification above.
  */
 export async function buildTokenColumns(
   tokens: { access_token?: string; refresh_token?: string },
@@ -210,7 +217,8 @@ export async function buildTokenColumns(
 
   const accessEncrypted = isCiphertext(update.access_token_enc) || isCiphertext(existing?.access_token_enc);
   const refreshEncrypted = isCiphertext(update.refresh_token_enc) || isCiphertext(existing?.refresh_token_enc);
-  const fullyEncrypted = accessEncrypted && refreshEncrypted;
+  const verified = await verifyColumnCiphertexts(update, tokens, existing, secret);
+  const fullyEncrypted = accessEncrypted && refreshEncrypted && verified;
   update.token_enc_version = fullyEncrypted ? 1 : 0;
   if (fullyEncrypted) {
     // Encrypted-only at rest: drop every readable copy in the same statement.
@@ -218,6 +226,34 @@ export async function buildTokenColumns(
     update.refresh_token = null;
   }
   return update;
+}
+
+/**
+ * Proves every ciphertext the row will depend on is readable before version 1
+ * may be claimed. Freshly written values must decrypt back to the exact source
+ * plaintext; inherited values only need to decrypt without error.
+ */
+async function verifyColumnCiphertexts(
+  update: TokenColumnUpdate,
+  tokens: { access_token?: string; refresh_token?: string },
+  existing: TokenRecordLike | null | undefined,
+  secret: string,
+): Promise<boolean> {
+  const checks: Array<[string | null | undefined, string | undefined]> = [
+    [update.access_token_enc ?? existing?.access_token_enc, tokens.access_token],
+    [update.refresh_token_enc ?? existing?.refresh_token_enc, tokens.refresh_token],
+  ];
+  for (const [cipher, expected] of checks) {
+    if (!isCiphertext(cipher)) return false;
+    try {
+      const back = await decryptToken(cipher as string, secret);
+      // `expected` is only known when this call is what wrote the ciphertext.
+      if (typeof expected === "string" && back !== expected) return false;
+    } catch {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function getTokenEncKey(): string | null {

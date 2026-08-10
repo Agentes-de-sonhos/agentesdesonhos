@@ -20,6 +20,7 @@ import {
   needsReconnect,
   reconnectMessage,
   legacyScopeNotice,
+  timeZoneScopeNotice,
   resolveStatusKey,
   statusDotClass,
   statusLabel,
@@ -165,6 +166,7 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
   const mustReconnect = needsReconnect(status);
   const bootstrapLabel = bootstrapProgressLabel(status);
   const legacyNotice = legacyScopeNotice(status);
+  const timezoneNotice = timeZoneScopeNotice(status);
 
   // Re-consent required: the connection is kept, but only reconnecting fixes it.
   if (mustReconnect) {
@@ -219,6 +221,17 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
         >
           <AlertTriangle className="h-3.5 w-3.5" />
           <span>Reduzir permissões</span>
+        </button>
+      )}
+      {timezoneNotice && (
+        <button
+          type="button"
+          onClick={() => setShowConsent(true)}
+          title={timezoneNotice}
+          className="hidden sm:flex items-center gap-1 text-xs text-amber-600 hover:underline"
+        >
+          <AlertTriangle className="h-3.5 w-3.5" />
+          <span>Fuso horário aproximado</span>
         </button>
       )}
       {lastReport && (

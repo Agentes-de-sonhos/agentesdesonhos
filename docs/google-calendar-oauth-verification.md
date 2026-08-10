@@ -9,10 +9,10 @@ Atualizado na etapa final de hardening da integração.
 | --- | --- |
 | Produto | Agentes de Sonhos |
 | Domínio principal | https://app.agentesdesonhos.com.br |
-| Homepage | https://agentesdesonhos.com.br |
-| Homepage pública da integração (App homepage no formulário) | https://agentesdesonhos.com.br/google-calendar |
-| Política de Privacidade | https://agentesdesonhos.com.br/politicasdeprivacidade (seção 7 — Integração com o Google Calendar) |
-| Termos de Uso | https://agentesdesonhos.com.br/termosdeuso |
+| Homepage / site de marketing (listado separadamente) | https://www.agentesdesonhos.com.br |
+| Homepage pública da integração (App homepage no formulário) | https://app.agentesdesonhos.com.br/google-calendar |
+| Política de Privacidade | https://app.agentesdesonhos.com.br/politicasdeprivacidade (seção 7 — Integração com o Google Calendar) |
+| Termos de Uso | https://app.agentesdesonhos.com.br/termosdeuso |
 | Redirect URI OAuth | `https://<projeto>.supabase.co/functions/v1/google-calendar-callback` |
 | Contato / DPO | suporte@agentesdesonhos.com.br |
 
@@ -65,7 +65,7 @@ impediria a publicação dos compromissos criados na plataforma, que é o valor 
 Record in one take, English narration, no cuts, browser URL bar always visible.
 
 1. "This is Agentes de Sonhos, a management platform for travel agents." Show the public
-   integration page at `https://agentesdesonhos.com.br/google-calendar`, scrolling through the
+   integration page at `https://app.agentesdesonhos.com.br/google-calendar`, scrolling through the
    requested scopes, the data usage section and the disconnect section. Point at the link to the
    Privacy Policy.
 2. Show the OAuth client ID on screen matching the client submitted for verification.

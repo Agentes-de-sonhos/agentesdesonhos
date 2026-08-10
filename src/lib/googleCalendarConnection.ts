@@ -46,7 +46,9 @@ export function hasLegacyBroadScope(status: CalendarConnectionStatus | null | un
   if (!status?.connected) return false;
   const scopes = grantedScopeList(status);
   if (scopes.length === 0) return false;
-  return scopes.includes(SCOPE_CALENDAR_FULL) && !scopes.includes(SCOPE_EVENTS);
+  // Any presence of the broad scope is overbroad, even alongside the minimal
+  // ones — the grant still allows far more than this feature needs.
+  return scopes.includes(SCOPE_CALENDAR_FULL);
 }
 
 /** Optional invitation text for a legacy broad grant. Never blocks the sync. */
@@ -55,6 +57,29 @@ export function legacyScopeNotice(
 ): string | null {
   if (!hasLegacyBroadScope(status)) return null;
   return "Sua conexão usa a permissão antiga e ampla do Google Calendar. A sincronização continua funcionando normalmente. Se quiser, reconecte para reduzir o acesso ao mínimo necessário (apenas eventos e o fuso do calendário).";
+}
+
+/**
+ * True when the grant covers events but not the calendar metadata scope (and is
+ * not the broad grant either). Sync keeps working; only the calendar time zone
+ * cannot be read, so a fallback time zone is used.
+ */
+export function missingTimeZoneScope(
+  status: CalendarConnectionStatus | null | undefined,
+): boolean {
+  if (!status?.connected) return false;
+  const scopes = grantedScopeList(status);
+  if (scopes.length === 0) return false;
+  if (scopes.includes(SCOPE_CALENDAR_FULL)) return false;
+  return scopes.includes(SCOPE_EVENTS) && !scopes.includes(SCOPE_CALENDARS_READONLY);
+}
+
+/** Non-fatal notice for an events-only grant. Never blocks the sync. */
+export function timeZoneScopeNotice(
+  status: CalendarConnectionStatus | null | undefined,
+): string | null {
+  if (!missingTimeZoneScope(status)) return null;
+  return "Sua conexão não autorizou a leitura do fuso horário do calendário. Os eventos continuam sincronizando normalmente, mas usamos um fuso padrão como alternativa. Reconecte para ganhar precisão de horário.";
 }
 
 export type CalendarStatusKey =
