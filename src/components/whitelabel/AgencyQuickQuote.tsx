@@ -9,13 +9,10 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
+import { AgencyQuoteJourney } from "@/components/whitelabel/AgencyQuoteJourney";
 import { isEditorialTheme } from "@/lib/agencySiteTheme";
 import {
-  REQUEST_SERVICES, initialServiceValues, quickQuoteFields, serviceByKey,
+  REQUEST_SERVICES, initialServiceValues, quickQuoteFields, serviceByKey, validateQuickStep,
   type ServiceValues,
 } from "@/lib/agencySiteRequests";
 
@@ -56,8 +53,9 @@ export function AgencyQuickQuote({
   onOpenChange,
 }: AgencyQuickQuoteProps) {
   const service = useMemo(() => serviceByKey(activeKey), [activeKey]);
-  const fields = useMemo(() => quickQuoteFields(service), [service]);
   const editorial = isEditorialTheme(hostname);
+  const railWrapRef = useRef<HTMLDivElement | null>(null);
+  const [quickErrors, setQuickErrors] = useState<Record<string, string>>({});
 
   const [valuesByService, setValuesByService] = useState<Record<string, ServiceValues>>(() => {
     const initial: Record<string, ServiceValues> = {};
@@ -65,6 +63,14 @@ export function AgencyQuickQuote({
     return initial;
   });
   const values = valuesByService[service.key] ?? initialServiceValues(service);
+
+  // Aéreo: a volta só faz sentido em "Ida e volta".
+  const fields = useMemo(() => {
+    const list = quickQuoteFields(service, 5);
+    if (service.key !== "aereo") return list;
+    const tipo = String(values.tipo_viagem ?? "");
+    return list.filter((f) => (f.name === "data_volta" ? tipo === "Ida e volta" : true));
+  }, [service, values.tipo_viagem]);
 
   // Rail horizontal das categorias (preset editorial): linha única, sem barra
   // de rolagem visível e setas discretas quando os rótulos não couberem.
@@ -101,13 +107,28 @@ export function AgencyQuickQuote({
   const setValue = useCallback(
     (name: string, value: string) => {
       setValuesByService((prev) => ({ ...prev, [service.key]: { ...prev[service.key], [name]: value } }));
+      setQuickErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
     },
     [service.key],
   );
 
+  /** Abre a jornada única já com o contexto digitado aqui. */
+  const startJourney = useCallback(() => {
+    const found = validateQuickStep(service, values);
+    const visible = new Set(fields.map((f) => f.name));
+    const relevant: Record<string, string> = {};
+    for (const [name, message] of Object.entries(found)) {
+      if (visible.has(name)) relevant[name] = message;
+    }
+    setQuickErrors(relevant);
+    if (Object.keys(relevant).length) return;
+    onOpenChange(true);
+  }, [service, values, fields, onOpenChange]);
+
   return (
     <>
       <div
+        ref={railWrapRef}
         className={
           editorial
             ? "rounded-xl border border-border/70 bg-card p-5 shadow-[0_14px_40px_-28px_hsl(220_12%_10%/0.3)] md:p-7"
@@ -183,13 +204,14 @@ export function AgencyQuickQuote({
         <div
           className={
             editorial
-              ? "grid gap-4 border-t border-border/70 pt-5 md:grid-cols-[repeat(4,minmax(0,1fr))_auto] md:items-end"
-              : "grid gap-3 border-t border-border/60 pt-4 md:grid-cols-[repeat(4,minmax(0,1fr))_auto] md:items-end"
+              ? "grid gap-4 border-t border-border/70 pt-5 md:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:items-end"
+              : "grid gap-3 border-t border-border/60 pt-4 md:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:items-end"
           }
         >
           {fields.map((field) => {
             const id = `quick-${field.name}`;
             const value = String(values[field.name] ?? "");
+            const error = quickErrors[field.name];
             return (
               <div key={field.name} className="min-w-0">
                 <Label
@@ -206,6 +228,8 @@ export function AgencyQuickQuote({
                   <Select value={value} onValueChange={(v) => setValue(field.name, v)}>
                     <SelectTrigger
                       id={id}
+                      aria-invalid={!!error}
+                      aria-describedby={error ? `${id}-error` : undefined}
                       className={editorial ? "mt-2 h-12 rounded-lg" : "mt-1.5 h-11 rounded-xl"}
                     >
                       <SelectValue placeholder="Selecione" />
@@ -226,8 +250,13 @@ export function AgencyQuickQuote({
                     max={field.max}
                     placeholder={field.placeholder}
                     value={value}
+                    aria-invalid={!!error}
+                    aria-describedby={error ? `${id}-error` : undefined}
                     onChange={(e) => setValue(field.name, e.target.value)}
                   />
+                )}
+                {error && (
+                  <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-destructive">{error}</p>
                 )}
               </div>
             );
@@ -240,7 +269,7 @@ export function AgencyQuickQuote({
                 ? "mt-2 h-12 w-full rounded-lg bg-[hsl(var(--wl-ink))] px-6 text-[15px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:w-auto"
                 : "mt-1.5 h-11 w-full rounded-xl md:w-auto"
             }
-            onClick={() => onOpenChange(true)}
+            onClick={startJourney}
           >
             Solicitar cotação <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
@@ -251,27 +280,17 @@ export function AgencyQuickQuote({
         </p>
       </div>
 
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-3xl overflow-y-auto rounded-2xl p-5 md:p-7">
-          <DialogHeader className="text-left">
-            <DialogTitle className="text-xl">Central de Solicitações</DialogTitle>
-            <DialogDescription>
-              Confirme os dados da viagem e como podemos falar com você. Um consultor analisa cada pedido.
-            </DialogDescription>
-          </DialogHeader>
-          {open && (
-            <AgencyRequestCenter
-              hostname={hostname}
-              agencyName={agencyName}
-              variant="plain"
-              hideHeading
-              initialService={service.key}
-              prefill={values}
-              onServiceChange={onServiceChange}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <AgencyQuoteJourney
+        hostname={hostname}
+        agencyName={agencyName}
+        open={open}
+        onOpenChange={onOpenChange}
+        primaryService={service.key}
+        quickValues={values}
+        onEditQuickValues={() =>
+          railWrapRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }
+      />
     </>
   );
 }
