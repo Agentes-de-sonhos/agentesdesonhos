@@ -629,6 +629,7 @@ export function canDeleteRemotely(mapping: {
 
 /** Same guard for updates: read-only mappings never receive a PATCH. */
 export function canPushUpdate(mapping: {
+  origin?: string | null;
   is_read_only?: boolean | null;
   is_google_managed?: boolean | null;
   recurring_event_id?: string | null;
