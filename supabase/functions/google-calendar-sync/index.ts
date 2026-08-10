@@ -879,7 +879,7 @@ Deno.serve(async (req) => {
 
     // 1b. Delete-from-Google: events soft-deleted locally with an active mapping
     console.log(
-      `[calendar-sync] delete-google-start count=${deletedLocalEvents.length} resumed=${deletedCursor.event_id ? "yes" : "no"} deleted_scan_complete=${deletedScanComplete}`,
+      `[calendar-sync] delete-google-start count=${deleteEvents.length} resumed=${deletedCursor.event_id ? "yes" : "no"} deleted_scan_complete=${deletedScanComplete}`,
     );
     // Cursor advances only over rows really processed and stops at the first
     // failure so a pending deletion is retried instead of being skipped.
@@ -888,11 +888,23 @@ Deno.serve(async (req) => {
     const markDeletedProcessed = (event: any) => {
       if (!deletedAdvanceBlocked) processedDeleted.push(event);
     };
-    for (const event of deletedLocalEvents) {
+    for (const event of deleteEvents) {
       const mapping = syncMap.get(event.id);
       if (!mapping) {
-        // No mapping → nothing to delete on Google. Safe to physically remove the row now.
-        await supabase.from("agency_events").delete().eq("id", event.id).eq("user_id", userId);
+        // No mapping → nothing to delete on Google. The physical removal must
+        // succeed before the cursor may pass this row.
+        const { error: cleanupErr } = await supabase
+          .from("agency_events")
+          .delete()
+          .eq("id", event.id)
+          .eq("user_id", userId);
+        if (cleanupErr) {
+          deleteErrors++;
+          console.error(`[calendar-sync] delete-local-cleanup-error event=${event.id} err=${cleanupErr.message}`);
+          pushErrors.push({ event_id: event.id, error: cleanupErr.message });
+          deletedAdvanceBlocked = true;
+          continue;
+        }
         console.log(`[calendar-sync] delete-local-cleanup event=${event.id} reason=no-mapping`);
         markDeletedProcessed(event);
         continue;
