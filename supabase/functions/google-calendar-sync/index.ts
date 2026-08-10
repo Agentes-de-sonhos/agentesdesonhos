@@ -435,7 +435,7 @@ Deno.serve(async (req) => {
     if (action === "status") {
       const { data: token } = await supabase
         .from("google_calendar_tokens")
-        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at, incremental_page_token, incremental_pages_done, incremental_items_done, push_deleted_cursor_completed_at")
+        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at, incremental_page_token, incremental_pages_done, incremental_items_done, push_deleted_cursor_completed_at, granted_scopes, oauth_scope_version, scopes_checked_at, token_enc_version, calendar_time_zone")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -485,6 +485,30 @@ Deno.serve(async (req) => {
 
     const storedRefreshToken = await readTokenField(tokenRecord, "refresh_token", encKey);
     const storedAccessToken = await readTokenField(tokenRecord, "access_token", encKey);
+
+    // Lazy migration to encryption at rest: whenever a readable credential is
+    // still present and the key is configured, re-write it encrypted and clear
+    // the plaintext columns in the same statement. Purely additive — a failure
+    // here never blocks the sync.
+    if (encKey && needsTokenMigration(tokenRecord) && storedRefreshToken && storedAccessToken) {
+      try {
+        const migrated = await buildTokenColumns(
+          { access_token: storedAccessToken, refresh_token: storedRefreshToken },
+          encKey,
+          tokenRecord,
+        );
+        if (migrated.token_enc_version === 1) {
+          const { error: migErr } = await supabase
+            .from("google_calendar_tokens")
+            .update({ ...migrated, updated_at: new Date().toISOString() })
+            .eq("user_id", userId);
+          if (migErr) console.warn(`[calendar-sync] token-migration-error err=${migErr.message}`);
+          else console.log(`[calendar-sync] token-migrated-to-enc version=1`);
+        }
+      } catch (e: any) {
+        console.warn(`[calendar-sync] token-migration-skipped err=${String(e?.message || e).slice(0, 120)}`);
+      }
+    }
 
     if (!storedRefreshToken) {
       await markReconnectRequired(supabase, userId, "Credencial ausente. Reconecte o Google Calendar.");
