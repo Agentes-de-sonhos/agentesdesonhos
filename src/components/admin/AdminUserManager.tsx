@@ -603,11 +603,14 @@ export function AdminUserManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className={user.role === "admin" ? "bg-amber-50/60 dark:bg-amber-950/20 border-l-4 border-l-amber-500" : ""}>
+                {filteredUsers.map((user) => {
+                  const kind = user.kind ?? "master";
+                  const can = allowedActions({ kind, is_orphan: !!user.is_orphan });
+                  return (
+                  <TableRow key={user.id} className={user.role === "admin" && kind === "master" ? "bg-amber-50/60 dark:bg-amber-950/20 border-l-4 border-l-amber-500" : ""}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {user.role === "admin" && (
+                        {user.role === "admin" && kind === "master" && (
                           <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center">
                             <Shield className="h-4 w-4 text-white" />
                           </div>
@@ -616,6 +619,15 @@ export function AdminUserManager() {
                           <p className="font-medium">{user.name}</p>
                           {user.agency_name && (
                             <p className="text-sm text-muted-foreground">{user.agency_name}</p>
+                          )}
+                          {kind !== "master" && (
+                            <p className="text-xs text-muted-foreground">
+                              {kind === "invite" ? "Convite pendente" : "Colaborador"}
+                              {user.master_name ? ` · equipe de ${user.master_name}` : ""}
+                            </p>
+                          )}
+                          {user.access_profile_name && (
+                            <p className="text-xs text-muted-foreground">Perfil: {user.access_profile_name}</p>
                           )}
                         </div>
                       </div>
@@ -629,12 +641,25 @@ export function AdminUserManager() {
                     <TableCell>
                     </TableCell>
                     <TableCell>
-                      <Badge className={`${planColors[user.plan]} text-white border-0`}>
-                        {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
-                      </Badge>
+                      <div className="space-y-1">
+                        <Badge className={`${planColors[user.plan]} text-white border-0`}>
+                          {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                        </Badge>
+                        {user.plan_inherited && (
+                          <p className="text-xs text-muted-foreground">Herdado da conta master</p>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {user.role === "admin" ? (
+                      {kind === "invite" ? (
+                        <Badge variant="outline" className="gap-1 px-3 py-1 text-xs">
+                          <UserPlus className="h-3 w-3" /> Convite pendente
+                        </Badge>
+                      ) : kind === "member" ? (
+                        <Badge variant="secondary" className="gap-1 px-3 py-1 text-xs">
+                          <Users className="h-3 w-3" /> Colaborador
+                        </Badge>
+                      ) : user.role === "admin" ? (
                         <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-0 gap-1 px-3 py-1 text-xs font-semibold">
                           <Shield className="h-3 w-3" /> Administrador
                         </Badge>
@@ -645,33 +670,45 @@ export function AdminUserManager() {
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(user.created_at), "dd/MM/yyyy")}
+                      {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : "-"}
                     </TableCell>
                     <TableCell>
-                      <Switch
-                        checked={user.monthly_paid}
-                        onCheckedChange={(checked) =>
-                          togglePaymentMutation.mutate({
-                            userId: user.user_id,
-                            isPaid: checked,
-                          })
-                        }
-                      />
+                      {can.togglePayment ? (
+                        <Switch
+                          checked={user.monthly_paid}
+                          onCheckedChange={(checked) =>
+                            togglePaymentMutation.mutate({
+                              userId: user.user_id,
+                              isPaid: checked,
+                            })
+                          }
+                        />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </TableCell>
                     <TableCell>
-                      <Switch
-                        checked={user.is_active}
-                        onCheckedChange={(checked) =>
-                          toggleActiveMutation.mutate({
-                            userId: user.user_id,
-                            isActive: checked,
-                          })
-                        }
-                      />
+                      {can.toggleActive ? (
+                        <Switch
+                          checked={user.is_active}
+                          onCheckedChange={(checked) =>
+                            toggleActiveMutation.mutate({
+                              userId: user.user_id,
+                              isActive: checked,
+                            })
+                          }
+                        />
+                      ) : user.is_orphan ? (
+                        <Badge variant="destructive" className="text-xs">Registro órfão</Badge>
+                      ) : (
+                        <Badge variant={user.is_active ? "secondary" : "outline"} className="text-xs">
+                          {kind === "invite" ? "Aguardando aceite" : user.is_active ? "Ativo" : "Inativo"}
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button
+                        {can.toggleRole && <Button
                           variant={user.role === "admin" ? "destructive" : "default"}
                           size="sm"
                           className="text-xs gap-1"
@@ -687,8 +724,8 @@ export function AdminUserManager() {
                           ) : (
                             <><Shield className="h-3 w-3" /> Tornar Admin</>
                           )}
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.impersonate && <Button
                           variant="ghost"
                           size="icon"
                           title="Acessar como usuário"
@@ -697,16 +734,16 @@ export function AdminUserManager() {
                           disabled={impersonateMutation.isPending}
                         >
                           <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {kind === "master" && <Button
                           variant="ghost"
                           size="icon"
                           title="Permissões especiais"
                           onClick={() => setFeatureAccessUser(user)}
                         >
                           <Settings2 className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {kind === "master" && <Button
                           variant="ghost"
                           size="icon"
                           title="Pacote VIP da agência"
@@ -714,8 +751,8 @@ export function AdminUserManager() {
                           onClick={() => setEntitlementsUser(user)}
                         >
                           <Crown className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.resetPassword && <Button
                           variant="ghost"
                           size="icon"
                           title="Resetar senha"
@@ -723,8 +760,8 @@ export function AdminUserManager() {
                           disabled={resetPasswordMutation.isPending}
                         >
                           <KeyRound className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.resetPassword && <Button
                           variant="ghost"
                           size="icon"
                           title="Gerar link para criar senha"
@@ -733,8 +770,8 @@ export function AdminUserManager() {
                           disabled={generateSetupLinkMutation.isPending}
                         >
                           <Link2 className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.changePlan && <Button
                           variant="outline"
                           size="icon"
                           onClick={() => {
@@ -743,8 +780,8 @@ export function AdminUserManager() {
                           }}
                         >
                           <CreditCard className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.forceLogout && <Button
                           variant="ghost"
                           size="icon"
                           title="Forçar logout"
@@ -753,8 +790,8 @@ export function AdminUserManager() {
                           disabled={forceLogoutMutation.isPending}
                         >
                           <LogOut className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+                        {can.delete && <Button
                           variant="ghost"
                           size="icon"
                           title="Excluir usuário"
@@ -762,11 +799,17 @@ export function AdminUserManager() {
                           onClick={() => setDeletingUser(user)}
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </Button>}
+                        {kind === "invite" && (
+                          <span className="text-xs text-muted-foreground">
+                            Gerencie em Equipe e Permissões
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
