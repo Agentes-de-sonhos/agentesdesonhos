@@ -11,6 +11,7 @@ import {
   needsTokenMigration,
   readTokenField,
 } from "../_shared/googleTokenCrypto.ts";
+import { parseScopeString, resolveScopeVersion } from "../_shared/googleCalendarScopes.ts";
 import {
   buildEventsListUrl,
   buildKeysetOrFilter,
