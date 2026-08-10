@@ -44,6 +44,7 @@ describe("validação da etapa 1", () => {
       origem: "São Paulo",
       destino: "Lisboa",
       data_ida: "2026-10-01",
+      data_volta: "2026-10-12",
     };
     expect(validateServiceStep(service, values)).toEqual({});
   });
