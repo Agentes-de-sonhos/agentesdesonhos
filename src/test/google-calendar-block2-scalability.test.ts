@@ -3,25 +3,33 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   buildEventsListUrl,
+  buildKeysetOrFilter,
   computeBootstrapUpdate,
   computeCursorResetUpdate,
   computeIncrementalUpdate,
+  CRON_MIN_SLICE_MS,
+  CRON_SAFETY_MARGIN_MS,
   DEFAULT_PAGING_LIMITS,
+  effectiveUserTimeoutMs,
   getCronBudget,
   getPagingLimits,
   hasCronBudgetLeft,
   isBudgetExhausted,
   isCursorGoneStatus,
+  isIncrementalInProgress,
   isPushScanComplete,
   isTransientSyncError,
+  nextDeletedCursor,
   nextPushCursor,
   orderEligibleTokens,
   resolvePullMode,
+  resolveResumePageToken,
   resolveSyncStatus,
 } from "../../supabase/functions/_shared/calendarSyncPaging";
 import {
   bootstrapProgressLabel,
   isBootstrapInProgress,
+  isIncrementalInProgress as uiIncrementalInProgress,
   resolveStatusKey,
   statusLabel,
 } from "@/lib/googleCalendarConnection";
@@ -129,17 +137,195 @@ describe("bootstrap progress persistence", () => {
   });
 });
 
-describe("incremental paging", () => {
-  it("keeps the current sync token while pages remain", () => {
-    const upd = computeIncrementalUpdate({ nextPageToken: "p2", nextSyncToken: "new", currentSyncToken: "old" });
+describe("incremental paging is resumable", () => {
+  it("persists the pending pageToken and keeps the base sync token", () => {
+    const upd = computeIncrementalUpdate({
+      nextPageToken: "p2",
+      nextSyncToken: "new",
+      currentSyncToken: "old",
+      pagesDone: 6,
+      itemsDone: 1200,
+      now: "2026-08-10T00:00:00.000Z",
+    });
     expect(upd.sync_token).toBe("old");
+    expect(upd.incremental_page_token).toBe("p2");
+    expect(upd.incremental_started_at).toBe("2026-08-10T00:00:00.000Z");
+    expect(upd.incremental_pages_done).toBe(6);
+    expect(upd.incremental_items_done).toBe(1200);
   });
-  it("adopts nextSyncToken when paging ends", () => {
+
+  it("clears the page token and adopts nextSyncToken on the last page", () => {
     const upd = computeIncrementalUpdate({ nextPageToken: null, nextSyncToken: "new", currentSyncToken: "old" });
     expect(upd.sync_token).toBe("new");
+    expect(upd.incremental_page_token).toBeNull();
+    expect(upd.incremental_started_at).toBeNull();
   });
-  it("does not clear the token when Google returns none", () => {
-    expect(computeIncrementalUpdate({ currentSyncToken: "old" })).toEqual({});
+
+  it("never clears the base token when Google returns none", () => {
+    const upd = computeIncrementalUpdate({ currentSyncToken: "old" });
+    expect(upd).not.toHaveProperty("sync_token");
+    expect(upd.incremental_page_token).toBeNull();
+  });
+
+  it("keeps the original incremental_started_at across resumes", () => {
+    const upd = computeIncrementalUpdate({
+      nextPageToken: "p3",
+      currentSyncToken: "old",
+      startedAt: "2026-08-01T00:00:00.000Z",
+    });
+    expect(upd.incremental_started_at).toBe("2026-08-01T00:00:00.000Z");
+  });
+
+  it("resumes each mode from its own persisted token", () => {
+    const state = { incremental_page_token: "inc-2", bootstrap_page_token: "boot-2", sync_token: "s", bootstrap_completed_at: "x" };
+    expect(resolveResumePageToken("incremental", state)).toBe("inc-2");
+    expect(resolveResumePageToken("bootstrap", state)).toBe("boot-2");
+    expect(resolveResumePageToken("incremental", {})).toBeNull();
+    expect(isIncrementalInProgress(state)).toBe(true);
+    expect(isIncrementalInProgress({})).toBe(false);
+  });
+
+  it("the sync function resumes incremental pages instead of restarting page 1", () => {
+    const src = fn("google-calendar-sync/index.ts");
+    expect(src).toContain("resolveResumePageToken(pullMode, tokenRecord)");
+    expect(src).not.toMatch(/pullMode === "bootstrap" \? \(tokenRecord\.bootstrap_page_token \?\? null\) : null/);
+    expect(src).toContain("incremental_page_token");
+    expect(src).toContain("incrementalInProgress");
+  });
+});
+
+describe("incremental over the per-run limit", () => {
+  it("walks every page across runs and ends with the new nextSyncToken", () => {
+    const limits = { maxPages: 2, maxItems: 10_000, maxPushItems: 300 };
+    const pages = Array.from({ length: 7 }, (_, i) =>
+      Array.from({ length: 120 }, (_, j) => `chg-${i * 120 + j}`),
+    );
+    let state: Record<string, any> = { sync_token: "sync-base", bootstrap_completed_at: "2026-01-01" };
+    const seen: string[] = [];
+    let runs = 0;
+
+    while (runs < 20) {
+      runs++;
+      expect(resolvePullMode(state)).toBe("incremental");
+      const baseToken = state.sync_token;
+      let cursor = state.incremental_page_token ? Number(state.incremental_page_token) : 0;
+      let pagesThisRun = 0;
+      let itemsThisRun = 0;
+      let pending: string | null = null;
+      let nextSyncToken: string | null = null;
+      while (true) {
+        // The base sync token must be the one used on every page of the walk.
+        expect(baseToken).toBe("sync-base");
+        seen.push(...pages[cursor]);
+        pagesThisRun++;
+        itemsThisRun += pages[cursor].length;
+        const hasNext = cursor + 1 < pages.length;
+        nextSyncToken = hasNext ? null : "sync-next";
+        if (!hasNext) break;
+        cursor++;
+        if (isBudgetExhausted({ pages: pagesThisRun, items: itemsThisRun }, limits)) {
+          pending = String(cursor);
+          break;
+        }
+      }
+      state = {
+        ...state,
+        ...computeIncrementalUpdate({
+          nextPageToken: pending,
+          nextSyncToken,
+          currentSyncToken: state.sync_token,
+          pagesDone: (state.incremental_pages_done || 0) + pagesThisRun,
+          itemsDone: (state.incremental_items_done || 0) + itemsThisRun,
+          startedAt: state.incremental_started_at,
+        }),
+      };
+      if (!state.incremental_page_token) break;
+    }
+
+    expect(runs).toBeGreaterThan(1);
+    expect(seen).toHaveLength(840);
+    expect(new Set(seen).size).toBe(840);
+    expect(state.sync_token).toBe("sync-next");
+    expect(state.incremental_page_token).toBeNull();
+    expect(state.incremental_items_done).toBe(840);
+  });
+});
+
+describe("local deletion queue is resumable", () => {
+  it("advances only over processed rows, with an id tiebreaker", () => {
+    const rows = [
+      { id: "11111111-1111-4111-8111-111111111111", deleted_at: "2026-01-01T00:00:00Z" },
+      { id: "22222222-2222-4222-8222-222222222222", deleted_at: "2026-01-01T00:00:00Z" },
+    ];
+    expect(nextDeletedCursor(rows, { deleted_at: null, event_id: null })).toEqual({
+      deleted_at: "2026-01-01T00:00:00Z",
+      event_id: "22222222-2222-4222-8222-222222222222",
+    });
+    const prev = { deleted_at: "2026-01-01T00:00:00Z", event_id: "z" };
+    expect(nextDeletedCursor([], prev)).toBe(prev);
+    // A blocked row keeps the cursor behind it, so it is retried next run.
+    expect(nextDeletedCursor([rows[0]], { deleted_at: null, event_id: null }).event_id).toBe(rows[0].id);
+  });
+
+  it("keyset filter compares (deleted_at, id) instead of an offset", () => {
+    expect(buildKeysetOrFilter("deleted_at", "2026-01-01T00:00:00Z", "abc")).toBe(
+      "deleted_at.gt.2026-01-01T00:00:00Z,and(deleted_at.eq.2026-01-01T00:00:00Z,id.gt.abc)",
+    );
+  });
+
+  it("no starvation or duplication above the per-run limit with identical timestamps", () => {
+    const limit = 3;
+    const ts = "2026-05-05T10:00:00Z";
+    const all = Array.from({ length: 10 }, (_, i) => ({
+      id: `e${String(i).padStart(2, "0")}`,
+      // Half share the exact same deleted_at, different UUID-like ids.
+      deleted_at: i < 5 ? ts : `2026-05-05T11:0${i}:00Z`,
+    }));
+    const sorted = [...all].sort((a, b) =>
+      a.deleted_at === b.deleted_at ? a.id.localeCompare(b.id) : a.deleted_at.localeCompare(b.deleted_at),
+    );
+    let cursor = { deleted_at: null as string | null, event_id: null as string | null };
+    const processed: string[] = [];
+    let runs = 0;
+    while (runs < 10) {
+      runs++;
+      const batch = sorted
+        .filter((r) =>
+          !cursor.deleted_at
+            ? true
+            : r.deleted_at > cursor.deleted_at ||
+              (r.deleted_at === cursor.deleted_at && r.id > (cursor.event_id as string)),
+        )
+        .slice(0, limit);
+      if (!batch.length) break;
+      processed.push(...batch.map((r) => r.id));
+      cursor = nextDeletedCursor(batch, cursor);
+      if (isPushScanComplete(batch.length, limit)) break;
+    }
+    expect(runs).toBeGreaterThan(1);
+    expect(processed).toHaveLength(10);
+    expect(new Set(processed).size).toBe(10);
+  });
+
+  it("the sync function pages deletions by cursor and preserves tombstones", () => {
+    const src = fn("google-calendar-sync/index.ts");
+    const block = src.slice(src.indexOf("const deletedCursor"), src.indexOf("const deletedLocalEvents"));
+    expect(block).toContain('.order("deleted_at", { ascending: true })');
+    expect(block).toContain('.order("id", { ascending: true })');
+    expect(block).toContain('buildKeysetOrFilter("deleted_at"');
+    expect(src).toContain("push_deleted_cursor_at: advancedDeletedCursor.deleted_at");
+    expect(src).toContain("push_deleted_cursor_event_id: advancedDeletedCursor.event_id");
+    expect(src).toContain("deletedAdvanceBlocked = true");
+    // Tombstone/mapping behaviour unchanged: only the existing rules delete rows.
+    expect(src.match(/from\("agency_events"\)\s*\.delete\(\)/g) || []).toHaveLength(1);
+    expect(src).not.toMatch(/from\("google_calendar_sync"\)\s*\.delete\(\)/);
+  });
+
+  it("reports live and deleted scan progress separately", () => {
+    const src = fn("google-calendar-sync/index.ts");
+    for (const field of ["push_scan_complete:", "deleted_scan_complete:", "deleted_batch_size:", "deleted_processed:"]) {
+      expect(src).toContain(field);
+    }
   });
 });
 
@@ -150,10 +336,19 @@ describe("410 recovery is non-destructive", () => {
     const upd = computeCursorResetUpdate("2026-08-10T00:00:00.000Z");
     expect(upd.sync_token).toBeNull();
     expect(upd.bootstrap_page_token).toBeNull();
+    expect(upd.incremental_page_token).toBeNull();
+    expect(upd.incremental_items_done).toBe(0);
     expect(upd.bootstrap_completed_at).toBeNull();
     expect(upd.bootstrap_started_at).toBe("2026-08-10T00:00:00.000Z");
     // No event/mapping deletion keys whatsoever.
     expect(Object.keys(upd).some((k) => /delete|remove|events|mapping/.test(k))).toBe(false);
+  });
+
+  it("cursors are reset only on a real 410", () => {
+    const src = fn("google-calendar-sync/index.ts");
+    expect(src).toMatch(/if \(isCursorGoneStatus\(pageRes\.status\)\)/);
+    expect(src).toMatch(/if \(cursorReset\) \{\s*(\/\/[^\n]*\n\s*)*progressColumns = computeCursorResetUpdate\(\);/);
+    expect(src.match(/computeCursorResetUpdate\(/g) || []).toHaveLength(2); // import + single call site
   });
 
   it("the sync function never deletes events or mappings on cursor reset", () => {
@@ -169,6 +364,20 @@ describe("sync status never over-claims", () => {
     expect(resolveSyncStatus({ bootstrapInProgress: true, errors: 0 })).toBe("bootstrap");
     expect(resolveSyncStatus({ bootstrapInProgress: false, errors: 0 })).toBe("synced");
     expect(resolveSyncStatus({ bootstrapInProgress: true, errors: 2 })).toBe("error");
+  });
+
+  it("reports incremental while an incremental walk is pending", () => {
+    expect(resolveSyncStatus({ bootstrapInProgress: false, incrementalInProgress: true, errors: 0 })).toBe("incremental");
+    expect(resolveSyncStatus({ bootstrapInProgress: false, incrementalInProgress: false, errors: 0 })).toBe("synced");
+    expect(resolveSyncStatus({ bootstrapInProgress: false, incrementalInProgress: true, errors: 1 })).toBe("error");
+  });
+
+  it("UI distinguishes a pending incremental walk from 'Sincronizado'", () => {
+    const status = { connected: true, incremental_in_progress: true, incremental_pages_done: 2, incremental_items_done: 240, last_sync_at: "2026-08-10T00:00:00Z" };
+    expect(uiIncrementalInProgress(status)).toBe(true);
+    expect(resolveStatusKey(status, false)).toBe("incremental");
+    expect(statusLabel("incremental")).toBe("Sincronização em andamento");
+    expect(bootstrapProgressLabel(status)).toContain("240 eventos em 2 páginas");
   });
 
   it("UI shows initial-sync progress instead of 'Sincronizado'", () => {
@@ -326,10 +535,43 @@ describe("cron fairness and budget", () => {
     expect(hasCronBudgetLeft(1_000, 3, budget)).toBe(false);
   });
 
+  it("never starts a slice that would overrun the total budget", () => {
+    const budget = getCronBudget({ GCAL_CRON_TOTAL_MS: "30000", GCAL_CRON_PER_USER_MS: "20000" });
+    // 15s left: the slice is clamped instead of the full 20s.
+    expect(effectiveUserTimeoutMs(15_000, budget)).toBe(15_000 - CRON_SAFETY_MARGIN_MS);
+    expect(effectiveUserTimeoutMs(0, budget)).toBe(20_000);
+    // No usable window left → no dispatch at all.
+    expect(effectiveUserTimeoutMs(29_000, budget)).toBe(0);
+    expect(hasCronBudgetLeft(29_000, 0, budget)).toBe(false);
+    expect(effectiveUserTimeoutMs(30_000 - CRON_SAFETY_MARGIN_MS - CRON_MIN_SLICE_MS, budget)).toBe(CRON_MIN_SLICE_MS);
+  });
+
+  it("worst-case dispatch loop stays inside the total budget plus a small margin", () => {
+    const budget = getCronBudget({ GCAL_CRON_TOTAL_MS: "55000", GCAL_CRON_PER_USER_MS: "20000", GCAL_CRON_MAX_USERS: "50" });
+    let elapsed = 0;
+    let dispatched = 0;
+    // Every user times out, i.e. consumes its whole slice.
+    while (hasCronBudgetLeft(elapsed, dispatched, budget)) {
+      const slice = effectiveUserTimeoutMs(elapsed, budget);
+      expect(slice).toBeGreaterThan(0);
+      elapsed += slice;
+      dispatched++;
+    }
+    expect(dispatched).toBeGreaterThan(1);
+    expect(elapsed).toBeLessThanOrEqual(budget.totalMs);
+    expect(budget.totalMs - elapsed).toBeLessThanOrEqual(CRON_SAFETY_MARGIN_MS + CRON_MIN_SLICE_MS);
+  });
+
   it("cron aborts per user, continues afterwards and stays aggregated/fail-closed", () => {
     const src = fn("google-calendar-cron/index.ts");
     expect(src).toContain("new AbortController()");
     expect(src).toContain("signal: controller.signal");
+    expect(src).toContain("effectiveUserTimeoutMs(Date.now() - startedAt, budget)");
+    expect(src).toContain("setTimeout(() => controller.abort(), sliceMs)");
+    expect(src).not.toContain("controller.abort(), budget.perUserMs");
+    // An abort is counted as a timeout and never flags re-consent.
+    expect(src).toContain('const aborted = e?.name === "AbortError"');
+    expect(src).not.toContain("reconnect_required");
     expect(src).toContain("orderEligibleTokens(eligible)");
     expect(src).toContain("hasCronBudgetLeft(");
     expect(src).toContain("isAuthorizedInternalCall(presentedSecret, expectedSecret)");
