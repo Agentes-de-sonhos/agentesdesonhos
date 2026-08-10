@@ -6,6 +6,7 @@ import {
 } from "../_shared/calendarCronAuth.ts";
 import {
   buildTokenColumns,
+  buildVerifiedEncryptedColumns,
   getTokenEncKey,
   isCiphertext,
   needsTokenMigration,
@@ -218,11 +219,29 @@ async function persistRefreshedToken(
   grantedScope?: string | null,
 ) {
   const encKey = getTokenEncKey();
+  // A row already encrypted must never be downgraded to plaintext because the
+  // key vanished from the environment: refuse to touch the credential columns.
+  if (!encKey && typeof existing?.token_enc_version === "number" && existing.token_enc_version >= 1) {
+    console.error("[calendar-sync] token-write-blocked reason=missing-enc-key");
+    return;
+  }
   const payload: { access_token: string; refresh_token?: string } = { access_token: accessToken };
   if (encKey && refreshTokenPlain && !isCiphertext(existing?.refresh_token_enc)) {
     payload.refresh_token = refreshTokenPlain;
   }
-  const columns = await buildTokenColumns(payload, encKey, existing ?? null);
+  const verified = encKey
+    ? await buildVerifiedEncryptedColumns(
+        {
+          access_token: accessToken,
+          refresh_token: refreshTokenPlain ?? null,
+        },
+        encKey,
+      )
+    : null;
+  // Prefer the verified round-trip payload (both credentials known). Otherwise
+  // fall back to the incremental builder, which keeps a partially migrated row
+  // at version 0 with its plaintext intact instead of losing the credential.
+  const columns = verified ?? (await buildTokenColumns(payload, encKey, existing ?? null));
   // Google echoes the effective grant on refresh: keep the recorded scope set
   // truthful so an overbroad legacy connection stays visible.
   const scopeList = parseScopeString(grantedScope);
