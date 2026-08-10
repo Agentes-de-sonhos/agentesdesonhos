@@ -504,30 +504,42 @@ Deno.serve(async (req) => {
       );
     }
 
+    // A migrated (v1) row is unreadable without the key. Fail safely and
+    // temporarily instead of degrading, and never log credential material.
+    if (!encKey && typeof tokenRecord.token_enc_version === "number" && tokenRecord.token_enc_version >= 1) {
+      console.error("[calendar-sync] enc-key-missing state=encrypted-row");
+      return new Response(
+        JSON.stringify({
+          error: "Sincronização temporariamente indisponível. Tente novamente em alguns minutos.",
+          code: "encryption_key_unavailable",
+          retryable: true,
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const storedRefreshToken = await readTokenField(tokenRecord, "refresh_token", encKey);
     const storedAccessToken = await readTokenField(tokenRecord, "access_token", encKey);
 
-    // Lazy migration to encryption at rest: whenever a readable credential is
-    // still present and the key is configured, re-write it encrypted and clear
-    // the plaintext columns in the same statement. Purely additive — a failure
-    // here never blocks the sync.
+    // Lazy migration to encryption at rest. The verified helper encrypts BOTH
+    // credentials, decrypts them back and compares them byte-for-byte with the
+    // originals; only then does it return a payload that clears the plaintext
+    // and claims version 1. A failure returns null, nothing is persisted and
+    // the credential stays exactly as it is for the next attempt.
     if (encKey && needsTokenMigration(tokenRecord) && storedRefreshToken && storedAccessToken) {
-      try {
-        const migrated = await buildTokenColumns(
-          { access_token: storedAccessToken, refresh_token: storedRefreshToken },
-          encKey,
-          tokenRecord,
-        );
-        if (migrated.token_enc_version === 1) {
-          const { error: migErr } = await supabase
-            .from("google_calendar_tokens")
-            .update({ ...migrated, updated_at: new Date().toISOString() })
-            .eq("user_id", userId);
-          if (migErr) console.warn(`[calendar-sync] token-migration-error err=${migErr.message}`);
-          else console.log(`[calendar-sync] token-migrated-to-enc version=1`);
-        }
-      } catch (e: any) {
-        console.warn(`[calendar-sync] token-migration-skipped err=${String(e?.message || e).slice(0, 120)}`);
+      const migrated = await buildVerifiedEncryptedColumns(
+        { access_token: storedAccessToken, refresh_token: storedRefreshToken },
+        encKey,
+      );
+      if (!migrated) {
+        console.warn("[calendar-sync] token-migration-skipped reason=verification-failed");
+      } else {
+        const { error: migErr } = await supabase
+          .from("google_calendar_tokens")
+          .update({ ...migrated, updated_at: new Date().toISOString() })
+          .eq("user_id", userId);
+        if (migErr) console.warn(`[calendar-sync] token-migration-error err=${migErr.message}`);
+        else console.log("[calendar-sync] token-migrated-to-enc version=1 verified=yes");
       }
     }
 
