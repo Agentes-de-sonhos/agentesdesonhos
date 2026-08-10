@@ -12,6 +12,7 @@ import {
 } from "../_shared/googleTokenCrypto.ts";
 import {
   buildEventsListUrl,
+  buildKeysetOrFilter,
   computeBootstrapUpdate,
   computeCursorResetUpdate,
   computeIncrementalUpdate,
@@ -20,9 +21,12 @@ import {
   isCursorGoneStatus,
   isPushScanComplete,
   isTransientSyncError,
+  nextDeletedCursor,
   nextPushCursor,
   resolvePullMode,
+  resolveResumePageToken,
   resolveSyncStatus,
+  type DeletedPushCursor,
   type PushCursor,
   type SyncLifecycleStatus,
 } from "../_shared/calendarSyncPaging.ts";
