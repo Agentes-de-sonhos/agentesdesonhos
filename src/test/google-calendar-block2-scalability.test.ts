@@ -318,7 +318,8 @@ describe("local deletion queue is resumable", () => {
     expect(src).toContain("deletedAdvanceBlocked = true");
     // Tombstone behaviour unchanged: the deletion pass pushes to Google and
     // never introduces new local deletes beyond the two pre-existing rules.
-    expect(src.match(/from\("agency_events"\)[\s\S]{0,40}?\.delete\(\)/g) || []).toHaveLength(2);
+    // Two pre-existing tombstone rules + the opt-in purge on disconnect.
+    expect(src.match(/from\("agency_events"\)[\s\S]{0,40}?\.delete\(\)/g) || []).toHaveLength(3);
     expect(block).not.toContain(".delete()");
   });
 
