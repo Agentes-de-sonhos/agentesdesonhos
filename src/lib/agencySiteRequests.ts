@@ -363,6 +363,14 @@ export function validateServiceDates(service: RequestService, values: ServiceVal
     if (out && back && back < out) {
       errors.data_volta = "A volta não pode ser antes da ida.";
     }
+    const tipo = typeof values.tipo_viagem === "string" ? values.tipo_viagem : "";
+    if (tipo === "Ida e volta" && out && !back) {
+      errors.data_volta = "Informe a data de volta.";
+    }
+    if (tipo === "Multidestinos") {
+      const rota = typeof values.rota_multidestinos === "string" ? values.rota_multidestinos.trim() : "";
+      if (!rota) errors.rota_multidestinos = "Informe os destinos da viagem.";
+    }
   }
 
   return errors;
@@ -373,6 +381,7 @@ export function validateServiceStep(service: RequestService, values: ServiceValu
   const errors: Record<string, string> = {};
   for (const field of service.fields) {
     if (!field.required) continue;
+    if (!fieldIsVisible(field, values)) continue;
     const raw = values[field.name];
     const value = typeof raw === "string" ? raw.trim() : raw;
     if (field.type === "checkbox") continue;
@@ -385,6 +394,32 @@ export function validateServiceStep(service: RequestService, values: ServiceValu
     }
   }
   return { ...errors, ...validateServiceDates(service, values) };
+}
+
+/**
+ * Validação da COTAÇÃO RÁPIDA (primeira dobra): só os campos daquela área.
+ * Para aéreo, respeita o tipo da viagem — "Somente ida" não exige volta e
+ * "Multidestinos" exige a rota em vez de destino/datas simples.
+ */
+export function validateQuickStep(service: RequestService, values: ServiceValues): Record<string, string> {
+  const errors: Record<string, string> = {};
+  const tipo = typeof values.tipo_viagem === "string" ? values.tipo_viagem : "";
+  const multi = service.key === "aereo" && tipo === "Multidestinos";
+
+  for (const field of quickQuoteFields(service)) {
+    if (!field.required) continue;
+    if (multi && (field.name === "destino" || field.name === "data_ida")) continue;
+    const raw = values[field.name];
+    const value = typeof raw === "string" ? raw.trim() : raw;
+    if (!value) errors[field.name] = "Campo obrigatório.";
+  }
+
+  const dateErrors = validateServiceDates(service, values);
+  for (const [name, message] of Object.entries(dateErrors)) {
+    if (multi && (name === "data_volta" || name === "data_ida")) continue;
+    errors[name] = message;
+  }
+  return errors;
 }
 
 /** Step 2 validation: shared contact block. WhatsApp OR e-mail is enough. */
