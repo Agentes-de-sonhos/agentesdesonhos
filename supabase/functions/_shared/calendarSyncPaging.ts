@@ -345,6 +345,29 @@ export function isPushScanComplete(rowCount: number, limit: number): boolean {
   return rowCount < limit;
 }
 
+/**
+ * A push failure is transient when Google refused the write for capacity
+ * reasons (quota/rate limit, backend error) instead of rejecting the payload.
+ * Transient failures must NOT let the push cursor advance, otherwise the
+ * affected events are silently skipped until the whole scan restarts.
+ * Permanent failures (400/401/403 permission, 404) do advance so a poison-pill
+ * event can never block the queue forever.
+ */
+export function isTransientPushFailure(status: number, body = ""): boolean {
+  if (status === 429) return true;
+  if (status >= 500) return true;
+  if (status === 403) {
+    const lowered = body.toLowerCase();
+    return (
+      lowered.includes("quotaexceeded") ||
+      lowered.includes("ratelimitexceeded") ||
+      lowered.includes("userratelimitexceeded") ||
+      lowered.includes("usage limits")
+    );
+  }
+  return false;
+}
+
 export interface DeletedPushCursor {
   deleted_at: string | null;
   event_id: string | null;

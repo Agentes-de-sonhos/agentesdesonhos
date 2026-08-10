@@ -429,7 +429,7 @@ describe("pull really precedes push in the sync function", () => {
     expect(SYNC).toContain("resolvePullWindow(pullMode, tokenRecord, localWindow)");
     expect(SYNC).toContain("isBudgetExhausted({ pages: pagesThisRun, items: itemsThisRun }, limits)");
     expect(SYNC).toContain("isCursorGoneStatus(pageRes.status)");
-    expect(SYNC).toContain("nextPushCursor(pushEvents, pushCursor)");
+    expect(SYNC).toContain("nextPushCursor(processedPushEvents, pushCursor)");
     expect(SYNC).toContain("nextDeletedCursor(processedDeleted, deletedCursor)");
     expect(SYNC).toContain("if (!localErr && !mappingFetchFailed)");
     expect(SYNC).toContain("if (!deletedErr && !mappingFetchFailed)");

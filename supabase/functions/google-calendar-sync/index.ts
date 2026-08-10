@@ -23,6 +23,7 @@ import {
   isCursorGoneStatus,
   isPushScanComplete,
   isTransientSyncError,
+  isTransientPushFailure,
   nextDeletedCursor,
   nextPushCursor,
   resolveIncrementalCycleBase,
@@ -1408,7 +1409,6 @@ Deno.serve(async (req) => {
 
     for (const e of pushEvents) localIds.add(e.id);
     const pushScanComplete = !mappingFetchFailed && isPushScanComplete(liveLocalEvents.length, limits.maxPushItems);
-    const advancedPushCursor = nextPushCursor(pushEvents, pushCursor);
     const mappedInWindow = liveLocalEvents.filter((e: any) => syncMap.has(e.id)).length;
     const unmappedInWindow = liveLocalEvents.length - mappedInWindow;
     const mappedLocalSignatures = new Map<string, string>();
@@ -1431,7 +1431,14 @@ Deno.serve(async (req) => {
 
     console.log(`[calendar-sync] push-start count=${pushEvents.length}`);
 
+    // Index of the first event whose push failed transiently (Google quota /
+    // rate limit / 5xx). Everything from that index on stays unprocessed and the
+    // push cursor must not advance past it.
+    let pushBlockedIndex: number | null = null;
+    let pushIndex = -1;
     for (const event of pushEvents) {
+      pushIndex++;
+      if (pushBlockedIndex !== null) break;
       const existing = syncMap.get(event.id);
 
       // Tombstone guard: never recreate an event whose mapping was marked deleted
@@ -1547,6 +1554,13 @@ Deno.serve(async (req) => {
             const errText = await res.text();
             console.error(`[calendar-sync] push-error update event=${event.id} status=${res.status} body=${errText.slice(0, 300)}`);
             pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+            if (isTransientPushFailure(res.status, errText)) {
+              pushBlockedIndex = pushIndex;
+              console.warn(
+                `[calendar-sync] push-throttled op=update status=${res.status} cursor_advance=blocked remaining=${pushEvents.length - pushIndex}`,
+              );
+              break;
+            }
           } else {
             const updated = await res.json().catch(() => ({}));
             pushedUpdated++;
@@ -1583,6 +1597,13 @@ Deno.serve(async (req) => {
             const errText = await res.text();
             console.error(`[calendar-sync] push-error create event=${event.id} status=${res.status} body=${errText.slice(0, 300)}`);
             pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+            if (isTransientPushFailure(res.status, errText)) {
+              pushBlockedIndex = pushIndex;
+              console.warn(
+                `[calendar-sync] push-throttled op=create status=${res.status} cursor_advance=blocked remaining=${pushEvents.length - pushIndex}`,
+              );
+              break;
+            }
             continue;
           }
           const created = await res.json();
@@ -1630,6 +1651,13 @@ Deno.serve(async (req) => {
       } catch (e: any) {
         console.error(`[calendar-sync] push-error exception event=${event.id} err=${e?.message || e}`);
         pushErrors.push({ event_id: event.id, error: String(e?.message || e) });
+        if (isTransientSyncError(e)) {
+          pushBlockedIndex = pushIndex;
+          console.warn(
+            `[calendar-sync] push-throttled op=exception cursor_advance=blocked remaining=${pushEvents.length - pushIndex}`,
+          );
+          break;
+        }
       }
     }
 
@@ -1770,6 +1798,13 @@ Deno.serve(async (req) => {
     }
     const advancedDeletedCursor = nextDeletedCursor(processedDeleted, deletedCursor);
 
+    // Cursor advances only over events actually processed: a transient push
+    // failure freezes it so the remaining batch is retried on the next run.
+    const processedPushEvents =
+      pushBlockedIndex === null ? pushEvents : pushEvents.slice(0, pushBlockedIndex);
+    const advancedPushCursor = nextPushCursor(processedPushEvents, pushCursor);
+    const pushAdvanceBlocked = pushBlockedIndex !== null;
+
     const pushed = pushedCreated + pushedUpdated;
     const pulled = pulledCreated + pulledUpdated;
     console.log(
@@ -1840,7 +1875,9 @@ Deno.serve(async (req) => {
         ...progressColumns,
         push_cursor_updated_at: advancedPushCursor.updated_at,
         push_cursor_event_id: advancedPushCursor.event_id,
-        ...(pushScanComplete ? { push_cursor_completed_at: new Date().toISOString() } : {}),
+        ...(pushScanComplete && !pushAdvanceBlocked
+          ? { push_cursor_completed_at: new Date().toISOString() }
+          : {}),
       };
     }
     // Deletion cursor advances independently from the live scan.
