@@ -117,25 +117,15 @@ export default function PoliticasPrivacidade() {
               </ul>
             </section>
 
-            <section className="space-y-4">
-              <h2 className="text-xl font-semibold">7. Contato</h2>
-              <p>Encarregado de Proteção de Dados (DPO):</p>
-              <ul className="list-none pl-0 space-y-1 text-muted-foreground">
-                <li><strong className="text-foreground">Nome:</strong> Matheus Rocha</li>
-                <li><strong className="text-foreground">E-mail:</strong> suporte@agentesdesonhos.com.br</li>
-                <li><strong className="text-foreground">Atendimento:</strong> Seg-Sex, 9h-18h</li>
-              </ul>
-            </section>
-
             <section className="space-y-4" id="google-calendar">
-              <h2 className="text-xl font-semibold">8. Integração com o Google Calendar</h2>
+              <h2 className="text-xl font-semibold">7. Integração com o Google Calendar</h2>
               <p>
                 A conexão com o Google Calendar é opcional, iniciada por você e pode ser desfeita a
                 qualquer momento. Ela existe com uma única finalidade: manter a sua Agenda dentro da
                 plataforma e o seu Google Calendar sincronizados.
               </p>
 
-              <h3 className="text-base font-semibold">8.1 Permissões solicitadas e por quê</h3>
+              <h3 className="text-base font-semibold">7.1 Permissões solicitadas e por quê</h3>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li>
                   <strong className="text-foreground">.../auth/calendar.events</strong> — ler, criar,
@@ -153,14 +143,14 @@ export default function PoliticasPrivacidade() {
                 dois acima.
               </p>
 
-              <h3 className="text-base font-semibold">8.2 Dados acessados e armazenados</h3>
+              <h3 className="text-base font-semibold">7.2 Dados acessados e armazenados</h3>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li>Título, descrição, data, hora, fuso horário, local, recorrência e status do evento</li>
                 <li>Identificadores técnicos do evento e do calendário, usados para evitar duplicidades</li>
                 <li>Credenciais de acesso do Google, guardadas criptografadas (AES-256-GCM) e acessíveis somente pelos serviços internos de sincronização</li>
               </ul>
 
-              <h3 className="text-base font-semibold">8.3 Uso limitado (Google API Services User Data Policy)</h3>
+              <h3 className="text-base font-semibold">7.3 Uso limitado (Google API Services User Data Policy)</h3>
               <p>
                 O uso e a transferência de informações recebidas das APIs do Google seguem a
                 <strong className="text-foreground"> Google API Services User Data Policy</strong>,
@@ -175,7 +165,7 @@ export default function PoliticasPrivacidade() {
                 <li>✅ São usados apenas para prestar o recurso de sincronização de agenda</li>
               </ul>
 
-              <h3 className="text-base font-semibold">8.4 Retenção e exclusão</h3>
+              <h3 className="text-base font-semibold">7.4 Retenção e exclusão</h3>
               <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
                 <li>Ao desconectar, a autorização é revogada no Google e as credenciais são apagadas imediatamente</li>
                 <li>Por padrão, os eventos já presentes na sua Agenda são preservados; no momento de desconectar você pode optar por apagar as cópias locais dos eventos importados do Google</li>
@@ -197,7 +187,7 @@ export default function PoliticasPrivacidade() {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold">9. Contato do responsável</h2>
+              <h2 className="text-xl font-semibold">8. Contato</h2>
               <p>Encarregado de Proteção de Dados (DPO):</p>
               <ul className="list-none pl-0 space-y-1 text-muted-foreground">
                 <li><strong className="text-foreground">Nome:</strong> Matheus Rocha</li>
