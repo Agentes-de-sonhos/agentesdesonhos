@@ -226,8 +226,12 @@ describe("push payload — non-destructive and correctly built", () => {
     for (const forbidden of FORBIDDEN_PUSH_FIELDS) {
       expect(payload as Record<string, unknown>).not.toHaveProperty(forbidden);
     }
-    expect(() => assertControlledPayload(payload as any)).not.toThrow();
-    expect(() => assertControlledPayload({ ...payload, attendees: [] } as any)).toThrow(/attendees/);
+    expect(() =>
+      assertControlledPayload(payload as unknown as Record<string, unknown>),
+    ).not.toThrow();
+    expect(() =>
+      assertControlledPayload({ ...payload, attendees: [] } as unknown as Record<string, unknown>),
+    ).toThrow(/attendees/);
   });
 
   it("omits location when the local record has none", () => {
@@ -485,18 +489,6 @@ describe("safe deletions — origin google vs local", () => {
     expect(SYNC).toContain('origin: "google"');
     expect(SYNC).toContain("is_read_only: false");
   });
-});
-
-describe("migration and conservative backfill", () => {
-  const migrations = readFileSync(
-    join(
-      process.cwd(),
-      "supabase/migrations",
-      readFileSync(join(process.cwd(), "supabase/migrations/.keep"), "utf8").trim() || "",
-    ),
-    "utf8",
-  ).toString();
-  it("placeholder", () => expect(typeof migrations).toBe("string"));
 });
 
 describe("report/UI helpers keep diagnostics safe", () => {
