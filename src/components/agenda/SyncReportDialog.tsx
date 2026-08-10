@@ -3,6 +3,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import type { SyncReport, SyncSkipSample } from "@/hooks/useGoogleCalendar";
 import { useUserRole } from "@/hooks/useUserRole";
+import {
+  conflictBannerLabel,
+  conflictTypeLabel,
+  deleteSkipLabel,
+  PRESERVED_FIELDS_LABEL,
+  readOnlySkipLabel,
+} from "@/lib/googleCalendarFidelityReport";
 
 interface Props {
   open: boolean;
@@ -15,6 +22,7 @@ const REASON_LABELS: Record<string, string> = {
   mapping_soft_deleted: "Já sincronizado e removido no Google",
   duplicate_local_signature: "Duplicado de um evento já mapeado",
   unchanged_since_last_sync: "Já sincronizado sem alterações",
+  read_only_mapping: "Somente leitura no Google — preservado sem alterações",
   google_created_without_id: "Google não retornou ID válido",
   // pull
   created_during_current_push: "Criado pela plataforma nesta sincronização",
@@ -82,6 +90,9 @@ function SampleTable({ samples }: { samples: SyncSkipSample[] }) {
 export function SyncReportDialog({ open, onOpenChange, report }: Props) {
   const { isAdmin } = useUserRole();
   const showSamples = isAdmin || import.meta.env.DEV;
+  const conflictBanner = conflictBannerLabel(report);
+  const readOnlyBanner = readOnlySkipLabel(report);
+  const deleteSkips = Object.entries(report.delete_skip_reasons || {});
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,6 +119,38 @@ export function SyncReportDialog({ open, onOpenChange, report }: Props) {
             <ReasonList counts={report.skip_summary.pull} total={report.pulled_skipped} />
           </section>
         </div>
+
+        {(conflictBanner || readOnlyBanner || deleteSkips.length > 0) && (
+          <section className="mt-2 space-y-2 rounded-md border bg-muted/30 p-3">
+            {conflictBanner && (
+              <div className="flex items-start gap-2 text-sm">
+                <Badge variant="destructive" className="min-w-[2rem] justify-center">
+                  {report.conflicts_detected}
+                </Badge>
+                <span className="text-foreground/90">{conflictBanner}</span>
+              </div>
+            )}
+            {(report.conflicts || []).length > 0 && (
+              <ul className="space-y-1 pl-1">
+                {(report.conflicts || []).map((c, i) => (
+                  <li key={i} className="text-xs text-muted-foreground">
+                    <span className="text-foreground/80">
+                      {c.title || "Sem título"}
+                    </span>{" "}
+                    · {conflictTypeLabel(c.conflict_type)}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {readOnlyBanner && <p className="text-xs text-muted-foreground">{readOnlyBanner}</p>}
+            {deleteSkips.map(([reason, n]) => (
+              <p key={reason} className="text-xs text-muted-foreground">
+                {n} · {deleteSkipLabel(reason)}
+              </p>
+            ))}
+            <p className="text-xs text-muted-foreground">{PRESERVED_FIELDS_LABEL}</p>
+          </section>
+        )}
 
         <p className="mt-2 text-xs text-muted-foreground">
           A sincronização importa compromissos e eventos do Google Calendar. Tarefas do Google Tasks ainda não são importadas.

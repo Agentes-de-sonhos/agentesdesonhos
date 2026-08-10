@@ -528,61 +528,103 @@ export type Database = {
       }
       agency_events: {
         Row: {
+          all_day: boolean
+          attendees: Json | null
           client_id: string | null
           color: string | null
+          conference_url: string | null
           created_at: string
           deleted_at: string | null
           deleted_by_sync: boolean
           description: string | null
+          end_at: string | null
+          end_date: string | null
+          end_time: string | null
           event_date: string
           event_time: string | null
           event_type: string
           event_url: string | null
           followup_id: string | null
           id: string
+          is_read_only: boolean
+          location: string | null
           location_address: string | null
           location_city: string | null
           opportunity_id: string | null
+          organizer: Json | null
+          recurrence: Json | null
+          reminders: Json | null
+          source: string | null
+          start_at: string | null
+          time_zone: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          all_day?: boolean
+          attendees?: Json | null
           client_id?: string | null
           color?: string | null
+          conference_url?: string | null
           created_at?: string
           deleted_at?: string | null
           deleted_by_sync?: boolean
           description?: string | null
+          end_at?: string | null
+          end_date?: string | null
+          end_time?: string | null
           event_date: string
           event_time?: string | null
           event_type?: string
           event_url?: string | null
           followup_id?: string | null
           id?: string
+          is_read_only?: boolean
+          location?: string | null
           location_address?: string | null
           location_city?: string | null
           opportunity_id?: string | null
+          organizer?: Json | null
+          recurrence?: Json | null
+          reminders?: Json | null
+          source?: string | null
+          start_at?: string | null
+          time_zone?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          all_day?: boolean
+          attendees?: Json | null
           client_id?: string | null
           color?: string | null
+          conference_url?: string | null
           created_at?: string
           deleted_at?: string | null
           deleted_by_sync?: boolean
           description?: string | null
+          end_at?: string | null
+          end_date?: string | null
+          end_time?: string | null
           event_date?: string
           event_time?: string | null
           event_type?: string
           event_url?: string | null
           followup_id?: string | null
           id?: string
+          is_read_only?: boolean
+          location?: string | null
           location_address?: string | null
           location_city?: string | null
           opportunity_id?: string | null
+          organizer?: Json | null
+          recurrence?: Json | null
+          reminders?: Json | null
+          source?: string | null
+          start_at?: string | null
+          time_zone?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -4671,34 +4713,138 @@ export type Database = {
         }
         Relationships: []
       }
+      google_calendar_conflicts: {
+        Row: {
+          agency_event_id: string | null
+          conflict_type: string
+          created_at: string
+          detected_at: string
+          google_etag: string | null
+          google_event_id: string | null
+          google_snapshot: Json | null
+          google_updated: string | null
+          id: string
+          local_snapshot: Json | null
+          local_updated_at: string | null
+          resolved_at: string | null
+          status: string
+          sync_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agency_event_id?: string | null
+          conflict_type?: string
+          created_at?: string
+          detected_at?: string
+          google_etag?: string | null
+          google_event_id?: string | null
+          google_snapshot?: Json | null
+          google_updated?: string | null
+          id?: string
+          local_snapshot?: Json | null
+          local_updated_at?: string | null
+          resolved_at?: string | null
+          status?: string
+          sync_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agency_event_id?: string | null
+          conflict_type?: string
+          created_at?: string
+          detected_at?: string
+          google_etag?: string | null
+          google_event_id?: string | null
+          google_snapshot?: Json | null
+          google_updated?: string | null
+          id?: string
+          local_snapshot?: Json | null
+          local_updated_at?: string | null
+          resolved_at?: string | null
+          status?: string
+          sync_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_calendar_conflicts_sync_id_fkey"
+            columns: ["sync_id"]
+            isOneToOne: false
+            referencedRelation: "google_calendar_sync"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       google_calendar_sync: {
         Row: {
           agency_event_id: string | null
+          conflict_at: string | null
+          conflict_state: string
           created_at: string | null
           deleted_at: string | null
+          event_type: string | null
+          google_calendar_id: string | null
+          google_etag: string | null
           google_event_id: string
+          google_updated: string | null
           id: string
+          is_google_managed: boolean
+          is_read_only: boolean
           last_synced_at: string | null
+          local_updated_at_at_sync: string | null
+          origin: string | null
+          original_start_time: string | null
+          provider_snapshot: Json | null
+          recurring_event_id: string | null
           sync_direction: string | null
           user_id: string
         }
         Insert: {
           agency_event_id?: string | null
+          conflict_at?: string | null
+          conflict_state?: string
           created_at?: string | null
           deleted_at?: string | null
+          event_type?: string | null
+          google_calendar_id?: string | null
+          google_etag?: string | null
           google_event_id: string
+          google_updated?: string | null
           id?: string
+          is_google_managed?: boolean
+          is_read_only?: boolean
           last_synced_at?: string | null
+          local_updated_at_at_sync?: string | null
+          origin?: string | null
+          original_start_time?: string | null
+          provider_snapshot?: Json | null
+          recurring_event_id?: string | null
           sync_direction?: string | null
           user_id: string
         }
         Update: {
           agency_event_id?: string | null
+          conflict_at?: string | null
+          conflict_state?: string
           created_at?: string | null
           deleted_at?: string | null
+          event_type?: string | null
+          google_calendar_id?: string | null
+          google_etag?: string | null
           google_event_id?: string
+          google_updated?: string | null
           id?: string
+          is_google_managed?: boolean
+          is_read_only?: boolean
           last_synced_at?: string | null
+          local_updated_at_at_sync?: string | null
+          origin?: string | null
+          original_start_time?: string | null
+          provider_snapshot?: Json | null
+          recurring_event_id?: string | null
           sync_direction?: string | null
           user_id?: string
         }
