@@ -19,6 +19,7 @@ import {
   bootstrapProgressLabel,
   needsReconnect,
   reconnectMessage,
+  legacyScopeNotice,
   resolveStatusKey,
   statusDotClass,
   statusLabel,
