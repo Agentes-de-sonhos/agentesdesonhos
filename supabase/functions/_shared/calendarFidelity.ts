@@ -316,6 +316,48 @@ export function buildMappingMetadata(
     primaryCalendarId?: string;
   },
 ): Record<string, unknown> {
+  return buildMappingMetadataInternal(gEvent, opts);
+}
+
+/**
+ * Legacy backfill escape hatch.
+ *
+ * The Block 3 backfill marked every pre-existing mapping as
+ * `is_read_only = true` for safety. That must not be permanent: on the first
+ * successful pull we reclassify the event against Google's real state and
+ * release the read-only flag for plain editable events. `origin` stays
+ * 'google' so remote DELETE remains blocked.
+ *
+ * Returns null when nothing needs to change.
+ */
+export function buildReadOnlyReclassification(
+  gEvent: GoogleEventLike,
+  mapping: { is_read_only?: boolean | null; is_google_managed?: boolean | null; origin?: string | null },
+  opts: { calendarId?: string; primaryCalendarId?: string } = {},
+): { is_read_only: boolean; is_google_managed: boolean; event_type: string } | null {
+  const classification = classifyGoogleEvent(gEvent, opts);
+  const currentReadOnly = mapping.is_read_only === true;
+  const currentManaged = mapping.is_google_managed === true;
+  if (currentReadOnly === classification.isReadOnly && currentManaged === classification.isGoogleManaged) {
+    return null;
+  }
+  return {
+    is_read_only: classification.isReadOnly,
+    is_google_managed: classification.isGoogleManaged,
+    event_type: gEvent.eventType || "default",
+  };
+}
+
+function buildMappingMetadataInternal(
+  gEvent: GoogleEventLike,
+  opts: {
+    origin: EventOrigin;
+    calendarId?: string;
+    localUpdatedAt?: string | null;
+    now?: string;
+    primaryCalendarId?: string;
+  },
+): Record<string, unknown> {
   const classification = classifyGoogleEvent(gEvent, {
     calendarId: opts.calendarId,
     primaryCalendarId: opts.primaryCalendarId,
