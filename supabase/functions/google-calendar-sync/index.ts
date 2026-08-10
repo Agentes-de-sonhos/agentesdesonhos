@@ -8,8 +8,10 @@ import {
   buildTokenColumns,
   getTokenEncKey,
   isCiphertext,
+  needsTokenMigration,
   readTokenField,
 } from "../_shared/googleTokenCrypto.ts";
+import { parseScopeString, resolveScopeVersion } from "../_shared/googleCalendarScopes.ts";
 import {
   buildEventsListUrl,
   buildKeysetOrFilter,
@@ -148,7 +150,7 @@ function localEventSignature(event: any): string {
   return `${title}|${date}|${time}|${description}`;
 }
 
-type RefreshOutcome = { access_token: string; expires_in: number } | null | "transient";
+type RefreshOutcome = { access_token: string; expires_in: number; scope?: string } | null | "transient";
 
 /**
  * Refreshes the access token. Returns "transient" for network aborts and
@@ -213,6 +215,7 @@ async function persistRefreshedToken(
   expiresIn: number,
   existing?: any,
   refreshTokenPlain?: string | null,
+  grantedScope?: string | null,
 ) {
   const encKey = getTokenEncKey();
   const payload: { access_token: string; refresh_token?: string } = { access_token: accessToken };
@@ -220,10 +223,21 @@ async function persistRefreshedToken(
     payload.refresh_token = refreshTokenPlain;
   }
   const columns = await buildTokenColumns(payload, encKey, existing ?? null);
+  // Google echoes the effective grant on refresh: keep the recorded scope set
+  // truthful so an overbroad legacy connection stays visible.
+  const scopeList = parseScopeString(grantedScope);
+  const scopeColumns = scopeList.length
+    ? {
+        granted_scopes: scopeList.join(" "),
+        oauth_scope_version: resolveScopeVersion(scopeList),
+        scopes_checked_at: new Date().toISOString(),
+      }
+    : {};
   await supabase
     .from("google_calendar_tokens")
     .update({
       ...columns,
+      ...scopeColumns,
       token_expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
       connection_state: "connected",
       last_auth_error: null,
@@ -259,6 +273,7 @@ async function getValidToken(
     refreshed.expires_in,
     tokenRecord,
     refreshToken,
+    refreshed.scope ?? null,
   );
   return refreshed.access_token;
 }
@@ -336,6 +351,10 @@ Deno.serve(async (req) => {
 
     // Handle disconnect
     if (action === "disconnect") {
+      // Opt-in only: when true, the local copies imported FROM Google are
+      // removed together with the credential. Remote Google events are never
+      // touched by this path.
+      const purgeLocal = body.purge_local === true;
       const { data: existingToken } = await supabase
         .from("google_calendar_tokens")
         .select("access_token, refresh_token, access_token_enc, refresh_token_enc, token_enc_version")
@@ -364,18 +383,73 @@ Deno.serve(async (req) => {
         );
       }
 
-      console.log(`[calendar-sync] disconnected user=${userId} revocation=${revocation} mappings=preserved`);
+      // Explicit local purge: only rows imported from Google (origin='google')
+      // are removed, and only for this user. Mappings are cleared afterwards so
+      // a failure mid-way never leaves an event without its mapping.
+      let purgedEvents = 0;
+      let purgedMappings = 0;
+      let purgeError: string | null = null;
+      if (purgeLocal) {
+        const { data: googleMappings, error: mapErr } = await supabase
+          .from("google_calendar_sync")
+          .select("id, agency_event_id, origin")
+          .eq("user_id", userId)
+          .eq("origin", "google")
+          .not("agency_event_id", "is", null);
 
-      return new Response(JSON.stringify({ success: true, message: "Desconectado", revocation }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        if (mapErr) {
+          purgeError = mapErr.message;
+        } else {
+          const eventIds = (googleMappings || [])
+            .map((m: any) => m.agency_event_id)
+            .filter((id: unknown): id is string => typeof id === "string");
+          for (let i = 0; i < eventIds.length; i += 200) {
+            const slice = eventIds.slice(i, i + 200);
+            const { error: evErr } = await supabase
+              .from("agency_events")
+              .delete()
+              .eq("user_id", userId)
+              .in("id", slice);
+            if (evErr) { purgeError = evErr.message; break; }
+            purgedEvents += slice.length;
+          }
+          if (!purgeError) {
+            const { error: mapDelErr, count } = await supabase
+              .from("google_calendar_sync")
+              .delete({ count: "exact" })
+              .eq("user_id", userId);
+            if (mapDelErr) purgeError = mapDelErr.message;
+            else purgedMappings = count ?? 0;
+          }
+        }
+        if (purgeError) {
+          console.error(`[calendar-sync] disconnect-purge-error user=${userId} err=${purgeError}`);
+        }
+      }
+
+      console.log(
+        `[calendar-sync] disconnected user=${userId} revocation=${revocation} purge=${purgeLocal ? "requested" : "no"} purged_events=${purgedEvents} purged_mappings=${purgedMappings}`,
+      );
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Desconectado",
+          revocation,
+          purge_local: purgeLocal,
+          purged_events: purgedEvents,
+          purged_mappings: purgedMappings,
+          purge_error: purgeError ? "Algumas cópias locais não puderam ser removidas." : null,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Handle status check
     if (action === "status") {
       const { data: token } = await supabase
         .from("google_calendar_tokens")
-        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at, incremental_page_token, incremental_pages_done, incremental_items_done, push_deleted_cursor_completed_at")
+        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at, incremental_page_token, incremental_pages_done, incremental_items_done, push_deleted_cursor_completed_at, granted_scopes, oauth_scope_version, scopes_checked_at, token_enc_version, calendar_time_zone")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -425,6 +499,30 @@ Deno.serve(async (req) => {
 
     const storedRefreshToken = await readTokenField(tokenRecord, "refresh_token", encKey);
     const storedAccessToken = await readTokenField(tokenRecord, "access_token", encKey);
+
+    // Lazy migration to encryption at rest: whenever a readable credential is
+    // still present and the key is configured, re-write it encrypted and clear
+    // the plaintext columns in the same statement. Purely additive — a failure
+    // here never blocks the sync.
+    if (encKey && needsTokenMigration(tokenRecord) && storedRefreshToken && storedAccessToken) {
+      try {
+        const migrated = await buildTokenColumns(
+          { access_token: storedAccessToken, refresh_token: storedRefreshToken },
+          encKey,
+          tokenRecord,
+        );
+        if (migrated.token_enc_version === 1) {
+          const { error: migErr } = await supabase
+            .from("google_calendar_tokens")
+            .update({ ...migrated, updated_at: new Date().toISOString() })
+            .eq("user_id", userId);
+          if (migErr) console.warn(`[calendar-sync] token-migration-error err=${migErr.message}`);
+          else console.log(`[calendar-sync] token-migrated-to-enc version=1`);
+        }
+      } catch (e: any) {
+        console.warn(`[calendar-sync] token-migration-skipped err=${String(e?.message || e).slice(0, 120)}`);
+      }
+    }
 
     if (!storedRefreshToken) {
       await markReconnectRequired(supabase, userId, "Credencial ausente. Reconecte o Google Calendar.");

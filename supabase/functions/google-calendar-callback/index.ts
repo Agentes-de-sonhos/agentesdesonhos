@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { hashNonce, parseState } from "../_shared/googleOAuthState.ts";
 import { buildTokenColumns, getTokenEncKey, readTokenField } from "../_shared/googleTokenCrypto.ts";
+import { hasRequiredScopes, parseScopeString, resolveScopeVersion } from "../_shared/googleCalendarScopes.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -76,6 +77,20 @@ Deno.serve(async (req) => {
 
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
+    // Fail-closed on the scope Google actually granted: without the events
+    // scope the sync cannot work, so the credential is not stored at all.
+    const grantedScopes = parseScopeString(tokenData.scope);
+    if (!hasRequiredScopes(grantedScopes)) {
+      console.error(`callback rejected: insufficient scope count=${grantedScopes.length}`);
+      return new Response(
+        redirectHtml(
+          "Precisamos da permissão de eventos da agenda para sincronizar. Tente conectar novamente e mantenha a permissão marcada.",
+          false,
+        ),
+        { headers: { "Content-Type": "text/html" } },
+      );
+    }
+
     // Reuse the stored refresh token when Google omits it on re-consent, so a
     // reconnect never downgrades an existing connection. Dual-read: the
     // encrypted column is used first, so this keeps working once the legacy
@@ -110,6 +125,9 @@ Deno.serve(async (req) => {
         token_expires_at: expiresAt,
         sync_enabled: true,
         connection_state: "connected",
+        granted_scopes: grantedScopes.join(" "),
+        scopes_checked_at: new Date().toISOString(),
+        oauth_scope_version: resolveScopeVersion(grantedScopes),
         last_auth_error: null,
         last_auth_error_at: null,
         sync_in_progress: false,

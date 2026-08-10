@@ -135,28 +135,29 @@ describe("token crypto helpers", () => {
     expect(cols).not.toHaveProperty("refresh_token_enc");
   });
 
-  it("never writes plaintext into an *_enc column when a key exists", async () => {
+  it("encrypts and drops every readable copy when a key exists", async () => {
     const cols = await buildTokenColumns({ access_token: "at", refresh_token: "rt" }, KEY);
     expect(cols.token_enc_version).toBe(1);
     expect(isCiphertext(cols.access_token_enc)).toBe(true);
     expect(isCiphertext(cols.refresh_token_enc)).toBe(true);
     expect(cols.access_token_enc).not.toContain("at");
-    // Dual-write keeps plaintext for a safe rollback in this block.
-    expect(cols.access_token).toBe("at");
+    // Encrypted-only at rest: the legacy plaintext columns are cleared.
+    expect(cols.access_token).toBeNull();
+    expect(cols.refresh_token).toBeNull();
     expect(await decryptToken(cols.refresh_token_enc as string, KEY)).toBe("rt");
   });
 
-  it("dual-reads: encrypted first, legacy plaintext as fallback", async () => {
+  it("reads encrypted first and is fail-closed on a migrated row", async () => {
     const enc = await encryptToken("secret-refresh", KEY);
     expect(await readTokenField({ refresh_token_enc: enc, refresh_token: "stale" }, "refresh_token", KEY)).toBe(
       "secret-refresh",
     );
     expect(await readTokenField({ refresh_token: "legacy" }, "refresh_token", KEY)).toBe("legacy");
     expect(await readTokenField({ refresh_token: "legacy" }, "refresh_token", null)).toBe("legacy");
-    // Undecryptable ciphertext must not break a live connection.
-    expect(await readTokenField({ refresh_token_enc: enc, refresh_token: "legacy" }, "refresh_token", "wrong")).toBe(
-      "legacy",
-    );
+    // A migrated row never silently degrades back to a plaintext credential.
+    expect(
+      await readTokenField({ refresh_token_enc: enc, refresh_token: "legacy" }, "refresh_token", "wrong"),
+    ).toBeNull();
     expect(await readTokenField({}, "refresh_token", KEY)).toBeNull();
   });
 });

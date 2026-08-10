@@ -89,11 +89,14 @@ describe("disconnect failure handling", () => {
     expect(src).toMatch(/Não foi possível desconectar agora/);
   });
 
-  it("returns a generic error without leaking secrets and preserves mappings", () => {
+  it("returns a generic error without leaking secrets and only purges local copies on request", () => {
     const src = fn("google-calendar-sync/index.ts");
     const block = src.slice(src.indexOf('action === "disconnect"'), src.indexOf('action === "status"'));
-    expect(block).not.toMatch(/google_calendar_sync/);
-    expect(block).not.toMatch(/agency_events/);
+    // Local copies are only touched behind the explicit opt-in flag.
+    expect(block).toContain("const purgeLocal = body.purge_local === true;");
+    expect(block).toMatch(/if \(purgeLocal\) \{/);
+    // Every local mutation stays scoped to the requesting user.
+    expect(block).toMatch(/from\("agency_events"\)[\s\S]{0,120}?\.eq\("user_id", userId\)/);
     expect(block).not.toMatch(/refresh_token:|token=\$\{/);
   });
 });

@@ -16,6 +16,9 @@ interface GoogleCalendarStatus {
   connection_state?: ConnectionState | null;
   last_auth_error?: string | null;
   last_auth_error_at?: string | null;
+  granted_scopes?: string | null;
+  oauth_scope_version?: number | null;
+  scopes_checked_at?: string | null;
   bootstrap_in_progress?: boolean | null;
   bootstrap_pages_done?: number | null;
   bootstrap_items_done?: number | null;
@@ -134,16 +137,24 @@ export function useGoogleCalendar() {
     }
   }, [user?.id, checkStatus]);
 
-  const disconnect = useCallback(async () => {
+  const disconnect = useCallback(async (purgeLocal = false) => {
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase.functions.invoke("google-calendar-sync", {
-        body: { action: "disconnect" },
+      const { data, error } = await supabase.functions.invoke("google-calendar-sync", {
+        body: { action: "disconnect", purge_local: purgeLocal },
       });
       if (error) throw error;
       setStatus({ connected: false });
-      toast.success("Google Calendar desconectado. Seus eventos foram preservados.");
+      if (data?.purge_error) {
+        toast.warning("Desconectado, mas algumas cópias locais não puderam ser removidas.");
+      } else if (purgeLocal) {
+        toast.success(
+          `Google Calendar desconectado e ${data?.purged_events ?? 0} evento(s) importado(s) removido(s) da sua Agenda. Nada foi alterado no Google.`,
+        );
+      } else {
+        toast.success("Google Calendar desconectado. Seus eventos foram preservados.");
+      }
     } catch {
       toast.error("Erro ao desconectar");
     } finally {
