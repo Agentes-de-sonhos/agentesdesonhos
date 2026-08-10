@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { user_id, confirm_master } = await req.json();
+    const { user_id } = await req.json();
 
     if (!user_id) {
       return new Response(JSON.stringify({ error: "user_id é obrigatório" }), {
@@ -82,13 +82,30 @@ Deno.serve(async (req) => {
       .select("id", { count: "exact", head: true })
       .eq("agency_id", user_id);
 
-    // Proteção: excluir a conta master apaga toda a equipe da agência.
-    if (!memberRow && (ownedMembers ?? 0) > 0 && confirm_master !== true) {
+    const { count: pendingInvites } = await adminClient
+      .from("agency_team_invites")
+      .select("id", { count: "exact", head: true })
+      .eq("agency_id", user_id)
+      .is("accepted_at", null)
+      .is("revoked_at", null);
+
+    // Proteção conservadora: nunca excluir a conta master enquanto houver
+    // qualquer colaborador vinculado ou convite pendente. Não há cascata
+    // destrutiva de agência — o administrador precisa remover/revogar a equipe
+    // primeiro, para não deixar a agência inteira órfã.
+    const members = ownedMembers ?? 0;
+    const invites = pendingInvites ?? 0;
+    if (!memberRow && (members > 0 || invites > 0)) {
+      const partes = [
+        members > 0 ? `${members} colaborador(es)` : null,
+        invites > 0 ? `${invites} convite(s) pendente(s)` : null,
+      ].filter(Boolean).join(" e ");
       return new Response(
         JSON.stringify({
-          error: `Esta é a conta principal de uma agência com ${ownedMembers} colaborador(es). Confirme a exclusão para remover a agência e toda a equipe.`,
-          requires_master_confirmation: true,
-          team_members: ownedMembers ?? 0,
+          error: `Esta é a conta principal de uma agência com ${partes}. Remova os colaboradores e revogue os convites pendentes em Equipe e Permissões antes de excluir a conta principal.`,
+          code: "master_has_team",
+          team_members: members,
+          pending_invites: invites,
         }),
         { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
