@@ -416,7 +416,7 @@ export function validateQuickStep(service: RequestService, values: ServiceValues
 
   const dateErrors = validateServiceDates(service, values);
   for (const [name, message] of Object.entries(dateErrors)) {
-    if (multi && (name === "data_volta" || name === "data_ida")) continue;
+    if (multi && (name === "data_volta" || name === "data_ida" || name === "rota_multidestinos")) continue;
     errors[name] = message;
   }
   return errors;
