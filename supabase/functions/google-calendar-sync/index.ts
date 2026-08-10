@@ -38,6 +38,7 @@ import {
   buildConflictRecord,
   buildGooglePushPayload,
   buildMappingMetadata,
+  buildReadOnlyReclassification,
   buildPatchHeaders,
   canDeleteRemotely,
   canPushUpdate,
