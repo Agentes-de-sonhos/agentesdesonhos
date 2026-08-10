@@ -647,18 +647,29 @@ Deno.serve(async (req) => {
       const key = conflictDedupKey(record as any);
       if (seenConflictKeys.has(key)) return;
       seenConflictKeys.add(key);
-      const { error: existingErr, data: existing } = await supabase
+      // Exact version match only: a different Google etag/updated or a newer
+      // local marker is a NEW conflict version and keeps its own row, so the
+      // version history is preserved instead of being overwritten.
+      let versionQuery = supabase
         .from("google_calendar_conflicts")
         .select("id")
         .eq("user_id", userId)
         .eq("google_event_id", record.google_event_id as string)
-        // Exact version match only: a different Google etag/updated or a newer
-        // local marker is a NEW conflict version and must keep its own row so
-        // the history is preserved.
-        .eq("google_etag", (record.google_etag as string) ?? "")
-        .eq("local_updated_at", record.local_updated_at as string)
-        .eq("sync_id", (input.syncId as string) ?? null)
-        .maybeSingle();
+        .limit(1);
+      versionQuery = record.google_etag
+        ? versionQuery.eq("google_etag", record.google_etag as string)
+        : versionQuery.is("google_etag", null);
+      versionQuery = record.google_updated
+        ? versionQuery.eq("google_updated", record.google_updated as string)
+        : versionQuery.is("google_updated", null);
+      versionQuery = record.local_updated_at
+        ? versionQuery.eq("local_updated_at", record.local_updated_at as string)
+        : versionQuery.is("local_updated_at", null);
+      versionQuery = input.syncId
+        ? versionQuery.eq("sync_id", input.syncId)
+        : versionQuery.is("sync_id", null);
+      const { error: existingErr, data: existingRows } = await versionQuery;
+      const existing = (existingRows || [])[0];
       if (!existingErr && existing) {
         // Same version seen again: refresh only the diagnostic snapshots.
         await supabase
