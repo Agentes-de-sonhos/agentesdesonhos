@@ -1036,7 +1036,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 ? "bg-[hsl(var(--wl-navy))]"
                 : "bg-[hsl(var(--wl-sand))]"
             }
-            style={{ paddingTop: `calc(${halfPx} + 2.5rem)` }}
+            style={{ paddingTop: halfPx }}
           >
             {node}
           </div>
