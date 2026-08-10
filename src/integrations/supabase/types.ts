@@ -14383,6 +14383,7 @@ export type Database = {
         Returns: Json
       }
       admin_supplier_review_counts: { Args: never; Returns: Json }
+      admin_team_accounts_overview: { Args: never; Returns: Json }
       admin_update_user_role: {
         Args: {
           _new_role: Database["public"]["Enums"]["app_role"]
@@ -14613,6 +14614,18 @@ export type Database = {
       delete_my_supplier_review: {
         Args: { _review_id: string }
         Returns: boolean
+      }
+      effective_subscription: {
+        Args: never
+        Returns: {
+          ai_usage_count: number
+          ai_usage_reset_at: string
+          expires_at: string
+          inherited: boolean
+          is_active: boolean
+          owner_user_id: string
+          plan: string
+        }[]
       }
       email_account_exists: { Args: { _email: string }; Returns: boolean }
       enqueue_lead_form_notifications: {
@@ -15332,6 +15345,17 @@ export type Database = {
           stage_permissions_count: number
           status: Database["public"]["Enums"]["team_member_status"]
           team_name: string
+        }[]
+      }
+      team_orphan_members: {
+        Args: never
+        Returns: {
+          agency_id: string
+          auth_user_id: string
+          full_name: string
+          login: string
+          member_id: string
+          status: string
         }[]
       }
       team_record_visible: {
