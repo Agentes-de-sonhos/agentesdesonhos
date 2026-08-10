@@ -10,6 +10,22 @@ import {
   isCiphertext,
   readTokenField,
 } from "../_shared/googleTokenCrypto.ts";
+import {
+  buildEventsListUrl,
+  computeBootstrapUpdate,
+  computeCursorResetUpdate,
+  computeIncrementalUpdate,
+  getPagingLimits,
+  isBudgetExhausted,
+  isCursorGoneStatus,
+  isPushScanComplete,
+  isTransientSyncError,
+  nextPushCursor,
+  resolvePullMode,
+  resolveSyncStatus,
+  type PushCursor,
+  type SyncLifecycleStatus,
+} from "../_shared/calendarSyncPaging.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -100,19 +116,32 @@ function localEventSignature(event: any): string {
   return `${title}|${date}|${time}|${description}`;
 }
 
-async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number } | null> {
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: Deno.env.get("GOOGLE_CLIENT_ID")!,
-      client_secret: Deno.env.get("GOOGLE_CLIENT_SECRET")!,
-      refresh_token: refreshToken,
-      grant_type: "refresh_token",
-    }),
-  });
-  if (!res.ok) return null;
-  return await res.json();
+type RefreshOutcome = { access_token: string; expires_in: number } | null | "transient";
+
+/**
+ * Refreshes the access token. Returns "transient" for network aborts and
+ * server-side/rate-limit failures so callers never flag re-consent on a
+ * temporary problem (Block 2, requirement 6).
+ */
+async function refreshAccessToken(refreshToken: string): Promise<RefreshOutcome> {
+  try {
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: Deno.env.get("GOOGLE_CLIENT_ID")!,
+        client_secret: Deno.env.get("GOOGLE_CLIENT_SECRET")!,
+        refresh_token: refreshToken,
+        grant_type: "refresh_token",
+      }),
+    });
+    if (res.status === 429 || res.status >= 500) return "transient";
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    console.warn(`[calendar-sync] token-refresh-transient err=${(e as Error)?.message}`);
+    return isTransientSyncError(e) ? "transient" : "transient";
+  }
 }
 
 /**
@@ -177,7 +206,7 @@ async function getValidToken(
   tokenRecord: any,
   refreshToken: string | null,
   currentAccessToken: string | null,
-): Promise<string | null> {
+): Promise<string | null | "transient"> {
   const now = new Date();
   const expiresAt = new Date(tokenRecord.token_expires_at);
 
@@ -188,6 +217,7 @@ async function getValidToken(
   if (!refreshToken) return null;
 
   const refreshed = await refreshAccessToken(refreshToken);
+  if (refreshed === "transient") return "transient";
   if (!refreshed) return null;
 
   await persistRefreshedToken(
@@ -313,13 +343,27 @@ Deno.serve(async (req) => {
     if (action === "status") {
       const { data: token } = await supabase
         .from("google_calendar_tokens")
-        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at")
+        .select("sync_enabled, auto_sync_enabled, last_sync_at, created_at, sync_in_progress, sync_lock_at, last_sync_status, last_sync_error, last_sync_duration_ms, connection_state, last_auth_error, last_auth_error_at, bootstrap_page_token, bootstrap_started_at, bootstrap_completed_at, bootstrap_pages_done, bootstrap_items_done, bootstrap_last_error, push_cursor_completed_at")
         .eq("user_id", userId)
         .maybeSingle();
 
-      return new Response(JSON.stringify({ connected: !!token, ...(token || {}) }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Bootstrap progress is exposed as a boolean plus counters so the UI can
+      // say "initial sync running" without ever claiming completion.
+      const bootstrapInProgress = !!token && (!!token.bootstrap_page_token || !token.bootstrap_completed_at);
+      return new Response(
+        JSON.stringify({
+          connected: !!token,
+          ...(token || {}),
+          ...(token
+            ? {
+                bootstrap_in_progress: bootstrapInProgress,
+                bootstrap_pages_done: token.bootstrap_pages_done ?? 0,
+                bootstrap_items_done: token.bootstrap_items_done ?? 0,
+              }
+            : {}),
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Full sync
@@ -400,11 +444,23 @@ Deno.serve(async (req) => {
       });
     }
     const syncStartedAt = Date.now();
-    const releaseLock = async (status: "synced" | "error", errorMsg: string | null) => {
+    let lockReleased = false;
+    /**
+     * Always releases sync_in_progress/sync_lock_at. `extra` carries the
+     * bootstrap/push progress columns so a partial run persists its cursors
+     * while never being reported as a finished sync.
+     */
+    const releaseLock = async (
+      status: SyncLifecycleStatus,
+      errorMsg: string | null,
+      extra: Record<string, unknown> = {},
+    ) => {
+      lockReleased = true;
       try {
         await supabase
           .from("google_calendar_tokens")
           .update({
+            ...extra,
             sync_in_progress: false,
             sync_lock_at: null,
             last_sync_at: new Date().toISOString(),
@@ -419,7 +475,17 @@ Deno.serve(async (req) => {
     };
 
     try {
-    let accessToken = await getValidToken(supabase, tokenRecord, storedRefreshToken, storedAccessToken);
+    const tokenAttempt = await getValidToken(supabase, tokenRecord, storedRefreshToken, storedAccessToken);
+    if (tokenAttempt === "transient") {
+      // Temporary failure: keep the connection "connected" and retry next run.
+      console.warn(`[calendar-sync] token-refresh-transient-skip user=${userId}`);
+      await releaseLock("error", "Falha temporária ao renovar o acesso. Nova tentativa em breve.");
+      return new Response(
+        JSON.stringify({ success: true, skipped: "transient-token-error" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    let accessToken: string | null = tokenAttempt;
     if (!accessToken) {
       // Refresh failed: keep the token row AND every mapping intact, flag the
       // connection for re-consent and release the lock.
@@ -440,6 +506,10 @@ Deno.serve(async (req) => {
       if (res.status !== 401) return res;
       console.warn(`[calendar-sync] token-refresh-retry user=${userId} url=${url.split("?")[0]}`);
       const refreshed = await refreshAccessToken(storedRefreshToken);
+      if (refreshed === "transient") {
+        console.warn(`[calendar-sync] token-refresh-transient user=${userId}`);
+        return res;
+      }
       if (!refreshed) {
         console.error(`[calendar-sync] token-refresh-failed user=${userId}`);
         await markReconnectRequired(supabase, userId, "Autorização do Google expirada ou revogada.");
@@ -479,43 +549,90 @@ Deno.serve(async (req) => {
       `[calendar-sync] boot user=${userId} agency=${agencyId ?? "n/a"} calendar=${calendarId} window=${windowStartDay}..${windowEndDay} window_iso=${windowStart}..${windowEnd}`
     );
 
-    // 1. Push local events → Google
-    const { data: localEvents, error: localErr } = await supabase
+    // Per-run budgets (configurable, clamped). They replace the old silent
+    // page cap: whatever is left over is reported and resumed next run.
+    const limits = getPagingLimits(Deno.env.toObject());
+
+    // 1. Push local events → Google — incremental, stable composite cursor
+    // (updated_at, id). No offsets, no full-table scan of tens of thousands
+    // of rows before the pull.
+    const pushCursor: PushCursor = {
+      updated_at: tokenRecord.push_cursor_updated_at ?? null,
+      event_id: tokenRecord.push_cursor_event_id ?? null,
+    };
+    let pushQuery = supabase
       .from("agency_events")
       .select("*")
       .eq("user_id", userId)
       .gte("event_date", windowStartDay)
-      .lte("event_date", windowEndDay);
+      .lte("event_date", windowEndDay)
+      .is("deleted_at", null)
+      .order("updated_at", { ascending: true })
+      .order("id", { ascending: true })
+      .limit(limits.maxPushItems);
+    if (pushCursor.updated_at && pushCursor.event_id) {
+      pushQuery = pushQuery.or(
+        `updated_at.gt.${pushCursor.updated_at},and(updated_at.eq.${pushCursor.updated_at},id.gt.${pushCursor.event_id})`,
+      );
+    } else if (pushCursor.updated_at) {
+      pushQuery = pushQuery.gt("updated_at", pushCursor.updated_at);
+    }
+    const { data: pushBatch, error: localErr } = await pushQuery;
 
     if (localErr) {
       console.error(`[calendar-sync] local-fetch-error err=${localErr.message}`);
     }
 
-    const { data: existingSyncs, error: syncErr } = await supabase
-      .from("google_calendar_sync")
-      .select("*")
-      .eq("user_id", userId);
+    const liveLocalEvents = (pushBatch || []) as any[];
 
-    if (syncErr) {
-      console.error(`[calendar-sync] sync-fetch-error err=${syncErr.message}`);
+    const { data: deletedBatch, error: deletedErr } = await supabase
+      .from("agency_events")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("event_date", windowStartDay)
+      .lte("event_date", windowEndDay)
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: true })
+      .limit(limits.maxPushItems);
+    if (deletedErr) {
+      console.error(`[calendar-sync] deleted-fetch-error err=${deletedErr.message}`);
+    }
+    const deletedLocalEvents = (deletedBatch || []) as any[];
+
+    // Mappings are fetched only for the events in this batch — never the whole
+    // google_calendar_sync table.
+    const batchEventIds = [
+      ...liveLocalEvents.map((e: any) => e.id),
+      ...deletedLocalEvents.map((e: any) => e.id),
+    ];
+    let existingSyncs: any[] = [];
+    if (batchEventIds.length > 0) {
+      const { data: batchSyncs, error: syncErr } = await supabase
+        .from("google_calendar_sync")
+        .select("*")
+        .eq("user_id", userId)
+        .in("agency_event_id", batchEventIds);
+      if (syncErr) {
+        console.error(`[calendar-sync] sync-fetch-error err=${syncErr.message}`);
+      }
+      existingSyncs = batchSyncs || [];
     }
 
-    const syncMap = new Map((existingSyncs || []).map((s: any) => [s.agency_event_id, s]));
-    const reverseSyncMap = new Map((existingSyncs || []).map((s: any) => [s.google_event_id, s]));
+    const syncMap = new Map(existingSyncs.map((s: any) => [s.agency_event_id, s]));
+    const reverseSyncMap = new Map(existingSyncs.map((s: any) => [s.google_event_id, s]));
     const justPushedGoogleIds = new Set<string>();
-    const liveLocalEvents = (localEvents || []).filter((e: any) => !e.deleted_at);
-    const deletedLocalEvents = (localEvents || []).filter((e: any) => !!e.deleted_at);
     const localIds = new Set(liveLocalEvents.map((e: any) => e.id));
+    const pushScanComplete = isPushScanComplete(liveLocalEvents.length, limits.maxPushItems);
+    const advancedPushCursor = nextPushCursor(liveLocalEvents, pushCursor);
     const mappedInWindow = liveLocalEvents.filter((e: any) => syncMap.has(e.id)).length;
     const unmappedInWindow = liveLocalEvents.length - mappedInWindow;
-    const orphanMappings = (existingSyncs || []).filter((s: any) => !localIds.has(s.agency_event_id)).length;
     const mappedLocalSignatures = new Map<string, string>();
     for (const event of liveLocalEvents) {
       if (syncMap.has(event.id)) mappedLocalSignatures.set(localEventSignature(event), event.id);
     }
 
     console.log(
-      `[calendar-sync] inventory local_events=${liveLocalEvents.length} deleted_local=${deletedLocalEvents.length} existing_mappings=${existingSyncs?.length || 0} reverse_mappings=${reverseSyncMap.size} mapped_in_window=${mappedInWindow} unmapped_in_window=${unmappedInWindow} orphan_mappings_outside_window=${orphanMappings}`
+      `[calendar-sync] inventory batch_local_events=${liveLocalEvents.length} deleted_local=${deletedLocalEvents.length} batch_mappings=${existingSyncs.length} reverse_mappings=${reverseSyncMap.size} mapped_in_batch=${mappedInWindow} unmapped_in_batch=${unmappedInWindow} push_scan_complete=${pushScanComplete} push_limit=${limits.maxPushItems}`
     );
     let pushedCreated = 0;
     let pushedUpdated = 0;
@@ -790,19 +907,35 @@ Deno.serve(async (req) => {
     };
     let googleEvents: GoogleEvent[] = [];
     let pullPageError = false;
+    // Two modes: resumable bootstrap inside the -30/+730 window, or incremental
+    // with the stored syncToken. Both walk pages under the same run budget.
+    const pullMode = resolvePullMode(tokenRecord);
+    let pagesThisRun = 0;
+    let itemsThisRun = 0;
+    let pendingPageToken: string | null = null;
+    let receivedSyncToken: string | null = null;
+    let cursorReset = false;
     {
-      // Paginate through all pages via nextPageToken
-      let pageToken: string | undefined = undefined;
-      let pageNum = 0;
-      const MAX_PAGES = 50; // safety cap (~12.5k events)
-      do {
-        pageNum++;
-        const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(windowStart)}&timeMax=${encodeURIComponent(windowEnd)}&singleEvents=true&maxResults=250&orderBy=startTime`;
-        const url = pageToken ? `${baseUrl}&pageToken=${encodeURIComponent(pageToken)}` : baseUrl;
+      let pageToken: string | null =
+        pullMode === "bootstrap" ? (tokenRecord.bootstrap_page_token ?? null) : null;
+      const syncToken = pullMode === "incremental" ? tokenRecord.sync_token : null;
+      console.log(
+        `[calendar-sync] pull-start mode=${pullMode} resumed=${pageToken ? "yes" : "no"} max_pages=${limits.maxPages} max_items=${limits.maxItems}`,
+      );
+      while (true) {
+        const url = buildEventsListUrl({ windowStart, windowEnd, pageToken, syncToken });
         const pageRes = await fetchGoogle(url);
+        if (isCursorGoneStatus(pageRes.status)) {
+          // Expired sync/page token: reset ONLY the cursors and restart the
+          // bootstrap. Events, mappings and tombstones are untouched.
+          await pageRes.text().catch(() => "");
+          console.warn(`[calendar-sync] cursor-expired-410 mode=${pullMode} restarting_bootstrap=true`);
+          cursorReset = true;
+          break;
+        }
         if (!pageRes.ok) {
           const errText = await pageRes.text();
-          console.error(`[calendar-sync] pull-error list page=${pageNum} status=${pageRes.status} body=${errText.slice(0, 300)}`);
+          console.error(`[calendar-sync] pull-error list page=${pagesThisRun + 1} status=${pageRes.status} body=${errText.slice(0, 300)}`);
           pullErrors.push({ status: pageRes.status, error: errText.slice(0, 200) });
           pullPageError = true;
           break;
@@ -810,14 +943,59 @@ Deno.serve(async (req) => {
         const pageData = await pageRes.json();
         const items: GoogleEvent[] = pageData.items || [];
         googleEvents = googleEvents.concat(items);
-        console.log(`[calendar-sync] pull-page page=${pageNum} events=${items.length}`);
-        pageToken = pageData.nextPageToken;
-        if (pageNum >= MAX_PAGES && pageToken) {
-          console.warn(`[calendar-sync] pull-page-cap reached pages=${pageNum} more_pages_skipped=true`);
+        pagesThisRun++;
+        itemsThisRun += items.length;
+        pageToken = pageData.nextPageToken ?? null;
+        receivedSyncToken = pageData.nextSyncToken ?? null;
+        console.log(`[calendar-sync] pull-page page=${pagesThisRun} events=${items.length} has_next=${pageToken ? "yes" : "no"}`);
+        if (!pageToken) break;
+        if (isBudgetExhausted({ pages: pagesThisRun, items: itemsThisRun }, limits)) {
+          // Not a silent cap: the cursor is persisted and reported.
+          pendingPageToken = pageToken;
+          console.log(
+            `[calendar-sync] pull-budget-reached pages=${pagesThisRun} items=${itemsThisRun} resume_pending=true`,
+          );
           break;
         }
-      } while (pageToken);
-      console.log(`[calendar-sync] pull-list google_events=${googleEvents.length} pages=${pageNum}`);
+      }
+      console.log(
+        `[calendar-sync] pull-list mode=${pullMode} google_events=${googleEvents.length} pages=${pagesThisRun} pending=${pendingPageToken ? "yes" : "no"}`,
+      );
+    }
+
+    // Reverse mappings for exactly the Google ids of this run (chunked in-lists).
+    if (googleEvents.length > 0) {
+      const ids = [...new Set(googleEvents.map((e) => e.id).filter(Boolean))];
+      for (let i = 0; i < ids.length; i += 200) {
+        const chunk = ids.slice(i, i + 200);
+        const { data: chunkMaps, error: chunkErr } = await supabase
+          .from("google_calendar_sync")
+          .select("*")
+          .eq("user_id", userId)
+          .in("google_event_id", chunk);
+        if (chunkErr) {
+          console.error(`[calendar-sync] reverse-map-fetch-error err=${chunkErr.message}`);
+          continue;
+        }
+        for (const m of chunkMaps || []) {
+          reverseSyncMap.set(m.google_event_id, m);
+          syncMap.set(m.agency_event_id, m);
+        }
+      }
+      // Local existence for mapped ids outside the current push batch.
+      const mappedLocalIds = [...new Set((googleEvents
+        .map((e) => reverseSyncMap.get(e.id)?.agency_event_id)
+        .filter(Boolean) as string[]).filter((id) => !localIds.has(id)))];
+      for (let i = 0; i < mappedLocalIds.length; i += 200) {
+        const chunk = mappedLocalIds.slice(i, i + 200);
+        const { data: liveRows } = await supabase
+          .from("agency_events")
+          .select("id")
+          .eq("user_id", userId)
+          .is("deleted_at", null)
+          .in("id", chunk);
+        for (const r of liveRows || []) localIds.add(r.id);
+      }
     }
 
     if (!pullPageError) {
@@ -1051,8 +1229,49 @@ Deno.serve(async (req) => {
     );
 
     const totalErrors = pushErrors.length + pullErrors.length + deleteErrors;
-    await releaseLock(totalErrors > 0 ? "error" : "synced",
-      totalErrors > 0 ? `${totalErrors} erro(s) durante a sincronização` : null);
+
+    // Progress persistence. A partial bootstrap keeps its pageToken and is
+    // reported as "bootstrap" — never as a finished sync.
+    let progressColumns: Record<string, unknown> = {};
+    let bootstrapInProgress = false;
+    if (cursorReset) {
+      progressColumns = computeCursorResetUpdate();
+      bootstrapInProgress = true;
+    } else if (!pullPageError) {
+      if (pullMode === "bootstrap") {
+        progressColumns = computeBootstrapUpdate({
+          nextPageToken: pendingPageToken,
+          nextSyncToken: receivedSyncToken,
+          pagesDone: (tokenRecord.bootstrap_pages_done || 0) + pagesThisRun,
+          itemsDone: (tokenRecord.bootstrap_items_done || 0) + itemsThisRun,
+          windowStart,
+          windowEnd,
+          startedAt: tokenRecord.bootstrap_started_at,
+        });
+        bootstrapInProgress = !!pendingPageToken;
+      } else {
+        progressColumns = computeIncrementalUpdate({
+          nextPageToken: pendingPageToken,
+          nextSyncToken: receivedSyncToken,
+          currentSyncToken: tokenRecord.sync_token,
+        });
+      }
+    }
+    // Local push cursor advances only over rows actually processed.
+    if (!localErr) {
+      progressColumns = {
+        ...progressColumns,
+        push_cursor_updated_at: advancedPushCursor.updated_at,
+        push_cursor_event_id: advancedPushCursor.event_id,
+        ...(pushScanComplete ? { push_cursor_completed_at: new Date().toISOString() } : {}),
+      };
+    }
+
+    await releaseLock(
+      resolveSyncStatus({ bootstrapInProgress, errors: totalErrors }),
+      totalErrors > 0 ? `${totalErrors} erro(s) durante a sincronização` : null,
+      progressColumns,
+    );
 
     return new Response(
       JSON.stringify({
@@ -1071,6 +1290,15 @@ Deno.serve(async (req) => {
         delete_errors: deleteErrors,
         duration_ms: Date.now() - syncStartedAt,
         total_google: googleEvents.length,
+        pull_mode: pullMode,
+        bootstrap_in_progress: bootstrapInProgress,
+        pages_this_run: pagesThisRun,
+        items_this_run: itemsThisRun,
+        resume_pending: !!pendingPageToken,
+        cursor_reset: cursorReset,
+        push_scan_complete: pushScanComplete,
+        push_batch_size: liveLocalEvents.length,
+        limits,
         push_errors: pushErrors,
         pull_errors: pullErrors,
         window: { start: windowStartDay, end: windowEndDay },
@@ -1090,9 +1318,17 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
     } catch (innerErr) {
-      console.error(`[calendar-sync] sync-failed user=${userId} err=${(innerErr as any)?.message || innerErr}`);
+      const transient = isTransientSyncError(innerErr);
+      console.error(
+        `[calendar-sync] sync-failed user=${userId} transient=${transient} err=${(innerErr as any)?.message || innerErr}`,
+      );
+      // Locks are always released; a transient timeout never flags re-consent.
       await releaseLock("error", String((innerErr as any)?.message || innerErr).slice(0, 500));
       throw innerErr;
+    } finally {
+      if (!lockReleased) {
+        await releaseLock("error", "Sincronização interrompida.");
+      }
     }
   } catch (error) {
     console.error("Sync error:", error);

@@ -4,6 +4,11 @@ import {
   fetchCronSecret,
   isAuthorizedInternalCall,
 } from "../_shared/calendarCronAuth.ts";
+import {
+  getCronBudget,
+  hasCronBudgetLeft,
+  orderEligibleTokens,
+} from "../_shared/calendarSyncPaging.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,16 +63,33 @@ Deno.serve(async (req) => {
   }
 
   const eligible = tokens || [];
-  console.log(`[calendar-sync] cron-eligible count=${eligible.length}`);
+  // Fairness: never-synced first, then oldest last_sync_at. Since every run
+  // updates last_sync_at, the heavy account cannot monopolize the queue.
+  const queue = orderEligibleTokens(eligible);
+  const budget = getCronBudget(Deno.env.toObject());
+  console.log(
+    `[calendar-sync] cron-eligible count=${queue.length} budget_ms=${budget.totalMs} per_user_ms=${budget.perUserMs} max_users=${budget.maxUsers}`,
+  );
 
   let invoked = 0;
   let failures = 0;
+  let timeouts = 0;
+  let deferred = 0;
+  let bootstrapPending = 0;
   // Aggregated only: user identifiers are never returned in the response.
   const statusCounts: Record<string, number> = {};
   const skipCounts: Record<string, number> = {};
 
-  // Sequential to avoid bursts; per-user sync is fast and respects its own lock.
-  for (const t of eligible) {
+  // Sequential to avoid bursts; each user has its own timeout and a slow or
+  // failing account never blocks the remaining ones.
+  for (const t of queue) {
+    if (!hasCronBudgetLeft(Date.now() - startedAt, invoked, budget)) {
+      deferred = queue.length - invoked;
+      console.log(`[calendar-sync] cron-budget-reached processed=${invoked} deferred=${deferred}`);
+      break;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), budget.perUserMs);
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/google-calendar-sync`, {
         method: "POST",
@@ -76,29 +98,44 @@ Deno.serve(async (req) => {
           [CRON_SECRET_HEADER]: expectedSecret!,
         },
         body: JSON.stringify({ action: "sync", user_id: t.user_id }),
+        signal: controller.signal,
       });
       let body: any = null;
       try { body = await res.json(); } catch { /* ignore */ }
       invoked++;
       statusCounts[String(res.status)] = (statusCounts[String(res.status)] || 0) + 1;
       if (body?.skipped) skipCounts[String(body.skipped)] = (skipCounts[String(body.skipped)] || 0) + 1;
+      if (body?.bootstrap_in_progress) bootstrapPending++;
       // Aggregated only: never log user identifiers here.
-      console.log(`[calendar-sync] cron-invoke status=${res.status} skipped=${body?.skipped || "no"}`);
+      console.log(
+        `[calendar-sync] cron-invoke status=${res.status} skipped=${body?.skipped || "no"} bootstrap_in_progress=${body?.bootstrap_in_progress ? "yes" : "no"} pages=${body?.pages_this_run ?? 0}`,
+      );
     } catch (e: any) {
+      const aborted = e?.name === "AbortError";
+      if (aborted) timeouts++;
       failures++;
-      console.error(`[calendar-sync] cron-invoke-error err=${e?.message || e}`);
+      invoked++;
+      // Continue with the remaining users after a timeout or error.
+      console.error(`[calendar-sync] cron-invoke-error timeout=${aborted} err=${e?.message || e}`);
+    } finally {
+      clearTimeout(timer);
     }
   }
 
   const durationMs = Date.now() - startedAt;
-  console.log(`[calendar-sync] cron-finished invoked=${invoked} failures=${failures} duration_ms=${durationMs}`);
+  console.log(
+    `[calendar-sync] cron-finished invoked=${invoked} failures=${failures} timeouts=${timeouts} deferred=${deferred} bootstrap_pending=${bootstrapPending} duration_ms=${durationMs}`,
+  );
 
   return new Response(
     JSON.stringify({
       success: true,
-      eligible: eligible.length,
+      eligible: queue.length,
       invoked,
       failures,
+      timeouts,
+      deferred,
+      bootstrap_pending: bootstrapPending,
       duration_ms: durationMs,
       status_counts: statusCounts,
       skip_counts: skipCounts,
