@@ -1310,13 +1310,17 @@ Deno.serve(async (req) => {
       `[calendar-sync] finished user=${userId} pushed_created=${pushedCreated} pushed_updated=${pushedUpdated} pushed_skipped=${pushedSkipped} push_errors=${pushErrors.length} pulled_created=${pulledCreated} pulled_updated=${pulledUpdated} pulled_skipped=${pulledSkipped} pull_errors=${pullErrors.length} deleted_google=${deletedGoogle} deleted_local=${deletedLocal} deleted_skipped=${deletedSkipped} delete_errors=${deleteErrors} total_google=${googleEvents.length}`
     );
 
-    const totalErrors = pushErrors.length + pullErrors.length + deleteErrors;
+    // A failed mapping lookup is a transient error: it must surface in the
+    // status so the run is never reported as a clean success.
+    const totalErrors =
+      pushErrors.length + pullErrors.length + deleteErrors + (mappingFetchFailed ? 1 : 0);
 
     // Progress persistence. A partial bootstrap keeps its pageToken and is
     // reported as "bootstrap" — never as a finished sync.
     let progressColumns: Record<string, unknown> = {};
     let bootstrapInProgress = false;
     let incrementalInProgress = false;
+    let bootstrapBlocked = false;
     if (cursorReset) {
       // Only a real HTTP 410 reaches here: cursors (sync_token,
       // bootstrap_page_token, incremental_page_token) are cleared; events,
@@ -1325,30 +1329,43 @@ Deno.serve(async (req) => {
       bootstrapInProgress = true;
     } else if (!pullPageError) {
       if (pullMode === "bootstrap") {
+        bootstrapBlocked = isBootstrapCompletionBlocked({
+          nextPageToken: pendingPageToken,
+          nextSyncToken: receivedSyncToken,
+        });
         progressColumns = computeBootstrapUpdate({
           nextPageToken: pendingPageToken,
           nextSyncToken: receivedSyncToken,
           pagesDone: (tokenRecord.bootstrap_pages_done || 0) + pagesThisRun,
           itemsDone: (tokenRecord.bootstrap_items_done || 0) + itemsThisRun,
-          windowStart,
-          windowEnd,
+          // Immutable for the whole walk: whatever produced the pageToken.
+          windowStart: pullBootstrapWindow.windowStart,
+          windowEnd: pullBootstrapWindow.windowEnd,
           startedAt: tokenRecord.bootstrap_started_at,
         });
-        bootstrapInProgress = !!pendingPageToken;
+        // Blocked completion keeps the bootstrap open for a safe retry.
+        bootstrapInProgress = !!pendingPageToken || bootstrapBlocked;
+        if (bootstrapBlocked) {
+          console.warn(
+            `[calendar-sync] bootstrap-missing-sync-token pages=${pagesThisRun} items=${itemsThisRun} completed=false retry=true`,
+          );
+        }
       } else {
+        const cycle = resolveIncrementalCycleBase(tokenRecord);
         progressColumns = computeIncrementalUpdate({
           nextPageToken: pendingPageToken,
           nextSyncToken: receivedSyncToken,
           currentSyncToken: tokenRecord.sync_token,
-          pagesDone: (tokenRecord.incremental_pages_done || 0) + pagesThisRun,
-          itemsDone: (tokenRecord.incremental_items_done || 0) + itemsThisRun,
-          startedAt: tokenRecord.incremental_started_at,
+          pagesDone: cycle.pagesDone + pagesThisRun,
+          itemsDone: cycle.itemsDone + itemsThisRun,
+          startedAt: cycle.startedAt,
         });
         incrementalInProgress = !!pendingPageToken;
       }
     }
-    // Local push cursor advances only over rows actually processed.
-    if (!localErr) {
+    // Local push cursor advances only over rows actually processed. With an
+    // unknown mapping state nothing was pushed, so the cursor stays put.
+    if (!localErr && !mappingFetchFailed) {
       progressColumns = {
         ...progressColumns,
         push_cursor_updated_at: advancedPushCursor.updated_at,
@@ -1357,7 +1374,7 @@ Deno.serve(async (req) => {
       };
     }
     // Deletion cursor advances independently from the live scan.
-    if (!deletedErr) {
+    if (!deletedErr && !mappingFetchFailed) {
       progressColumns = {
         ...progressColumns,
         push_deleted_cursor_at: advancedDeletedCursor.deleted_at,
