@@ -245,10 +245,36 @@ export function initialServiceValues(service: RequestService): ServiceValues {
  * The full form (AgencyRequestCenter) keeps every field — this is presentation only.
  */
 export function quickQuoteFields(service: RequestService, max = 4): RequestField[] {
+  const explicit = service.fields.filter((f) => f.origin === "quick" && f.type !== "textarea");
+  if (explicit.length) return explicit.slice(0, max);
   const usable = service.fields.filter((f) => f.type !== "textarea" && f.type !== "checkbox");
   const required = usable.filter((f) => f.required);
   const optional = usable.filter((f) => !f.required);
   return [...required, ...optional].slice(0, max);
+}
+
+/**
+ * Campos renderizados no formulário FOCADO do modal.
+ * `quick` sai quando o serviço é o principal (já veio da primeira dobra e é
+ * mostrado num resumo editável), `standalone` sai quando o serviço entrou como
+ * complemento (herda do contexto) e `context` nunca é digitado.
+ */
+export function formFields(
+  service: RequestService,
+  options: { isPrimary?: boolean; isComplement?: boolean } = {},
+): RequestField[] {
+  return service.fields.filter((field) => {
+    if (field.origin === "context") return false;
+    if (field.origin === "quick" && options.isPrimary) return false;
+    if (field.origin === "standalone" && options.isComplement) return false;
+    return true;
+  });
+}
+
+/** O campo depende de um checkbox marcado? */
+export function fieldIsVisible(field: RequestField, values: ServiceValues): boolean {
+  if (!field.visibleWhen) return true;
+  return values[field.visibleWhen] === true;
 }
 
 /** Merges a partial prefill (from the quick card) into a full service value bag. */
