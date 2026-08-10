@@ -18,6 +18,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { parseFunctionsError, formatCancelDate } from "@/lib/subscriptionCancel";
 import {
   CreditCard,
   ExternalLink,
