@@ -477,6 +477,8 @@ export function AdminUserManager() {
     { key: "premium", label: "Premium", value: stats.premium },
     { key: "fundador", label: "Fundador", value: stats.fundador },
     { key: "fornecedor_parceiro", label: "Fornecedor Parceiro", value: stats.fornecedor_parceiro },
+    { key: "members", label: "Colaboradores", value: users.filter((u) => u.kind === "member").length },
+    { key: "invites", label: "Convites pendentes", value: users.filter((u) => u.kind === "invite").length },
   ];
 
   const planColors: Record<string, string> = {
