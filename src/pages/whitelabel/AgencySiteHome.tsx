@@ -990,17 +990,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         <section
           id="cotacao"
           className="relative z-10"
-          style={{ marginTop: `calc(-1 * ${halfPx})` }}
+          style={{
+            marginTop: `calc(-1 * ${halfPx})`,
+            // A seção seguinte sobe até o eixo central do card: a metade
+            // inferior da caixa fica sobre o fundo dessa seção (sem faixa vazia).
+            marginBottom: `calc(-1 * ${halfPx})`,
+          }}
         >
-          <div
-            aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 bg-[hsl(var(--wl-sand))]"
-            style={{ top: halfPx }}
-          />
-          <div
-            ref={requestCenterRef}
-            className={`relative ${container} pb-14 md:pb-20`}
-          >
+          <div ref={requestCenterRef} className={`relative ${container}`}>
             <div ref={quoteCardRef} className="drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
               <AgencyQuickQuote
                 hostname={hostname}
@@ -1026,7 +1023,25 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       )}
 
-      {sections.map((section) => renderSection(section.key))}
+      {sections.map((section, index) => {
+        const node = renderSection(section.key);
+        if (!editorial || index !== 0 || !node) return node;
+        // Compensa a metade inferior do card na primeira seção após a cotação,
+        // preservando a superfície da própria seção (sem nova faixa vazia).
+        return (
+          <div
+            key={`${section.key}-offset`}
+            className={
+              section.key === "dmc"
+                ? "bg-[hsl(var(--wl-navy))]"
+                : "bg-[hsl(var(--wl-sand))]"
+            }
+            style={{ paddingTop: `calc(${halfPx} + 2.5rem)` }}
+          >
+            {node}
+          </div>
+        );
+      })}
     </>
   );
 }
