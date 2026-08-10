@@ -455,13 +455,15 @@ export function AdminUserManager() {
   }, [users, searchTerm, statFilter]);
 
   const stats = {
-    total: users.length,
-    admins: users.filter((u) => u.role === "admin").length,
-    start: users.filter((u) => u.role !== "admin" && u.plan === "start").length,
-    profissional: users.filter((u) => u.role !== "admin" && u.plan === "profissional").length,
-    premium: users.filter((u) => u.role !== "admin" && u.plan === "premium").length,
-    fundador: users.filter((u) => u.role !== "admin" && u.plan === "fundador").length,
-    fornecedor_parceiro: users.filter((u) => u.role !== "admin" && u.plan === "fornecedor_parceiro").length,
+    // Estatísticas de plano consideram apenas contas comerciais (masters):
+    // colaboradores herdam o plano e convites ainda não são contas.
+    total: users.filter((u) => (u.kind ?? "master") === "master").length,
+    admins: users.filter((u) => (u.kind ?? "master") === "master" && u.role === "admin").length,
+    start: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "start").length,
+    profissional: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "profissional").length,
+    premium: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "premium").length,
+    fundador: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "fundador").length,
+    fornecedor_parceiro: users.filter((u) => (u.kind ?? "master") === "master" && u.role !== "admin" && u.plan === "fornecedor_parceiro").length,
   };
 
   const statCards: { key: string; label: string; value: number }[] = [
