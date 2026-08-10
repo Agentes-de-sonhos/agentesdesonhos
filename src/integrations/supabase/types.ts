@@ -4863,7 +4863,7 @@ export type Database = {
       }
       google_calendar_tokens: {
         Row: {
-          access_token: string
+          access_token: string | null
           access_token_enc: string | null
           auto_sync_enabled: boolean
           bootstrap_completed_at: string | null
@@ -4879,6 +4879,7 @@ export type Database = {
           calendar_time_zone_checked_at: string | null
           connection_state: string
           created_at: string | null
+          granted_scopes: string | null
           id: string
           incremental_items_done: number
           incremental_page_token: string | null
@@ -4890,14 +4891,16 @@ export type Database = {
           last_sync_duration_ms: number | null
           last_sync_error: string | null
           last_sync_status: string | null
+          oauth_scope_version: number
           push_cursor_completed_at: string | null
           push_cursor_event_id: string | null
           push_cursor_updated_at: string | null
           push_deleted_cursor_at: string | null
           push_deleted_cursor_completed_at: string | null
           push_deleted_cursor_event_id: string | null
-          refresh_token: string
+          refresh_token: string | null
           refresh_token_enc: string | null
+          scopes_checked_at: string | null
           sync_enabled: boolean | null
           sync_in_progress: boolean
           sync_lock_at: string | null
@@ -4908,7 +4911,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          access_token: string
+          access_token?: string | null
           access_token_enc?: string | null
           auto_sync_enabled?: boolean
           bootstrap_completed_at?: string | null
@@ -4924,6 +4927,7 @@ export type Database = {
           calendar_time_zone_checked_at?: string | null
           connection_state?: string
           created_at?: string | null
+          granted_scopes?: string | null
           id?: string
           incremental_items_done?: number
           incremental_page_token?: string | null
@@ -4935,14 +4939,16 @@ export type Database = {
           last_sync_duration_ms?: number | null
           last_sync_error?: string | null
           last_sync_status?: string | null
+          oauth_scope_version?: number
           push_cursor_completed_at?: string | null
           push_cursor_event_id?: string | null
           push_cursor_updated_at?: string | null
           push_deleted_cursor_at?: string | null
           push_deleted_cursor_completed_at?: string | null
           push_deleted_cursor_event_id?: string | null
-          refresh_token: string
+          refresh_token?: string | null
           refresh_token_enc?: string | null
+          scopes_checked_at?: string | null
           sync_enabled?: boolean | null
           sync_in_progress?: boolean
           sync_lock_at?: string | null
@@ -4953,7 +4959,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          access_token?: string
+          access_token?: string | null
           access_token_enc?: string | null
           auto_sync_enabled?: boolean
           bootstrap_completed_at?: string | null
@@ -4969,6 +4975,7 @@ export type Database = {
           calendar_time_zone_checked_at?: string | null
           connection_state?: string
           created_at?: string | null
+          granted_scopes?: string | null
           id?: string
           incremental_items_done?: number
           incremental_page_token?: string | null
@@ -4980,14 +4987,16 @@ export type Database = {
           last_sync_duration_ms?: number | null
           last_sync_error?: string | null
           last_sync_status?: string | null
+          oauth_scope_version?: number
           push_cursor_completed_at?: string | null
           push_cursor_event_id?: string | null
           push_cursor_updated_at?: string | null
           push_deleted_cursor_at?: string | null
           push_deleted_cursor_completed_at?: string | null
           push_deleted_cursor_event_id?: string | null
-          refresh_token?: string
+          refresh_token?: string | null
           refresh_token_enc?: string | null
+          scopes_checked_at?: string | null
           sync_enabled?: boolean | null
           sync_in_progress?: boolean
           sync_lock_at?: string | null
