@@ -448,7 +448,6 @@ export function buildGooglePushPayload(
     defaultDurationMinutes?: number;
   } = {},
 ): GooglePushPayload {
-  const startDay = String(localEvent.event_date);
   const payload: GooglePushPayload = {
     summary: localEvent.title || "Sem título",
     start: {},
@@ -462,7 +461,16 @@ export function buildGooglePushPayload(
   }
 
   const allDay = localEvent.all_day === true || !localEvent.event_time;
-  if (allDay) {
+  const timeZone = resolvePushTimeZone(localEvent, opts.profileTimeZone);
+
+  // Start: wall fields win; otherwise the stored instant converted into the
+  // resolved IANA zone (never read as local wall time).
+  const startFromInstant = !localEvent.event_date && localEvent.start_at
+    ? wallTimeInZone(localEvent.start_at, timeZone)
+    : null;
+  const startDay = String(localEvent.event_date || startFromInstant?.date || "");
+
+  if (allDay && !startFromInstant) {
     const inclusiveEnd = localEvent.end_date && localEvent.end_date >= startDay
       ? localEvent.end_date
       : startDay;
@@ -471,12 +479,21 @@ export function buildGooglePushPayload(
     return payload;
   }
 
-  const timeZone = resolvePushTimeZone(localEvent, opts.profileTimeZone);
-  const startTime = String(localEvent.event_time).slice(0, 5);
+  const startTime = localEvent.event_time
+    ? String(localEvent.event_time).slice(0, 5)
+    : (startFromInstant?.time ?? "00:00");
   payload.start = { dateTime: `${startDay}T${startTime}:00`, timeZone };
 
   let endDay = localEvent.end_date || null;
   let endTime = localEvent.end_time ? String(localEvent.end_time).slice(0, 5) : null;
+  if (!endTime && localEvent.end_at) {
+    // Real end recorded as an instant: convert it, do not invent a duration.
+    const wall = wallTimeInZone(localEvent.end_at, timeZone);
+    if (wall) {
+      endDay = wall.date;
+      endTime = wall.time;
+    }
+  }
   if (!endTime) {
     const minutes = opts.defaultDurationMinutes ?? DEFAULT_DURATION_MINUTES;
     const shifted = shiftWallTime(startTime, minutes);
