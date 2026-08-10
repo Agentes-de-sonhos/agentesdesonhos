@@ -142,8 +142,8 @@ export default function GoogleCalendarIntegracao() {
             <Link to="/termosdeuso" className="underline">
               Termos de Uso
             </Link>
-            <a href="mailto:contato@agentesdesonhos.com.br" className="underline">
-              contato@agentesdesonhos.com.br
+            <a href="mailto:suporte@agentesdesonhos.com.br" className="underline">
+              suporte@agentesdesonhos.com.br
             </a>
           </div>
         </section>
