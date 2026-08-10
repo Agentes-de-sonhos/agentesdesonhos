@@ -19,7 +19,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { parseFunctionsError, formatCancelDate } from "@/lib/subscriptionCancel";
+import { parsePortalError } from "@/lib/customerPortal";
+import { getScheduledCancellation } from "@/lib/subscriptionState";
 import {
+  CalendarClock,
   CreditCard,
   ExternalLink,
   Loader2,
@@ -70,19 +73,27 @@ export default function MinhaConta() {
   };
 
   const isPaid = plan === "profissional" || plan === "premium" || plan === "fundador";
+  const cancellation = getScheduledCancellation(subscription as any);
 
   const openPortal = async (mode: "manage" | "cancel") => {
+    // Abre uma janela placeholder no gesto do clique para não ser bloqueada
+    // pelo navegador depois do await.
+    const placeholder = window.open("", "_blank");
     try {
       setLoadingPortal(mode);
       const { data, error } = await supabase.functions.invoke("customer-portal", {
         body: { mode },
       });
-      if (error) throw error;
-      if (!data?.url) throw new Error("Não foi possível abrir o portal de gerenciamento.");
-      window.open(data.url, "_blank");
+      if (error) throw new Error(await parsePortalError(error));
+      if (!data?.url) throw new Error(await parsePortalError({ context: data }));
+      if (placeholder && !placeholder.closed) {
+        placeholder.location.href = data.url;
+      } else {
+        window.location.href = data.url;
+      }
     } catch (err: any) {
-      const msg = err?.message || err?.context?.error || "Erro ao abrir o portal de assinatura.";
-      toast.error(msg);
+      if (placeholder && !placeholder.closed) placeholder.close();
+      toast.error(err?.message || (await parsePortalError(err)));
     } finally {
       setLoadingPortal(null);
     }
@@ -164,7 +175,24 @@ export default function MinhaConta() {
               </div>
             )}
 
-            {isPaid && subscription?.expires_at && (
+            {isPaid && cancellation.scheduled && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex flex-col gap-3 rounded-lg border border-amber-300/60 bg-amber-50 p-4 text-amber-900 sm:flex-row sm:items-start dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+              >
+                <CalendarClock className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold leading-none">Cancelamento agendado</p>
+                  <p className="text-sm opacity-90">
+                    Seu plano permanece ativo até {cancellation.endDateLabel}. Não haverá novas
+                    cobranças.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {isPaid && !cancellation.scheduled && subscription?.expires_at && (
               <p className="text-sm text-muted-foreground">
                 Próxima renovação: {new Date(subscription.expires_at).toLocaleDateString("pt-BR")}
               </p>
@@ -284,25 +312,43 @@ export default function MinhaConta() {
                   </div>
                 </Button>
 
-                <Button
-                  variant="outline"
-                  className="justify-start h-auto py-4 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/20"
-                  onClick={() => setConfirmCancel(true)}
-                  disabled={loadingPortal !== null}
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  <div className="text-left">
-                    <div className="font-medium">Cancelar assinatura</div>
-                    <div className="text-xs text-muted-foreground font-normal">
-                      Acesso mantido até o fim do período pago
+                {cancellation.scheduled ? (
+                  <div
+                    className="flex items-start justify-start gap-2 rounded-md border border-amber-300/60 bg-amber-50/60 px-4 py-4 text-left dark:border-amber-500/30 dark:bg-amber-500/10"
+                    aria-disabled="true"
+                  >
+                    <CalendarClock className="h-4 w-4 mt-0.5 shrink-0 text-amber-700 dark:text-amber-200" aria-hidden="true" />
+                    <div>
+                      <div className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                        Cancelamento agendado
+                      </div>
+                      <div className="text-xs text-amber-900/80 dark:text-amber-100/80">
+                        Acesso ativo até {cancellation.endDateLabel} — sem novas cobranças
+                      </div>
                     </div>
                   </div>
-                </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="justify-start h-auto py-4 text-destructive hover:text-destructive hover:bg-destructive/5 border-destructive/20"
+                    onClick={() => setConfirmCancel(true)}
+                    disabled={loadingPortal !== null}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    <div className="text-left">
+                      <div className="font-medium">Cancelar assinatura</div>
+                      <div className="text-xs text-muted-foreground font-normal">
+                        Acesso mantido até o fim do período pago
+                      </div>
+                    </div>
+                  </Button>
+                )}
               </div>
 
               <p className="text-xs text-muted-foreground pt-2">
-                Ao cancelar, você continua com acesso completo até o fim do período já pago. Não há
-                cobranças adicionais após o cancelamento.
+                {cancellation.scheduled
+                  ? `Sua assinatura não será renovada. O acesso completo continua disponível até ${cancellation.endDateLabel}.`
+                  : "Ao cancelar, você continua com acesso completo até o fim do período já pago. Não há cobranças adicionais após o cancelamento."}
               </p>
             </CardContent>
           </Card>
