@@ -25,7 +25,7 @@ import {
 } from "@/lib/agencySiteRequests";
 import {
   CHILD_AGE_HELP, CHILD_AGE_OPTIONS, applyContextToService, buildJourneyPayload,
-  applyRouteToContext, contextFromService, describeContext, describeTravelers, eligibleComplements,
+  applyRouteToContext, contextFromService, describeContext, eligibleComplements,
   emptyRouteLegs, emptyTripContext, formatChildAges, rebuildContext, serializeRoute, syncChildAges, totalTravelers,
   validateChildAges, validateRouteLegs,
   type JourneyEntry, type RouteLeg, type TripContext,
