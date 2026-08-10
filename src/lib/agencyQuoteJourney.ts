@@ -111,6 +111,13 @@ export function describeTravelers(context: TripContext): string {
 // ---------------------------------------------------------------------------
 // Rota multidestinos (aéreo)
 // ---------------------------------------------------------------------------
+export const MIN_ROUTE_LEGS = 2;
+
+/** Linhas iniciais do editor estruturado de destinos. */
+export function emptyRouteLegs(count = MIN_ROUTE_LEGS): RouteLeg[] {
+  return Array.from({ length: Math.max(MIN_ROUTE_LEGS, count) }, () => ({ destino: "", data: "" }));
+}
+
 export function serializeRoute(origem: string, legs: RouteLeg[]): string {
   const clean = legs.filter((l) => l.destino.trim());
   if (!clean.length) return "";
@@ -125,7 +132,74 @@ export function serializeRoute(origem: string, legs: RouteLeg[]): string {
 
 export function routeIsActionable(legs: RouteLeg[]): boolean {
   const filled = legs.filter((l) => l.destino.trim());
-  return filled.length >= 2 && filled.every((l) => !!l.data);
+  return filled.length >= MIN_ROUTE_LEGS && filled.every((l) => !!l.data);
+}
+
+/**
+ * Validação da rota estruturada: origem, no mínimo 2 destinos com data e datas
+ * em ordem não decrescente. As chaves seguem `leg_<index>_<campo>` para que o
+ * editor possa marcar exatamente a linha com problema.
+ */
+export function validateRouteLegs(origem: string, legs: RouteLeg[]): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!origem.trim()) errors.origem = "Campo obrigatório.";
+
+  const complete = legs.filter((l) => l.destino.trim() && l.data);
+  legs.forEach((leg, index) => {
+    const destino = leg.destino.trim();
+    const required = index < MIN_ROUTE_LEGS;
+    if (!destino && (required || leg.data)) errors[`leg_${index}_destino`] = "Informe o destino.";
+    if (!leg.data && (required || destino)) errors[`leg_${index}_data`] = "Informe a data.";
+  });
+
+  if (complete.length < MIN_ROUTE_LEGS) {
+    errors.rota = `Informe ao menos ${MIN_ROUTE_LEGS} destinos com data.`;
+  }
+
+  for (let i = 1; i < legs.length; i += 1) {
+    const previous = legs[i - 1];
+    const current = legs[i];
+    if (previous.data && current.data && current.data < previous.data) {
+      errors[`leg_${i}_data`] = "A data deve ser igual ou posterior à anterior.";
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Deriva o contexto global a partir da rota: o DESTINO passa a ser o último
+ * destino informado e as datas-base vêm da primeira e da última data da rota.
+ */
+export function applyRouteToContext(context: TripContext, origem: string, legs: RouteLeg[]): TripContext {
+  const clean = legs.filter((l) => l.destino.trim());
+  const next: TripContext = { ...context, origem: origem.trim() || context.origem, rota: clean.map((l) => ({ ...l })) };
+  if (clean.length) {
+    next.destino = clean[clean.length - 1].destino.trim();
+    const dates = clean.map((l) => l.data).filter(Boolean).sort();
+    if (dates.length) {
+      next.data_inicio = dates[0];
+      next.data_fim = dates[dates.length - 1];
+    }
+  }
+  return next;
+}
+
+/** Idades obrigatórias: uma idade 0..17 por criança. */
+export function validateChildAges(ages: string[], count: number): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (count <= 0) return errors;
+  for (let i = 0; i < count; i += 1) {
+    const value = (ages[i] ?? "").trim();
+    const age = Number(value);
+    if (!value || !Number.isInteger(age) || age < 0 || age > 17) {
+      errors[`child_age_${i}`] = "Informe a idade.";
+    }
+  }
+  if (Object.keys(errors).length) {
+    errors.idades_criancas = "Informe a idade de cada criança.";
+  }
+  return errors;
 }
 
 // ---------------------------------------------------------------------------
@@ -202,11 +276,26 @@ export function contextFromService(
   if (criancas) next.criancas = Math.max(0, Math.min(MAX_CHILDREN, num(criancas, previous.criancas)));
   next.idades_criancas = syncChildAges(next.idades_criancas, next.criancas);
 
-  if (key === "aereo") {
-    const rota = str(values, "rota_multidestinos");
-    if (!rota) next.rota = previous.rota;
-  }
+  return next;
+}
 
+/**
+ * Recalcula o contexto a partir dos serviços que AINDA existem na jornada,
+ * preservando a fonte global estável (viajantes, idades e rota estruturada).
+ * Usado quando um serviço é removido na revisão para que destino/datas nunca
+ * fiquem herdados de um serviço que já não faz parte do pedido.
+ */
+export function rebuildContext(entries: JourneyEntry[], previous: TripContext): TripContext {
+  if (!entries.length) return previous;
+  let next: TripContext = {
+    ...emptyTripContext(),
+    adultos: previous.adultos,
+    criancas: previous.criancas,
+    idades_criancas: [...previous.idades_criancas],
+    rota: previous.rota.map((leg) => ({ ...leg })),
+  };
+  for (const entry of entries) next = contextFromService(entry.key, entry.values, next);
+  if (next.rota.length) next = applyRouteToContext(next, next.origem, next.rota);
   return next;
 }
 
@@ -238,7 +327,6 @@ function contextValueFor(field: string, context: TripContext): string {
     case "viajantes":
       return String(totalTravelers(context));
     case "idades_criancas":
-    case "idades":
       return formatChildAges(context.idades_criancas);
     default:
       return "";

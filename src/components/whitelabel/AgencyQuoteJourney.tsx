@@ -15,17 +15,20 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { EDITORIAL_ROOT_CLASS, isEditorialTheme } from "@/lib/agencySiteTheme";
+import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
+import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
 import {
   CONTACT_CHANNELS, CONTACT_TIMES, EMPTY_CONTACT,
-  describeServiceValues, fieldIsVisible, formFields, initialServiceValues,
+  describeServiceValues, fieldIsVisible, formFields, initialServiceValues, isMultiRoute,
   mergeServiceValues, quickQuoteFields, serviceByKey, validateContactStep, validateServiceStep,
   type ContactValues, type RequestField, type RequestService, type ServiceValues,
 } from "@/lib/agencySiteRequests";
 import {
   CHILD_AGE_HELP, CHILD_AGE_OPTIONS, applyContextToService, buildJourneyPayload,
-  contextFromService, describeContext, describeTravelers, eligibleComplements,
-  emptyTripContext, syncChildAges, totalTravelers,
-  type JourneyEntry, type TripContext,
+  applyRouteToContext, contextFromService, describeContext, describeTravelers, eligibleComplements,
+  emptyRouteLegs, emptyTripContext, rebuildContext, serializeRoute, syncChildAges, totalTravelers,
+  validateChildAges, validateRouteLegs,
+  type JourneyEntry, type RouteLeg, type TripContext,
 } from "@/lib/agencyQuoteJourney";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 
@@ -49,13 +52,14 @@ const STEP_LABELS: { key: JourneyStep; label: string }[] = [
 ];
 
 function FieldControl({
-  field, value, error, onChange, surface,
+  field, value, error, onChange, surface, editorial,
 }: {
   field: RequestField;
   value: string | boolean;
   error?: string;
   onChange: (value: string | boolean) => void;
   surface: string;
+  editorial?: boolean;
 }) {
   const id = `wlq-${field.name}`;
   const describedBy = error ? `${id}-error` : field.help ? `${id}-help` : undefined;
@@ -68,6 +72,24 @@ function FieldControl({
           <Label htmlFor={id} className="text-sm font-normal">{field.label}</Label>
         </div>
       </div>
+    );
+  }
+
+  // Toda data usa o mesmo controle de calendário da primeira dobra.
+  if (field.type === "date") {
+    return (
+      <TripDatePicker
+        id={id}
+        label={field.label}
+        mode="single"
+        start={String(value ?? "")}
+        onChange={({ start }) => onChange(start)}
+        editorial={editorial}
+        error={error}
+        help={field.help}
+        required={field.required}
+        className={field.span === 2 ? "sm:col-span-2" : ""}
+      />
     );
   }
 
@@ -133,6 +155,8 @@ export interface AgencyQuoteJourneyProps {
   primaryService: string;
   /** Valores já digitados na cotação rápida. */
   quickValues: ServiceValues;
+  /** Rota estruturada de multidestinos vinda da cotação rápida (aéreo). */
+  quickRoute?: RouteLeg[];
   /** Volta o foco para a cotação rápida sem perder os detalhes preenchidos. */
   onEditQuickValues?: () => void;
   privacyUrl?: string;
@@ -151,6 +175,7 @@ export function AgencyQuoteJourney({
   onOpenChange,
   primaryService,
   quickValues,
+  quickRoute,
   onEditQuickValues,
   privacyUrl = "/politicasdeprivacidade",
   termsUrl = "/termosdeuso",
@@ -164,6 +189,7 @@ export function AgencyQuoteJourney({
   const [activeKey, setActiveKey] = useState(primaryService);
   const [activeValues, setActiveValues] = useState<ServiceValues>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [legs, setLegs] = useState<RouteLeg[]>(() => emptyRouteLegs());
   const [contact, setContact] = useState<ContactValues>(EMPTY_CONTACT);
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
   const [honeypot, setHoneypot] = useState("");
@@ -178,7 +204,12 @@ export function AgencyQuoteJourney({
     if (!open) return;
     const service = serviceByKey(primaryService);
     const merged = mergeServiceValues(service, quickValues);
-    const baseContext = contextFromService(service.key, merged, emptyTripContext());
+    const initialLegs = quickRoute?.length ? quickRoute.map((l) => ({ ...l })) : emptyRouteLegs();
+    setLegs(initialLegs);
+    let baseContext = contextFromService(service.key, merged, emptyTripContext());
+    if (isMultiRoute(service, merged)) {
+      baseContext = applyRouteToContext(baseContext, String(merged.origem ?? ""), initialLegs);
+    }
     setContext(baseContext);
     setEntries([]);
     setActiveKey(service.key);
@@ -191,9 +222,48 @@ export function AgencyQuoteJourney({
   }, [open, primaryService]);
 
   const visibleFields = useMemo(
-    () => formFields(activeService, { isPrimary, isComplement }).filter((f) => fieldIsVisible(f, activeValues)),
+    () =>
+      formFields(activeService, { isPrimary, isComplement, values: activeValues })
+        .filter((f) => fieldIsVisible(f, activeValues)),
     [activeService, isPrimary, isComplement, activeValues],
   );
+
+  const activeIsMultiRoute = activeService.key === "aereo" && isMultiRoute(activeService, activeValues);
+
+  /** Ida e volta do aéreo: um único calendário de período no lugar de dois campos. */
+  const rangeDates = useMemo(() => {
+    if (activeService.key !== "aereo" || activeIsMultiRoute) return null;
+    const showsIda = visibleFields.some((f) => f.name === "data_ida");
+    const showsVolta = visibleFields.some((f) => f.name === "data_volta");
+    if (!showsIda && !showsVolta) return null;
+    return { range: String(activeValues.tipo_viagem ?? "") !== "Somente ida" && showsVolta };
+  }, [activeService.key, activeIsMultiRoute, visibleFields, activeValues.tipo_viagem]);
+
+  const renderedFields = useMemo(
+    () =>
+      visibleFields.filter((f) =>
+        activeIsMultiRoute
+          ? f.name !== "destino" && f.name !== "data_ida" && f.name !== "data_volta"
+          : rangeDates
+          ? f.name !== "data_ida" && f.name !== "data_volta"
+          : true,
+      ),
+    [visibleFields, activeIsMultiRoute, rangeDates],
+  );
+
+  const updateLegs = useCallback((next: RouteLeg[]) => {
+    setLegs(next);
+    setActiveValues((prev) => ({
+      ...prev,
+      rota_multidestinos: serializeRoute(String(prev.origem ?? ""), next),
+    }));
+    setErrors({});
+  }, []);
+
+  const setDates = useCallback((next: { start: string; end: string }) => {
+    setActiveValues((prev) => ({ ...prev, data_ida: next.start, data_volta: next.end }));
+    setErrors((prev) => ({ ...prev, data_ida: "", data_volta: "", periodo: "" }));
+  }, []);
 
   const exposesChildren = visibleFields.some((f) => f.name === "criancas");
   const childCount = exposesChildren
@@ -227,19 +297,34 @@ export function AgencyQuoteJourney({
   const finishActive = () => {
     const found = validateServiceStep(activeService, activeValues);
     // Campos não renderizados (herdados/derivados) nunca acusam erro ao usuário.
-    const renderable = new Set(visibleFields.map((f) => f.name));
+    const renderable = new Set(renderedFields.map((f) => f.name));
     const relevant: Record<string, string> = {};
     for (const [name, message] of Object.entries(found)) {
       if (renderable.has(name)) relevant[name] = message;
     }
+
+    if (activeIsMultiRoute) {
+      Object.assign(relevant, validateRouteLegs(String(activeValues.origem ?? ""), legs));
+    } else if (rangeDates) {
+      if (found.data_ida) relevant.periodo = "Selecione a data de ida.";
+      else if (found.data_volta) relevant.periodo = found.data_volta;
+    }
+
+    // Idades das crianças são obrigatórias sempre que houver crianças.
+    const ageErrors = childCount > 0 ? validateChildAges(context.idades_criancas, childCount) : {};
+    Object.assign(relevant, ageErrors);
+
     setErrors(relevant);
     if (Object.keys(relevant).length) return;
 
-    const nextContext = contextFromService(activeService.key, activeValues, {
+    let nextContext = contextFromService(activeService.key, activeValues, {
       ...context,
       criancas: childCount,
       idades_criancas: syncChildAges(context.idades_criancas, childCount),
     });
+    if (activeIsMultiRoute) {
+      nextContext = applyRouteToContext(nextContext, String(activeValues.origem ?? ""), legs);
+    }
     setContext(nextContext);
 
     const stored: ServiceValues = {
@@ -274,7 +359,12 @@ export function AgencyQuoteJourney({
   };
 
   const removeEntry = (key: string) => {
-    setEntries((prev) => prev.filter((e) => e.key !== key));
+    setEntries((prev) => {
+      const next = prev.filter((e) => e.key !== key);
+      // O contexto volta a refletir SOMENTE os serviços que continuam no pedido.
+      setContext((current) => rebuildContext(next, current));
+      return next;
+    });
   };
 
   const handleSubmit = async () => {
@@ -403,7 +493,7 @@ export function AgencyQuoteJourney({
               <div className={cardCls}>
                 <p className="mb-4 text-sm text-muted-foreground">{activeService.intro}</p>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {visibleFields.map((field) => (
+                  {renderedFields.map((field) => (
                     <FieldControl
                       key={field.name}
                       field={field}
@@ -411,17 +501,46 @@ export function AgencyQuoteJourney({
                       error={errors[field.name] || undefined}
                       onChange={(v) => setValue(field.name, v)}
                       surface={surface}
+                      editorial={editorial}
                     />
                   ))}
+
+                  {rangeDates && (
+                    <TripDatePicker
+                      id="wlq-periodo"
+                      label={rangeDates.range ? "Ida e volta" : "Data da ida"}
+                      mode={rangeDates.range ? "range" : "single"}
+                      start={String(activeValues.data_ida ?? "")}
+                      end={String(activeValues.data_volta ?? "")}
+                      onChange={setDates}
+                      editorial={editorial}
+                      required
+                      error={errors.periodo || errors.data_ida || errors.data_volta || undefined}
+                      className="sm:col-span-2"
+                    />
+                  )}
+
+                  {activeIsMultiRoute && (
+                    <RouteLegsEditor
+                      legs={legs}
+                      onChange={updateLegs}
+                      errors={errors}
+                      editorial={editorial}
+                      idPrefix="wlq-rota"
+                      className="sm:col-span-2"
+                    />
+                  )}
 
                   {childCount > 0 && (
                     <fieldset className="sm:col-span-2">
                       <legend className="text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                         Idade das crianças
+                        <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>
                       </legend>
                       <div className="mt-2 grid gap-3 sm:grid-cols-3">
                         {Array.from({ length: childCount }, (_, index) => {
                           const id = `child-age-${index}`;
+                          const ageError = errors[`child_age_${index}`];
                           return (
                             <div key={id}>
                               <Label htmlFor={id} className="text-xs text-muted-foreground">
@@ -431,7 +550,12 @@ export function AgencyQuoteJourney({
                                 value={context.idades_criancas[index] ?? ""}
                                 onValueChange={(v) => setChildAge(index, v)}
                               >
-                                <SelectTrigger id={id} className={`mt-1.5 ${surface}`}>
+                                <SelectTrigger
+                                  id={id}
+                                  aria-invalid={!!ageError}
+                                  aria-describedby={ageError ? `${id}-error` : undefined}
+                                  className={`mt-1.5 ${surface} ${ageError ? "border-destructive" : ""}`}
+                                >
                                   <SelectValue placeholder="Idade" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -440,11 +564,19 @@ export function AgencyQuoteJourney({
                                   ))}
                                 </SelectContent>
                               </Select>
+                              {ageError && (
+                                <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-destructive">
+                                  {ageError}
+                                </p>
+                              )}
                             </div>
                           );
                         })}
                       </div>
                       <p className="mt-2 text-xs text-muted-foreground">{CHILD_AGE_HELP}</p>
+                      {errors.idades_criancas && (
+                        <p role="alert" className="mt-1 text-xs text-destructive">{errors.idades_criancas}</p>
+                      )}
                     </fieldset>
                   )}
                 </div>
