@@ -1,16 +1,19 @@
 // AES-GCM token protection for google_calendar_tokens.
 //
-// Design rules (Block 1 — inert preparation):
+// Design rules (final hardening — encryption at rest is now real):
 //  * When GOOGLE_TOKEN_ENC_KEY is absent, encryption is NOT active: tokens keep
 //    being written to the legacy plaintext columns and the `*_enc` columns stay
 //    NULL with token_enc_version = 0. There is never a fallback that writes
 //    plaintext into a column named `*_enc`.
 //  * When the key is present, tokens are written encrypted into `*_enc` with
-//    token_enc_version = 1 while the legacy plaintext columns are kept in place
-//    (dual-write) so a rollback cannot break the live connections. Clearing the
-//    plaintext columns is a later, separately verified step.
-//  * Reads always prefer `*_enc` when it holds a real ciphertext and the key is
-//    available, falling back to the legacy plaintext column (dual-read).
+//    token_enc_version = 1 and the legacy plaintext columns are cleared in the
+//    SAME write (`access_token: null`, `refresh_token: null`). No readable copy
+//    of a Google credential remains at rest.
+//  * Reads prefer `*_enc`. A legacy plaintext value is only accepted while the
+//    row has not been migrated yet (token_enc_version = 0 / `*_enc` empty) —
+//    that is what makes the lazy migration possible. Once a row claims version
+//    1, a failed decryption is fail-closed (null) instead of silently falling
+//    back, so the connection is flagged for reconnect rather than half-working.
 
 export const ENC_PREFIX = "v1:";
 
