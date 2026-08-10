@@ -112,6 +112,7 @@ const Pesquisa = lazy(() => import("./pages/Pesquisa"));
 const AtivarCartao = lazy(() => import("./pages/AtivarCartao"));
 const PoliticasPrivacidade = lazy(() => import("./pages/PoliticasPrivacidade"));
 const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
+const GoogleCalendarIntegracao = lazy(() => import("./pages/GoogleCalendarIntegracao"));
 const Atualizacoes = lazy(() => import("./pages/Atualizacoes"));
 const PersonalizadorLaminas = lazy(() => import("./pages/PersonalizadorLaminas"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
