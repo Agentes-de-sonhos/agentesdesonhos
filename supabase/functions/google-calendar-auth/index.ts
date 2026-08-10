@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { encodeState, generateNonce, hashNonce, stateExpiryIso } from "../_shared/googleOAuthState.ts";
+import { REQUIRED_SCOPES } from "../_shared/googleCalendarScopes.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -69,7 +70,9 @@ Deno.serve(async (req) => {
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: "code",
-      scope: "https://www.googleapis.com/auth/calendar",
+      // Minimal proven scope set. include_granted_scopes is deliberately absent
+      // so a legacy broad grant is not silently carried into the new consent.
+      scope: REQUIRED_SCOPES.join(" "),
       access_type: "offline",
       prompt: "consent",
       state,
