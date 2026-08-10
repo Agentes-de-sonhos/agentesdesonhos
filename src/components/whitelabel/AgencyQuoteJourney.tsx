@@ -14,7 +14,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { isEditorialTheme } from "@/lib/agencySiteTheme";
+import { EDITORIAL_ROOT_CLASS, isEditorialTheme } from "@/lib/agencySiteTheme";
 import {
   CONTACT_CHANNELS, CONTACT_TIMES, EMPTY_CONTACT,
   describeServiceValues, fieldIsVisible, formFields, initialServiceValues,
@@ -300,7 +300,7 @@ export function AgencyQuoteJourney({
   const chosenKeys = entries.map((e) => e.key);
   const complements = eligibleComplements(chosenKeys);
   const contextLines = describeContext(context);
-  const quickSummary = quickQuoteFields(serviceByKey(primaryKey))
+  const quickSummary = quickQuoteFields(serviceByKey(primaryKey), 5)
     .map((field) => {
       const source = entries[0]?.values ?? activeValues;
       const value = typeof source[field.name] === "string" ? String(source[field.name]).trim() : "";
@@ -315,7 +315,7 @@ export function AgencyQuoteJourney({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`max-h-[92vh] w-[calc(100vw-1rem)] max-w-3xl overflow-y-auto rounded-2xl p-0 sm:w-[calc(100vw-3rem)] ${shellBg}`}
+        className={`max-h-[92vh] w-[calc(100vw-1rem)] max-w-3xl overflow-y-auto rounded-2xl p-0 sm:w-[calc(100vw-3rem)] ${shellBg} ${editorial ? EDITORIAL_ROOT_CLASS : ""}`}
       >
         <DialogHeader className="border-b border-border/60 px-4 pt-5 text-left md:px-7 md:pt-6">
           <DialogTitle className="text-lg md:text-xl">Solicitação de cotação</DialogTitle>
