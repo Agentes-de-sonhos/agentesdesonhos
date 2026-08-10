@@ -20,6 +20,26 @@ export const CANCEL_ERROR_MESSAGES: Record<CancelErrorCode, string> = {
 const GENERIC_MESSAGE = "Não foi possível cancelar a assinatura. Tente novamente.";
 
 /**
+ * Extrai o fim do período vigente de uma assinatura Stripe (epoch em segundos).
+ * Espelha a lógica usada na Edge Function `cancel-subscription`: na API atual
+ * (2025-08-27.basil) `current_period_end` vive nos itens da assinatura.
+ */
+export function extractPeriodEnd(sub: unknown): number | null {
+  const s = sub as Record<string, any> | null | undefined;
+  const candidates = [
+    s?.items?.data?.[0]?.current_period_end,
+    s?.cancel_at,
+    s?.current_period_end,
+    s?.trial_end,
+    s?.ended_at,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  }
+  return null;
+}
+
+/**
  * Lê o corpo real do erro de uma Edge Function.
  * No supabase-js v2, `error.context` é um `Response` — o JSON precisa ser lido
  * explicitamente, senão sobra apenas o texto genérico do SDK.
