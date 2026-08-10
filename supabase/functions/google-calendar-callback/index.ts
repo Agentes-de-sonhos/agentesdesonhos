@@ -1,6 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { hashNonce, parseState } from "../_shared/googleOAuthState.ts";
-import { buildTokenColumns, getTokenEncKey, readTokenField } from "../_shared/googleTokenCrypto.ts";
+import {
+  buildVerifiedEncryptedColumns,
+  getTokenEncKey,
+  readTokenField,
+} from "../_shared/googleTokenCrypto.ts";
 import { hasRequiredScopes, parseScopeString, resolveScopeVersion } from "../_shared/googleCalendarScopes.ts";
 
 Deno.serve(async (req) => {
@@ -96,6 +100,17 @@ Deno.serve(async (req) => {
     // encrypted column is used first, so this keeps working once the legacy
     // plaintext columns are cleared.
     const encKey = getTokenEncKey();
+    // Encryption at rest is mandatory now that every stored connection is
+    // encrypted-only: without the key we refuse the connection instead of
+    // writing a readable credential.
+    if (!encKey) {
+      console.error("callback rejected: encryption key unavailable");
+      return new Response(
+        redirectHtml("Serviço temporariamente indisponível. Tente conectar novamente em alguns minutos.", false),
+        { headers: { "Content-Type": "text/html" } },
+      );
+    }
+
     const { data: existing } = await supabase
       .from("google_calendar_tokens")
       .select("refresh_token, refresh_token_enc, access_token_enc, token_enc_version")
@@ -111,11 +126,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    const tokenColumns = await buildTokenColumns(
+    // Verified round-trip (encrypt -> decrypt -> exact compare) before any write.
+    const tokenColumns = await buildVerifiedEncryptedColumns(
       { access_token: tokenData.access_token, refresh_token: refreshToken },
       encKey,
-      existing ?? null,
     );
+    if (!tokenColumns) {
+      console.error("callback rejected: token encryption verification failed");
+      return new Response(
+        redirectHtml("Serviço temporariamente indisponível. Tente conectar novamente em alguns minutos.", false),
+        { headers: { "Content-Type": "text/html" } },
+      );
+    }
 
     const { error: upsertError } = await supabase
       .from("google_calendar_tokens")

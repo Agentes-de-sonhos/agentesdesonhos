@@ -112,6 +112,7 @@ const Pesquisa = lazy(() => import("./pages/Pesquisa"));
 const AtivarCartao = lazy(() => import("./pages/AtivarCartao"));
 const PoliticasPrivacidade = lazy(() => import("./pages/PoliticasPrivacidade"));
 const TermosDeUso = lazy(() => import("./pages/TermosDeUso"));
+const GoogleCalendarIntegracao = lazy(() => import("./pages/GoogleCalendarIntegracao"));
 const Atualizacoes = lazy(() => import("./pages/Atualizacoes"));
 const PersonalizadorLaminas = lazy(() => import("./pages/PersonalizadorLaminas"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -229,6 +230,7 @@ const App = () => (
             <Route path="/trade-connect/comunidades" element={<Navigate to="/comunidade/comunidades" replace />} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
+            <Route path="/google-calendar" element={<GoogleCalendarIntegracao />} />
             <Route path="/pesquisa/:slug" element={<Pesquisa />} />
             <Route path="/orcamento/:token" element={<OrcamentoPublico />} />
             <Route path="/fatura/:agencySlug/:code" element={<FaturaPublica />} />

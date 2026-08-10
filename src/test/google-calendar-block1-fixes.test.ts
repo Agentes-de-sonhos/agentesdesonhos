@@ -95,8 +95,8 @@ describe("disconnect failure handling", () => {
     // Local copies are only touched behind the explicit opt-in flag.
     expect(block).toContain("const purgeLocal = body.purge_local === true;");
     expect(block).toMatch(/if \(purgeLocal\) \{/);
-    // Every local mutation stays scoped to the requesting user.
-    expect(block).toMatch(/from\("agency_events"\)[\s\S]{0,120}?\.eq\("user_id", userId\)/);
+    // The purge is delegated to a transactional RPC scoped to the requesting user.
+    expect(block).toMatch(/purge_google_calendar_local_copies[\s\S]{0,120}?p_user_id: userId/);
     expect(block).not.toMatch(/refresh_token:|token=\$\{/);
   });
 });

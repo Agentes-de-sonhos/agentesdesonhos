@@ -19,6 +19,7 @@ import {
   bootstrapProgressLabel,
   needsReconnect,
   reconnectMessage,
+  legacyScopeNotice,
   resolveStatusKey,
   statusDotClass,
   statusLabel,
@@ -163,6 +164,7 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
   const label = statusLabel(statusKey);
   const mustReconnect = needsReconnect(status);
   const bootstrapLabel = bootstrapProgressLabel(status);
+  const legacyNotice = legacyScopeNotice(status);
 
   // Re-consent required: the connection is kept, but only reconnecting fixes it.
   if (mustReconnect) {
@@ -208,6 +210,17 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
         )}
         {statusKey === "error" ? <AlertCircle className="h-3 w-3 text-rose-500" /> : statusKey === "synced" ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : null}
       </div>
+      {legacyNotice && (
+        <button
+          type="button"
+          onClick={() => setShowConsent(true)}
+          title={legacyNotice}
+          className="hidden sm:flex items-center gap-1 text-xs text-amber-600 hover:underline"
+        >
+          <AlertTriangle className="h-3.5 w-3.5" />
+          <span>Reduzir permissões</span>
+        </button>
+      )}
       {lastReport && (
         <Button
           variant="ghost"

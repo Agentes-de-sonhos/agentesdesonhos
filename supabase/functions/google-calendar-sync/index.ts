@@ -6,6 +6,7 @@ import {
 } from "../_shared/calendarCronAuth.ts";
 import {
   buildTokenColumns,
+  buildVerifiedEncryptedColumns,
   getTokenEncKey,
   isCiphertext,
   needsTokenMigration,
@@ -218,11 +219,29 @@ async function persistRefreshedToken(
   grantedScope?: string | null,
 ) {
   const encKey = getTokenEncKey();
+  // A row already encrypted must never be downgraded to plaintext because the
+  // key vanished from the environment: refuse to touch the credential columns.
+  if (!encKey && typeof existing?.token_enc_version === "number" && existing.token_enc_version >= 1) {
+    console.error("[calendar-sync] token-write-blocked reason=missing-enc-key");
+    return;
+  }
   const payload: { access_token: string; refresh_token?: string } = { access_token: accessToken };
   if (encKey && refreshTokenPlain && !isCiphertext(existing?.refresh_token_enc)) {
     payload.refresh_token = refreshTokenPlain;
   }
-  const columns = await buildTokenColumns(payload, encKey, existing ?? null);
+  const verified = encKey
+    ? await buildVerifiedEncryptedColumns(
+        {
+          access_token: accessToken,
+          refresh_token: refreshTokenPlain ?? null,
+        },
+        encKey,
+      )
+    : null;
+  // Prefer the verified round-trip payload (both credentials known). Otherwise
+  // fall back to the incremental builder, which keeps a partially migrated row
+  // at version 0 with its plaintext intact instead of losing the credential.
+  const columns = verified ?? (await buildTokenColumns(payload, encKey, existing ?? null));
   // Google echoes the effective grant on refresh: keep the recorded scope set
   // truthful so an overbroad legacy connection stays visible.
   const scopeList = parseScopeString(grantedScope);
@@ -369,6 +388,37 @@ Deno.serve(async (req) => {
         revocation = await revokeGoogleToken(refresh || access);
       }
 
+      // Explicit local purge runs BEFORE the credential is dropped and is fully
+      // transactional inside the database: one SECURITY DEFINER RPC deletes the
+      // user's conflicts, the agency_events joined to origin='google' mappings
+      // and the remaining mappings, with no id list crossing the edge boundary
+      // (so no 1000-row PostgREST cap) and no possibility of orphan copies.
+      // Google-side events are never touched.
+      let purgedEvents = 0;
+      let purgedMappings = 0;
+      let purgedConflicts = 0;
+      if (purgeLocal) {
+        const { data: purgeResult, error: purgeRpcError } = await supabase.rpc(
+          "purge_google_calendar_local_copies",
+          { p_user_id: userId },
+        );
+        if (purgeRpcError) {
+          console.error(`[calendar-sync] disconnect-purge-error user=${userId} err=${purgeRpcError.message}`);
+          return new Response(
+            JSON.stringify({
+              error: "Não foi possível remover as cópias locais agora. Nada foi alterado — tente novamente.",
+              code: "purge_failed",
+              retryable: true,
+            }),
+            { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        const row = Array.isArray(purgeResult) ? purgeResult[0] : purgeResult;
+        purgedEvents = Number(row?.deleted_events ?? 0);
+        purgedMappings = Number(row?.deleted_mappings ?? 0);
+        purgedConflicts = Number(row?.deleted_conflicts ?? 0);
+      }
+
       // Credentials are removed; event mappings and calendar events are preserved.
       const { error: deleteError } = await supabase
         .from("google_calendar_tokens")
@@ -383,50 +433,6 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Explicit local purge: only rows imported from Google (origin='google')
-      // are removed, and only for this user. Mappings are cleared afterwards so
-      // a failure mid-way never leaves an event without its mapping.
-      let purgedEvents = 0;
-      let purgedMappings = 0;
-      let purgeError: string | null = null;
-      if (purgeLocal) {
-        const { data: googleMappings, error: mapErr } = await supabase
-          .from("google_calendar_sync")
-          .select("id, agency_event_id, origin")
-          .eq("user_id", userId)
-          .eq("origin", "google")
-          .not("agency_event_id", "is", null);
-
-        if (mapErr) {
-          purgeError = mapErr.message;
-        } else {
-          const eventIds = (googleMappings || [])
-            .map((m: any) => m.agency_event_id)
-            .filter((id: unknown): id is string => typeof id === "string");
-          for (let i = 0; i < eventIds.length; i += 200) {
-            const slice = eventIds.slice(i, i + 200);
-            const { error: evErr } = await supabase
-              .from("agency_events")
-              .delete()
-              .eq("user_id", userId)
-              .in("id", slice);
-            if (evErr) { purgeError = evErr.message; break; }
-            purgedEvents += slice.length;
-          }
-          if (!purgeError) {
-            const { error: mapDelErr, count } = await supabase
-              .from("google_calendar_sync")
-              .delete({ count: "exact" })
-              .eq("user_id", userId);
-            if (mapDelErr) purgeError = mapDelErr.message;
-            else purgedMappings = count ?? 0;
-          }
-        }
-        if (purgeError) {
-          console.error(`[calendar-sync] disconnect-purge-error user=${userId} err=${purgeError}`);
-        }
-      }
-
       console.log(
         `[calendar-sync] disconnected user=${userId} revocation=${revocation} purge=${purgeLocal ? "requested" : "no"} purged_events=${purgedEvents} purged_mappings=${purgedMappings}`,
       );
@@ -439,7 +445,8 @@ Deno.serve(async (req) => {
           purge_local: purgeLocal,
           purged_events: purgedEvents,
           purged_mappings: purgedMappings,
-          purge_error: purgeError ? "Algumas cópias locais não puderam ser removidas." : null,
+          purged_conflicts: purgedConflicts,
+          purge_error: null,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -497,30 +504,42 @@ Deno.serve(async (req) => {
       );
     }
 
+    // A migrated (v1) row is unreadable without the key. Fail safely and
+    // temporarily instead of degrading, and never log credential material.
+    if (!encKey && typeof tokenRecord.token_enc_version === "number" && tokenRecord.token_enc_version >= 1) {
+      console.error("[calendar-sync] enc-key-missing state=encrypted-row");
+      return new Response(
+        JSON.stringify({
+          error: "Sincronização temporariamente indisponível. Tente novamente em alguns minutos.",
+          code: "encryption_key_unavailable",
+          retryable: true,
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const storedRefreshToken = await readTokenField(tokenRecord, "refresh_token", encKey);
     const storedAccessToken = await readTokenField(tokenRecord, "access_token", encKey);
 
-    // Lazy migration to encryption at rest: whenever a readable credential is
-    // still present and the key is configured, re-write it encrypted and clear
-    // the plaintext columns in the same statement. Purely additive — a failure
-    // here never blocks the sync.
+    // Lazy migration to encryption at rest. The verified helper encrypts BOTH
+    // credentials, decrypts them back and compares them byte-for-byte with the
+    // originals; only then does it return a payload that clears the plaintext
+    // and claims version 1. A failure returns null, nothing is persisted and
+    // the credential stays exactly as it is for the next attempt.
     if (encKey && needsTokenMigration(tokenRecord) && storedRefreshToken && storedAccessToken) {
-      try {
-        const migrated = await buildTokenColumns(
-          { access_token: storedAccessToken, refresh_token: storedRefreshToken },
-          encKey,
-          tokenRecord,
-        );
-        if (migrated.token_enc_version === 1) {
-          const { error: migErr } = await supabase
-            .from("google_calendar_tokens")
-            .update({ ...migrated, updated_at: new Date().toISOString() })
-            .eq("user_id", userId);
-          if (migErr) console.warn(`[calendar-sync] token-migration-error err=${migErr.message}`);
-          else console.log(`[calendar-sync] token-migrated-to-enc version=1`);
-        }
-      } catch (e: any) {
-        console.warn(`[calendar-sync] token-migration-skipped err=${String(e?.message || e).slice(0, 120)}`);
+      const migrated = await buildVerifiedEncryptedColumns(
+        { access_token: storedAccessToken, refresh_token: storedRefreshToken },
+        encKey,
+      );
+      if (!migrated) {
+        console.warn("[calendar-sync] token-migration-skipped reason=verification-failed");
+      } else {
+        const { error: migErr } = await supabase
+          .from("google_calendar_tokens")
+          .update({ ...migrated, updated_at: new Date().toISOString() })
+          .eq("user_id", userId);
+        if (migErr) console.warn(`[calendar-sync] token-migration-error err=${migErr.message}`);
+        else console.log("[calendar-sync] token-migrated-to-enc version=1 verified=yes");
       }
     }
 

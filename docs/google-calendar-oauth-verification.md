@@ -10,6 +10,7 @@ Atualizado na etapa final de hardening da integração.
 | Produto | Agentes de Sonhos |
 | Domínio principal | https://app.agentesdesonhos.com.br |
 | Homepage | https://agentesdesonhos.com.br |
+| Homepage pública da integração (App homepage no formulário) | https://agentesdesonhos.com.br/google-calendar |
 | Política de Privacidade | https://agentesdesonhos.com.br/politicasdeprivacidade (seção 7 — Integração com o Google Calendar) |
 | Termos de Uso | https://agentesdesonhos.com.br/termosdeuso |
 | Redirect URI OAuth | `https://<projeto>.supabase.co/functions/v1/google-calendar-callback` |
@@ -59,19 +60,36 @@ impediria a publicação dos compromissos criados na plataforma, que é o valor 
   apagá-las. Eventos no Google nunca são apagados por essa ação.
 - Revogação também disponível em https://myaccount.google.com/permissions.
 
-## 6. Roteiro do vídeo de demonstração
+## 6. Demo video script (English — as required by Google review)
 
-1. Mostrar a URL `app.agentesdesonhos.com.br` e o login do usuário de teste.
-2. Abrir **Agenda** e mostrar o botão "Conectar Google Calendar".
-3. Abrir a tela de consentimento da plataforma, lendo em voz alta as permissões solicitadas e a
-   finalidade; mostrar o link para a Política de Privacidade.
-4. Clicar em "Continuar para o Google" e mostrar a tela de consentimento do Google, destacando
-   que apenas os dois escopos mínimos aparecem.
-5. Voltar à Agenda e mostrar o status "Sincronizado" e o botão "Detalhes" com o relatório.
-6. Criar um compromisso na plataforma, sincronizar e mostrá-lo aparecendo no Google Calendar.
-7. Criar um evento no Google Calendar, sincronizar e mostrá-lo aparecendo na Agenda.
-8. Clicar em "Desconectar", mostrar a opção de apagar cópias locais e concluir.
-9. Mostrar em https://myaccount.google.com/permissions que o acesso não está mais concedido.
+Record in one take, English narration, no cuts, browser URL bar always visible.
+
+1. "This is Agentes de Sonhos, a management platform for travel agents." Show the public
+   integration page at `https://agentesdesonhos.com.br/google-calendar`, scrolling through the
+   requested scopes, the data usage section and the disconnect section. Point at the link to the
+   Privacy Policy.
+2. Show the OAuth client ID on screen matching the client submitted for verification.
+3. Sign in to `https://app.agentesdesonhos.com.br` with the test account provided to Google.
+4. Open **Agenda** (Calendar) and point at the "Conectar Google Calendar" ("Connect Google
+   Calendar") button. "The integration is optional and always started by the user."
+5. Click it. Read the in-app consent screen out loud: "We request only two scopes:
+   `calendar.events`, to read and write the events of your primary calendar, and
+   `calendars.readonly`, to read only the calendar time zone." Show the Privacy Policy link.
+6. Click "Continuar para o Google" ("Continue to Google") and show the Google consent screen.
+   Say: "Only the two minimum scopes are listed here — nothing else is requested."
+7. Grant consent and return to the app. Show the status indicator reaching "Sincronizado"
+   ("Synced") and open the "Detalhes" ("Details") report.
+8. Create an appointment in the platform, run the sync, then open Google Calendar in another tab
+   and show the same event there, with matching title, date, time and time zone.
+9. Create an event directly in Google Calendar, run the sync again, and show it appearing in the
+   platform Agenda. "The synchronization is bidirectional, which is why the write scope is
+   required."
+10. Click "Desconectar" ("Disconnect"). Show the dialog and its optional checkbox: "The user can
+    also delete the local copies of the events imported from Google. We never delete anything on
+    the Google side."
+11. Confirm the disconnect and show the button returning to the disconnected state.
+12. Open `https://myaccount.google.com/permissions` and show that Agentes de Sonhos no longer has
+    access. "The token was revoked at Google and deleted from our database."
 
 ## 7. Conexões legadas
 

@@ -80,10 +80,16 @@ export async function decryptToken(value: string, secret: string): Promise<strin
 }
 
 /**
- * Read a credential. The encrypted column wins whenever it holds a ciphertext.
- * The legacy plaintext column is only consulted while the row is still
- * unmigrated; a row that claims version >= 1 is fail-closed on decryption
- * failure so callers flag the connection for reconnect.
+ * Read a credential.
+ *
+ * A row that claims `token_enc_version >= 1` is strictly fail-closed: the value
+ * MUST come from a valid ciphertext in `*_enc`, decrypted with the configured
+ * key. A missing/blank/non-ciphertext `*_enc`, a missing key or a decryption
+ * error all return null — the legacy plaintext column is never consulted for a
+ * migrated row, even if some value is still sitting there.
+ *
+ * Only an unmigrated row (version 0/null) may fall back to plaintext; that is
+ * what makes the one-time lazy migration possible.
  */
 export async function readTokenField(
   record: TokenRecordLike,
@@ -91,17 +97,74 @@ export async function readTokenField(
   secret: string | null | undefined,
 ): Promise<string | null> {
   const encValue = record[`${field}_enc` as "access_token_enc" | "refresh_token_enc"];
+  const claimsEncrypted = typeof record.token_enc_version === "number" && record.token_enc_version >= 1;
+
+  if (claimsEncrypted) {
+    if (!isCiphertext(encValue) || !secret) return null;
+    try {
+      return await decryptToken(encValue as string, secret);
+    } catch {
+      return null;
+    }
+  }
+
   if (isCiphertext(encValue)) {
     if (!secret) return null;
     try {
       return await decryptToken(encValue as string, secret);
     } catch {
-      // Fail-closed: a migrated row must never silently degrade to plaintext.
       return null;
     }
   }
   const plain = record[field];
   return typeof plain === "string" && plain.length > 0 ? plain : null;
+}
+
+/**
+ * Verified encryption payload — the ONLY way a row is allowed to reach
+ * `token_enc_version = 1` with the plaintext columns cleared.
+ *
+ * Steps, in order, all mandatory:
+ *  1. both credentials must be present and non-empty;
+ *  2. a key must be configured;
+ *  3. each credential is encrypted;
+ *  4. each ciphertext is decrypted back;
+ *  5. each round-trip result is compared exactly (===) with the original.
+ *
+ * Any failure returns null and the caller MUST NOT persist anything — no
+ * version bump, no plaintext clearing. Idempotent: calling it repeatedly with
+ * the same input yields equivalent (freshly-IV'd) payloads and never mutates
+ * its arguments.
+ */
+export async function buildVerifiedEncryptedColumns(
+  tokens: { access_token?: string | null; refresh_token?: string | null },
+  secret: string | null | undefined,
+): Promise<TokenColumnUpdate | null> {
+  const access = tokens.access_token;
+  const refresh = tokens.refresh_token;
+  if (typeof access !== "string" || access.length === 0) return null;
+  if (typeof refresh !== "string" || refresh.length === 0) return null;
+  if (!secret) return null;
+
+  try {
+    const accessEnc = await encryptToken(access, secret);
+    const refreshEnc = await encryptToken(refresh, secret);
+    if (!isCiphertext(accessEnc) || !isCiphertext(refreshEnc)) return null;
+
+    const accessBack = await decryptToken(accessEnc, secret);
+    const refreshBack = await decryptToken(refreshEnc, secret);
+    if (accessBack !== access || refreshBack !== refresh) return null;
+
+    return {
+      access_token_enc: accessEnc,
+      refresh_token_enc: refreshEnc,
+      access_token: null,
+      refresh_token: null,
+      token_enc_version: 1,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /** True when the row still holds a readable credential that must be migrated. */

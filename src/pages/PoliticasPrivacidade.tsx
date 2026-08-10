@@ -153,7 +153,15 @@ export default function PoliticasPrivacidade() {
               <h3 className="text-base font-semibold">7.3 Uso limitado (Google API Services User Data Policy)</h3>
               <p>
                 O uso e a transferência de informações recebidas das APIs do Google seguem a
-                <strong className="text-foreground"> Google API Services User Data Policy</strong>,
+                <a
+                  href="https://developers.google.com/terms/api-services-user-data-policy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-foreground font-semibold"
+                >
+                  {" "}Google API Services User Data Policy
+                </a>
+                ,
                 incluindo os requisitos de <strong className="text-foreground">Limited Use</strong>.
                 Isso significa que os dados da sua agenda:
               </p>
