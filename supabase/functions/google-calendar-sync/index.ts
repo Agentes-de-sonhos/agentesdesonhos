@@ -208,6 +208,11 @@ async function markReconnectRequired(supabase: any, userId: string, reason: stri
  * Persists a freshly refreshed access token. When encryption is active and the
  * stored row is still legacy (refresh_token_enc missing), the known plaintext
  * refresh token is encrypted in the same write so the row can reach version 1.
+ *
+ * Fail-closed: credentials are only ever written through the verified
+ * round-trip builder. Without a key, or when verification fails, nothing is
+ * written at all — the caller keeps using the in-memory access token for this
+ * run and the next run retries.
  */
 async function persistRefreshedToken(
   supabase: any,
@@ -219,29 +224,22 @@ async function persistRefreshedToken(
   grantedScope?: string | null,
 ) {
   const encKey = getTokenEncKey();
-  // A row already encrypted must never be downgraded to plaintext because the
-  // key vanished from the environment: refuse to touch the credential columns.
-  if (!encKey && typeof existing?.token_enc_version === "number" && existing.token_enc_version >= 1) {
+  // No key: never write a readable credential, and never downgrade an encrypted
+  // row. Nothing is persisted; this run continues with the in-memory token.
+  if (!encKey) {
     console.error("[calendar-sync] token-write-blocked reason=missing-enc-key");
     return;
   }
-  const payload: { access_token: string; refresh_token?: string } = { access_token: accessToken };
-  if (encKey && refreshTokenPlain && !isCiphertext(existing?.refresh_token_enc)) {
-    payload.refresh_token = refreshTokenPlain;
+  // Only the verified builder may touch credential columns / the version flag.
+  const columns = await buildVerifiedEncryptedColumns(
+    { access_token: accessToken, refresh_token: refreshTokenPlain ?? null },
+    encKey,
+  );
+  if (!columns) {
+    // Generic log: never include the token or any credential material.
+    console.error("[calendar-sync] token-write-blocked reason=verified-encryption-unavailable");
+    return;
   }
-  const verified = encKey
-    ? await buildVerifiedEncryptedColumns(
-        {
-          access_token: accessToken,
-          refresh_token: refreshTokenPlain ?? null,
-        },
-        encKey,
-      )
-    : null;
-  // Prefer the verified round-trip payload (both credentials known). Otherwise
-  // fall back to the incremental builder, which keeps a partially migrated row
-  // at version 0 with its plaintext intact instead of losing the credential.
-  const columns = verified ?? (await buildTokenColumns(payload, encKey, existing ?? null));
   // Google echoes the effective grant on refresh: keep the recorded scope set
   // truthful so an overbroad legacy connection stays visible.
   const scopeList = parseScopeString(grantedScope);
