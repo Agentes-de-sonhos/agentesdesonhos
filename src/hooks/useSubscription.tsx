@@ -19,6 +19,8 @@ interface SubscriptionContextType {
   plan: SubscriptionPlan;
   loading: boolean;
   isPromotor: boolean;
+  /** true quando o plano vigente vem da conta master (colaborador de equipe). */
+  planInherited: boolean;
   hasFeature: (feature: Feature) => boolean;
   canUseAI: () => boolean;
   aiUsageCount: number;
@@ -35,12 +37,14 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [planInherited, setPlanInherited] = useState(false);
   const [loading, setLoading] = useState(true);
   const initialLoadDone = useRef(false);
 
   const fetchSubscription = useCallback(async () => {
     if (!user) {
       setSubscription(null);
+      setPlanInherited(false);
       setLoading(false);
       initialLoadDone.current = false;
       return;
@@ -54,20 +58,48 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("is_active", true)
+      // Plano efetivo: a agência é resolvida no servidor (nunca enviada pelo
+      // cliente), então um colaborador herda apenas o plano da sua master.
+      const { data: effective, error: effectiveError } = await supabase
+        .rpc("effective_subscription")
         .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching subscription:", error);
-        // Row creation is handled server-side by the handle_new_user_subscription
-        // trigger; client inserts are blocked by RLS. Leave subscription null so
-        // the app falls back to the default "start" plan derived below.
-      } else if (data) {
-        setSubscription(data as unknown as Subscription);
+      const effectiveRow = effective as
+        | { owner_user_id: string; inherited: boolean; plan: string | null; is_active: boolean;
+            expires_at: string | null; ai_usage_count: number | null; ai_usage_reset_at: string | null }
+        | null;
+
+      if (effectiveError) console.error("Error fetching effective subscription:", effectiveError);
+
+      if (effectiveRow?.inherited) {
+        // Colaborador: usa o plano da master apenas para gates/exibição; a
+        // assinatura comercial individual não é alterada.
+        setPlanInherited(true);
+        setSubscription({
+          user_id: effectiveRow.owner_user_id,
+          plan: (effectiveRow.plan as SubscriptionPlan) || "start",
+          is_active: effectiveRow.is_active,
+          expires_at: effectiveRow.expires_at,
+          ai_usage_count: effectiveRow.ai_usage_count ?? 0,
+          ai_usage_reset_at: effectiveRow.ai_usage_reset_at,
+        } as unknown as Subscription);
+      } else {
+        setPlanInherited(false);
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("is_active", true)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching subscription:", error);
+          // Row creation is handled server-side by the handle_new_user_subscription
+          // trigger; client inserts are blocked by RLS. Leave subscription null so
+          // the app falls back to the default "start" plan derived below.
+        } else if (data) {
+          setSubscription(data as unknown as Subscription);
+        }
       }
     } catch (err) {
       console.error("Error in subscription fetch:", err);
@@ -170,6 +202,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       plan,
       loading,
       isPromotor,
+      planInherited,
       hasFeature,
       canUseAI,
       aiUsageCount,
