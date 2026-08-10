@@ -222,12 +222,17 @@ export function computeCursorResetUpdate(now = new Date().toISOString()): Record
   };
 }
 
-export type SyncLifecycleStatus = "synced" | "bootstrap" | "error";
+export type SyncLifecycleStatus = "synced" | "bootstrap" | "incremental" | "error";
 
 /** A partial bootstrap must never be reported as a finished sync. */
-export function resolveSyncStatus(opts: { bootstrapInProgress: boolean; errors: number }): SyncLifecycleStatus {
+export function resolveSyncStatus(opts: {
+  bootstrapInProgress: boolean;
+  incrementalInProgress?: boolean;
+  errors: number;
+}): SyncLifecycleStatus {
   if (opts.errors > 0) return "error";
-  return opts.bootstrapInProgress ? "bootstrap" : "synced";
+  if (opts.bootstrapInProgress) return "bootstrap";
+  return opts.incrementalInProgress ? "incremental" : "synced";
 }
 
 /** Transient aborts/timeouts must not flag the connection for re-consent. */
