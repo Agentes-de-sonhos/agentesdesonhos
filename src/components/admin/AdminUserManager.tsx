@@ -140,12 +140,13 @@ export function AdminUserManager() {
     queryKey: ["admin-users-full"],
     queryFn: async () => {
       // Fetch profiles, roles, subscriptions, emails, and monthly payments in parallel
-      const [profilesRes, rolesRes, subsRes, emailsRes, paymentsRes] = await Promise.all([
+      const [profilesRes, rolesRes, subsRes, emailsRes, paymentsRes, teamRes] = await Promise.all([
         supabase.from("profiles").select("*").order("created_at", { ascending: false }),
         supabase.from("user_roles").select("user_id, role"),
         supabase.from("subscriptions").select("user_id, plan, is_active"),
         supabase.functions.invoke("admin-list-emails"),
         supabase.from("monthly_payments").select("user_id, is_paid").eq("month", currentMonth).eq("year", currentYear),
+        supabase.rpc("admin_team_accounts_overview"),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -156,8 +157,7 @@ export function AdminUserManager() {
       const paymentMap: Record<string, boolean> = {};
       (paymentsRes.data || []).forEach((p: any) => { paymentMap[p.user_id] = p.is_paid; });
 
-      // Combine data
-      return (profilesRes.data || []).map((profile) => {
+      const baseRows = (profilesRes.data || []).map((profile) => {
         const userRoles = rolesRes.data?.filter((r) => r.user_id === profile.user_id) || [];
         const hasAdmin = userRoles.some((r) => r.role === "admin");
         const userRole = hasAdmin ? "admin" : (userRoles[0]?.role || "agente");
@@ -177,8 +177,14 @@ export function AdminUserManager() {
           plan: (userSub?.plan as SubscriptionPlan) || "start",
           is_active: userSub?.is_active ?? true,
           monthly_paid: paymentMap[profile.user_id] ?? false,
-        } as UserWithDetails;
+        } as unknown as AdminAccountRow;
       });
+
+      // Sobrepõe colaboradores de equipe (e-mail real + plano herdado da master)
+      // e adiciona os convites pendentes como linhas próprias.
+      const overview = (teamRes.data as unknown as TeamOverview | null) ?? null;
+      if (teamRes.error) console.error("admin_team_accounts_overview error", teamRes.error);
+      return buildAdminAccountRows(baseRows, overview) as unknown as UserWithDetails[];
     },
   });
 
