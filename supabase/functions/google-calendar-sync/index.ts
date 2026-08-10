@@ -1694,6 +1694,7 @@ Deno.serve(async (req) => {
         read_only_skipped: readOnlySkipped,
         delete_skip_reasons: deleteSkipReasons,
         phase_order: "pull_then_push",
+        pull_inventory_failed: pullInventoryFailed,
         limits,
         push_errors: pushErrors,
         pull_errors: pullErrors,
