@@ -5,6 +5,7 @@ import {
   isAuthorizedInternalCall,
 } from "../_shared/calendarCronAuth.ts";
 import {
+  effectiveUserTimeoutMs,
   getCronBudget,
   hasCronBudgetLeft,
   orderEligibleTokens,
@@ -88,8 +89,15 @@ Deno.serve(async (req) => {
       console.log(`[calendar-sync] cron-budget-reached processed=${invoked} deferred=${deferred}`);
       break;
     }
+    // Effective slice: never exceeds what is left of the whole-run budget.
+    const sliceMs = effectiveUserTimeoutMs(Date.now() - startedAt, budget);
+    if (sliceMs <= 0) {
+      deferred = queue.length - invoked;
+      console.log(`[calendar-sync] cron-no-window processed=${invoked} deferred=${deferred}`);
+      break;
+    }
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), budget.perUserMs);
+    const timer = setTimeout(() => controller.abort(), sliceMs);
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/google-calendar-sync`, {
         method: "POST",
