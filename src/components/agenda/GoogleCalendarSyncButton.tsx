@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { SyncReportDialog } from "./SyncReportDialog";
 import {
+  bootstrapProgressLabel,
   needsReconnect,
   reconnectMessage,
   resolveStatusKey,
@@ -45,6 +46,7 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
   const dotColor = statusDotClass(statusKey);
   const label = statusLabel(statusKey);
   const mustReconnect = needsReconnect(status);
+  const bootstrapLabel = bootstrapProgressLabel(status);
 
   // Re-consent required: the connection is kept, but only reconnecting fixes it.
   if (mustReconnect) {
@@ -79,11 +81,11 @@ export function GoogleCalendarSyncButton({ onSyncComplete }: GoogleCalendarSyncB
     <div className="flex items-center gap-2">
       <div
         className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground"
-        title={status.last_sync_error || label}
+        title={bootstrapLabel || status.last_sync_error || label}
       >
         <span className={`inline-block h-2 w-2 rounded-full ${dotColor}`} />
-        <span>{label}</span>
-        {status.last_sync_at && statusKey !== "syncing" && (
+        <span>{bootstrapLabel ?? label}</span>
+        {status.last_sync_at && statusKey !== "syncing" && statusKey !== "bootstrap" && (
           <span>· {formatDistanceToNow(new Date(status.last_sync_at), { addSuffix: true, locale: ptBR })}</span>
         )}
         {statusKey === "error" ? <AlertCircle className="h-3 w-3 text-rose-500" /> : statusKey === "synced" ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : null}

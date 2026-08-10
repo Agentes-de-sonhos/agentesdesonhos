@@ -4717,6 +4717,14 @@ export type Database = {
           access_token: string
           access_token_enc: string | null
           auto_sync_enabled: boolean
+          bootstrap_completed_at: string | null
+          bootstrap_items_done: number
+          bootstrap_last_error: string | null
+          bootstrap_page_token: string | null
+          bootstrap_pages_done: number
+          bootstrap_started_at: string | null
+          bootstrap_window_end: string | null
+          bootstrap_window_start: string | null
           calendar_id: string | null
           connection_state: string
           created_at: string | null
@@ -4727,6 +4735,9 @@ export type Database = {
           last_sync_duration_ms: number | null
           last_sync_error: string | null
           last_sync_status: string | null
+          push_cursor_completed_at: string | null
+          push_cursor_event_id: string | null
+          push_cursor_updated_at: string | null
           refresh_token: string
           refresh_token_enc: string | null
           sync_enabled: boolean | null
@@ -4742,6 +4753,14 @@ export type Database = {
           access_token: string
           access_token_enc?: string | null
           auto_sync_enabled?: boolean
+          bootstrap_completed_at?: string | null
+          bootstrap_items_done?: number
+          bootstrap_last_error?: string | null
+          bootstrap_page_token?: string | null
+          bootstrap_pages_done?: number
+          bootstrap_started_at?: string | null
+          bootstrap_window_end?: string | null
+          bootstrap_window_start?: string | null
           calendar_id?: string | null
           connection_state?: string
           created_at?: string | null
@@ -4752,6 +4771,9 @@ export type Database = {
           last_sync_duration_ms?: number | null
           last_sync_error?: string | null
           last_sync_status?: string | null
+          push_cursor_completed_at?: string | null
+          push_cursor_event_id?: string | null
+          push_cursor_updated_at?: string | null
           refresh_token: string
           refresh_token_enc?: string | null
           sync_enabled?: boolean | null
@@ -4767,6 +4789,14 @@ export type Database = {
           access_token?: string
           access_token_enc?: string | null
           auto_sync_enabled?: boolean
+          bootstrap_completed_at?: string | null
+          bootstrap_items_done?: number
+          bootstrap_last_error?: string | null
+          bootstrap_page_token?: string | null
+          bootstrap_pages_done?: number
+          bootstrap_started_at?: string | null
+          bootstrap_window_end?: string | null
+          bootstrap_window_start?: string | null
           calendar_id?: string | null
           connection_state?: string
           created_at?: string | null
@@ -4777,6 +4807,9 @@ export type Database = {
           last_sync_duration_ms?: number | null
           last_sync_error?: string | null
           last_sync_status?: string | null
+          push_cursor_completed_at?: string | null
+          push_cursor_event_id?: string | null
+          push_cursor_updated_at?: string | null
           refresh_token?: string
           refresh_token_enc?: string | null
           sync_enabled?: boolean | null

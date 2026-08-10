@@ -10,12 +10,15 @@ interface GoogleCalendarStatus {
   auto_sync_enabled?: boolean;
   last_sync_at?: string | null;
   sync_in_progress?: boolean;
-  last_sync_status?: "idle" | "syncing" | "synced" | "error" | null;
+  last_sync_status?: "idle" | "syncing" | "synced" | "error" | "bootstrap" | null;
   last_sync_error?: string | null;
   last_sync_duration_ms?: number | null;
   connection_state?: ConnectionState | null;
   last_auth_error?: string | null;
   last_auth_error_at?: string | null;
+  bootstrap_in_progress?: boolean | null;
+  bootstrap_pages_done?: number | null;
+  bootstrap_items_done?: number | null;
 }
 
 export interface SyncSkipSample {
@@ -53,6 +56,11 @@ export interface SyncReport {
   skip_samples: { push: SyncSkipSample[]; pull: SyncSkipSample[] };
   window: { start: string; end: string };
   duration_ms: number;
+  pull_mode?: "bootstrap" | "incremental";
+  bootstrap_in_progress?: boolean;
+  pages_this_run?: number;
+  items_this_run?: number;
+  resume_pending?: boolean;
 }
 
 export function useGoogleCalendar() {
@@ -185,6 +193,11 @@ export function useGoogleCalendar() {
           skip_samples: data.skip_samples ?? { push: [], pull: [] },
           window: data.window ?? { start: "", end: "" },
           duration_ms: data.duration_ms ?? 0,
+          pull_mode: data.pull_mode,
+          bootstrap_in_progress: !!data.bootstrap_in_progress,
+          pages_this_run: data.pages_this_run ?? 0,
+          items_this_run: data.items_this_run ?? 0,
+          resume_pending: !!data.resume_pending,
         });
         const summary =
           `Enviados: ${pCreated} criados, ${pUpdated} atualizados, ${pSkipped} ignorados · ` +
@@ -194,6 +207,11 @@ export function useGoogleCalendar() {
           toast.warning(`${summary} · ${totalErrors} erro(s). Veja os logs.`);
           console.error("[calendar-sync] push_errors:", data.push_errors);
           console.error("[calendar-sync] pull_errors:", data.pull_errors);
+        } else if (data.bootstrap_in_progress) {
+          // Partial bootstrap: report progress, never completion.
+          toast.info(
+            `Sincronização inicial em andamento · ${data.items_this_run ?? 0} eventos em ${data.pages_this_run ?? 0} páginas nesta rodada. Continua automaticamente.`,
+          );
         } else {
           toast.success(`Sincronizado! ${summary}`);
         }
