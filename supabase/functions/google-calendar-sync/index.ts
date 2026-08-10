@@ -388,6 +388,37 @@ Deno.serve(async (req) => {
         revocation = await revokeGoogleToken(refresh || access);
       }
 
+      // Explicit local purge runs BEFORE the credential is dropped and is fully
+      // transactional inside the database: one SECURITY DEFINER RPC deletes the
+      // user's conflicts, the agency_events joined to origin='google' mappings
+      // and the remaining mappings, with no id list crossing the edge boundary
+      // (so no 1000-row PostgREST cap) and no possibility of orphan copies.
+      // Google-side events are never touched.
+      let purgedEvents = 0;
+      let purgedMappings = 0;
+      let purgedConflicts = 0;
+      if (purgeLocal) {
+        const { data: purgeResult, error: purgeRpcError } = await supabase.rpc(
+          "purge_google_calendar_local_copies",
+          { p_user_id: userId },
+        );
+        if (purgeRpcError) {
+          console.error(`[calendar-sync] disconnect-purge-error user=${userId} err=${purgeRpcError.message}`);
+          return new Response(
+            JSON.stringify({
+              error: "Não foi possível remover as cópias locais agora. Nada foi alterado — tente novamente.",
+              code: "purge_failed",
+              retryable: true,
+            }),
+            { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        const row = Array.isArray(purgeResult) ? purgeResult[0] : purgeResult;
+        purgedEvents = Number(row?.deleted_events ?? 0);
+        purgedMappings = Number(row?.deleted_mappings ?? 0);
+        purgedConflicts = Number(row?.deleted_conflicts ?? 0);
+      }
+
       // Credentials are removed; event mappings and calendar events are preserved.
       const { error: deleteError } = await supabase
         .from("google_calendar_tokens")
@@ -402,50 +433,6 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Explicit local purge: only rows imported from Google (origin='google')
-      // are removed, and only for this user. Mappings are cleared afterwards so
-      // a failure mid-way never leaves an event without its mapping.
-      let purgedEvents = 0;
-      let purgedMappings = 0;
-      let purgeError: string | null = null;
-      if (purgeLocal) {
-        const { data: googleMappings, error: mapErr } = await supabase
-          .from("google_calendar_sync")
-          .select("id, agency_event_id, origin")
-          .eq("user_id", userId)
-          .eq("origin", "google")
-          .not("agency_event_id", "is", null);
-
-        if (mapErr) {
-          purgeError = mapErr.message;
-        } else {
-          const eventIds = (googleMappings || [])
-            .map((m: any) => m.agency_event_id)
-            .filter((id: unknown): id is string => typeof id === "string");
-          for (let i = 0; i < eventIds.length; i += 200) {
-            const slice = eventIds.slice(i, i + 200);
-            const { error: evErr } = await supabase
-              .from("agency_events")
-              .delete()
-              .eq("user_id", userId)
-              .in("id", slice);
-            if (evErr) { purgeError = evErr.message; break; }
-            purgedEvents += slice.length;
-          }
-          if (!purgeError) {
-            const { error: mapDelErr, count } = await supabase
-              .from("google_calendar_sync")
-              .delete({ count: "exact" })
-              .eq("user_id", userId);
-            if (mapDelErr) purgeError = mapDelErr.message;
-            else purgedMappings = count ?? 0;
-          }
-        }
-        if (purgeError) {
-          console.error(`[calendar-sync] disconnect-purge-error user=${userId} err=${purgeError}`);
-        }
-      }
-
       console.log(
         `[calendar-sync] disconnected user=${userId} revocation=${revocation} purge=${purgeLocal ? "requested" : "no"} purged_events=${purgedEvents} purged_mappings=${purgedMappings}`,
       );
@@ -458,7 +445,8 @@ Deno.serve(async (req) => {
           purge_local: purgeLocal,
           purged_events: purgedEvents,
           purged_mappings: purgedMappings,
-          purge_error: purgeError ? "Algumas cópias locais não puderam ser removidas." : null,
+          purged_conflicts: purgedConflicts,
+          purge_error: null,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
