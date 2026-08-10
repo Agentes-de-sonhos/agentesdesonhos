@@ -121,6 +121,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
     const checkStripe = async () => {
       try {
+        // Colaboradores não têm assinatura comercial própria: consultar o Stripe
+        // criaria/ajustaria um plano individual indevido.
+        if (planInherited) return;
         const { data, error } = await supabase.functions.invoke("check-subscription");
         if (!error && data?.subscribed && data?.plan) {
           // Only refetch if plan actually changed
@@ -135,7 +138,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     // Delay stripe check to not block initial render
     const timer = window.setTimeout(checkStripe, 2000);
     return () => window.clearTimeout(timer);
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, planInherited]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { role } = useUserRole();
   const isPromotor = role === "promotor";
