@@ -1,73 +1,67 @@
-# Domínio próprio da agência: 100limites.tur.br
+# Diagnóstico: erro ao confirmar cancelamento de assinatura
 
-Objetivo: fazer `100limites.tur.br` e `www.100limites.tur.br` servirem o site público da agência **100 Limites Viagens** e passar a gerar os links públicos dessa conta nesse domínio — de forma aditiva, sem tocar em autenticação, RLS existente ou nos domínios genéricos atuais.
+## 1) Causa raiz mais provável
 
-## O que já existe (verificado)
+A Edge Function `cancel-subscription` só encontra a assinatura **pelo e-mail do usuário no Stripe**, ignorando os IDs já persistidos na tabela `subscriptions`.
 
-- Toda a resolução pública é feita no cliente por hostname (`src/App.tsx`, `PublicCodeResolver`, `SlugResolver`, `ProductLandingResolver`, `CarteiraOrVitrineResolver`).
-- Os RPCs públicos já são escopados por agência: `get_quote_by_public_code(p_agency_slug, p_code)`, `get_itinerary_by_public_code`, `get_trip_by_public_code`, `get_invoice_by_public_code`. Isso já bloqueia acesso cruzado entre agências — serão reutilizados sem alteração.
-- O "site whitelabel" existente da agência é a **Vitrine** (`agency_showcases` + `VitrinePublica`, hoje em `vitrine.tur.br/:slug`). Não haverá site paralelo: no domínio próprio a home passa a renderizar a Vitrine da agência.
-- A agência já tem `public_slug = 100-limites-viagens`, logo e telefone em `profiles`.
-- Hoje não existe nenhuma tabela de domínios por agência — é a peça que falta.
+Evidências:
+- `supabase/functions/cancel-subscription/index.ts` (linhas 47–68): a busca começa com `stripe.customers.list({ email: user.email, limit: 1 })` e, como fallback, `stripe.customers.search({ query: "metadata['supabase_user_id']:..." })`. Nunca lê `subscriptions.stripe_customer_id` / `subscriptions.stripe_subscription_id`.
+- A tabela `public.subscriptions` **possui** as colunas `stripe_customer_id` e `stripe_subscription_id` (com índices dedicados), ou seja, o dado correto existe e não é usado.
+- Quando nada é encontrado, a função lança erro e responde **HTTP 400** — exatamente o status que gera o toast genérico na tela.
 
-## Mapeamento hostname → agência
+Ou seja: se o e-mail do login for diferente do e-mail do cliente no Stripe (troca de e-mail, compra feita com outro endereço, cliente duplicado, `limit: 1` pegando o customer errado sem assinatura), o cancelamento falha com 400 mesmo havendo assinatura ativa.
 
-Nova tabela `public.agency_public_domains`:
+O segundo problema é que a interface **não lê o corpo do erro**. Em `src/pages/MinhaConta.tsx` (linhas 96–99) o código faz `(error as any)?.context?.error`. No supabase-js v2, `error.context` é um objeto `Response`, não o JSON — logo `.error` é sempre `undefined` e a mensagem cai no padrão do SDK: **"Edge Function returned a non-2xx status code"**. A mensagem específica em português já produzida pela função nunca chega ao usuário.
 
-- `hostname` (único, minúsculo), `user_id` (dono da agência), `agency_slug`, `is_primary`, `is_active`, timestamps.
-- Seed: `100limites.tur.br` (primary) e `www.100limites.tur.br` (alias), ambos apontando para `9433421c-…b009e` / `100-limites-viagens`.
-- Leitura pública apenas via RPC `get_agency_domain(p_hostname text)` (SECURITY DEFINER, STABLE) devolvendo `{ user_id, agency_slug, agency_name, logo_url, phone, city, is_primary }` — sem expor e-mail ou outros campos sensíveis. A tabela fica com RLS restrita (dono/admin leem; escrita só por admin).
-- Cache leve no cliente (React Query, staleTime longo) para não repetir a chamada em cada rota.
+## 2) Outros cenários de falha
 
-Sem hardcode espalhado: a única entrada nova em código é o helper que consulta esse RPC. Novas agências entram com uma linha na tabela + domínio apontado no painel.
+- **Filtro `status: "active"`**: `stripe.subscriptions.list({ status: "active" })` ignora `trialing`, `past_due` e `unpaid` → usuário em teste gratuito recebe "Não encontramos uma assinatura ativa para cancelar" (400).
+- **Assinatura já agendada para cancelamento**: hoje o fluxo tenta atualizar de novo e trata como operação normal, sem informar que já estava agendada (e sem idempotência explícita).
+- **API Stripe `2025-08-27.basil`**: `current_period_end` **não existe mais no objeto Subscription** — confirmado ao inspecionar as assinaturas reais da conta, onde o campo aparece apenas em `items.data[0].current_period_end`. Resultado atual: `cancel_at` volta `undefined`, o toast perde a data e o `expires_at` gravado em `subscriptions` falha silenciosamente (o `new Date(undefined)` estoura dentro do try "non-blocking").
+- **Sessão ausente/expirada**: `verify_jwt = false` para esta função, então uma chamada sem `Authorization` válido também retorna 400 com a mesma aparência genérica.
+- **`customers.search`** depende de indexação eventual do Stripe; recém-criados podem não aparecer.
+- Todos os erros retornam **400**, sem distinção entre "não autenticado", "não encontrado" e "falha do Stripe".
 
-## Rotas no domínio da agência
+## 3) Correção exata recomendada (Edge Function)
 
-Um resolver único (`src/components/routing/AgencyDomainGate.tsx`) decide o comportamento quando o hostname é um domínio de agência:
+Reescrever a resolução da assinatura em ordem de prioridade:
 
-```text
-/                      -> Vitrine pública da agência (VitrinePublica com slug do domínio)
-/orcamento/:codigo     -> OrcamentoPublicoV2  (agency_slug vem do domínio)
-/roteiro/:codigo       -> RoteiroPublicoV2
-/carteira/:codigo      -> CarteiraPublicaV2
-/fatura/:codigo        -> FaturaPublica
-qualquer outro         -> fallback seguro ("link indisponível"), sem cair na landing da plataforma
-```
+1. Ler a linha de `subscriptions` do usuário (`user_id`, `is_active = true`) com service role e usar `stripe_subscription_id` → `stripe.subscriptions.retrieve(id)`.
+2. Se não houver, usar `stripe_customer_id` → `stripe.subscriptions.list({ customer, status: "all", limit: 10 })` e escolher a primeira com status em `["active", "trialing", "past_due", "unpaid"]`.
+3. Só então cair no fallback atual por e-mail (percorrendo todos os customers do e-mail, não apenas o primeiro) e por `metadata.supabase_user_id`.
+4. Se a assinatura já tiver `cancel_at_period_end === true`, retornar **200** idempotente com `already_scheduled: true` e a data.
+5. Substituir `updated.current_period_end` por `updated.items.data[0]?.current_period_end ?? updated.cancel_at ?? updated.trial_end`, com guarda antes de `new Date(...)`.
+6. Persistir de volta em `subscriptions`: `expires_at`, e também `stripe_customer_id` / `stripe_subscription_id` quando descobertos pelo fallback (auto-cura dos dados).
+7. Padronizar códigos HTTP: `401` sem sessão, `404` assinatura não encontrada, `502` erro do Stripe, `400` payload inválido — sempre com `{ error, code }` e headers de CORS.
+8. Manter logs por etapa (`[CANCEL-SUBSCRIPTION] ...`) incluindo qual estratégia localizou a assinatura, sem expor dados sensíveis.
 
-Compatibilidade preservada: nos outros hosts, `/orcamento/:token`, `/roteiro/:token`, `/c/:slug`, `/viagem/:token`, `/fatura/:agencySlug/:code`, `/:slug/ofertas` e `/:agencySlug/:accessCode` continuam exatamente como hoje. `/orcamento/:x` e `/roteiro/:x` passam a ser bifurcados por host (comportamento novo só no domínio da agência).
+## 4) Melhorar a mensagem ao usuário (`src/pages/MinhaConta.tsx`)
 
-## Geração de links
+- Ler o corpo real do erro: quando `error.context` for uma `Response`, fazer `await error.context.json()` (com try/catch e fallback para `.text()`) e usar `body.error`.
+- Mapear `code` para mensagens em português acionáveis, por exemplo:
+  - `not_authenticated` → "Sua sessão expirou. Entre novamente e tente cancelar."
+  - `subscription_not_found` → "Não localizamos uma assinatura ativa vinculada à sua conta. Fale com o suporte informando o e-mail usado no pagamento."
+  - `already_scheduled` → toast informativo: "Seu cancelamento já estava agendado. O acesso vai até DD/MM/AAAA."
+  - `stripe_error` → "O provedor de pagamento não respondeu. Tente novamente em alguns minutos."
+- Manter o fallback genérico apenas como última linha, e fechar o modal + `refetch()` também no caso idempotente.
 
-Novo módulo `src/lib/agencyPublicLinks.ts` + hook `useAgencyPublicDomain()`:
+## 5) Plano de teste
 
-- Se a agência logada tiver domínio primário ativo, os builders retornam `https://<domínio>/orcamento/<código>`, `/roteiro/<código>`, `/carteira/<código>`, `/fatura/<código>`.
-- Caso contrário, mantêm o comportamento atual (`seuorcamento.tur.br`, `seuroteiro.tur.br`, `carteiradigital.tur.br`, `/fatura/:slug/:code`).
-- Pontos atualizados: `src/lib/orcamento-domain.ts`, `roteiro-domain.ts`, `carteira-domain.ts` (parâmetro opcional de domínio) e chamadores `GerarOrcamento.tsx`, `CriarRoteiro.tsx`, `TripWalletList.tsx`, `ShareTripModal.tsx`, `InvoicesManager.tsx`. `AdminUserProjectsManager` resolve o domínio pela agência do projeto.
-- Links já compartilhados não mudam: os antigos seguem válidos nos domínios genéricos.
+| Cenário | Como preparar | Resultado esperado |
+| --- | --- | --- |
+| Assinatura ativa localizada por `stripe_subscription_id` | Linha em `subscriptions` com o ID preenchido | 200, `cancel_at` com data real, toast com data, `expires_at` gravado |
+| Assinatura ativa localizada por `stripe_customer_id` | Limpar `stripe_subscription_id`, manter customer | 200 e `stripe_subscription_id` regravado na tabela |
+| Fallback por e-mail | Limpar ambos os IDs | 200 e ambos os IDs preenchidos automaticamente |
+| E-mail do login diferente do Stripe | Login com e-mail alternativo, IDs preenchidos | 200 (não deve mais falhar) |
+| Já agendada para cancelamento | Repetir o cancelamento | 200 idempotente, toast "já estava agendado" com data |
+| `trialing` | Assinatura em período de teste | 200, cancelamento agendado para o fim do trial |
+| Sem assinatura no Stripe | Usuário Start | 404 + mensagem específica de suporte (não o texto genérico) |
+| Sessão expirada | Invocar sem token válido | 401 + "Sua sessão expirou..." |
+| Motivo com 1000+ caracteres | Colar texto longo | Truncado sem erro; motivo em `cancellation_details.comment` |
+| Verificação final | Após cancelar, rodar `check-subscription` e reabrir `/minha-conta` | Estado consistente e sem novas cobranças |
 
-## Como evitamos exposição cruzada
+Verificação adicional: conferir os logs da função para confirmar qual estratégia localizou a assinatura e que nenhum erro silencioso aparece na gravação de `expires_at`.
 
-1. O código público nunca é buscado sem `agency_slug`; no domínio próprio esse slug vem **do domínio**, não da URL.
-2. Código de outra agência → o RPC não retorna nada → tela de "link indisponível" no padrão visual atual, sem redirecionar para outro domínio.
-3. A Vitrine na home só carrega o showcase do `user_id` vinculado ao hostname.
-4. Nenhuma RLS de tabela existente é alterada; só a nova tabela e um RPC de leitura restrita.
+## Observação
 
-## Validação
-
-- Testes unitários novos: mapa hostname→agência (root, www, host desconhecido, host inativo) e builders de link (com e sem domínio próprio).
-- Verificação em preview com override de host cobrindo: home = Vitrine da 100 Limites; orçamento/roteiro/carteira/fatura válidos abrindo; código de outra agência rejeitado; rota inexistente com fallback; não-regressão em `seuorcamento.tur.br`, `seuroteiro.tur.br`, `carteiradigital.tur.br`, `vitrine.tur.br` e `/fatura/:slug/:code`.
-- `tsgo` + suíte de testes relacionada.
-- Publicação: nada vai a produção nesta etapa. O domínio precisa ser conectado em Configurações do Projeto → Domínios (root + `www`); depois da aprovação, publica-se para o domínio servir o app.
-
-## Ordem de execução
-
-1. Migração: tabela `agency_public_domains` + GRANTs + RLS + RPC `get_agency_domain` + seed da 100 Limites.
-2. `src/lib/agencyDomains.ts` (resolução/cache) e `useAgencyPublicDomain()`.
-3. `AgencyDomainGate` + ajustes de rota em `App.tsx`.
-4. Builders de link e chamadores.
-5. Testes + validação em preview.
-
-## Suposições
-
-- A home do domínio da agência é a Vitrine existente (`agency_showcases`). Se a expectativa for outra página institucional, aviso antes de implementar.
-- O domínio já está/será conectado ao projeto no painel; sem isso o DNS não resolve para o app.
+Nenhum arquivo foi alterado — este é apenas o diagnóstico. Aprove para eu aplicar a correção na Edge Function e no tratamento de erro da tela.
