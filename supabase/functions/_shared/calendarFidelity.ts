@@ -368,11 +368,48 @@ export interface LocalEventLike {
   event_time?: string | null;
   end_date?: string | null;
   end_time?: string | null;
+  start_at?: string | null;
   end_at?: string | null;
   time_zone?: string | null;
   all_day?: boolean | null;
   location?: string | null;
   updated_at?: string | null;
+}
+
+/**
+ * Converts an absolute instant (ISO/UTC) into the wall date and time observed
+ * in an IANA zone. Uses Intl.formatToParts, so DST transitions are handled by
+ * the timezone database instead of a fixed offset. An ISO UTC string is NEVER
+ * treated as local wall time.
+ */
+export function wallTimeInZone(
+  instant: string,
+  timeZone: string,
+): { date: string; time: string } | null {
+  const ms = Date.parse(instant);
+  if (!Number.isFinite(ms)) return null;
+  let parts: Intl.DateTimeFormatPart[];
+  try {
+    parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).formatToParts(new Date(ms));
+  } catch {
+    // Unknown zone: fall back to the platform zone rather than breaking sync.
+    if (timeZone === FALLBACK_TIME_ZONE) return null;
+    return wallTimeInZone(instant, FALLBACK_TIME_ZONE);
+  }
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  const hour = get("hour") === "24" ? "00" : get("hour");
+  const date = `${get("year")}-${get("month")}-${get("day")}`;
+  const time = `${hour}:${get("minute")}`;
+  if (date.length !== 10 || time.length !== 5) return null;
+  return { date, time };
 }
 
 /**
