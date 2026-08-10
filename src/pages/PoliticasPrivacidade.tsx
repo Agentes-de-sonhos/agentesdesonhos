@@ -126,6 +126,85 @@ export default function PoliticasPrivacidade() {
                 <li><strong className="text-foreground">Atendimento:</strong> Seg-Sex, 9h-18h</li>
               </ul>
             </section>
+
+            <section className="space-y-4" id="google-calendar">
+              <h2 className="text-xl font-semibold">8. Integração com o Google Calendar</h2>
+              <p>
+                A conexão com o Google Calendar é opcional, iniciada por você e pode ser desfeita a
+                qualquer momento. Ela existe com uma única finalidade: manter a sua Agenda dentro da
+                plataforma e o seu Google Calendar sincronizados.
+              </p>
+
+              <h3 className="text-base font-semibold">8.1 Permissões solicitadas e por quê</h3>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li>
+                  <strong className="text-foreground">.../auth/calendar.events</strong> — ler, criar,
+                  atualizar e excluir eventos do seu calendário principal. É a permissão mínima que
+                  torna a sincronização bidirecional possível.
+                </li>
+                <li>
+                  <strong className="text-foreground">.../auth/calendar.calendars.readonly</strong> —
+                  ler apenas a configuração do calendário principal (fuso horário), para que horários
+                  e eventos de dia inteiro apareçam corretamente.
+                </li>
+              </ul>
+              <p className="text-muted-foreground">
+                Não solicitamos acesso a Gmail, Drive, Contatos, nem a qualquer outro escopo além dos
+                dois acima.
+              </p>
+
+              <h3 className="text-base font-semibold">8.2 Dados acessados e armazenados</h3>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li>Título, descrição, data, hora, fuso horário, local, recorrência e status do evento</li>
+                <li>Identificadores técnicos do evento e do calendário, usados para evitar duplicidades</li>
+                <li>Credenciais de acesso do Google, guardadas criptografadas (AES-256-GCM) e acessíveis somente pelos serviços internos de sincronização</li>
+              </ul>
+
+              <h3 className="text-base font-semibold">8.3 Uso limitado (Google API Services User Data Policy)</h3>
+              <p>
+                O uso e a transferência de informações recebidas das APIs do Google seguem a
+                <strong className="text-foreground"> Google API Services User Data Policy</strong>,
+                incluindo os requisitos de <strong className="text-foreground">Limited Use</strong>.
+                Isso significa que os dados da sua agenda:
+              </p>
+              <ul className="list-none pl-0 space-y-1 text-muted-foreground">
+                <li>❌ Não são vendidos nem cedidos a terceiros</li>
+                <li>❌ Não são usados para publicidade, remarketing ou perfilamento comercial</li>
+                <li>❌ Não são usados para treinar modelos de inteligência artificial</li>
+                <li>❌ Não são lidos por pessoas, exceto com sua autorização expressa em suporte, por exigência legal ou para investigação de incidentes de segurança</li>
+                <li>✅ São usados apenas para prestar o recurso de sincronização de agenda</li>
+              </ul>
+
+              <h3 className="text-base font-semibold">8.4 Retenção e exclusão</h3>
+              <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                <li>Ao desconectar, a autorização é revogada no Google e as credenciais são apagadas imediatamente</li>
+                <li>Por padrão, os eventos já presentes na sua Agenda são preservados; no momento de desconectar você pode optar por apagar as cópias locais dos eventos importados do Google</li>
+                <li>Nada é apagado no seu Google Calendar quando você desconecta</li>
+                <li>A exclusão da conta remove todos os dados de sincronização associados</li>
+              </ul>
+              <p className="text-muted-foreground">
+                Você também pode revogar o acesso diretamente em{" "}
+                <a
+                  href="https://myaccount.google.com/permissions"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-foreground"
+                >
+                  myaccount.google.com/permissions
+                </a>
+                .
+              </p>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="text-xl font-semibold">9. Contato do responsável</h2>
+              <p>Encarregado de Proteção de Dados (DPO):</p>
+              <ul className="list-none pl-0 space-y-1 text-muted-foreground">
+                <li><strong className="text-foreground">Nome:</strong> Matheus Rocha</li>
+                <li><strong className="text-foreground">E-mail:</strong> suporte@agentesdesonhos.com.br</li>
+                <li><strong className="text-foreground">Atendimento:</strong> Seg-Sex, 9h-18h</li>
+              </ul>
+            </section>
           </div>
         </div>
       </main>
