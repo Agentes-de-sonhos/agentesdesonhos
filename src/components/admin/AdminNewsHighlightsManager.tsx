@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { friendlyCurationError } from "@/lib/newsCurationErrors";
 import { Crown, Loader2, Search, Sparkles, Trash2, TrendingUp, X } from "lucide-react";
 import { spDateKey, spWeekStartKey } from "@/lib/newsRanking";
 import { cn } from "@/lib/utils";
@@ -99,7 +100,8 @@ export function AdminNewsHighlightsManager() {
       setSearch("");
       invalidate();
     },
-    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
+    onError: (e: unknown) =>
+      toast({ title: "Não foi possível atualizar", description: friendlyCurationError(e), variant: "destructive" }),
   });
 
   const removeMutation = useMutation({
@@ -114,7 +116,8 @@ export function AdminNewsHighlightsManager() {
       toast({ title: "Curadoria removida", description: "O ranking automático volta a valer." });
       invalidate();
     },
-    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
+    onError: (e: unknown) =>
+      toast({ title: "Não foi possível remover", description: friendlyCurationError(e), variant: "destructive" }),
   });
 
   const clearMutation = useMutation({
@@ -126,7 +129,8 @@ export function AdminNewsHighlightsManager() {
       toast({ title: "Curadoria da semana limpa", description: "Tudo volta ao ranking automático." });
       invalidate();
     },
-    onError: (e: any) => toast({ title: "Erro", description: e.message, variant: "destructive" }),
+    onError: (e: unknown) =>
+      toast({ title: "Não foi possível limpar", description: friendlyCurationError(e), variant: "destructive" }),
   });
 
   const items = curationQuery.data ?? [];
