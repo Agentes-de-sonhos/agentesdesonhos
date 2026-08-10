@@ -1431,7 +1431,14 @@ Deno.serve(async (req) => {
 
     console.log(`[calendar-sync] push-start count=${pushEvents.length}`);
 
+    // Index of the first event whose push failed transiently (Google quota /
+    // rate limit / 5xx). Everything from that index on stays unprocessed and the
+    // push cursor must not advance past it.
+    let pushBlockedIndex: number | null = null;
+    let pushIndex = -1;
     for (const event of pushEvents) {
+      pushIndex++;
+      if (pushBlockedIndex !== null) break;
       const existing = syncMap.get(event.id);
 
       // Tombstone guard: never recreate an event whose mapping was marked deleted
@@ -1547,6 +1554,13 @@ Deno.serve(async (req) => {
             const errText = await res.text();
             console.error(`[calendar-sync] push-error update event=${event.id} status=${res.status} body=${errText.slice(0, 300)}`);
             pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+            if (isTransientPushFailure(res.status, errText)) {
+              pushBlockedIndex = pushIndex;
+              console.warn(
+                `[calendar-sync] push-throttled op=update status=${res.status} cursor_advance=blocked remaining=${pushEvents.length - pushIndex}`,
+              );
+              break;
+            }
           } else {
             const updated = await res.json().catch(() => ({}));
             pushedUpdated++;
@@ -1583,6 +1597,13 @@ Deno.serve(async (req) => {
             const errText = await res.text();
             console.error(`[calendar-sync] push-error create event=${event.id} status=${res.status} body=${errText.slice(0, 300)}`);
             pushErrors.push({ event_id: event.id, status: res.status, error: errText.slice(0, 200) });
+            if (isTransientPushFailure(res.status, errText)) {
+              pushBlockedIndex = pushIndex;
+              console.warn(
+                `[calendar-sync] push-throttled op=create status=${res.status} cursor_advance=blocked remaining=${pushEvents.length - pushIndex}`,
+              );
+              break;
+            }
             continue;
           }
           const created = await res.json();
@@ -1630,6 +1651,13 @@ Deno.serve(async (req) => {
       } catch (e: any) {
         console.error(`[calendar-sync] push-error exception event=${event.id} err=${e?.message || e}`);
         pushErrors.push({ event_id: event.id, error: String(e?.message || e) });
+        if (isTransientSyncError(e)) {
+          pushBlockedIndex = pushIndex;
+          console.warn(
+            `[calendar-sync] push-throttled op=exception cursor_advance=blocked remaining=${pushEvents.length - pushIndex}`,
+          );
+          break;
+        }
       }
     }
 
