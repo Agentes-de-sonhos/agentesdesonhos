@@ -1576,6 +1576,10 @@ Deno.serve(async (req) => {
     const totalErrors =
       pushErrors.length + pullErrors.length + deleteErrors + (mappingFetchFailed ? 1 : 0);
 
+    // A failed pull inventory is fail-closed: no cursor may advance, otherwise
+    // the unprocessed pages would be skipped forever.
+    const pullBlocked = pullPageError || pullInventoryFailed;
+
     // Progress persistence. A partial bootstrap keeps its pageToken and is
     // reported as "bootstrap" — never as a finished sync.
     let progressColumns: Record<string, unknown> = {};
@@ -1588,7 +1592,7 @@ Deno.serve(async (req) => {
       // mappings and tombstones are untouched.
       progressColumns = computeCursorResetUpdate();
       bootstrapInProgress = true;
-    } else if (!pullPageError) {
+    } else if (!pullBlocked) {
       if (pullMode === "bootstrap") {
         bootstrapBlocked = isBootstrapCompletionBlocked({
           nextPageToken: pendingPageToken,
