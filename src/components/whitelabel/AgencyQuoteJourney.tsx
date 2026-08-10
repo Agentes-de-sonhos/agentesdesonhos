@@ -25,8 +25,8 @@ import {
 } from "@/lib/agencySiteRequests";
 import {
   CHILD_AGE_HELP, CHILD_AGE_OPTIONS, applyContextToService, buildJourneyPayload,
-  applyRouteToContext, contextFromService, describeContext, describeTravelers, eligibleComplements,
-  emptyRouteLegs, emptyTripContext, rebuildContext, serializeRoute, syncChildAges, totalTravelers,
+  applyRouteToContext, contextFromService, describeContext, eligibleComplements,
+  emptyRouteLegs, emptyTripContext, formatChildAges, rebuildContext, serializeRoute, syncChildAges, totalTravelers,
   validateChildAges, validateRouteLegs,
   type JourneyEntry, type RouteLeg, type TripContext,
 } from "@/lib/agencyQuoteJourney";
@@ -284,10 +284,23 @@ export function AgencyQuoteJourney({
   }, []);
 
   const setChildAge = (index: number, value: string) => {
+    let updated: string[] = [];
     setContext((prev) => {
       const ages = syncChildAges(prev.idades_criancas, Math.max(prev.criancas, index + 1));
       ages[index] = value;
+      updated = ages;
       return { ...prev, idades_criancas: ages };
+    });
+    setErrors((prev) => {
+      if (!prev[`child_age_${index}`] && !prev.idades_criancas) return prev;
+      const next = { ...prev };
+      delete next[`child_age_${index}`];
+      const allValid = updated.every((age) => {
+        const parsed = Number(age);
+        return age !== "" && Number.isInteger(parsed) && parsed >= 0 && parsed <= 17;
+      });
+      if (allValid) delete next.idades_criancas;
+      return next;
     });
   };
 
@@ -331,7 +344,7 @@ export function AgencyQuoteJourney({
       ...activeValues,
       idades_criancas:
         activeService.fields.some((f) => f.name === "idades_criancas")
-          ? describeTravelers(nextContext)
+          ? formatChildAges(nextContext.idades_criancas)
           : (activeValues.idades_criancas as string) ?? "",
     };
     setEntries((prev) => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyContextToService, buildJourneyPayload, contextFromService, eligibleComplements,
-  emptyRouteLegs, emptyTripContext, rebuildContext, syncChildAges, totalTravelers,
+  emptyRouteLegs, emptyTripContext, formatChildAges, rebuildContext, syncChildAges, totalTravelers,
   validateChildAges, validateRouteLegs, applyRouteToContext, type RouteLeg,
 } from "@/lib/agencyQuoteJourney";
 import {
@@ -135,5 +135,52 @@ describe("rota multidestinos e idades obrigatórias", () => {
     const rebuilt = rebuildContext([{ key: "hospedagem", values: { destino: "Porto", check_in: "2026-11-02", check_out: "2026-11-08" } }], ctx);
     expect(rebuilt.destino).toBe("Porto");
     expect(rebuilt.adultos).toBe(ctx.adultos);
+  });
+
+  it("idades_criancas contém somente idades legíveis", () => {
+    const value = formatChildAges(["0", "5", "12"]);
+    expect(value).not.toMatch(/adulto|criança/i);
+    expect(value).toContain("Menos de 1 ano");
+    expect(value).toContain("5 anos");
+    expect(value).toContain("12 anos");
+  });
+
+  it("remover aéreo multidestinos zera a rota e usa dados do hotel", () => {
+    let ctx = contextFromService(
+      "aereo",
+      { ...initialServiceValues(aereo), tipo_viagem: "Multidestinos", origem: "São Paulo" },
+      emptyTripContext(),
+    );
+    ctx = applyRouteToContext(ctx, "São Paulo", [
+      { destino: "Lisboa", data: "2026-10-01" },
+      { destino: "Madri", data: "2026-10-06" },
+    ]);
+    expect(ctx.rota.length).toBe(2);
+    const rebuilt = rebuildContext(
+      [{ key: "hospedagem", values: { destino: "Porto", check_in: "2026-11-02", check_out: "2026-11-08" } }],
+      ctx,
+    );
+    expect(rebuilt.rota).toEqual([]);
+    expect(rebuilt.destino).toBe("Porto");
+    expect(rebuilt.data_inicio).toBe("2026-11-02");
+    expect(rebuilt.data_fim).toBe("2026-11-08");
+  });
+
+  it("mantém a rota quando o aéreo multidestinos permanece", () => {
+    let ctx = contextFromService(
+      "aereo",
+      { ...initialServiceValues(aereo), tipo_viagem: "Multidestinos", origem: "São Paulo" },
+      emptyTripContext(),
+    );
+    ctx = applyRouteToContext(ctx, "São Paulo", [
+      { destino: "Lisboa", data: "2026-10-01" },
+      { destino: "Madri", data: "2026-10-06" },
+    ]);
+    const rebuilt = rebuildContext(
+      [{ key: "aereo", values: { ...initialServiceValues(aereo), tipo_viagem: "Multidestinos", origem: "São Paulo" } }],
+      ctx,
+    );
+    expect(rebuilt.rota.length).toBe(2);
+    expect(rebuilt.destino).toBe("Madri");
   });
 });
