@@ -638,6 +638,9 @@ Deno.serve(async (req) => {
       ...deletedLocalEvents.map((e: any) => e.id),
     ];
     let existingSyncs: any[] = [];
+    // Fail-closed: a failed mapping lookup must never be read as "unmapped",
+    // otherwise the push would recreate events that already exist on Google.
+    let mappingFetchFailed = false;
     if (batchEventIds.length > 0) {
       const { data: batchSyncs, error: syncErr } = await supabase
         .from("google_calendar_sync")
@@ -646,20 +649,30 @@ Deno.serve(async (req) => {
         .in("agency_event_id", batchEventIds);
       if (syncErr) {
         console.error(`[calendar-sync] sync-fetch-error err=${syncErr.message}`);
+        mappingFetchFailed = true;
       }
       existingSyncs = batchSyncs || [];
+    }
+    // With an unknown mapping state the whole push (creates/updates/deletes) is
+    // skipped for this run; cursors stay put so the batch is retried intact.
+    const pushEvents: any[] = mappingFetchFailed ? [] : liveLocalEvents;
+    const deleteEvents: any[] = mappingFetchFailed ? [] : deletedLocalEvents;
+    if (mappingFetchFailed) {
+      console.warn(
+        `[calendar-sync] push-aborted reason=mapping-fetch-error live=${liveLocalEvents.length} deleted=${deletedLocalEvents.length} cursors_preserved=true`,
+      );
     }
 
     const syncMap = new Map(existingSyncs.map((s: any) => [s.agency_event_id, s]));
     const reverseSyncMap = new Map(existingSyncs.map((s: any) => [s.google_event_id, s]));
     const justPushedGoogleIds = new Set<string>();
-    const localIds = new Set(liveLocalEvents.map((e: any) => e.id));
-    const pushScanComplete = isPushScanComplete(liveLocalEvents.length, limits.maxPushItems);
-    const advancedPushCursor = nextPushCursor(liveLocalEvents, pushCursor);
+    const localIds = new Set(pushEvents.map((e: any) => e.id));
+    const pushScanComplete = !mappingFetchFailed && isPushScanComplete(liveLocalEvents.length, limits.maxPushItems);
+    const advancedPushCursor = nextPushCursor(pushEvents, pushCursor);
     const mappedInWindow = liveLocalEvents.filter((e: any) => syncMap.has(e.id)).length;
     const unmappedInWindow = liveLocalEvents.length - mappedInWindow;
     const mappedLocalSignatures = new Map<string, string>();
-    for (const event of liveLocalEvents) {
+    for (const event of pushEvents) {
       if (syncMap.has(event.id)) mappedLocalSignatures.set(localEventSignature(event), event.id);
     }
 
@@ -685,9 +698,9 @@ Deno.serve(async (req) => {
       pushSample(pushSkipSamples, { ...sample, reason });
     };
 
-    console.log(`[calendar-sync] push-start count=${liveLocalEvents.length}`);
+    console.log(`[calendar-sync] push-start count=${pushEvents.length}`);
 
-    for (const event of liveLocalEvents) {
+    for (const event of pushEvents) {
       const existing = syncMap.get(event.id);
 
       // Tombstone guard: never recreate an event whose mapping was marked deleted
