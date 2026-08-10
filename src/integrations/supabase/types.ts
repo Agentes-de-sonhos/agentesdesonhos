@@ -15350,6 +15350,14 @@ export type Database = {
         }
         Returns: string
       }
+      purge_google_calendar_local_copies: {
+        Args: { p_user_id: string }
+        Returns: {
+          deleted_conflicts: number
+          deleted_events: number
+          deleted_mappings: number
+        }[]
+      }
       recalc_product_landing_counters: {
         Args: { p_landing_id: string }
         Returns: Json
