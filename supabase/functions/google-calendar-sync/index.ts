@@ -7,6 +7,7 @@ import {
 import {
   buildTokenColumns,
   getTokenEncKey,
+  isCiphertext,
   readTokenField,
 } from "../_shared/googleTokenCrypto.ts";
 
@@ -139,8 +140,25 @@ async function markReconnectRequired(supabase: any, userId: string, reason: stri
   }
 }
 
-async function persistRefreshedToken(supabase: any, userId: string, accessToken: string, expiresIn: number) {
-  const columns = await buildTokenColumns({ access_token: accessToken }, getTokenEncKey());
+/**
+ * Persists a freshly refreshed access token. When encryption is active and the
+ * stored row is still legacy (refresh_token_enc missing), the known plaintext
+ * refresh token is encrypted in the same write so the row can reach version 1.
+ */
+async function persistRefreshedToken(
+  supabase: any,
+  userId: string,
+  accessToken: string,
+  expiresIn: number,
+  existing?: any,
+  refreshTokenPlain?: string | null,
+) {
+  const encKey = getTokenEncKey();
+  const payload: { access_token: string; refresh_token?: string } = { access_token: accessToken };
+  if (encKey && refreshTokenPlain && !isCiphertext(existing?.refresh_token_enc)) {
+    payload.refresh_token = refreshTokenPlain;
+  }
+  const columns = await buildTokenColumns(payload, encKey, existing ?? null);
   await supabase
     .from("google_calendar_tokens")
     .update({
@@ -172,7 +190,14 @@ async function getValidToken(
   const refreshed = await refreshAccessToken(refreshToken);
   if (!refreshed) return null;
 
-  await persistRefreshedToken(supabase, tokenRecord.user_id, refreshed.access_token, refreshed.expires_in);
+  await persistRefreshedToken(
+    supabase,
+    tokenRecord.user_id,
+    refreshed.access_token,
+    refreshed.expires_in,
+    tokenRecord,
+    refreshToken,
+  );
   return refreshed.access_token;
 }
 
@@ -264,7 +289,19 @@ Deno.serve(async (req) => {
       }
 
       // Credentials are removed; event mappings and calendar events are preserved.
-      await supabase.from("google_calendar_tokens").delete().eq("user_id", userId);
+      const { error: deleteError } = await supabase
+        .from("google_calendar_tokens")
+        .delete()
+        .eq("user_id", userId);
+
+      if (deleteError) {
+        console.error(`[calendar-sync] disconnect-delete-error user=${userId} err=${deleteError.message}`);
+        return new Response(
+          JSON.stringify({ error: "Não foi possível desconectar agora. Tente novamente." }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
       console.log(`[calendar-sync] disconnected user=${userId} revocation=${revocation} mappings=preserved`);
 
       return new Response(JSON.stringify({ success: true, message: "Desconectado", revocation }), {
@@ -408,7 +445,14 @@ Deno.serve(async (req) => {
         await markReconnectRequired(supabase, userId, "Autorização do Google expirada ou revogada.");
         return res;
       }
-      await persistRefreshedToken(supabase, userId, refreshed.access_token, refreshed.expires_in);
+      await persistRefreshedToken(
+        supabase,
+        userId,
+        refreshed.access_token,
+        refreshed.expires_in,
+        tokenRecord,
+        storedRefreshToken,
+      );
       accessToken = refreshed.access_token;
       console.log(`[calendar-sync] token-refresh-success user=${userId}`);
       res = await fetch(url, withAuth(accessToken!));

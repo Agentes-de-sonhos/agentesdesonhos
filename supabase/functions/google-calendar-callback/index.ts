@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { hashNonce, parseState } from "../_shared/googleOAuthState.ts";
-import { buildTokenColumns, getTokenEncKey } from "../_shared/googleTokenCrypto.ts";
+import { buildTokenColumns, getTokenEncKey, readTokenField } from "../_shared/googleTokenCrypto.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -77,14 +77,18 @@ Deno.serve(async (req) => {
     const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000).toISOString();
 
     // Reuse the stored refresh token when Google omits it on re-consent, so a
-    // reconnect never downgrades an existing connection.
+    // reconnect never downgrades an existing connection. Dual-read: the
+    // encrypted column is used first, so this keeps working once the legacy
+    // plaintext columns are cleared.
+    const encKey = getTokenEncKey();
     const { data: existing } = await supabase
       .from("google_calendar_tokens")
-      .select("refresh_token")
+      .select("refresh_token, refresh_token_enc, access_token_enc, token_enc_version")
       .eq("user_id", userId)
       .maybeSingle();
 
-    const refreshToken: string | undefined = tokenData.refresh_token || existing?.refresh_token || undefined;
+    const storedRefreshToken = existing ? await readTokenField(existing, "refresh_token", encKey) : null;
+    const refreshToken: string | undefined = tokenData.refresh_token || storedRefreshToken || undefined;
     if (!refreshToken) {
       console.error("callback rejected: no refresh token available");
       return new Response(redirectHtml("O Google não retornou permissão de acesso contínuo. Tente novamente.", false), {
@@ -94,7 +98,8 @@ Deno.serve(async (req) => {
 
     const tokenColumns = await buildTokenColumns(
       { access_token: tokenData.access_token, refresh_token: refreshToken },
-      getTokenEncKey(),
+      encKey,
+      existing ?? null,
     );
 
     const { error: upsertError } = await supabase

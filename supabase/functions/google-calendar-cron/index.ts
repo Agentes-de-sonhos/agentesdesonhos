@@ -82,10 +82,11 @@ Deno.serve(async (req) => {
       invoked++;
       statusCounts[String(res.status)] = (statusCounts[String(res.status)] || 0) + 1;
       if (body?.skipped) skipCounts[String(body.skipped)] = (skipCounts[String(body.skipped)] || 0) + 1;
-      console.log(`[calendar-sync] cron-invoke user=${t.user_id} status=${res.status} skipped=${body?.skipped || "no"}`);
+      // Aggregated only: never log user identifiers here.
+      console.log(`[calendar-sync] cron-invoke status=${res.status} skipped=${body?.skipped || "no"}`);
     } catch (e: any) {
       failures++;
-      console.error(`[calendar-sync] cron-invoke-error user=${t.user_id} err=${e?.message || e}`);
+      console.error(`[calendar-sync] cron-invoke-error err=${e?.message || e}`);
     }
   }
 

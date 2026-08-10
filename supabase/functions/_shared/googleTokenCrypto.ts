@@ -101,10 +101,15 @@ export async function readTokenField(
  * Builds the column payload for storing tokens.
  * Without a key: plaintext columns only, `*_enc` untouched, version 0.
  * With a key: encrypted `*_enc` + version 1, plaintext kept for safe rollback.
+ *
+ * Version 1 is only claimed when BOTH access_token_enc and refresh_token_enc
+ * end up populated (either written now or already ciphertext on `existing`).
+ * A partially migrated row stays at version 0 so a later refresh retries it.
  */
 export async function buildTokenColumns(
   tokens: { access_token?: string; refresh_token?: string },
   secret: string | null | undefined,
+  existing?: TokenRecordLike | null,
 ): Promise<TokenColumnUpdate> {
   const update: TokenColumnUpdate = {};
   if (typeof tokens.access_token === "string") update.access_token = tokens.access_token;
@@ -121,7 +126,10 @@ export async function buildTokenColumns(
   if (typeof tokens.refresh_token === "string") {
     update.refresh_token_enc = await encryptToken(tokens.refresh_token, secret);
   }
-  update.token_enc_version = 1;
+
+  const accessEncrypted = isCiphertext(update.access_token_enc) || isCiphertext(existing?.access_token_enc);
+  const refreshEncrypted = isCiphertext(update.refresh_token_enc) || isCiphertext(existing?.refresh_token_enc);
+  update.token_enc_version = accessEncrypted && refreshEncrypted ? 1 : 0;
   return update;
 }
 
