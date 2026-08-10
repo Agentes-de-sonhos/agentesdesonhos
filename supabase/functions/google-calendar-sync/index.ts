@@ -1797,6 +1797,13 @@ Deno.serve(async (req) => {
     }
     const advancedDeletedCursor = nextDeletedCursor(processedDeleted, deletedCursor);
 
+    // Cursor advances only over events actually processed: a transient push
+    // failure freezes it so the remaining batch is retried on the next run.
+    const processedPushEvents =
+      pushBlockedIndex === null ? pushEvents : pushEvents.slice(0, pushBlockedIndex);
+    const advancedPushCursor = nextPushCursor(processedPushEvents, pushCursor);
+    const pushAdvanceBlocked = pushBlockedIndex !== null;
+
     const pushed = pushedCreated + pushedUpdated;
     const pulled = pulledCreated + pulledUpdated;
     console.log(
