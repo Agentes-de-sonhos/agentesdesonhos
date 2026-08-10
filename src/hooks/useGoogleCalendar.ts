@@ -68,6 +68,19 @@ export interface SyncReport {
   deleted_scan_complete?: boolean;
   deleted_batch_size?: number;
   deleted_processed?: number;
+  // Block 3: conflicts, read-only skips and phase order.
+  conflicts_detected?: number;
+  conflicts?: SyncConflictSummary[];
+  read_only_skipped?: number;
+  delete_skip_reasons?: Record<string, number>;
+  phase_order?: string;
+}
+
+export interface SyncConflictSummary {
+  google_event_id: string | null;
+  agency_event_id: string | null;
+  conflict_type: string;
+  title: string | null;
 }
 
 export function useGoogleCalendar() {
