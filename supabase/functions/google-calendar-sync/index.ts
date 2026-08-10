@@ -23,6 +23,7 @@ import {
   isCursorGoneStatus,
   isPushScanComplete,
   isTransientSyncError,
+  isTransientPushFailure,
   nextDeletedCursor,
   nextPushCursor,
   resolveIncrementalCycleBase,
