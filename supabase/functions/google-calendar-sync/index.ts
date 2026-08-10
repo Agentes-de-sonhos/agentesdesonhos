@@ -5,10 +5,8 @@ import {
   isAuthorizedInternalCall,
 } from "../_shared/calendarCronAuth.ts";
 import {
-  buildTokenColumns,
   buildVerifiedEncryptedColumns,
   getTokenEncKey,
-  isCiphertext,
   needsTokenMigration,
   readTokenField,
 } from "../_shared/googleTokenCrypto.ts";
