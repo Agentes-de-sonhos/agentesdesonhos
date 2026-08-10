@@ -573,6 +573,36 @@ Deno.serve(async (req) => {
     // The pull window for a resumed bootstrap is separate and immutable —
     // see pullBootstrapWindow below.
     const now = new Date();
+
+    // Calendar time zone: cached on the connection. Discovered lazily and
+    // non-destructively — a failure never breaks the sync, it just falls back
+    // to the fidelity helper's own IANA fallback.
+    let calendarTimeZone: string | null = tokenRecord.calendar_time_zone ?? null;
+    const ensureCalendarTimeZone = async () => {
+      if (calendarTimeZone) return;
+      try {
+        const res = await fetchGoogle(
+          "https://www.googleapis.com/calendar/v3/calendars/primary?fields=timeZone"
+        );
+        if (!res.ok) {
+          await res.text().catch(() => "");
+          console.warn(`[calendar-sync] calendar-timezone-fetch-skipped status=${res.status}`);
+          return;
+        }
+        const body = await res.json().catch(() => ({} as any));
+        const tz = typeof body?.timeZone === "string" ? body.timeZone.trim() : "";
+        if (!tz) return;
+        calendarTimeZone = tz;
+        await supabase
+          .from("google_calendar_tokens")
+          .update({ calendar_time_zone: tz, calendar_time_zone_checked_at: new Date().toISOString() })
+          .eq("user_id", userId);
+        console.log(`[calendar-sync] calendar-timezone-resolved tz=${tz}`);
+      } catch (e: any) {
+        console.warn(`[calendar-sync] calendar-timezone-error err=${String(e?.message || e).slice(0, 120)}`);
+      }
+    };
+
     const windowStartDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const windowEndDate = new Date(now.getTime() + 730 * 24 * 60 * 60 * 1000);
     const localWindow = {
