@@ -1370,12 +1370,14 @@ Deno.serve(async (req) => {
             // Stale etag: Google changed under us. Record a conflict instead of
             // retrying blindly with the local version.
             await res.text().catch(() => "");
+            const currentGoogle = await safeGetGoogleEvent(existing.google_event_id);
             await recordConflict({
               userId,
               syncId: existing.id,
               agencyEventId: event.id,
               googleEventId: existing.google_event_id,
               conflictType: "precondition_failed",
+              googleEvent: (currentGoogle as any) ?? undefined,
               localEvent: event,
               localUpdatedAt: event.updated_at ?? null,
             });
@@ -1548,12 +1550,14 @@ Deno.serve(async (req) => {
         if (isPreconditionFailed(res.status)) {
           // Changed on Google since our last read → treat as a conflict.
           await res.text().catch(() => "");
+          const currentGoogle = await safeGetGoogleEvent(mapping.google_event_id);
           await recordConflict({
             userId,
             syncId: mapping.id,
             agencyEventId: event.id,
             googleEventId: mapping.google_event_id,
             conflictType: "precondition_failed",
+            googleEvent: (currentGoogle as any) ?? undefined,
             localEvent: event,
             localUpdatedAt: event.updated_at ?? null,
           });
