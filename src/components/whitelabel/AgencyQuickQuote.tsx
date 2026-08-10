@@ -172,6 +172,16 @@ export function AgencyQuickQuote({
 
     setQuickErrors(relevant);
     if (Object.keys(relevant).length) return;
+    // Origem pode ter mudado depois das linhas: reserializa a rota antes de abrir.
+    if (isAereo && multi) {
+      setValuesByService((prev) => ({
+        ...prev,
+        [service.key]: {
+          ...prev[service.key],
+          rota_multidestinos: serializeRoute(String(prev[service.key]?.origem ?? ""), legs),
+        },
+      }));
+    }
     onOpenChange(true);
   }, [service, values, fields, onOpenChange, isAereo, multi, legs]);
 

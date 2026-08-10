@@ -26,7 +26,7 @@ import {
 import {
   CHILD_AGE_HELP, CHILD_AGE_OPTIONS, applyContextToService, buildJourneyPayload,
   applyRouteToContext, contextFromService, describeContext, describeTravelers, eligibleComplements,
-  emptyRouteLegs, emptyTripContext, rebuildContext, serializeRoute, syncChildAges, totalTravelers,
+  emptyRouteLegs, emptyTripContext, formatChildAges, rebuildContext, serializeRoute, syncChildAges, totalTravelers,
   validateChildAges, validateRouteLegs,
   type JourneyEntry, type RouteLeg, type TripContext,
 } from "@/lib/agencyQuoteJourney";
