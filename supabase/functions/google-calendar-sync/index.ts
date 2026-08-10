@@ -1278,7 +1278,11 @@ Deno.serve(async (req) => {
     // reported as "bootstrap" — never as a finished sync.
     let progressColumns: Record<string, unknown> = {};
     let bootstrapInProgress = false;
+    let incrementalInProgress = false;
     if (cursorReset) {
+      // Only a real HTTP 410 reaches here: cursors (sync_token,
+      // bootstrap_page_token, incremental_page_token) are cleared; events,
+      // mappings and tombstones are untouched.
       progressColumns = computeCursorResetUpdate();
       bootstrapInProgress = true;
     } else if (!pullPageError) {
@@ -1298,7 +1302,11 @@ Deno.serve(async (req) => {
           nextPageToken: pendingPageToken,
           nextSyncToken: receivedSyncToken,
           currentSyncToken: tokenRecord.sync_token,
+          pagesDone: (tokenRecord.incremental_pages_done || 0) + pagesThisRun,
+          itemsDone: (tokenRecord.incremental_items_done || 0) + itemsThisRun,
+          startedAt: tokenRecord.incremental_started_at,
         });
+        incrementalInProgress = !!pendingPageToken;
       }
     }
     // Local push cursor advances only over rows actually processed.
@@ -1308,6 +1316,17 @@ Deno.serve(async (req) => {
         push_cursor_updated_at: advancedPushCursor.updated_at,
         push_cursor_event_id: advancedPushCursor.event_id,
         ...(pushScanComplete ? { push_cursor_completed_at: new Date().toISOString() } : {}),
+      };
+    }
+    // Deletion cursor advances independently from the live scan.
+    if (!deletedErr) {
+      progressColumns = {
+        ...progressColumns,
+        push_deleted_cursor_at: advancedDeletedCursor.deleted_at,
+        push_deleted_cursor_event_id: advancedDeletedCursor.event_id,
+        ...(deletedScanComplete && !deletedAdvanceBlocked
+          ? { push_deleted_cursor_completed_at: new Date().toISOString() }
+          : {}),
       };
     }
 
@@ -1338,10 +1357,14 @@ Deno.serve(async (req) => {
         bootstrap_in_progress: bootstrapInProgress,
         pages_this_run: pagesThisRun,
         items_this_run: itemsThisRun,
-        resume_pending: !!pendingPageToken,
+        incremental_in_progress: incrementalInProgress,
+        resume_pending: !!pendingPageToken || bootstrapInProgress || incrementalInProgress,
         cursor_reset: cursorReset,
         push_scan_complete: pushScanComplete,
         push_batch_size: liveLocalEvents.length,
+        deleted_scan_complete: deletedScanComplete && !deletedAdvanceBlocked,
+        deleted_batch_size: deletedLocalEvents.length,
+        deleted_processed: processedDeleted.length,
         limits,
         push_errors: pushErrors,
         pull_errors: pullErrors,
