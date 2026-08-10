@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encodeState, generateNonce, hashNonce, stateExpiryIso } from "../_shared/googleOAuthState.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,7 +38,32 @@ Deno.serve(async (req) => {
 
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-callback`;
 
-    const state = btoa(JSON.stringify({ user_id: claimsData.claims.sub }));
+    // Cryptographic single-use state with a 10 minute TTL. Only the nonce hash
+    // is persisted; the user id is never carried inside the state value.
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const nonce = generateNonce();
+    const { data: stateRow, error: stateError } = await admin
+      .from("google_oauth_states")
+      .insert({
+        user_id: claimsData.claims.sub,
+        nonce_hash: await hashNonce(nonce),
+        expires_at: stateExpiryIso(),
+      })
+      .select("id")
+      .single();
+
+    if (stateError || !stateRow?.id) {
+      console.error("oauth state insert failed:", stateError?.message);
+      return new Response(JSON.stringify({ error: "Não foi possível iniciar a conexão. Tente novamente." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const state = encodeState(stateRow.id, nonce);
 
     const params = new URLSearchParams({
       client_id: clientId,
