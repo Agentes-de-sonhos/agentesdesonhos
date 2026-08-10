@@ -967,7 +967,12 @@ Deno.serve(async (req) => {
     const advancedDeletedCursor = nextDeletedCursor(processedDeleted, deletedCursor);
 
     // 2. Pull Google events → local
-    console.log(`[calendar-sync] pull-start range=${windowStart}..${windowEnd}`);
+    // Bootstrap resumes with the exact window that produced its pageToken.
+    const pullMode = resolvePullMode(tokenRecord);
+    const pullBootstrapWindow = resolvePullWindow(pullMode, tokenRecord, localWindow);
+    console.log(
+      `[calendar-sync] pull-start range=${pullBootstrapWindow.windowStart}..${pullBootstrapWindow.windowEnd} window_persisted=${pullBootstrapWindow.persisted}`,
+    );
     let pulledCreated = 0;
     let pulledUpdated = 0;
     let pulledSkipped = 0;
@@ -980,9 +985,8 @@ Deno.serve(async (req) => {
     };
     let googleEvents: GoogleEvent[] = [];
     let pullPageError = false;
-    // Two modes: resumable bootstrap inside the -30/+730 window, or incremental
+    // Two modes: resumable bootstrap inside the immutable window, or incremental
     // with the stored syncToken. Both walk pages under the same run budget.
-    const pullMode = resolvePullMode(tokenRecord);
     let pagesThisRun = 0;
     let itemsThisRun = 0;
     let pendingPageToken: string | null = null;
@@ -996,7 +1000,12 @@ Deno.serve(async (req) => {
         `[calendar-sync] pull-start mode=${pullMode} resumed=${pageToken ? "yes" : "no"} max_pages=${limits.maxPages} max_items=${limits.maxItems}`,
       );
       while (true) {
-        const url = buildEventsListUrl({ windowStart, windowEnd, pageToken, syncToken });
+        const url = buildEventsListUrl({
+          windowStart: pullBootstrapWindow.windowStart,
+          windowEnd: pullBootstrapWindow.windowEnd,
+          pageToken,
+          syncToken,
+        });
         const pageRes = await fetchGoogle(url);
         if (isCursorGoneStatus(pageRes.status)) {
           // Expired sync/page token: reset ONLY the cursors and restart the
