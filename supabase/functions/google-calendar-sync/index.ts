@@ -337,6 +337,10 @@ Deno.serve(async (req) => {
 
     // Handle disconnect
     if (action === "disconnect") {
+      // Opt-in only: when true, the local copies imported FROM Google are
+      // removed together with the credential. Remote Google events are never
+      // touched by this path.
+      const purgeLocal = body.purge_local === true;
       const { data: existingToken } = await supabase
         .from("google_calendar_tokens")
         .select("access_token, refresh_token, access_token_enc, refresh_token_enc, token_enc_version")
@@ -365,11 +369,66 @@ Deno.serve(async (req) => {
         );
       }
 
-      console.log(`[calendar-sync] disconnected user=${userId} revocation=${revocation} mappings=preserved`);
+      // Explicit local purge: only rows imported from Google (origin='google')
+      // are removed, and only for this user. Mappings are cleared afterwards so
+      // a failure mid-way never leaves an event without its mapping.
+      let purgedEvents = 0;
+      let purgedMappings = 0;
+      let purgeError: string | null = null;
+      if (purgeLocal) {
+        const { data: googleMappings, error: mapErr } = await supabase
+          .from("google_calendar_sync")
+          .select("id, agency_event_id, origin")
+          .eq("user_id", userId)
+          .eq("origin", "google")
+          .not("agency_event_id", "is", null);
 
-      return new Response(JSON.stringify({ success: true, message: "Desconectado", revocation }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+        if (mapErr) {
+          purgeError = mapErr.message;
+        } else {
+          const eventIds = (googleMappings || [])
+            .map((m: any) => m.agency_event_id)
+            .filter((id: unknown): id is string => typeof id === "string");
+          for (let i = 0; i < eventIds.length; i += 200) {
+            const slice = eventIds.slice(i, i + 200);
+            const { error: evErr } = await supabase
+              .from("agency_events")
+              .delete()
+              .eq("user_id", userId)
+              .in("id", slice);
+            if (evErr) { purgeError = evErr.message; break; }
+            purgedEvents += slice.length;
+          }
+          if (!purgeError) {
+            const { error: mapDelErr, count } = await supabase
+              .from("google_calendar_sync")
+              .delete({ count: "exact" })
+              .eq("user_id", userId);
+            if (mapDelErr) purgeError = mapDelErr.message;
+            else purgedMappings = count ?? 0;
+          }
+        }
+        if (purgeError) {
+          console.error(`[calendar-sync] disconnect-purge-error user=${userId} err=${purgeError}`);
+        }
+      }
+
+      console.log(
+        `[calendar-sync] disconnected user=${userId} revocation=${revocation} purge=${purgeLocal ? "requested" : "no"} purged_events=${purgedEvents} purged_mappings=${purgedMappings}`,
+      );
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Desconectado",
+          revocation,
+          purge_local: purgeLocal,
+          purged_events: purgedEvents,
+          purged_mappings: purgedMappings,
+          purge_error: purgeError ? "Algumas cópias locais não puderam ser removidas." : null,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // Handle status check
