@@ -960,8 +960,8 @@ Deno.serve(async (req) => {
     let receivedSyncToken: string | null = null;
     let cursorReset = false;
     {
-      let pageToken: string | null =
-        pullMode === "bootstrap" ? (tokenRecord.bootstrap_page_token ?? null) : null;
+      // Both modes resume from their own persisted pageToken.
+      let pageToken: string | null = resolveResumePageToken(pullMode, tokenRecord);
       const syncToken = pullMode === "incremental" ? tokenRecord.sync_token : null;
       console.log(
         `[calendar-sync] pull-start mode=${pullMode} resumed=${pageToken ? "yes" : "no"} max_pages=${limits.maxPages} max_items=${limits.maxItems}`,
