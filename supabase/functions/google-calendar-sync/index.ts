@@ -673,6 +673,7 @@ Deno.serve(async (req) => {
     }> = [];
     const seenConflictKeys = new Set<string>();
     const recordConflict = async (input: Parameters<typeof buildConflictRecord>[0]) => {
+      // (see safeGetGoogleEvent below for the 412 baseline read)
       const record = buildConflictRecord(input);
       const key = conflictDedupKey(record as any);
       if (seenConflictKeys.has(key)) return;
