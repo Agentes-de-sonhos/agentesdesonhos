@@ -57,7 +57,7 @@ export const REQUEST_SERVICES: RequestService[] = [
       { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou aeroporto de chegada", origin: "quick" },
       { name: "data_ida", label: "Data de ida", type: "date", required: true, origin: "quick" },
       { name: "data_volta", label: "Data de volta", type: "date", origin: "quick" },
-      { name: "rota_multidestinos", label: "Destinos da viagem", type: "textarea", span: 2, origin: "quick" },
+      { name: "rota_multidestinos", label: "Destinos da viagem", type: "textarea", span: 2, origin: "always", help: "Obrigatório para multidestinos: liste os trechos na ordem desejada." },
       { name: "classe", label: "Classe", type: "select", options: ["Econômica", "Econômica premium", "Executiva", "Primeira classe", "Indiferente"] },
       { name: "adultos", label: "Adultos", type: "number", required: true, min: 1, max: 30 },
       { name: "criancas", label: "Crianças", type: "number", min: 0, max: 12 },
