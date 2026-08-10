@@ -442,7 +442,8 @@ describe("pull really precedes push in the sync function", () => {
 
   it("does not advance cursors when a needed step failed", () => {
     // Pull page error → no bootstrap/incremental progress is written.
-    expect(SYNC).toContain("} else if (!pullPageError) {");
+    expect(SYNC).toContain("} else if (!pullBlocked) {");
+    expect(SYNC).toContain("pullPageError || pullInventoryFailed");
     expect(SYNC).toContain("(mappingFetchFailed ? 1 : 0)");
   });
 });
