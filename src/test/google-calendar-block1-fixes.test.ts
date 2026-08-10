@@ -55,10 +55,13 @@ describe("legacy row encryption migration", () => {
     expect(cols.refresh_token_enc).toBeUndefined();
   });
 
-  it("passes the stored record into buildTokenColumns on refresh", () => {
+  // Superseded contract: refresh persistence is now fail-closed and only ever
+  // goes through the verified round-trip builder (buildTokenColumns is banned
+  // from production paths).
+  it("persists refreshed credentials only through the verified builder", () => {
     const src = fn("google-calendar-sync/index.ts");
-    expect(src).toMatch(/buildTokenColumns\(payload, encKey, existing \?\? null\)/);
-    expect(src).toMatch(/refreshTokenPlain && !isCiphertext\(existing\?\.refresh_token_enc\)/);
+    expect(src).not.toContain("buildTokenColumns");
+    expect(src).toMatch(/buildVerifiedEncryptedColumns\(/);
     expect(src).toMatch(/existing\?: any,\s*\n\s*refreshTokenPlain\?: string \| null,/);
   });
 });
