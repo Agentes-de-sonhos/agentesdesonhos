@@ -1263,8 +1263,9 @@ Deno.serve(async (req) => {
     );
 
     const pushDefaultDuration = parseInt(Deno.env.get("CALENDAR_DEFAULT_DURATION_MINUTES") || "", 10);
+    await ensureCalendarTimeZone();
     const pushOptions = {
-      profileTimeZone: tokenRecord.calendar_time_zone ?? null,
+      profileTimeZone: calendarTimeZone,
       defaultDurationMinutes: Number.isFinite(pushDefaultDuration) && pushDefaultDuration > 0
         ? pushDefaultDuration
         : DEFAULT_DURATION_MINUTES,
