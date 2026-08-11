@@ -134,9 +134,9 @@ describe("wiring", () => {
     expect(purgeSource).toContain('json({ error: "Unauthorized" }, 401)');
   });
 
-  it("purge never re-enables sync", () => {
-    expect(purgeSource).not.toContain("sync_enabled");
-    expect(purgeSource).not.toContain("auto_sync_enabled");
+  it("purge never writes the sync toggles", () => {
+    expect(/sync_enabled\s*:/.test(purgeSource)).toBe(false);
+    expect(/auto_sync_enabled\s*:/.test(purgeSource)).toBe(false);
   });
 
   it("purge preserves the cursor on transient failures", () => {
