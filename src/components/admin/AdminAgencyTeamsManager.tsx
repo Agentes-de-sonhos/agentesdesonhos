@@ -27,7 +27,7 @@ import { TeamManagementCenter } from '@/components/team/TeamManagementCenter'
 
 const PLAN_OPTIONS = [
   'all', 'start', 'essencial', 'profissional', 'premium',
-  'fundador', 'educa_pass', 'cartao_digital', 'fornecedor_parceiro',
+  'fundador', 'promo_grupo_sc', 'educa_pass', 'cartao_digital', 'fornecedor_parceiro',
 ]
 
 function Kpi({ icon: Icon, label, value, hint }: {
