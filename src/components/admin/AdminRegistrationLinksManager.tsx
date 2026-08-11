@@ -38,6 +38,8 @@ export function AdminRegistrationLinksManager() {
     },
   });
 
+  const isPromoGrupoSc = newLink.plan === "promo_grupo_sc";
+
   const createMutation = useMutation({
     mutationFn: async () => {
       const payload: Record<string, unknown> = {
@@ -92,6 +94,7 @@ export function AdminRegistrationLinksManager() {
     essencial: "Essencial",
     educa_pass: "Educa Pass",
     cartao_digital: "Cartão Digital",
+    promo_grupo_sc: "Promoção Grupo SC",
   };
 
   return (
@@ -114,15 +117,35 @@ export function AdminRegistrationLinksManager() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium">Plano</label>
-                    <Select value={newLink.plan} onValueChange={(v) => setNewLink({ ...newLink, plan: v })}>
+                    <Select
+                      value={newLink.plan}
+                      onValueChange={(v) =>
+                        setNewLink((prev) => ({
+                          ...prev,
+                          plan: v,
+                          // Promoção Grupo SC segue o acesso padrão do Premium/Agente
+                          role: v === "promo_grupo_sc" ? "agente" : prev.role,
+                          notes:
+                            v === "promo_grupo_sc" && !prev.notes
+                              ? "Promoção Grupo SC — pagamento confirmado via Asaas"
+                              : prev.notes,
+                        }))
+                      }
+                    >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="profissional">Plano Fundador</SelectItem>
                         <SelectItem value="essencial">Plano Essencial</SelectItem>
                         <SelectItem value="educa_pass">Educa Pass</SelectItem>
                         <SelectItem value="cartao_digital">Cartão Digital</SelectItem>
+                        <SelectItem value="promo_grupo_sc">Promoção Grupo SC</SelectItem>
                       </SelectContent>
                     </Select>
+                    {isPromoGrupoSc && (
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        Pagamento confirmado manualmente via Asaas. O acesso será válido por 3 meses a partir da ativação.
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-sm font-medium">Tipo de Acesso</label>
@@ -151,6 +174,11 @@ export function AdminRegistrationLinksManager() {
                       value={newLink.expires_at}
                       onChange={(e) => setNewLink({ ...newLink, expires_at: e.target.value })}
                     />
+                    {isPromoGrupoSc && (
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        Controla apenas a validade deste link de cadastro — não altera os 3 meses de acesso da assinatura.
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div>
