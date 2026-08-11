@@ -242,12 +242,13 @@ Deno.serve(async (req) => {
           chunk.map(async (id) => ({ id, ...(await deleteRemote(id)) })),
         );
         let stop = false;
+        let hitTransient = false;
         for (const r of results) {
           if (stop) break;
           if (r.outcome === "transient") {
-            throttled = true;
+            hitTransient = true;
             stop = true;
-            console.warn(`[calendar-purge] throttled status=${r.status} cursor_preserved=true`);
+            console.warn(`[calendar-purge] transient status=${r.status} cursor_preserved=true`);
             break;
           }
           if (r.outcome === "removed" || r.outcome === "already_gone") {
@@ -275,6 +276,21 @@ Deno.serve(async (req) => {
           }
         }
         if (throttled) break;
+        if (hitTransient) {
+          // Quota / rate limit: back off inside the same run instead of losing
+          // the rest of the slice. The cursor already stopped at the last
+          // confirmed removal, so the blocked targets are simply retried.
+          consecutiveTransient++;
+          if (consecutiveTransient > PURGE_MAX_BACKOFFS) {
+            throttled = true;
+            console.warn(`[calendar-purge] throttled backoffs=${consecutiveTransient} cursor_preserved=true`);
+            break;
+          }
+          const waitMs = Math.min(1_000 * 2 ** (consecutiveTransient - 1), 8_000);
+          await new Promise((r) => setTimeout(r, waitMs));
+          break;
+        }
+        consecutiveTransient = 0;
       }
       // Persist progress after every batch so a cold stop never loses work.
       await supabase
