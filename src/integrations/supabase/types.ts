@@ -4781,6 +4781,81 @@ export type Database = {
           },
         ]
       }
+      google_calendar_purge_jobs: {
+        Row: {
+          already_gone_count: number
+          calendar_id: string
+          created_at: string
+          error_summary: Json
+          failed_count: number
+          id: string
+          last_error: string | null
+          last_run_at: string | null
+          locked_at: string | null
+          mapping_cursor: string | null
+          mappings_marked: number
+          phase: string
+          removed_count: number
+          runs_count: number
+          scan_page_token: string | null
+          scan_window_end: string | null
+          scan_window_start: string | null
+          scanned_count: number
+          status: string
+          titles: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          already_gone_count?: number
+          calendar_id?: string
+          created_at?: string
+          error_summary?: Json
+          failed_count?: number
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          locked_at?: string | null
+          mapping_cursor?: string | null
+          mappings_marked?: number
+          phase?: string
+          removed_count?: number
+          runs_count?: number
+          scan_page_token?: string | null
+          scan_window_end?: string | null
+          scan_window_start?: string | null
+          scanned_count?: number
+          status?: string
+          titles: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          already_gone_count?: number
+          calendar_id?: string
+          created_at?: string
+          error_summary?: Json
+          failed_count?: number
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          locked_at?: string | null
+          mapping_cursor?: string | null
+          mappings_marked?: number
+          phase?: string
+          removed_count?: number
+          runs_count?: number
+          scan_page_token?: string | null
+          scan_window_end?: string | null
+          scan_window_start?: string | null
+          scanned_count?: number
+          status?: string
+          titles?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       google_calendar_sync: {
         Row: {
           agency_event_id: string | null
@@ -15235,6 +15310,24 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      google_calendar_purge_claim: {
+        Args: { p_job: string; p_stale_seconds?: number }
+        Returns: boolean
+      }
+      google_calendar_purge_mark_target: {
+        Args: { p_target: string; p_titles: string[]; p_user: string }
+        Returns: number
+      }
+      google_calendar_purge_next_targets: {
+        Args: { p_job: string; p_limit?: number }
+        Returns: {
+          target: string
+        }[]
+      }
+      google_calendar_purge_release: {
+        Args: { p_job: string }
+        Returns: undefined
+      }
       has_feature_access: {
         Args: { _feature: string; _user_id: string }
         Returns: boolean
@@ -15674,6 +15767,7 @@ export type Database = {
         Returns: undefined
       }
       trigger_google_calendar_cron: { Args: never; Returns: number }
+      trigger_google_calendar_purge: { Args: never; Returns: number }
       unaccent: { Args: { "": string }; Returns: string }
       user_agency_id: { Args: { _uid: string }; Returns: string }
       validate_quick_access_token: { Args: { _token: string }; Returns: string }
