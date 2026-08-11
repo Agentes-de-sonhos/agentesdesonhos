@@ -229,35 +229,50 @@ Deno.serve(async (req) => {
         break;
       }
       for (const target of list) {
-        if (!hasPurgeBudgetLeft(Date.now() - startedAt)) break;
-        const { outcome, status: httpStatus } = await deleteRemote(target);
-        if (outcome === "transient") {
-          throttled = true;
-          console.warn(`[calendar-purge] throttled status=${httpStatus} cursor_preserved=true`);
-          break;
-        }
-        if (outcome === "removed" || outcome === "already_gone") {
-          if (outcome === "removed") removed++; else alreadyGone++;
-          deletedThisRun++;
-          const { data: marked, error: markErr } = await supabase.rpc("google_calendar_purge_mark_target", {
-            p_user: job.user_id,
-            p_titles: titles,
-            p_target: target,
-          });
-          if (markErr) {
-            // Do not advance past a target whose mappings are still active.
+        pending.push(target);
+        if (pending.length < PURGE_DELETE_CONCURRENCY && target !== list[list.length - 1]) continue;
+        if (!hasPurgeBudgetLeft(Date.now() - startedAt)) { pending.length = 0; break; }
+        const chunk = pending.slice();
+        pending.length = 0;
+        // Bounded concurrency: results are applied in request order so the
+        // cursor can only advance over an uninterrupted prefix of successes.
+        const results = await Promise.all(
+          chunk.map(async (id) => ({ id, ...(await deleteRemote(id)) })),
+        );
+        let stop = false;
+        for (const r of results) {
+          if (stop) break;
+          if (r.outcome === "transient") {
             throttled = true;
-            lastError = "mapping_mark_failed";
-            console.error(`[calendar-purge] mark-error err=${markErr.message}`);
+            stop = true;
+            console.warn(`[calendar-purge] throttled status=${r.status} cursor_preserved=true`);
             break;
           }
-          mappingsMarked += Number(marked || 0);
-          mappingCursor = target;
-        } else {
-          failed++;
-          errorSummary = bumpErrorSummary(errorSummary, httpStatus);
-          mappingCursor = target;
+          if (r.outcome === "removed" || r.outcome === "already_gone") {
+            if (r.outcome === "removed") removed++; else alreadyGone++;
+            deletedThisRun++;
+            const { data: marked, error: markErr } = await supabase.rpc("google_calendar_purge_mark_target", {
+              p_user: job.user_id,
+              p_titles: titles,
+              p_target: r.id,
+            });
+            if (markErr) {
+              // Do not advance past a target whose mappings are still active.
+              throttled = true;
+              stop = true;
+              lastError = "mapping_mark_failed";
+              console.error(`[calendar-purge] mark-error err=${markErr.message}`);
+              break;
+            }
+            mappingsMarked += Number(marked || 0);
+            mappingCursor = r.id;
+          } else {
+            failed++;
+            errorSummary = bumpErrorSummary(errorSummary, r.status);
+            mappingCursor = r.id;
+          }
         }
+        if (throttled) break;
       }
       // Persist progress after every batch so a cold stop never loses work.
       await supabase
