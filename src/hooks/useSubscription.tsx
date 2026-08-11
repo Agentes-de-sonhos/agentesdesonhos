@@ -8,7 +8,8 @@ import {
   PLAN_FEATURES, 
   AI_LIMITS,
   REQUIRED_PLAN_FOR_FEATURE,
-  PLAN_LABELS
+  PLAN_LABELS,
+  resolveEffectivePlan
 } from "@/types/subscription";
 import { useUserRole } from "./useUserRole";
 import { useFeatureAccess } from "./useFeatureAccess";
@@ -148,7 +149,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const isTeamMember = !!teamMember;
 
   const plan: SubscriptionPlan = subscription?.plan || "start";
-  const aiLimit = AI_LIMITS[plan];
+  // Planos promocionais herdam a configuração efetiva do plano base (ex.: Premium).
+  const effectivePlan: SubscriptionPlan = resolveEffectivePlan(plan);
+  const aiLimit = AI_LIMITS[effectivePlan];
   const aiUsageCount = subscription?.ai_usage_count || 0;
   const aiUsageRemaining = Math.max(0, aiLimit - aiUsageCount);
 
@@ -159,17 +162,17 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     if (isTeamMember) return true;
     // Check explicit grants (additive)
     if (hasExplicitAccess(feature)) return true;
-    const features = PLAN_FEATURES[plan];
+    const features = PLAN_FEATURES[effectivePlan];
     if (!features) return false;
     return features.includes(feature);
-  }, [plan, isPromotor, isAdmin, isTeamMember, hasExplicitAccess]);
+  }, [effectivePlan, isPromotor, isAdmin, isTeamMember, hasExplicitAccess]);
 
   const canUseAI = useCallback((): boolean => {
     if (isAdmin || isPromotor) return true;
-    if (plan === "start" || plan === "educa_pass" || plan === "cartao_digital" || plan === "essencial") return false;
-    if (plan === "premium" || plan === "profissional" || plan === "fundador") return true;
+    if (effectivePlan === "start" || effectivePlan === "educa_pass" || effectivePlan === "cartao_digital" || effectivePlan === "essencial") return false;
+    if (effectivePlan === "premium" || effectivePlan === "profissional" || effectivePlan === "fundador") return true;
     return aiUsageCount < aiLimit;
-  }, [plan, aiUsageCount, aiLimit, isAdmin, isPromotor]);
+  }, [effectivePlan, aiUsageCount, aiLimit, isAdmin, isPromotor]);
 
   const incrementAIUsage = useCallback(async (): Promise<boolean> => {
     if (!user || !subscription || !canUseAI()) return false;
