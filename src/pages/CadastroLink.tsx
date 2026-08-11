@@ -73,6 +73,7 @@ export default function CadastroLink() {
     essencial: "Plano Essencial",
     educa_pass: "Educa Pass",
     cartao_digital: "Cartão Digital",
+    promo_grupo_sc: "Promoção Grupo SC",
   };
 
   async function handleSubmit(e: React.FormEvent) {
