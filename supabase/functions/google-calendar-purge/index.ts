@@ -26,6 +26,7 @@ import {
   hasPurgeBudgetLeft,
   matchesPurgeTitle,
   PURGE_BATCH_SIZE,
+  PURGE_DELETE_CONCURRENCY,
   PURGE_TARGET_TITLES,
 } from "../_shared/calendarPurge.ts";
 
@@ -228,6 +229,7 @@ Deno.serve(async (req) => {
         console.log(`[calendar-purge] phase-advance to=scan removed=${removed} already_gone=${alreadyGone}`);
         break;
       }
+      const pending: string[] = [];
       for (const target of list) {
         pending.push(target);
         if (pending.length < PURGE_DELETE_CONCURRENCY && target !== list[list.length - 1]) continue;
