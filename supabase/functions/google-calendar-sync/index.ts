@@ -1584,6 +1584,20 @@ Deno.serve(async (req) => {
             }
             console.log(`[calendar-sync] push-updated event=${event.id} google=${existing.google_event_id} method=PATCH if_match=${existing.google_etag ? "yes" : "no"}`);
           }
+        } else if (!canCreateOnGoogle(event, { hasAnyMapping: Boolean(existing) })) {
+          // Root-cause guard for the mass-duplication incident: a row with any
+          // provider-origin evidence (source=google, read-only, recurrence) or
+          // any existing mapping may never be created on Google as new.
+          pushedSkipped++;
+          console.log(`[calendar-sync] push-skipped event=${event.id} reason=provider-origin-not-creatable`);
+          recordPushSkip("provider_origin_not_creatable", {
+            reason: "provider_origin_not_creatable",
+            agency_event_id: event.id,
+            title: event.title,
+            start: event.event_date,
+            all_day: !event.event_time,
+            has_mapping: Boolean(existing),
+          });
         } else {
           const res = await fetchGoogle(
             "https://www.googleapis.com/calendar/v3/calendars/primary/events",
