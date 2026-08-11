@@ -50,7 +50,7 @@ export default function StartDashboard() {
   // Premium/Fundador users should always use the full dashboard, even if a
   // legacy link or bookmark points them to /dashboard-start.
   React.useEffect(() => {
-    if (plan === "premium" || plan === "fundador") {
+    if (plan === "premium" || plan === "fundador" || plan === "promo_grupo_sc") {
       navigate("/dashboard", { replace: true });
     }
   }, [plan, navigate]);
