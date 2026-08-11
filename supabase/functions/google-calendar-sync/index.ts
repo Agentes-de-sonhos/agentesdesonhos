@@ -35,6 +35,7 @@ import {
   type PushCursor,
   type SyncLifecycleStatus,
 } from "../_shared/calendarSyncPaging.ts";
+import { canCreateOnGoogle } from "../_shared/calendarProvenance.ts";
 import {
   assertControlledPayload,
   buildConflictRecord,
