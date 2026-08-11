@@ -27,6 +27,7 @@ import {
   matchesPurgeTitle,
   PURGE_BATCH_SIZE,
   PURGE_DELETE_CONCURRENCY,
+  PURGE_MAX_BACKOFFS,
   PURGE_TARGET_TITLES,
 } from "../_shared/calendarPurge.ts";
 
@@ -191,6 +192,7 @@ Deno.serve(async (req) => {
   let lastError: string | null = null;
   let throttled = false;
   let deletedThisRun = 0;
+  let consecutiveTransient = 0;
 
   const accessToken = await resolveAccessToken(supabase, job.user_id);
   if (!accessToken) {

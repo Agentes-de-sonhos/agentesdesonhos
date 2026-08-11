@@ -93,7 +93,9 @@ export function buildPurgeScanUrl(params: ScanUrlParams): string {
 
 export const PURGE_BATCH_SIZE = 60;
 /** Small bounded concurrency: fast enough for 64.9k targets, gentle on quota. */
-export const PURGE_DELETE_CONCURRENCY = 6;
+export const PURGE_DELETE_CONCURRENCY = 5;
+/** Consecutive rate-limit backoffs tolerated inside one run before deferring. */
+export const PURGE_MAX_BACKOFFS = 6;
 export const PURGE_RUN_BUDGET_MS = 40_000;
 
 export function hasPurgeBudgetLeft(elapsedMs: number, budgetMs = PURGE_RUN_BUDGET_MS): boolean {
