@@ -88,6 +88,7 @@ const PLAN_OPTIONS: { value: SubscriptionPlan; label: string }[] = [
   { value: "profissional", label: PLAN_LABELS.profissional },
   { value: "premium", label: PLAN_LABELS.premium },
   { value: "fundador", label: PLAN_LABELS.fundador },
+  { value: "promo_grupo_sc", label: PLAN_LABELS.promo_grupo_sc },
   { value: "fornecedor_parceiro", label: PLAN_LABELS.fornecedor_parceiro },
 ];
 
