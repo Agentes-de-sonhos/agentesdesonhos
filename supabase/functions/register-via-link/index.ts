@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { buildSubscriptionPayloadForLink } from "../_shared/promoPlans.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -97,11 +98,13 @@ Deno.serve(async (req) => {
         .eq("user_id", userId);
     }
 
-    // Set plan if not default
+    // Set plan if not default. Planos promocionais recebem vigência fixa a
+    // partir da ATIVAÇÃO (nunca da data de expiração do link).
     if (link.plan && link.plan !== "essencial") {
+      const payload = buildSubscriptionPayloadForLink(link.plan, new Date());
       await adminClient
         .from("subscriptions")
-        .update({ plan: link.plan })
+        .update(payload)
         .eq("user_id", userId);
     }
 

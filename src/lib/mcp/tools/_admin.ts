@@ -81,5 +81,5 @@ export function withAdmin<TInput, TOutput>(
 }
 
 /** Plans considered "premium" (paid) tiers. */
-export const PREMIUM_PLANS = ["premium", "profissional", "fundador", "essencial", "cartao_digital"] as const;
+export const PREMIUM_PLANS = ["premium", "profissional", "fundador", "essencial", "cartao_digital", "promo_grupo_sc"] as const;
 export const FREE_PLANS = ["start"] as const;

@@ -8,7 +8,7 @@
  * preenchido representa um CANCELAMENTO AGENDADO — o acesso segue até a data.
  */
 
-export const PAID_PLANS = ["profissional", "premium", "fundador"] as const;
+export const PAID_PLANS = ["profissional", "premium", "fundador", "promo_grupo_sc"] as const;
 
 export type MinimalSubscription = {
   plan?: string | null;

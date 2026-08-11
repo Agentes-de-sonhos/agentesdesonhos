@@ -200,7 +200,7 @@ function withAdmin(toolName, fn) {
     }
   };
 }
-var PREMIUM_PLANS = ["premium", "profissional", "fundador", "essencial", "cartao_digital"];
+var PREMIUM_PLANS = ["premium", "profissional", "fundador", "essencial", "cartao_digital", "promo_grupo_sc"];
 var FREE_PLANS = ["start"];
 
 // src/lib/mcp/tools/admin-platform-metrics.ts

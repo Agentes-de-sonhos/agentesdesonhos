@@ -13,7 +13,7 @@ const HIDDEN_SECTION_KEYS = new Set<string>([
   "section_recursos_vendas",
 ]);
 
-const TARGET_PLANS = new Set<string>(["premium", "fundador"]);
+const TARGET_PLANS = new Set<string>(["premium", "fundador", "promo_grupo_sc"]);
 
 export function shouldApplyPremiumFundadorFilter(
   isAdmin: boolean,

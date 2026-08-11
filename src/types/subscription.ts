@@ -1,4 +1,24 @@
-export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador' | 'fornecedor_parceiro';
+export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador' | 'fornecedor_parceiro' | 'promo_grupo_sc';
+
+/**
+ * Planos que herdam integralmente a configuração de outro plano.
+ * Evita divergência acidental de recursos/limites entre o plano promocional
+ * e o plano base (Premium).
+ */
+export const PLAN_ALIASES: Partial<Record<SubscriptionPlan, SubscriptionPlan>> = {
+  promo_grupo_sc: 'premium',
+};
+
+/** Retorna o plano efetivo (resolve aliases como promo_grupo_sc → premium). */
+export function resolveEffectivePlan(plan: string | null | undefined): SubscriptionPlan {
+  if (!plan) return 'start';
+  return (PLAN_ALIASES[plan as SubscriptionPlan] ?? plan) as SubscriptionPlan;
+}
+
+/** Duração fixa de acesso, em meses, para planos promocionais manuais. */
+export const PROMO_PLAN_DURATION_MONTHS: Partial<Record<SubscriptionPlan, number>> = {
+  promo_grupo_sc: 3,
+};
 
 export interface Subscription {
   id: string;
@@ -89,6 +109,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   premium: ALL_FEATURES,
   fundador: ALL_FEATURES,
   fornecedor_parceiro: [],
+  promo_grupo_sc: ALL_FEATURES,
 };
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
@@ -100,6 +121,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   premium: 'Plano Premium',
   fundador: 'Plano Fundador',
   fornecedor_parceiro: 'Fornecedor Parceiro',
+  promo_grupo_sc: 'Promoção Grupo SC',
 };
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
@@ -111,6 +133,7 @@ export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   premium: 'Para agentes que querem escalar resultados e se conectar com o mercado',
   fundador: 'Acesso vitalício completo — plano exclusivo dos primeiros membros',
   fornecedor_parceiro: 'Plano destinado a fornecedores parceiros — acesso restrito ao próprio perfil de empresa',
+  promo_grupo_sc: 'Campanha Grupo SC — acesso equivalente ao Premium por 3 meses a partir da ativação',
 };
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
@@ -122,6 +145,7 @@ export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   premium: 999999,
   fundador: 1000,
   fornecedor_parceiro: 0,
+  promo_grupo_sc: 999999,
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {
