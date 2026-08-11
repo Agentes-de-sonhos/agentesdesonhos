@@ -59,5 +59,5 @@ export function isWorkspaceEligible(
   role: string | null | undefined,
   plan: string | null | undefined,
 ): boolean {
-  return role === "admin" || plan === "premium" || plan === "fundador";
+  return role === "admin" || plan === "premium" || plan === "fundador" || plan === "promo_grupo_sc";
 }
