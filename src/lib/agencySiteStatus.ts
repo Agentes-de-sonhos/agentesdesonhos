@@ -43,3 +43,32 @@ export function isUnderConstruction(hostname?: string | null): boolean {
 export function configuredCnpj(hostname?: string | null): string | null {
   return resolveSiteStatusConfig(hostname).cnpj ?? null;
 }
+
+/** Rotas públicas que NUNCA podem ser afetadas pelo status da home. */
+export const ALWAYS_PUBLIC_ROUTE_PREFIXES = [
+  "/orcamento/",
+  "/roteiro/",
+  "/carteira/",
+  "/fatura/",
+  "/area-do-cliente",
+  "/ofertas",
+  "/politicasdeprivacidade",
+  "/termosdeuso",
+];
+
+/** Superfície que a rota "/" deve renderizar para um hostname. */
+export function resolveHomeSurface(
+  hostname?: string | null,
+): "under_construction" | "site_home" {
+  return isUnderConstruction(hostname) ? "under_construction" : "site_home";
+}
+
+/**
+ * O status de publicação só governa a home. Qualquer outra rota pública
+ * (incluindo links transacionais por código) segue liberada.
+ */
+export function isRouteGatedByStatus(pathname: string, hostname?: string | null): boolean {
+  const path = pathname || "/";
+  if (ALWAYS_PUBLIC_ROUTE_PREFIXES.some((p) => path === p || path.startsWith(p))) return false;
+  return path === "/" && isUnderConstruction(hostname);
+}
