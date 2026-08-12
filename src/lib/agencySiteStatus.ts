@@ -41,9 +41,13 @@ export function isUnderConstruction(hostname?: string | null): boolean {
 
 /* ---------------------- BYPASS DE PREVIEW (Lovable apenas) ------------------- */
 
-/** Hostnames técnicos de preview do Lovable — nunca domínios reais de agência. */
+/**
+ * Hostnames técnicos de preview (Lovable) e de desenvolvimento local.
+ * Nunca inclui domínios reais de agência nem o domínio publicado.
+ */
 function isLovablePreviewHost(actualHostname?: string | null): boolean {
   const host = normalizeStatusHost(actualHostname);
+  if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") return true;
   return (
     (host.startsWith("id-preview--") || host.startsWith("preview--")) &&
     host.endsWith(".lovable.app")
