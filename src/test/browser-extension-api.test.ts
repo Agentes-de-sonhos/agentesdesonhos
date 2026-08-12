@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
-  ACTIONS, escapeIlike, ilikeContainsPattern, mergeContactMatches,
+  ACTIONS, escapeIlike, ilikeContainsPattern, mergeContactMatches, phoneMatchVariants,
   assertAction, assertCanMoveStage, budgetSentNote, clampInt, filterVisibleStages,
   assertPermissionReadOk, assertTeamMembershipBinding, teamPermissionFilter,
   isUsablePhone, isUuid, normalizePhone, publicContact, publicOpportunity, safeAmount,
@@ -221,5 +221,38 @@ describe('search_contacts (v0.3)', () => {
     expect(block).toContain('mergeContactMatches(phoneRows, nameRows, 10)')
     expect(block).not.toMatch(/cpf|cnpj|notes/i)
     expect(block).toContain('.limit(10)')
+  })
+
+  it('compara telefone por variantes com e sem 55', () => {
+    expect(block).toContain('phoneMatchVariants(digits)')
+    expect(block).toContain('.in("phone_normalized", phoneVariants)')
+    expect(block).not.toContain('.eq("phone_normalized", digits)')
+  })
+
+  it('mantém a prioridade do telefone antes do nome', () => {
+    expect(block.indexOf('phoneRows =')).toBeLessThan(block.indexOf('nameRows ='))
+    expect(block).toContain('mergeContactMatches(phoneRows, nameRows, 10)')
+  })
+})
+
+describe('phoneMatchVariants', () => {
+  it('celular local ↔ com código do país', () => {
+    expect(phoneMatchVariants('11999999999')).toEqual(['11999999999', '5511999999999'])
+    expect(phoneMatchVariants('5511999999999')).toEqual(['5511999999999', '11999999999'])
+  })
+  it('fixo de 10 dígitos ↔ 12 com 55', () => {
+    expect(phoneMatchVariants('1134210212')).toEqual(['1134210212', '551134210212'])
+    expect(phoneMatchVariants('551134210212')).toEqual(['551134210212', '1134210212'])
+  })
+  it('não inventa variantes para outros países', () => {
+    expect(phoneMatchVariants('14155552671')).toEqual(['14155552671', '5514155552671'])
+    expect(phoneMatchVariants('447911123456')).toEqual(['447911123456'])
+    expect(phoneMatchVariants('4479111234567')).toEqual(['4479111234567'])
+  })
+  it('deduplica e recusa inválidos', () => {
+    expect(new Set(phoneMatchVariants('11999999999')).size).toBe(2)
+    expect(phoneMatchVariants('')).toEqual([])
+    expect(phoneMatchVariants('1234')).toEqual([])
+    expect(phoneMatchVariants('1234567890123456')).toEqual([])
   })
 })

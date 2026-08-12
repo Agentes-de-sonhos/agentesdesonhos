@@ -25,6 +25,7 @@ import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-
 import {
   assertAction, assertCanMoveStage, assertPermissionReadOk, assertTeamMembershipBinding,
   budgetSentNote, clampInt, filterVisibleStages, ilikeContainsPattern, mergeContactMatches,
+  phoneMatchVariants,
   isUuid, isUsablePhone, normalizePhone, publicContact, publicOpportunity, safeAmount,
   safeHttpUrl, safeText, teamPermissionFilter, validateDestination, validateIsoDate, validateName,
   type BridgeError,
@@ -273,6 +274,7 @@ Deno.serve(async (req) => {
         const digits = normalizePhone(body.phone);
         const name = safeText(body.name, 120);
         const usablePhone = isUsablePhone(digits);
+        const phoneVariants = phoneMatchVariants(digits);
         if (!usablePhone && name.length < 2) {
           return fail({ status: 400, error: "Informe um telefone válido ou pelo menos 2 caracteres do nome." });
         }
@@ -281,12 +283,12 @@ Deno.serve(async (req) => {
         let phoneRows: Record<string, unknown>[] = [];
         let nameRows: Record<string, unknown>[] = [];
 
-        if (usablePhone) {
+        if (phoneVariants.length > 0) {
           const { data } = await client
             .from("clients")
             .select(columns)
             .eq("user_id", agencyId)
-            .eq("phone_normalized", digits)
+            .in("phone_normalized", phoneVariants)
             .order("created_at", { ascending: true })
             .limit(10);
           phoneRows = (data ?? []) as Record<string, unknown>[];
