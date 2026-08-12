@@ -12,7 +12,7 @@ img {
    Colors: Sky blue primary, coral accents, warm neutrals
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -270,6 +270,69 @@ img {
 .wl-editorial h4 {
   font-family: 'Manrope', 'Inter', system-ui, sans-serif;
   letter-spacing: -0.02em;
+}
+
+/* ===== Acabamento "luxuryEditorial" (Paraíso Viagens) ==========================
+   Camada FINA sobre `.wl-editorial`: reaproveita todo o layout editorial e troca
+   apenas tokens, tipografia e acabamento. Paleta: azul-marinho profundo, verde
+   sálvia, marfim quente e champanhe discreto. Nenhum componente muda. */
+.wl-editorial.wl-luxury {
+  --background: 40 30% 97%;
+  --foreground: 218 30% 14%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 218 30% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 218 30% 14%;
+
+  /* Azul-marinho profundo como cor primária (CTAs e foco). */
+  --primary: 217 44% 20%;
+  --primary-foreground: 40 32% 97%;
+
+  --secondary: 40 24% 93%;
+  --secondary-foreground: 218 30% 14%;
+  --muted: 40 24% 94%;
+  --muted-foreground: 218 12% 36%;
+  --accent: 40 24% 93%;
+  --accent-foreground: 218 30% 14%;
+
+  --border: 38 20% 88%;
+  --input: 38 20% 84%;
+  --ring: 217 44% 20%;
+  /* Cantos discretos, quase retos. */
+  --radius: 0.25rem;
+
+  /* Verde sálvia substitui o vermelho de marca nos detalhes/kickers/ícones. */
+  --wl-red: 148 20% 30%;
+  --wl-navy: 217 44% 15%;
+  --wl-ink: 217 46% 12%;
+  /* Marfim quente/champanhe muito discreto nas faixas alternadas. */
+  --wl-sand: 40 28% 94%;
+
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+}
+
+.wl-editorial.wl-luxury h1,
+.wl-editorial.wl-luxury h2,
+.wl-editorial.wl-luxury h3 {
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.12;
+}
+
+.wl-editorial.wl-luxury h4 {
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+/* Formulários e interface seguem em Manrope: legibilidade acima do estilo. */
+.wl-editorial.wl-luxury input,
+.wl-editorial.wl-luxury textarea,
+.wl-editorial.wl-luxury select,
+.wl-editorial.wl-luxury button,
+.wl-editorial.wl-luxury label {
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif;
 }
 
 /* Wizard – Cadastro assistido por etapas (Carteira Digital)

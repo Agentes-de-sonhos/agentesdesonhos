@@ -49,3 +49,11 @@ type: feature
 - `get_agency_domain` passou a devolver `cnpj` (de `profiles.cnpj`); `AgencyDomainInfo.cnpj` reflete isso. Não existe campo de razão social.
 - Hosts em construção hoje: `100limites.tur.br`, `www.100limites.tur.br`, `paraisoviagens.com`, `www.paraisoviagens.com`.
 - PENDÊNCIA Paraíso Viagens: os hostnames `paraisoviagens.com`/`www.paraisoviagens.com` ainda NÃO estão em `agency_public_domains` (owner `d14b95d2…fb4f`, slug `paraiso-viagens`). Enquanto não forem cadastrados, esses domínios abrem o app da plataforma. O cadastro só deve ser feito DEPOIS de publicar o frontend com o gate de construção já ativo.
+
+## Perfis editoriais + tema (engine única)
+- Três camadas separadas: PERFIL (`src/lib/agencySiteProfile.ts`: seções, ordem, conteúdo), TEMA (`agencySiteTheme.ts`: tokens/fontes) e DADOS REAIS do cadastro. `AgencySiteHome` continua sendo a única engine — proibido duplicar a home por tenant.
+- `AgencySiteProfileKey = "classic" | "editorialDmc" | "luxuryCurated"`; `resolveProfileKey(hostname)`. 100limites → `editorialDmc`; paraisoviagens.com → `luxuryCurated`.
+- `AgencySiteThemeKey` ganhou `"luxuryEditorial"`; `siteThemeRootClass(hostname)` devolve `""`, `wl-editorial` ou `wl-editorial wl-luxury`. `.wl-luxury` (index.css) é camada fina: marinho, sálvia, marfim, radius 0.25rem, títulos Cormorant Garamond e corpo/formulários Manrope.
+- `resolveSections` aceita `boolean` (legado) OU `{enabled, order}`; `resolveModules`/`resolveDestinations` aceitam conjunto próprio por perfil. Seções genéricas novas: `signature` e `credentials` (off por padrão).
+- Paraíso: sem DMC, sem depoimentos, sem equipe; ordem signature → destinos → coleções → destaques → diferenciais → história → credenciais (Luxperts) → concierge → FAQ → newsletter → ofertas (nunca lidera). Redação prudente: 1997 sem atribuir fundação a Mariana/Daniela, sem VIP/upgrades, sem preços.
+- Preview seguro: `isConstructionPreviewBypass(actualHostname, search)` só libera a home em construção em hosts técnicos (`id-preview--*`/`preview--*.lovable.app` e localhost) com `?__agency_preview=1`. Nunca nos domínios reais nem no publicado. `STATUS_BY_HOST` permanece intacto.

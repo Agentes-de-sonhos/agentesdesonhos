@@ -4,6 +4,7 @@ import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
   MapPin, CheckCircle2, Quote, Route, UserRound, FileCheck2, LifeBuoy, Handshake,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,16 +25,24 @@ import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
   resolveDestinations, resolveDmc, resolveHeroSlides, resolveModules, resolveSections,
-  type AgencySectionKey,
+  type AgencySectionKey, type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
+import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProfile";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
+import heroLuxo from "@/assets/whitelabel/hero-luxo.jpg";
 import destinoLitoral from "@/assets/whitelabel/destino-litoral.jpg";
 import destinoResort from "@/assets/whitelabel/destino-resort.jpg";
 import destinoCruzeiro from "@/assets/whitelabel/destino-cruzeiro.jpg";
 import destinoEuropa from "@/assets/whitelabel/destino-europa.jpg";
 import destinoParques from "@/assets/whitelabel/destino-parques.jpg";
+import destinoSafari from "@/assets/whitelabel/destino-safari.jpg";
+import destinoDouro from "@/assets/whitelabel/destino-douro.jpg";
+import destinoVilla from "@/assets/whitelabel/destino-villa.jpg";
+import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
+import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
+import destinoLuaDeMel from "@/assets/whitelabel/destino-luademel.jpg";
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
@@ -42,6 +51,18 @@ const DESTINATION_IMAGES: Record<string, string> = {
   cruzeiro: destinoCruzeiro,
   europa: destinoEuropa,
   parques: destinoParques,
+  safari: destinoSafari,
+  douro: destinoDouro,
+  villa: destinoVilla,
+  gastronomia: destinoGastronomia,
+  brasil: destinoBrasil,
+  luademel: destinoLuaDeMel,
+};
+
+/** Slots de imagem de hero (fallback quando a agência não tem capa própria). */
+const HERO_IMAGES: Record<string, string> = {
+  praia: heroPraia,
+  luxo: heroLuxo,
 };
 
 /** Kept exported: other white-label surfaces import this service list. */
@@ -61,6 +82,9 @@ const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
   "Roteiro sob medida": Route,
   "Aéreo com estratégia": Plane,
   "Viagem protegida": ShieldCheck,
+  "Roteiros desenhados para cada viajante": Route,
+  "Seleção criteriosa de hospedagens": BedDouble,
+  "Parceiros especializados": Handshake,
 };
 
 /** Ícone semântico por diferencial (um símbolo distinto para cada um). */
@@ -69,6 +93,11 @@ const DIFFERENTIAL_ICONS: Record<string, typeof Route> = {
   conferido: FileCheck2,
   acompanhamento: LifeBuoy,
   fornecedores: Handshake,
+};
+
+/** Credenciais: ícone semântico único, resolvido na apresentação. */
+const CREDENTIAL_ICONS: Record<string, typeof Route> = {
+  luxperts: Award,
 };
 
 function SectionHeading({
@@ -125,11 +154,31 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const editorial = isEditorialTheme(hostname);
   const container = siteContainer(editorial);
 
+  // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
+  const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  const copyFor = useCallback(
+    (key: AgencySectionKey): AgencySectionCopy => profile.copy?.[key] ?? {},
+    [profile],
+  );
+
   // Faixa B2B/DMC: exclusiva das agências configuradas por hostname.
   const dmc = useMemo(() => resolveDmc(hostname), [hostname]);
-  const sections = useMemo(() => resolveSections({ dmc: !!dmc }), [dmc]);
-  const modules = useMemo(() => resolveModules(), []);
-  const destinations = useMemo(() => resolveDestinations(), []);
+  const sections = useMemo(() => {
+    const overrides: Partial<Record<AgencySectionKey, AgencySectionOverride>> = {
+      ...(profile.sections ?? {}),
+    };
+    const dmcOverride = overrides.dmc;
+    overrides.dmc =
+      typeof dmcOverride === "object"
+        ? { ...dmcOverride, enabled: (dmcOverride.enabled ?? true) && !!dmc }
+        : { enabled: !!dmc && dmcOverride !== false };
+    return resolveSections(overrides);
+  }, [dmc, profile]);
+  const modules = useMemo(() => resolveModules(undefined, profile.modules), [profile]);
+  const destinations = useMemo(() => resolveDestinations(undefined, profile.destinations), [profile]);
+  const highlights = profile.highlights ?? DEFAULT_HIGHLIGHTS;
+  const differentials = profile.differentials ?? DEFAULT_DIFFERENTIALS;
+  const faq = profile.faq ?? DEFAULT_FAQ;
   const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
@@ -183,8 +232,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   // Hero banners (1 to 5) come from the central config — no hardcoded copy here.
   const slides = useMemo(
-    () => resolveHeroSlides(name, info.cover_image_url, undefined, heroPraia),
-    [name, info.cover_image_url],
+    () =>
+      resolveHeroSlides(
+        name,
+        info.cover_image_url,
+        profile.hero,
+        HERO_IMAGES[profile.heroImage ?? "praia"] ?? heroPraia,
+      ),
+    [name, info.cover_image_url, profile],
   );
 
   const [slide, setSlide] = useState(0);
@@ -219,6 +274,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "highlights":
+        {
+        const copy = copyFor("highlights");
         return (
           <section
             key={key}
@@ -227,13 +284,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           >
             <div className={editorial ? `${container} py-14 md:py-24` : undefined}>
             <SectionHeading
-              title="Destaques"
-              subtitle="Três formas de começar agora o planejamento da sua próxima viagem."
+              title={copy.title ?? "Destaques"}
+              subtitle={copy.subtitle ?? "Três formas de começar agora o planejamento da sua próxima viagem."}
               editorial={editorial}
             />
             {editorial ? (
               <div className="grid gap-5 md:grid-cols-3">
-                {DEFAULT_HIGHLIGHTS.map((h) => {
+                {highlights.map((h) => {
                   const Icon = HIGHLIGHT_ICONS[h.title] ?? Compass;
                   return (
                     <article
@@ -256,7 +313,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-3">
-                {DEFAULT_HIGHLIGHTS.map((h) => (
+                {highlights.map((h) => (
                 <Card key={h.title} className="flex h-full flex-col p-6 transition-shadow hover:shadow-lg">
                   <Sparkles className="mb-4 h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="text-base font-semibold text-foreground">{h.title}</h3>
@@ -271,15 +328,86 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
+
+      case "signature": {
+        const s = profile.signature;
+        if (!s) return null;
+        return (
+          <section key={key} id="assinatura" className="bg-background">
+            <div className={`${container} py-16 md:py-24`}>
+              <div className="mx-auto max-w-3xl text-center">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--wl-red))]">
+                  {s.kicker}
+                </p>
+                <h2 className="mt-6 text-3xl leading-tight text-foreground md:text-[2.9rem]">
+                  {s.title}
+                </h2>
+                <div className="mx-auto mt-8 h-px w-16 bg-foreground/20" />
+                <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground md:text-lg">
+                  {s.text}
+                </p>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      case "credentials": {
+        const c = profile.credentials;
+        if (!c) return null;
+        return (
+          <section key={key} id="credenciais" className="bg-background">
+            <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-16 md:py-24`}>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  {c.kicker}
+                </p>
+                <h2 className="mt-4 text-3xl leading-tight text-foreground md:text-[2.6rem]">
+                  {c.title}
+                </h2>
+                <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
+                  {c.text}
+                </p>
+              </div>
+              <ul className="grid content-start gap-6">
+                {c.items.map((item) => {
+                  const Icon = CREDENTIAL_ICONS[item.key] ?? Award;
+                  return (
+                    <li
+                      key={item.key}
+                      className="flex gap-5 border-t border-foreground/10 pt-6"
+                    >
+                      <Icon
+                        className="mt-1 h-7 w-7 shrink-0 text-[hsl(var(--wl-red))]"
+                        aria-hidden="true"
+                        strokeWidth={1.5}
+                      />
+                      <div>
+                        <h3 className="text-lg text-foreground">{item.name}</h3>
+                        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                          {item.text}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </section>
+        );
+      }
 
       case "modules":
+        {
+        const copy = copyFor("modules");
         if (editorial) {
           return (
             <section key={key} id="campanhas" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
-                  title="Experiências e campanhas"
-                  subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
+                  title={copy.title ?? "Experiências e campanhas"}
+                  subtitle={copy.subtitle ?? "Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."}
                   editorial
                 />
                 <AgencyCampaignRail
@@ -300,8 +428,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="campanhas" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading
-                title="Experiências e campanhas"
-                subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
+                title={copy.title ?? "Experiências e campanhas"}
+                subtitle={copy.subtitle ?? "Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."}
               />
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {modules.map((m) => (
@@ -321,6 +449,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "offers":
         if (!showcasePublished) return null;
@@ -366,13 +495,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "destinations":
+        {
+        const copy = copyFor("destinations");
         if (editorial) {
           return (
             <section key={key} id="destinos" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
-                  title="Descubra o seu próximo destino"
-                  subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+                  title={copy.title ?? "Descubra o seu próximo destino"}
+                  subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
                   editorial
                 />
                 <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:auto-rows-[236px] md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
@@ -425,8 +556,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading
-                title="Descubra o seu próximo destino"
-                subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+                title={copy.title ?? "Descubra o seu próximo destino"}
+                subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
               />
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {destinations.map((d) => (
@@ -459,23 +590,32 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "about":
         if (editorial) {
-          const bio = normalizeInstitutionalText(info.bio) ||
+          const aboutCopy = profile.about;
+          const bio = aboutCopy?.text ||
+            normalizeInstitutionalText(info.bio) ||
             `A ${name} cuida de cada viagem com atenção aos detalhes: entende o momento de cada cliente, apresenta opções claras e acompanha a experiência do planejamento ao retorno.`;
           // Só destaca um número que JÁ existe no conteúdo resolvido (nunca inventado).
-          const years = bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
+          const years = aboutCopy ? null : bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
               <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Quem planeja a sua viagem
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                    {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
                   </p>
-                  <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-                    Sobre a <BrandText>{name}</BrandText>
-                  </h2>
+                  {aboutCopy?.title ? (
+                    <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                      {aboutCopy.title}
+                    </h2>
+                  ) : (
+                    <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                      Sobre a <BrandText>{name}</BrandText>
+                    </h2>
+                  )}
                   {years && (
                     <p className="mt-8 flex items-baseline gap-3">
                       <span className="text-5xl font-extrabold leading-none text-[hsl(var(--wl-ink))] md:text-6xl">
@@ -505,7 +645,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 </div>
                 <div className="overflow-hidden rounded-xl">
                   <img
-                    src={info.cover_image_url || destinoEuropa}
+                    src={info.cover_image_url || (aboutCopy?.image ? DESTINATION_IMAGES[aboutCopy.image] : undefined) || destinoEuropa}
                     alt={`Viagens acompanhadas pela ${name}`}
                     loading="lazy"
                     width={900}
@@ -561,17 +701,19 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "differentials":
+        {
+        const copy = copyFor("differentials");
         if (editorial) {
           return (
             <section key={key} id="diferenciais" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
-                  title="Diferenciais"
-                  subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe."
+                  title={copy.title ?? "Diferenciais"}
+                  subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
                   editorial
                 />
                 <ul className="grid gap-x-14 gap-y-10 md:grid-cols-2">
-                  {DEFAULT_DIFFERENTIALS.map((d) => {
+                  {differentials.map((d) => {
                     const Icon = DIFFERENTIAL_ICONS[d.icon] ?? CheckCircle2;
                     return (
                       <li key={d.title} className="flex gap-5 border-t border-foreground/10 pt-6">
@@ -594,9 +736,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         }
         return (
           <section key={key} id="diferenciais" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <SectionHeading title="Diferenciais" subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe." />
+            <SectionHeading
+              title={copy.title ?? "Diferenciais"}
+              subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
+            />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {DEFAULT_DIFFERENTIALS.map((d) => (
+              {differentials.map((d) => (
                 <Card key={d.title} className="h-full p-5">
                   <CheckCircle2 className="mb-3 h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="text-sm font-semibold text-foreground">{d.title}</h3>
@@ -606,22 +751,25 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "concierge":
+        {
+        const copy = copyFor("concierge");
         if (editorial) {
           return (
             <section key={key} id="atendimento" className="bg-background">
               <div className={`${container} grid items-stretch gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Gente cuidando de gente
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                    {copy.kicker ?? "Gente cuidando de gente"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-                    Atendimento humano
+                    {copy.title ?? "Atendimento humano"}
                   </h2>
                   <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
-                    Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação,
-                    monta as melhores opções e explica cada detalhe antes de você decidir.
+                    {copy.subtitle ??
+                      "Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação, monta as melhores opções e explica cada detalhe antes de você decidir."}
                   </p>
                   <div className="mt-9 flex flex-wrap gap-3">
                      <Button
@@ -673,11 +821,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <Card className="grid gap-8 p-8 md:grid-cols-2 md:p-10">
                 <div>
-                  <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Atendimento humano</h2>
+                  <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
+                    {copy.title ?? "Atendimento humano"}
+                  </h2>
                   <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
                   <p className="mt-4 text-muted-foreground">
-                    Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação,
-                    monta as melhores opções e explica cada detalhe antes de você decidir.
+                    {copy.subtitle ??
+                      "Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação, monta as melhores opções e explica cada detalhe antes de você decidir."}
                   </p>
                   <div className="mt-8 flex flex-wrap gap-3">
                     <Button size="lg" onClick={() => openRequest("pacotes")}>
@@ -705,6 +855,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "team":
         return (
@@ -738,16 +889,18 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "faq":
+        {
+        const copy = copyFor("faq");
         if (editorial) {
           return (
             <section key={key} id="faq" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Antes de solicitar
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                    {copy.kicker ?? "Antes de solicitar"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-                    Perguntas frequentes
+                    {copy.title ?? "Perguntas frequentes"}
                   </h2>
                   <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
                     Se a sua dúvida não estiver aqui, fale com um consultor da{" "}
@@ -772,7 +925,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </div>
                 </div>
                 <Accordion type="single" collapsible className="w-full border-t border-border/70">
-                  {DEFAULT_FAQ.map((item, index) => (
+                  {faq.map((item, index) => (
                     <AccordionItem
                       key={item.q}
                       value={`faq-${index}`}
@@ -794,9 +947,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         return (
           <section key={key} id="faq" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-4xl px-4 py-14 md:py-16">
-              <SectionHeading title="Perguntas frequentes" />
+              <SectionHeading title={copy.title ?? "Perguntas frequentes"} />
               <Accordion type="single" collapsible className="w-full">
-                {DEFAULT_FAQ.map((item, index) => (
+                {faq.map((item, index) => (
                   <AccordionItem key={item.q} value={`faq-${index}`}>
                     <AccordionTrigger className="text-left text-base">{item.q}</AccordionTrigger>
                     <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
@@ -806,8 +959,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "newsletter":
+        {
+        const copy = copyFor("newsletter");
         if (editorial) {
           return (
             <section key={key} id="novidades" className="bg-background">
@@ -816,14 +972,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
                       <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
-                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Novidades da agência
+                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
-                        Receba novidades e oportunidades
+                        {copy.title ?? "Receba novidades e oportunidades"}
                       </h2>
                       <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/80 md:text-base">
-                        Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar
-                        quando surgirem oportunidades no seu perfil de viagem.
+                        {copy.subtitle ??
+                          "Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar quando surgirem oportunidades no seu perfil de viagem."}
                       </p>
                     </div>
                     <div className="md:justify-self-end">
@@ -832,7 +988,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         className="h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
                         onClick={() => openRequest("pacotes")}
                       >
-                        Quero receber novidades <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                        {copy.cta ?? "Quero receber novidades"}{" "}
+                        <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
@@ -849,19 +1006,22 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <Mail className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground">Receba novidades e oportunidades</h2>
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {copy.title ?? "Receba novidades e oportunidades"}
+                  </h2>
                   <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
-                    Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar
-                    quando surgirem oportunidades no seu perfil de viagem.
+                    {copy.subtitle ??
+                      "Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar quando surgirem oportunidades no seu perfil de viagem."}
                   </p>
                 </div>
               </div>
               <Button size="lg" variant="outline" onClick={() => openRequest("pacotes")}>
-                Quero receber novidades
+                {copy.cta ?? "Quero receber novidades"}
               </Button>
             </Card>
           </section>
         );
+        }
 
       default:
         return null;
@@ -1028,14 +1188,20 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (!editorial || index !== 0 || !node) return node;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).
+        // A cor precisa ser a MESMA superfície da seção que abre a página.
+        const surface =
+          section.key === "dmc"
+            ? "bg-[hsl(var(--wl-navy))]"
+            : section.key === "destinations" ||
+                section.key === "modules" ||
+                section.key === "differentials" ||
+                section.key === "faq"
+              ? "bg-[hsl(var(--wl-sand))]"
+              : "bg-background";
         return (
           <div
             key={`${section.key}-offset`}
-            className={
-              section.key === "dmc"
-                ? "bg-[hsl(var(--wl-navy))]"
-                : "bg-[hsl(var(--wl-sand))]"
-            }
+            className={surface}
             style={{ paddingTop: halfPx }}
           >
             {node}

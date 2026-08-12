@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
-import { isUnderConstruction } from "@/lib/agencySiteStatus";
+import { shouldRenderUnderConstruction } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
@@ -59,7 +59,19 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
 }
 
 export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
-  const construction = isUnderConstruction(info.hostname);
+  /**
+   * O status governa a home. O bypass explícito de revisão (`?__agency_preview=1`)
+   * só vale no hostname técnico de preview do Lovable — nunca no domínio real da
+   * agência nem no domínio publicado.
+   */
+  const construction =
+    typeof window === "undefined"
+      ? true
+      : shouldRenderUnderConstruction(
+          info.hostname,
+          window.location.hostname,
+          window.location.search,
+        );
   return (
     <BrowserRouter>
       <Suspense fallback={<Fallback />}>

@@ -10,11 +10,13 @@
 export type AgencySectionKey =
   | "highlights"
   | "dmc"
+  | "signature"
   | "destinations"
   | "modules"
   | "offers"
   | "about"
   | "differentials"
+  | "credentials"
   | "concierge"
   | "team"
   | "testimonials"
@@ -32,12 +34,16 @@ export interface AgencySectionConfig {
 export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   // Faixa editorial B2B (DMC): exclusiva/configurável por agência — desativada por padrão.
   { key: "dmc", label: "Seção B2B / DMC", enabled: false, order: 0 },
+  // Assinatura editorial de posicionamento (curta) — genérica, off por padrão.
+  { key: "signature", label: "Assinatura editorial", enabled: false, order: 0.5 },
   { key: "offers", label: "Ofertas em destaque", enabled: true, order: 1 },
   { key: "destinations", label: "Descoberta de destinos", enabled: true, order: 2 },
   { key: "highlights", label: "Destaques", enabled: true, order: 3 },
   { key: "modules", label: "Módulos temáticos", enabled: true, order: 4 },
   { key: "about", label: "Apresentação da agência", enabled: true, order: 5 },
   { key: "differentials", label: "Diferenciais", enabled: true, order: 6 },
+  // Associações/selos verificados — genérica, off por padrão (só com dado real).
+  { key: "credentials", label: "Credenciais e conexões", enabled: false, order: 6.5 },
   { key: "concierge", label: "Atendimento concierge", enabled: true, order: 7 },
   { key: "team", label: "Equipe e consultores", enabled: false, order: 8 },
   { key: "testimonials", label: "Depoimentos", enabled: false, order: 9 },
@@ -45,16 +51,35 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   { key: "newsletter", label: "Newsletter", enabled: true, order: 11 },
 ];
 
+/** Override por seção: booleano simples (legado) ou ajuste de enabled/order. */
+export type AgencySectionOverride = boolean | { enabled?: boolean; order?: number };
+
 export function resolveSections(
-  overrides?: Partial<Record<AgencySectionKey, boolean>>,
+  overrides?: Partial<Record<AgencySectionKey, AgencySectionOverride>>,
 ): AgencySectionConfig[] {
-  return DEFAULT_SECTIONS.map((section) => ({
-    ...section,
-    enabled: overrides?.[section.key] ?? section.enabled,
-  }))
+  return DEFAULT_SECTIONS.map((section) => {
+    const o = overrides?.[section.key];
+    if (typeof o === "boolean") return { ...section, enabled: o };
+    if (o && typeof o === "object") {
+      return {
+        ...section,
+        enabled: o.enabled ?? section.enabled,
+        order: o.order ?? section.order,
+      };
+    }
+    return { ...section };
+  })
     .filter((section) => section.enabled)
     .sort((a, b) => a.order - b.order);
 }
+
+/**
+ * Slot de imagem resolvido pela camada de apresentação (config fica sem assets).
+ * Mapeamento central em `AgencySiteHome` — nunca imports espalhados.
+ */
+export type AgencyImageSlot =
+  | "litoral" | "resort" | "cruzeiro" | "europa" | "parques"
+  | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel";
 
 export interface AgencyModule {
   key: string;
@@ -62,11 +87,7 @@ export interface AgencyModule {
   text: string;
   /** Pre-selected service tab of the Central de Solicitações. */
   service: string;
-  /**
-   * Image slot resolved by the presentation layer (config stays asset-free).
-   * Central mapping of campaign artwork — change here, not in components.
-   */
-  image: "litoral" | "resort" | "cruzeiro" | "europa" | "parques";
+  image: AgencyImageSlot;
   enabled: boolean;
   order: number;
 }
@@ -84,8 +105,17 @@ export const DEFAULT_MODULES: AgencyModule[] = [
   { key: "comandatuba", title: "Comandatuba", text: "Experiência all inclusive no litoral da Bahia, com apoio na programação.", service: "hospedagem", image: "litoral", enabled: true, order: 9 },
 ];
 
-export function resolveModules(overrides?: Partial<Record<string, boolean>>): AgencyModule[] {
-  return DEFAULT_MODULES.map((m) => ({ ...m, enabled: overrides?.[m.key] ?? m.enabled }))
+/**
+ * Módulos temáticos de uma agência. `source` permite que um perfil substitua
+ * integralmente o conjunto (conteúdo por perfil, não só liga/desliga); sem
+ * `source`, os defaults continuam valendo.
+ */
+export function resolveModules(
+  overrides?: Partial<Record<string, boolean>>,
+  source?: AgencyModule[],
+): AgencyModule[] {
+  return (source?.length ? source : DEFAULT_MODULES)
+    .map((m) => ({ ...m, enabled: overrides?.[m.key] ?? m.enabled }))
     .filter((m) => m.enabled)
     .sort((a, b) => a.order - b.order);
 }
@@ -237,8 +267,7 @@ export function normalizeInstitutionalText(text?: string | null): string {
 
 export interface AgencyDestination {
   key: string;
-  /** Image slot resolved by the presentation layer (no asset imports here). */
-  image: "litoral" | "resort" | "cruzeiro" | "europa" | "parques";
+  image: AgencyImageSlot;
   title: string;
   label: string;
   text: string;
@@ -262,8 +291,10 @@ export const DEFAULT_DESTINATIONS: AgencyDestination[] = [
 
 export function resolveDestinations(
   overrides?: Partial<Record<string, boolean>>,
+  source?: AgencyDestination[],
 ): AgencyDestination[] {
-  return DEFAULT_DESTINATIONS.map((d) => ({ ...d, enabled: overrides?.[d.key] ?? d.enabled }))
+  return (source?.length ? source : DEFAULT_DESTINATIONS)
+    .map((d) => ({ ...d, enabled: overrides?.[d.key] ?? d.enabled }))
     .filter((d) => d.enabled)
     .sort((a, b) => a.order - b.order);
 }

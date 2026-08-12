@@ -1,16 +1,22 @@
 /**
  * Preset visual dos sites White Label.
  *
- * `classic` é o visual atual (mantido para todos os tenants) e `travelEditorial`
- * é a nova linguagem de portal de viagens, em avaliação e habilitada apenas para
- * os hostnames listados abaixo. Os tokens do preset ficam em `src/index.css`
- * (`.wl-editorial`), então nenhum estilo precisa ser espalhado pelos componentes.
+ * `classic` é o visual atual (mantido para todos os tenants), `travelEditorial`
+ * é a linguagem de portal de viagens (100 Limites) e `luxuryEditorial` é o
+ * acabamento de curadoria de luxo (Paraíso Viagens). Os tokens ficam em
+ * `src/index.css` (`.wl-editorial` e `.wl-luxury`), então nenhum estilo precisa
+ * ser espalhado pelos componentes.
+ *
+ * IMPORTANTE: `luxuryEditorial` reaproveita integralmente o LAYOUT editorial —
+ * apenas troca tokens, tipografia e acabamento.
  */
-export type AgencySiteThemeKey = "classic" | "travelEditorial";
+export type AgencySiteThemeKey = "classic" | "travelEditorial" | "luxuryEditorial";
 
 const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "100limites.tur.br": "travelEditorial",
   "www.100limites.tur.br": "travelEditorial",
+  "paraisoviagens.com": "luxuryEditorial",
+  "www.paraisoviagens.com": "luxuryEditorial",
 };
 
 function normalizeHost(hostname?: string | null): string {
@@ -21,13 +27,31 @@ export function resolveSiteTheme(hostname?: string | null): AgencySiteThemeKey {
   return THEME_BY_HOSTNAME[normalizeHost(hostname)] ?? "classic";
 }
 
-/** Atalho de apresentação: o hostname usa o preset editorial? */
+/**
+ * Atalho de apresentação: o hostname usa a FAMÍLIA editorial de layout?
+ * (true para `travelEditorial` e `luxuryEditorial`.)
+ */
 export function isEditorialTheme(hostname?: string | null): boolean {
-  return resolveSiteTheme(hostname) === "travelEditorial";
+  const theme = resolveSiteTheme(hostname);
+  return theme === "travelEditorial" || theme === "luxuryEditorial";
+}
+
+/** O hostname usa o acabamento de luxo (variações finas sobre o editorial)? */
+export function isLuxuryTheme(hostname?: string | null): boolean {
+  return resolveSiteTheme(hostname) === "luxuryEditorial";
 }
 
 /** Classe raiz que ativa os tokens do preset (aplicada só no site white label). */
 export const EDITORIAL_ROOT_CLASS = "wl-editorial";
+export const LUXURY_ROOT_CLASS = "wl-luxury";
+
+/** Classe(s) raiz do tema resolvido — única fonte de verdade para o layout. */
+export function siteThemeRootClass(hostname?: string | null): string {
+  const theme = resolveSiteTheme(hostname);
+  if (theme === "luxuryEditorial") return `${EDITORIAL_ROOT_CLASS} ${LUXURY_ROOT_CLASS}`;
+  if (theme === "travelEditorial") return EDITORIAL_ROOT_CLASS;
+  return "";
+}
 
 /** Largura de conteúdo do preset editorial (~1200px) e do visual clássico. */
 export function siteContainer(editorial: boolean): string {
