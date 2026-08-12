@@ -21,6 +21,7 @@ export function isUuid(value: unknown): boolean {
 export const ACTIONS = [
   'context',
   'lookup_contact',
+  'search_contacts',
   'create_contact',
   'list_opportunities',
   'get_pipeline_stages',
