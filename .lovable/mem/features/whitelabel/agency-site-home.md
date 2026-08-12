@@ -40,3 +40,12 @@ type: feature
 - Botões "Falar no WhatsApp" em verde acessível `--wl-whatsapp: 152 62% 30%` com texto branco.
 - Rodapé editorial voltou ao grafite escuro com texto branco e logo dentro de cartão branco.
 - Cards de "Destaques" todos brancos (sem alternância de cinza) com hover de elevação/sombra (motion-safe, md+).
+
+## Ciclo de vida da home (status por hostname)
+- `src/lib/agencySiteStatus.ts` é a ÚNICA fonte de verdade: `resolveSiteStatus(hostname)` → `live` (default) ou `under_construction`; opcionalmente um `cnpj` de fallback por host. Para liberar um site, basta remover o host do mapa — nenhum condicional espalhado em componentes.
+- Em `under_construction`, `AgencyDomainRoutes` renderiza `src/pages/whitelabel/AgencyUnderConstruction.tsx` SOMENTE na rota `/`, fora do `AgencySiteLayout` (sem cabeçalho/menu/rodapé do site completo). Todas as outras rotas continuam dentro do layout via rota-pai com `Outlet`.
+- O status governa apenas a home: `/orcamento/:code`, `/roteiro/:code`, `/carteira/:code`, `/fatura/:code`, `/area-do-cliente`, `/ofertas`, privacidade e termos nunca são bloqueados. O gate NÃO fica em `AgencyDomainGate`.
+- Página temporária: identidade só da agência (nunca "Agentes de Sonhos"), logo com fallback de inicial, cidade/UF, CNPJ formatado (`formatCnpj`), CTA WhatsApp, rodapé com © ano + nome + CNPJ, `title`/description por agência e `<meta name="robots" content="noindex,nofollow">` inserida e removida no cleanup (não contamina outras rotas SPA).
+- `get_agency_domain` passou a devolver `cnpj` (de `profiles.cnpj`); `AgencyDomainInfo.cnpj` reflete isso. Não existe campo de razão social.
+- Hosts em construção hoje: `100limites.tur.br`, `www.100limites.tur.br`, `paraisoviagens.com`, `www.paraisoviagens.com`.
+- PENDÊNCIA Paraíso Viagens: os hostnames `paraisoviagens.com`/`www.paraisoviagens.com` ainda NÃO estão em `agency_public_domains` (owner `d14b95d2…fb4f`, slug `paraiso-viagens`). Enquanto não forem cadastrados, esses domínios abrem o app da plataforma. O cadastro só deve ser feito DEPOIS de publicar o frontend com o gate de construção já ativo.
