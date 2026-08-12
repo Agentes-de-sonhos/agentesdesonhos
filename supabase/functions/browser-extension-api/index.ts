@@ -24,7 +24,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import {
   assertAction, assertCanMoveStage, assertPermissionReadOk, assertTeamMembershipBinding,
-  budgetSentNote, clampInt, filterVisibleStages,
+  budgetSentNote, clampInt, filterVisibleStages, ilikeContainsPattern, mergeContactMatches,
   isUuid, isUsablePhone, normalizePhone, publicContact, publicOpportunity, safeAmount,
   safeHttpUrl, safeText, teamPermissionFilter, validateDestination, validateIsoDate, validateName,
   type BridgeError,
@@ -264,6 +264,48 @@ Deno.serve(async (req) => {
         }
 
         return json({ contact: null, matched_by: null });
+      }
+
+      // ── b2) search_contacts ─────────────────────────────────────────────
+      case "search_contacts": {
+        const denied = requirePermission("clients.view");
+        if (denied) return fail(denied);
+        const digits = normalizePhone(body.phone);
+        const name = safeText(body.name, 120);
+        const usablePhone = isUsablePhone(digits);
+        if (!usablePhone && name.length < 2) {
+          return fail({ status: 400, error: "Informe um telefone válido ou pelo menos 2 caracteres do nome." });
+        }
+
+        const columns = "id, name, phone, email, status, created_at";
+        let phoneRows: Record<string, unknown>[] = [];
+        let nameRows: Record<string, unknown>[] = [];
+
+        if (usablePhone) {
+          const { data } = await client
+            .from("clients")
+            .select(columns)
+            .eq("user_id", agencyId)
+            .eq("phone_normalized", digits)
+            .order("created_at", { ascending: true })
+            .limit(10);
+          phoneRows = (data ?? []) as Record<string, unknown>[];
+        }
+
+        if (name.length >= 2) {
+          const { data } = await client
+            .from("clients")
+            .select(columns)
+            .eq("user_id", agencyId)
+            .ilike("name", ilikeContainsPattern(name))
+            .order("created_at", { ascending: true })
+            .limit(10);
+          nameRows = (data ?? []) as Record<string, unknown>[];
+        }
+
+        return json({
+          contacts: mergeContactMatches(phoneRows, nameRows, 10).map(r => publicContact(r)),
+        });
       }
 
       // ── c) create_contact ───────────────────────────────────────────────

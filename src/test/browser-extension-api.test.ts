@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
+  ACTIONS, escapeIlike, ilikeContainsPattern, mergeContactMatches,
   assertAction, assertCanMoveStage, budgetSentNote, clampInt, filterVisibleStages,
   assertPermissionReadOk, assertTeamMembershipBinding, teamPermissionFilter,
   isUsablePhone, isUuid, normalizePhone, publicContact, publicOpportunity, safeAmount,
@@ -172,5 +173,53 @@ describe('garantias de fonte da Edge Function', () => {
   it('CRM continua no client do JWT', () => {
     expect(/(?<!admin)(?<!adminRead)\bclient\s*\n?\s*\.from\("clients"\)/.test(src)).toBe(true)
     expect(/(?<!admin)(?<!adminRead)\bclient\s*\n?\s*\.from\("opportunities"\)/.test(src)).toBe(true)
+  })
+})
+
+describe('search_contacts (v0.3)', () => {
+  it('a action está no allowlist', () => {
+    expect(ACTIONS).toContain('search_contacts')
+    expect(assertAction('search_contacts')).toBeNull()
+  })
+
+  it('escapa curingas do ilike e monta busca parcial', () => {
+    expect(escapeIlike('100% _ok\\')).toBe('100\\% \\_ok\\\\')
+    expect(ilikeContainsPattern('ana')).toBe('%ana%')
+    expect(ilikeContainsPattern('50%_')).toBe('%50\\%\\_%')
+  })
+
+  it('deduplica por id, telefone primeiro, e limita a 10', () => {
+    const phone = [{ id: 'a' }, { id: 'b' }]
+    const name = [{ id: 'b' }, { id: 'c' }]
+    expect(mergeContactMatches(phone, name).map(r => r.id)).toEqual(['a', 'b', 'c'])
+    expect(mergeContactMatches(null, null)).toEqual([])
+    const many = Array.from({ length: 25 }, (_, i) => ({ id: `id-${i}` }))
+    expect(mergeContactMatches(many, many, 10)).toHaveLength(10)
+  })
+
+  const src = readFileSync(resolve(process.cwd(), 'supabase/functions/browser-extension-api/index.ts'), 'utf8')
+  const block = src.slice(src.indexOf('case "search_contacts"'), src.indexOf('case "create_contact"'))
+
+  it('exige permissão clients.view e validação mínima', () => {
+    expect(block).toContain('requirePermission("clients.view")')
+    expect(block).toContain('name.length < 2')
+    expect(block).toContain('status: 400')
+  })
+
+  it('isola por agência em toda consulta e nunca confia no body', () => {
+    const froms = [...block.matchAll(/\.from\("clients"\)/g)]
+    const eqs = [...block.matchAll(/\.eq\("user_id", agencyId\)/g)]
+    expect(froms.length).toBe(2)
+    expect(eqs.length).toBe(froms.length)
+    expect(block).not.toMatch(/body\.(agencyId|userId|teamMemberId|memberId)/)
+    expect(block).toMatch(/client\s*\n?\s*\.from\("clients"\)/)
+    expect(block).not.toContain('adminRead')
+  })
+
+  it('devolve apenas contatos mascarados, limitados a 10', () => {
+    expect(block).toContain('publicContact(r)')
+    expect(block).toContain('mergeContactMatches(phoneRows, nameRows, 10)')
+    expect(block).not.toMatch(/cpf|cnpj|notes/i)
+    expect(block).toContain('.limit(10)')
   })
 })

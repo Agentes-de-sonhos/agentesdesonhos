@@ -21,6 +21,7 @@ export function isUuid(value: unknown): boolean {
 export const ACTIONS = [
   'context',
   'lookup_contact',
+  'search_contacts',
   'create_contact',
   'list_opportunities',
   'get_pipeline_stages',
@@ -179,6 +180,40 @@ export function publicContact(row: Record<string, unknown> | null) {
     status: (row.status as string) ?? null,
     created_at: (row.created_at as string) ?? null,
   }
+}
+
+/**
+ * Escapa curingas do LIKE/ILIKE (`%`, `_`, `\`) para que o texto digitado seja
+ * tratado como literal. A busca parcial é montada por nós (`%termo%`).
+ */
+export function escapeIlike(value: string): string {
+  return value.replace(/[\\%_]/g, m => `\\${m}`)
+}
+
+/** Padrão de busca parcial case-insensitive, com curingas escapados. */
+export function ilikeContainsPattern(value: string): string {
+  return `%${escapeIlike(value)}%`
+}
+
+/**
+ * Une resultados de telefone (correspondência exata, primeiro) e de nome,
+ * deduplicando por `id` e limitando a quantidade devolvida.
+ */
+export function mergeContactMatches(
+  phoneRows: Record<string, unknown>[] | null | undefined,
+  nameRows: Record<string, unknown>[] | null | undefined,
+  limit = 10,
+): Record<string, unknown>[] {
+  const seen = new Set<string>()
+  const out: Record<string, unknown>[] = []
+  for (const row of [...(phoneRows ?? []), ...(nameRows ?? [])]) {
+    const id = row?.id as string | undefined
+    if (!id || seen.has(id)) continue
+    seen.add(id)
+    out.push(row)
+    if (out.length >= limit) break
+  }
+  return out
 }
 
 /** Oportunidade devolvida à extensão: apenas campos mínimos. */

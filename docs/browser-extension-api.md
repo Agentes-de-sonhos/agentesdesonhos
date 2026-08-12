@@ -51,6 +51,7 @@ Content-Type: application/json
 |---|---|---|
 | `context` | — | usuário mínimo, `agencyId`, `teamMemberId`, `mode` (`master`/`collaborator`), permissões e etapas visíveis |
 | `lookup_contact` | `phone?`, `name?` | `{ contact, matched_by }` ou `{ contact: null }` |
+| `search_contacts` | `phone?`, `name?` (mín. 2 caracteres) | `{ contacts: [...] }` (máx. 10, busca parcial por nome com curingas escapados; telefone exato primeiro) |
 | `create_contact` | `name`, `phone?` | `201 { contact }` · `409 { error, contact }` em telefone duplicado |
 | `list_opportunities` | `contactId` | `{ opportunities: [...] }` (máx. 50, etapas visíveis) |
 | `get_pipeline_stages` | — | `{ stages: [{ id, name, legacy_key, position, color, can_view, can_edit, can_move }] }` |
@@ -63,6 +64,8 @@ Content-Type: application/json
 
 - Telefone é normalizado no servidor (somente dígitos) e comparado com a coluna
   gerada `clients.phone_normalized`, sempre restrito à agência do usuário.
+- `search_contacts` exige `clients.view`, aceita telefone e/ou nome, sempre filtra
+  `user_id = agencyId` e devolve apenas campos mínimos (`publicContact`).
 - Busca por nome só ocorre sem telefone utilizável: correspondência exata,
   case-insensitive, limite de 5 registros.
 - Novos contatos: `user_id = agencyId`, `status = 'lead'`, origem registrada em
