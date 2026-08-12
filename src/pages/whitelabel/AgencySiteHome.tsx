@@ -897,16 +897,18 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "faq":
+        {
+        const copy = copyFor("faq");
         if (editorial) {
           return (
             <section key={key} id="faq" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Antes de solicitar
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                    {copy.kicker ?? "Antes de solicitar"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-                    Perguntas frequentes
+                    {copy.title ?? "Perguntas frequentes"}
                   </h2>
                   <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
                     Se a sua dúvida não estiver aqui, fale com um consultor da{" "}
@@ -931,7 +933,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </div>
                 </div>
                 <Accordion type="single" collapsible className="w-full border-t border-border/70">
-                  {DEFAULT_FAQ.map((item, index) => (
+                  {faq.map((item, index) => (
                     <AccordionItem
                       key={item.q}
                       value={`faq-${index}`}
@@ -953,9 +955,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         return (
           <section key={key} id="faq" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-4xl px-4 py-14 md:py-16">
-              <SectionHeading title="Perguntas frequentes" />
+              <SectionHeading title={copy.title ?? "Perguntas frequentes"} />
               <Accordion type="single" collapsible className="w-full">
-                {DEFAULT_FAQ.map((item, index) => (
+                {faq.map((item, index) => (
                   <AccordionItem key={item.q} value={`faq-${index}`}>
                     <AccordionTrigger className="text-left text-base">{item.q}</AccordionTrigger>
                     <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
@@ -965,8 +967,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "newsletter":
+        {
+        const copy = copyFor("newsletter");
         if (editorial) {
           return (
             <section key={key} id="novidades" className="bg-background">
@@ -975,14 +980,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
                       <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
-                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> Novidades da agência
+                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
-                        Receba novidades e oportunidades
+                        {copy.title ?? "Receba novidades e oportunidades"}
                       </h2>
                       <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/80 md:text-base">
-                        Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar
-                        quando surgirem oportunidades no seu perfil de viagem.
+                        {copy.subtitle ??
+                          "Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar quando surgirem oportunidades no seu perfil de viagem."}
                       </p>
                     </div>
                     <div className="md:justify-self-end">
@@ -991,7 +996,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         className="h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
                         onClick={() => openRequest("pacotes")}
                       >
-                        Quero receber novidades <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                        {copy.cta ?? "Quero receber novidades"}{" "}
+                        <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </div>
@@ -1008,19 +1014,22 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <Mail className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground">Receba novidades e oportunidades</h2>
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {copy.title ?? "Receba novidades e oportunidades"}
+                  </h2>
                   <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
-                    Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar
-                    quando surgirem oportunidades no seu perfil de viagem.
+                    {copy.subtitle ??
+                      "Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar quando surgirem oportunidades no seu perfil de viagem."}
                   </p>
                 </div>
               </div>
               <Button size="lg" variant="outline" onClick={() => openRequest("pacotes")}>
-                Quero receber novidades
+                {copy.cta ?? "Quero receber novidades"}
               </Button>
             </Card>
           </section>
         );
+        }
 
       default:
         return null;
