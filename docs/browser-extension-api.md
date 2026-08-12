@@ -16,8 +16,23 @@ WhatsApp.
 - `agencyId` (`user_agency_id`) e `teamMemberId` (`team_self_member_id`) são
   derivados **no servidor**. `user_id`, `agency_id`, `member_id` e permissões
   enviados pelo cliente são ignorados.
-- Todas as leituras e mutações usam o cliente Supabase com o JWT do usuário: o
-  RLS permanece como autoridade final. Não há uso de service role para burlar RLS.
+- Todas as leituras e mutações **do CRM** usam o cliente Supabase com o JWT do
+  usuário: o RLS permanece como autoridade final.
+- **Uso administrativo limitado de service role.** As políticas RLS de
+  `agency_team_permissions` e `agency_team_stage_permissions` liberam `SELECT`
+  apenas ao owner (`auth.uid() = agency_id`), então um colaborador autenticado
+  não consegue ler as próprias permissões pelo JWT. Para resolver isso — e
+  somente quando `teamMemberId` existe — a função cria um service client usado
+  exclusivamente para ler `agency_team_members`, `agency_team_permissions` e
+  `agency_team_stage_permissions`. Esse client **não lê clientes/oportunidades e
+  não executa nenhuma mutação**; não é criado para contas master.
+- Antes de ler permissões, o service client valida o **vínculo triplo**: deve
+  existir exatamente um `agency_team_members` com `status = 'active'`,
+  `id = teamMemberId`, `auth_user_id = auth.uid()` e `agency_id = agencyId`.
+  Qualquer divergência devolve `403` (fail-closed).
+- As consultas de permissões filtram sempre por `agency_id` **e**
+  `team_member_id` derivados no servidor. Falha de leitura é negação explícita
+  (`403`), nunca lista vazia silenciosa.
 - Rate limit: 90 requisições por minuto por usuário.
 
 ## Formato
