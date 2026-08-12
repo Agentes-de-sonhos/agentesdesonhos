@@ -610,7 +610,7 @@ export default function Agende() {
                 )}
               </div>
 
-              <Button type="submit" className="h-13 w-full rounded-xl py-4 text-base" disabled={submitting}>
+              <Button type="submit" className="h-12 w-full rounded-xl text-base" disabled={submitting}>
                 {submitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
