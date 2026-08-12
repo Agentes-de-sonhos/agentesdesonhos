@@ -147,7 +147,11 @@ export function seatsLabel(session: Pick<AgendeSession, "seats_left" | "is_full"
   if (session.is_full || left === 0) return { text: "Vagas esgotadas", tone: "full" };
   if (typeof left !== "number" || !Number.isFinite(left) || left < 0)
     return { text: "Vagas disponíveis", tone: "unknown" };
-  if (left <= 3) return { text: `Últimas ${left} ${left === 1 ? "vaga" : "vagas"}`, tone: "scarce" };
+  if (left <= 3)
+    return {
+      text: left === 1 ? "Última 1 vaga" : `Últimas ${left} vagas`,
+      tone: "scarce",
+    };
   return { text: `${left} vagas disponíveis`, tone: "available" };
 }
 
