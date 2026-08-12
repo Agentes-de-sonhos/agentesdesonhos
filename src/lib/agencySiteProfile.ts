@@ -60,7 +60,7 @@ export interface AgencySiteProfile {
   /** Títulos/subtítulos por seção (fallback: textos padrão da engine). */
   copy?: Partial<Record<AgencySectionKey, AgencySectionCopy>>;
   /** Conteúdo institucional da seção "about" quando o perfil define a redação. */
-  about?: { kicker?: string; title?: string; text?: string; highlightYear?: string };
+  about?: { kicker?: string; title?: string; text?: string; image?: string };
 }
 
 /* ------------------------------ PERFIS ------------------------------ */
@@ -153,7 +153,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
     title: "Uma trajetória construída desde 1997.",
     text:
       "À frente da Paraíso, Mariana e Daniela unem repertório, escuta e cuidado para desenhar viagens personalizadas.",
-    highlightYear: "1997",
+    image: "villa",
   },
   credentials: {
     kicker: "CREDENCIAIS E CONEXÕES",

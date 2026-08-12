@@ -600,7 +600,6 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             `A ${name} cuida de cada viagem com atenção aos detalhes: entende o momento de cada cliente, apresenta opções claras e acompanha a experiência do planejamento ao retorno.`;
           // Só destaca um número que JÁ existe no conteúdo resolvido (nunca inventado).
           const years = aboutCopy ? null : bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
-          const sinceYear = aboutCopy?.highlightYear ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
               <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
@@ -616,16 +615,6 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
                       Sobre a <BrandText>{name}</BrandText>
                     </h2>
-                  )}
-                  {sinceYear && (
-                    <p className="mt-8 flex items-baseline gap-3">
-                      <span className="text-5xl leading-none text-[hsl(var(--wl-ink))] md:text-6xl">
-                        {sinceYear}
-                      </span>
-                      <span className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        início da trajetória
-                      </span>
-                    </p>
                   )}
                   {years && (
                     <p className="mt-8 flex items-baseline gap-3">
@@ -656,7 +645,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 </div>
                 <div className="overflow-hidden rounded-xl">
                   <img
-                    src={info.cover_image_url || destinoEuropa}
+                    src={info.cover_image_url || (aboutCopy?.image ? DESTINATION_IMAGES[aboutCopy.image] : undefined) || destinoEuropa}
                     alt={`Viagens acompanhadas pela ${name}`}
                     loading="lazy"
                     width={900}
