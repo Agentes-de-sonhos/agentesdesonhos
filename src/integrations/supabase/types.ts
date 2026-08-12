@@ -2395,6 +2395,7 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
+          phone_normalized: string | null
           status: string | null
           subcategory_id: string | null
           travel_preferences: string | null
@@ -2417,6 +2418,7 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
+          phone_normalized?: string | null
           status?: string | null
           subcategory_id?: string | null
           travel_preferences?: string | null
@@ -2439,6 +2441,7 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
+          phone_normalized?: string | null
           status?: string | null
           subcategory_id?: string | null
           travel_preferences?: string | null
