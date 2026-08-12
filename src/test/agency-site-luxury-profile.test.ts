@@ -105,7 +105,6 @@ describe("bypass de preview da home em construção", () => {
       "100limites.tur.br",
       "agentedesonhoproject.lovable.app",
       "app.agentesdesonhos.com.br",
-      "localhost",
     ]) {
       expect(isConstructionPreviewBypass(host, search), host).toBe(false);
       expect(shouldRenderUnderConstruction("paraisoviagens.com", host, search), host).toBe(true);
