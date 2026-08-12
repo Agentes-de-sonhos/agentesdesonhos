@@ -23,6 +23,8 @@ export interface AgencyDomainInfo {
   state: string | null;
   bio: string | null;
   public_slug: string | null;
+  /** CNPJ do cadastro da agência (exposto pelo RPC get_agency_domain). */
+  cnpj: string | null;
 }
 
 /** Hosts owned by the platform — never resolved as agency domains. */
@@ -91,4 +93,14 @@ export function agencyWhatsappNumber(info: AgencyDomainInfo | null): string | nu
   const raw = (info?.phone || "").replace(/\D/g, "");
   if (raw.length < 10) return null;
   return raw.startsWith("55") ? raw : `55${raw}`;
+}
+
+/**
+ * CNPJ formatado (00.000.000/0000-00) quando o valor tem 14 dígitos.
+ * Retorna null quando não há CNPJ; nunca inventa nem completa dígitos.
+ */
+export function formatCnpj(raw?: string | null): string | null {
+  const digits = (raw || "").replace(/\D/g, "");
+  if (digits.length !== 14) return null;
+  return digits.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
 }
