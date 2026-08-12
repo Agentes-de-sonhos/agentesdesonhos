@@ -196,6 +196,30 @@ export function ilikeContainsPattern(value: string): string {
 }
 
 /**
+ * Variantes exatas e seguras de um telefone normalizado, para comparar com
+ * `clients.phone_normalized`. O CRM pode ter salvo DDD+número (10/11 dígitos)
+ * enquanto o WhatsApp entrega 55+DDD+número (12/13 dígitos).
+ *
+ * Regras (conservadoras, sem inventar variantes de outros países):
+ * - o próprio número, quando utilizável (8–15 dígitos);
+ * - 10/11 dígitos → também `55` + número;
+ * - 12/13 dígitos começando por `55` → também a versão sem o `55`.
+ */
+export function phoneMatchVariants(digits: string): string[] {
+  if (!isUsablePhone(digits)) return []
+  const out = [digits]
+  const push = (v: string) => {
+    if (isUsablePhone(v) && !out.includes(v)) out.push(v)
+  }
+  if (digits.length === 10 || digits.length === 11) {
+    push(`55${digits}`)
+  } else if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) {
+    push(digits.slice(2))
+  }
+  return out
+}
+
+/**
  * Une resultados de telefone (correspondência exata, primeiro) e de nome,
  * deduplicando por `id` e limitando a quantidade devolvida.
  */
