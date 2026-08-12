@@ -39,6 +39,42 @@ export function isUnderConstruction(hostname?: string | null): boolean {
   return resolveSiteStatus(hostname) === "under_construction";
 }
 
+/* ---------------------- BYPASS DE PREVIEW (Lovable apenas) ------------------- */
+
+/** Hostnames técnicos de preview do Lovable — nunca domínios reais de agência. */
+function isLovablePreviewHost(actualHostname?: string | null): boolean {
+  const host = normalizeStatusHost(actualHostname);
+  return (
+    (host.startsWith("id-preview--") || host.startsWith("preview--")) &&
+    host.endsWith(".lovable.app")
+  );
+}
+
+/**
+ * Permite revisar a home de um tenant `under_construction` APENAS no hostname
+ * técnico de preview do Lovable, com `?__agency_preview=1`.
+ *
+ * Jamais funciona no domínio real da agência, no domínio publicado
+ * (agentedesonhoproject.lovable.app) ou em qualquer outro host.
+ */
+export function isConstructionPreviewBypass(
+  actualHostname?: string | null,
+  search?: string | null,
+): boolean {
+  if (!isLovablePreviewHost(actualHostname)) return false;
+  return new URLSearchParams(search || "").get("__agency_preview") === "1";
+}
+
+/** Status efetivo da home considerando o bypass de preview. */
+export function shouldRenderUnderConstruction(
+  agencyHostname?: string | null,
+  actualHostname?: string | null,
+  search?: string | null,
+): boolean {
+  if (!isUnderConstruction(agencyHostname)) return false;
+  return !isConstructionPreviewBypass(actualHostname, search);
+}
+
 /** CNPJ configurado para o hostname (fallback quando o perfil não tem o dado). */
 export function configuredCnpj(hostname?: string | null): string | null {
   return resolveSiteStatusConfig(hostname).cnpj ?? null;
