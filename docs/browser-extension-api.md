@@ -64,6 +64,10 @@ Content-Type: application/json
 
 - Telefone é normalizado no servidor (somente dígitos) e comparado com a coluna
   gerada `clients.phone_normalized`, sempre restrito à agência do usuário.
+- `search_contacts` compara o telefone por variantes exatas: o número informado
+  e, para números brasileiros, a versão com e sem o prefixo `55` (10/11 ↔ 12/13
+  dígitos). Nenhuma variante é inventada para outros países. A correspondência
+  por telefone tem prioridade sobre a busca por nome.
 - `search_contacts` exige `clients.view`, aceita telefone e/ou nome, sempre filtra
   `user_id = agencyId` e devolve apenas campos mínimos (`publicContact`).
 - Busca por nome só ocorre sem telefone utilizável: correspondência exata,
