@@ -216,18 +216,6 @@ export function mergeContactMatches(
   return out
 }
 
-function _unusedPublicContact(row: Record<string, unknown> | null) {
-  if (!row) return null
-  return {
-    id: row.id as string,
-    name: (row.name as string) ?? '',
-    phone: (row.phone as string) ?? null,
-    email: (row.email as string) ?? null,
-    status: (row.status as string) ?? null,
-    created_at: (row.created_at as string) ?? null,
-  }
-}
-
 /** Oportunidade devolvida à extensão: apenas campos mínimos. */
 export function publicOpportunity(row: Record<string, unknown>) {
   const stage = (row.pipeline_stage ?? null) as Record<string, unknown> | null
