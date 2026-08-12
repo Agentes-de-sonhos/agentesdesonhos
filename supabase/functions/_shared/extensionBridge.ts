@@ -182,6 +182,52 @@ export function publicContact(row: Record<string, unknown> | null) {
   }
 }
 
+/**
+ * Escapa curingas do LIKE/ILIKE (`%`, `_`, `\`) para que o texto digitado seja
+ * tratado como literal. A busca parcial é montada por nós (`%termo%`).
+ */
+export function escapeIlike(value: string): string {
+  return value.replace(/[\\%_]/g, m => `\\${m}`)
+}
+
+/** Padrão de busca parcial case-insensitive, com curingas escapados. */
+export function ilikeContainsPattern(value: string): string {
+  return `%${escapeIlike(value)}%`
+}
+
+/**
+ * Une resultados de telefone (correspondência exata, primeiro) e de nome,
+ * deduplicando por `id` e limitando a quantidade devolvida.
+ */
+export function mergeContactMatches(
+  phoneRows: Record<string, unknown>[] | null | undefined,
+  nameRows: Record<string, unknown>[] | null | undefined,
+  limit = 10,
+): Record<string, unknown>[] {
+  const seen = new Set<string>()
+  const out: Record<string, unknown>[] = []
+  for (const row of [...(phoneRows ?? []), ...(nameRows ?? [])]) {
+    const id = row?.id as string | undefined
+    if (!id || seen.has(id)) continue
+    seen.add(id)
+    out.push(row)
+    if (out.length >= limit) break
+  }
+  return out
+}
+
+function _unusedPublicContact(row: Record<string, unknown> | null) {
+  if (!row) return null
+  return {
+    id: row.id as string,
+    name: (row.name as string) ?? '',
+    phone: (row.phone as string) ?? null,
+    email: (row.email as string) ?? null,
+    status: (row.status as string) ?? null,
+    created_at: (row.created_at as string) ?? null,
+  }
+}
+
 /** Oportunidade devolvida à extensão: apenas campos mínimos. */
 export function publicOpportunity(row: Record<string, unknown>) {
   const stage = (row.pipeline_stage ?? null) as Record<string, unknown> | null
