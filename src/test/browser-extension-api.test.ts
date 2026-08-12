@@ -247,7 +247,7 @@ describe('phoneMatchVariants', () => {
   it('não inventa variantes para outros países', () => {
     expect(phoneMatchVariants('14155552671')).toEqual(['14155552671', '5514155552671'])
     expect(phoneMatchVariants('447911123456')).toEqual(['447911123456'])
-    expect(phoneMatchVariants('33123456789')).toEqual(['33123456789'])
+    expect(phoneMatchVariants('4479111234567')).toEqual(['4479111234567'])
   })
   it('deduplica e recusa inválidos', () => {
     expect(new Set(phoneMatchVariants('11999999999')).size).toBe(2)
