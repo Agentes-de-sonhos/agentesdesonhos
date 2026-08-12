@@ -24,16 +24,24 @@ import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
   resolveDestinations, resolveDmc, resolveHeroSlides, resolveModules, resolveSections,
-  type AgencySectionKey,
+  type AgencySectionKey, type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
+import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProfile";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
+import heroLuxo from "@/assets/whitelabel/hero-luxo.jpg";
 import destinoLitoral from "@/assets/whitelabel/destino-litoral.jpg";
 import destinoResort from "@/assets/whitelabel/destino-resort.jpg";
 import destinoCruzeiro from "@/assets/whitelabel/destino-cruzeiro.jpg";
 import destinoEuropa from "@/assets/whitelabel/destino-europa.jpg";
 import destinoParques from "@/assets/whitelabel/destino-parques.jpg";
+import destinoSafari from "@/assets/whitelabel/destino-safari.jpg";
+import destinoDouro from "@/assets/whitelabel/destino-douro.jpg";
+import destinoVilla from "@/assets/whitelabel/destino-villa.jpg";
+import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
+import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
+import destinoLuaDeMel from "@/assets/whitelabel/destino-luademel.jpg";
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
@@ -42,6 +50,18 @@ const DESTINATION_IMAGES: Record<string, string> = {
   cruzeiro: destinoCruzeiro,
   europa: destinoEuropa,
   parques: destinoParques,
+  safari: destinoSafari,
+  douro: destinoDouro,
+  villa: destinoVilla,
+  gastronomia: destinoGastronomia,
+  brasil: destinoBrasil,
+  luademel: destinoLuaDeMel,
+};
+
+/** Slots de imagem de hero (fallback quando a agência não tem capa própria). */
+const HERO_IMAGES: Record<string, string> = {
+  praia: heroPraia,
+  luxo: heroLuxo,
 };
 
 /** Kept exported: other white-label surfaces import this service list. */
