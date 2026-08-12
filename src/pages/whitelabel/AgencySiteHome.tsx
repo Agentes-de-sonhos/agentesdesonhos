@@ -4,6 +4,7 @@ import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
   MapPin, CheckCircle2, Quote, Route, UserRound, FileCheck2, LifeBuoy, Handshake,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -91,6 +92,11 @@ const DIFFERENTIAL_ICONS: Record<string, typeof Route> = {
   fornecedores: Handshake,
 };
 
+/** Credenciais: ícone semântico único, resolvido na apresentação. */
+const CREDENTIAL_ICONS: Record<string, typeof Route> = {
+  luxperts: Award,
+};
+
 function SectionHeading({
   title,
   subtitle,
@@ -145,11 +151,31 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const editorial = isEditorialTheme(hostname);
   const container = siteContainer(editorial);
 
+  // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
+  const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  const copyFor = useCallback(
+    (key: AgencySectionKey): AgencySectionCopy => profile.copy?.[key] ?? {},
+    [profile],
+  );
+
   // Faixa B2B/DMC: exclusiva das agências configuradas por hostname.
   const dmc = useMemo(() => resolveDmc(hostname), [hostname]);
-  const sections = useMemo(() => resolveSections({ dmc: !!dmc }), [dmc]);
-  const modules = useMemo(() => resolveModules(), []);
-  const destinations = useMemo(() => resolveDestinations(), []);
+  const sections = useMemo(() => {
+    const overrides: Partial<Record<AgencySectionKey, AgencySectionOverride>> = {
+      ...(profile.sections ?? {}),
+    };
+    const dmcOverride = overrides.dmc;
+    overrides.dmc =
+      typeof dmcOverride === "object"
+        ? { ...dmcOverride, enabled: (dmcOverride.enabled ?? true) && !!dmc }
+        : { enabled: !!dmc && dmcOverride !== false };
+    return resolveSections(overrides);
+  }, [dmc, profile]);
+  const modules = useMemo(() => resolveModules(undefined, profile.modules), [profile]);
+  const destinations = useMemo(() => resolveDestinations(undefined, profile.destinations), [profile]);
+  const highlights = profile.highlights ?? DEFAULT_HIGHLIGHTS;
+  const differentials = profile.differentials ?? DEFAULT_DIFFERENTIALS;
+  const faq = profile.faq ?? DEFAULT_FAQ;
   const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
@@ -203,8 +229,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   // Hero banners (1 to 5) come from the central config — no hardcoded copy here.
   const slides = useMemo(
-    () => resolveHeroSlides(name, info.cover_image_url, undefined, heroPraia),
-    [name, info.cover_image_url],
+    () =>
+      resolveHeroSlides(
+        name,
+        info.cover_image_url,
+        profile.hero,
+        HERO_IMAGES[profile.heroImage ?? "praia"] ?? heroPraia,
+      ),
+    [name, info.cover_image_url, profile],
   );
 
   const [slide, setSlide] = useState(0);
