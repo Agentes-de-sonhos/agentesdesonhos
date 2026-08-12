@@ -56,7 +56,7 @@ describe("tenant display fallbacks", () => {
     user_id: "u1", agency_slug: "100-limites-viagens", hostname: "100limites.tur.br",
     is_primary: true, agency_name: null, owner_name: "Amanda Larini", logo_url: null,
     cover_image_url: null, primary_color: null, phone: null, city: null, state: null,
-    bio: null, public_slug: "100-limites-viagens",
+    bio: null, public_slug: "100-limites-viagens", cnpj: null,
   };
 
   it("falls back from agency name to owner name", () => {

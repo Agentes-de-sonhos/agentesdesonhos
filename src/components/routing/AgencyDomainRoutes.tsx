@@ -1,10 +1,12 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
+import { isUnderConstruction } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
+const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
@@ -57,24 +59,35 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
 }
 
 export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
+  const construction = isUnderConstruction(info.hostname);
   return (
     <BrowserRouter>
-      <AgencySiteLayout info={info}>
       <Suspense fallback={<Fallback />}>
         <Routes>
-          <Route path="/" element={<AgencySiteHome info={info} />} />
-          <Route path="/area-do-cliente" element={<AgencyClientArea info={info} />} />
-          <Route path="/ofertas" element={<Ofertas info={info} />} />
-          <Route path="/orcamento/:code" element={<CodePage info={info} kind="orcamento" />} />
-          <Route path="/roteiro/:code" element={<CodePage info={info} kind="roteiro" />} />
-          <Route path="/carteira/:code" element={<CodePage info={info} kind="carteira" />} />
-          <Route path="/fatura/:code" element={<CodePage info={info} kind="fatura" />} />
-          <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
-          <Route path="/termosdeuso" element={<TermosDeUso />} />
-          <Route path="*" element={<LinkUnavailable />} />
+          {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
+          {construction && <Route path="/" element={<AgencyUnderConstruction info={info} />} />}
+
+          {/* Todas as demais rotas mantêm o chrome atual do site white label. */}
+          <Route
+            element={
+              <AgencySiteLayout info={info}>
+                <Outlet />
+              </AgencySiteLayout>
+            }
+          >
+            {!construction && <Route path="/" element={<AgencySiteHome info={info} />} />}
+            <Route path="/area-do-cliente" element={<AgencyClientArea info={info} />} />
+            <Route path="/ofertas" element={<Ofertas info={info} />} />
+            <Route path="/orcamento/:code" element={<CodePage info={info} kind="orcamento" />} />
+            <Route path="/roteiro/:code" element={<CodePage info={info} kind="roteiro" />} />
+            <Route path="/carteira/:code" element={<CodePage info={info} kind="carteira" />} />
+            <Route path="/fatura/:code" element={<CodePage info={info} kind="fatura" />} />
+            <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
+            <Route path="/termosdeuso" element={<TermosDeUso />} />
+            <Route path="*" element={<LinkUnavailable />} />
+          </Route>
         </Routes>
       </Suspense>
-      </AgencySiteLayout>
     </BrowserRouter>
   );
 }
