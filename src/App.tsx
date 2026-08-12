@@ -27,6 +27,7 @@ import { AgencyDomainGate } from "@/components/routing/AgencyDomainGate";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const Agende = lazy(() => import("./pages/Agende"));
 const OrlandoMagicLandingPage = lazy(() => import("./pages/OrlandoMagicLandingPage"));
 const ComandatubaLandingPage = lazy(() => import("./pages/ComandatubaLandingPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -210,6 +211,7 @@ const App = () => (
                 )
               }
             />
+            <Route path="/agende" element={<Agende />} />
             <Route path="/planos" element={<Planos />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/experiencias/orlando-magic/demo" element={<OrlandoMagicLandingPage />} />
