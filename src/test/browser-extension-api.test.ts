@@ -1,12 +1,16 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import {
   assertAction, assertCanMoveStage, budgetSentNote, clampInt, filterVisibleStages,
+  assertPermissionReadOk, assertTeamMembershipBinding, teamPermissionFilter,
   isUsablePhone, isUuid, normalizePhone, publicContact, publicOpportunity, safeAmount,
   safeHttpUrl, safeText, validateDestination, validateIsoDate, validateName,
 } from '../../supabase/functions/_shared/extensionBridge'
 
 const S1 = '11111111-1111-4111-8111-111111111111'
 const S2 = '22222222-2222-4222-8222-222222222222'
+const AG = '33333333-3333-4333-8333-333333333333'
 
 describe('normalização de telefone', () => {
   it('mantém apenas dígitos', () => {
@@ -105,5 +109,68 @@ describe('payloads mínimos', () => {
   it('nota de orçamento inclui URL só quando existe', () => {
     expect(budgetSentNote(null)).toBe('Orçamento enviado pelo WhatsApp.')
     expect(budgetSentNote('https://x/y')).toContain('https://x/y')
+  })
+})
+
+describe('vínculo triplo do colaborador', () => {
+  const base = { teamMemberId: S1, authUserId: S2, agencyId: AG }
+  const row = { id: S1, auth_user_id: S2, agency_id: AG, status: 'active' }
+  it('aceita exatamente uma linha coerente e ativa', () => {
+    expect(assertTeamMembershipBinding({ ...base, rows: [row] })).toBeNull()
+  })
+  it('nega quando não há linha, há mais de uma, ou está inativo', () => {
+    expect(assertTeamMembershipBinding({ ...base, rows: [] })?.status).toBe(403)
+    expect(assertTeamMembershipBinding({ ...base, rows: null })?.status).toBe(403)
+    expect(assertTeamMembershipBinding({ ...base, rows: [row, row] })?.status).toBe(403)
+    expect(assertTeamMembershipBinding({ ...base, rows: [{ ...row, status: 'blocked' }] })?.status).toBe(403)
+  })
+  it('nega quando auth user ou agência divergem', () => {
+    expect(assertTeamMembershipBinding({ ...base, rows: [{ ...row, auth_user_id: AG }] })?.status).toBe(403)
+    expect(assertTeamMembershipBinding({ ...base, rows: [{ ...row, agency_id: S2 }] })?.status).toBe(403)
+    expect(assertTeamMembershipBinding({ ...base, rows: [{ ...row, id: S2 }] })?.status).toBe(403)
+  })
+})
+
+describe('leitura de permissões fail-closed', () => {
+  it('erro de banco vira negação, nunca array vazio silencioso', () => {
+    expect(assertPermissionReadOk(null, undefined)).toBeNull()
+    expect(assertPermissionReadOk(null, { message: 'boom' })?.status).toBe(403)
+  })
+  it('filtro exige agency_id e team_member_id derivados', () => {
+    expect(teamPermissionFilter(AG, S1)).toEqual({ agency_id: AG, team_member_id: S1 })
+    expect(() => teamPermissionFilter('x', S1)).toThrow()
+  })
+})
+
+describe('garantias de fonte da Edge Function', () => {
+  const src = readFileSync(resolve(process.cwd(), 'supabase/functions/browser-extension-api/index.ts'), 'utf8')
+  const adminBlock = src.slice(src.indexOf('const adminRead'), src.indexOf('const can = ('))
+
+  it('service client só toca as três tabelas de equipe', () => {
+    const tables = [...adminBlock.matchAll(/adminRead\s*\n?\s*\.from\("([a-z_]+)"\)/g)].map(m => m[1])
+    expect(tables.length).toBeGreaterThanOrEqual(3)
+    expect(new Set(tables)).toEqual(new Set([
+      'agency_team_members', 'agency_team_permissions', 'agency_team_stage_permissions',
+    ]))
+  })
+  it('service client nunca executa mutação nem lê CRM', () => {
+    expect(/adminRead[\s\S]{0,200}\.(insert|update|upsert|delete)\(/.test(src)).toBe(false)
+    expect(/adminRead\s*\n?\s*\.from\("(clients|opportunities|pipeline_stages|opportunity_\w+)"\)/.test(src)).toBe(false)
+  })
+  it('permissões são lidas sempre filtrando agency_id e team_member_id', () => {
+    for (const table of ['agency_team_permissions', 'agency_team_stage_permissions']) {
+      const chunk = adminBlock.slice(adminBlock.indexOf(`"${table}"`))
+      expect(chunk).toContain('.eq("agency_id", scope.agency_id)')
+      expect(chunk).toContain('.eq("team_member_id", scope.team_member_id)')
+    }
+    expect(adminBlock).not.toMatch(/body\.(teamMemberId|agencyId|memberId|userId)/)
+  })
+  it('valida o vínculo triplo antes de ler permissões', () => {
+    expect(adminBlock.indexOf('assertTeamMembershipBinding'))
+      .toBeLessThan(adminBlock.indexOf('agency_team_permissions'))
+  })
+  it('CRM continua no client do JWT', () => {
+    expect(/(?<!admin)(?<!adminRead)\bclient\s*\n?\s*\.from\("clients"\)/.test(src)).toBe(true)
+    expect(/(?<!admin)(?<!adminRead)\bclient\s*\n?\s*\.from\("opportunities"\)/.test(src)).toBe(true)
   })
 })

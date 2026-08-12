@@ -11,16 +11,22 @@
  * - Sem JWT válido não existe operação (nem leitura).
  * - `agencyId` e `teamMemberId` são derivados NO SERVIDOR (user_agency_id /
  *   team_self_member_id). Nada enviado pelo cliente é confiado.
- * - Todas as leituras/mutações usam o cliente com o JWT do usuário: o RLS
- *   continua sendo a autoridade final.
+ * - Todas as leituras/mutações do CRM usam o cliente com o JWT do usuário: o
+ *   RLS continua sendo a autoridade final.
+ * - Uso administrativo LIMITADO de service role: apenas para ler o vínculo do
+ *   colaborador e suas permissões (agency_team_members,
+ *   agency_team_permissions, agency_team_stage_permissions), cujas políticas
+ *   RLS liberam SELECT somente ao owner. O service client nunca lê clientes ou
+ *   oportunidades e nunca executa mutações.
  * - Nunca envia mensagem pelo WhatsApp e nunca devolve CPF/CNPJ ou credenciais.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import {
-  assertAction, assertCanMoveStage, budgetSentNote, clampInt, filterVisibleStages,
+  assertAction, assertCanMoveStage, assertPermissionReadOk, assertTeamMembershipBinding,
+  budgetSentNote, clampInt, filterVisibleStages,
   isUuid, isUsablePhone, normalizePhone, publicContact, publicOpportunity, safeAmount,
-  safeHttpUrl, safeText, validateDestination, validateIsoDate, validateName,
+  safeHttpUrl, safeText, teamPermissionFilter, validateDestination, validateIsoDate, validateName,
   type BridgeError,
 } from "../_shared/extensionBridge.ts";
 
@@ -90,15 +96,51 @@ Deno.serve(async (req) => {
     let permissionSet = new Set<string>();
     let stagePerms: { stage_id: string; can_view: boolean; can_edit: boolean; can_move: boolean }[] = [];
     if (isTeamMember) {
-      const [{ data: perms }, { data: sperms }] = await Promise.all([
-        client.from("agency_team_permissions")
+      // As políticas RLS de agency_team_permissions / _stage_permissions liberam
+      // SELECT somente ao owner (auth.uid() = agency_id). O colaborador não
+      // consegue ler as próprias permissões pelo JWT — por isso um service
+      // client de leitura administrativa, restrito a estas três tabelas.
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (!serviceKey) {
+        console.error("SUPABASE_SERVICE_ROLE_KEY ausente");
+        return fail({ status: 403, error: "Não foi possível validar suas permissões. Tente novamente." });
+      }
+      const adminRead = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+      const scope = teamPermissionFilter(agencyId, teamMemberId);
+
+      // Vínculo triplo antes de qualquer leitura de permissão (fail-closed).
+      const { data: memberRows, error: memberError } = await adminRead
+        .from("agency_team_members")
+        .select("id, auth_user_id, agency_id, status")
+        .eq("id", scope.team_member_id)
+        .eq("auth_user_id", user.id)
+        .eq("agency_id", scope.agency_id)
+        .eq("status", "active")
+        .limit(2);
+      const memberReadError = assertPermissionReadOk(memberError);
+      if (memberReadError) return fail(memberReadError);
+      const bindingError = assertTeamMembershipBinding({
+        rows: memberRows as { id: unknown; auth_user_id: unknown; agency_id: unknown; status?: unknown }[] | null,
+        teamMemberId,
+        authUserId: user.id,
+        agencyId,
+      });
+      if (bindingError) return fail(bindingError);
+
+      const [{ data: perms, error: permsError }, { data: sperms, error: spermsError }] = await Promise.all([
+        adminRead.from("agency_team_permissions")
           .select("permission_key, enabled")
-          .eq("team_member_id", teamMemberId),
-        client.from("agency_team_stage_permissions")
+          .eq("agency_id", scope.agency_id)
+          .eq("team_member_id", scope.team_member_id),
+        adminRead.from("agency_team_stage_permissions")
           .select("stage_id, can_view, can_edit, can_move")
-          .eq("team_member_id", teamMemberId)
+          .eq("agency_id", scope.agency_id)
+          .eq("team_member_id", scope.team_member_id)
           .eq("pipeline_type", "opportunities"),
       ]);
+      const permsReadError = assertPermissionReadOk(permsError, spermsError);
+      if (permsReadError) return fail(permsReadError);
+
       (perms ?? []).forEach((p: Record<string, unknown>) => {
         if (p.enabled) permissionSet.add(String(p.permission_key));
       });

@@ -198,3 +198,63 @@ export function publicOpportunity(row: Record<string, unknown>) {
     created_at: (row.created_at as string) ?? null,
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Vínculo triplo do colaborador (usado com o service client administrativo)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface TeamMemberBindingRow {
+  id: unknown
+  auth_user_id: unknown
+  agency_id: unknown
+  status?: unknown
+}
+
+/**
+ * Valida, fail-closed, que existe EXATAMENTE UM colaborador ativo cujo
+ * `id`, `auth_user_id` e `agency_id` correspondem ao trio derivado no servidor.
+ * Qualquer divergência (nenhum, mais de um, inativo, agência ou usuário
+ * diferente) resulta em 403.
+ */
+export function assertTeamMembershipBinding(input: {
+  rows: TeamMemberBindingRow[] | null | undefined
+  teamMemberId: string
+  authUserId: string
+  agencyId: string
+}): BridgeError | null {
+  const denied: BridgeError = { status: 403, error: 'Vínculo de colaborador inválido para esta agência.' }
+  if (!isUuid(input.teamMemberId) || !isUuid(input.authUserId) || !isUuid(input.agencyId)) return denied
+  const rows = input.rows
+  if (!Array.isArray(rows) || rows.length !== 1) return denied
+  const row = rows[0]
+  if (row.id !== input.teamMemberId) return denied
+  if (row.auth_user_id !== input.authUserId) return denied
+  if (row.agency_id !== input.agencyId) return denied
+  if (row.status !== undefined && row.status !== 'active') return denied
+  return null
+}
+
+/**
+ * Filtro obrigatório das leituras de permissões: sempre `agency_id` E
+ * `team_member_id` derivados no servidor. Nunca aceita IDs do body.
+ */
+export function teamPermissionFilter(agencyId: string, teamMemberId: string): {
+  agency_id: string
+  team_member_id: string
+} {
+  if (!isUuid(agencyId) || !isUuid(teamMemberId)) {
+    throw new Error('teamPermissionFilter exige agencyId e teamMemberId válidos.')
+  }
+  return { agency_id: agencyId, team_member_id: teamMemberId }
+}
+
+/**
+ * Leitura de permissões nunca pode degradar para array vazio silencioso: erro
+ * de banco é negação explícita.
+ */
+export function assertPermissionReadOk(...errors: (unknown | null | undefined)[]): BridgeError | null {
+  if (errors.some(e => !!e)) {
+    return { status: 403, error: 'Não foi possível validar suas permissões. Tente novamente.' }
+  }
+  return null
+}
