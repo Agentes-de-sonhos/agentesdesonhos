@@ -82,6 +82,9 @@ const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
   "Roteiro sob medida": Route,
   "Aéreo com estratégia": Plane,
   "Viagem protegida": ShieldCheck,
+  "Roteiros desenhados para cada viajante": Route,
+  "Seleção criteriosa de hospedagens": BedDouble,
+  "Parceiros especializados": Handshake,
 };
 
 /** Ícone semântico por diferencial (um símbolo distinto para cada um). */
