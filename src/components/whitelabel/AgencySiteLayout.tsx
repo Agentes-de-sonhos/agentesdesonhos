@@ -9,9 +9,9 @@ import {
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
 import {
-  EDITORIAL_ROOT_CLASS,
   isEditorialTheme,
   siteContainer,
+  siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
 
 export const NAV_LINKS = [
@@ -355,9 +355,8 @@ export function AgencySiteLayout({
   info: AgencyDomainInfo;
   children: React.ReactNode;
 }) {
-  const editorial = isEditorialTheme(info.hostname);
   return (
-    <div className={`min-h-screen bg-background ${editorial ? EDITORIAL_ROOT_CLASS : ""}`}>
+    <div className={`min-h-screen bg-background ${siteThemeRootClass(info.hostname)}`}>
       <AgencyBrandBar info={info} />
       <main>{children}</main>
       <AgencyFooter info={info} />
