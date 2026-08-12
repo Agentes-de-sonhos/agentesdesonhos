@@ -170,7 +170,7 @@ describe('garantias de fonte da Edge Function', () => {
       .toBeLessThan(adminBlock.indexOf('agency_team_permissions'))
   })
   it('CRM continua no client do JWT', () => {
-    expect(src).toContain('client.from("clients")')
-    expect(src).toContain('client.from("opportunities")')
+    expect(/(?<!admin)(?<!adminRead)\bclient\s*\n?\s*\.from\("clients"\)/.test(src)).toBe(true)
+    expect(/(?<!admin)(?<!adminRead)\bclient\s*\n?\s*\.from\("opportunities"\)/.test(src)).toBe(true)
   })
 })
