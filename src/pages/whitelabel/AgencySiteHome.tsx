@@ -1196,14 +1196,20 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (!editorial || index !== 0 || !node) return node;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).
+        // A cor precisa ser a MESMA superfície da seção que abre a página.
+        const surface =
+          section.key === "dmc"
+            ? "bg-[hsl(var(--wl-navy))]"
+            : section.key === "destinations" ||
+                section.key === "modules" ||
+                section.key === "differentials" ||
+                section.key === "faq"
+              ? "bg-[hsl(var(--wl-sand))]"
+              : "bg-background";
         return (
           <div
             key={`${section.key}-offset`}
-            className={
-              section.key === "dmc"
-                ? "bg-[hsl(var(--wl-navy))]"
-                : "bg-[hsl(var(--wl-sand))]"
-            }
+            className={surface}
             style={{ paddingTop: halfPx }}
           >
             {node}
