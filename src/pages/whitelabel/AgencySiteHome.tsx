@@ -271,6 +271,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "highlights":
+        {
+        const copy = copyFor("highlights");
         return (
           <section
             key={key}
@@ -279,13 +281,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           >
             <div className={editorial ? `${container} py-14 md:py-24` : undefined}>
             <SectionHeading
-              title="Destaques"
-              subtitle="Três formas de começar agora o planejamento da sua próxima viagem."
+              title={copy.title ?? "Destaques"}
+              subtitle={copy.subtitle ?? "Três formas de começar agora o planejamento da sua próxima viagem."}
               editorial={editorial}
             />
             {editorial ? (
               <div className="grid gap-5 md:grid-cols-3">
-                {DEFAULT_HIGHLIGHTS.map((h) => {
+                {highlights.map((h) => {
                   const Icon = HIGHLIGHT_ICONS[h.title] ?? Compass;
                   return (
                     <article
@@ -308,7 +310,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-3">
-                {DEFAULT_HIGHLIGHTS.map((h) => (
+                {highlights.map((h) => (
                 <Card key={h.title} className="flex h-full flex-col p-6 transition-shadow hover:shadow-lg">
                   <Sparkles className="mb-4 h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="text-base font-semibold text-foreground">{h.title}</h3>
@@ -323,6 +325,75 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
+
+      case "signature": {
+        const s = profile.signature;
+        if (!s) return null;
+        return (
+          <section key={key} id="assinatura" className="bg-background">
+            <div className={`${container} py-16 md:py-24`}>
+              <div className="mx-auto max-w-3xl text-center">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--wl-red))]">
+                  {s.kicker}
+                </p>
+                <h2 className="mt-6 text-3xl leading-tight text-foreground md:text-[2.9rem]">
+                  {s.title}
+                </h2>
+                <div className="mx-auto mt-8 h-px w-16 bg-foreground/20" />
+                <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground md:text-lg">
+                  {s.text}
+                </p>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      case "credentials": {
+        const c = profile.credentials;
+        if (!c) return null;
+        return (
+          <section key={key} id="credenciais" className="bg-background">
+            <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-16 md:py-24`}>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  {c.kicker}
+                </p>
+                <h2 className="mt-4 text-3xl leading-tight text-foreground md:text-[2.6rem]">
+                  {c.title}
+                </h2>
+                <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
+                  {c.text}
+                </p>
+              </div>
+              <ul className="grid content-start gap-6">
+                {c.items.map((item) => {
+                  const Icon = CREDENTIAL_ICONS[item.key] ?? Award;
+                  return (
+                    <li
+                      key={item.key}
+                      className="flex gap-5 border-t border-foreground/10 pt-6"
+                    >
+                      <Icon
+                        className="mt-1 h-7 w-7 shrink-0 text-[hsl(var(--wl-red))]"
+                        aria-hidden="true"
+                        strokeWidth={1.5}
+                      />
+                      <div>
+                        <h3 className="text-lg text-foreground">{item.name}</h3>
+                        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                          {item.text}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </section>
+        );
+      }
 
       case "modules":
         if (editorial) {
