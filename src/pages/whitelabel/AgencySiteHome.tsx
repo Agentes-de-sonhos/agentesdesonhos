@@ -709,17 +709,19 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "differentials":
+        {
+        const copy = copyFor("differentials");
         if (editorial) {
           return (
             <section key={key} id="diferenciais" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
-                  title="Diferenciais"
-                  subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe."
+                  title={copy.title ?? "Diferenciais"}
+                  subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
                   editorial
                 />
                 <ul className="grid gap-x-14 gap-y-10 md:grid-cols-2">
-                  {DEFAULT_DIFFERENTIALS.map((d) => {
+                  {differentials.map((d) => {
                     const Icon = DIFFERENTIAL_ICONS[d.icon] ?? CheckCircle2;
                     return (
                       <li key={d.title} className="flex gap-5 border-t border-foreground/10 pt-6">
@@ -742,9 +744,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         }
         return (
           <section key={key} id="diferenciais" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <SectionHeading title="Diferenciais" subtitle="O que muda quando a viagem é planejada com quem acompanha cada detalhe." />
+            <SectionHeading
+              title={copy.title ?? "Diferenciais"}
+              subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
+            />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {DEFAULT_DIFFERENTIALS.map((d) => (
+              {differentials.map((d) => (
                 <Card key={d.title} className="h-full p-5">
                   <CheckCircle2 className="mb-3 h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="text-sm font-semibold text-foreground">{d.title}</h3>
@@ -754,22 +759,25 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "concierge":
+        {
+        const copy = copyFor("concierge");
         if (editorial) {
           return (
             <section key={key} id="atendimento" className="bg-background">
               <div className={`${container} grid items-stretch gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Gente cuidando de gente
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                    {copy.kicker ?? "Gente cuidando de gente"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-                    Atendimento humano
+                    {copy.title ?? "Atendimento humano"}
                   </h2>
                   <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
-                    Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação,
-                    monta as melhores opções e explica cada detalhe antes de você decidir.
+                    {copy.subtitle ??
+                      "Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação, monta as melhores opções e explica cada detalhe antes de você decidir."}
                   </p>
                   <div className="mt-9 flex flex-wrap gap-3">
                      <Button
@@ -821,11 +829,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <Card className="grid gap-8 p-8 md:grid-cols-2 md:p-10">
                 <div>
-                  <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Atendimento humano</h2>
+                  <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
+                    {copy.title ?? "Atendimento humano"}
+                  </h2>
                   <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
                   <p className="mt-4 text-muted-foreground">
-                    Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação,
-                    monta as melhores opções e explica cada detalhe antes de você decidir.
+                    {copy.subtitle ??
+                      "Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação, monta as melhores opções e explica cada detalhe antes de você decidir."}
                   </p>
                   <div className="mt-8 flex flex-wrap gap-3">
                     <Button size="lg" onClick={() => openRequest("pacotes")}>
@@ -853,6 +863,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "team":
         return (
