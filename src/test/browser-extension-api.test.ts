@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import {
   assertAction, assertCanMoveStage, budgetSentNote, clampInt, filterVisibleStages,
   assertPermissionReadOk, assertTeamMembershipBinding, teamPermissionFilter,
@@ -142,10 +143,7 @@ describe('leitura de permissões fail-closed', () => {
 })
 
 describe('garantias de fonte da Edge Function', () => {
-  const src = readFileSync(
-    new URL('../../supabase/functions/browser-extension-api/index.ts', import.meta.url),
-    'utf8',
-  )
+  const src = readFileSync(resolve(process.cwd(), 'supabase/functions/browser-extension-api/index.ts'), 'utf8')
   const adminBlock = src.slice(src.indexOf('const adminRead'), src.indexOf('const can = ('))
 
   it('service client só toca as três tabelas de equipe', () => {
