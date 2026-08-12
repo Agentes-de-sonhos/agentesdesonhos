@@ -396,13 +396,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       }
 
       case "modules":
+        {
+        const copy = copyFor("modules");
         if (editorial) {
           return (
             <section key={key} id="campanhas" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
-                  title="Experiências e campanhas"
-                  subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
+                  title={copy.title ?? "Experiências e campanhas"}
+                  subtitle={copy.subtitle ?? "Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."}
                   editorial
                 />
                 <AgencyCampaignRail
@@ -423,8 +425,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="campanhas" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading
-                title="Experiências e campanhas"
-                subtitle="Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."
+                title={copy.title ?? "Experiências e campanhas"}
+                subtitle={copy.subtitle ?? "Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."}
               />
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {modules.map((m) => (
@@ -444,6 +446,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "offers":
         if (!showcasePublished) return null;
@@ -489,13 +492,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
 
       case "destinations":
+        {
+        const copy = copyFor("destinations");
         if (editorial) {
           return (
             <section key={key} id="destinos" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
-                  title="Descubra o seu próximo destino"
-                  subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+                  title={copy.title ?? "Descubra o seu próximo destino"}
+                  subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
                   editorial
                 />
                 <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:auto-rows-[236px] md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
@@ -548,8 +553,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading
-                title="Descubra o seu próximo destino"
-                subtitle="Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."
+                title={copy.title ?? "Descubra o seu próximo destino"}
+                subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
               />
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {destinations.map((d) => (
@@ -582,23 +587,43 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+        }
 
       case "about":
         if (editorial) {
-          const bio = normalizeInstitutionalText(info.bio) ||
+          const aboutCopy = profile.about;
+          const bio = aboutCopy?.text ||
+            normalizeInstitutionalText(info.bio) ||
             `A ${name} cuida de cada viagem com atenção aos detalhes: entende o momento de cada cliente, apresenta opções claras e acompanha a experiência do planejamento ao retorno.`;
           // Só destaca um número que JÁ existe no conteúdo resolvido (nunca inventado).
-          const years = bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
+          const years = aboutCopy ? null : bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
+          const sinceYear = aboutCopy?.highlightYear ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
               <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                    Quem planeja a sua viagem
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                    {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
                   </p>
-                  <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-                    Sobre a <BrandText>{name}</BrandText>
-                  </h2>
+                  {aboutCopy?.title ? (
+                    <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                      {aboutCopy.title}
+                    </h2>
+                  ) : (
+                    <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                      Sobre a <BrandText>{name}</BrandText>
+                    </h2>
+                  )}
+                  {sinceYear && (
+                    <p className="mt-8 flex items-baseline gap-3">
+                      <span className="text-5xl leading-none text-[hsl(var(--wl-ink))] md:text-6xl">
+                        {sinceYear}
+                      </span>
+                      <span className="text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        início da trajetória
+                      </span>
+                    </p>
+                  )}
                   {years && (
                     <p className="mt-8 flex items-baseline gap-3">
                       <span className="text-5xl font-extrabold leading-none text-[hsl(var(--wl-ink))] md:text-6xl">
