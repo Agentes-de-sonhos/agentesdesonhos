@@ -2145,8 +2145,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     >
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="container max-w-5xl mx-auto px-4 py-3 sm:py-3 relative flex items-center justify-start">
-          <div className="absolute top-1/2 -translate-y-1/2 right-5 sm:right-4">
+        <div className="container max-w-5xl md:max-w-6xl mx-auto px-4 md:px-8 py-3 sm:py-3 relative flex items-center justify-start">
+          <div className="absolute top-1/2 -translate-y-1/2 right-5 sm:right-4 md:right-8">
             {isMobile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
