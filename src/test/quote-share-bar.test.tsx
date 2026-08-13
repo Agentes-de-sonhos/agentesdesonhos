@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { QuoteShareBar } from "@/components/quote/QuoteShareBar";
+import { QuoteStepsGuide } from "@/components/quote/QuoteStepsGuide";
+
+const guideSource = readFileSync("src/components/quote/QuoteStepsGuide.tsx", "utf8");
 
 const copyTextToClipboard = vi.fn(async (_text: string) => true);
 const success = vi.fn();
@@ -229,8 +232,8 @@ describe("QuoteStepsGuide — trilha compacta + modal", () => {
   });
 
   it("trilha em linha única com rolagem local, sem overflow global", () => {
-    expect(guide).toContain("overflow-x-auto");
-    expect(guide).toContain('className="flex w-max items-center gap-x-2"');
-    expect(guide).toContain("bg-background");
+    expect(guideSource).toContain("overflow-x-auto");
+    expect(guideSource).toContain('className="flex w-max items-center gap-x-2"');
+    expect(guideSource).toContain("bg-background");
   });
 });
