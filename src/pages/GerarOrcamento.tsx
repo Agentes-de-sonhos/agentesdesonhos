@@ -1244,22 +1244,10 @@ export default function GerarOrcamento() {
               hint={QUOTE_STEPS[2].hint}
               accentClass="bg-violet-500"
               icon={<CreditCard className="h-5 w-5 text-violet-500" />}
-              open={openSections.settings}
-              onToggle={() => toggleSection("settings")}
-            >
-              <button
-                type="button"
-                onClick={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
-                className="w-full text-left rounded-lg border border-border px-4 py-4 hover:bg-muted/30 transition-colors flex items-center justify-between gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <span className="text-sm font-medium text-foreground">
-                  Abrir configurações em etapas guiadas
-                </span>
-                <span className="shrink-0 h-10 w-10 rounded-full bg-violet-500 flex items-center justify-center shadow-md">
-                  <Play className="h-5 w-5 text-white fill-white" />
-                </span>
-              </button>
-            </QuoteStepCard>
+              direct
+              open={false}
+              onToggle={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
+            />
 
             {/* 4. Revisar orçamento */}
             <QuoteStepCard
