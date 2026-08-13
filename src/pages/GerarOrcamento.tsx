@@ -1671,8 +1671,7 @@ export default function GerarOrcamento() {
           <QuoteDocuments
             quoteId={quote.id}
             userId={quote.user_id}
-            isOpen={true}
-            onToggle={() => {}}
+            embedded
           />
         )}
         renderAdvanced={() => (
