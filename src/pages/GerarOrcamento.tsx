@@ -1171,7 +1171,6 @@ export default function GerarOrcamento() {
               );
             })()
           )}
-          </div>
         </div>
 
         <div className="grid gap-4 sm:gap-6">
