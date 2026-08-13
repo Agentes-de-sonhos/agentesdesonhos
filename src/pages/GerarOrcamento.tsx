@@ -1412,7 +1412,7 @@ export default function GerarOrcamento() {
           return (
           <div className="space-y-4">
                   {/* Nova lógica: O QUE exibir para o cliente (3 opções consolidadas) */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {layoutOptions.map((opt) => {
@@ -1483,11 +1483,9 @@ export default function GerarOrcamento() {
                     )}
                   </div>
 
-                  <Separator />
-
                   {effectiveLayout === "consolidated" && (
                   <>
-                  <div className="space-y-2">
+                  <div className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
                     <p className="text-xs text-muted-foreground">
                       {effectiveLayout === "consolidated"
@@ -1522,10 +1520,8 @@ export default function GerarOrcamento() {
                     </div>
                   </div>
 
-                  <Separator />
-
                   {paymentDisplayMode === "installments" && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                       <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Nº de parcelas</Label>
                         <Input type="number" min={2} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
@@ -1542,7 +1538,7 @@ export default function GerarOrcamento() {
                   )}
 
                   {paymentDisplayMode === "installments_with_entry" && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                       <div className="space-y-1.5">
                         <Label className="text-sm">% da entrada</Label>
                         <Input type="number" min={1} max={90} value={entryPercentage} onChange={(e) => setEntryPercentage(Number(e.target.value))} />
@@ -1578,7 +1574,7 @@ export default function GerarOrcamento() {
                   )}
 
                   {paymentDisplayMode === "full_payment" && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                       <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Desconto à vista (%)</Label>
                         <Input type="number" min={0} max={50} value={fullPaymentDiscountPercent} onChange={(e) => setFullPaymentDiscountPercent(Number(e.target.value))} />
@@ -1597,7 +1593,7 @@ export default function GerarOrcamento() {
                   )}
 
                       {paymentDisplayMode === "total_only" && quote && (
-                        <div className="rounded-lg bg-muted/50 p-3">
+                        <div className="rounded-xl border bg-card p-4 shadow-sm">
                           <p className="text-sm font-medium text-primary">
                             Destaque: <span className="font-bold">{fmt(quote.total_amount)}</span>
                             <span className="text-xs text-muted-foreground ml-1">(valor total da viagem)</span>
@@ -1607,9 +1603,7 @@ export default function GerarOrcamento() {
                   </>
                   )}
 
-                  <Separator />
-
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm">Meio de pagamento</Label>
                     <p className="text-xs text-muted-foreground">
                       Selecione um ou mais meios de pagamento aceitos. Eles aparecerão para o cliente em todos os formatos de apresentação do investimento.
@@ -1623,9 +1617,7 @@ export default function GerarOrcamento() {
                     />
                   </div>
 
-                  <Separator />
-
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm">Observações adicionais de pagamento</Label>
                     <Textarea
                       placeholder="Ex: Parcelamento sem juros. Desconto especial para pagamento via Pix."
@@ -1640,7 +1632,7 @@ export default function GerarOrcamento() {
         }}
         renderValidity={() => (
           <div className="space-y-3">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                     <div className="space-y-1.5">
                       <Label className="text-sm">Válido até</Label>
                       <Popover>
@@ -1656,7 +1648,7 @@ export default function GerarOrcamento() {
                       </Popover>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm">Termos e condições</Label>
                     <Textarea
                       value={validityDisclaimer}
