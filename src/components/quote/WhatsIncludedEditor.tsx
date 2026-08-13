@@ -95,26 +95,21 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border bg-muted/30 p-4">
-        <div className="flex items-start justify-between gap-3 flex-wrap">
-          <div>
-            <p className="text-sm font-semibold">O que está incluso</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {isCustom
-                ? "Você está usando uma lista personalizada."
-                : "Sugestão automática gerada a partir dos serviços do orçamento."}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={regenerate}>
-              <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Gerar novamente
+      <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border bg-card px-4 py-2.5 shadow-sm">
+        <p className="text-xs text-muted-foreground">
+          {isCustom
+            ? "Lista personalizada."
+            : "Sugestão automática gerada a partir dos serviços."}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={regenerate}>
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Gerar novamente
+          </Button>
+          {isCustom && (
+            <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={restoreAuto} disabled={saving}>
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Restaurar automática
             </Button>
-            {isCustom && (
-              <Button type="button" variant="ghost" size="sm" onClick={restoreAuto} disabled={saving}>
-                <RotateCcw className="h-3.5 w-3.5 mr-1.5" /> Restaurar automática
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
@@ -122,7 +117,7 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
         {items.map((text, i) => {
           const Icon = ICONS[iconKeyForIncludedItem(text)] || Sparkles;
           return (
-            <li key={i} className="flex items-center gap-2 rounded-lg border bg-background p-2">
+            <li key={i} className="flex items-center gap-2 rounded-xl border bg-card p-2 shadow-sm">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                 <Icon className="h-4 w-4" />
               </span>
