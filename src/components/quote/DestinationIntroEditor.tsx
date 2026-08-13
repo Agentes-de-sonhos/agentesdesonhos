@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, Sparkles, MapPin, X, Upload, Pencil, Images, Star, Link2 } from "lucide-react";
+import { Loader2, Sparkles, MapPin, X, Upload, Pencil, Images, Star, Link2, Globe2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,99 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
+import { MediaOverlayActions, MediaOverlayButton } from "@/components/shared/MediaOverlayActions";
+
+/* ── Shared generation routines (used by the editor and by the header switch) ── */
+
+export async function generateDestinationIntroText(destination: string): Promise<string | null> {
+  const { data, error } = await supabase.functions.invoke("generate-destination-intro", {
+    body: { destination },
+  });
+  if (error || !data?.text) return null;
+  return data.text as string;
+}
+
+export async function fetchDestinationPhotos(destination: string): Promise<string[]> {
+  // Support multi-destination strings ("Paris, Roma, Florença").
+  const cities = destination.split(",").map((s) => s.trim()).filter(Boolean);
+  const MAX_PHOTOS = 5;
+  const perCity = Math.max(1, Math.floor(MAX_PHOTOS / Math.max(1, cities.length)));
+  const collected: string[] = [];
+  for (const city of cities) {
+    if (collected.length >= MAX_PHOTOS) break;
+    const { data: placeData, error: placeError } = await supabase.functions.invoke(
+      "places-autocomplete",
+      { body: { input: city, place_type: "city" } }
+    );
+    if (placeError || !placeData?.predictions?.length) continue;
+    const { data: detailsData } = await supabase.functions.invoke("places-autocomplete", {
+      body: { fetch_details: true, place_id: placeData.predictions[0].place_id, place_type: "city" },
+    });
+    const urls: string[] = detailsData?.details?.photo_urls || [];
+    if (urls.length > 0) collected.push(...urls.slice(0, perCity));
+  }
+  return collected.slice(0, MAX_PHOTOS);
+}
+
+/**
+ * Compact visibility control for "Apresentação do destino".
+ * Rendered in the contextual header of step 1 of the quote settings wizard.
+ * Same field (`show_destination_intro`) and same side effect (auto-generate when
+ * enabled with no content) as the original inline card.
+ */
+export function DestinationIntroSwitch({
+  quoteId,
+  destination,
+  checked,
+  hasContent,
+  onUpdate,
+}: {
+  quoteId: string;
+  destination: string;
+  checked: boolean;
+  hasContent: boolean;
+  onUpdate?: () => void;
+}) {
+  const { toast } = useToast();
+  const [enabled, setEnabled] = useState(checked);
+  useEffect(() => setEnabled(checked), [checked]);
+
+  const handleToggle = async (next: boolean) => {
+    setEnabled(next);
+    const { error } = await supabase
+      .from("quotes")
+      .update({ show_destination_intro: next } as any)
+      .eq("id", quoteId);
+    if (error) {
+      setEnabled(!next);
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      return;
+    }
+    onUpdate?.();
+    if (next && !hasContent) {
+      const [text, photos] = await Promise.all([
+        generateDestinationIntroText(destination).catch(() => null),
+        fetchDestinationPhotos(destination).catch(() => [] as string[]),
+      ]);
+      const updates: Record<string, any> = {};
+      if (text) updates.destination_intro_text = text;
+      if (photos.length) updates.destination_intro_images = photos;
+      if (Object.keys(updates).length) {
+        await supabase.from("quotes").update(updates as any).eq("id", quoteId);
+        onUpdate?.();
+      }
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Label htmlFor="show-destination-header" className="cursor-pointer text-xs font-medium sm:text-sm">
+        Exibir apresentação do destino
+      </Label>
+      <Switch id="show-destination-header" checked={enabled} onCheckedChange={handleToggle} />
+    </div>
+  );
+}
 
 interface DestinationIntroEditorProps {
   quoteId: string;
