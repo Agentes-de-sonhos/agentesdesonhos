@@ -207,13 +207,10 @@ export function DestinationIntroEditor({
     setIsFetchingPhotos(true);
 
     try {
-      const { data: aiData, error: aiError } = await supabase.functions.invoke(
-        "generate-destination-intro",
-        { body: { destination } }
-      );
-      if (!aiError && aiData?.text) {
-        setText(aiData.text);
-        await saveToDb({ destination_intro_text: aiData.text });
+      const generated = await generateDestinationIntroText(destination);
+      if (generated) {
+        setText(generated);
+        await saveToDb({ destination_intro_text: generated });
       } else {
         toast({ title: "Não foi possível gerar o texto", description: "Tente novamente ou escreva manualmente.", variant: "destructive" });
       }
@@ -224,31 +221,7 @@ export function DestinationIntroEditor({
     }
 
     try {
-      // Support multi-destination strings ("Paris, Roma, Florença").
-      const cities = destination.split(",").map((s) => s.trim()).filter(Boolean);
-      const MAX_PHOTOS = 5;
-      // Photos per city: distribute fairly, min 1 each.
-      const perCity = Math.max(1, Math.floor(MAX_PHOTOS / cities.length));
-      const collected: string[] = [];
-
-      for (const city of cities) {
-        if (collected.length >= MAX_PHOTOS) break;
-        const { data: placeData, error: placeError } = await supabase.functions.invoke(
-          "places-autocomplete",
-          { body: { input: city, place_type: "city" } }
-        );
-        if (placeError || !placeData?.predictions?.length) continue;
-        const { data: detailsData } = await supabase.functions.invoke(
-          "places-autocomplete",
-          { body: { fetch_details: true, place_id: placeData.predictions[0].place_id, place_type: "city" } }
-        );
-        const urls: string[] = detailsData?.details?.photo_urls || [];
-        if (urls.length > 0) {
-          collected.push(...urls.slice(0, perCity));
-        }
-      }
-
-      const photos = collected.slice(0, MAX_PHOTOS);
+      const photos = await fetchDestinationPhotos(destination);
       if (photos.length > 0) {
         setImages(photos);
         await saveToDb({ destination_intro_images: photos });
