@@ -106,3 +106,9 @@ verify_jwt = false
 
 [functions.submit-booking-request]
 verify_jwt = false
+
+[functions.hotel-place-match]
+verify_jwt = false
+
+[functions.place-static-map]
+verify_jwt = false
