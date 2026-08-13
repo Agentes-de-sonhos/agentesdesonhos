@@ -155,6 +155,20 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
     expect(page.slice(0, barIndex)).toContain("{quote.share_token && (");
   });
 
+  it("cabeçalho em duas linhas: ações abaixo do título e alinhadas à esquerda", () => {
+    const barIndex = page.indexOf("<QuoteShareBar");
+    expect(page.slice(barIndex, barIndex + 400)).toContain('className="justify-start sm:pl-[52px]"');
+    expect(page).toContain('<div className="flex w-full min-w-0 flex-col gap-3">');
+    expect(page).not.toContain('className="lg:justify-end"');
+  });
+
+  it("no estado sem URL, o botão PDF também usa estilo primário", () => {
+    const preIndex = page.indexOf("{!quote.share_token && (");
+    const block = page.slice(preIndex, preIndex + 1200);
+    expect(block).toContain("Gerar orçamento PDF");
+    expect(block).not.toContain('variant="outline"');
+  });
+
   it("bloco 'Depois das 5 etapas' com fundo branco e apenas borda azul", () => {
     expect(guide).toContain("border border-primary/30 bg-background");
     expect(guide).not.toContain("bg-primary/5");
