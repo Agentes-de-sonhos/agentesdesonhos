@@ -2583,7 +2583,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           // WhatsApp only (no signature) — slim card
           if (!showSig && whatsappUrl) {
             return (
-              <div className="rounded-2xl border border-border/40 bg-white shadow-sm px-5 py-4 flex items-center justify-between gap-3">
+              <div className="rounded-2xl border border-border/40 bg-white shadow-sm px-5 py-4 flex items-center justify-between gap-3 md:mx-auto md:w-full md:max-w-2xl">
                 <p className="text-sm font-medium text-gray-700">Precisa de ajuda? Fale com a gente.</p>
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-3.5 py-2 font-semibold text-xs shadow-sm transition-colors shrink-0">
@@ -2594,7 +2594,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             );
           }
           return (
-            <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden" open>
+            <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden md:mx-auto md:w-full md:max-w-2xl" open>
               <summary className="list-none cursor-pointer px-5 py-3 flex items-center justify-between gap-3">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Precisa de ajuda?</p>
                 <ChevronDown className="h-4 w-4 text-gray-400 transition-transform group-open:hidden" />
