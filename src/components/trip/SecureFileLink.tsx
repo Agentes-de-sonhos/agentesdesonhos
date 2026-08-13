@@ -125,9 +125,10 @@ export function SecureFileLink(props: Props) {
         onClick={() => void fetchUrl()}
         className={className}
         title="Tentar novamente"
+        aria-label={props.ariaLabel || `Tentar abrir ${props.fileName} novamente`}
       >
         <AlertCircle className="h-3 w-3" />
-        {props.fileName}
+        {props.children ?? props.fileName}
       </button>
     );
   }
@@ -137,10 +138,16 @@ export function SecureFileLink(props: Props) {
       href={url || "#"}
       target="_blank"
       rel="noopener noreferrer"
+      download={props.download ? props.fileName : undefined}
       onClick={handleClick}
       className={className}
       aria-busy={status === "loading"}
+      aria-label={props.ariaLabel || undefined}
     >
+      {props.children ? (
+        props.children
+      ) : (
+        <>
       {status === "loading" && !url ? (
         <Loader2 className="h-3 w-3 animate-spin" />
       ) : (
@@ -148,6 +155,8 @@ export function SecureFileLink(props: Props) {
       )}
       {props.fileName}
       {url && <ExternalLink className="h-3 w-3" />}
+        </>
+      )}
     </a>
   );
 }
