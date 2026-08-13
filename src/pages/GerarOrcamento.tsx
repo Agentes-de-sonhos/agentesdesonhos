@@ -72,7 +72,7 @@ import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
 import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
-import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
+import { DestinationIntroEditor, DestinationIntroSwitch } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
@@ -1342,6 +1342,20 @@ export default function GerarOrcamento() {
         initialStep={settingsStep}
         onBeforeNavigate={async () => {
           await Promise.all([handleSavePaymentConfig(), handleSaveValidity()]);
+        }}
+        stepHeaderActions={{
+          destination: (
+            <DestinationIntroSwitch
+              quoteId={quote.id}
+              destination={quote.destination}
+              checked={(quote as any).show_destination_intro !== false}
+              hasContent={
+                !!(quote as any).destination_intro_text ||
+                ((quote as any).destination_intro_images || []).length > 0
+              }
+              onUpdate={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+            />
+          ),
         }}
         renderDestination={() => (
           <DestinationIntroEditor

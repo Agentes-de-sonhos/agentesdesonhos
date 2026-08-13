@@ -177,6 +177,9 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
               file_path: path,
               file_type: file.type || null,
               file_size: file.size,
+              // Novos arquivos nascem internos: só aparecem para o cliente
+              // quando a agência ativar a opção no item.
+              is_public: false,
             });
           if (dbErr) {
             await supabase.storage.from("quote-documents").remove([path]);
@@ -223,11 +226,17 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
   const body = (
       <div className={cn("space-y-3", !embedded && "pt-0")}>
         {embedded && (
-          <p className="rounded-xl border bg-card px-4 py-2.5 text-xs text-muted-foreground shadow-sm">
-            Anexe arquivos de apoio (roteiros, vouchers, contratos). Somente os documentos marcados como
-            <span className="font-medium text-foreground"> visíveis no orçamento público </span>
-            aparecem para o cliente no link compartilhado.
-          </p>
+          <div className="space-y-2 rounded-xl border bg-card px-4 py-3 shadow-sm">
+            <p className="text-sm text-foreground">
+              Armazene aqui os arquivos originais utilizados para criar este orçamento, como propostas de
+              fornecedores, cotações, PDFs e outros documentos. Assim, você mantém todo o material organizado e
+              pode consultá-lo sempre que precisar.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Todo arquivo novo entra como <span className="font-medium text-foreground">interno</span> por padrão e
+              não aparece para o cliente até que a agência ative a opção de disponibilizá-lo no item do arquivo.
+            </p>
+          </div>
         )}
         <div className="flex justify-end">
           <Button
@@ -304,9 +313,9 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
               return (
                 <li
                   key={doc.id}
-                  className="flex flex-col gap-2 px-3 py-2.5 hover:bg-muted/30 transition-colors sm:flex-row sm:items-center"
+                  className="grid gap-2 px-3 py-3 transition-colors hover:bg-muted/30"
                 >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-start gap-3 min-w-0">
                     <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -335,50 +344,55 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
                         • {formatBytes(doc.file_size)}
                       </p>
                     </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Visualizar"
+                        onClick={() => openSignedUrl(doc, false)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Baixar"
+                        onClick={() => openSignedUrl(doc, true)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        title="Excluir"
+                        onClick={() => setPendingDelete(doc)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 justify-between sm:justify-end pl-8 sm:pl-0">
+                  <div className="flex flex-col gap-1.5 rounded-lg border bg-muted/20 px-3 py-2 sm:pl-8">
                     <label
-                      className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none"
-                      title="Exibir este documento no link público do orçamento"
+                      htmlFor={`doc-public-${doc.id}`}
+                      className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none"
                     >
                       <Switch
+                        id={`doc-public-${doc.id}`}
                         checked={doc.is_public}
                         disabled={togglePublicMutation.isPending}
                         onCheckedChange={(checked) =>
                           togglePublicMutation.mutate({ id: doc.id, is_public: checked })
                         }
                       />
-                      <span className="hidden sm:inline">Visível no público</span>
+                      <span>Disponibilizar este documento para o cliente</span>
                     </label>
-                    <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      title="Visualizar"
-                      onClick={() => openSignedUrl(doc, false)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      title="Baixar"
-                      onClick={() => openSignedUrl(doc, true)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      title="Excluir"
-                      onClick={() => setPendingDelete(doc)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Ative somente se quiser que este arquivo apareça no orçamento enviado ao cliente. Desativado,
+                      ele permanece visível apenas para a agência.
+                    </p>
                   </div>
                 </li>
               );

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Loader2, Sparkles, MapPin, X, Upload, Pencil, Images, Star, Link2 } from "lucide-react";
+import { Loader2, Sparkles, MapPin, X, Upload, Pencil, Images, Star, Link2, Globe2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,99 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
+import { MediaOverlayActions, MediaOverlayButton } from "@/components/shared/MediaOverlayActions";
+
+/* ── Shared generation routines (used by the editor and by the header switch) ── */
+
+export async function generateDestinationIntroText(destination: string): Promise<string | null> {
+  const { data, error } = await supabase.functions.invoke("generate-destination-intro", {
+    body: { destination },
+  });
+  if (error || !data?.text) return null;
+  return data.text as string;
+}
+
+export async function fetchDestinationPhotos(destination: string): Promise<string[]> {
+  // Support multi-destination strings ("Paris, Roma, Florença").
+  const cities = destination.split(",").map((s) => s.trim()).filter(Boolean);
+  const MAX_PHOTOS = 5;
+  const perCity = Math.max(1, Math.floor(MAX_PHOTOS / Math.max(1, cities.length)));
+  const collected: string[] = [];
+  for (const city of cities) {
+    if (collected.length >= MAX_PHOTOS) break;
+    const { data: placeData, error: placeError } = await supabase.functions.invoke(
+      "places-autocomplete",
+      { body: { input: city, place_type: "city" } }
+    );
+    if (placeError || !placeData?.predictions?.length) continue;
+    const { data: detailsData } = await supabase.functions.invoke("places-autocomplete", {
+      body: { fetch_details: true, place_id: placeData.predictions[0].place_id, place_type: "city" },
+    });
+    const urls: string[] = detailsData?.details?.photo_urls || [];
+    if (urls.length > 0) collected.push(...urls.slice(0, perCity));
+  }
+  return collected.slice(0, MAX_PHOTOS);
+}
+
+/**
+ * Compact visibility control for "Apresentação do destino".
+ * Rendered in the contextual header of step 1 of the quote settings wizard.
+ * Same field (`show_destination_intro`) and same side effect (auto-generate when
+ * enabled with no content) as the original inline card.
+ */
+export function DestinationIntroSwitch({
+  quoteId,
+  destination,
+  checked,
+  hasContent,
+  onUpdate,
+}: {
+  quoteId: string;
+  destination: string;
+  checked: boolean;
+  hasContent: boolean;
+  onUpdate?: () => void;
+}) {
+  const { toast } = useToast();
+  const [enabled, setEnabled] = useState(checked);
+  useEffect(() => setEnabled(checked), [checked]);
+
+  const handleToggle = async (next: boolean) => {
+    setEnabled(next);
+    const { error } = await supabase
+      .from("quotes")
+      .update({ show_destination_intro: next } as any)
+      .eq("id", quoteId);
+    if (error) {
+      setEnabled(!next);
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      return;
+    }
+    onUpdate?.();
+    if (next && !hasContent) {
+      const [text, photos] = await Promise.all([
+        generateDestinationIntroText(destination).catch(() => null),
+        fetchDestinationPhotos(destination).catch(() => [] as string[]),
+      ]);
+      const updates: Record<string, any> = {};
+      if (text) updates.destination_intro_text = text;
+      if (photos.length) updates.destination_intro_images = photos;
+      if (Object.keys(updates).length) {
+        await supabase.from("quotes").update(updates as any).eq("id", quoteId);
+        onUpdate?.();
+      }
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Label htmlFor="show-destination-header" className="cursor-pointer text-xs font-medium sm:text-sm">
+        Exibir apresentação do destino
+      </Label>
+      <Switch id="show-destination-header" checked={enabled} onCheckedChange={handleToggle} />
+    </div>
+  );
+}
 
 interface DestinationIntroEditorProps {
   quoteId: string;
@@ -114,13 +207,10 @@ export function DestinationIntroEditor({
     setIsFetchingPhotos(true);
 
     try {
-      const { data: aiData, error: aiError } = await supabase.functions.invoke(
-        "generate-destination-intro",
-        { body: { destination } }
-      );
-      if (!aiError && aiData?.text) {
-        setText(aiData.text);
-        await saveToDb({ destination_intro_text: aiData.text });
+      const generated = await generateDestinationIntroText(destination);
+      if (generated) {
+        setText(generated);
+        await saveToDb({ destination_intro_text: generated });
       } else {
         toast({ title: "Não foi possível gerar o texto", description: "Tente novamente ou escreva manualmente.", variant: "destructive" });
       }
@@ -131,31 +221,7 @@ export function DestinationIntroEditor({
     }
 
     try {
-      // Support multi-destination strings ("Paris, Roma, Florença").
-      const cities = destination.split(",").map((s) => s.trim()).filter(Boolean);
-      const MAX_PHOTOS = 5;
-      // Photos per city: distribute fairly, min 1 each.
-      const perCity = Math.max(1, Math.floor(MAX_PHOTOS / cities.length));
-      const collected: string[] = [];
-
-      for (const city of cities) {
-        if (collected.length >= MAX_PHOTOS) break;
-        const { data: placeData, error: placeError } = await supabase.functions.invoke(
-          "places-autocomplete",
-          { body: { input: city, place_type: "city" } }
-        );
-        if (placeError || !placeData?.predictions?.length) continue;
-        const { data: detailsData } = await supabase.functions.invoke(
-          "places-autocomplete",
-          { body: { fetch_details: true, place_id: placeData.predictions[0].place_id, place_type: "city" } }
-        );
-        const urls: string[] = detailsData?.details?.photo_urls || [];
-        if (urls.length > 0) {
-          collected.push(...urls.slice(0, perCity));
-        }
-      }
-
-      const photos = collected.slice(0, MAX_PHOTOS);
+      const photos = await fetchDestinationPhotos(destination);
       if (photos.length > 0) {
         setImages(photos);
         await saveToDb({ destination_intro_images: photos });
@@ -378,16 +444,18 @@ interface EmbeddedProps {
 
 function EmbeddedDestinationIntro(props: EmbeddedProps) {
   const {
-    destination, enabled, onToggle, text, onTextChange, images,
+    destination, text, onTextChange, images,
     onRemoveImage, onAddGooglePhotos, onUploadImages, onSetCover, onAddByUrl,
     onGenerate, isGenerating, isFetchingPhotos, isUploading,
   } = props;
 
   const [textOpen, setTextOpen] = useState(false);
   const [photosOpen, setPhotosOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [draftText, setDraftText] = useState(text);
   const [urlInput, setUrlInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (textOpen) setDraftText(text);
@@ -409,22 +477,28 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
 
   return (
     <div className="space-y-4">
-      {/* Visibilidade */}
-      <div className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm">
-        <div className="flex items-start gap-3 min-w-0">
-          <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-          <div className="min-w-0">
-            <Label htmlFor="show-destination-inline" className="text-sm font-medium cursor-pointer">
-              Exibir apresentação do destino
-            </Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Mostre uma descrição e imagens do destino antes dos serviços.
-            </p>
-          </div>
-        </div>
-        <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
-      </div>
-
+      <input
+        ref={galleryFileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) onUploadImages(e.target.files);
+          e.target.value = "";
+        }}
+      />
+      {searchOpen && (
+        <InternetPhotosPicker
+          query={destination}
+          destination={destination}
+          existingUrls={images}
+          onPick={onAddGooglePhotos}
+          autoOpen
+          hideTrigger
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Coluna 1 — Capa e fotos */}
         <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
@@ -467,29 +541,31 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
                       <Star className="h-2.5 w-2.5 fill-current" /> Capa
                     </span>
                   )}
-                  {/* Ações sobre a imagem (sempre visíveis no toque, hover no desktop) */}
-                  <div className="pointer-events-none absolute inset-0 flex items-end justify-end gap-1 bg-gradient-to-t from-black/55 via-black/5 to-transparent p-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                  {/* Ações sobre a imagem — primitiva compartilhada com o módulo Roteiros */}
+                  <MediaOverlayActions>
                     {i !== 0 && (
-                      <button
-                        type="button"
-                        title="Definir como capa"
-                        aria-label="Definir como capa"
-                        onClick={() => onSetCover(i)}
-                        className="pointer-events-auto inline-flex h-6 w-6 items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm hover:bg-background"
-                      >
+                      <MediaOverlayButton label="Definir como capa" onClick={() => onSetCover(i)}>
                         <Star className="h-3 w-3" />
-                      </button>
+                      </MediaOverlayButton>
                     )}
-                    <button
-                      type="button"
-                      title="Remover imagem"
-                      aria-label="Remover imagem"
-                      onClick={() => onRemoveImage(i)}
-                      className="pointer-events-auto inline-flex h-6 w-6 items-center justify-center rounded-md bg-background/90 text-destructive shadow-sm hover:bg-background"
+                    <MediaOverlayButton
+                      label={i === 0 ? "Enviar ou substituir a capa" : "Enviar ou substituir imagem"}
+                      onClick={() => galleryFileInputRef.current?.click()}
+                      disabled={isUploading}
                     >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
+                      {isUploading ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Upload className="h-3 w-3" />
+                      )}
+                    </MediaOverlayButton>
+                    <MediaOverlayButton label="Buscar outra foto na internet" onClick={() => setSearchOpen(true)}>
+                      <Globe2 className="h-3 w-3" />
+                    </MediaOverlayButton>
+                    <MediaOverlayButton label="Remover imagem" onClick={() => onRemoveImage(i)} destructive>
+                      <Trash2 className="h-3 w-3" />
+                    </MediaOverlayButton>
+                  </MediaOverlayActions>
                 </div>
               ))}
               {images.length > 6 && (
@@ -535,29 +611,35 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
             </Button>
           </div>
 
-          <div className="flex-1 rounded-lg border border-dashed bg-muted/20 p-3">
+          <div
+            data-testid="destination-description-surface"
+            className="flex-1 rounded-lg border border-border bg-background p-3"
+          >
             {text ? (
-              <p className="whitespace-pre-wrap text-xs leading-5 text-muted-foreground line-clamp-[12]">{text}</p>
+              <p className="whitespace-pre-wrap text-sm leading-6 text-foreground line-clamp-[12]">{text}</p>
             ) : (
-              <p className="text-xs italic text-muted-foreground">Nenhuma descrição adicionada ainda.</p>
+              <p className="text-sm italic text-muted-foreground">Nenhuma descrição adicionada ainda.</p>
             )}
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onGenerate}
-            disabled={isGenerating || isFetchingPhotos}
-            className="gap-2 self-start"
-          >
-            {isGenerating || isFetchingPhotos ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="h-3.5 w-3.5" />
-            )}
-            {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
-          </Button>
         </section>
+      </div>
+
+      {/* Ação de IA — abaixo do conjunto das duas colunas */}
+      <div className="flex" data-testid="destination-ai-action">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onGenerate}
+          disabled={isGenerating || isFetchingPhotos}
+          className="gap-2"
+        >
+          {isGenerating || isFetchingPhotos ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          {text || images.length > 0 ? "Regenerar descrição com IA" : "Gerar descrição com IA"}
+        </Button>
       </div>
 
       {/* Text-only modal */}

@@ -71,11 +71,14 @@ interface Props {
   renderValidity: () => ReactNode;
   renderDocuments: () => ReactNode;
   renderAdvanced: () => ReactNode;
+  /** Optional compact action rendered at the right of the contextual step header. */
+  stepHeaderActions?: Partial<Record<QuoteSettingsStep, ReactNode>>;
 }
 
 export function QuoteSettingsModal({
   open, onOpenChange, initialStep = "destination", onBeforeNavigate,
   renderDestination, renderIncluded, renderPayment, renderValidity, renderDocuments, renderAdvanced,
+  stepHeaderActions,
 }: Props) {
   const [active, setActive] = useState<QuoteSettingsStep>(initialStep);
   const idx = STEPS.findIndex(s => s.key === active);
@@ -110,7 +113,7 @@ export function QuoteSettingsModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden">
         <DialogHeader className="px-4 sm:px-6 pt-5 pb-4 border-b space-y-0">
-          <DialogTitle className="text-base sm:text-lg">Configurar apresentação</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">Configurações do Orçamento</DialogTitle>
           <DialogDescription className="text-xs">
             Seis passos rápidos para definir como o cliente verá este orçamento.
           </DialogDescription>
@@ -160,16 +163,21 @@ export function QuoteSettingsModal({
         </nav>
 
         <div className="flex-1 overflow-y-auto bg-muted/20 px-4 sm:px-6 py-5">
-          <header className="mb-4 flex items-start gap-2.5">
-            <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <CurrentIcon className="h-4 w-4" />
-            </span>
-            <div className="min-w-0">
-              <h3 className="font-display text-sm sm:text-base font-semibold text-foreground">
-                {current.title}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">{current.description}</p>
+          <header className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <CurrentIcon className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-display text-sm sm:text-base font-semibold text-foreground">
+                  {current.title}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{current.description}</p>
+              </div>
             </div>
+            {stepHeaderActions?.[active] && (
+              <div className="shrink-0 sm:pt-1">{stepHeaderActions[active]}</div>
+            )}
           </header>
           {content[active]}
         </div>
