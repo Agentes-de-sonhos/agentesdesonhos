@@ -505,7 +505,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
   return (
     <div className="space-y-4">
       <input
-        ref={fileInputRef}
+        ref={galleryFileInputRef}
         type="file"
         accept="image/*"
         multiple
@@ -568,29 +568,31 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
                       <Star className="h-2.5 w-2.5 fill-current" /> Capa
                     </span>
                   )}
-                  {/* Ações sobre a imagem (sempre visíveis no toque, hover no desktop) */}
-                  <div className="pointer-events-none absolute inset-0 flex items-end justify-end gap-1 bg-gradient-to-t from-black/55 via-black/5 to-transparent p-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                  {/* Ações sobre a imagem — primitiva compartilhada com o módulo Roteiros */}
+                  <MediaOverlayActions>
                     {i !== 0 && (
-                      <button
-                        type="button"
-                        title="Definir como capa"
-                        aria-label="Definir como capa"
-                        onClick={() => onSetCover(i)}
-                        className="pointer-events-auto inline-flex h-6 w-6 items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm hover:bg-background"
-                      >
+                      <MediaOverlayButton label="Definir como capa" onClick={() => onSetCover(i)}>
                         <Star className="h-3 w-3" />
-                      </button>
+                      </MediaOverlayButton>
                     )}
-                    <button
-                      type="button"
-                      title="Remover imagem"
-                      aria-label="Remover imagem"
-                      onClick={() => onRemoveImage(i)}
-                      className="pointer-events-auto inline-flex h-6 w-6 items-center justify-center rounded-md bg-background/90 text-destructive shadow-sm hover:bg-background"
+                    <MediaOverlayButton
+                      label={i === 0 ? "Enviar ou substituir a capa" : "Enviar ou substituir imagem"}
+                      onClick={() => galleryFileInputRef.current?.click()}
+                      disabled={isUploading}
                     >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
+                      {isUploading ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Upload className="h-3 w-3" />
+                      )}
+                    </MediaOverlayButton>
+                    <MediaOverlayButton label="Buscar outra foto na internet" onClick={() => setSearchOpen(true)}>
+                      <Globe2 className="h-3 w-3" />
+                    </MediaOverlayButton>
+                    <MediaOverlayButton label="Remover imagem" onClick={() => onRemoveImage(i)} destructive>
+                      <Trash2 className="h-3 w-3" />
+                    </MediaOverlayButton>
+                  </MediaOverlayActions>
                 </div>
               ))}
               {images.length > 6 && (
@@ -636,29 +638,35 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
             </Button>
           </div>
 
-          <div className="flex-1 rounded-lg border border-dashed bg-muted/20 p-3">
+          <div
+            data-testid="destination-description-surface"
+            className="flex-1 rounded-lg border border-border bg-background p-3"
+          >
             {text ? (
-              <p className="whitespace-pre-wrap text-xs leading-5 text-muted-foreground line-clamp-[12]">{text}</p>
+              <p className="whitespace-pre-wrap text-sm leading-6 text-foreground line-clamp-[12]">{text}</p>
             ) : (
-              <p className="text-xs italic text-muted-foreground">Nenhuma descrição adicionada ainda.</p>
+              <p className="text-sm italic text-muted-foreground">Nenhuma descrição adicionada ainda.</p>
             )}
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onGenerate}
-            disabled={isGenerating || isFetchingPhotos}
-            className="gap-2 self-start"
-          >
-            {isGenerating || isFetchingPhotos ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="h-3.5 w-3.5" />
-            )}
-            {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
-          </Button>
         </section>
+      </div>
+
+      {/* Ação de IA — abaixo do conjunto das duas colunas */}
+      <div className="flex" data-testid="destination-ai-action">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onGenerate}
+          disabled={isGenerating || isFetchingPhotos}
+          className="gap-2"
+        >
+          {isGenerating || isFetchingPhotos ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          {text || images.length > 0 ? "Regenerar descrição com IA" : "Gerar descrição com IA"}
+        </Button>
       </div>
 
       {/* Text-only modal */}
