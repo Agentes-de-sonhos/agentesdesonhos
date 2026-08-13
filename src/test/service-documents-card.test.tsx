@@ -38,7 +38,7 @@ describe("ServiceDocumentsCard — documento selecionado", () => {
       />,
     );
 
-    const openButtons = screen.getAllByRole("button", { name: /Abrir arquivo voucher\.pdf/ });
+    const openButtons = screen.getAllByRole("button", { name: /Abrir arquivo voucher\.pdf/, hidden: true });
     expect(openButtons.length).toBeGreaterThanOrEqual(2);
     fireEvent.click(openButtons[1]);
 
@@ -48,7 +48,7 @@ describe("ServiceDocumentsCard — documento selecionado", () => {
 
     // Baixar dentro do modal usa exatamente o segundo documento, mesmo sem doc carregado
     const modalDownload = screen
-      .getAllByRole("button", { name: /Baixar arquivo voucher\.pdf/ })
+      .getAllByRole("button", { name: /Baixar arquivo voucher\.pdf/, hidden: true })
       .slice(-1)[0];
     fireEvent.click(modalDownload);
     await waitFor(() =>
@@ -65,7 +65,7 @@ describe("ServiceDocumentsCard — documento selecionado", () => {
         access={{ mode: "public", slug: "minha-agencia", password: "1234" }}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /Abrir arquivo reserva\.pdf/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Abrir arquivo reserva\.pdf/, hidden: true }));
     expect(openDocument).toHaveBeenCalledWith(
       expect.objectContaining({ slug: "minha-agencia", password: "1234", shareToken: undefined }),
     );
