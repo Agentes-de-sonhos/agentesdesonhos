@@ -50,20 +50,17 @@ const INITIAL_LIMIT = 3;
 
 function DocumentRow({
   doc,
-  access,
   onOpen,
   onDownload,
   downloading,
 }: {
   doc: ServiceDocument;
-  access: ServiceDocumentsAccess;
   onOpen: (doc: ServiceDocument) => void;
   onDownload: (doc: ServiceDocument) => void;
   downloading: boolean;
 }) {
   const Icon = KIND_ICON[doc.kind];
   const meta = [doc.ext, doc.size].filter(Boolean).join(" · ");
-  void access;
 
   return (
     <li className="flex flex-col gap-2 rounded-xl bg-background/70 p-3 ring-1 ring-border/50 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -124,6 +121,7 @@ export function ServiceDocumentsCard({
   className,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<ServiceDocument | null>(null);
   const viewer = useSecureDocument();
   if (!visible) return null;
 
@@ -147,6 +145,20 @@ export function ServiceDocumentsCard({
       toast.error(err instanceof Error ? err.message : "Não foi possível baixar este arquivo."),
     );
   };
+
+  const openDocument = (doc: ServiceDocument) => {
+    setSelectedDocument(doc);
+    void viewer.openDocument(toSource(doc));
+  };
+
+  const closeViewer = () => {
+    viewer.close();
+    setSelectedDocument(null);
+  };
+
+  const selectedMeta = selectedDocument
+    ? [selectedDocument.ext, selectedDocument.size].filter(Boolean).join(" · ") || null
+    : null;
 
   return (
     <>
@@ -174,8 +186,7 @@ export function ServiceDocumentsCard({
           <DocumentRow
             key={doc.path}
             doc={doc}
-            access={access}
-            onOpen={(d) => void viewer.openDocument(toSource(d))}
+            onOpen={openDocument}
             onDownload={handleDownload}
             downloading={viewer.downloading}
           />
@@ -201,12 +212,14 @@ export function ServiceDocumentsCard({
       downloading={viewer.downloading}
       error={viewer.error}
       doc={viewer.doc}
-      fileName={viewer.doc?.fileName || "Documento"}
-      onClose={viewer.close}
-      onRetry={() => void viewer.retry()}
+      fileName={selectedDocument?.name || "Documento"}
+      fileMeta={selectedMeta}
+      onClose={closeViewer}
+      onRetry={() => {
+        if (selectedDocument) void viewer.openDocument(toSource(selectedDocument));
+      }}
       onDownload={() => {
-        const current = docs.find((d) => d.name === viewer.doc?.fileName) ?? docs[0];
-        if (current) handleDownload(current);
+        if (selectedDocument) handleDownload(selectedDocument);
       }}
     />
     </>
