@@ -76,7 +76,6 @@ const sectionLinks = [
   { label: "Funcionalidades", id: "funcionalidades" },
   { label: "Benefícios", id: "beneficios" },
   { label: "Diferenciais", id: "diferenciais" },
-  { label: "Blog", href: "https://agentesdesonhos.com.br/blog" },
   { label: "FAQ", id: "faq" },
 ];
 
@@ -282,112 +281,6 @@ const faqs = [
 /* ------------------------------------------------------------------ */
 const sectionContainer = "max-w-[1100px] mx-auto px-6";
 
-/* ------------------------------------------------------------------ */
-/*  Blog Section (Soro embed)                                          */
-/* ------------------------------------------------------------------ */
-const SORO_SCRIPT_SRC = "https://app.trysoro.com/api/embed/18bb9f90-e619-4a42-b7df-c1dce0cc053a";
-
-const BLOG_BASE_URL = "https://agentesdesonhos.com.br/blog";
-
-type SoroArticle = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  date: string;
-  isoDate: string;
-  image: string;
-};
-
-function BlogSection() {
-  const [articles, setArticles] = useState<SoroArticle[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(SORO_SCRIPT_SRC)
-      .then((r) => r.text())
-      .then((js) => {
-        const match = js.match(/SORO_ARTICLES\s*=\s*(\[[\s\S]*?\]);/);
-        if (!match) return;
-        const parsed: SoroArticle[] = JSON.parse(match[1]);
-        const sorted = [...parsed]
-          .sort((a, b) => new Date(b.isoDate).getTime() - new Date(a.isoDate).getTime())
-          .slice(0, 5);
-        if (!cancelled) setArticles(sorted);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return (
-    <section id="blog" className="py-[100px] md:py-[120px] scroll-mt-20 bg-card">
-      <div className={cn(sectionContainer, "space-y-12")}>
-        <Reveal>
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl md:text-4xl lg:text-[2.5rem] font-bold tracking-[-0.02em]">
-              Direto do nosso blog
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-[1.7]">
-              Conteúdo, novidades e insights para profissionais do mercado de turismo.
-            </p>
-          </div>
-        </Reveal>
-        <Reveal delay={120}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((a) => (
-              <a
-                key={a.id}
-                href={`${BLOG_BASE_URL}?post=${encodeURIComponent(a.slug)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
-              >
-                {a.image && (
-                  <div className="aspect-[16/9] overflow-hidden bg-muted">
-                    <img
-                      src={a.image}
-                      alt={a.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                )}
-                <div className="flex flex-1 flex-col gap-3 p-5">
-                  <span className="text-xs text-muted-foreground">{a.date}</span>
-                  <h3 className="text-lg font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                    {a.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                    {a.excerpt}
-                  </p>
-                  <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-primary">
-                    Ler artigo
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </Reveal>
-        <Reveal delay={200}>
-          <div className="text-center">
-            <a
-              href={BLOG_BASE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
-            >
-              Ver todos os posts
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
@@ -494,25 +387,15 @@ export default function LandingPage() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {sectionLinks.map((s) =>
-              s.href ? (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
-                >
-                  {s.label}
-                </a>
-              ) : (
-                <button
-                  key={s.id}
-                  onClick={() => scrollToSection(s.id!)}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
-                >
-                  {s.label}
-                </button>
-              )
-            )}
+            {sectionLinks.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200"
+              >
+                {s.label}
+              </button>
+            ))}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -545,25 +428,15 @@ export default function LandingPage() {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border/40 bg-card py-4 px-6 space-y-2">
-            {sectionLinks.map((s) =>
-              s.href ? (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
-                >
-                  {s.label}
-                </a>
-              ) : (
-                <button
-                  key={s.id}
-                  onClick={() => scrollToSection(s.id!)}
-                  className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
-                >
-                  {s.label}
-                </button>
-              )
-            )}
+            {sectionLinks.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className="block w-full text-left text-sm font-medium text-muted-foreground hover:text-foreground py-2 transition-colors"
+              >
+                {s.label}
+              </button>
+            ))}
             <div className="flex gap-2 pt-2 border-t border-border/40">
               <Button variant="outline" size="sm" onClick={goLogin} className="flex-1 rounded-xl">
                 Já sou cliente
@@ -877,9 +750,6 @@ export default function LandingPage() {
           </Reveal>
         </div>
       </section>
-
-      {/* ── Blog ───────────────────────────────────────────────── */}
-      <BlogSection />
 
       {/* ── FAQ ────────────────────────────────────────────────── */}
       <section id="faq" className="py-[100px] md:py-[120px] scroll-mt-20" style={{ backgroundColor: "hsl(210 20% 97%)" }}>
