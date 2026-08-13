@@ -502,22 +502,28 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
 
   return (
     <div className="space-y-4">
-      {/* Visibilidade */}
-      <div className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm">
-        <div className="flex items-start gap-3 min-w-0">
-          <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-          <div className="min-w-0">
-            <Label htmlFor="show-destination-inline" className="text-sm font-medium cursor-pointer">
-              Exibir apresentação do destino
-            </Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Mostre uma descrição e imagens do destino antes dos serviços.
-            </p>
-          </div>
-        </div>
-        <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
-      </div>
-
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) onUploadImages(e.target.files);
+          e.target.value = "";
+        }}
+      />
+      {searchOpen && (
+        <InternetPhotosPicker
+          query={destination}
+          destination={destination}
+          existingUrls={images}
+          onPick={onAddGooglePhotos}
+          autoOpen
+          hideTrigger
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Coluna 1 — Capa e fotos */}
         <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
