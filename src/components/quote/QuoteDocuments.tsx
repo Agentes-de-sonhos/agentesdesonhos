@@ -177,6 +177,9 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
               file_path: path,
               file_type: file.type || null,
               file_size: file.size,
+              // Novos arquivos nascem internos: só aparecem para o cliente
+              // quando a agência ativar a opção no item.
+              is_public: false,
             });
           if (dbErr) {
             await supabase.storage.from("quote-documents").remove([path]);
@@ -223,11 +226,17 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
   const body = (
       <div className={cn("space-y-3", !embedded && "pt-0")}>
         {embedded && (
-          <p className="rounded-xl border bg-card px-4 py-2.5 text-xs text-muted-foreground shadow-sm">
-            Anexe arquivos de apoio (roteiros, vouchers, contratos). Somente os documentos marcados como
-            <span className="font-medium text-foreground"> visíveis no orçamento público </span>
-            aparecem para o cliente no link compartilhado.
-          </p>
+          <div className="space-y-2 rounded-xl border bg-card px-4 py-3 shadow-sm">
+            <p className="text-sm text-foreground">
+              Armazene aqui os arquivos originais utilizados para criar este orçamento, como propostas de
+              fornecedores, cotações, PDFs e outros documentos. Assim, você mantém todo o material organizado e
+              pode consultá-lo sempre que precisar.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Todo arquivo novo entra como <span className="font-medium text-foreground">interno</span> por padrão e
+              não aparece para o cliente até que a agência ative a opção de disponibilizá-lo no item do arquivo.
+            </p>
+          </div>
         )}
         <div className="flex justify-end">
           <Button
