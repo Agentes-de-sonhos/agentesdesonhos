@@ -60,7 +60,7 @@ export function SecureDocumentViewer({
             </span>
             <div className="min-w-0 flex-1">
               <DialogTitle className="truncate text-[15px] font-semibold">
-                {doc?.fileName || fileName}
+                {fileName || doc?.fileName}
               </DialogTitle>
               <DialogDescription className="text-[11px] uppercase tracking-wide">
                 {fileMeta || doc?.contentType || "Documento do serviço"}
@@ -73,7 +73,7 @@ export function SecureDocumentViewer({
                 size="sm"
                 onClick={onDownload}
                 disabled={downloading}
-                aria-label={`Baixar arquivo ${doc?.fileName || fileName}`}
+                aria-label={`Baixar arquivo ${fileName || doc?.fileName || ""}`.trim()}
                 className="h-9 rounded-full px-3 text-[12px] font-semibold"
               >
                 {downloading ? (
