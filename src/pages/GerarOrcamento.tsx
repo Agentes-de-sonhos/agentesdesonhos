@@ -4,7 +4,7 @@ import { ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
-import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
+import { QuoteShareBar } from "@/components/quote/QuoteShareBar";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
