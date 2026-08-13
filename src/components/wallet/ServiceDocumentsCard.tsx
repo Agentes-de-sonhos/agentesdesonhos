@@ -90,7 +90,7 @@ function DocumentRow({
         <button
           type="button"
           onClick={() => onOpen(doc)}
-          ariaLabel={`Abrir arquivo ${doc.name}`}
+          aria-label={`Abrir arquivo ${doc.name}`}
           className={cn(
             "inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary/10 px-3.5 text-[12px] font-semibold text-primary",
             "transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
@@ -124,6 +124,7 @@ export function ServiceDocumentsCard({
   className,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const viewer = useSecureDocument();
   if (!visible) return null;
 
   const docs = collectServiceDocuments(service);
@@ -132,7 +133,23 @@ export function ServiceDocumentsCard({
   const shown = expanded ? docs : docs.slice(0, initialVisible);
   const hidden = docs.length - shown.length;
 
+  const toSource = (doc: ServiceDocument): SecureDocumentSource => ({
+    filePath: doc.path,
+    fileName: doc.name,
+    mode: access.mode,
+    slug: access.slug,
+    shareToken: access.shareToken,
+    password: access.password,
+  });
+
+  const handleDownload = (doc: ServiceDocument) => {
+    void viewer.download(toSource(doc)).catch((err) =>
+      toast.error(err instanceof Error ? err.message : "Não foi possível baixar este arquivo."),
+    );
+  };
+
   return (
+    <>
     <section
       className={cn(
         "mt-3 rounded-2xl bg-primary/5 p-3.5 ring-1 ring-primary/15",
@@ -154,7 +171,14 @@ export function ServiceDocumentsCard({
 
       <ul className="space-y-2">
         {shown.map((doc) => (
-          <DocumentRow key={doc.path} doc={doc} access={access} />
+          <DocumentRow
+            key={doc.path}
+            doc={doc}
+            access={access}
+            onOpen={(d) => void viewer.openDocument(toSource(d))}
+            onDownload={handleDownload}
+            downloading={viewer.downloading}
+          />
         ))}
       </ul>
 
@@ -170,5 +194,21 @@ export function ServiceDocumentsCard({
         </Button>
       )}
     </section>
+
+    <SecureDocumentViewer
+      open={viewer.open}
+      loading={viewer.loading}
+      downloading={viewer.downloading}
+      error={viewer.error}
+      doc={viewer.doc}
+      fileName={viewer.doc?.fileName || "Documento"}
+      onClose={viewer.close}
+      onRetry={() => void viewer.retry()}
+      onDownload={() => {
+        const current = docs.find((d) => d.name === viewer.doc?.fileName) ?? docs[0];
+        if (current) handleDownload(current);
+      }}
+    />
+    </>
   );
 }
