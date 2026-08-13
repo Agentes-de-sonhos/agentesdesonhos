@@ -9,6 +9,11 @@ interface SecureFileLinkProps {
   /** For authenticated user access */
   mode?: "authenticated";
   className?: string;
+  /** Custom content — replaces the default icon + file name. */
+  children?: React.ReactNode;
+  /** Suggest a download instead of inline navigation (best-effort). */
+  download?: boolean;
+  ariaLabel?: string;
 }
 
 interface PublicFileLinkProps {
@@ -19,6 +24,9 @@ interface PublicFileLinkProps {
   shareToken?: string;
   password?: string;
   className?: string;
+  children?: React.ReactNode;
+  download?: boolean;
+  ariaLabel?: string;
 }
 
 type Props = SecureFileLinkProps | PublicFileLinkProps;
