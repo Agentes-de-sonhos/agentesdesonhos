@@ -79,6 +79,7 @@ function FlightStepSection({ index, title, defaultOpen, wizardMode, currentStep,
   );
 }
 import { PlacesAutocompleteInput, parsePlaceSecondary } from "@/components/shared/PlacesAutocompleteInput";
+import { HotelPlaceConfirm, type HotelPlaceDetail } from "@/components/shared/HotelPlaceConfirm";
 
 interface TripServiceFormProps {
   serviceType: TripServiceType;
@@ -913,6 +914,10 @@ const hotelSchema = z.object({
   hotel_email: z.string().optional(),
   hotel_website: z.string().optional(),
   maps_url: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  google_place_name: z.string().optional(),
+  google_place_confirmed_at: z.string().optional(),
   breakfast_hours: z.string().optional(),
   restaurants_included: z.string().optional(),
   food_notes: z.string().optional(),
@@ -944,7 +949,7 @@ interface HotelGuestInput {
 
 const emptyGuest = (): HotelGuestInput => ({ name: '', age: '', notes: '' });
 
-function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
+function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, placeId, onPlaceIdChange, googlePhotoSlot, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { wizardMode?: boolean }) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   const [files, setFiles] = useState<File[]>([]);
   const [guests, setGuests] = useState<HotelGuestInput[]>(
@@ -957,7 +962,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const [predictions, setPredictions] = useState<Array<{ place_id: string; name: string; secondary: string; is_hotel: boolean }>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(placeId ?? null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -1000,6 +1005,10 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
       hotel_email: defaultValues?.hotel_email || "",
       hotel_website: defaultValues?.hotel_website || "",
       maps_url: defaultValues?.maps_url || "",
+      latitude: defaultValues?.latitude != null ? String(defaultValues.latitude) : "",
+      longitude: defaultValues?.longitude != null ? String(defaultValues.longitude) : "",
+      google_place_name: defaultValues?.google_place_name || "",
+      google_place_confirmed_at: defaultValues?.google_place_confirmed_at || "",
       breakfast_hours: defaultValues?.breakfast_hours || "",
       restaurants_included: defaultValues?.restaurants_included || "",
       food_notes: defaultValues?.food_notes || "",
@@ -1072,6 +1081,43 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
       if (!form.getValues("address")) form.setValue("address", p.secondary);
     }
   }, [form, onPlaceIdChange]);
+
+  // ─── Conferência do hotel real no Google Places ───
+  const applyPlaceDetail = useCallback((detail: HotelPlaceDetail) => {
+    const set = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, String(v)); };
+    set("hotel_name", detail.name);
+    set("google_place_name", detail.name);
+    set("address", detail.formatted_address);
+    set("city", detail.city);
+    set("country", detail.country);
+    set("hotel_phone", detail.phone);
+    set("hotel_website", detail.website);
+    set("maps_url", detail.maps_url);
+    set("latitude", detail.latitude);
+    set("longitude", detail.longitude);
+    form.setValue("google_place_confirmed_at", new Date().toISOString());
+    setSelectedPlaceId(detail.place_id);
+    onPlaceIdChange?.(detail.place_id);
+  }, [form, onPlaceIdChange]);
+
+  const clearPlaceDetail = useCallback(() => {
+    setSelectedPlaceId(null);
+    onPlaceIdChange?.(null);
+    form.setValue("latitude", "");
+    form.setValue("longitude", "");
+    form.setValue("google_place_name", "");
+    form.setValue("google_place_confirmed_at", "");
+  }, [form, onPlaceIdChange]);
+
+  const watchedHotelName = form.watch("hotel_name");
+  const watchedCity = form.watch("city");
+  const watchedCountry = form.watch("country");
+  const watchedAddress = form.watch("address");
+  const watchedLat = form.watch("latitude");
+  const watchedLng = form.watch("longitude");
+  const watchedPhone = form.watch("hotel_phone");
+  const watchedWebsite = form.watch("hotel_website");
+  const watchedPlaceName = form.watch("google_place_name");
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
     onSubmit(
@@ -1507,6 +1553,25 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         </>)}
 
         {renderHotelStep("📍 Localização e Contato", <>
+
+        <HotelPlaceConfirm
+          hotelName={watchedHotelName}
+          city={watchedCity}
+          country={watchedCountry}
+          address={watchedAddress}
+          placeId={selectedPlaceId}
+          confirmed={{
+            name: watchedPlaceName || watchedHotelName,
+            address: watchedAddress,
+            latitude: watchedLat,
+            longitude: watchedLng,
+            phone: watchedPhone,
+            website: watchedWebsite,
+          }}
+          onConfirm={applyPlaceDetail}
+          onClear={clearPlaceDetail}
+          photoSlot={googlePhotoSlot}
+        />
 
         <FormField control={form.control} name="address" render={({ field }) => (
           <FormItem>

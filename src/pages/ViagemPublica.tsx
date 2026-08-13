@@ -53,6 +53,7 @@ import { NextActivityCard } from "@/components/wallet/NextActivityCard";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
+import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the
@@ -1046,7 +1047,15 @@ function PublicServiceCard({ service }: { service: TripService }) {
             {data.address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.address}</p>}
             {data.hotel_phone && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 {data.hotel_phone}</p>}
             {data.hotel_email && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">✉️ {data.hotel_email}</p>}
-            {data.maps_url && (
+            <PlaceMapCard
+              className="mt-2"
+              latitude={data.latitude}
+              longitude={data.longitude}
+              address={data.address}
+              name={data.hotel_name}
+              placeId={(service as any)?.place_id ?? data.place_id ?? null}
+            />
+            {!data.latitude && !data.longitude && !data.address && data.maps_url && (
               <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
                   <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
