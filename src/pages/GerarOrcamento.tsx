@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal, Play, UserCircle2,
+  Pencil, MoreHorizontal, UserCircle2,
 } from "lucide-react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
