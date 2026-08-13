@@ -14,18 +14,19 @@ const created: string[] = [];
 const revoked: string[] = [];
 
 function mockBlobUrls() {
-  // @ts-expect-error test env
   URL.createObjectURL = (b: Blob) => {
     const u = `blob:local/${created.length}-${b.type || "bin"}`;
     created.push(u);
     return u;
   };
-  // @ts-expect-error test env
   URL.revokeObjectURL = (u: string) => revoked.push(u);
 }
 
-function mockFetch(body: BodyInit, init: ResponseInit) {
-  const spy = vi.fn(async () => new Response(body, init));
+function mockFetch(body: BodyInit, init?: ResponseInit) {
+  const spy = vi.fn(async (...args: unknown[]) => {
+    void args;
+    return new Response(body, init);
+  });
   vi.stubGlobal("fetch", spy);
   return spy;
 }
@@ -61,7 +62,7 @@ describe("fetchSecureDocument", () => {
     expect(doc.objectUrl).not.toContain("supabase.co");
     expect(doc.kind).toBe("pdf");
     // o endpoint seguro é usado apenas internamente no fetch
-    expect(String(spy.mock.calls[0][0])).toContain("/functions/v1/serve-voucher");
+    expect(String((spy.mock.calls[0] as unknown[])[0])).toContain("/functions/v1/serve-voucher");
   });
 
   it("imagem: usa blob URL e detecta o tipo pelo content-type", async () => {
