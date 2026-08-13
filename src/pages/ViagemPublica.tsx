@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { formatItineraryDayHeader } from "@/lib/dateParsing";
-import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { ServiceDocumentsCard } from "@/components/wallet/ServiceDocumentsCard";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
