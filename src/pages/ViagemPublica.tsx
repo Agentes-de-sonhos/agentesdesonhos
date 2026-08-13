@@ -77,7 +77,7 @@ function TripCoverHero({
   const { photoUrl } = useDestinationCoverPhoto({ destination, enabled: !coverUrl });
   const photo = coverUrl || photoUrl || null;
   return (
-    <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9]">
+    <div className="relative w-full overflow-hidden rounded-b-2xl md:rounded-2xl bg-muted aspect-[16/11] sm:aspect-[21/9] md:shadow-sm">
       {photo ? (
         <img
           src={photo}
@@ -2145,8 +2145,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     >
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
-        <div className="container max-w-5xl mx-auto px-4 py-3 sm:py-3 relative flex items-center justify-start">
-          <div className="absolute top-1/2 -translate-y-1/2 right-5 sm:right-4">
+        <div className="container max-w-5xl md:max-w-6xl mx-auto px-4 md:px-8 py-3 sm:py-3 relative flex items-center justify-start">
+          <div className="absolute top-1/2 -translate-y-1/2 right-5 sm:right-4 md:right-8">
             {isMobile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -2200,9 +2200,9 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         </div>
       </header>
 
-      <div className="container max-w-5xl mx-auto px-4 pt-0 pb-6 space-y-6">
+      <div className="container max-w-5xl md:max-w-6xl mx-auto px-4 md:px-8 pt-0 md:pt-6 pb-6 space-y-6">
         {/* Full-width cover hero — escapes the container padding so the image touches the sides */}
-        <div className="-mx-4">
+        <div className="-mx-4 md:mx-0">
           <TripCoverHero
             title={(tripData as any).trip_title || tripData.destination || "Sua Viagem"}
             destination={tripData.destination}
@@ -2289,21 +2289,18 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
           return (
             <div className="space-y-5">
-              {/* ── Desktop: 2 colunas (Calendário + Navegação) | Mobile: coluna única ── */}
-              <div className="flex flex-col gap-5 md:grid md:grid-cols-2">
+              {/* ── Mobile: nav → calendário/next cards (ordem original)
+                   Tablet/Desktop: navegação em largura total, depois coluna
+                   central mais estreita (referência editorial). ── */}
+              <div className="flex flex-col gap-5">
 
-                {/* COLUNA ESQUERDA no desktop = Calendário + Next cards */}
-                {/* order-2 no mobile (aparece depois da nav), order-1 no desktop */}
-                <div className="space-y-5 order-2 md:order-1">
-                  {walletSettings.show_calendar && (
-                    <div className="flex items-center gap-3 my-1">
-                      <div className="h-px flex-1 bg-border/60" />
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        Seu calendário
-                      </span>
-                      <div className="h-px flex-1 bg-border/60" />
-                    </div>
-                  )}
+                {/* Navegação Rápida — largura total */}
+                <div className="space-y-5">
+                  {navGrid}
+                </div>
+
+                {/* Coluna central (estreita em tablet/desktop) */}
+                <div className="flex flex-col gap-5 md:mx-auto md:w-full md:max-w-2xl">
                   {(() => {
                     const showCal = walletSettings.show_calendar;
                     const showNextService = walletSettings.show_next_service && services.length > 0;
@@ -2312,7 +2309,14 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     return (
                       <div className="flex flex-col gap-5">
                         {showCal && (
-                          <div className="flex flex-col gap-5">
+                          <div className="flex flex-col gap-5 md:order-3">
+                            <div className="flex items-center gap-3 my-1">
+                              <div className="h-px flex-1 bg-border/60" />
+                              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                                Seu calendário
+                              </span>
+                              <div className="h-px flex-1 bg-border/60" />
+                            </div>
                             <TripLocalClockBar
                               destination={tripData.destination}
                               startDate={startDate}
@@ -2330,12 +2334,15 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           </div>
                         )}
                         {showNextService && (
-                          <NextAppointmentCard
-                            services={services}
-                            onOpenService={handleOpenService}
-                          />
+                          <div className="md:order-1">
+                            <NextAppointmentCard
+                              services={services}
+                              onOpenService={handleOpenService}
+                            />
+                          </div>
                         )}
                         {showNextActivity && (
+                          <div className="md:order-2">
                           <NextActivityCard
                             activities={itineraryActivities as any}
                             onOpenItinerary={(dayDate?: string) => {
@@ -2349,21 +2356,17 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                               }, dayDate ? 420 : 100);
                             }}
                           />
+                          </div>
                         )}
                       </div>
                     );
                   })()}
                 </div>
 
-                {/* COLUNA DIREITA no desktop = Navegação Rápida */}
-                {/* order-1 no mobile (aparece primeiro), order-2 no desktop */}
-                <div className="space-y-5 order-1 md:order-2">
-                  {navGrid}
-                </div>
-
               </div>
 
               {/* ── Abaixo das colunas: Ferramentas de apoio (largura total) ── */}
+              <div className="flex flex-col gap-5 md:mx-auto md:w-full md:max-w-2xl">
               {walletSettings.show_support_tools && (services.length > 0 || itineraryActivities.length > 0) && (
                 <div className="flex items-center gap-3 my-1">
                   <div className="h-px flex-1 bg-border/60" />
@@ -2382,6 +2385,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   services={services}
                 />
               )}
+              </div>
             </div>
           );
         })()}
@@ -2579,7 +2583,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           // WhatsApp only (no signature) — slim card
           if (!showSig && whatsappUrl) {
             return (
-              <div className="rounded-2xl border border-border/40 bg-white shadow-sm px-5 py-4 flex items-center justify-between gap-3">
+              <div className="rounded-2xl border border-border/40 bg-white shadow-sm px-5 py-4 flex items-center justify-between gap-3 md:mx-auto md:w-full md:max-w-2xl">
                 <p className="text-sm font-medium text-gray-700">Precisa de ajuda? Fale com a gente.</p>
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-3.5 py-2 font-semibold text-xs shadow-sm transition-colors shrink-0">
@@ -2590,7 +2594,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             );
           }
           return (
-            <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden" open>
+            <details className="group rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden md:mx-auto md:w-full md:max-w-2xl" open>
               <summary className="list-none cursor-pointer px-5 py-3 flex items-center justify-between gap-3">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">Precisa de ajuda?</p>
                 <ChevronDown className="h-4 w-4 text-gray-400 transition-transform group-open:hidden" />
