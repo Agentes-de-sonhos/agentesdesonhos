@@ -466,6 +466,12 @@ export default function GerarOrcamento() {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const STEP_KEYS = ["add", "services", "settings", "summary", "signature"] as const;
   const openStep = (step: number) => {
+    // Etapa 3 abre diretamente o wizard de configurações (sem expandir o card).
+    if (step === 3) {
+      setSettingsStep("destination");
+      setSettingsOpen(true);
+      return;
+    }
     const key = STEP_KEYS[step - 1];
     setOpenSections((prev) => ({ ...prev, [key]: true }));
     requestAnimationFrame(() => {
