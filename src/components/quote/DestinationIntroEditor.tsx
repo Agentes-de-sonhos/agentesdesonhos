@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
 
 interface DestinationIntroEditorProps {
@@ -408,11 +409,11 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
 
   return (
     <div className="space-y-4">
-      {/* Inline switch */}
-      <div className="flex items-center justify-between rounded-lg border bg-card px-4 py-3">
-        <div className="flex items-start gap-3">
-          <MapPin className="h-4 w-4 text-primary mt-0.5" />
-          <div>
+      {/* Visibilidade */}
+      <div className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm">
+        <div className="flex items-start gap-3 min-w-0">
+          <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <div className="min-w-0">
             <Label htmlFor="show-destination-inline" className="text-sm font-medium cursor-pointer">
               Exibir apresentação do destino
             </Label>
@@ -424,63 +425,139 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
         <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
       </div>
 
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" onClick={() => setTextOpen(true)} className="gap-2">
-          <Pencil className="h-3.5 w-3.5" />
-          Editar descrição
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => setPhotosOpen(true)} className="gap-2">
-          <Images className="h-3.5 w-3.5" />
-          Capa e fotos
-          {images.length > 0 && (
-            <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">
-              {images.length}
-            </span>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onGenerate}
-          disabled={isGenerating || isFetchingPhotos}
-          className="gap-2"
-        >
-          {isGenerating || isFetchingPhotos ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Sparkles className="h-3.5 w-3.5" />
-          )}
-          {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
-        </Button>
-      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Coluna 1 — Capa e fotos */}
+        <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold flex items-center gap-2">
+              <Images className="h-4 w-4 text-primary" />
+              Capa e fotos
+              {images.length > 0 && (
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                  {images.length}
+                </span>
+              )}
+            </h4>
+            <Button variant="ghost" size="sm" onClick={() => setPhotosOpen(true)} className="h-7 gap-1.5 text-xs">
+              <Pencil className="h-3.5 w-3.5" />
+              Gerenciar
+            </Button>
+          </div>
 
-      {/* Preview summary */}
-      <div className="rounded-lg border border-dashed bg-muted/20 p-3 space-y-2">
-        {text ? (
-          <p className="text-xs text-muted-foreground line-clamp-3 whitespace-pre-wrap">{text}</p>
-        ) : (
-          <p className="text-xs italic text-muted-foreground">Nenhuma descrição adicionada.</p>
-        )}
-        {images.length > 0 ? (
-          <div className="flex gap-1.5 overflow-x-auto">
-            {images.slice(0, 6).map((url, i) => (
-              <img
-                key={i}
-                src={url}
-                alt={`${destination} ${i + 1}`}
-                className="h-12 w-16 rounded object-cover border border-border/40 shrink-0"
-              />
-            ))}
-            {images.length > 6 && (
-              <div className="h-12 w-16 rounded border border-border/40 bg-muted flex items-center justify-center text-[10px] text-muted-foreground shrink-0">
-                +{images.length - 6}
-              </div>
+          {images.length > 0 ? (
+            <div className="grid grid-cols-3 gap-2">
+              {images.slice(0, 6).map((url, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "group relative overflow-hidden rounded-lg border border-border/50",
+                    i === 0 && "col-span-3 aspect-[16/9]",
+                    i !== 0 && "aspect-square",
+                  )}
+                >
+                  <img
+                    src={url}
+                    alt={`${destination} ${i + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                  {i === 0 && (
+                    <span className="absolute top-1.5 left-1.5 flex items-center gap-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                      <Star className="h-2.5 w-2.5 fill-current" /> Capa
+                    </span>
+                  )}
+                  {/* Ações sobre a imagem (sempre visíveis no toque, hover no desktop) */}
+                  <div className="pointer-events-none absolute inset-0 flex items-end justify-end gap-1 bg-gradient-to-t from-black/55 via-black/5 to-transparent p-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                    {i !== 0 && (
+                      <button
+                        type="button"
+                        title="Definir como capa"
+                        aria-label="Definir como capa"
+                        onClick={() => onSetCover(i)}
+                        className="pointer-events-auto inline-flex h-6 w-6 items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm hover:bg-background"
+                      >
+                        <Star className="h-3 w-3" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      title="Remover imagem"
+                      aria-label="Remover imagem"
+                      onClick={() => onRemoveImage(i)}
+                      className="pointer-events-auto inline-flex h-6 w-6 items-center justify-center rounded-md bg-background/90 text-destructive shadow-sm hover:bg-background"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {images.length > 6 && (
+                <button
+                  type="button"
+                  onClick={() => setPhotosOpen(true)}
+                  className="aspect-square rounded-lg border border-dashed bg-muted/30 text-xs font-medium text-muted-foreground hover:bg-muted/60"
+                >
+                  +{images.length - 6}
+                </button>
+              )}
+            </div>
+          ) : isFetchingPhotos ? (
+            <div className="flex items-center gap-2 py-8 justify-center text-xs text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Buscando fotos do destino...
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setPhotosOpen(true)}
+              className="flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed bg-muted/20 py-10 text-xs text-muted-foreground hover:bg-muted/40"
+            >
+              <Images className="h-5 w-5 opacity-60" />
+              Adicionar fotos do destino
+            </button>
+          )}
+        </section>
+
+        {/* Coluna 2 — Descrição */}
+        <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3 flex flex-col">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold">Descrição do destino</h4>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTextOpen(true)}
+              className="h-7 w-7"
+              title="Editar descrição"
+              aria-label="Editar descrição"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          <div className="flex-1 rounded-lg border border-dashed bg-muted/20 p-3">
+            {text ? (
+              <p className="whitespace-pre-wrap text-xs leading-5 text-muted-foreground line-clamp-[12]">{text}</p>
+            ) : (
+              <p className="text-xs italic text-muted-foreground">Nenhuma descrição adicionada ainda.</p>
             )}
           </div>
-        ) : (
-          <p className="text-xs italic text-muted-foreground">Nenhuma imagem adicionada.</p>
-        )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onGenerate}
+            disabled={isGenerating || isFetchingPhotos}
+            className="gap-2 self-start"
+          >
+            {isGenerating || isFetchingPhotos ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
+            {text || images.length > 0 ? "Regenerar com IA" : "Gerar com IA"}
+          </Button>
+        </section>
       </div>
 
       {/* Text-only modal */}

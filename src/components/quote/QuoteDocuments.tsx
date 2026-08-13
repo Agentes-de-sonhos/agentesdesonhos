@@ -41,6 +41,8 @@ interface QuoteDocumentsProps {
   userId: string;
   isOpen?: boolean;
   onToggle?: () => void;
+  /** Renders without the Card shell / accordion header (used inside the settings wizard). */
+  embedded?: boolean;
 }
 
 interface QuoteDocument {
@@ -81,7 +83,7 @@ function getIcon(fileType: string | null, fileName: string) {
   return FileText;
 }
 
-export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocumentsProps) {
+export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = false }: QuoteDocumentsProps) {
   const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<{
@@ -218,31 +220,15 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
-  return (
-    <Card>
-      <button
-        type="button"
-        onClick={() => onToggle?.()}
-        className="w-full flex items-center justify-between px-6 py-4 text-left"
-      >
-        <div className="flex items-center gap-2">
-          <Paperclip className="h-4 w-4 text-muted-foreground" />
-          <span className="text-base font-semibold">Documentos do Orçamento</span>
-          {documents.length > 0 && (
-            <span className="text-xs font-normal text-muted-foreground">
-              ({documents.length})
-            </span>
-          )}
-        </div>
-        <ChevronDown
-          className={cn(
-            "h-4 w-4 text-muted-foreground transition-transform duration-200",
-            isOpen && "rotate-180"
-          )}
-        />
-      </button>
-      {isOpen && (
-      <CardContent className="space-y-3 pt-0">
+  const body = (
+      <div className={cn("space-y-3", !embedded && "pt-0")}>
+        {embedded && (
+          <p className="rounded-xl border bg-card px-4 py-2.5 text-xs text-muted-foreground shadow-sm">
+            Anexe arquivos de apoio (roteiros, vouchers, contratos). Somente os documentos marcados como
+            <span className="font-medium text-foreground"> visíveis no orçamento público </span>
+            aparecem para o cliente no link compartilhado.
+          </p>
+        )}
         <div className="flex justify-end">
           <Button
             size="sm"
@@ -275,7 +261,7 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
           onDrop={handleDrop}
           onClick={() => !uploadProgress && inputRef.current?.click()}
           className={cn(
-            "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
+            "border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors bg-card/60",
             isDragging
               ? "border-primary bg-primary/5"
               : "border-muted-foreground/25 hover:border-primary/50"
@@ -312,7 +298,7 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
             Nenhum documento anexado ainda.
           </p>
         ) : (
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y rounded-xl border bg-card shadow-sm">
             {documents.map((doc) => {
               const Icon = getIcon(doc.file_type, doc.file_name);
               return (
@@ -333,12 +319,12 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
                         {doc.is_public ? (
                           <Badge variant="secondary" className="gap-1 text-[10px] h-5 px-1.5 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 border-emerald-500/20">
                             <Globe className="h-3 w-3" />
-                            Compartilhado
+                            Visível no público
                           </Badge>
                         ) : (
                           <Badge variant="secondary" className="gap-1 text-[10px] h-5 px-1.5 bg-muted text-muted-foreground">
                             <Lock className="h-3 w-3" />
-                            Privado
+                            Somente interno
                           </Badge>
                         )}
                       </div>
@@ -353,7 +339,7 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
                   <div className="flex items-center gap-2 shrink-0 justify-between sm:justify-end pl-8 sm:pl-0">
                     <label
                       className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none"
-                      title="Compartilhar este documento no link público do orçamento"
+                      title="Exibir este documento no link público do orçamento"
                     >
                       <Switch
                         checked={doc.is_public}
@@ -362,7 +348,7 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
                           togglePublicMutation.mutate({ id: doc.id, is_public: checked })
                         }
                       />
-                      <span className="hidden sm:inline">Compartilhar</span>
+                      <span className="hidden sm:inline">Visível no público</span>
                     </label>
                     <div className="flex items-center gap-1">
                     <Button
@@ -426,8 +412,35 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle }: QuoteDocum
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </CardContent>
-      )}
+      </div>
+  );
+
+  if (embedded) return body;
+
+  return (
+    <Card>
+      <button
+        type="button"
+        onClick={() => onToggle?.()}
+        className="w-full flex items-center justify-between px-6 py-4 text-left"
+      >
+        <div className="flex items-center gap-2">
+          <Paperclip className="h-4 w-4 text-muted-foreground" />
+          <span className="text-base font-semibold">Documentos do Orçamento</span>
+          {documents.length > 0 && (
+            <span className="text-xs font-normal text-muted-foreground">
+              ({documents.length})
+            </span>
+          )}
+        </div>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 text-muted-foreground transition-transform duration-200",
+            isOpen && "rotate-180"
+          )}
+        />
+      </button>
+      {isOpen && <CardContent>{body}</CardContent>}
     </Card>
   );
 }

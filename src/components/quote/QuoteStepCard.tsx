@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface QuoteStepCardProps {
@@ -14,20 +14,24 @@ export interface QuoteStepCardProps {
   badge?: ReactNode;
   open: boolean;
   onToggle: () => void;
-  children: ReactNode;
+  /** When true the card acts as a single action (opens a modal) instead of an accordion. */
+  direct?: boolean;
+  children?: ReactNode;
 }
 
 export function QuoteStepCard({
-  step, id, title, hint, accentClass, icon, badge, open, onToggle, children,
+  step, id, title, hint, accentClass, icon, badge, open, onToggle, direct = false, children,
 }: QuoteStepCardProps) {
   const panelId = `${id}-panel`;
+  const showBody = !direct && open;
   return (
     <Card id={id} className="shadow-card scroll-mt-24">
       <button
         type="button"
         onClick={onToggle}
-        aria-expanded={open}
-        aria-controls={panelId}
+        aria-expanded={direct ? undefined : open}
+        aria-controls={direct ? undefined : panelId}
+        aria-haspopup={direct ? "dialog" : undefined}
         className="w-full flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 text-left rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="flex items-start gap-3 min-w-0">
@@ -49,19 +53,23 @@ export function QuoteStepCard({
               </h2>
               <div className={cn("mt-2 h-1 w-full rounded-full", accentClass)} />
             </div>
-            {!open && (
+            {(direct || !open) && (
               <p className="text-xs text-muted-foreground mt-2">{hint}</p>
             )}
           </div>
         </div>
-        <ChevronDown
-          className={cn(
-            "h-5 w-5 mt-1 text-muted-foreground transition-transform duration-200 flex-shrink-0",
-            open && "rotate-180"
-          )}
-        />
+        {direct ? (
+          <ChevronRight className="h-5 w-5 mt-1 text-muted-foreground flex-shrink-0" />
+        ) : (
+          <ChevronDown
+            className={cn(
+              "h-5 w-5 mt-1 text-muted-foreground transition-transform duration-200 flex-shrink-0",
+              open && "rotate-180"
+            )}
+          />
+        )}
       </button>
-      {open && (
+      {showBody && (
         <CardContent id={panelId} className="pt-0">
           {children}
         </CardContent>

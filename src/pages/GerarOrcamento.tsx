@@ -14,11 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft, Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal, Play, UserCircle2,
+  Pencil, MoreHorizontal, UserCircle2,
 } from "lucide-react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -466,6 +465,12 @@ export default function GerarOrcamento() {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const STEP_KEYS = ["add", "services", "settings", "summary", "signature"] as const;
   const openStep = (step: number) => {
+    // Etapa 3 abre diretamente o wizard de configurações (sem expandir o card).
+    if (step === 3) {
+      setSettingsStep("destination");
+      setSettingsOpen(true);
+      return;
+    }
     const key = STEP_KEYS[step - 1];
     setOpenSections((prev) => ({ ...prev, [key]: true }));
     requestAnimationFrame(() => {
@@ -1238,22 +1243,10 @@ export default function GerarOrcamento() {
               hint={QUOTE_STEPS[2].hint}
               accentClass="bg-violet-500"
               icon={<CreditCard className="h-5 w-5 text-violet-500" />}
-              open={openSections.settings}
-              onToggle={() => toggleSection("settings")}
-            >
-              <button
-                type="button"
-                onClick={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
-                className="w-full text-left rounded-lg border border-border px-4 py-4 hover:bg-muted/30 transition-colors flex items-center justify-between gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <span className="text-sm font-medium text-foreground">
-                  Abrir configurações em etapas guiadas
-                </span>
-                <span className="shrink-0 h-10 w-10 rounded-full bg-violet-500 flex items-center justify-center shadow-md">
-                  <Play className="h-5 w-5 text-white fill-white" />
-                </span>
-              </button>
-            </QuoteStepCard>
+              direct
+              open={false}
+              onToggle={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
+            />
 
             {/* 4. Revisar orçamento */}
             <QuoteStepCard
@@ -1418,7 +1411,7 @@ export default function GerarOrcamento() {
           return (
           <div className="space-y-4">
                   {/* Nova lógica: O QUE exibir para o cliente (3 opções consolidadas) */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {layoutOptions.map((opt) => {
@@ -1489,11 +1482,9 @@ export default function GerarOrcamento() {
                     )}
                   </div>
 
-                  <Separator />
-
                   {effectiveLayout === "consolidated" && (
                   <>
-                  <div className="space-y-2">
+                  <div className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm font-medium">Como exibir o valor para o cliente?</Label>
                     <p className="text-xs text-muted-foreground">
                       {effectiveLayout === "consolidated"
@@ -1528,10 +1519,8 @@ export default function GerarOrcamento() {
                     </div>
                   </div>
 
-                  <Separator />
-
                   {paymentDisplayMode === "installments" && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                       <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Nº de parcelas</Label>
                         <Input type="number" min={2} max={48} value={installmentsCount} onChange={(e) => setInstallmentsCount(Number(e.target.value))} />
@@ -1548,7 +1537,7 @@ export default function GerarOrcamento() {
                   )}
 
                   {paymentDisplayMode === "installments_with_entry" && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                       <div className="space-y-1.5">
                         <Label className="text-sm">% da entrada</Label>
                         <Input type="number" min={1} max={90} value={entryPercentage} onChange={(e) => setEntryPercentage(Number(e.target.value))} />
@@ -1584,7 +1573,7 @@ export default function GerarOrcamento() {
                   )}
 
                   {paymentDisplayMode === "full_payment" && (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                       <div className="space-y-1.5 sm:col-span-2">
                         <Label className="text-sm">Desconto à vista (%)</Label>
                         <Input type="number" min={0} max={50} value={fullPaymentDiscountPercent} onChange={(e) => setFullPaymentDiscountPercent(Number(e.target.value))} />
@@ -1603,7 +1592,7 @@ export default function GerarOrcamento() {
                   )}
 
                       {paymentDisplayMode === "total_only" && quote && (
-                        <div className="rounded-lg bg-muted/50 p-3">
+                        <div className="rounded-xl border bg-card p-4 shadow-sm">
                           <p className="text-sm font-medium text-primary">
                             Destaque: <span className="font-bold">{fmt(quote.total_amount)}</span>
                             <span className="text-xs text-muted-foreground ml-1">(valor total da viagem)</span>
@@ -1613,9 +1602,7 @@ export default function GerarOrcamento() {
                   </>
                   )}
 
-                  <Separator />
-
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm">Meio de pagamento</Label>
                     <p className="text-xs text-muted-foreground">
                       Selecione um ou mais meios de pagamento aceitos. Eles aparecerão para o cliente em todos os formatos de apresentação do investimento.
@@ -1629,9 +1616,7 @@ export default function GerarOrcamento() {
                     />
                   </div>
 
-                  <Separator />
-
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm">Observações adicionais de pagamento</Label>
                     <Textarea
                       placeholder="Ex: Parcelamento sem juros. Desconto especial para pagamento via Pix."
@@ -1646,7 +1631,7 @@ export default function GerarOrcamento() {
         }}
         renderValidity={() => (
           <div className="space-y-3">
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
                     <div className="space-y-1.5">
                       <Label className="text-sm">Válido até</Label>
                       <Popover>
@@ -1662,7 +1647,7 @@ export default function GerarOrcamento() {
                       </Popover>
                     </div>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm">Termos e condições</Label>
                     <Textarea
                       value={validityDisclaimer}
@@ -1677,8 +1662,7 @@ export default function GerarOrcamento() {
           <QuoteDocuments
             quoteId={quote.id}
             userId={quote.user_id}
-            isOpen={true}
-            onToggle={() => {}}
+            embedded
           />
         )}
         renderAdvanced={() => (
