@@ -9,6 +9,11 @@ interface SecureFileLinkProps {
   /** For authenticated user access */
   mode?: "authenticated";
   className?: string;
+  /** Custom content — replaces the default icon + file name. */
+  children?: React.ReactNode;
+  /** Suggest a download instead of inline navigation (best-effort). */
+  download?: boolean;
+  ariaLabel?: string;
 }
 
 interface PublicFileLinkProps {
@@ -19,6 +24,9 @@ interface PublicFileLinkProps {
   shareToken?: string;
   password?: string;
   className?: string;
+  children?: React.ReactNode;
+  download?: boolean;
+  ariaLabel?: string;
 }
 
 type Props = SecureFileLinkProps | PublicFileLinkProps;
@@ -117,9 +125,10 @@ export function SecureFileLink(props: Props) {
         onClick={() => void fetchUrl()}
         className={className}
         title="Tentar novamente"
+        aria-label={props.ariaLabel || `Tentar abrir ${props.fileName} novamente`}
       >
         <AlertCircle className="h-3 w-3" />
-        {props.fileName}
+        {props.children ?? props.fileName}
       </button>
     );
   }
@@ -129,10 +138,16 @@ export function SecureFileLink(props: Props) {
       href={url || "#"}
       target="_blank"
       rel="noopener noreferrer"
+      download={props.download ? props.fileName : undefined}
       onClick={handleClick}
       className={className}
       aria-busy={status === "loading"}
+      aria-label={props.ariaLabel || undefined}
     >
+      {props.children ? (
+        props.children
+      ) : (
+        <>
       {status === "loading" && !url ? (
         <Loader2 className="h-3 w-3 animate-spin" />
       ) : (
@@ -140,6 +155,8 @@ export function SecureFileLink(props: Props) {
       )}
       {props.fileName}
       {url && <ExternalLink className="h-3 w-3" />}
+        </>
+      )}
     </a>
   );
 }

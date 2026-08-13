@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatItineraryDayHeader } from "@/lib/dateParsing";
 import { SecureFileLink } from "@/components/trip/SecureFileLink";
+import { ServiceDocumentsCard } from "@/components/wallet/ServiceDocumentsCard";
 import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
@@ -1664,35 +1665,16 @@ function PublicServiceCard({ service }: { service: TripService }) {
             )}
           </div>
         )}
-        {/* Attachments */}
-        {(service.attachments?.length > 0 || service.voucher_url) && (
-          <div className="mt-3 space-y-1">
-            {service.attachments?.length > 0 ? (
-              service.attachments.map((att: any, idx: number) => (
-                <SecureFileLink
-                  key={idx}
-                  filePath={att.url}
-                  fileName={att.name}
-                  mode="public"
-                  slug={voucherAccess.slug || undefined}
-                  shareToken={voucherAccess.shareToken || undefined}
-                  password={voucherAccess.password}
-                  className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline mr-3 cursor-pointer"
-                />
-              ))
-            ) : service.voucher_url ? (
-              <SecureFileLink
-                filePath={service.voucher_url}
-                fileName={service.voucher_name || "Baixar documento"}
-                mode="public"
-                slug={voucherAccess.slug || undefined}
-                shareToken={voucherAccess.shareToken || undefined}
-                password={voucherAccess.password}
-                className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline cursor-pointer"
-              />
-            ) : null}
-          </div>
-        )}
+        {/* Documentos do serviço (bloco compartilhado, todos os tipos) */}
+        <ServiceDocumentsCard
+          service={service}
+          access={{
+            mode: "public",
+            slug: voucherAccess.slug || undefined,
+            shareToken: voucherAccess.shareToken || undefined,
+            password: voucherAccess.password,
+          }}
+        />
       </CardContent>
     </Card>
   );
