@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { QuoteShareBar } from "@/components/quote/QuoteShareBar";
 
-const copyTextToClipboard = vi.fn(async () => true);
+const copyTextToClipboard = vi.fn(async (_text: string) => true);
 const success = vi.fn();
 
 vi.mock("sonner", () => ({ toast: { success: (m: string) => success(m), error: vi.fn() } }));
