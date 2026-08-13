@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, Copy, FileText, Link as LinkIcon, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -34,17 +34,18 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
   const [open, setOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [draft, setDraft] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const composedMessage = useMemo(
     () => buildPublicShareMessage({ type: "quote", publicUrl, ...message }),
     [publicUrl, message],
   );
 
-  // Ao abrir, inicializa com a mensagem gerada pelo sistema (edições ficam locais).
-  useEffect(() => {
-    if (open) setDraft(composedMessage);
-  }, [open, composedMessage]);
+  // A mensagem é inicializada SOMENTE na abertura do modal. Rerenders do pai
+  // (autosave, status, novo objeto `message`) nunca sobrescrevem as edições locais.
+  const handleOpenDialog = () => {
+    setDraft(composedMessage);
+    setOpen(true);
+  };
 
   const handleCopyLink = async () => {
     const ok = await copyTextToClipboard(publicUrl);
@@ -69,7 +70,7 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
   return (
     <TooltipProvider delayDuration={150}>
       <div className={"flex w-full min-w-0 flex-wrap items-center gap-2 " + (className || "")}>
-        <Button size="sm" className="shrink-0" onClick={() => setOpen(true)}>
+        <Button size="sm" className="shrink-0" onClick={handleOpenDialog}>
           <MessageCircle className="mr-1.5 h-4 w-4" />
           Criar mensagem
         </Button>
@@ -102,7 +103,7 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
         </Button>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(next) => (next ? handleOpenDialog() : setOpen(false))}>
         <DialogContent className="max-w-[95vw] sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Mensagem pronta para envio</DialogTitle>
@@ -116,7 +117,6 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
             <Label htmlFor="quote-share-message">Mensagem</Label>
             <Textarea
               id="quote-share-message"
-              ref={textareaRef}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               className="min-h-[220px] text-sm sm:min-h-[260px]"
