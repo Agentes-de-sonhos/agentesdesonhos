@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Globe, Share2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface QuoteStepMeta {
