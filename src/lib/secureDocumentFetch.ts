@@ -1,4 +1,9 @@
-import { extractVoucherPath, buildPublicVoucherProxyUrl, getSignedVoucherUrl } from "@/lib/secureVoucher";
+import {
+  extractVoucherPath,
+  buildPublicVoucherProxyUrl,
+  getSignedVoucherUrl,
+  getPublicVoucherUrl,
+} from "@/lib/secureVoucher";
 import { getDocumentKind, type ServiceDocumentKind } from "@/lib/serviceDocuments";
 
 export interface SecureDocumentSource {
@@ -25,7 +30,18 @@ export const SECURE_DOCUMENT_ERROR =
 /** Resolve the internal (never displayed) endpoint that serves the bytes. */
 async function resolveInternalUrl(source: SecureDocumentSource): Promise<string | null> {
   if (source.mode === "public") {
-    return buildPublicVoucherProxyUrl(source.filePath, source.shareToken);
+    // Caminho rápido: proxy permanente quando há share_token válido.
+    const proxy = buildPublicVoucherProxyUrl(source.filePath, source.shareToken);
+    if (proxy) return proxy;
+    // Formato público legado (slug/senha): obtém URL assinada apenas para uso interno.
+    if (source.slug || source.shareToken || source.password) {
+      return getPublicVoucherUrl(source.filePath, {
+        slug: source.slug,
+        share_token: source.shareToken,
+        password: source.password,
+      });
+    }
+    return null;
   }
   return getSignedVoucherUrl(source.filePath);
 }
