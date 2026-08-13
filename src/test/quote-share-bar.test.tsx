@@ -8,7 +8,7 @@ const success = vi.fn();
 
 vi.mock("sonner", () => ({ toast: { success: (m: string) => success(m), error: vi.fn() } }));
 vi.mock("@/lib/public-share-message", () => ({
-  buildPublicShareMessage: () => "Olá Catia! Segue o orçamento.\nhttps://seuorcamento.tur.br/nobre/abc",
+  buildPublicShareMessage: (_input?: unknown) => "Olá Catia! Segue o orçamento.\nhttps://seuorcamento.tur.br/nobre/abc",
   copyTextToClipboard: (t: string) => copyTextToClipboard(t),
 }));
 
