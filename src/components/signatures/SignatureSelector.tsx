@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Check, ChevronDown, UserCircle2, Plus } from "lucide-react";
+import { Check, ChevronDown, UserCircle2, Plus, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCommercialSignatures } from "@/hooks/useCommercialSignatures";
 import { buildSnapshot } from "@/lib/commercialSignature";
+import { isSystemSignatureId } from "@/lib/effectiveSignature";
 import type { SignatureSnapshot, CommercialSignature } from "@/types/signature";
 import { SignatureFormDialog } from "./SignatureFormDialog";
 import { cn } from "@/lib/utils";
@@ -16,15 +18,11 @@ interface Props {
 }
 
 export function SignatureSelector({ value, onChange, className, label }: Props) {
-  const { activeSignatures, signatures, defaultSignature, isLoading, create } = useCommercialSignatures();
+  const { allSignatures, effectiveSignature, isLoading, create } = useCommercialSignatures();
   const [open, setOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  // If nothing selected yet but a default exists, suggest it
   const current = value;
-  const currentSig: CommercialSignature | undefined = value?.id
-    ? signatures.find((s) => s.id === value.id)
-    : undefined;
 
   const renderCard = (s: CommercialSignature, selected: boolean) => (
     <button
@@ -35,6 +33,7 @@ export function SignatureSelector({ value, onChange, className, label }: Props) 
         "w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors hover:bg-muted/50",
         selected ? "border-primary bg-primary/5" : "border-border"
       )}
+      aria-label={`Usar assinatura de ${s.name}${isSystemSignatureId(s.id) ? " (do cadastro)" : ""}`}
     >
       {s.photo_url ? (
         <img src={s.photo_url} alt={s.name} className="h-10 w-10 rounded-full object-cover shrink-0" />
@@ -46,6 +45,16 @@ export function SignatureSelector({ value, onChange, className, label }: Props) 
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium truncate">{s.name}</p>
         {s.title && <p className="text-xs text-muted-foreground truncate">{s.title}</p>}
+        <div className="flex flex-wrap gap-1 mt-1">
+          {isSystemSignatureId(s.id) && (
+            <Badge variant="secondary" className="text-[10px]">Do cadastro</Badge>
+          )}
+          {effectiveSignature?.id === s.id && (
+            <Badge variant="default" className="text-[10px]">
+              <Star className="h-2.5 w-2.5 mr-0.5" aria-hidden />Padrão
+            </Badge>
+          )}
+        </div>
       </div>
       {selected && <Check className="h-4 w-4 text-primary shrink-0" />}
     </button>
@@ -74,7 +83,7 @@ export function SignatureSelector({ value, onChange, className, label }: Props) 
         <PopoverContent className="w-[min(420px,90vw)] p-2" align="start">
           {isLoading ? (
             <p className="text-sm text-muted-foreground p-3">Carregando...</p>
-          ) : activeSignatures.length === 0 ? (
+          ) : allSignatures.length === 0 ? (
             <div className="p-3 space-y-3">
               <p className="text-sm text-muted-foreground">Nenhuma assinatura cadastrada ainda.</p>
               <Button size="sm" className="w-full" onClick={() => { setCreateOpen(true); setOpen(false); }}>
@@ -83,14 +92,14 @@ export function SignatureSelector({ value, onChange, className, label }: Props) 
             </div>
           ) : (
             <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
-              {activeSignatures.map((s) => renderCard(s, s.id === current?.id))}
+              {allSignatures.map((s) => renderCard(s, s.id === current?.id))}
               {current && (
                 <button
                   type="button"
                   onClick={() => { onChange(null); setOpen(false); }}
                   className="w-full text-center text-xs text-muted-foreground hover:text-foreground py-2"
                 >
-                  Limpar assinatura do documento
+                  Usar a assinatura padrão da agência
                 </button>
               )}
               <button
