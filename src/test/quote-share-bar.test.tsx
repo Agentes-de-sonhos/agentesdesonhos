@@ -174,4 +174,63 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
     expect(guide).not.toContain("bg-primary/5");
     expect(guide).toContain("Depois das 5 etapas: publique e compartilhe");
   });
+
+  it("rótulo da etapa 3 é 'Configurar cotação'", () => {
+    expect(page).toContain('short: "Configurar cotação"');
+  });
+
+  it("Criar mensagem reutiliza o verde do botão de suporte (#25D366)", () => {
+    const supportBtn = readFileSync("src/components/layout/WhatsAppSupportButton.tsx", "utf8");
+    expect(supportBtn).toContain("#25D366");
+    const shareBar = readFileSync("src/components/quote/QuoteShareBar.tsx", "utf8");
+    expect(shareBar).toContain("bg-[#25D366]");
+    // campo da URL com fundo branco e borda neutra
+    expect(shareBar).toContain("border bg-background");
+    expect(shareBar).not.toContain("bg-muted/40");
+  });
+});
+
+describe("QuoteStepsGuide — trilha compacta + modal", () => {
+  const steps = [
+    { step: 1, short: "Adicionar serviços", hint: "Inclua passagens.", accentClass: "bg-sky-500" },
+    { step: 2, short: "Organizar serviços", hint: "Revise e agrupe.", accentClass: "bg-emerald-500" },
+    { step: 3, short: "Configurar cotação", hint: "Defina valores.", accentClass: "bg-violet-500" },
+    { step: 4, short: "Revisar orçamento", hint: "Confira os dados.", accentClass: "bg-amber-500" },
+    { step: 5, short: "Escolher assinatura", hint: "Selecione o responsável.", accentClass: "bg-sky-600" },
+  ];
+
+  it("não renderiza título, subtítulo nem card antigos", () => {
+    render(<QuoteStepsGuide steps={steps} onSelect={vi.fn()} />);
+    expect(screen.queryByText(/Monte seu orçamento em 5 etapas/i)).toBeNull();
+    expect(screen.queryByRole("button", { name: /Ver orientações/i })).toBeNull();
+  });
+
+  it("mostra as cinco etiquetas na ordem exata e chama onSelect", () => {
+    const onSelect = vi.fn();
+    render(<QuoteStepsGuide steps={steps} onSelect={onSelect} />);
+    const labels = steps.map((s) => s.short);
+    const rendered = screen
+      .getAllByRole("button")
+      .map((b) => b.textContent || "")
+      .filter((t) => labels.some((l) => t.includes(l)));
+    labels.forEach((l, i) => expect(rendered[i]).toContain(l));
+    fireEvent.click(screen.getByText("Configurar cotação"));
+    expect(onSelect).toHaveBeenCalledWith(3);
+  });
+
+  it("'Ver mais' abre o modal com as explicações e o bloco pós-etapas, e fecha no botão", async () => {
+    render(<QuoteStepsGuide steps={steps} onSelect={vi.fn()} />);
+    fireEvent.click(screen.getByLabelText("Ver mais sobre como montar seu orçamento"));
+    await screen.findByText("Como montar seu orçamento");
+    expect(screen.getByText(/Inclua passagens\./)).toBeTruthy();
+    expect(screen.getByText("Depois das 5 etapas: publique e compartilhe")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Fechar" }));
+    await waitFor(() => expect(screen.queryByText("Como montar seu orçamento")).toBeNull());
+  });
+
+  it("trilha em linha única com rolagem local, sem overflow global", () => {
+    expect(guide).toContain("overflow-x-auto");
+    expect(guide).toContain('className="flex w-max items-center gap-x-2"');
+    expect(guide).toContain("bg-background");
+  });
 });
