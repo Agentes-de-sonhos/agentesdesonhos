@@ -15,14 +15,15 @@ vi.mock("@/lib/public-share-message", () => ({
 const publicUrl = "https://seuorcamento.tur.br/nobre-tours/rQk7E8N9";
 const onGeneratePDF = vi.fn();
 
-const renderBar = () =>
-  render(
-    <QuoteShareBar
-      publicUrl={publicUrl}
-      onGeneratePDF={onGeneratePDF}
-      message={{ clientFirstName: "Catia" }}
-    />,
-  );
+const bar = (clientFirstName = "Catia") => (
+  <QuoteShareBar
+    publicUrl={publicUrl}
+    onGeneratePDF={onGeneratePDF}
+    message={{ clientFirstName }}
+  />
+);
+
+const renderBar = () => render(bar());
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -84,6 +85,30 @@ describe("QuoteShareBar — modal Criar mensagem", () => {
     expect(success).toHaveBeenCalledWith("Mensagem copiada!");
     // Não fecha automaticamente após copiar.
     expect(screen.getByText("Mensagem pronta para envio")).toBeTruthy();
+  });
+
+  it("preserva as edições em rerenders do pai e reinicializa ao reabrir", async () => {
+    const view = render(bar());
+    fireEvent.click(screen.getByRole("button", { name: "Criar mensagem" }));
+    await screen.findByText("Mensagem pronta para envio");
+
+    const textarea = screen.getByLabelText("Mensagem") as HTMLTextAreaElement;
+    fireEvent.change(textarea, { target: { value: "Texto editado pela agência" } });
+
+    // Rerender do pai com um NOVO objeto `message` (ex.: autosave alterando o estado).
+    view.rerender(bar("Catia Lima"));
+    expect((screen.getByLabelText("Mensagem") as HTMLTextAreaElement).value).toBe(
+      "Texto editado pela agência",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Fechar" }));
+    await waitFor(() => expect(screen.queryByText("Mensagem pronta para envio")).toBeNull());
+
+    fireEvent.click(screen.getByRole("button", { name: "Criar mensagem" }));
+    await screen.findByText("Mensagem pronta para envio");
+    expect((screen.getByLabelText("Mensagem") as HTMLTextAreaElement).value).toContain(
+      "Olá Catia",
+    );
   });
 
   it("fecha o modal no botão Fechar", async () => {
