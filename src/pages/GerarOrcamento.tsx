@@ -4,7 +4,7 @@ import { ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
-import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
+import { QuoteShareBar } from "@/components/quote/QuoteShareBar";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -1069,14 +1069,18 @@ export default function GerarOrcamento() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0 shrink-0">
             <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-lg sm:text-2xl font-bold truncate">Orçamento: {quote.client_name}</h1>
+                <h1 className="font-display text-lg sm:text-2xl font-bold truncate">
+                  {/^\s*Or[çc]amento\s*:/i.test(quote.client_name || "")
+                    ? quote.client_name
+                    : `Orçamento: ${quote.client_name}`}
+                </h1>
                 {quoteCurrencyCode !== 'BRL' && (
                   <Badge variant="secondary" className="text-xs shrink-0">
                     {getCurrencySymbol(quoteCurrencyCode)} {(quote as any).currency_mode === 'conversion' ? 'Conversão' : 'Fixa'}
@@ -1085,7 +1089,7 @@ export default function GerarOrcamento() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-stretch gap-2 sm:items-end sm:ml-auto">
+          <div className="flex min-w-0 flex-1 flex-col items-stretch gap-2 lg:items-end lg:ml-auto">
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:justify-end">
             {saveStatus === "saving" && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
@@ -1108,6 +1112,7 @@ export default function GerarOrcamento() {
             <TooltipProvider delayDuration={150}>
               <div className="flex items-center gap-2 flex-wrap sm:justify-end">
                 {!quote.share_token && (
+                  <>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
@@ -1118,7 +1123,6 @@ export default function GerarOrcamento() {
                     </TooltipTrigger>
                     <TooltipContent>Cria um link para você enviar ao cliente.</TooltipContent>
                   </Tooltip>
-                )}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
@@ -1129,6 +1133,8 @@ export default function GerarOrcamento() {
                   </TooltipTrigger>
                   <TooltipContent>Gera uma versão em PDF para compartilhar ou imprimir.</TooltipContent>
                 </Tooltip>
+                  </>
+                )}
               </div>
             </TooltipProvider>
             </div>
@@ -1141,35 +1147,24 @@ export default function GerarOrcamento() {
                 : `${ORCAMENTO_DOMAIN}/orcamento/${quote.share_token}`;
               const serviceTypes = (quote.services || []).map((s: any) => s.service_type).filter(Boolean);
               return (
-                <div className="flex flex-col gap-2 rounded-md border bg-muted/40 px-2 py-2 max-w-full">
-                  <div className="flex items-center gap-1">
-                    <LinkIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <input
-                      readOnly
-                      value={publicUrl}
-                      onFocus={(e) => e.currentTarget.select()}
-                      className="bg-transparent text-xs outline-none w-[180px] sm:w-[280px] truncate"
-                    />
-                  </div>
-                  <PublicLinkActions
-                    type="quote"
-                    publicUrl={publicUrl}
-                    message={{
-                      clientFirstName: quote.client_name,
-                      destination: quote.destination,
-                      startDate: quote.start_date,
-                      endDate: quote.end_date,
-                      travelers: {
-                        adults: (quote as any).adults_count,
-                        children: (quote as any).children_count,
-                        infants: (quote as any).infants_count,
-                      },
-                      serviceTypes,
-                      agencyName: agentProfile?.agency_name,
-                    }}
-                    size="sm"
-                  />
-                </div>
+                <QuoteShareBar
+                  publicUrl={publicUrl}
+                  onGeneratePDF={handleGeneratePDF}
+                  className="lg:justify-end"
+                  message={{
+                    clientFirstName: quote.client_name,
+                    destination: quote.destination,
+                    startDate: quote.start_date,
+                    endDate: quote.end_date,
+                    travelers: {
+                      adults: (quote as any).adults_count,
+                      children: (quote as any).children_count,
+                      infants: (quote as any).infants_count,
+                    },
+                    serviceTypes,
+                    agencyName: agentProfile?.agency_name,
+                  }}
+                />
               );
             })()
           )}
