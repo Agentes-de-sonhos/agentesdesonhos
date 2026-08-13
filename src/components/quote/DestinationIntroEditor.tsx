@@ -471,16 +471,18 @@ interface EmbeddedProps {
 
 function EmbeddedDestinationIntro(props: EmbeddedProps) {
   const {
-    destination, enabled, onToggle, text, onTextChange, images,
+    destination, text, onTextChange, images,
     onRemoveImage, onAddGooglePhotos, onUploadImages, onSetCover, onAddByUrl,
     onGenerate, isGenerating, isFetchingPhotos, isUploading,
   } = props;
 
   const [textOpen, setTextOpen] = useState(false);
   const [photosOpen, setPhotosOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [draftText, setDraftText] = useState(text);
   const [urlInput, setUrlInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (textOpen) setDraftText(text);
