@@ -1069,8 +1069,9 @@ export default function GerarOrcamento() {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0 shrink-0">
+        <div className="flex w-full min-w-0 flex-col gap-3">
+          <div className="flex w-full min-w-0 flex-wrap items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
             <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -1089,7 +1090,7 @@ export default function GerarOrcamento() {
               </div>
             </div>
           </div>
-          <div className="flex min-w-0 flex-1 flex-col items-stretch gap-2 lg:items-end lg:ml-auto">
+          <div className="flex min-w-0 flex-col items-stretch gap-2 sm:items-end">
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:justify-end">
             {saveStatus === "saving" && (
               <span className="text-xs text-muted-foreground flex items-center gap-1 animate-fade-in">
@@ -1125,7 +1126,7 @@ export default function GerarOrcamento() {
                   </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
+                    <Button size="sm" onClick={handleGeneratePDF}>
                       <FileText className="mr-1 sm:mr-2 h-4 w-4" />
                       <span className="hidden sm:inline">Gerar orçamento PDF</span>
                       <span className="sm:hidden">Orçamento PDF</span>
@@ -1138,6 +1139,8 @@ export default function GerarOrcamento() {
               </div>
             </TooltipProvider>
             </div>
+          </div>
+          </div>
           {quote.share_token && (
             (() => {
               const accessCode = (quote as any).public_access_code;
@@ -1150,7 +1153,7 @@ export default function GerarOrcamento() {
                 <QuoteShareBar
                   publicUrl={publicUrl}
                   onGeneratePDF={handleGeneratePDF}
-                  className="lg:justify-end"
+                  className="justify-start sm:pl-[52px]"
                   message={{
                     clientFirstName: quote.client_name,
                     destination: quote.destination,
@@ -1168,7 +1171,6 @@ export default function GerarOrcamento() {
               );
             })()
           )}
-          </div>
         </div>
 
         <div className="grid gap-4 sm:gap-6">

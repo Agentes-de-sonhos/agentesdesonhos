@@ -75,29 +75,30 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
           Criar mensagem
         </Button>
 
-        <div className="flex min-w-0 flex-1 basis-[220px] items-center gap-1.5 rounded-md border bg-muted/40 px-2 py-1.5">
+        <div className="flex h-9 min-w-0 flex-1 basis-[240px] items-center gap-1.5 overflow-hidden rounded-md border bg-background pl-2 sm:max-w-md">
           <LinkIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <span className="min-w-0 break-all text-xs leading-4 text-muted-foreground [overflow-wrap:anywhere]">
+          <span
+            title={publicUrl}
+            className="min-w-0 flex-1 truncate whitespace-nowrap text-xs leading-4 text-muted-foreground"
+          >
             {publicUrl}
           </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="flex h-9 w-9 shrink-0 items-center justify-center border-l text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                aria-label="Copiar link do orçamento"
+                onClick={handleCopyLink}
+              >
+                {copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Copiar link do orçamento</TooltipContent>
+          </Tooltip>
         </div>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-9 w-9 shrink-0"
-              aria-label="Copiar link do orçamento"
-              onClick={handleCopyLink}
-            >
-              {copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Copiar link do orçamento</TooltipContent>
-        </Tooltip>
-
-        <Button size="sm" variant="outline" className="shrink-0" onClick={onGeneratePDF}>
+        <Button size="sm" className="shrink-0" onClick={onGeneratePDF}>
           <FileText className="mr-1.5 h-4 w-4" />
           Gerar orçamento PDF
         </Button>
