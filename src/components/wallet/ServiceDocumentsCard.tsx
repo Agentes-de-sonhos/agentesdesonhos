@@ -121,6 +121,7 @@ export function ServiceDocumentsCard({
   className,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<ServiceDocument | null>(null);
   const viewer = useSecureDocument();
   if (!visible) return null;
 
@@ -144,6 +145,20 @@ export function ServiceDocumentsCard({
       toast.error(err instanceof Error ? err.message : "Não foi possível baixar este arquivo."),
     );
   };
+
+  const openDocument = (doc: ServiceDocument) => {
+    setSelectedDocument(doc);
+    void viewer.openDocument(toSource(doc));
+  };
+
+  const closeViewer = () => {
+    viewer.close();
+    setSelectedDocument(null);
+  };
+
+  const selectedMeta = selectedDocument
+    ? [selectedDocument.ext, selectedDocument.size].filter(Boolean).join(" · ") || null
+    : null;
 
   return (
     <>
@@ -171,8 +186,7 @@ export function ServiceDocumentsCard({
           <DocumentRow
             key={doc.path}
             doc={doc}
-            access={access}
-            onOpen={(d) => void viewer.openDocument(toSource(d))}
+            onOpen={openDocument}
             onDownload={handleDownload}
             downloading={viewer.downloading}
           />
@@ -198,12 +212,14 @@ export function ServiceDocumentsCard({
       downloading={viewer.downloading}
       error={viewer.error}
       doc={viewer.doc}
-      fileName={viewer.doc?.fileName || "Documento"}
-      onClose={viewer.close}
-      onRetry={() => void viewer.retry()}
+      fileName={selectedDocument?.name || "Documento"}
+      fileMeta={selectedMeta}
+      onClose={closeViewer}
+      onRetry={() => {
+        if (selectedDocument) void viewer.openDocument(toSource(selectedDocument));
+      }}
       onDownload={() => {
-        const current = docs.find((d) => d.name === viewer.doc?.fileName) ?? docs[0];
-        if (current) handleDownload(current);
+        if (selectedDocument) handleDownload(selectedDocument);
       }}
     />
     </>
