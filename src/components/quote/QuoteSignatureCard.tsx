@@ -4,6 +4,7 @@ import { UserCircle2 } from "lucide-react";
 import { SignatureSelector } from "@/components/signatures/SignatureSelector";
 import { useCommercialSignatures } from "@/hooks/useCommercialSignatures";
 import { buildSnapshot } from "@/lib/commercialSignature";
+import { isSystemSignatureId } from "@/lib/effectiveSignature";
 import type { SignatureSnapshot } from "@/types/signature";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -22,22 +23,39 @@ interface Props {
 
 /** Reusable signature card for any document editor */
 export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot, onSaved, unwrapped = false, hideHeader = false }: Props) {
-  const { defaultSignature } = useCommercialSignatures();
+  const { effectiveSignature, systemSignature } = useCommercialSignatures();
   const [snap, setSnap] = useState<SignatureSnapshot | null>(initialSnapshot ?? null);
   const [saving, setSaving] = useState(false);
   const [initFilled, setInitFilled] = useState(false);
+  const [synced, setSynced] = useState(false);
 
-  // Auto-apply default signature on first load if nothing set yet
+  // Auto-apply the effective agency signature on first load if nothing set yet
   useEffect(() => {
     if (initFilled) return;
-    if (!initialSnapshot && defaultSignature) {
-      const s = buildSnapshot(defaultSignature);
+    if (!initialSnapshot && effectiveSignature) {
+      const s = buildSnapshot(effectiveSignature);
       setSnap(s);
       persist(s);
       setInitFilled(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultSignature, initialSnapshot]);
+  }, [effectiveSignature, initialSnapshot]);
+
+  // Keep the automatic (registration) signature fresh: if this document points to
+  // the system signature, refresh its snapshot when the holder data changed.
+  useEffect(() => {
+    if (synced) return;
+    if (!snap?.id || !isSystemSignatureId(snap.id) || !systemSignature) return;
+    const next = buildSnapshot(systemSignature);
+    if (!next) return;
+    const changed = JSON.stringify({ ...next, updated_at: null }) !== JSON.stringify({ ...snap, updated_at: null });
+    if (changed) {
+      setSnap(next);
+      persist(next);
+    }
+    setSynced(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [systemSignature, snap?.id]);
 
   const persist = async (next: SignatureSnapshot | null) => {
     setSaving(true);
