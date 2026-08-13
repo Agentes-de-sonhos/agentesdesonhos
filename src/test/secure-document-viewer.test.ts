@@ -1,3 +1,10 @@
+vi.mock("@/lib/secureVoucher", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/secureVoucher")>();
+  return { ...actual, getPublicVoucherUrl: vi.fn(async () => "https://proj.supabase.co/signed/legacy.pdf") };
+});
+
+import { getPublicVoucherUrl } from "@/lib/secureVoucher";
+
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   fetchSecureDocument,
@@ -91,8 +98,34 @@ describe("fetchSecureDocument", () => {
   it("sem shareToken não monta URL e falha amigavelmente", async () => {
     mockFetch(new Blob(["x"]), { status: 200 });
     await expect(
-      fetchSecureDocument({ ...source, shareToken: undefined }),
+      fetchSecureDocument({ ...source, shareToken: undefined, slug: undefined, password: undefined }),
     ).rejects.toThrow(SECURE_DOCUMENT_ERROR);
+  });
+
+  it("acesso público por shareToken usa o proxy serve-voucher (caminho rápido)", async () => {
+    const spy = mockFetch(new Blob(["%PDF"], { type: "application/pdf" }), { status: 200 });
+    await fetchSecureDocument(source);
+    expect(String((spy.mock.calls[0] as unknown[])[0])).toContain("serve-voucher");
+    expect(getPublicVoucherUrl).not.toHaveBeenCalled();
+  });
+
+  it("fallback slug/senha usa URL assinada apenas internamente", async () => {
+    const spy = mockFetch(new Blob(["%PDF"], { type: "application/pdf" }), { status: 200 });
+    const doc = await fetchSecureDocument({
+      filePath: "user-1/voucher.pdf",
+      fileName: "voucher.pdf",
+      mode: "public",
+      slug: "minha-agencia",
+      password: "1234",
+    });
+    expect(getPublicVoucherUrl).toHaveBeenCalledWith("user-1/voucher.pdf", {
+      slug: "minha-agencia",
+      share_token: undefined,
+      password: "1234",
+    });
+    expect(String((spy.mock.calls[0] as unknown[])[0])).toContain("/signed/legacy.pdf");
+    // a URL assinada nunca é exposta para navegação
+    expect(doc.objectUrl.startsWith("blob:")).toBe(true);
   });
 });
 
