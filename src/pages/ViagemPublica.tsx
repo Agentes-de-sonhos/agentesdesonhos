@@ -77,7 +77,7 @@ function TripCoverHero({
   const { photoUrl } = useDestinationCoverPhoto({ destination, enabled: !coverUrl });
   const photo = coverUrl || photoUrl || null;
   return (
-    <div className="relative w-full overflow-hidden rounded-b-2xl bg-muted aspect-[16/11] sm:aspect-[21/9]">
+    <div className="relative w-full overflow-hidden rounded-b-2xl md:rounded-2xl bg-muted aspect-[16/11] sm:aspect-[21/9] md:shadow-sm">
       {photo ? (
         <img
           src={photo}
