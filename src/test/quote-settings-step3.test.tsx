@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
 import { QuoteSettingsModal } from "@/components/quote/QuoteSettingsModal";
@@ -74,28 +74,30 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
     });
   });
 
-  it("marca aria-current no passo atual e conclui/pendente conforme a posição", () => {
+  it("marca aria-current no passo atual e conclui/pendente conforme a posição", async () => {
     renderModal();
     const destino = screen.getByRole("button", { name: /Destino/ });
     expect(destino.getAttribute("aria-current")).toBe("step");
     expect(screen.getByRole("button", { name: /Documentos/ }).getAttribute("aria-current")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: /Investimento/ }));
-    expect(screen.getByRole("button", { name: /Investimento/ }).getAttribute("aria-current")).toBe("step");
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Investimento/ }).getAttribute("aria-current")).toBe("step"),
+    );
     // passos anteriores ficam concluídos (check em vez de número)
     expect(screen.getByRole("button", { name: /Destino/ }).textContent).not.toContain("1");
     expect(screen.getByText("conteudo-investimento")).toBeTruthy();
   });
 
-  it("navega por Voltar, Avançar e mostra Concluir no último passo", () => {
+  it("navega por Voltar, Avançar e mostra Concluir no último passo", async () => {
     renderModal();
     expect(screen.getByRole("button", { name: /Voltar/ }).hasAttribute("disabled")).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: /Avançar/ }));
-    expect(screen.getByText("conteudo-incluso")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("conteudo-incluso")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: /Voltar/ }));
-    expect(screen.getByText("conteudo-destino")).toBeTruthy();
+    await waitFor(() => expect(screen.getByText("conteudo-destino")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: /Avançado/ }));
-    expect(screen.getByRole("button", { name: "Concluir" })).toBeTruthy();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Concluir" })).toBeTruthy());
     expect(screen.queryByRole("button", { name: /Avançar/ })).toBeNull();
   });
 
@@ -105,11 +107,11 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
     expect(nav.className).toContain("overflow-x-auto");
   });
 
-  it("renderiza a ação de cabeçalho apenas no passo correspondente", () => {
+  it("renderiza a ação de cabeçalho apenas no passo correspondente", async () => {
     renderModal({ stepHeaderActions: { destination: <button type="button">switch-destino</button> } });
     expect(screen.getByRole("button", { name: "switch-destino" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Documentos/ }));
-    expect(screen.queryByRole("button", { name: "switch-destino" })).toBeNull();
+    await waitFor(() => expect(screen.queryByRole("button", { name: "switch-destino" })).toBeNull());
   });
 });
 
