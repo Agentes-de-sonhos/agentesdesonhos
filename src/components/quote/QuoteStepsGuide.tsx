@@ -94,7 +94,7 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
                 </p>
 
                 <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <li className="flex items-start gap-2.5 rounded-lg bg-background/60 p-2.5">
+                  <li className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-muted/30 p-2.5">
                     <Globe className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0">
                       <span className="block text-xs font-medium text-foreground">
@@ -105,7 +105,7 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
                       </span>
                     </div>
                   </li>
-                  <li className="flex items-start gap-2.5 rounded-lg bg-background/60 p-2.5">
+                  <li className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-muted/30 p-2.5">
                     <Share2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0">
                       <span className="block text-xs font-medium text-foreground">
@@ -116,7 +116,7 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
                       </span>
                     </div>
                   </li>
-                  <li className="flex items-start gap-2.5 rounded-lg bg-background/60 p-2.5">
+                  <li className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-muted/30 p-2.5">
                     <FileText className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0">
                       <span className="block text-xs font-medium text-foreground">
