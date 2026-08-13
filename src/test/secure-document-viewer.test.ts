@@ -39,6 +39,7 @@ function mockFetch(body: BodyInit, init?: ResponseInit) {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
   created.length = 0;
   revoked.length = 0;
   mockBlobUrls();
