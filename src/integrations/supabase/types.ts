@@ -15045,6 +15045,16 @@ export type Database = {
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
       get_agency_domain: { Args: { p_hostname: string }; Returns: Json }
+      get_agency_signature_base: {
+        Args: { _agency_id: string }
+        Returns: {
+          avatar_url: string
+          email: string
+          name: string
+          phone: string
+          user_id: string
+        }[]
+      }
       get_agency_slug_for_user: { Args: { p_user_id: string }; Returns: string }
       get_agency_wallet_settings: {
         Args: { _user_id: string }
