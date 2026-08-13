@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { SecureFileLink } from "@/components/trip/SecureFileLink";
+import { SecureDocumentViewer } from "@/components/wallet/SecureDocumentViewer";
+import { useSecureDocument } from "@/hooks/useSecureDocument";
+import { toast } from "sonner";
+import type { SecureDocumentSource } from "@/lib/secureDocumentFetch";
 import {
   collectServiceDocuments,
   type ServiceDocument,
@@ -48,21 +51,19 @@ const INITIAL_LIMIT = 3;
 function DocumentRow({
   doc,
   access,
+  onOpen,
+  onDownload,
+  downloading,
 }: {
   doc: ServiceDocument;
   access: ServiceDocumentsAccess;
+  onOpen: (doc: ServiceDocument) => void;
+  onDownload: (doc: ServiceDocument) => void;
+  downloading: boolean;
 }) {
   const Icon = KIND_ICON[doc.kind];
   const meta = [doc.ext, doc.size].filter(Boolean).join(" · ");
-  const linkProps =
-    access.mode === "public"
-      ? ({
-          mode: "public" as const,
-          slug: access.slug,
-          shareToken: access.shareToken,
-          password: access.password,
-        })
-      : ({ mode: "authenticated" as const });
+  void access;
 
   return (
     <li className="flex flex-col gap-2 rounded-xl bg-background/70 p-3 ring-1 ring-border/50 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -86,10 +87,9 @@ function DocumentRow({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <SecureFileLink
-          {...linkProps}
-          filePath={doc.path}
-          fileName={doc.name}
+        <button
+          type="button"
+          onClick={() => onOpen(doc)}
           ariaLabel={`Abrir arquivo ${doc.name}`}
           className={cn(
             "inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary/10 px-3.5 text-[12px] font-semibold text-primary",
@@ -98,20 +98,19 @@ function DocumentRow({
         >
           <Eye className="h-3.5 w-3.5" aria-hidden />
           Abrir arquivo
-        </SecureFileLink>
-        <SecureFileLink
-          {...linkProps}
-          filePath={doc.path}
-          fileName={doc.name}
-          download
-          ariaLabel={`Baixar arquivo ${doc.name}`}
+        </button>
+        <button
+          type="button"
+          onClick={() => onDownload(doc)}
+          disabled={downloading}
+          aria-label={`Baixar arquivo ${doc.name}`}
           className={cn(
             "inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground ring-1 ring-border/60",
-            "transition-colors hover:text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "transition-colors hover:text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
           )}
         >
           <Download className="h-3.5 w-3.5" aria-hidden />
-        </SecureFileLink>
+        </button>
       </div>
     </li>
   );
