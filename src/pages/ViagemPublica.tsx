@@ -2200,9 +2200,9 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         </div>
       </header>
 
-      <div className="container max-w-5xl mx-auto px-4 pt-0 pb-6 space-y-6">
+      <div className="container max-w-5xl md:max-w-6xl mx-auto px-4 md:px-8 pt-0 md:pt-6 pb-6 space-y-6">
         {/* Full-width cover hero — escapes the container padding so the image touches the sides */}
-        <div className="-mx-4">
+        <div className="-mx-4 md:mx-0">
           <TripCoverHero
             title={(tripData as any).trip_title || tripData.destination || "Sua Viagem"}
             destination={tripData.destination}
