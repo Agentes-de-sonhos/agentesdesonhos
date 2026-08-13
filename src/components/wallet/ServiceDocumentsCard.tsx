@@ -50,20 +50,17 @@ const INITIAL_LIMIT = 3;
 
 function DocumentRow({
   doc,
-  access,
   onOpen,
   onDownload,
   downloading,
 }: {
   doc: ServiceDocument;
-  access: ServiceDocumentsAccess;
   onOpen: (doc: ServiceDocument) => void;
   onDownload: (doc: ServiceDocument) => void;
   downloading: boolean;
 }) {
   const Icon = KIND_ICON[doc.kind];
   const meta = [doc.ext, doc.size].filter(Boolean).join(" · ");
-  void access;
 
   return (
     <li className="flex flex-col gap-2 rounded-xl bg-background/70 p-3 ring-1 ring-border/50 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
