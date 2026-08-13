@@ -52,13 +52,36 @@ describe("QuoteShareBar — estado com URL pública", () => {
     expect(onGeneratePDF).toHaveBeenCalledTimes(1);
   });
 
-  it("não cria rolagem horizontal: URL usa quebra segura e faixa com min-w-0", () => {
+  it("URL em uma única linha com truncate e sem regras de quebra", () => {
     renderBar();
     const url = screen.getByText(publicUrl);
-    expect(url.className).toContain("break-all");
+    expect(url.className).toContain("truncate");
+    expect(url.className).toContain("whitespace-nowrap");
     expect(url.className).toContain("min-w-0");
-    expect(url.parentElement?.className).toContain("min-w-0");
-    expect(url.parentElement?.parentElement?.className).toContain("flex-wrap");
+    expect(url.className).not.toContain("break-all");
+    expect(url.className).not.toContain("anywhere");
+    expect(url.getAttribute("title")).toBe(publicUrl);
+  });
+
+  it("campo da URL tem fundo branco, min-w-0 e contém o botão de copiar (sem botão externo)", () => {
+    renderBar();
+    const url = screen.getByText(publicUrl);
+    const field = url.parentElement!;
+    expect(field.className).toContain("bg-background");
+    expect(field.className).not.toContain("bg-muted");
+    expect(field.className).toContain("min-w-0");
+    expect(field.className).toContain("overflow-hidden");
+    const copyBtn = screen.getByRole("button", { name: "Copiar link do orçamento" });
+    expect(field.contains(copyBtn)).toBe(true);
+    expect(copyBtn.className).toContain("border-l");
+    expect(field.parentElement?.className).toContain("flex-wrap");
+  });
+
+  it("Gerar orçamento PDF usa estilo primário azul (não outline)", () => {
+    renderBar();
+    const pdf = screen.getByRole("button", { name: /Gerar orçamento PDF/i });
+    expect(pdf.className).toContain("bg-primary");
+    expect(pdf.className).not.toContain("border-input");
   });
 });
 
