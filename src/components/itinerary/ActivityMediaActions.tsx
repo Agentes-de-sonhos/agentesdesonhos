@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
+import { MediaOverlayActions, MediaOverlayButton } from "@/components/shared/MediaOverlayActions";
 
 interface Props {
   itineraryId?: string;
@@ -181,52 +182,37 @@ export function ActivityPhotoEditor({
           </div>
         )}
 
-        {/* Overlay actions */}
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0 flex items-end justify-center gap-1 p-1",
-            "bg-gradient-to-t from-black/55 via-black/10 to-transparent",
-            // Always visible on touch; hover-only on desktop
-            "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity",
-          )}
-        >
+        {/* Overlay actions (shared primitive, also used by the quote destination gallery) */}
+        <MediaOverlayActions align="center" className="p-1">
           {hasPhoto && (
-            <button
-              type="button"
-              title="Excluir foto"
-              aria-label="Excluir foto"
+            <MediaOverlayButton
+              label="Excluir foto"
               onClick={handleRemovePhoto}
               disabled={!activityId}
-              className="pointer-events-auto h-6 w-6 inline-flex items-center justify-center rounded-md bg-background/90 text-destructive shadow-sm hover:bg-background"
+              destructive
             >
               <Trash2 className="h-3 w-3" />
-            </button>
+            </MediaOverlayButton>
           )}
-          <button
-            type="button"
-            title="Buscar foto na internet"
-            aria-label="Buscar foto na internet"
+          <MediaOverlayButton
+            label="Buscar foto na internet"
             onClick={() => setPickerOpen(true)}
             disabled={!activityId}
-            className="pointer-events-auto h-6 w-6 inline-flex items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm hover:bg-background"
           >
             <Globe2 className="h-3 w-3" />
-          </button>
-          <button
-            type="button"
-            title={hasPhoto ? "Trocar foto" : "Enviar foto"}
-            aria-label={hasPhoto ? "Trocar foto" : "Enviar foto"}
+          </MediaOverlayButton>
+          <MediaOverlayButton
+            label={hasPhoto ? "Trocar foto" : "Enviar foto"}
             onClick={() => photoInputRef.current?.click()}
             disabled={uploadingPhoto || !activityId}
-            className="pointer-events-auto h-6 w-6 inline-flex items-center justify-center rounded-md bg-background/90 text-foreground shadow-sm hover:bg-background"
           >
             {uploadingPhoto ? (
               <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
               <Upload className="h-3 w-3" />
             )}
-          </button>
-        </div>
+          </MediaOverlayButton>
+        </MediaOverlayActions>
       </div>
 
       <InternetPhotoPickerDialog
