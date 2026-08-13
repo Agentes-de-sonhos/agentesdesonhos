@@ -81,7 +81,7 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
 
               <section
                 aria-labelledby="quote-after-steps-title"
-                className="rounded-xl border border-primary/10 bg-primary/5 p-3 sm:p-4"
+                className="rounded-xl border border-primary/30 bg-background p-3 sm:p-4"
               >
                 <h3
                   id="quote-after-steps-title"
