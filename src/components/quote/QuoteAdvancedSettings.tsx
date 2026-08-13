@@ -65,8 +65,8 @@ export function QuoteAdvancedSettings({ quote, onUpdated }: Props) {
   const showRate = showConversion && mode === "conversion";
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-xl border bg-muted/20 p-4 space-y-1">
+    <section className="rounded-xl border bg-card p-4 shadow-sm space-y-5">
+      <div className="space-y-1">
         <p className="text-sm font-semibold">Moeda do orçamento</p>
         <p className="text-xs text-muted-foreground">
           Altere a moeda a qualquer momento. Os valores cadastrados nos serviços não são modificados —
@@ -161,13 +161,13 @@ export function QuoteAdvancedSettings({ quote, onUpdated }: Props) {
         </div>
       )}
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 border-t pt-3">
         <Badge variant="secondary" className="text-xs">
           {CURRENCY_OPTIONS.find((c) => c.value === currency)?.flag}{" "}
           {mode === "fixed" || currency === "BRL" ? "Moeda fixa" : "Conversão ativa"} — {getCurrencySymbol(currency)}
         </Badge>
         {saving && <span className="text-xs text-muted-foreground">Salvando…</span>}
       </div>
-    </div>
+    </section>
   );
 }
