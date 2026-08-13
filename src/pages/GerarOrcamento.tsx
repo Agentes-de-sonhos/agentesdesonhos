@@ -52,7 +52,7 @@ import { QuoteStepsGuide, type QuoteStepMeta } from "@/components/quote/QuoteSte
 const QUOTE_STEPS: QuoteStepMeta[] = [
   { step: 1, short: "Adicionar serviços", hint: "Inclua passagens, hospedagens e os demais itens da viagem.", accentClass: "bg-sky-500" },
   { step: 2, short: "Organizar serviços", hint: "Revise, edite e agrupe os serviços por destino ou seção.", accentClass: "bg-emerald-500" },
-  { step: 3, short: "Configurar apresentação", hint: "Defina capa, detalhes, valores, condições e documentos.", accentClass: "bg-violet-500" },
+  { step: 3, short: "Configurar cotação", hint: "Defina capa, detalhes, valores, condições e documentos.", accentClass: "bg-violet-500" },
   { step: 4, short: "Revisar orçamento", hint: "Confira cliente, viagem, passageiros, destino, datas e total.", accentClass: "bg-amber-500" },
   { step: 5, short: "Escolher assinatura", hint: "Selecione o responsável que aparecerá no orçamento.", accentClass: "bg-sky-600" },
 ];

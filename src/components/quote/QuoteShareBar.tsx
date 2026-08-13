@@ -70,7 +70,11 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
   return (
     <TooltipProvider delayDuration={150}>
       <div className={"flex w-full min-w-0 flex-wrap items-center gap-2 " + (className || "")}>
-        <Button size="sm" className="shrink-0" onClick={handleOpenDialog}>
+        <Button
+          size="sm"
+          onClick={handleOpenDialog}
+          className="shrink-0 bg-[#25D366] text-white shadow-sm shadow-[#25D366]/30 hover:bg-[#1fb857]"
+        >
           <MessageCircle className="mr-1.5 h-4 w-4" />
           Criar mensagem
         </Button>
