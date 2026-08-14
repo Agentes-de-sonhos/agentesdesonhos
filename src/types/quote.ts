@@ -8,6 +8,10 @@ export interface Quote {
   start_date: string;
   end_date: string;
   total_amount: number;
+  /** Modo de cálculo do total: soma dos serviços (padrão) ou valor fechado do pacote. */
+  pricing_mode?: import("@/lib/quotePricing").QuotePricingMode;
+  /** Valor fechado do pacote (usado quando `pricing_mode === 'package'`). */
+  package_total_amount?: number | null;
   status: 'draft' | 'published';
   share_token: string | null;
   show_detailed_prices: boolean;

@@ -15,6 +15,7 @@ import { QuoteDateEditor } from "./QuoteDateEditor";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import type { Quote } from "@/types/quote";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencyFlag } from "@/lib/quoteCurrency";
+import { getEffectiveQuoteTotal } from "@/lib/quotePricing";
 
 function parseLocalDate(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -91,10 +92,8 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const displayEnd = parseLocalDate(quote.end_date);
   const days = Math.ceil((displayEnd.getTime() - displayStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  // Compute total from services to ensure accuracy
-  const computedTotal = quote.services && quote.services.length > 0
-    ? quote.services.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
-    : quote.total_amount;
+  // Total efetivo: soma dos serviços ou valor fechado do pacote.
+  const computedTotal = getEffectiveQuoteTotal(quote, quote.services);
 
   return (
     <div className="space-y-4">

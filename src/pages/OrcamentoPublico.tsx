@@ -39,6 +39,11 @@ import {
   ENTRY_EXTRA_TYPE_LABELS,
   type QuoteEntryExtra,
 } from "@/lib/quoteEntryExtras";
+import {
+  getEffectiveQuoteTotal,
+  isPackagePricing,
+  PACKAGE_INCLUDED_LABEL,
+} from "@/lib/quotePricing";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -728,6 +733,12 @@ function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote 
  */
 function ServiceInvestmentInline({ service, quote }: { service: QuoteService; quote?: Quote }) {
   const amount = Number(service.amount) || 0;
+  // Valor fechado de pacote: nenhum valor individual é exibido ao cliente.
+  if (quote && isPackagePricing(quote)) {
+    return (
+      <p className="text-xs font-medium text-muted-foreground">{PACKAGE_INCLUDED_LABEL}</p>
+    );
+  }
   if (amount <= 0) return null;
 
   const fmt = (v: number) => formatCurrency(v);
@@ -1224,7 +1235,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const { currency: qCurrency } = getQuoteCurrencyInfo(quote);
   quoteCurrency = qCurrency;
 
-  const showDetailedPrices = (quote as any).show_detailed_prices !== false;
+  // No modo pacote nenhum valor individual é exibido, independentemente da configuração.
+  const showDetailedPrices = (quote as any).show_detailed_prices !== false && !isPackagePricing(quote);
   const paymentTerms = (quote as any).payment_terms as string | null;
   const validUntil = (quote as any).valid_until as string | null;
   const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
@@ -1286,9 +1298,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const heroImage = introImages[0] || resolvedHeroFallback || null;
   const tripTitle = (quote as any).trip_title as string | undefined;
 
-  const totalForBar = quote.services && quote.services.length > 0
-    ? quote.services.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
-    : quote.total_amount;
+  const totalForBar = getEffectiveQuoteTotal(quote, quote.services);
 
   // Highlights: custom edited list (if any) or auto-generated from services.
   const svcTypes = new Set((quote.services || []).map(s => s.service_type));

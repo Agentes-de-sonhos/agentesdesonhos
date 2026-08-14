@@ -10988,9 +10988,11 @@ export type Database = {
           installments_count: number | null
           investment_summary_layout: string | null
           opportunity_id: string | null
+          package_total_amount: number | null
           payment_display_mode: string
           payment_method_label: string | null
           payment_terms: string | null
+          pricing_mode: string
           public_access_code: string | null
           share_expires_at: string | null
           share_token: string | null
@@ -11032,9 +11034,11 @@ export type Database = {
           installments_count?: number | null
           investment_summary_layout?: string | null
           opportunity_id?: string | null
+          package_total_amount?: number | null
           payment_display_mode?: string
           payment_method_label?: string | null
           payment_terms?: string | null
+          pricing_mode?: string
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null
@@ -11076,9 +11080,11 @@ export type Database = {
           installments_count?: number | null
           investment_summary_layout?: string | null
           opportunity_id?: string | null
+          package_total_amount?: number | null
           payment_display_mode?: string
           payment_method_label?: string | null
           payment_terms?: string | null
+          pricing_mode?: string
           public_access_code?: string | null
           share_expires_at?: string | null
           share_token?: string | null

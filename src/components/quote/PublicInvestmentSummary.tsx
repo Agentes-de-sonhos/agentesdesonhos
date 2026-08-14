@@ -10,6 +10,11 @@ import { cn } from "@/lib/utils";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { parsePaymentMethods } from "@/lib/paymentMethods";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
+import {
+  getEffectiveQuoteTotal,
+  isPackagePricing,
+  PACKAGE_TOTAL_LABEL,
+} from "@/lib/quotePricing";
 
 /** Formatação na moeda do orçamento. */
 function makeFmt(currency: QuoteCurrency) {
@@ -182,12 +187,29 @@ export function PublicInvestmentSummary({
 }: PublicInvestmentSummaryProps) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = useMemo(() => makeFmt(currency), [currency]);
+  const packageMode = isPackagePricing(quote);
   const totalAll = useMemo(
-    () => services.reduce((s, x) => s + (Number(x.amount) || 0), 0),
-    [services],
+    () => getEffectiveQuoteTotal(quote, services),
+    [quote, services],
   );
 
   const items: GroupItem[] = useMemo(() => {
+    // Valor fechado de pacote: um único bloco financeiro, sem valores por serviço.
+    if (packageMode) {
+      return [
+        {
+          key: "package-total",
+          type: "other" as ServiceType,
+          title: "Pacote completo",
+          subtitle: services.length > 0
+            ? `${services.length} ${services.length === 1 ? "serviço incluído" : "serviços incluídos"}`
+            : undefined,
+          total: totalAll,
+          payment: buildPaymentInfo({} as any, globalPayment, false, fmt),
+          count: services.length || 1,
+        },
+      ];
+    }
     if (groupingMode === "ungrouped") {
       return services.map((s) => {
         const payment = buildPaymentInfo(s, globalPayment, useServicePayment, fmt);
@@ -229,9 +251,9 @@ export function PublicInvestmentSummary({
       }
     }
     return Array.from(buckets.values());
-  }, [services, groupingMode, globalPayment, useServicePayment, fmt]);
+  }, [services, groupingMode, globalPayment, useServicePayment, fmt, packageMode, totalAll]);
 
-  const showTotalCard = displayMode === "both";
+  const showTotalCard = displayMode === "both" || (packageMode && displayMode !== "detailed");
 
   const methodsForFooter = parsePaymentMethods(globalPayment.methodLabel);
   const hasFooter = methodsForFooter.length > 0 || !!paymentTerms;
@@ -242,7 +264,9 @@ export function PublicInvestmentSummary({
 
   const discountPct = globalPayment.fullPaymentDiscountPercent || 0;
   const totalAVista = discountPct > 0 ? totalAll * (1 - discountPct / 100) : null;
-  const totalLabel = hideServiceList
+  const totalLabel = packageMode
+    ? "Este orçamento é apresentado com valor fechado de pacote: um único valor cobre todos os serviços incluídos."
+    : hideServiceList
     ? "As condições de pagamento de cada serviço estão detalhadas no card correspondente acima."
     : groupingMode === "grouped"
     ? "Veja abaixo o investimento detalhado por tipo de serviço e as condições de pagamento da sua viagem."
@@ -273,7 +297,9 @@ export function PublicInvestmentSummary({
           const Icon = SERVICE_ICON[item.type] || Sparkles;
           const rows = item.payment.render(item.total);
           const totalLabelText =
-            groupingMode === "grouped"
+            packageMode
+              ? PACKAGE_TOTAL_LABEL
+              : groupingMode === "grouped"
               ? (GROUP_TOTAL_LABEL[item.type] || "Total dos Serviços")
               : "Total do serviço";
 
@@ -361,7 +387,7 @@ export function PublicInvestmentSummary({
             <div className="mt-5 w-full flex justify-center">
               <div className="inline-block rounded-2xl bg-white border border-primary/20 shadow-sm px-8 sm:px-14 py-5 sm:py-6 text-center">
                 <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                  Valor total
+                  {packageMode ? PACKAGE_TOTAL_LABEL : "Valor total"}
                 </p>
                 <p className={cn("mt-1 text-[1.75rem] sm:text-[2.5rem] font-bold tracking-tight leading-tight", VALUE_PRIMARY)}>
                   {fmt(totalAll)}
