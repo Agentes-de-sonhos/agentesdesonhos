@@ -32,6 +32,8 @@ import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/Tr
 import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { TripConverters } from "@/components/trip/TripConverters";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
+import { useResolvedServiceImage } from "@/components/shared/ResolvedServiceImage";
+import { resolveServicePlaceId } from "@/lib/serviceImages";
 import { useTripWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
@@ -723,11 +725,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {(() => {
           const urls = (service.image_urls && service.image_urls.length > 0)
             ? service.image_urls
-            : (service.image_url && /^https?:\/\//i.test(service.image_url) ? [service.image_url] : []);
+            : (service.image_url && /^(https?:\/\/|gplace:\/\/)/i.test(service.image_url) ? [service.image_url] : []);
           if (urls.length === 0) return null;
           return (
             <div className="mb-4 -mx-1 overflow-hidden rounded-xl">
-              <ServiceImageCarousel images={urls} alt={title} placeId={(service as any)?.service_data?.place_id ?? null} />
+              <ServiceImageCarousel images={urls} alt={title} placeId={resolveServicePlaceId(service)} />
             </div>
           );
         })()}
