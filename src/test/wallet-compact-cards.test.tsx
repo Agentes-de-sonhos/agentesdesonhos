@@ -58,7 +58,23 @@ describe("formatFriendlyDateRange", () => {
     expect(formatFriendlyDateRange("", "")).toBeNull();
     expect(formatFriendlyDateRange(null, undefined)).toBeNull();
     expect(formatFriendlyDate("banana")).toBeNull();
-    expect(formatFriendlyDateRange("2026-13-40")).not.toBe("");
+  });
+  it("datas impossíveis são rejeitadas (sem normalização silenciosa)", () => {
+    expect(formatFriendlyDate("2026-13-40")).toBeNull();
+    expect(formatFriendlyDateRange("2026-13-40")).toBeNull();
+    expect(formatFriendlyDate("2026-00-10")).toBeNull();
+    expect(formatFriendlyDate("2026-08-00")).toBeNull();
+    expect(formatFriendlyDate("2026-08-32")).toBeNull();
+    expect(formatFriendlyDate("2026-02-31")).toBeNull();
+    expect(formatFriendlyDate("2026-02-29")).toBeNull();
+    expect(formatFriendlyDate("31/02/2026")).toBeNull();
+    expect(formatFriendlyDate("2026-8-1")).toBeNull();
+    expect(formatFriendlyDate("20260801")).toBeNull();
+  });
+  it("ano bissexto e timestamp ISO continuam válidos", () => {
+    expect(formatFriendlyDate("2028-02-29")).toBe("29 de fevereiro de 2028");
+    expect(formatFriendlyDate("2026-08-17T14:30:00Z")).toBe("17 de agosto de 2026");
+    expect(formatFriendlyDate("17/08/2026")).toBe("17 de agosto de 2026");
   });
   it("não desloca timezone (YYYY-MM-DD local)", () => {
     expect(formatFriendlyDate("2026-07-01")).toBe("1 de julho de 2026");
@@ -312,6 +328,20 @@ describe("anexos — fonte única e texto correto", () => {
     expect(collectServiceDocuments(dupService)).toHaveLength(1);
     expect(countServiceFiles(dupService)).toBe(1);
     expect(formatFilesCountLabel(countServiceFiles(dupService))).toBe("1 arquivo");
+  });
+
+  it("caminho relativo com prefixo do bucket == URL assinada absoluta => 1 arquivo", () => {
+    const mixed = svc("hotel", { hotel_name: "Hilton" }, {
+      voucher_url: "vouchers/u1/voucher.pdf",
+      attachments: [
+        {
+          url: "https://x.supabase.co/storage/v1/object/sign/vouchers/u1/voucher.pdf?token=abc",
+          name: "Voucher.pdf",
+        },
+      ],
+    } as any);
+    expect(collectServiceDocuments(mixed)).toHaveLength(1);
+    expect(formatFilesCountLabel(countServiceFiles(mixed))).toBe("1 arquivo");
   });
 
   it("dois caminhos distintos => 2 arquivos", () => {

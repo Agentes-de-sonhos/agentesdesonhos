@@ -65,17 +65,60 @@ export function formatDocumentSize(bytes: unknown): string | null {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Chave de deduplicação: ignora querystring/assinatura e prefixo de bucket. */
-function dedupeKey(pathOrUrl: string): string {
-  const clean = pathOrUrl.split("?")[0].split("#")[0];
-  const marker = "/vouchers/";
-  const idx = clean.indexOf(marker);
-  const rel = idx !== -1 ? clean.slice(idx + marker.length) : clean;
+function safeDecode(value: string): string {
   try {
-    return decodeURIComponent(rel).replace(/^\/+/, "").toLowerCase();
+    return decodeURIComponent(value);
   } catch {
+    return value;
+  }
+}
+
+/** Buckets conhecidos que podem aparecer como prefixo em caminhos relativos. */
+const KNOWN_BUCKET_PREFIXES = [
+  "vouchers",
+  "traveler-documents",
+  "ticket-attachments",
+  "media-files",
+];
+
+/**
+ * Chave de deduplicação: ignora querystring/assinatura e o prefixo do bucket,
+ * de modo que "vouchers/u1/voucher.pdf" e
+ * ".../storage/v1/object/sign/vouchers/u1/voucher.pdf?token=abc"
+ * gerem a mesma chave — sem colapsar objetos realmente distintos.
+ */
+function dedupeKey(pathOrUrl: string): string {
+  const clean = safeDecode(pathOrUrl.split("?")[0].split("#")[0]).trim();
+  if (!clean) return "";
+
+  // URLs do Storage: /storage/v1/object/{public|sign|authenticated}/<bucket>/<objeto>
+  const storage = clean.match(
+    /\/storage\/v1\/object\/(?:public|sign|authenticated)\/[^/]+\/(.+)$/i,
+  );
+  if (storage) return storage[1].replace(/^\/+/, "").toLowerCase();
+
+  let rel = clean.replace(/^\/+/, "");
+
+  // Caminho relativo com prefixo de bucket conhecido ("vouchers/u1/x.pdf").
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(rel)) {
+    for (const bucket of KNOWN_BUCKET_PREFIXES) {
+      const prefix = `${bucket}/`;
+      if (rel.toLowerCase().startsWith(prefix)) {
+        rel = rel.slice(prefix.length);
+        break;
+      }
+    }
     return rel.replace(/^\/+/, "").toLowerCase();
   }
+
+  // Outras URLs absolutas (compatibilidade): usa o caminho após o bucket
+  // conhecido quando presente, senão a URL inteira sem query.
+  for (const bucket of KNOWN_BUCKET_PREFIXES) {
+    const marker = `/${bucket}/`;
+    const idx = rel.toLowerCase().indexOf(marker);
+    if (idx !== -1) return rel.slice(idx + marker.length).replace(/^\/+/, "").toLowerCase();
+  }
+  return rel.toLowerCase();
 }
 
 interface RawCandidate {
