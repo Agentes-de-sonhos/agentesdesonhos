@@ -32,6 +32,60 @@ function moduleOf(key: string): string {
   return map[head] ?? 'tools'
 }
 
+const INVITE_FROM = 'Agentes de Sonhos <fernando.nobre@agentesdesonhos.com.br>'
+
+/**
+ * Reenvia o e-mail de ativação de um convite pendente. Exige a posse do token
+ * bruto do convite e envia SEMPRE para o e-mail já registrado no convite,
+ * portanto não expõe nenhuma informação nova a quem chama.
+ */
+async function sendInviteEmail(opts: {
+  to: string; name: string | null; agencyName: string; url: string; expiresAt: string
+}): Promise<boolean> {
+  const key = Deno.env.get('RESEND_API_KEY')
+  if (!key) return false
+  const validade = new Date(opts.expiresAt).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+  const html = `
+    <div style="font-family:Inter,Arial,sans-serif;max-width:520px;margin:0 auto;color:#111">
+      <h2 style="font-size:20px;margin:0 0 12px">Ative o seu acesso à equipe de ${opts.agencyName}</h2>
+      <p style="font-size:14px;line-height:1.6">Olá${opts.name ? ` ${opts.name}` : ''}, use o link abaixo para criar a sua senha e ativar o seu acesso.
+      Você mesma definirá a senha — nenhuma senha é enviada por e-mail.</p>
+      <p style="margin:24px 0"><a href="${opts.url}"
+        style="background:#111;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-size:14px">
+        Criar minha senha</a></p>
+      <p style="font-size:12px;color:#666">Este link é de uso único e válido até ${validade}. Se você não esperava esta mensagem, ignore-a.</p>
+    </div>`
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: INVITE_FROM, to: [opts.to],
+        subject: `Ative o seu acesso — equipe de ${opts.agencyName}`,
+        html,
+      }),
+    })
+    if (!res.ok) console.error('resend error', res.status, await res.text())
+    return res.ok
+  } catch (e) {
+    console.error('invite email error', e)
+    return false
+  }
+}
+
+function moduleOfUnused(key: string): string {
+  const head = key.split('.')[0]
+  const map: Record<string, string> = {
+    dashboard: 'dashboard', clients: 'clients', opportunities: 'opportunities', operations: 'operations',
+    sales: 'sales', quotes: 'quotes', itineraries: 'itineraries', wallet: 'wallet',
+    agenda: 'agenda', tasks: 'agenda', trips: 'agenda', financial: 'financial', marketing: 'marketing',
+    academy: 'education', courses: 'education', mentorships: 'education', community: 'community',
+    chat: 'community', online_users: 'community', settings: 'settings', account: 'settings',
+    subscription: 'settings', integrations: 'settings', team: 'settings', audit: 'settings',
+  }
+  return map[head] ?? 'tools'
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
