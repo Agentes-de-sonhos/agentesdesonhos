@@ -530,6 +530,75 @@ Deno.serve(async (req) => {
       return json({ ok: true, invite_url: inviteUrl, emailed })
     }
 
+    /**
+     * Convite de ativação/redefinição para colaborador LEGADO que existe em
+     * agency_team_members mas nunca ganhou auth user sintético. Reutiliza o
+     * MESMO registro do colaborador (member_id no convite), sem consumir nova
+     * vaga e sem alterar perfil de acesso, permissões, scopes ou status.
+     */
+    if (action === 'member_activation_invite') {
+      const { id } = body
+      const { data: member } = await admin.from('agency_team_members')
+        .select('id, agency_id, full_name, login, login_normalized, email, role_title, department, team_name, access_profile_id, auth_user_id, synthetic_email, status')
+        .eq('id', String(id ?? '')).maybeSingle()
+      if (!member || member.agency_id !== ownerId) return json({ error: 'Acesso negado' }, 403)
+      { const deny = await assertTargetAllowed(member.id); if (deny) return json({ error: deny }, 403) }
+      if (member.auth_user_id || member.synthetic_email) {
+        return json({ error: 'Este colaborador já possui acesso criado.' }, 400)
+      }
+
+      const email = (str(body.email, 180) ?? member.email ?? member.login ?? '').toLowerCase()
+      if (!email || !EMAIL_RE.test(email)) {
+        return json({ error: 'Informe um e-mail válido para o envio da ativação.' }, 400)
+      }
+
+      const inviteToken = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+      const token_hash = await sha256(inviteToken)
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+      const { data: existing } = await admin.from('agency_team_invites')
+        .select('id, sent_count').eq('agency_id', ownerId).eq('member_id', member.id)
+        .is('accepted_at', null).order('created_at', { ascending: false }).limit(1).maybeSingle()
+
+      let inviteId = existing?.id ?? null
+      if (existing) {
+        const { error } = await admin.from('agency_team_invites').update({
+          email, full_name: member.full_name, token_hash, expires_at: expiresAt,
+          revoked_at: null, last_sent_at: new Date().toISOString(),
+          sent_count: (existing.sent_count ?? 0) + 1,
+        }).eq('id', existing.id)
+        if (error) return json({ error: error.message }, 400)
+      } else {
+        const { data: inserted, error } = await admin.from('agency_team_invites').insert({
+          agency_id: ownerId, email, full_name: member.full_name,
+          role_title: member.role_title, department: member.department, team_name: member.team_name,
+          access_profile_id: member.access_profile_id,
+          permission_keys: [], scopes: {},
+          member_id: member.id, token_hash, expires_at: expiresAt,
+          invited_by: ownerId, last_sent_at: new Date().toISOString(),
+        }).select('id').single()
+        if (error) {
+          if (error.code === '23505' || error.message.includes('uq_team_invite_open')) {
+            return json({ error: 'Já existe um convite em aberto para este e-mail.' }, 400)
+          }
+          return json({ error: error.message }, 400)
+        }
+        inviteId = inserted?.id ?? null
+      }
+
+      const origin = str(body.origin, 200) ?? 'https://app.agentesdesonhos.com.br'
+      const inviteUrl = `${origin}/convite/${inviteToken}`
+      const emailed = await sendInviteEmail({
+        to: email, name: str(body.display_name, 120) ?? member.full_name,
+        agencyName, url: inviteUrl, expiresAt,
+      })
+      await audit({
+        action: 'member_activation_invite', entityType: 'team_invite', entityId: inviteId,
+        teamMemberId: member.id, subject: member.full_name, details: { email, emailed },
+      })
+      return json({ ok: true, invite_id: inviteId, invite_url: inviteUrl, emailed })
+    }
+
     if (action === 'invite_revoke' || action === 'invite_resend') {
       const { id } = body
       const { data: invite } = await admin.from('agency_team_invites')
