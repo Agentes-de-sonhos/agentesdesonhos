@@ -370,6 +370,19 @@ const SERVICE_ICONS: Record<TripServiceType, any> = {
 };
 
 /**
+ * Responsive grid class for the Digital Wallet quick-navigation shortcuts.
+ * Keeps the layout balanced for 1–4 shortcuts and caps the desktop layout
+ * at 5 columns so the 6th item always wraps to the next row.
+ */
+export function getShortcutGridClass(total: number): string {
+  if (total <= 1) return "grid-cols-1";
+  if (total === 2) return "grid-cols-2";
+  if (total === 3) return "grid-cols-3";
+  if (total === 4) return "grid-cols-2 sm:grid-cols-4";
+  return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+}
+
+/**
  * Unified wallet brand palette.
  *
  * All service categories (flight, hotel, insurance, itinerary, etc) share the
