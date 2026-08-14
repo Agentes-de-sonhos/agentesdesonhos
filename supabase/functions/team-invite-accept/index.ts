@@ -96,6 +96,29 @@ Deno.serve(async (req) => {
       })
     }
 
+    /**
+     * Reenvio do e-mail de ativação para o e-mail já registrado no convite.
+     * Requer a posse do token bruto; nada é revelado ao solicitante.
+     */
+    if (mode === 'send') {
+      const { data: agencyProfile } = await admin.from('profiles')
+        .select('agency_name, name').eq('user_id', invite.agency_id).maybeSingle()
+      const agencyName = agencyProfile?.agency_name || agencyProfile?.name || 'sua agência'
+      const origin = typeof (invite as any).origin === 'string' ? '' : ''
+      const url = `https://app.agentesdesonhos.com.br/convite/${token}${origin}`
+      const emailed = await sendInviteEmail({
+        to: invite.email, name: invite.full_name, agencyName,
+        url, expiresAt: invite.expires_at,
+      })
+      if (emailed) {
+        await admin.from('agency_team_invites').update({
+          last_sent_at: new Date().toISOString(),
+          sent_count: (invite.sent_count ?? 0) + 1,
+        }).eq('id', invite.id)
+      }
+      return json({ ok: emailed, emailed })
+    }
+
     if (typeof password !== 'string' || password.length < 6) {
       return json({ error: 'A senha precisa ter ao menos 6 caracteres.' }, 400)
     }
@@ -129,7 +152,6 @@ Deno.serve(async (req) => {
 
       const password_hash = await bcrypt.hash(password, 10)
       const { error: updErr } = await admin.from('agency_team_members').update({
-        full_name: name || member.full_name,
         auth_user_id: created.user.id,
         synthetic_email: email,
         email: member.email ?? invite.email,
