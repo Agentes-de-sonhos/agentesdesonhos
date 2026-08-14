@@ -114,27 +114,26 @@ describe("waitForWindowImages", () => {
   });
 
   it("liquida uma única vez mesmo com load e error, e cobre a corrida com complete", async () => {
-    const maps: Record<string, () => void>[] = [];
-    const mk = (completeAfter: boolean) => {
-      const map: Record<string, () => void> = {};
-      maps.push(map);
-      return {
-        get complete() { return completeAfter; },
-        addEventListener: (ev: string, cb: () => void) => { map[ev] = cb; },
-      };
+    // `racing`: reporta pendente no filtro e concluída na reconferência após
+    // registrar os listeners (corrida real do navegador).
+    let reads = 0;
+    const racing: any = {
+      get complete() { reads += 1; return reads > 1; },
+      addEventListener: () => {},
     };
-    // primeira imagem: pendente no filtro, concluída ao registrar listeners
-    const racing: any = { complete: false, addEventListener: (ev: string, cb: () => void) => { (racing.h ||= {})[ev] = cb; } };
-    const other = mk(false);
+    const otherHandlers: Record<string, () => void> = {};
+    const other: any = {
+      complete: false,
+      addEventListener: (ev: string, cb: () => void) => { otherHandlers[ev] = cb; },
+    };
     const win = { document: { images: [racing, other] } } as any;
     let resolved = false;
     const p = waitForWindowImages(win, 5000).then(() => { resolved = true; });
-    racing.complete = true; // simula conclusão antes do registro
     await Promise.resolve();
-    expect(resolved).toBe(false);
+    expect(resolved).toBe(false); // racing liquidada, `other` ainda pendente
     // load e error na mesma imagem não podem decrementar duas vezes
-    maps[0].load();
-    maps[0].error();
+    otherHandlers.load();
+    otherHandlers.error();
     await p;
     expect(resolved).toBe(true);
   });
