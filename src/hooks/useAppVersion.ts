@@ -121,7 +121,13 @@ export function useAppVersion(): { updateAvailable: boolean; remoteVersion: stri
   useEffect(() => {
     // Skip in development — there is no meaningful version to compare against.
     if (currentVersion === "dev") return;
-    if (isPublicUpdateContext()) return;
+    if (isPublicUpdateContext()) {
+      // Defense in depth: never poll and never keep a pending prompt in a
+      // public / white-label context.
+      setUpdateAvailable(false);
+      setRemoteVersion(null);
+      return;
+    }
 
     stopRef.current = false;
 
