@@ -151,19 +151,25 @@ function WalletCoverPicker({
 }) {
   const [open, setOpen] = useState(false);
   const current: string | null = trip?.wallet_cover_url || null;
-  const serviceCandidates: string[] = (() => {
+  // Candidatos guardam a referência persistida (URL do Storage ou `gplace://`)
+  // junto do place_id do serviço, para que a exibição possa ser resolvida sem
+  // nunca substituir a referência estável que será salva.
+  const serviceCandidates: Array<{ ref: string; placeId: string | null }> = (() => {
     const seen = new Set<string>();
-    const out: string[] = [];
+    const out: Array<{ ref: string; placeId: string | null }> = [];
     for (const s of (trip?.services || []) as TripService[]) {
+      const placeId = resolveServicePlaceId(s);
       const all = [s.image_url, ...((s as any).image_urls || [])].filter(
         (u): u is string => typeof u === "string" && !!u
       );
       for (const u of all) {
-        if (!seen.has(u)) { seen.add(u); out.push(u); }
+        if (!seen.has(u)) { seen.add(u); out.push({ ref: u, placeId }); }
       }
     }
     return out;
   })();
+  const currentPlaceId =
+    serviceCandidates.find((c) => c.ref === current)?.placeId ?? null;
 
   const destinationParts = parseDestinationParts(trip?.destination);
   const initialQuery = destinationParts[0] || trip?.destination || "";
@@ -212,8 +218,9 @@ function WalletCoverPicker({
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-muted-foreground">Foto de capa:</span>
       {current ? (
-        <img
-          src={current}
+        <ResolvedServiceThumb
+          imageRef={current}
+          placeId={currentPlaceId}
           alt="Foto de capa atual"
           className="h-10 w-16 rounded-md object-cover border"
         />
@@ -362,7 +369,7 @@ function WalletCoverPicker({
                 Fotos dos serviços da viagem
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[260px] overflow-y-auto pr-1">
-                {serviceCandidates.map((url) => {
+                {serviceCandidates.map(({ ref: url, placeId }) => {
                   const selected = current === url;
                   return (
                     <button
@@ -374,7 +381,12 @@ function WalletCoverPicker({
                         selected ? "border-primary ring-2 ring-primary" : "hover:opacity-90"
                       )}
                     >
-                      <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <ResolvedServiceThumb
+                        imageRef={url}
+                        placeId={placeId}
+                        alt="Foto de serviço da viagem"
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
                       {selected && (
                         <span className="absolute top-1.5 right-1.5 bg-primary text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center">
                           <Check className="h-3.5 w-3.5" />
