@@ -4,6 +4,87 @@ import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { extractVoucherPath } from "@/lib/secureVoucher";
 import { toast } from "sonner";
+import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@/lib/serviceImages";
+
+/** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
+export type PdfImageResolver = (ref: string) => string | null;
+
+/** Reúne as referências persistidas de imagem do serviço, sem repetição e preservando a ordem. */
+export function collectServiceImageRefs(service: TripService): string[] {
+  const out: string[] = [];
+  const push = (ref?: string | null) => {
+    if (!ref || typeof ref !== "string") return;
+    const v = ref.trim();
+    if (!v || out.includes(v)) return;
+    out.push(v);
+  };
+  (service.image_urls || []).forEach(push);
+  push(service.image_url);
+  return out;
+}
+
+/**
+ * Constrói o mapa `ref -> URL fresca` para todos os serviços, resolvendo apenas
+ * referências do Google (gplace:// e URLs legadas). Nada é copiado/persistido.
+ */
+export async function buildServiceImageResolver(services: TripService[]): Promise<PdfImageResolver> {
+  const imageMap = new Map<string, string>();
+  for (const service of services || []) {
+    const refs = collectServiceImageRefs(service);
+    if (!refs.some(isGoogleImageRef)) continue;
+    try {
+      const resolved = await resolveServiceImages(refs, resolveServicePlaceId(service));
+      resolved.forEach((r) => {
+        if (r.src) imageMap.set(r.ref, r.src);
+      });
+    } catch {
+      /* referências não resolvidas são simplesmente omitidas */
+    }
+  }
+  return (ref: string) => {
+    if (imageMap.has(ref)) return imageMap.get(ref)!;
+    return isGoogleImageRef(ref) ? null : ref || null;
+  };
+}
+
+/**
+ * Aguarda todas as imagens da janela de impressão terminarem (load ou error),
+ * com timeout de segurança. Falhas individuais nunca travam a impressão.
+ */
+export function waitForWindowImages(win: Window, timeoutMs = 8000): Promise<void> {
+  return new Promise<void>((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve();
+    };
+    const timer = setTimeout(finish, timeoutMs);
+    const finishAndClear = () => {
+      clearTimeout(timer);
+      finish();
+    };
+    try {
+      const imgs = Array.from(win.document?.images || []) as HTMLImageElement[];
+      const pending = imgs.filter((img) => !img.complete);
+      if (pending.length === 0) {
+        finishAndClear();
+        return;
+      }
+      let remaining = pending.length;
+      const settle = () => {
+        remaining -= 1;
+        if (remaining <= 0) finishAndClear();
+      };
+      pending.forEach((img) => {
+        img.addEventListener("load", settle, { once: true });
+        img.addEventListener("error", settle, { once: true });
+      });
+    } catch {
+      finishAndClear();
+    }
+  });
+}
 
 export interface VoucherAccessOptions {
   mode: "authenticated" | "public";
