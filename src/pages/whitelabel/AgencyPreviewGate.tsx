@@ -40,9 +40,9 @@ function useNoIndex(title: string) {
 export default function AgencyPreviewGate({ info }: { info: AgencyDomainInfo }) {
   /**
    * Identidade do tenant é SEMPRE o hostname canônico resolvido pelo
-   * AgencyDomainGate (info.hostname) — nunca window.location.hostname, que no
-   * preview técnico é id-preview/localhost. A Origin HTTP continua sendo
-   * tratada apenas pela Edge Function, para CORS.
+   * AgencyDomainGate (info.hostname) — nunca o host da janela, que no preview
+   * técnico é id-preview/localhost. A Origin HTTP continua sendo tratada
+   * apenas pela Edge Function, para CORS.
    */
   const host = normalizeHostname(info.hostname);
   const name = agencyDisplayName(info);
