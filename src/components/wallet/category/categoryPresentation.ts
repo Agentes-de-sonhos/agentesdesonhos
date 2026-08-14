@@ -466,21 +466,17 @@ export function hasAdditionalDetails(s: TripService): boolean {
       if (compactText.includes(asDate.toLowerCase())) return true;
       // Períodos ("17 a 22 de agosto de 2026") cobrem cada data isolada:
       // basta que dia, mês e ano da data crua apareçam no resumo.
-      const [day, month, , year] = asDate.split(" de ").join(" ").split(" ");
-      const parts = asDate.match(/^(\\d{1,2}) de (.+) de (\\d{4})$/);
+      const parts = asDate.match(/^(\d{1,2}) de (.+) de (\d{4})$/);
       if (parts) {
         const [, d, m, y] = parts;
         if (
           compactText.includes(m.toLowerCase()) &&
           compactText.includes(y) &&
-          new RegExp(`(^|[^\\\\d])${d}([^\\\\d]|$)`).test(compactText)
+          new RegExp(`(^|\\D)${d}(\\D|$)`).test(compactText)
         ) {
           return true;
         }
       }
-      void day;
-      void month;
-      void year;
     }
     const asTime = formatFriendlyTime(raw);
     if (asTime && compactText.includes(asTime.toLowerCase())) return true;
