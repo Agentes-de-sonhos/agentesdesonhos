@@ -80,6 +80,9 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
           {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
           {construction && <Route path="/" element={<AgencyUnderConstruction info={info} />} />}
 
+          {/* Preview protegido por senha: tela isolada, sem o chrome do site. */}
+          <Route path="/preview" element={<AgencyPreviewGate info={info} />} />
+
           {/* Todas as demais rotas mantêm o chrome atual do site white label. */}
           <Route
             element={
