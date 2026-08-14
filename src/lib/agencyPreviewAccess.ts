@@ -56,6 +56,33 @@ export function hasPreviewAccess(hostname: string): boolean {
   return valid;
 }
 
+/**
+ * Expiração (epoch ms) do grant válido do tenant, ou null quando não existe /
+ * está expirado / é inválido. Nunca expõe nada além do carimbo de tempo.
+ */
+export function previewGrantExpiresAt(hostname: string, now = Date.now()): number | null {
+  const store = storage();
+  if (!store) return null;
+  const key = previewStorageKey(hostname);
+  const raw = store.getItem(key);
+  if (!isGrantValid(raw, hostname, now)) {
+    if (raw) store.removeItem(key);
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(raw as string) as StoredGrant;
+    return parsed.exp;
+  } catch {
+    return null;
+  }
+}
+
+/** Tempo restante (ms) do grant válido; 0 quando não há autorização vigente. */
+export function previewAccessRemainingMs(hostname: string, now = Date.now()): number {
+  const exp = previewGrantExpiresAt(hostname, now);
+  return exp === null ? 0 : Math.max(0, exp - now);
+}
+
 export function grantPreviewAccess(hostname: string, ttlMs = PREVIEW_MAX_TTL_MS): void {
   storage()?.setItem(previewStorageKey(hostname), buildGrant(hostname, Date.now(), ttlMs));
 }
