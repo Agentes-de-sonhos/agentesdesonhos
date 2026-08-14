@@ -61,6 +61,66 @@ Deno.serve(async (req) => {
     const name = String(full_name ?? invite.full_name ?? invite.email).trim().slice(0, 120)
     const login = String(invite.email).toLowerCase()
 
+    /**
+     * Convite de ativação de colaborador LEGADO: o registro em
+     * agency_team_members já existe (sem auth user sintético). Reutiliza o
+     * MESMO id, cria o auth user, grava a senha escolhida pela própria pessoa
+     * e preserva perfil de acesso, permissões, scopes, etapas e status.
+     */
+    if (invite.member_id) {
+      const { data: member } = await admin.from('agency_team_members')
+        .select('id, agency_id, full_name, login, login_normalized, email, status, auth_user_id, synthetic_email')
+        .eq('id', invite.member_id).maybeSingle()
+      if (!member || member.agency_id !== invite.agency_id) {
+        return json({ error: 'Cadastro não encontrado.' }, 404)
+      }
+      if (member.auth_user_id || member.synthetic_email) {
+        return json({ error: 'Este acesso já foi ativado.' }, 400)
+      }
+
+      const memberLogin = String(member.login_normalized ?? member.login ?? login).toLowerCase()
+      const email = syntheticEmail(memberLogin, invite.agency_id)
+      const { data: created, error: authErr } = await admin.auth.admin.createUser({
+        email, password, email_confirm: true,
+        user_metadata: { name, is_team_member: true, agency_id: invite.agency_id, team_login: memberLogin },
+      })
+      if (authErr || !created?.user) return json({ error: 'Não foi possível criar o acesso.' }, 400)
+
+      const password_hash = await bcrypt.hash(password, 10)
+      const { error: updErr } = await admin.from('agency_team_members').update({
+        full_name: name || member.full_name,
+        auth_user_id: created.user.id,
+        synthetic_email: email,
+        email: member.email ?? invite.email,
+        activated_at: new Date().toISOString(),
+      }).eq('id', member.id)
+      if (updErr) {
+        await admin.auth.admin.deleteUser(created.user.id).catch(() => {})
+        return json({ error: 'Não foi possível concluir a ativação.' }, 400)
+      }
+
+      const { data: secret } = await admin.from('agency_team_member_secrets')
+        .select('member_id').eq('member_id', member.id).maybeSingle()
+      if (secret) {
+        await admin.from('agency_team_member_secrets')
+          .update({ password_hash }).eq('member_id', member.id)
+      } else {
+        await admin.from('agency_team_member_secrets')
+          .insert({ member_id: member.id, password_hash })
+      }
+
+      await admin.from('agency_team_invites').update({
+        accepted_at: new Date().toISOString(),
+      }).eq('id', invite.id)
+
+      await admin.from('agency_team_audit_log').insert({
+        agency_id: invite.agency_id, team_member_id: member.id, action: 'member_activation_completed',
+        module_key: 'team', entity_type: 'team_invite', entity_id: invite.id,
+      })
+
+      return json({ ok: true, login: memberLogin })
+    }
+
     const { data: taken } = await admin.from('agency_team_members')
       .select('id').eq('login_normalized', login).maybeSingle()
     if (taken) return json({ error: 'Já existe um acesso com este e-mail.' }, 400)
