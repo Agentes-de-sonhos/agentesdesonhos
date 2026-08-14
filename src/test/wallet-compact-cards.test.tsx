@@ -330,6 +330,20 @@ describe("anexos — fonte única e texto correto", () => {
     expect(formatFilesCountLabel(countServiceFiles(dupService))).toBe("1 arquivo");
   });
 
+  it("caminho relativo com prefixo do bucket == URL assinada absoluta => 1 arquivo", () => {
+    const mixed = svc("hotel", { hotel_name: "Hilton" }, {
+      voucher_url: "vouchers/u1/voucher.pdf",
+      attachments: [
+        {
+          url: "https://x.supabase.co/storage/v1/object/sign/vouchers/u1/voucher.pdf?token=abc",
+          name: "Voucher.pdf",
+        },
+      ],
+    } as any);
+    expect(collectServiceDocuments(mixed)).toHaveLength(1);
+    expect(formatFilesCountLabel(countServiceFiles(mixed))).toBe("1 arquivo");
+  });
+
   it("dois caminhos distintos => 2 arquivos", () => {
     const two = svc("hotel", { hotel_name: "Hilton" }, {
       voucher_url: "vouchers/u1/voucher.pdf",
