@@ -4,6 +4,87 @@ import type { Trip, TripService, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { extractVoucherPath } from "@/lib/secureVoucher";
 import { toast } from "sonner";
+import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@/lib/serviceImages";
+
+/** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
+export type PdfImageResolver = (ref: string) => string | null;
+
+/** Reúne as referências persistidas de imagem do serviço, sem repetição e preservando a ordem. */
+export function collectServiceImageRefs(service: TripService): string[] {
+  const out: string[] = [];
+  const push = (ref?: string | null) => {
+    if (!ref || typeof ref !== "string") return;
+    const v = ref.trim();
+    if (!v || out.includes(v)) return;
+    out.push(v);
+  };
+  (service.image_urls || []).forEach(push);
+  push(service.image_url);
+  return out;
+}
+
+/**
+ * Constrói o mapa `ref -> URL fresca` para todos os serviços, resolvendo apenas
+ * referências do Google (gplace:// e URLs legadas). Nada é copiado/persistido.
+ */
+export async function buildServiceImageResolver(services: TripService[]): Promise<PdfImageResolver> {
+  const imageMap = new Map<string, string>();
+  for (const service of services || []) {
+    const refs = collectServiceImageRefs(service);
+    if (!refs.some(isGoogleImageRef)) continue;
+    try {
+      const resolved = await resolveServiceImages(refs, resolveServicePlaceId(service));
+      resolved.forEach((r) => {
+        if (r.src) imageMap.set(r.ref, r.src);
+      });
+    } catch {
+      /* referências não resolvidas são simplesmente omitidas */
+    }
+  }
+  return (ref: string) => {
+    if (imageMap.has(ref)) return imageMap.get(ref)!;
+    return isGoogleImageRef(ref) ? null : ref || null;
+  };
+}
+
+/**
+ * Aguarda todas as imagens da janela de impressão terminarem (load ou error),
+ * com timeout de segurança. Falhas individuais nunca travam a impressão.
+ */
+export function waitForWindowImages(win: Window, timeoutMs = 8000): Promise<void> {
+  return new Promise<void>((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve();
+    };
+    const timer = setTimeout(finish, timeoutMs);
+    const finishAndClear = () => {
+      clearTimeout(timer);
+      finish();
+    };
+    try {
+      const imgs = Array.from(win.document?.images || []) as HTMLImageElement[];
+      const pending = imgs.filter((img) => !img.complete);
+      if (pending.length === 0) {
+        finishAndClear();
+        return;
+      }
+      let remaining = pending.length;
+      const settle = () => {
+        remaining -= 1;
+        if (remaining <= 0) finishAndClear();
+      };
+      pending.forEach((img) => {
+        img.addEventListener("load", settle, { once: true });
+        img.addEventListener("error", settle, { once: true });
+      });
+    } catch {
+      finishAndClear();
+    }
+  });
+}
 
 export interface VoucherAccessOptions {
   mode: "authenticated" | "public";
@@ -953,10 +1034,10 @@ function renderServiceBody(service: TripService): string {
   }
 }
 
-function renderServiceGallery(service: TripService): string {
+function renderServiceGallery(service: TripService, resolveImg: PdfImageResolver): string {
   // Aligned with QuotePDF: hotels get a grid of up to 10 thumbnails;
   // other service types get a single left-side image rendered inside renderServiceLayout.
-  const urls = collectServiceImages(service);
+  const urls = collectServiceImages(service, resolveImg);
   if (!urls.length) return "";
   if (service.service_type !== 'hotel') return "";
   const hotelImages = urls.slice(0, 10);
@@ -987,18 +1068,25 @@ function renderServiceGallery(service: TripService): string {
   `;
 }
 
-function collectServiceImages(service: TripService): string[] {
-  const list: string[] = [];
-  if (service.image_urls && service.image_urls.length) list.push(...service.image_urls);
-  if (service.image_url && /^https?:\/\//i.test(service.image_url) && !list.includes(service.image_url)) {
-    list.push(service.image_url);
+/**
+ * Retorna apenas URLs realmente utilizáveis: referências `gplace://` e URLs
+ * legadas do Google são substituídas pela URL fresca; quando não resolvem, a
+ * imagem é omitida (nunca chega valor cru/expirado ao atributo src).
+ */
+export function collectServiceImages(service: TripService, resolveImg: PdfImageResolver): string[] {
+  const out: string[] = [];
+  for (const ref of collectServiceImageRefs(service)) {
+    const src = resolveImg(ref);
+    if (!src) continue;
+    if (!/^https?:\/\//i.test(src)) continue;
+    if (!out.includes(src)) out.push(src);
   }
-  return list;
+  return out;
 }
 
-function renderServiceLayout(service: TripService, bodyHtml: string): string {
+function renderServiceLayout(service: TripService, bodyHtml: string, resolveImg: PdfImageResolver): string {
   if (service.service_type === 'hotel') return bodyHtml;
-  const urls = collectServiceImages(service);
+  const urls = collectServiceImages(service, resolveImg);
   const firstImage = urls[0];
   if (!firstImage) return bodyHtml;
   return `
@@ -1177,6 +1265,15 @@ export async function generateTripPDF(
   voucherAccess?: VoucherAccessOptions
 ) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
+  // Abrir a janela ANTES dos awaits para evitar bloqueio de popup pelo navegador.
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    try {
+      printWindow.document.write(
+        '<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Preparando PDF…</body></html>',
+      );
+    } catch {}
+  }
   const startDate = parseLocal(trip.start_date);
   const endDate = parseLocal(trip.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -1214,6 +1311,10 @@ export async function generateTripPDF(
     (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
   );
 
+  // Resolve referências do Google (gplace:// e URLs legadas) para URLs válidas
+  // no momento da geração — nada é copiado ou persistido.
+  const resolveImg = await buildServiceImageResolver(sortedServices);
+
   // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
   const servicesHtml = sortedServices.map((service) => {
     const type = service.service_type as TripServiceType;
@@ -1221,7 +1322,7 @@ export async function generateTripPDF(
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
     const bodyHtml = renderServiceBody(service);
-    const galleryHtml = renderServiceGallery(service);
+    const galleryHtml = renderServiceGallery(service, resolveImg);
 
     let attachmentsHtml = '';
     if (service.attachments?.length > 0) {
@@ -1258,7 +1359,7 @@ export async function generateTripPDF(
         </div>
         <div style="padding:12px 16px;">
           ${galleryHtml}
-          ${renderServiceLayout(service, bodyHtml)}
+          ${renderServiceLayout(service, bodyHtml, resolveImg)}
           ${attachmentsBlock}
         </div>
       </div>
@@ -1388,12 +1489,18 @@ export async function generateTripPDF(
     </html>
   `;
 
-  const printWindow = window.open("", "_blank");
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.print();
-    };
+  if (!printWindow) {
+    toast.error("Não foi possível abrir a janela de impressão. Permita pop-ups e tente novamente.");
+    return;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+  await waitForWindowImages(printWindow);
+  try {
+    printWindow.print();
+  } catch {
+    /* impressão cancelada pelo usuário/ambiente */
   }
 }
