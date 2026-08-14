@@ -1187,7 +1187,12 @@ function TripWalletContent() {
                               <div className="flex gap-2 overflow-x-auto pb-1">
                                 {gallery.map((url, i) => (
                                   <div key={i} className="relative shrink-0">
-                                    <img src={url} alt={`Foto ${i+1}`} className="h-24 w-32 object-cover rounded-md border" />
+                                    <ResolvedServiceThumb
+                                      imageRef={url}
+                                      placeId={editPlaceId ?? resolveServicePlaceId(editingService)}
+                                      alt={`Foto ${i+1}`}
+                                      className="h-24 w-32 object-cover rounded-md border"
+                                    />
                                     <button
                                       type="button"
                                       onClick={() => {
