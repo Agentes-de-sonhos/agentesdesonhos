@@ -7,6 +7,7 @@ import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
+const AgencyPreviewGate = lazy(() => import("@/pages/whitelabel/AgencyPreviewGate"));
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
