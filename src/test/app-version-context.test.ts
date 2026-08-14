@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, cleanup } from "@testing-library/react";
 import { isPublicUpdateContext, useAppVersion } from "@/hooks/useAppVersion";
+
+const ORIGINAL_LOCATION_DESCRIPTOR = Object.getOwnPropertyDescriptor(window, "location");
 
 function setLocation(href: string) {
   const url = new URL(href);
@@ -14,6 +17,16 @@ function setLocation(href: string) {
     },
   });
 }
+
+function restoreLocation() {
+  if (ORIGINAL_LOCATION_DESCRIPTOR) {
+    Object.defineProperty(window, "location", ORIGINAL_LOCATION_DESCRIPTOR);
+  }
+}
+
+afterEach(() => {
+  restoreLocation();
+});
 
 describe("isPublicUpdateContext — white label suppression", () => {
   it("suppresses generic custom domains on .com", () => {
@@ -55,11 +68,13 @@ describe("isPublicUpdateContext — white label suppression", () => {
 
 describe("useAppVersion — no polling in white-label context", () => {
   const fetchSpy = vi.fn();
+  let originalFetch: typeof globalThis.fetch;
   let addSpy: ReturnType<typeof vi.spyOn>;
   let intervalSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     fetchSpy.mockReset();
+    originalFetch = globalThis.fetch;
     (globalThis as any).fetch = fetchSpy;
     (globalThis as any).__APP_VERSION__ = "1.0.0";
     addSpy = vi.spyOn(document, "addEventListener");
@@ -67,14 +82,15 @@ describe("useAppVersion — no polling in white-label context", () => {
   });
 
   afterEach(() => {
+    cleanup();
     addSpy.mockRestore();
     intervalSpy.mockRestore();
+    (globalThis as any).fetch = originalFetch;
     delete (globalThis as any).__APP_VERSION__;
   });
 
-  it("does not fetch /version.json, set intervals nor listen to visibilitychange", async () => {
+  it("does not fetch /version.json, set intervals nor listen to visibilitychange", () => {
     setLocation("https://exemploagencia.com/");
-    const { renderHook } = await import("@testing-library/react");
     const { result } = renderHook(() => useAppVersion());
     expect(result.current.updateAvailable).toBe(false);
     expect(fetchSpy).not.toHaveBeenCalled();

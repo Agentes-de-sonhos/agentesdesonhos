@@ -4,13 +4,14 @@ import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
+import { type AgencyDomainInfo, agencyDisplayName, normalizeHostname } from "@/lib/agencyDomains";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 import {
   grantPreviewAccess,
   hasPreviewAccess,
   lockoutMsForAttempts,
+  previewAccessRemainingMs,
   revokePreviewAccess,
   verifyPreviewPassword,
 } from "@/lib/agencyPreviewAccess";
@@ -37,7 +38,13 @@ function useNoIndex(title: string) {
 }
 
 export default function AgencyPreviewGate({ info }: { info: AgencyDomainInfo }) {
-  const host = typeof window === "undefined" ? info.hostname : window.location.hostname;
+  /**
+   * Identidade do tenant é SEMPRE o hostname canônico resolvido pelo
+   * AgencyDomainGate (info.hostname) — nunca o host da janela, que no preview
+   * técnico é id-preview/localhost. A Origin HTTP continua sendo tratada
+   * apenas pela Edge Function, para CORS.
+   */
+  const host = normalizeHostname(info.hostname);
   const name = agencyDisplayName(info);
   const accent = safeAccent(info.primary_color);
 
@@ -60,6 +67,22 @@ export default function AgencyPreviewGate({ info }: { info: AgencyDomainInfo }) 
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, [locked]);
+
+  /** Expiração real mesmo com a aba aberta: desautoriza no instante do vencimento. */
+  useEffect(() => {
+    if (!authorized) return;
+    const remaining = previewAccessRemainingMs(host);
+    if (remaining <= 0) {
+      revokePreviewAccess(host);
+      setAuthorized(false);
+      return;
+    }
+    const id = window.setTimeout(() => {
+      revokePreviewAccess(host);
+      setAuthorized(false);
+    }, remaining);
+    return () => window.clearTimeout(id);
+  }, [authorized, host]);
 
   const lockLabel = useMemo(() => {
     const seconds = Math.ceil(lockRemaining / 1000);
