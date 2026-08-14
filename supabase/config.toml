@@ -112,3 +112,6 @@ verify_jwt = false
 
 [functions.place-static-map]
 verify_jwt = false
+
+[functions.verify-agency-preview]
+verify_jwt = false
