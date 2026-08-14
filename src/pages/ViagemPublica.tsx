@@ -1076,12 +1076,19 @@ function PublicServiceCard({ service }: { service: TripService }) {
           </div>
         )}
 
-        {/* Hotel - Special requests / Agency notes */}
-        {isHotel && (data.special_requests || data.agency_notes) && (
-          <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📝 Observações</p>
-            {data.special_requests && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Solicitações: {data.special_requests}</p>}
-            {data.agency_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>}
+        {/* Hotel - Notes / Special requests / Agency notes (full width) */}
+        {isHotel && (data.notes || data.special_requests || data.agency_notes) && (
+          <div className="mt-2 w-full min-w-0 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1.5">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">Observações:</p>
+            {data.notes && (
+              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.notes}</p>
+            )}
+            {data.special_requests && (
+              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">Solicitações: {data.special_requests}</p>
+            )}
+            {data.agency_notes && (
+              <p className="w-full min-w-0 text-[13px] italic text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.agency_notes}</p>
+            )}
           </div>
         )}
 
