@@ -129,6 +129,17 @@ describe("rotas do domínio da agência", () => {
   it("não usa o bypass técnico __agency_preview como autenticação", () => {
     expect(GATE).not.toContain("__agency_preview");
   });
+
+  it("usa o hostname canônico do tenant (info.hostname), nunca window.location", () => {
+    expect(GATE).toContain("normalizeHostname(info.hostname)");
+    expect(GATE).not.toContain("window.location.hostname");
+  });
+
+  it("agenda a revogação na expiração real do grant", () => {
+    expect(GATE).toContain("previewAccessRemainingMs");
+    expect(GATE).toContain("window.setTimeout");
+    expect(GATE).toContain("window.clearTimeout");
+  });
 });
 
 describe("descoberta", () => {
