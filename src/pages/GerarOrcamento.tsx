@@ -34,6 +34,7 @@ import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { QuoteServicesOrganizer } from "@/components/quote/QuoteServicesOrganizer";
+import { QuotePricingModeCard } from "@/components/quote/QuotePricingModeCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -404,6 +405,7 @@ export default function GerarOrcamento() {
   const {
     quote, addService, updateService, deleteService, reorderServices, isAddingService,
     createSection, renameSection, deleteSection, reorderSections, saveServiceLayout, isSavingSections,
+    setPricingMode, isSavingPricingMode,
   } = useQuote(id);
   // Seção destino quando o usuário cria um serviço a partir de uma seção
   const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
@@ -1215,7 +1217,13 @@ export default function GerarOrcamento() {
               open={openSections.services}
               onToggle={() => toggleSection("services")}
             >
-              <QuoteServicesOrganizer
+              <div className="space-y-4">
+                <QuotePricingModeCard
+                  quote={quote}
+                  onSave={(input) => setPricingMode(input)}
+                  saving={isSavingPricingMode}
+                />
+                <QuoteServicesOrganizer
                     services={quote.services || []}
                     sections={quote.sections || []}
                     onDeleteService={deleteService}
@@ -1232,7 +1240,8 @@ export default function GerarOrcamento() {
                     }}
                     isSaving={isSavingSections}
                     currency={quoteCurrencyCode}
-              />
+                />
+              </div>
             </QuoteStepCard>
 
             {/* 3. Configurar apresentação */}
@@ -1703,6 +1712,9 @@ export default function GerarOrcamento() {
         open={showFullPackage}
         onOpenChange={setShowFullPackage}
         quoteId={id}
+        onPricingDecision={({ pricingMode, packageTotal }) => {
+          setPricingMode({ pricingMode, packageTotal });
+        }}
         onConfirmService={async (svc: FullPackageImportResult) => {
           await addService({
             service_type: svc.service_type,

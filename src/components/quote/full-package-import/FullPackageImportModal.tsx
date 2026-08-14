@@ -22,6 +22,8 @@ import { parsedHotelToHotelData, type ParsedHotel } from "@/components/quote/hot
 import { parsedCarToCarData, type ParsedCarRental } from "@/components/quote/car-rental-import/CarRentalSmartImport";
 import { SERVICE_IMPORT_CONFIGS } from "@/components/quote/service-import/serviceImportConfigs";
 import type { GenericServiceKey } from "@/components/quote/service-import/GenericServiceSmartImport";
+import { CurrencyInput } from "@/components/shared/CurrencyInput";
+import type { QuotePricingMode } from "@/lib/quotePricing";
 
 /* ─────────────── Types ─────────────── */
 
@@ -66,6 +68,11 @@ interface Props {
   onConfirmService: (svc: FullPackageImportResult) => Promise<void> | void;
   /** Optional trip-level summary callback (destination, dates, total...). */
   onTripMeta?: (meta: Record<string, any>) => void;
+  /**
+   * Decisão de precificação tomada na etapa de resumo:
+   * soma dos serviços ou valor fechado de pacote (com total editável).
+   */
+  onPricingDecision?: (input: { pricingMode: QuotePricingMode; packageTotal: number | null }) => void;
 }
 
 const ALL_TYPES: { type: ServiceType; label: string; icon: typeof Plane }[] = [
@@ -115,7 +122,7 @@ type ReviewStatus = "pending" | "confirmed" | "skipped";
 
 /* ─────────────── Component ─────────────── */
 
-export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmService, onTripMeta }: Props) {
+export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmService, onTripMeta, onPricingDecision }: Props) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -130,6 +137,8 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   const [activeBlockIdx, setActiveBlockIdx] = useState(0);
   const [hardError, setHardError] = useState<string | null>(null);
   const [bulkImporting, setBulkImporting] = useState(false);
+  const [pricingMode, setPricingMode] = useState<QuotePricingMode>("itemized");
+  const [packageTotal, setPackageTotal] = useState<number | null>(null);
 
   /* progress animation */
   useEffect(() => {
@@ -151,6 +160,8 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       setStatusByBlock({});
       setActiveBlockIdx(0);
       setHardError(null);
+      setPricingMode("itemized");
+      setPackageTotal(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }, [open]);
@@ -247,6 +258,8 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       const resp: AiResponse = body;
       setAiResponse(resp);
       setBlocks(resp.blocks);
+      // Pré-preenche o valor de pacote lido pela IA (editável na etapa de resumo).
+      setPackageTotal(Number(resp.trip_meta?.total_amount_brl ?? resp.trip_meta?.total_amount) || null);
       setStatusByBlock(Object.fromEntries(resp.blocks.map((b) => [b.id, "pending" as ReviewStatus])));
       if (onTripMeta && resp.trip_meta && Object.keys(resp.trip_meta).length) onTripMeta(resp.trip_meta);
 
@@ -399,6 +412,19 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
               statusByBlock={statusByBlock}
               onGoToReview={goToReview}
               onJumpTo={(idx) => { setActiveBlockIdx(idx); setStep("review"); }}
+              pricingMode={pricingMode}
+              packageTotal={packageTotal}
+              onPricingModeChange={(mode) => {
+                setPricingMode(mode);
+                onPricingDecision?.({ pricingMode: mode, packageTotal: mode === "package" ? packageTotal : null });
+              }}
+              onPackageTotalChange={setPackageTotal}
+              onPackageTotalCommit={(value) => {
+                setPackageTotal(value);
+                if (pricingMode === "package") {
+                  onPricingDecision?.({ pricingMode: "package", packageTotal: value });
+                }
+              }}
             />
           )}
           {step === "review" && blocks[activeBlockIdx] && (
@@ -562,12 +588,18 @@ function ProcessingStep({ step }: { step: number }) {
 
 function SummaryStep({
   response, blocks, statusByBlock, onGoToReview, onJumpTo,
+  pricingMode, packageTotal, onPricingModeChange, onPackageTotalChange, onPackageTotalCommit,
 }: {
   response: AiResponse;
   blocks: AiBlock[];
   statusByBlock: Record<string, ReviewStatus>;
   onGoToReview: () => void;
   onJumpTo: (idx: number) => void;
+  pricingMode: QuotePricingMode;
+  packageTotal: number | null;
+  onPricingModeChange: (mode: QuotePricingMode) => void;
+  onPackageTotalChange: (value: number | null) => void;
+  onPackageTotalCommit: (value: number | null) => void;
 }) {
   const trip = response.trip_meta || {};
   const counts = useMemo(() => {
@@ -596,6 +628,54 @@ function SummaryStep({
           <Meta label="Crianças" value={trip.children != null ? String(trip.children) : ""} />
           <Meta label="Moeda" value={trip.currency} />
           <Meta label="Total do pacote" value={fmtMoney(trip.total_amount_brl ?? trip.total_amount, trip.currency)} />
+        </CardContent>
+      </Card>
+
+      {/* Modo de precificação — soma dos serviços x valor fechado de pacote */}
+      <Card>
+        <CardContent className="pt-4 space-y-3">
+          <div className="space-y-1">
+            <h4 className="text-xs font-semibold uppercase text-muted-foreground">
+              Como calcular o valor deste orçamento?
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              Você pode somar os serviços importados ou apresentar um valor fechado de pacote.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {([
+              { value: "itemized" as QuotePricingMode, title: "Somar os serviços", desc: "Total = soma dos valores de cada serviço." },
+              { value: "package" as QuotePricingMode, title: "Valor fechado de pacote", desc: "Um único valor final; serviços sem valor individual." },
+            ]).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => onPricingModeChange(opt.value)}
+                className={`rounded-xl border p-3 text-left transition-all ${
+                  pricingMode === opt.value
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                    : "border-border hover:bg-muted/30"
+                }`}
+              >
+                <p className="text-sm font-medium">{opt.title}</p>
+                <p className="text-xs text-muted-foreground">{opt.desc}</p>
+              </button>
+            ))}
+          </div>
+          {pricingMode === "package" && (
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium">Valor total do pacote</p>
+              <CurrencyInput
+                value={packageTotal}
+                onValueChange={onPackageTotalChange}
+                onBlur={() => onPackageTotalCommit(packageTotal)}
+                aria-label="Valor total do pacote"
+              />
+              <p className="text-xs text-muted-foreground">
+                Confira e ajuste o valor lido pela IA antes de continuar.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

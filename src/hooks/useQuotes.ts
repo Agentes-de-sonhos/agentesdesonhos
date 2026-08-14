@@ -5,6 +5,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
 import type { Quote, QuoteSection, QuoteService, QuoteFormData, ServiceType, ServiceData } from "@/types/quote";
+import {
+  computeQuoteTotalForPersistence,
+  getQuotePricingMode,
+  sumServiceAmounts,
+  type QuotePricingMode,
+} from "@/lib/quotePricing";
 
 export function useQuotes() {
   const { user } = useAuth();
@@ -280,11 +286,22 @@ export function useQuote(id: string | undefined) {
   });
 
   async function recalcQuoteTotal(quoteId: string) {
+    // Respeita o modo de cálculo: no modo pacote o total é o valor fechado e
+    // NUNCA pode ser sobrescrito pela soma dos serviços.
+    const { data: quoteRow } = await supabase
+      .from("quotes")
+      .select("pricing_mode, package_total_amount")
+      .eq("id", quoteId)
+      .maybeSingle();
     const { data: allServices } = await supabase
       .from("quote_services")
       .select("amount")
       .eq("quote_id", quoteId);
-    const total = (allServices || []).reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+    const total = computeQuoteTotalForPersistence({
+      pricingMode: getQuotePricingMode(quoteRow),
+      packageTotal: (quoteRow as any)?.package_total_amount,
+      servicesSum: sumServiceAmounts(allServices as any),
+    });
     await supabase.from("quotes").update({ total_amount: total }).eq("id", quoteId);
   }
 
@@ -437,6 +454,42 @@ export function useQuote(id: string | undefined) {
     },
   });
 
+  /** Define o modo de cálculo do total (soma dos serviços x valor fechado do pacote). */
+  const setPricingModeMutation = useMutation({
+    mutationFn: async (input: { pricingMode: QuotePricingMode; packageTotal?: number | null }) => {
+      if (!id) throw new Error("Quote ID is required");
+      const { data: services } = await supabase
+        .from("quote_services")
+        .select("amount")
+        .eq("quote_id", id);
+      const total = computeQuoteTotalForPersistence({
+        pricingMode: input.pricingMode,
+        packageTotal: input.packageTotal,
+        servicesSum: sumServiceAmounts(services as any),
+      });
+      const packageTotal =
+        input.pricingMode === "package" && Number(input.packageTotal) > 0
+          ? Number(input.packageTotal)
+          : null;
+      const { error } = await supabase
+        .from("quotes")
+        .update({
+          pricing_mode: input.pricingMode,
+          package_total_amount: packageTotal,
+          total_amount: total,
+        } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["quote", id] });
+      queryClient.invalidateQueries({ queryKey: ["quotes"] });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao salvar o valor", description: (error as Error).message, variant: "destructive" });
+    },
+  });
+
   // ---------------------------------------------------------------------------
   // Seções do orçamento (organização visual)
   // ---------------------------------------------------------------------------
@@ -567,6 +620,8 @@ export function useQuote(id: string | undefined) {
     deleteService: deleteServiceMutation.mutateAsync,
     reorderServices: reorderServicesMutation.mutate,
     isAddingService: addServiceMutation.isPending,
+    setPricingMode: setPricingModeMutation.mutateAsync,
+    isSavingPricingMode: setPricingModeMutation.isPending,
     createSection: createSectionMutation.mutateAsync,
     renameSection: renameSectionMutation.mutateAsync,
     deleteSection: deleteSectionMutation.mutateAsync,

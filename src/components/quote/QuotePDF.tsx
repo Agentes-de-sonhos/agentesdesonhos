@@ -9,6 +9,12 @@ import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsInclude
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
 import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
+import {
+  getEffectiveQuoteTotal,
+  isPackagePricing,
+  PACKAGE_INCLUDED_LABEL,
+  PACKAGE_TOTAL_LABEL,
+} from "@/lib/quotePricing";
 
 type QuoteDocument = {
   id: string;
@@ -347,7 +353,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   const useServicePayment = (quote as any).use_service_payment || 
     quote.services?.some((s: any) => s.is_custom_payment === true) || false;
 
-  const showDetailedPrices = (quote as any).show_detailed_prices !== false;
+  const packagePricing = isPackagePricing(quote);
+  // No modo pacote nenhum valor individual aparece no PDF.
+  const showDetailedPrices = (quote as any).show_detailed_prices !== false && !packagePricing;
 
   // Resolve imagens do Google (referências gplace:// e URLs legadas) para URLs
   // válidas no momento da geração — nada é copiado ou persistido.
@@ -614,7 +622,11 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                 ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
               </div>
             </div>
-            ${showDetailedPrices && !hotelHasMultipleRooms ? `<span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>` : ""}
+            ${packagePricing
+              ? `<span style="font-size:11px;font-weight:600;color:${grad.fg};opacity:0.8;white-space:nowrap;">${PACKAGE_INCLUDED_LABEL}</span>`
+              : showDetailedPrices && !hotelHasMultipleRooms
+                ? `<span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>`
+                : ""}
           </div>
           <div style="padding:12px 16px;">
             ${bodyHtml}
@@ -910,9 +922,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         <!-- Total -->
         ${(() => {
-          const total = quote.services && quote.services.length > 0
-            ? quote.services.reduce((sum: number, s: any) => sum + (Number(s.amount) || 0), 0)
-            : quote.total_amount;
+          const total = getEffectiveQuoteTotal(quote, quote.services as any);
           const mode = quote.payment_display_mode || "full_payment";
           const installments = quote.installments_count || 10;
           const entryPct = quote.entry_percentage || 0;
@@ -938,13 +948,13 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             `;
           } else if (mode === "total_only") {
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Valor total da viagem</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">${packagePricing ? PACKAGE_TOTAL_LABEL : "Valor total da viagem"}</p>
               <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(total)}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Investimento</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">${packagePricing ? PACKAGE_TOTAL_LABEL : "Investimento"}</p>
               <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(discountedTotal)}</p>
               ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:#94a3b8;">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:#0f766e;font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
               ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">${methodLabel}</p>` : ""}
