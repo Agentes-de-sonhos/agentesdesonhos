@@ -75,8 +75,12 @@ function TripCoverHero({
   days: number;
   coverUrl?: string | null;
 }) {
-  const { photoUrl } = useDestinationCoverPhoto({ destination, enabled: !coverUrl });
-  const photo = coverUrl || photoUrl || null;
+  // A capa pode ser uma URL do Storage, uma referência `gplace://` ou uma URL
+  // legada do Google — resolvemos antes de exibir e caímos para a foto
+  // automática do destino quando não houver imagem utilizável.
+  const { src: resolvedCover, onError: onCoverError } = useResolvedServiceImage(coverUrl, null);
+  const { photoUrl } = useDestinationCoverPhoto({ destination, enabled: !resolvedCover });
+  const photo = resolvedCover || photoUrl || null;
   return (
     <div className="relative w-full overflow-hidden rounded-b-2xl md:rounded-2xl bg-muted aspect-[16/11] sm:aspect-[21/9] md:shadow-sm">
       {photo ? (
@@ -84,6 +88,7 @@ function TripCoverHero({
           src={photo}
           alt={destination}
           loading="eager"
+          onError={photo === resolvedCover ? onCoverError : undefined}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
