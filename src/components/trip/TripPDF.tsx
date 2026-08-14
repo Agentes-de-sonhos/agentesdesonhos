@@ -1034,10 +1034,10 @@ function renderServiceBody(service: TripService): string {
   }
 }
 
-function renderServiceGallery(service: TripService): string {
+function renderServiceGallery(service: TripService, resolveImg: PdfImageResolver): string {
   // Aligned with QuotePDF: hotels get a grid of up to 10 thumbnails;
   // other service types get a single left-side image rendered inside renderServiceLayout.
-  const urls = collectServiceImages(service);
+  const urls = collectServiceImages(service, resolveImg);
   if (!urls.length) return "";
   if (service.service_type !== 'hotel') return "";
   const hotelImages = urls.slice(0, 10);
@@ -1068,18 +1068,25 @@ function renderServiceGallery(service: TripService): string {
   `;
 }
 
-function collectServiceImages(service: TripService): string[] {
-  const list: string[] = [];
-  if (service.image_urls && service.image_urls.length) list.push(...service.image_urls);
-  if (service.image_url && /^https?:\/\//i.test(service.image_url) && !list.includes(service.image_url)) {
-    list.push(service.image_url);
+/**
+ * Retorna apenas URLs realmente utilizáveis: referências `gplace://` e URLs
+ * legadas do Google são substituídas pela URL fresca; quando não resolvem, a
+ * imagem é omitida (nunca chega valor cru/expirado ao atributo src).
+ */
+export function collectServiceImages(service: TripService, resolveImg: PdfImageResolver): string[] {
+  const out: string[] = [];
+  for (const ref of collectServiceImageRefs(service)) {
+    const src = resolveImg(ref);
+    if (!src) continue;
+    if (!/^https?:\/\//i.test(src)) continue;
+    if (!out.includes(src)) out.push(src);
   }
-  return list;
+  return out;
 }
 
-function renderServiceLayout(service: TripService, bodyHtml: string): string {
+function renderServiceLayout(service: TripService, bodyHtml: string, resolveImg: PdfImageResolver): string {
   if (service.service_type === 'hotel') return bodyHtml;
-  const urls = collectServiceImages(service);
+  const urls = collectServiceImages(service, resolveImg);
   const firstImage = urls[0];
   if (!firstImage) return bodyHtml;
   return `
