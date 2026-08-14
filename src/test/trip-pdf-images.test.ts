@@ -48,6 +48,24 @@ describe("TripPDF resolver", () => {
     expect(collectServiceImages(s, resolve)).toEqual(["https://cdn.example/new.jpg"]);
   });
 
+  it("URL legada do Google SEM place_id nunca é reaproveitada", async () => {
+    const legacy = "https://lh3.googleusercontent.com/place-photos/EXPIRED";
+    const s = svc({ image_urls: [legacy] });
+    const resolve = await buildServiceImageResolver([s]);
+    expect(resolve(legacy)).toBeNull();
+    expect(collectServiceImages(s, resolve)).toEqual([]);
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it("aceita URL fresca do googleusercontent quando houver resolução real", async () => {
+    const legacy = "https://lh3.googleusercontent.com/place-photos/OLD";
+    const fresh = "https://lh3.googleusercontent.com/place-photos/NEW";
+    invoke.mockResolvedValue({ data: { photos: [{ url: fresh, thumb_url: "t" }] }, error: null });
+    const s = svc({ image_urls: [legacy], place_id: "P9" });
+    const resolve = await buildServiceImageResolver([s]);
+    expect(collectServiceImages(s, resolve)).toEqual([fresh]);
+  });
+
   it("omite imagem Google não resolvida", async () => {
     invoke.mockResolvedValue({ data: { photos: [] }, error: null });
     const s = svc({ image_urls: [makeGplaceRef("P3", 2), "https://storage.example/ok.jpg"], place_id: "P3" });
@@ -91,6 +109,32 @@ describe("waitForWindowImages", () => {
     await Promise.resolve();
     expect(resolved).toBe(false);
     listeners[1].error();
+    await p;
+    expect(resolved).toBe(true);
+  });
+
+  it("liquida uma única vez mesmo com load e error, e cobre a corrida com complete", async () => {
+    const maps: Record<string, () => void>[] = [];
+    const mk = (completeAfter: boolean) => {
+      const map: Record<string, () => void> = {};
+      maps.push(map);
+      return {
+        get complete() { return completeAfter; },
+        addEventListener: (ev: string, cb: () => void) => { map[ev] = cb; },
+      };
+    };
+    // primeira imagem: pendente no filtro, concluída ao registrar listeners
+    const racing: any = { complete: false, addEventListener: (ev: string, cb: () => void) => { (racing.h ||= {})[ev] = cb; } };
+    const other = mk(false);
+    const win = { document: { images: [racing, other] } } as any;
+    let resolved = false;
+    const p = waitForWindowImages(win, 5000).then(() => { resolved = true; });
+    racing.complete = true; // simula conclusão antes do registro
+    await Promise.resolve();
+    expect(resolved).toBe(false);
+    // load e error na mesma imagem não podem decrementar duas vezes
+    maps[0].load();
+    maps[0].error();
     await p;
     expect(resolved).toBe(true);
   });
