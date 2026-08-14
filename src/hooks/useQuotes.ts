@@ -8,6 +8,8 @@ import type { Quote, QuoteSection, QuoteService, QuoteFormData, ServiceType, Ser
 import {
   computeQuoteTotalForPersistence,
   getQuotePricingMode,
+  isValidPricingDecision,
+  PACKAGE_TOTAL_REQUIRED_MESSAGE,
   sumServiceAmounts,
   type QuotePricingMode,
 } from "@/lib/quotePricing";
@@ -458,6 +460,8 @@ export function useQuote(id: string | undefined) {
   const setPricingModeMutation = useMutation({
     mutationFn: async (input: { pricingMode: QuotePricingMode; packageTotal?: number | null }) => {
       if (!id) throw new Error("Quote ID is required");
+      // Validação defensiva: pacote sem valor fechado válido nunca é gravado.
+      if (!isValidPricingDecision(input)) throw new Error(PACKAGE_TOTAL_REQUIRED_MESSAGE);
       const { data: services } = await supabase
         .from("quote_services")
         .select("amount")
@@ -467,18 +471,16 @@ export function useQuote(id: string | undefined) {
         packageTotal: input.packageTotal,
         servicesSum: sumServiceAmounts(services as any),
       });
-      const packageTotal =
-        input.pricingMode === "package" && Number(input.packageTotal) > 0
-          ? Number(input.packageTotal)
-          : null;
-      const { error } = await supabase
-        .from("quotes")
-        .update({
-          pricing_mode: input.pricingMode,
-          package_total_amount: packageTotal,
-          total_amount: total,
-        } as any)
-        .eq("id", id);
+      // No modo itemizado preservamos o último valor fechado informado, para
+      // facilitar voltar ao modo pacote sem redigitar.
+      const payload: Record<string, unknown> = {
+        pricing_mode: input.pricingMode,
+        total_amount: total,
+      };
+      if (input.pricingMode === "package") {
+        payload.package_total_amount = Number(input.packageTotal);
+      }
+      const { error } = await supabase.from("quotes").update(payload as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

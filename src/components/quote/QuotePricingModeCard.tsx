@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
 import { Calculator, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   getPackageTotalAmount,
   getQuotePricingMode,
+  isValidPricingDecision,
+  PACKAGE_TOTAL_REQUIRED_MESSAGE,
   sumServiceAmounts,
   type QuotePricingMode,
 } from "@/lib/quotePricing";
@@ -29,10 +32,39 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
   const [packageTotal, setPackageTotal] = useState<number | null>(
     getPackageTotalAmount(quote) || null,
   );
+  /** Opção selecionada localmente — só é gravada quando válida. */
+  const [draftMode, setDraftMode] = useState<QuotePricingMode>(mode);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setPackageTotal(getPackageTotalAmount(quote) || null);
   }, [quote?.id, quote?.package_total_amount]);
+
+  useEffect(() => {
+    setDraftMode(mode);
+    setError(null);
+  }, [mode, quote?.id]);
+
+  const canApplyPackage = isValidPricingDecision({ pricingMode: "package", packageTotal });
+  const pendingPackage = draftMode === "package" && (mode !== "package" || getPackageTotalAmount(quote) !== (packageTotal ?? 0));
+
+  async function handleSelect(value: QuotePricingMode) {
+    setError(null);
+    setDraftMode(value);
+    // Voltar para "somar os serviços" pode salvar de imediato (recalcula pela soma).
+    if (value === "itemized" && mode !== "itemized") {
+      await onSave({ pricingMode: "itemized" });
+    }
+  }
+
+  async function handleApplyPackage() {
+    if (!canApplyPackage) {
+      setError(PACKAGE_TOTAL_REQUIRED_MESSAGE);
+      return;
+    }
+    setError(null);
+    await onSave({ pricingMode: "package", packageTotal });
+  }
 
   const options: { value: QuotePricingMode; title: string; description: string; Icon: typeof Calculator }[] = [
     {
@@ -65,15 +97,11 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
             key={opt.value}
             type="button"
             disabled={saving}
-            onClick={() =>
-              onSave({
-                pricingMode: opt.value,
-                packageTotal: opt.value === "package" ? packageTotal ?? servicesSum : null,
-              })
-            }
+            aria-pressed={draftMode === opt.value}
+            onClick={() => handleSelect(opt.value)}
             className={cn(
               "flex items-start gap-2 rounded-xl border p-3 text-left transition-all",
-              mode === opt.value
+              draftMode === opt.value
                 ? "border-primary bg-primary/5 ring-1 ring-primary/30"
                 : "border-border hover:border-border/80 hover:bg-muted/30",
             )}
@@ -81,10 +109,10 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
             <div
               className={cn(
                 "mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 flex items-center justify-center",
-                mode === opt.value ? "border-primary" : "border-muted-foreground/40",
+                draftMode === opt.value ? "border-primary" : "border-muted-foreground/40",
               )}
             >
-              {mode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
+              {draftMode === opt.value && <div className="h-2 w-2 rounded-full bg-primary" />}
             </div>
             <div className="min-w-0">
               <p className="flex items-center gap-1.5 text-sm font-medium">
@@ -97,15 +125,28 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
         ))}
       </div>
 
-      {mode === "package" && (
+      {draftMode === "package" && (
         <div className="space-y-1.5 rounded-xl border border-dashed bg-muted/30 p-3">
           <Label className="text-xs font-medium">Valor total do pacote</Label>
           <CurrencyInput
             value={packageTotal}
-            onValueChange={setPackageTotal}
-            onBlur={() => onSave({ pricingMode: "package", packageTotal })}
+            onValueChange={(v) => { setPackageTotal(v); setError(null); }}
             aria-label="Valor total do pacote"
           />
+          {error && <p role="alert" className="text-xs font-medium text-destructive">{error}</p>}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleApplyPackage}
+              disabled={saving || !canApplyPackage}
+            >
+              Aplicar valor fechado
+            </Button>
+            {pendingPackage && canApplyPackage && (
+              <span className="text-xs text-amber-700 dark:text-amber-300">Alteração não aplicada.</span>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">
             Soma atual dos serviços cadastrados: {formatQuoteCurrency(servicesSum, currency)} — apenas
             referência, não é usada no total.
