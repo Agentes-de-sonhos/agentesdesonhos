@@ -1265,6 +1265,15 @@ export async function generateTripPDF(
   voucherAccess?: VoucherAccessOptions
 ) {
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
+  // Abrir a janela ANTES dos awaits para evitar bloqueio de popup pelo navegador.
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    try {
+      printWindow.document.write(
+        '<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Preparando PDF…</body></html>',
+      );
+    } catch {}
+  }
   const startDate = parseLocal(trip.start_date);
   const endDate = parseLocal(trip.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -1302,6 +1311,10 @@ export async function generateTripPDF(
     (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
   );
 
+  // Resolve referências do Google (gplace:// e URLs legadas) para URLs válidas
+  // no momento da geração — nada é copiado ou persistido.
+  const resolveImg = await buildServiceImageResolver(sortedServices);
+
   // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
   const servicesHtml = sortedServices.map((service) => {
     const type = service.service_type as TripServiceType;
@@ -1309,7 +1322,7 @@ export async function generateTripPDF(
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
     const bodyHtml = renderServiceBody(service);
-    const galleryHtml = renderServiceGallery(service);
+    const galleryHtml = renderServiceGallery(service, resolveImg);
 
     let attachmentsHtml = '';
     if (service.attachments?.length > 0) {
@@ -1346,7 +1359,7 @@ export async function generateTripPDF(
         </div>
         <div style="padding:12px 16px;">
           ${galleryHtml}
-          ${renderServiceLayout(service, bodyHtml)}
+          ${renderServiceLayout(service, bodyHtml, resolveImg)}
           ${attachmentsBlock}
         </div>
       </div>
@@ -1476,12 +1489,18 @@ export async function generateTripPDF(
     </html>
   `;
 
-  const printWindow = window.open("", "_blank");
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.print();
-    };
+  if (!printWindow) {
+    toast.error("Não foi possível abrir a janela de impressão. Permita pop-ups e tente novamente.");
+    return;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(html);
+  printWindow.document.close();
+  await waitForWindowImages(printWindow);
+  try {
+    printWindow.print();
+  } catch {
+    /* impressão cancelada pelo usuário/ambiente */
   }
 }
