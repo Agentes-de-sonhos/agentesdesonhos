@@ -125,3 +125,16 @@ export async function resolveServiceImages(
   }
   return out;
 }
+
+/**
+ * Deriva o place_id de um serviço de viagem/orçamento, considerando a coluna de
+ * primeira classe e os campos legados dentro de `service_data`.
+ */
+export function resolveServicePlaceId(service: any): string | null {
+  return (
+    service?.place_id ??
+    service?.service_data?.place_id ??
+    service?.service_data?.google_place_id ??
+    null
+  );
+}

@@ -32,6 +32,8 @@ import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/Tr
 import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { TripConverters } from "@/components/trip/TripConverters";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
+import { useResolvedServiceImage } from "@/components/shared/ResolvedServiceImage";
+import { resolveServicePlaceId } from "@/lib/serviceImages";
 import { useTripWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
@@ -75,8 +77,12 @@ function TripCoverHero({
   days: number;
   coverUrl?: string | null;
 }) {
-  const { photoUrl } = useDestinationCoverPhoto({ destination, enabled: !coverUrl });
-  const photo = coverUrl || photoUrl || null;
+  // A capa pode ser uma URL do Storage, uma referência `gplace://` ou uma URL
+  // legada do Google — resolvemos antes de exibir e caímos para a foto
+  // automática do destino quando não houver imagem utilizável.
+  const { src: resolvedCover, onError: onCoverError } = useResolvedServiceImage(coverUrl, null);
+  const { photoUrl } = useDestinationCoverPhoto({ destination, enabled: !resolvedCover });
+  const photo = resolvedCover || photoUrl || null;
   return (
     <div className="relative w-full overflow-hidden rounded-b-2xl md:rounded-2xl bg-muted aspect-[16/11] sm:aspect-[21/9] md:shadow-sm">
       {photo ? (
@@ -84,6 +90,7 @@ function TripCoverHero({
           src={photo}
           alt={destination}
           loading="eager"
+          onError={photo === resolvedCover ? onCoverError : undefined}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
@@ -718,11 +725,11 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {(() => {
           const urls = (service.image_urls && service.image_urls.length > 0)
             ? service.image_urls
-            : (service.image_url && /^https?:\/\//i.test(service.image_url) ? [service.image_url] : []);
+            : (service.image_url && /^(https?:\/\/|gplace:\/\/)/i.test(service.image_url) ? [service.image_url] : []);
           if (urls.length === 0) return null;
           return (
             <div className="mb-4 -mx-1 overflow-hidden rounded-xl">
-              <ServiceImageCarousel images={urls} alt={title} placeId={(service as any)?.service_data?.place_id ?? null} />
+              <ServiceImageCarousel images={urls} alt={title} placeId={resolveServicePlaceId(service)} />
             </div>
           );
         })()}

@@ -10,6 +10,8 @@ import {
 import { ChevronDown, FileText, Paperclip, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TripService, TripServiceType } from "@/types/trip";
+import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
+import { resolveServicePlaceId } from "@/lib/serviceImages";
 import {
   CATEGORY_CONFIG,
   collectAttachments,
@@ -307,6 +309,7 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
       const Icon = cfg.icon;
       const compact = cfg.getCompactFields(service);
       const thumb = getServiceThumbnail(service);
+      const thumbPlaceId = resolveServicePlaceId(service);
       const status = resolveStatusBadge(compact.rawStatus);
       const attachments = collectAttachments(service);
       const expandable = hasAdditionalDetails(service);
@@ -345,11 +348,16 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
               )}
             >
               {thumb ? (
-                <img
-                  src={thumb}
+                <ResolvedServiceThumb
+                  imageRef={thumb}
+                  placeId={thumbPlaceId}
                   alt={compact.title}
-                  loading="lazy"
                   className="absolute inset-0 h-full w-full object-cover"
+                  fallback={
+                    <div className={cn("absolute inset-0 flex items-center justify-center", cfg.thumbBg)}>
+                      <Icon className={cn("h-6 w-6", cfg.thumbIconColor)} aria-hidden />
+                    </div>
+                  }
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
