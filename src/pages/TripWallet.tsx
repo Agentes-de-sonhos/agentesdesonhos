@@ -23,6 +23,8 @@ import { LegacyItinerarySection } from "@/components/wallet/LegacyItinerarySecti
 import { TripForm } from "@/components/trip/TripForm";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
+import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
+import { resolveServicePlaceId } from "@/lib/serviceImages";
 import { PassengerPoolProvider } from "@/components/trip/PassengerPoolContext";
 import { TravelImporter } from "@/components/trip/TravelImporter";
 import { TripServiceList } from "@/components/trip/TripServiceCard";
