@@ -58,7 +58,23 @@ describe("formatFriendlyDateRange", () => {
     expect(formatFriendlyDateRange("", "")).toBeNull();
     expect(formatFriendlyDateRange(null, undefined)).toBeNull();
     expect(formatFriendlyDate("banana")).toBeNull();
-    expect(formatFriendlyDateRange("2026-13-40")).not.toBe("");
+  });
+  it("datas impossíveis são rejeitadas (sem normalização silenciosa)", () => {
+    expect(formatFriendlyDate("2026-13-40")).toBeNull();
+    expect(formatFriendlyDateRange("2026-13-40")).toBeNull();
+    expect(formatFriendlyDate("2026-00-10")).toBeNull();
+    expect(formatFriendlyDate("2026-08-00")).toBeNull();
+    expect(formatFriendlyDate("2026-08-32")).toBeNull();
+    expect(formatFriendlyDate("2026-02-31")).toBeNull();
+    expect(formatFriendlyDate("2026-02-29")).toBeNull();
+    expect(formatFriendlyDate("31/02/2026")).toBeNull();
+    expect(formatFriendlyDate("2026-8-1")).toBeNull();
+    expect(formatFriendlyDate("20260801")).toBeNull();
+  });
+  it("ano bissexto e timestamp ISO continuam válidos", () => {
+    expect(formatFriendlyDate("2028-02-29")).toBe("29 de fevereiro de 2028");
+    expect(formatFriendlyDate("2026-08-17T14:30:00Z")).toBe("17 de agosto de 2026");
+    expect(formatFriendlyDate("17/08/2026")).toBe("17 de agosto de 2026");
   });
   it("não desloca timezone (YYYY-MM-DD local)", () => {
     expect(formatFriendlyDate("2026-07-01")).toBe("1 de julho de 2026");
