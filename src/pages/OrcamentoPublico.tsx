@@ -907,7 +907,7 @@ function CollapsibleServiceCard({
           {isOpen && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
-              <ServiceImageCarousel images={imgs} alt={getServiceLabel(service)} disableExpand placeId={(service.service_data as any)?.place_id ?? null} />
+              <ServiceImageCarousel images={imgs} alt={getServiceLabel(service)} disableExpand placeId={resolveServicePlaceId(service)} />
             ) : null;
           })()}
           {isOpen && (() => {
