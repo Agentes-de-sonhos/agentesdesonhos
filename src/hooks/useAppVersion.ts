@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { agencyHostFromLocation } from "@/lib/agencyDomains";
 
 const VERSION_URL = "/version.json";
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -37,6 +38,11 @@ export function isPublicUpdateContext(): boolean {
   if (typeof window === "undefined") return true;
   const host = window.location.hostname.toLowerCase();
   const path = window.location.pathname;
+
+  // Structural white-label detection: any hostname that could belong to an
+  // agency (custom domain, any TLD) — plus the ?__agency_host preview mode —
+  // is a client-facing context and must never see the platform update prompt.
+  if (agencyHostFromLocation(host, window.location.search)) return true;
 
   // White-label / marketing hostnames.
   if (
