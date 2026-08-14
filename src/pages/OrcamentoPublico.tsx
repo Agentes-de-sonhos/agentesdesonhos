@@ -1267,7 +1267,21 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   // ── Smart trip summary derived from services
   const introImages: string[] = (quote as any).destination_intro_images || [];
   const introText: string | null = (quote as any).destination_intro_text || null;
-  const heroImage = introImages[0] || quote.services?.find(s => s.image_url)?.image_url || quote.services?.find(s => (s as any).image_urls?.length)?.image_urls?.[0] || null;
+  // Fallback do hero: primeira imagem de serviço, que pode ser uma referência
+  // `gplace://` — resolvida abaixo para nunca chegar crua ao <img>.
+  const heroFallbackService =
+    quote.services?.find((s) => s.image_url) ||
+    quote.services?.find((s) => (s as any).image_urls?.length) ||
+    null;
+  const heroFallbackRef: string | null =
+    (heroFallbackService as any)?.image_url ||
+    (heroFallbackService as any)?.image_urls?.[0] ||
+    null;
+  const { src: resolvedHeroFallback, onError: onHeroFallbackError } = useResolvedServiceImage(
+    introImages[0] ? null : heroFallbackRef,
+    heroFallbackService ? resolveServicePlaceId(heroFallbackService) : null,
+  );
+  const heroImage = introImages[0] || resolvedHeroFallback || null;
   const tripTitle = (quote as any).trip_title as string | undefined;
 
   const totalForBar = quote.services && quote.services.length > 0
@@ -1330,6 +1344,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 alt={quote.destination}
                 className="absolute inset-0 h-full w-full object-cover scale-[1.02]"
                 loading="eager"
+                onError={heroImage === resolvedHeroFallback ? onHeroFallbackError : undefined}
               />
               {/* cinematic gradient overlay (only with image) */}
               <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/85" />
