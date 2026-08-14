@@ -73,19 +73,6 @@ async function sendInviteEmail(opts: {
   }
 }
 
-function moduleOfUnused(key: string): string {
-  const head = key.split('.')[0]
-  const map: Record<string, string> = {
-    dashboard: 'dashboard', clients: 'clients', opportunities: 'opportunities', operations: 'operations',
-    sales: 'sales', quotes: 'quotes', itineraries: 'itineraries', wallet: 'wallet',
-    agenda: 'agenda', tasks: 'agenda', trips: 'agenda', financial: 'financial', marketing: 'marketing',
-    academy: 'education', courses: 'education', mentorships: 'education', community: 'community',
-    chat: 'community', online_users: 'community', settings: 'settings', account: 'settings',
-    subscription: 'settings', integrations: 'settings', team: 'settings', audit: 'settings',
-  }
-  return map[head] ?? 'tools'
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
