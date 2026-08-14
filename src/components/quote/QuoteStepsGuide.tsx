@@ -63,18 +63,18 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
       </nav>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] max-w-[95vw] overflow-y-auto sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Como montar seu orçamento</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="flex max-h-[90vh] w-[95vw] max-w-[95vw] flex-col gap-0 overflow-hidden bg-background p-0 md:max-w-3xl">
+          <DialogHeader className="shrink-0 border-b border-border/60 bg-background px-5 py-4 text-left sm:px-6">
+            <DialogTitle className="text-base font-semibold text-foreground sm:text-lg">Como montar seu orçamento</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground sm:text-sm">
               Abra uma etapa por vez. Você pode revisar e editar tudo antes de enviar.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-              <ol className="space-y-2">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-background px-5 py-4 sm:px-6">
+              <ol className="space-y-2.5">
                 {steps.map((s) => (
-                  <li key={s.step} className="flex items-start gap-2 text-xs">
+                  <li key={s.step} className="flex items-start gap-2 text-xs sm:text-[13px]">
                     <span className={cn("mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold text-white", s.accentClass)}>
                       {s.step}
                     </span>
@@ -88,7 +88,7 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
 
               <section
                 aria-labelledby="quote-after-steps-title"
-                className="rounded-xl border border-primary/30 bg-background p-3 sm:p-4"
+                className="rounded-xl border border-border bg-background p-3 sm:p-4"
               >
                 <h3
                   id="quote-after-steps-title"
@@ -101,10 +101,10 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
                 </p>
 
                 <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <li className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-muted/30 p-2.5">
+                  <li className="flex h-full items-start gap-2.5 rounded-lg border border-border/70 bg-muted/40 p-3">
                     <Globe className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0">
-                      <span className="block text-xs font-medium text-foreground">
+                      <span className="block text-xs font-medium text-foreground sm:whitespace-nowrap">
                         Gerar orçamento web
                       </span>
                       <span className="block text-[11px] leading-4 text-muted-foreground">
@@ -112,10 +112,10 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
                       </span>
                     </div>
                   </li>
-                  <li className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-muted/30 p-2.5">
+                  <li className="flex h-full items-start gap-2.5 rounded-lg border border-border/70 bg-muted/40 p-3">
                     <Share2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0">
-                      <span className="block text-xs font-medium text-foreground">
+                      <span className="block text-xs font-medium text-foreground sm:whitespace-nowrap">
                         Compartilhar
                       </span>
                       <span className="block text-[11px] leading-4 text-muted-foreground">
@@ -123,10 +123,10 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
                       </span>
                     </div>
                   </li>
-                  <li className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-muted/30 p-2.5">
+                  <li className="flex h-full items-start gap-2.5 rounded-lg border border-border/70 bg-muted/40 p-3">
                     <FileText className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
                     <div className="min-w-0">
-                      <span className="block text-xs font-medium text-foreground">
+                      <span className="block text-xs font-medium text-foreground sm:whitespace-nowrap">
                         Gerar orçamento PDF
                       </span>
                       <span className="block text-[11px] leading-4 text-muted-foreground">
@@ -136,14 +136,13 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
                   </li>
                 </ul>
 
-                <p className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="inline-block h-px w-3 bg-muted-foreground/40" aria-hidden="true" />
+                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
                   Essas ações estão nos botões <span className="font-medium text-foreground">Gerar orçamento web</span> e <span className="font-medium text-foreground">Gerar orçamento PDF</span>, no topo da página.
                 </p>
               </section>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="shrink-0 border-t border-border/60 bg-background px-5 py-3 sm:px-6">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Fechar
             </Button>

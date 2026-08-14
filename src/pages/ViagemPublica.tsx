@@ -463,7 +463,6 @@ function getServiceDetails(service: TripService): { title: string; details: stri
       if (data.reservation_code) hotelDetails.push(`Reserva: ${data.reservation_code}`);
       if (data.room_type) hotelDetails.push(`Acomodação: ${roomMap[data.room_type] || data.room_type}`);
       if (data.meal_plan) hotelDetails.push(`Regime: ${mealMap[data.meal_plan] || data.meal_plan}`);
-      if (data.notes) hotelDetails.push(`Obs: ${data.notes}`);
       const nights = (() => { try { const [sy,sm,sd] = data.check_in.split('-').map(Number); const [ey,em,ed] = data.check_out.split('-').map(Number); return Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / (1000*60*60*24)); } catch { return null; } })();
       return { title: data.hotel_name, details: hotelDetails, dates: `${formatDate(data.check_in)} - ${formatDate(data.check_out)}${nights ? ` (${nights} noites)` : ''}` };
     }
@@ -1077,12 +1076,19 @@ function PublicServiceCard({ service }: { service: TripService }) {
           </div>
         )}
 
-        {/* Hotel - Special requests / Agency notes */}
-        {isHotel && (data.special_requests || data.agency_notes) && (
-          <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📝 Observações</p>
-            {data.special_requests && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Solicitações: {data.special_requests}</p>}
-            {data.agency_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>}
+        {/* Hotel - Notes / Special requests / Agency notes (full width) */}
+        {isHotel && (data.notes || data.special_requests || data.agency_notes) && (
+          <div className="mt-2 w-full min-w-0 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1.5">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">Observações:</p>
+            {data.notes && (
+              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.notes}</p>
+            )}
+            {data.special_requests && (
+              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">Solicitações: {data.special_requests}</p>
+            )}
+            {data.agency_notes && (
+              <p className="w-full min-w-0 text-[13px] italic text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.agency_notes}</p>
+            )}
           </div>
         )}
 

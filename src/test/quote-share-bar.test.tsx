@@ -172,8 +172,8 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
     expect(block).not.toContain('variant="outline"');
   });
 
-  it("bloco 'Depois das 5 etapas' com fundo branco e apenas borda azul", () => {
-    expect(guide).toContain("border border-primary/30 bg-background");
+  it("bloco 'Depois das 5 etapas' com fundo branco e borda neutra sutil", () => {
+    expect(guide).toContain("border border-border bg-background");
     expect(guide).not.toContain("bg-primary/5");
     expect(guide).toContain("Depois das 5 etapas: publique e compartilhe");
   });
