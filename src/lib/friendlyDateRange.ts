@@ -1,5 +1,3 @@
-import { parseLocalDateSafe } from "@/lib/dateParsing";
-
 /**
  * Datas amigáveis em pt-BR para os cards recolhidos da Carteira Digital.
  *
@@ -29,16 +27,53 @@ const MONTHS_PT = [
   "dezembro",
 ];
 
+/**
+ * Converte "YYYY-MM-DD" (ou timestamp ISO, usando só a parte da data) e o
+ * legado "DD/MM/YYYY" em Date local, rejeitando datas impossíveis.
+ *
+ * new Date(y, m - 1, d) normaliza silenciosamente (2026-13-40 → 2027-02-09),
+ * então validamos round-trip: ano/mês/dia resultantes precisam ser exatamente
+ * os informados. Assim 2026-02-29 e 31/02 são rejeitados, e 2028-02-29 passa.
+ */
 export function parseFriendlyDate(value: unknown): Date | null {
   if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
-  // Aceita "DD/MM/YYYY" legado convertendo para ISO antes do parse local.
-  const br = trimmed.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  const iso = br ? `${br[3]}-${br[2]}-${br[1]}` : trimmed;
-  const parsed = parseLocalDateSafe(iso);
-  if (!parsed || Number.isNaN(parsed.getTime())) return null;
+
+  let y: number;
+  let m: number;
+  let d: number;
+
+  const br = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (br) {
+    d = Number(br[1]);
+    m = Number(br[2]);
+    y = Number(br[3]);
+  } else {
+    // Data-only ou timestamp ISO: só a parte da data importa.
+    const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/);
+    if (!isoMatch) return null;
+    y = Number(isoMatch[1]);
+    m = Number(isoMatch[2]);
+    d = Number(isoMatch[3]);
+  }
+
+  if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) return null;
+  if (y < 1000 || y > 9999) return null;
+  if (m < 1 || m > 12) return null;
+  if (d < 1 || d > 31) return null;
+
+  const parsed = new Date(y, m - 1, d);
+  if (Number.isNaN(parsed.getTime())) return null;
+  // Round-trip: rejeita 31/02, 29/02 em ano não bissexto, etc.
+  if (
+    parsed.getFullYear() !== y ||
+    parsed.getMonth() !== m - 1 ||
+    parsed.getDate() !== d
+  ) {
+    return null;
+  }
   return parsed;
 }
 
