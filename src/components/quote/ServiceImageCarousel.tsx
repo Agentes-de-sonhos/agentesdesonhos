@@ -26,7 +26,7 @@ function ImageFallback({ alt, loading }: { alt: string; loading?: boolean }) {
 
 function GoogleAttribution({ attributions }: { attributions: string[] }) {
   return (
-    <p className="mt-1 text-[10px] text-muted-foreground/80 leading-snug">
+    <p className="mt-1.5 w-full min-w-0 px-3 py-1 text-center text-[10px] leading-relaxed text-muted-foreground/80 break-words [overflow-wrap:anywhere]">
       Fotos: Google Maps
       {attributions.length > 0 && (
         <>
