@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { isPublicUpdateContext } from "@/hooks/useAppVersion";
+import { isPublicUpdateContext, useAppVersion } from "@/hooks/useAppVersion";
 
 function setLocation(href: string) {
   const url = new URL(href);
@@ -75,10 +75,7 @@ describe("useAppVersion — no polling in white-label context", () => {
   it("does not fetch /version.json, set intervals nor listen to visibilitychange", async () => {
     setLocation("https://exemploagencia.com/");
     const { renderHook } = await import("@testing-library/react");
-    const { result } = renderHook(() => {
-      const mod = require("@/hooks/useAppVersion");
-      return mod.useAppVersion();
-    });
+    const { result } = renderHook(() => useAppVersion());
     expect(result.current.updateAvailable).toBe(false);
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(intervalSpy).not.toHaveBeenCalled();
