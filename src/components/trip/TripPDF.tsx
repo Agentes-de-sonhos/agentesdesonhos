@@ -35,7 +35,13 @@ export async function buildServiceImageResolver(services: TripService[]): Promis
     try {
       const resolved = await resolveServiceImages(refs, resolveServicePlaceId(service));
       resolved.forEach((r) => {
-        if (r.src) imageMap.set(r.ref, r.src);
+        if (!r.src) return;
+        // Sem place_id, resolveServiceImages devolve a própria URL legada como
+        // fallback. Isso NÃO é resolução real: aceitar reintroduziria a URL
+        // expirada no PDF. O critério é a igualdade com a referência crua —
+        // URLs frescas do googleusercontent seguem sendo aceitas.
+        if (isGoogleImageRef(r.ref) && r.src === r.ref) return;
+        imageMap.set(r.ref, r.src);
       });
     } catch {
       /* referências não resolvidas são simplesmente omitidas */
@@ -72,13 +78,20 @@ export function waitForWindowImages(win: Window, timeoutMs = 8000): Promise<void
         return;
       }
       let remaining = pending.length;
-      const settle = () => {
+      const settled = new WeakSet<object>();
+      const settleOnce = (img: HTMLImageElement) => {
+        if (settled.has(img)) return;
+        settled.add(img);
         remaining -= 1;
         if (remaining <= 0) finishAndClear();
       };
       pending.forEach((img) => {
-        img.addEventListener("load", settle, { once: true });
-        img.addEventListener("error", settle, { once: true });
+        const handler = () => settleOnce(img);
+        img.addEventListener("load", handler, { once: true });
+        img.addEventListener("error", handler, { once: true });
+        // Corrida: a imagem pode ter concluído entre o filtro e o registro dos
+        // listeners — nesse caso liquidamos aqui (uma única vez).
+        if (img.complete) settleOnce(img);
       });
     } catch {
       finishAndClear();
