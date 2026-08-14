@@ -69,3 +69,74 @@ export function shouldHideServiceAmount(quote: any, amount?: number | string | n
   if (!isPackagePricing(quote)) return false;
   return !(Number(amount) > 0);
 }
+
+/**
+ * Validação defensiva: `package` exige um valor fechado finito e maior que zero.
+ * Usada na UI (antes de habilitar o botão) e no hook (antes de gravar no banco).
+ */
+export function isValidPricingDecision(input: {
+  pricingMode: QuotePricingMode;
+  packageTotal?: number | null;
+}): boolean {
+  if (input.pricingMode !== 'package') return true;
+  const value = Number(input.packageTotal);
+  return Number.isFinite(value) && value > 0;
+}
+
+export const PACKAGE_TOTAL_REQUIRED_MESSAGE =
+  'Informe o valor total do pacote (maior que zero) para usar o valor fechado.';
+
+/** Avisos da IA que indicam total global sem valores individuais. */
+function warnsPackageWithoutItemValues(warnings?: string[] | null): boolean {
+  return (warnings || []).some((w) => {
+    const text = String(w || '').toLowerCase();
+    const mentionsTotal = text.includes('valor total') || text.includes('total do pacote');
+    const mentionsMissingItems =
+      text.includes('sem valores individuais') ||
+      text.includes('sem valor individual') ||
+      text.includes('sem valores por serviço') ||
+      text.includes('sem valores por servico');
+    return mentionsTotal && mentionsMissingItems;
+  });
+}
+
+export interface ImportPricingSuggestion {
+  pricingMode: QuotePricingMode;
+  /** Valor fechado sugerido (total global extraído), quando houver. */
+  packageTotal: number | null;
+  /** true quando existem total global E valores individuais: exige decisão explícita. */
+  needsExplicitChoice: boolean;
+  /** Aviso comparativo mostrado na etapa de resumo (ou null). */
+  mismatchWarning: string | null;
+}
+
+/**
+ * Sugestão de modo de precificação a partir do resultado da importação por IA.
+ * Função pura — testada em `src/test/quote-pricing.test.ts`.
+ */
+export function suggestPricingModeFromImport(input: {
+  globalTotal?: number | string | null;
+  itemsSum?: number | string | null;
+  warnings?: string[] | null;
+}): ImportPricingSuggestion {
+  const globalTotal = Number(input.globalTotal);
+  const total = Number.isFinite(globalTotal) && globalTotal > 0 ? globalTotal : 0;
+  const itemsSumRaw = Number(input.itemsSum);
+  const itemsSum = Number.isFinite(itemsSumRaw) && itemsSumRaw > 0 ? itemsSumRaw : 0;
+
+  if (total <= 0) {
+    return { pricingMode: 'itemized', packageTotal: null, needsExplicitChoice: false, mismatchWarning: null };
+  }
+
+  if (itemsSum <= 0 || warnsPackageWithoutItemValues(input.warnings)) {
+    return { pricingMode: 'package', packageTotal: total, needsExplicitChoice: false, mismatchWarning: null };
+  }
+
+  return {
+    pricingMode: 'itemized',
+    packageTotal: total,
+    needsExplicitChoice: true,
+    mismatchWarning:
+      'A IA encontrou um valor total do pacote e também valores individuais nos serviços. Escolha como o orçamento deve ser calculado.',
+  };
+}

@@ -1712,8 +1712,8 @@ export default function GerarOrcamento() {
         open={showFullPackage}
         onOpenChange={setShowFullPackage}
         quoteId={id}
-        onPricingDecision={({ pricingMode, packageTotal }) => {
-          setPricingMode({ pricingMode, packageTotal });
+        onPricingDecision={async ({ pricingMode, packageTotal }) => {
+          await setPricingMode({ pricingMode, packageTotal });
         }}
         onConfirmService={async (svc: FullPackageImportResult) => {
           await addService({

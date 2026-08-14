@@ -253,14 +253,18 @@ export function PublicInvestmentSummary({
     return Array.from(buckets.values());
   }, [services, groupingMode, globalPayment, useServicePayment, fmt, packageMode, totalAll]);
 
-  const showTotalCard = displayMode === "both" || (packageMode && displayMode !== "detailed");
+  // No modo pacote existe UMA única apresentação financeira: o card do pacote
+  // (com condições globais + valor total). Nunca repetir o total num segundo card.
+  const showTotalCard = packageMode ? false : displayMode === "both";
+  // O card do pacote continua visível mesmo com hideServiceList/displayMode.
+  const showItems = packageMode ? true : !hideServiceList;
 
   const methodsForFooter = parsePaymentMethods(globalPayment.methodLabel);
   const hasFooter = methodsForFooter.length > 0 || !!paymentTerms;
 
   // Se a lista foi ocultada, o total geral está desativado e não há rodapé,
   // evita renderizar uma seção vazia.
-  if (hideServiceList && !showTotalCard && !hasFooter) return null;
+  if (!showItems && !showTotalCard && !hasFooter) return null;
 
   const discountPct = globalPayment.fullPaymentDiscountPercent || 0;
   const totalAVista = discountPct > 0 ? totalAll * (1 - discountPct / 100) : null;
@@ -291,7 +295,7 @@ export function PublicInvestmentSummary({
       </div>
 
       {/* Cards de serviço — layout unificado conforme referência visual */}
-      {!hideServiceList && (
+      {showItems && (
       <ul className="space-y-4 list-none p-0">
         {items.map((item) => {
           const Icon = SERVICE_ICON[item.type] || Sparkles;

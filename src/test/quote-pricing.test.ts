@@ -49,3 +49,46 @@ describe('quotePricing', () => {
     expect(shouldHideServiceAmount({}, 0)).toBe(false);
   });
 });
+
+import { suggestPricingModeFromImport, isValidPricingDecision } from '@/lib/quotePricing';
+
+describe('sugestão de modo na importação por IA', () => {
+  it('total global 15000 com 5 serviços sem preço => package pré-selecionado', () => {
+    const r = suggestPricingModeFromImport({ globalTotal: 15000, itemsSum: 0, warnings: [] });
+    expect(r.pricingMode).toBe('package');
+    expect(r.packageTotal).toBe(15000);
+    expect(r.needsExplicitChoice).toBe(false);
+  });
+
+  it('warning de valor total sem valores individuais também sugere package', () => {
+    const r = suggestPricingModeFromImport({
+      globalTotal: 9800,
+      itemsSum: 500,
+      warnings: ['Valor total do pacote sem valores individuais por serviço'],
+    });
+    expect(r.pricingMode).toBe('package');
+  });
+
+  it('total global + soma individual > 0 não decide silenciosamente', () => {
+    const r = suggestPricingModeFromImport({ globalTotal: 15000, itemsSum: 12000, warnings: [] });
+    expect(r.pricingMode).toBe('itemized');
+    expect(r.needsExplicitChoice).toBe(true);
+    expect(r.mismatchWarning).toBeTruthy();
+    expect(r.packageTotal).toBe(15000);
+  });
+
+  it('sem total global mantém itemized', () => {
+    const r = suggestPricingModeFromImport({ globalTotal: null, itemsSum: 3000 });
+    expect(r.pricingMode).toBe('itemized');
+    expect(r.packageTotal).toBeNull();
+    expect(r.needsExplicitChoice).toBe(false);
+  });
+
+  it('package sem valor/zero é rejeitado', () => {
+    expect(isValidPricingDecision({ pricingMode: 'package', packageTotal: null })).toBe(false);
+    expect(isValidPricingDecision({ pricingMode: 'package', packageTotal: 0 })).toBe(false);
+    expect(isValidPricingDecision({ pricingMode: 'package', packageTotal: -5 })).toBe(false);
+    expect(isValidPricingDecision({ pricingMode: 'package', packageTotal: 1 })).toBe(true);
+    expect(isValidPricingDecision({ pricingMode: 'itemized' })).toBe(true);
+  });
+});

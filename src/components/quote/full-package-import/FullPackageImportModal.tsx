@@ -23,7 +23,12 @@ import { parsedCarToCarData, type ParsedCarRental } from "@/components/quote/car
 import { SERVICE_IMPORT_CONFIGS } from "@/components/quote/service-import/serviceImportConfigs";
 import type { GenericServiceKey } from "@/components/quote/service-import/GenericServiceSmartImport";
 import { CurrencyInput } from "@/components/shared/CurrencyInput";
-import type { QuotePricingMode } from "@/lib/quotePricing";
+import {
+  PACKAGE_TOTAL_REQUIRED_MESSAGE,
+  suggestPricingModeFromImport,
+  type QuotePricingMode,
+} from "@/lib/quotePricing";
+import { createPricingDecisionGate } from "@/lib/importPricingGate";
 
 /* ─────────────── Types ─────────────── */
 
@@ -72,7 +77,10 @@ interface Props {
    * Decisão de precificação tomada na etapa de resumo:
    * soma dos serviços ou valor fechado de pacote (com total editável).
    */
-  onPricingDecision?: (input: { pricingMode: QuotePricingMode; packageTotal: number | null }) => void;
+  onPricingDecision?: (input: {
+    pricingMode: QuotePricingMode;
+    packageTotal: number | null;
+  }) => Promise<void> | void;
 }
 
 const ALL_TYPES: { type: ServiceType; label: string; icon: typeof Plane }[] = [
@@ -139,6 +147,17 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   const [bulkImporting, setBulkImporting] = useState(false);
   const [pricingMode, setPricingMode] = useState<QuotePricingMode>("itemized");
   const [packageTotal, setPackageTotal] = useState<number | null>(null);
+  const [pricingMismatchWarning, setPricingMismatchWarning] = useState<string | null>(null);
+  const [pricingError, setPricingError] = useState<string | null>(null);
+  /** Portão de persistência da decisão (idempotente e serializado). */
+  const pricingGateRef = useRef(createPricingDecisionGate(async () => {}));
+  const pricingDecisionRef = useRef<((d: { pricingMode: QuotePricingMode; packageTotal: number | null }) => Promise<void> | void) | undefined>(onPricingDecision);
+  pricingDecisionRef.current = onPricingDecision;
+  useEffect(() => {
+    pricingGateRef.current = createPricingDecisionGate(async (decision) => {
+      await pricingDecisionRef.current?.(decision);
+    });
+  }, [open]);
 
   /* progress animation */
   useEffect(() => {
@@ -162,6 +181,9 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       setHardError(null);
       setPricingMode("itemized");
       setPackageTotal(null);
+      setPricingMismatchWarning(null);
+      setPricingError(null);
+      pricingGateRef.current.reset();
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }, [open]);
@@ -258,8 +280,21 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       const resp: AiResponse = body;
       setAiResponse(resp);
       setBlocks(resp.blocks);
-      // Pré-preenche o valor de pacote lido pela IA (editável na etapa de resumo).
-      setPackageTotal(Number(resp.trip_meta?.total_amount_brl ?? resp.trip_meta?.total_amount) || null);
+      // Pré-seleção do modo de precificação a partir do que a IA extraiu.
+      const itemsSum = resp.blocks.reduce((sum, b) => {
+        const mapped = mapBlockToService(b);
+        return sum + (Number(mapped?.amount) || 0);
+      }, 0);
+      const suggestion = suggestPricingModeFromImport({
+        globalTotal: resp.trip_meta?.total_amount_brl ?? resp.trip_meta?.total_amount,
+        itemsSum,
+        warnings: resp.warnings,
+      });
+      setPricingMode(suggestion.pricingMode);
+      setPackageTotal(suggestion.packageTotal);
+      setPricingMismatchWarning(suggestion.mismatchWarning);
+      setPricingError(null);
+      pricingGateRef.current.reset();
       setStatusByBlock(Object.fromEntries(resp.blocks.map((b) => [b.id, "pending" as ReviewStatus])));
       if (onTripMeta && resp.trip_meta && Object.keys(resp.trip_meta).length) onTripMeta(resp.trip_meta);
 
@@ -283,12 +318,41 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
     setStep("review");
   };
 
+  /**
+   * Persiste a decisão de precificação ANTES de qualquer serviço ser adicionado.
+   * Sem isso, `recalcQuoteTotal` do primeiro serviço poderia sobrescrever o total
+   * com a soma dos itens. Idempotente por assinatura.
+   */
+  const ensurePricingDecisionPersisted = async (): Promise<boolean> => {
+    if (!onPricingDecision) return true;
+    const decision = {
+      pricingMode: pricingMode,
+      packageTotal: pricingMode === "package" ? packageTotal : null,
+    };
+    const result = await pricingGateRef.current.ensure(decision);
+    if (result.ok === true) {
+      setPricingError(null);
+      return true;
+    }
+    const errorMessage = result.error;
+    // Mantém o modal aberto na etapa de resumo para o usuário corrigir.
+    setPricingError(errorMessage);
+    setStep("summary");
+    toast({
+      title: errorMessage === PACKAGE_TOTAL_REQUIRED_MESSAGE ? "Valor do pacote obrigatório" : "Erro ao salvar o valor",
+      description: errorMessage,
+      variant: "destructive",
+    });
+    return false;
+  };
+
   const handleConfirmBlock = async (idx: number, updated: AiBlock) => {
     const mapped = mapBlockToService(updated);
     if (!mapped) {
       toast({ title: "Não foi possível mapear este serviço", variant: "destructive" });
       return;
     }
+    if (!(await ensurePricingDecisionPersisted())) return;
     try {
       await onConfirmService(mapped);
       setStatusByBlock((s) => ({ ...s, [updated.id]: "confirmed" }));
@@ -311,6 +375,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   };
 
   const handleImportAllPending = async () => {
+    if (!(await ensurePricingDecisionPersisted())) return;
     const pendingBlocks = blocks.filter((b) => (statusByBlock[b.id] || "pending") === "pending");
     if (pendingBlocks.length === 0) {
       onOpenChange(false);
@@ -414,16 +479,15 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
               onJumpTo={(idx) => { setActiveBlockIdx(idx); setStep("review"); }}
               pricingMode={pricingMode}
               packageTotal={packageTotal}
+              mismatchWarning={pricingMismatchWarning}
+              pricingError={pricingError}
               onPricingModeChange={(mode) => {
                 setPricingMode(mode);
-                onPricingDecision?.({ pricingMode: mode, packageTotal: mode === "package" ? packageTotal : null });
+                setPricingError(null);
               }}
-              onPackageTotalChange={setPackageTotal}
-              onPackageTotalCommit={(value) => {
+              onPackageTotalChange={(value) => {
                 setPackageTotal(value);
-                if (pricingMode === "package") {
-                  onPricingDecision?.({ pricingMode: "package", packageTotal: value });
-                }
+                setPricingError(null);
               }}
             />
           )}
@@ -588,7 +652,8 @@ function ProcessingStep({ step }: { step: number }) {
 
 function SummaryStep({
   response, blocks, statusByBlock, onGoToReview, onJumpTo,
-  pricingMode, packageTotal, onPricingModeChange, onPackageTotalChange, onPackageTotalCommit,
+  pricingMode, packageTotal, mismatchWarning, pricingError,
+  onPricingModeChange, onPackageTotalChange,
 }: {
   response: AiResponse;
   blocks: AiBlock[];
@@ -597,9 +662,10 @@ function SummaryStep({
   onJumpTo: (idx: number) => void;
   pricingMode: QuotePricingMode;
   packageTotal: number | null;
+  mismatchWarning: string | null;
+  pricingError: string | null;
   onPricingModeChange: (mode: QuotePricingMode) => void;
   onPackageTotalChange: (value: number | null) => void;
-  onPackageTotalCommit: (value: number | null) => void;
 }) {
   const trip = response.trip_meta || {};
   const counts = useMemo(() => {
@@ -610,6 +676,10 @@ function SummaryStep({
 
   const pendingCount = blocks.filter((b) => statusByBlock[b.id] === "pending").length;
   const confirmedCount = blocks.filter((b) => statusByBlock[b.id] === "confirmed").length;
+  const itemsSum = useMemo(
+    () => blocks.reduce((sum, b) => sum + (Number(mapBlockToService(b)?.amount) || 0), 0),
+    [blocks],
+  );
 
   return (
     <div className="space-y-4">
@@ -668,12 +738,27 @@ function SummaryStep({
               <CurrencyInput
                 value={packageTotal}
                 onValueChange={onPackageTotalChange}
-                onBlur={() => onPackageTotalCommit(packageTotal)}
                 aria-label="Valor total do pacote"
               />
-              <p className="text-xs text-muted-foreground">
-                Confira e ajuste o valor lido pela IA antes de continuar.
-              </p>
+              {pricingError ? (
+                <p role="alert" className="text-xs font-medium text-destructive">{pricingError}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Confira e ajuste o valor lido pela IA. Ele é salvo quando você confirmar/importar os serviços.
+                </p>
+              )}
+            </div>
+          )}
+          {mismatchWarning && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-200">
+              <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <div className="space-y-0.5">
+                <p>{mismatchWarning}</p>
+                <p>
+                  Total global extraído: <strong>{fmtMoney(packageTotal, trip.currency)}</strong> · Soma dos itens:{" "}
+                  <strong>{fmtMoney(itemsSum, trip.currency)}</strong>
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
