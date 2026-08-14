@@ -530,10 +530,6 @@ Deno.serve(async (req) => {
       return json({ ok: true, invite_url: inviteUrl, emailed })
     }
 
-    if (action === 'invite_revoke' || action === 'invite_resend') {
-      // handled below
-    }
-
     /**
      * Convite de ativação/redefinição para colaborador LEGADO que existe em
      * agency_team_members mas nunca ganhou auth user sintético. Reutiliza o
