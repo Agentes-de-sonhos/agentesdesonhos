@@ -2247,7 +2247,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               }
             }, delay);
           };
-          const navGrid = (availableTabs.length > 0 || itineraryActivities.length > 0) ? (
+          const shortcutCount = availableTabs.length + (itineraryActivities.length > 0 ? 1 : 0);
+          const navGrid = shortcutCount > 0 ? (
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-px flex-1 bg-border/60" />
@@ -2256,7 +2257,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </span>
                 <div className="h-px flex-1 bg-border/60" />
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3">
+              <div className={cn("grid gap-2 sm:gap-3 auto-rows-fr", getShortcutGridClass(shortcutCount))}>
                 {availableTabs.map((type) => {
                   const Icon = SERVICE_ICONS[type];
                   const colors = SERVICE_COLORS[type];
@@ -2265,7 +2266,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       key={type}
                       onClick={() => setActiveGroupType(type)}
                       className={cn(
-                        "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
+                        "flex flex-col items-center justify-between gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97] h-full",
                         cn(colors.border, "hover:shadow-md"),
                         colors.hoverBg
                       )}
@@ -2273,7 +2274,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", colors.bg)}>
                         <Icon className={cn("h-5 w-5", colors.icon)} />
                       </div>
-                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">{SERVICE_LABELS[type]}</span>
+                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight break-words line-clamp-2">{SERVICE_LABELS[type]}</span>
                       <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{grouped[type].length}</span>
                     </button>
                   );
@@ -2284,7 +2285,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     <button
                       onClick={() => setItineraryOpen(true)}
                       className={cn(
-                        "flex flex-col items-center gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97]",
+                        "flex flex-col items-center justify-between gap-1.5 p-3 rounded-xl bg-card border shadow-sm transition-all duration-200 active:scale-[0.97] h-full",
                         cn(itColors.border, "hover:shadow-md"),
                         itColors.hoverBg
                       )}
@@ -2292,7 +2293,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", itColors.bg)}>
                         <CalendarDays className={cn("h-5 w-5", itColors.icon)} />
                       </div>
-                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight">Roteiro</span>
+                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight break-words line-clamp-2">Roteiro</span>
                       <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", itColors.badge)}>
                         {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
                       </span>
@@ -2306,12 +2307,12 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           return (
             <div className="space-y-5">
               {/* ── Mobile: nav → calendário/next cards (ordem original)
-                   Tablet/Desktop: navegação em largura total, depois coluna
-                   central mais estreita (referência editorial). ── */}
+                   Tablet/Desktop: quick navigation shares the same centered
+                   max-w-2xl column as the Next Service card below. ── */}
               <div className="flex flex-col gap-5">
 
-                {/* Navegação Rápida — largura total */}
-                <div className="space-y-5">
+                {/* Navegação Rápida — full width on mobile, centered max-w-2xl on md+ */}
+                <div className="md:mx-auto md:w-full md:max-w-2xl">
                   {navGrid}
                 </div>
 
