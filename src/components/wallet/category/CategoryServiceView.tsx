@@ -14,7 +14,8 @@ import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
 import {
   CATEGORY_CONFIG,
-  collectAttachments,
+  countServiceFiles,
+  formatFilesCountLabel,
   getServiceShortName,
   getServiceThumbnail,
   hasAdditionalDetails,
@@ -311,7 +312,9 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
       const thumb = getServiceThumbnail(service);
       const thumbPlaceId = resolveServicePlaceId(service);
       const status = resolveStatusBadge(compact.rawStatus);
-      const attachments = collectAttachments(service);
+      // Fonte única de arquivos: mesma lista normalizada do card expandido.
+      const filesCount = countServiceFiles(service);
+      const filesLabel = formatFilesCountLabel(filesCount);
       const expandable = hasAdditionalDetails(service);
 
       return (
@@ -386,17 +389,21 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
                   </span>
                 )}
               </div>
-              {compact.secondary && (
-                <p className="mt-0.5 text-[13px] text-muted-foreground leading-tight truncate">
-                  {compact.secondary}
-                </p>
+              {compact.details.length > 0 && (
+                <div className="mt-1 space-y-0.5">
+                  {compact.details.map((line) => (
+                    <p
+                      key={line}
+                      className="text-[13px] text-muted-foreground leading-snug break-words"
+                    >
+                      {line}
+                    </p>
+                  ))}
+                </div>
               )}
-              <div className="mt-1.5 flex items-center justify-between gap-2">
-                <span className="text-[12px] text-muted-foreground/90">
-                  {compact.quantity || ""}
-                </span>
+              <div className="mt-1.5 flex items-center justify-end gap-2">
                 <div className="flex items-center gap-1.5">
-                  {attachments.length > 0 && (
+                  {filesLabel && (
                     <span
                       role="button"
                       tabIndex={0}
@@ -411,11 +418,11 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
                           onOpenAttachments();
                         }
                       }}
-                      aria-label={`${compact.title} possui ${attachments.length} ${attachments.length === 1 ? "documento" : "documentos"}`}
+                      aria-label={`${compact.title} possui ${filesLabel}`}
                       className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-[hsl(var(--wallet-brand))] bg-[hsl(var(--wallet-brand-soft)/0.6)] hover:bg-[hsl(var(--wallet-brand-soft))] transition"
                     >
                       <Paperclip className="h-3.5 w-3.5" />
-                      {attachments.length}
+                      {filesLabel}
                     </span>
                   )}
                   {expandable && (
