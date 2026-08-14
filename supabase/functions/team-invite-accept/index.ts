@@ -104,8 +104,7 @@ Deno.serve(async (req) => {
       const { data: agencyProfile } = await admin.from('profiles')
         .select('agency_name, name').eq('user_id', invite.agency_id).maybeSingle()
       const agencyName = agencyProfile?.agency_name || agencyProfile?.name || 'sua agência'
-      const origin = typeof (invite as any).origin === 'string' ? '' : ''
-      const url = `https://app.agentesdesonhos.com.br/convite/${token}${origin}`
+      const url = `https://app.agentesdesonhos.com.br/convite/${token}`
       const emailed = await sendInviteEmail({
         to: invite.email, name: invite.full_name, agencyName,
         url, expiresAt: invite.expires_at,
