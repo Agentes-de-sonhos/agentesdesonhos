@@ -70,9 +70,8 @@ export function ServiceInitialFields({
               onChange={onDates}
               editorial={editorial}
               required
-              help={single ? undefined : service.period.help}
               error={errors.periodo || errors[service.period.start] || errors[service.period.end] || undefined}
-              className="md:col-span-2"
+              className="md:col-span-2 lg:col-span-1"
             />
           );
         }
@@ -100,7 +99,7 @@ export function ServiceInitialFields({
         const id = `${idPrefix}-${field.name}`;
         const value = String(values[field.name] ?? "");
         const error = errors[field.name];
-        const spanCls = field.span === 2 ? "md:col-span-2" : undefined;
+        const spanCls = field.span === 2 ? "md:col-span-2 lg:col-span-1" : undefined;
 
         if (field.search) {
           return (
@@ -158,7 +157,7 @@ export function ServiceInitialFields({
         }
 
         return (
-          <div key={field.name} className={cn("min-w-0", spanCls)}>
+          <div key={field.name} className={cn("relative min-w-0", spanCls)}>
             <Label htmlFor={id} className={labelCls}>
               {field.label}
               {field.required && <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>}
@@ -197,7 +196,12 @@ export function ServiceInitialFields({
             {error ? (
               <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-destructive">{error}</p>
             ) : field.help ? (
-              <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{field.help}</p>
+              <p
+                id={`${id}-help`}
+                className="mt-1 text-xs text-muted-foreground lg:absolute lg:left-0 lg:top-full lg:mt-1 lg:whitespace-nowrap"
+              >
+                {field.help}
+              </p>
             ) : null}
           </div>
         );
