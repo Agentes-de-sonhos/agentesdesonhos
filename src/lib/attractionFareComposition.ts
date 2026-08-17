@@ -184,11 +184,23 @@ export function compositionBase(comp: AttractionFareComposition): PaxSnapshot {
   };
 }
 
-/** `true` quando a distribuição difere do padrão global (houve ajuste manual). */
+/**
+ * `true` quando a distribuição difere do padrão global (houve ajuste manual).
+ *
+ * A comparação é feita PASSAGEIRO A PASSAGEIRO (category !== base), e não por
+ * contagens agregadas: trocar "Adulto 1 → Criança" e "Criança 1 → Adulto"
+ * mantém os totais idênticos, mas é uma configuração manual real que nunca
+ * pode ser auto-sincronizada/apagada. A semântica da regra etária é
+ * preservada: `age_rule.enabled` sempre marca a composição como personalizada.
+ */
 export function isCustomized(comp: AttractionFareComposition): boolean {
+  if (comp.age_rule?.enabled === true) return true;
+  if (comp.passengers.some((p) => p.category !== p.base)) return true;
+  // Rede de segurança para dados legados/inconsistentes onde `counts` salvo
+  // não corresponde ao mapeamento individual.
   const base = compositionBase(comp);
   const counts = comp.counts ?? deriveCounts(comp.passengers);
-  return comp.age_rule?.enabled === true || counts.adult !== base.adults || counts.child !== base.children;
+  return counts.adult !== base.adults || counts.child !== base.children;
 }
 
 /**
