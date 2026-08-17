@@ -1601,9 +1601,13 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
 
   // Composição tarifária exclusiva deste ingresso. Legado (sem composição)
   // é derivado do global sem recalcular o valor já salvo.
-  const [composition, setComposition] = useState<AttractionFareComposition>(() =>
-    normalizeComposition((init as any)?.fare_composition, { adults: adultsCount, children: childrenCount }),
-  );
+  // Composição padrão desatualizada acompanha automaticamente a viagem;
+  // composição personalizada é preservada e sinalizada para revisão.
+  const [composition, setComposition] = useState<AttractionFareComposition>(() => {
+    const pax = { adults: adultsCount, children: childrenCount };
+    const normalized = normalizeComposition((init as any)?.fare_composition, pax);
+    return autoSyncDefaultComposition(normalized, pax) ?? normalized;
+  });
   const [compositionError, setCompositionError] = useState<string | null>(null);
   const [compositionPending, setCompositionPending] = useState(false);
   const handleValidity = useCallback((error: string | null) => setCompositionError(error), []);
