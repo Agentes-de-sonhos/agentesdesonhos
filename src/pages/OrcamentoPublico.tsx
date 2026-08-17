@@ -43,6 +43,7 @@ import {
 import {
   getEffectiveQuoteTotal,
   isPackagePricing,
+  hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
 
@@ -739,7 +740,7 @@ function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote 
 function ServiceInvestmentInline({ service, quote }: { service: QuoteService; quote?: Quote }) {
   const amount = Number(service.amount) || 0;
   // Valor fechado de pacote: nenhum valor individual é exibido ao cliente.
-  if (quote && isPackagePricing(quote)) {
+  if (quote && hidesIndividualAmounts(quote)) {
     return (
       <p className="text-xs font-medium text-muted-foreground">{PACKAGE_INCLUDED_LABEL}</p>
     );
@@ -1241,7 +1242,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   quoteCurrency = qCurrency;
 
   // No modo pacote nenhum valor individual é exibido, independentemente da configuração.
-  const showDetailedPrices = (quote as any).show_detailed_prices !== false && !isPackagePricing(quote);
+  const showDetailedPrices = (quote as any).show_detailed_prices !== false && !hidesIndividualAmounts(quote);
   const paymentTerms = (quote as any).payment_terms as string | null;
   const validUntil = (quote as any).valid_until as string | null;
   const validityDisclaimer = (quote as any).validity_disclaimer as string | null;
@@ -1553,7 +1554,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             quote={quote}
             services={quote.services || []}
             displayMode={
-              (quote as any).hide_investment_total ? "detailed" : "both"
+              // No modo consolidado o total é sempre apresentado ao cliente.
+              (quote as any).hide_investment_total && investmentLayout !== "consolidated"
+                ? "detailed"
+                : "both"
             }
             groupingMode={investmentLayout === "ungrouped" ? "ungrouped" : "grouped"}
             globalPayment={{
