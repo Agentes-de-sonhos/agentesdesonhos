@@ -39,7 +39,7 @@ import {
   needsReview as fareNeedsReview,
   normalizeComposition as normalizeFareComposition,
 } from "@/lib/attractionFareComposition";
-import { QuoteInvestmentDisplayCard } from "@/components/quote/QuoteInvestmentDisplayCard";
+import { QuoteTotalAmountCard } from "@/components/quote/QuoteTotalAmountCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -704,10 +704,16 @@ export default function GerarOrcamento() {
 
     // Default: nos modos detalhados/agrupados, o total consolidado fica oculto.
     // O usuário pode reverter manualmente. Mantém escolha existente nos demais casos.
+    // Default: nos modos detalhados/agrupados, o total consolidado começa oculto
+    // (toggle desligado). No consolidado, o total é sempre exibido.
     let nextHideInvestmentTotal = hideInvestmentTotal;
     if ((value === "ungrouped" || value === "grouped") && !hideInvestmentTotal) {
       nextHideInvestmentTotal = true;
       setHideInvestmentTotal(true);
+    }
+    if (value === "consolidated" && hideInvestmentTotal) {
+      nextHideInvestmentTotal = false;
+      setHideInvestmentTotal(false);
     }
 
     const { error } = await supabase
@@ -1536,14 +1542,7 @@ export default function GerarOrcamento() {
 
           return (
           <div className="space-y-4">
-                  <QuoteInvestmentDisplayCard
-                    quote={quote}
-                    hideTotal={hideInvestmentTotal}
-                    onChangeHideTotal={(hide) => handleToggleHideInvestmentTotal(hide)}
-                    onSavePricing={(input) => setPricingMode(input)}
-                    savingPricing={isSavingPricingMode}
-                  />
-                  {/* Nova lógica: O QUE exibir para o cliente (3 opções consolidadas) */}
+                  {/* O QUE exibir para o cliente (3 modalidades) */}
                   <div className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -1592,6 +1591,32 @@ export default function GerarOrcamento() {
                     )}
 
                   </div>
+
+                  {/* Valor total do orçamento: soma automática com edição manual */}
+                  <QuoteTotalAmountCard
+                    quote={quote}
+                    onSavePricing={(input) => setPricingMode(input)}
+                    saving={isSavingPricingMode}
+                  />
+
+                  {/* Toggle do total geral: só nas modalidades detalhada/agrupada */}
+                  {(effectiveLayout === "ungrouped" || effectiveLayout === "grouped") && (
+                    <div className="flex items-start justify-between gap-3 rounded-xl border bg-card p-4 shadow-sm">
+                      <div className="min-w-0">
+                        <Label htmlFor="show-investment-total" className="text-sm font-medium">
+                          Exibir valor total do investimento
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Quando ligado, o cliente vê também o valor total geral no final da apresentação.
+                        </p>
+                      </div>
+                      <Switch
+                        id="show-investment-total"
+                        checked={!hideInvestmentTotal}
+                        onCheckedChange={(checked) => handleToggleHideInvestmentTotal(!checked)}
+                      />
+                    </div>
+                  )}
 
                   {effectiveLayout === "consolidated" && (
                   <>
