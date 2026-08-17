@@ -1554,10 +1554,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             quote={quote}
             services={quote.services || []}
             displayMode={
-              // No modo consolidado o total é sempre apresentado ao cliente.
-              (quote as any).hide_investment_total && investmentLayout !== "consolidated"
-                ? "detailed"
-                : "both"
+              (quote as any).hide_investment_total ? "detailed" : "both"
             }
             groupingMode={investmentLayout === "ungrouped" ? "ungrouped" : "grouped"}
             globalPayment={{
