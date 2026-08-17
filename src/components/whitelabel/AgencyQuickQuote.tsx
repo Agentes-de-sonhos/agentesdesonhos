@@ -308,7 +308,7 @@ export function AgencyQuickQuote({
             // Desktop: reserva duas linhas de rótulo para que TODOS os labels e
             // caixas comecem na mesma altura, mesmo em colunas compactas, e
             // espaço inferior para textos de ajuda ancorados sob o campo.
-            "lg:pb-5 lg:[&_label]:flex lg:[&_label]:min-h-[2.1rem] lg:[&_label]:items-end",
+            "lg:pb-5 lg:[&_label]:flex lg:[&_label]:min-h-[2.1rem] lg:[&_label]:items-end lg:[&_label]:whitespace-nowrap",
             editorial ? "gap-4 border-border/70 pt-5 lg:gap-3" : "gap-3 border-border/60 pt-4 lg:gap-2.5",
             initialGridClass(service.key),
           )}
