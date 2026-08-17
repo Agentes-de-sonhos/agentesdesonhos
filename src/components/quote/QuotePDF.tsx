@@ -228,7 +228,14 @@ function getServiceDetails(service: QuoteService): string[] {
       break;
     case "attraction":
       details.push([data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name);
-      details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity || 1}`);
+      {
+        const fareCounts = readCompositionCounts(data);
+        details.push(
+          fareCounts
+            ? `Data: ${formatDate(data.date)} | Cobrança: ${formatCompositionLabel(fareCounts)}`
+            : `Data: ${formatDate(data.date)} | Quantidade: ${data.quantity || 1}`,
+        );
+      }
       if (data.adult_price > 0) details.push(`Adulto: ${Number(data.adult_price).toFixed(2)}`);
       if (data.child_price > 0) details.push(`Criança: ${Number(data.child_price).toFixed(2)}`);
       break;
