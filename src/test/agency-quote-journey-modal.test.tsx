@@ -171,7 +171,7 @@ describe("pop-up da jornada de cotação White Label", () => {
     // Nenhuma ação da etapa inicial leva para fora do modal.
     expect(screen.queryByRole("button", { name: /editar dados iniciais/i })).toBeNull();
 
-    fireEvent.change(screen.getByLabelText(/classe/i), { target: { value: "Executiva" } });
+    fireEvent.change(screen.getByLabelText(/adultos/i), { target: { value: "3" } });
     fireEvent.click(continueBtn());
     fireEvent.click(continueBtn());
     fireEvent.change(screen.getByLabelText(/nome/i), { target: { value: "Maria Souza" } });
@@ -186,8 +186,7 @@ describe("pop-up da jornada de cotação White Label", () => {
     expect(onEditQuickValues).not.toHaveBeenCalled();
 
     // Dados preservados e retorno ao resumo com o contato intacto.
-    expect(screen.getByLabelText(/adultos/i)).toHaveValue(2);
-    expect(screen.getByLabelText(/classe/i)).toHaveValue("Executiva");
+    expect(screen.getByLabelText(/adultos/i)).toHaveValue(3);
     fireEvent.click(continueBtn());
     expect(screen.getByText("Revise sua solicitação")).toBeInTheDocument();
     expect(screen.getByText("maria@exemplo.com")).toBeInTheDocument();
