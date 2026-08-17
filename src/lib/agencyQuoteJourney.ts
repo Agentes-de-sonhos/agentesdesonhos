@@ -296,6 +296,13 @@ export function contextFromService(
   if (criancas) next.criancas = Math.max(0, Math.min(MAX_CHILDREN, num(criancas, previous.criancas)));
   next.idades_criancas = syncChildAges(next.idades_criancas, next.criancas);
 
+  // Idades já informadas no bloco inicial (texto) hidratam o contexto.
+  const ages = str(values, "idades_criancas");
+  if (ages && next.criancas > 0 && next.idades_criancas.some((age) => !age)) {
+    const parsed = parseChildAges(ages, next.criancas);
+    next.idades_criancas = next.idades_criancas.map((age, index) => age || parsed[index] || "");
+  }
+
   return next;
 }
 
