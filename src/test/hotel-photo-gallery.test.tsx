@@ -230,11 +230,15 @@ describe("HotelPhotoGallery", () => {
     await waitFor(() =>
       expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(1)),
     );
-    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
-    const input2 = screen.getByPlaceholderText("Cole aqui o link direto da imagem");
+    if (!screen.queryByTestId("hotel-gallery-url-form")) {
+      fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
+    }
+    const input2 = await screen.findByPlaceholderText("Cole aqui o link direto da imagem");
     fireEvent.change(input2, { target: { value: "https://cdn.example/dup.jpg" } });
     fireEvent.click(screen.getByLabelText("Adicionar foto"));
-    expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("já está na galeria");
+    await waitFor(() =>
+      expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("já está na galeria"),
+    );
   });
 
   it("ao atingir 10 fotos desabilita novas adições e mostra a mensagem de limite", async () => {
