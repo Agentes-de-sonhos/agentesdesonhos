@@ -9,6 +9,16 @@ import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
+import { AttractionFareCompositionEditor } from "@/components/quote/AttractionFareCompositionEditor";
+import {
+  billableQuantity,
+  computeAttractionTotal,
+  formatCompositionLabel,
+  needsReview,
+  normalizeComposition,
+  totalQuantity as fareTotalQuantity,
+  type AttractionFareComposition,
+} from "@/lib/attractionFareComposition";
 import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
