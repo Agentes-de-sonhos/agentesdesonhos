@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ChevronDown, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,9 +49,9 @@ export function AttractionFareCompositionEditor({ value, onChange, pax, children
   const outOfSync = needsReview(value, pax);
   const customized = isCustomized(value);
 
-  // Reporta validade sem efeito colateral tardio (render puro + callback).
-  const lastReported = useMemo(() => ruleError, [ruleError]);
-  if (onValidityChange) onValidityChange(lastReported);
+  useEffect(() => {
+    onValidityChange?.(ruleError);
+  }, [ruleError, onValidityChange]);
 
   const updateRule = (patch: Partial<AttractionFareComposition["age_rule"]>) => {
     const next = { ...value, age_rule: { ...value.age_rule, ...patch } };
