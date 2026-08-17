@@ -2813,38 +2813,12 @@ function ResolvedThumb({ imageRef, placeId, alt, className }: { imageRef: string
   // Hotel mode
   if (hotelMode) {
     return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          {placeId && (
-            <div className="flex-1">
-              <GoogleHotelPhotos
-                placeId={placeId}
-                onPhotosSelected={handleGooglePhotosSelected}
-                onPhotoRemoved={handleGooglePhotoRemoved}
-                existingUrls={imageUrls}
-                autoShow
-              />
-            </div>
-          )}
-          {canAddMore && (
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
-              title="Enviar foto própria"
-            >
-              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
-              {uploading ? "Otimizando..." : "Upload"}
-            </button>
-          )}
-        </div>
-        {statusLine}
-        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
-        {!placeId && imageUrls.length === 0 && (
-          <p className="text-xs text-muted-foreground italic">Selecione um hotel acima para carregar fotos automaticamente</p>
-        )}
-      </div>
+      <HotelPhotoGallery
+        imageUrls={imageUrls}
+        onImageUrlsChange={onImageUrlsChange}
+        placeId={placeId}
+        hasSavedService={hasSavedService}
+      />
     );
   }
 
