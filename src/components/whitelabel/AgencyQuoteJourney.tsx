@@ -17,10 +17,13 @@ import {
 import { EDITORIAL_ROOT_CLASS, isEditorialTheme } from "@/lib/agencySiteTheme";
 import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
 import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
+import { LocationSearchInput } from "@/components/whitelabel/LocationSearchInput";
+import { DestinationTagsInput } from "@/components/whitelabel/DestinationTagsInput";
 import {
   CONTACT_CHANNELS, CONTACT_TIMES, EMPTY_CONTACT,
   describeServiceValues, fieldIsVisible, formFields, initialServiceValues, isMultiRoute,
-  mergeServiceValues, quickQuoteFields, serviceByKey, validateContactStep, validateServiceStep,
+  mergeServiceValues, periodFieldNames, periodMode, quickQuoteFields, serviceByKey,
+  validateContactStep, validateServiceStep,
   type ContactValues, type RequestField, type RequestService, type ServiceValues,
 } from "@/lib/agencySiteRequests";
 import {
@@ -72,6 +75,41 @@ function FieldControl({
           <Label htmlFor={id} className="text-sm font-normal">{field.label}</Label>
         </div>
       </div>
+    );
+  }
+
+  if (field.search) {
+    return (
+      <LocationSearchInput
+        id={id}
+        label={field.label}
+        kind={field.search}
+        value={String(value ?? "")}
+        onChange={onChange}
+        placeholder={field.placeholder}
+        error={error}
+        help={field.help}
+        required={field.required}
+        editorial={editorial}
+        className={field.span === 2 ? "sm:col-span-2" : ""}
+      />
+    );
+  }
+
+  if (field.type === "tags") {
+    return (
+      <DestinationTagsInput
+        id={id}
+        label={field.label}
+        value={String(value ?? "")}
+        onChange={onChange}
+        placeholder={field.placeholder}
+        error={error}
+        help={field.help}
+        required={field.required}
+        editorial={editorial}
+        className={field.span === 2 ? "sm:col-span-2" : ""}
+      />
     );
   }
 
