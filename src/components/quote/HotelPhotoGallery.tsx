@@ -102,7 +102,7 @@ export function HotelPhotoGallery({
         setFeedback(null);
         return res.urls;
       }
-      setFeedback({ tone: "error", text: res.error });
+      setFeedback({ tone: "error", text: res.error || HOTEL_GALLERY_LIMIT_MESSAGE });
       return res.urls;
     });
     return ok;
