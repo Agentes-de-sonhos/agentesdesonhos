@@ -831,6 +831,7 @@ export default function GerarOrcamento() {
         for (const item of pendingFareSync) {
           await updateService({
             serviceId: item.id,
+            service_type: "attraction",
             service_data: item.service_data as any,
             amount: item.amount,
           });
