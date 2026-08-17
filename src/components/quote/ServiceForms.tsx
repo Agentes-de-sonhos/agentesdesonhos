@@ -1605,6 +1605,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
     normalizeComposition((init as any)?.fare_composition, { adults: adultsCount, children: childrenCount }),
   );
   const [compositionError, setCompositionError] = useState<string | null>(null);
+  const [compositionPending, setCompositionPending] = useState(false);
   const handleValidity = useCallback((error: string | null) => setCompositionError(error), []);
 
   const form = useForm<z.infer<typeof attractionSchema>>({
@@ -1630,7 +1631,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   const paxOutOfSync = needsReview(composition, { adults: adultsCount, children: childrenCount });
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
-    if (compositionError || paxOutOfSync) return;
+    if (compositionError || paxOutOfSync || compositionPending) return;
     const total = computeAttractionTotal({
       counts: composition.counts,
       adultPrice: values.adult_price,
@@ -1696,6 +1697,14 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
           <FormItem><FormLabel>Descrição <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><TextareaWithTemplate placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
+        <AttractionFareCompositionEditor
+          value={composition}
+          onChange={setComposition}
+          pax={{ adults: adultsCount, children: childrenCount }}
+          onValidityChange={handleValidity}
+          onPendingChange={setCompositionPending}
+        />
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="adult_price" render={({ field }) => (
             <FormItem>
@@ -1727,13 +1736,6 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
           )} />
         </div>
 
-        <AttractionFareCompositionEditor
-          value={composition}
-          onChange={setComposition}
-          pax={{ adults: adultsCount, children: childrenCount }}
-          onValidityChange={handleValidity}
-        />
-
         {/* Total breakdown */}
         {(adultPrice > 0 || childPrice > 0) && (
           <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
@@ -1754,14 +1756,17 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
 
         {photoSlot}
         {renderPaymentSlot(paymentSlot, totalAmount)}
-        {(compositionError || paxOutOfSync) && (
+        {(compositionError || paxOutOfSync || compositionPending) && (
           <p className="text-xs text-destructive">
-            {compositionError || "Atualize a composição tarifária deste ingresso antes de salvar."}
+            {compositionError ||
+              (compositionPending
+                ? "Confirme ou cancele a composição tarifária deste ingresso antes de salvar."
+                : "A composição da viagem foi alterada. Revise a configuração tarifária deste ingresso.")}
           </p>
         )}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading || !!compositionError || paxOutOfSync}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
+          <Button type="submit" disabled={isLoading || !!compositionError || paxOutOfSync || compositionPending}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
         </div>
       </form>
     </Form>
