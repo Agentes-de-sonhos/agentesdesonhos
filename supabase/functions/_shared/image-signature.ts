@@ -53,7 +53,8 @@ export function normalizeRemoteImageUrl(raw: string): string {
 /** SHA-256 hex de um texto (identidade estável da URL de origem). */
 export async function sha256Hex(input: string | Uint8Array): Promise<string> {
   const data = typeof input === "string" ? new TextEncoder().encode(input) : input;
-  const digest = await crypto.subtle.digest("SHA-256", data);
+  const buffer = data.slice().buffer as ArrayBuffer;
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");

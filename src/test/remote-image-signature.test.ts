@@ -4,7 +4,7 @@ import {
   normalizeRemoteImageUrl,
   sha256Hex,
   extensionForContentType,
-} from "../../supabase/functions/_shared/remote-image-fetch.ts";
+} from "../../supabase/functions/_shared/image-signature.ts";
 
 const withPad = (head: number[]) => new Uint8Array([...head, ...Array(16).fill(0)]);
 
