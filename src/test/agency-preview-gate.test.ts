@@ -106,11 +106,18 @@ describe("rotas do domínio da agência", () => {
   });
 
   it("mantém intactas as rotas públicas existentes", () => {
+    // As rotas de ferramentas/documentos passaram a ser declaradas na
+    // fronteira central (agencyPublicToolRoutes), fora do shell institucional.
+    const TOOLS = readFileSync("src/lib/agencyPublicToolRoutes.ts", "utf8");
     for (const path of [
       "/orcamento/:code",
       "/roteiro/:code",
       "/carteira/:code",
       "/fatura/:code",
+    ]) {
+      expect(TOOLS).toContain(`"${path}"`);
+    }
+    for (const path of [
       "/ofertas",
       "/area-do-cliente",
     ]) {
