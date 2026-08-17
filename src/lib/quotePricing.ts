@@ -26,6 +26,66 @@ export function isPackagePricing(quote: any): boolean {
   return getQuotePricingMode(quote) === 'package';
 }
 
+/**
+ * Layout de apresentação do investimento (item 3 do wizard).
+ * `legacy` = orçamentos antigos sem escolha explícita.
+ */
+export type InvestmentPresentationLayout = 'consolidated' | 'ungrouped' | 'grouped' | 'legacy';
+
+export function getInvestmentPresentationLayout(quote: any): InvestmentPresentationLayout {
+  const value = quote?.investment_summary_layout;
+  return value === 'consolidated' || value === 'ungrouped' || value === 'grouped' ? value : 'legacy';
+}
+
+/**
+ * O valor total manual (pacote fechado) só esconde os valores individuais
+ * quando a modalidade apresentada é o total consolidado. Em "valores
+ * detalhados por serviço" e "agrupar por tipo de serviço", os valores
+ * cadastrados continuam visíveis e apenas o total geral usa o valor manual.
+ */
+export function hidesIndividualAmounts(quote: any): boolean {
+  if (!isPackagePricing(quote)) return false;
+  const layout = getInvestmentPresentationLayout(quote);
+  return layout === 'consolidated' || layout === 'legacy';
+}
+
+/** Serviço sem valor informado (null/undefined/''). Zero explícito = gratuito intencional. */
+export function isServiceAmountMissing(service: AmountLike | null | undefined): boolean {
+  const raw = service?.amount;
+  if (raw === null || raw === undefined || raw === '') return true;
+  return !Number.isFinite(Number(raw));
+}
+
+export interface QuoteTotalState {
+  /** true quando existe um valor total definido manualmente. */
+  manual: boolean;
+  manualAmount: number;
+  servicesSum: number;
+  /** Total efetivo apresentado ao cliente. */
+  total: number;
+  servicesCount: number;
+  servicesWithoutValue: number;
+  /** true quando ao menos um serviço tem valor > 0. */
+  hasAnyServiceValue: boolean;
+}
+
+/** Estado do bloco "Valor total do orçamento" na área administrativa. */
+export function computeQuoteTotalState(quote: any, services?: AmountLike[] | null): QuoteTotalState {
+  const list = (services ?? quote?.services ?? []) as AmountLike[];
+  const servicesSum = sumServiceAmounts(list);
+  const manualAmount = getPackageTotalAmount(quote);
+  const manual = isPackagePricing(quote) && manualAmount > 0;
+  return {
+    manual,
+    manualAmount,
+    servicesSum,
+    total: manual ? manualAmount : servicesSum,
+    servicesCount: list.length,
+    servicesWithoutValue: list.filter((s) => isServiceAmountMissing(s)).length,
+    hasAnyServiceValue: list.some((s) => Number(s?.amount) > 0),
+  };
+}
+
 /** Valor fechado do pacote (0 quando ausente/inválido). */
 export function getPackageTotalAmount(quote: any): number {
   const value = Number(quote?.package_total_amount);
