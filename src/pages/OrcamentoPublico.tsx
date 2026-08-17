@@ -33,6 +33,7 @@ import CruiseCabinOptions from "@/components/quote/CruiseCabinOptions";
 import ShipVideoEmbed from "@/components/quote/ShipVideoEmbed";
 import { normalizeCruiseCabins, cabinOptionLabel } from "@/lib/cruiseCabins";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
+import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import {
   computeExtrasTotal,
   computeExtraAmount,

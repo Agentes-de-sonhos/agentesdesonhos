@@ -9,6 +9,7 @@ import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsInclude
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
 import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
+import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import {
   getEffectiveQuoteTotal,
   isPackagePricing,
