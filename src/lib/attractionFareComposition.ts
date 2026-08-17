@@ -25,11 +25,13 @@ export interface FarePassenger {
 
 export interface FareAgeRule {
   enabled: boolean;
-  /** Idade máxima (inclusive) para ser gratuito. */
+  /** Idade máxima (inclusive) para ser gratuito/isento. */
   free_max_age?: number | null;
   /** Faixa de criança (inclusive). */
   child_min_age?: number | null;
   child_max_age?: number | null;
+  /** Idade a partir da qual o passageiro é cobrado como adulto. */
+  adult_min_age?: number | null;
 }
 
 export interface FareCounts {
@@ -57,6 +59,7 @@ export const EMPTY_AGE_RULE: FareAgeRule = {
   free_max_age: null,
   child_min_age: null,
   child_max_age: null,
+  adult_min_age: null,
 };
 
 const CATEGORY_LABEL: Record<FareCategory, [string, string]> = {
@@ -157,6 +160,7 @@ export function normalizeComposition(
     free_max_age: Number.isFinite(Number(ruleRaw.free_max_age)) ? Number(ruleRaw.free_max_age) : null,
     child_min_age: Number.isFinite(Number(ruleRaw.child_min_age)) ? Number(ruleRaw.child_min_age) : null,
     child_max_age: Number.isFinite(Number(ruleRaw.child_max_age)) ? Number(ruleRaw.child_max_age) : null,
+    adult_min_age: Number.isFinite(Number(ruleRaw.adult_min_age)) ? Number(ruleRaw.adult_min_age) : null,
   };
 
   const snapRaw = (source?.pax_snapshot || {}) as Partial<PaxSnapshot>;
@@ -257,7 +261,7 @@ export function setPassengerAge(
 
 export function validateAgeRule(rule: FareAgeRule): string | null {
   if (!rule.enabled) return null;
-  const values = [rule.free_max_age, rule.child_min_age, rule.child_max_age];
+  const values = [rule.free_max_age, rule.child_min_age, rule.child_max_age, rule.adult_min_age];
   if (values.every((v) => v === null || v === undefined)) {
     return 'Informe pelo menos uma faixa de idade para usar a regra etária.';
   }
@@ -274,6 +278,13 @@ export function validateAgeRule(rule: FareAgeRule): string | null {
   if (free != null && min != null && Number(free) >= Number(min)) {
     return 'A idade máxima de gratuidade deve ser menor que a idade mínima de criança.';
   }
+  const adult = rule.adult_min_age;
+  if (adult != null && max != null && Number(adult) <= Number(max)) {
+    return 'O início da idade adulta deve ser maior que a idade máxima infantil.';
+  }
+  if (adult != null && free != null && Number(adult) <= Number(free)) {
+    return 'O início da idade adulta deve ser maior que a idade máxima de gratuidade.';
+  }
   return null;
 }
 
@@ -285,6 +296,7 @@ export function applyAgeRule(comp: AttractionFareComposition): AttractionFareCom
     if (p.age === null || p.age === undefined) return p;
     const age = Number(p.age);
     if (rule.free_max_age != null && age <= Number(rule.free_max_age)) return { ...p, category: 'free' as FareCategory };
+    if (rule.adult_min_age != null && age >= Number(rule.adult_min_age)) return { ...p, category: 'adult' as FareCategory };
     const min = rule.child_min_age;
     const max = rule.child_max_age;
     if (min != null || max != null) {

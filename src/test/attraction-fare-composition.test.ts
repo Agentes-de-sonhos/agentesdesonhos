@@ -11,6 +11,7 @@ import {
   normalizeComposition,
   readCompositionCounts,
   reconcileComposition,
+  setPassengerAge,
   setPassengerCategory,
   totalQuantity,
   validateAgeRule,
@@ -119,5 +120,27 @@ describe("compatibilidade com dados legados", () => {
     });
     const comp = buildDefaultComposition({ adults: 1, children: 0 });
     expect(readCompositionCounts({ fare_composition: comp })).toEqual({ adult: 1, child: 0, free: 0 });
+  });
+});
+
+describe('regra etária com início adulto', () => {
+  it('valida incoerência entre criança e adulto', () => {
+    expect(
+      validateAgeRule({ enabled: true, free_max_age: 2, child_min_age: 3, child_max_age: 12, adult_min_age: 10 }),
+    ).toBeTruthy();
+    expect(
+      validateAgeRule({ enabled: true, free_max_age: 2, child_min_age: 3, child_max_age: 12, adult_min_age: 13 }),
+    ).toBeNull();
+  });
+
+  it('classifica como adulto a partir da idade adulta', () => {
+    const base = normalizeComposition(undefined, { adults: 1, children: 2 });
+    const withAges = setPassengerAge(setPassengerAge(base, base.passengers[1].id, 1), base.passengers[2].id, 15);
+    const ruled = applyAgeRule({
+      ...withAges,
+      age_rule: { enabled: true, free_max_age: 2, child_min_age: 3, child_max_age: 12, adult_min_age: 13 },
+    });
+    expect(ruled.counts).toEqual({ adult: 2, child: 0, free: 1 });
+    expect(ruled.counts.adult + ruled.counts.child + ruled.counts.free).toBe(3);
   });
 });
