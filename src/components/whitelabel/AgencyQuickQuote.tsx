@@ -8,6 +8,7 @@ import { AgencyQuoteJourney } from "@/components/whitelabel/AgencyQuoteJourney";
 import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
 import { ServiceInitialFields } from "@/components/whitelabel/ServiceInitialFields";
 import { isEditorialTheme } from "@/lib/agencySiteTheme";
+import { initialGridClass } from "@/lib/agencyInitialGrid";
 import {
   REQUEST_SERVICES, initialBlockFields, initialServiceValues, isMultiRoute, periodMode, serviceByKey,
   validateQuickStep,
@@ -300,11 +301,12 @@ export function AgencyQuickQuote({
         </div>
 
         <div
-          className={
-            editorial
-              ? "grid gap-4 border-t border-border/70 pt-5 md:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:items-end"
-              : "grid gap-3 border-t border-border/60 pt-4 md:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:items-end"
-          }
+          data-testid="wl-initial-grid"
+          className={cn(
+            "grid border-t md:items-end",
+            editorial ? "gap-4 border-border/70 pt-5 lg:gap-3" : "gap-3 border-border/60 pt-4 lg:gap-2.5",
+            initialGridClass(service.key),
+          )}
         >
           <ServiceInitialFields
             service={service}
@@ -321,14 +323,15 @@ export function AgencyQuickQuote({
 
           <Button
             size="lg"
-            className={
+            className={cn(
+              "w-full min-w-0 whitespace-nowrap px-4",
               editorial
-                ? "mt-2 h-12 w-full rounded-lg bg-[hsl(var(--wl-ink))] px-6 text-[15px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:w-auto"
-                : "mt-1.5 h-11 w-full rounded-xl md:w-auto"
-            }
+                ? "mt-2 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-[15px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:mt-0"
+                : "mt-1.5 h-11 rounded-xl md:mt-0",
+            )}
             onClick={startJourney}
           >
-            Solicitar cotação <ArrowRight className="ml-2 h-4 w-4" />
+            Solicitar <ArrowRight className="ml-2 h-4 w-4 shrink-0" />
           </Button>
         </div>
 

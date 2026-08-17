@@ -59,6 +59,8 @@ export function ServiceInitialFields({
         if (periodNames.includes(field.name)) {
           if (!service.period || field.name !== service.period.start || !period) return null;
           const single = period === "single";
+          // Sem texto auxiliar de intervalo aqui: ele desalinhava a linha única
+          // do bloco inicial (o calendário já é autoexplicativo).
           return (
             <TripDatePicker
               key="periodo"
