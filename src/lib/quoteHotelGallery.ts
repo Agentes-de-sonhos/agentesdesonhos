@@ -63,9 +63,12 @@ export function dedupeImageRefs(list: string[]): string[] {
   return out;
 }
 
-export type AddImageResult =
-  | { ok: true; urls: string[] }
-  | { ok: false; urls: string[]; error: string };
+export interface AddImageResult {
+  ok: boolean;
+  urls: string[];
+  /** Motivo da recusa quando `ok` é falso. */
+  error?: string;
+}
 
 /**
  * Adiciona uma referência ao rascunho respeitando limite e duplicidade.
