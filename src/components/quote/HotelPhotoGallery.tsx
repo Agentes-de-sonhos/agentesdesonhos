@@ -97,12 +97,12 @@ export function HotelPhotoGallery({
     let ok = false;
     setDraft((prev) => {
       const res = addImageRef(prev, ref);
-      if (!res.ok) {
-        setFeedback({ tone: "error", text: res.error });
+      if (res.ok) {
+        ok = true;
+        setFeedback(null);
         return res.urls;
       }
-      ok = true;
-      setFeedback(null);
+      setFeedback({ tone: "error", text: res.error });
       return res.urls;
     });
     return ok;
