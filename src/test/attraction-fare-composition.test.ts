@@ -264,6 +264,6 @@ describe('detecção de personalização por passageiro (swap com contagem igual
     comp = setPassengerCategory(comp, 'child-1', 'adult');
     const round = normalizeComposition(JSON.parse(JSON.stringify(comp)), base);
     expect(isCustomized(round)).toBe(true);
-    expect(readCompositionCounts(round)).toEqual({ adult: 2, child: 2, free: 0 });
+    expect(round.counts).toEqual({ adult: 2, child: 2, free: 0 });
   });
 });
