@@ -3218,6 +3218,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
       placeId={placeId}
       hotelMode={isHotel}
       placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : 'other'}
+      hasSavedService={!!initialData}
     />
   );
   const formProps = {
