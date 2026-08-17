@@ -21,11 +21,11 @@ const getPublicUrl = vi.fn();
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    functions: { invoke: (...args: any[]) => invoke(...args) },
+    functions: { invoke: (...args: unknown[]) => invoke(...args) },
     storage: {
       from: () => ({
-        upload: (...a: any[]) => upload(...a),
-        getPublicUrl: (...a: any[]) => getPublicUrl(...a),
+        upload: (...a: unknown[]) => upload(...a),
+        getPublicUrl: (...a: unknown[]) => getPublicUrl(...a),
       }),
     },
   },
@@ -43,7 +43,7 @@ beforeEach(() => {
   invoke.mockReset();
   upload.mockReset();
   getPublicUrl.mockReset();
-  invoke.mockImplementation((fn: string) => {
+  invoke.mockImplementation((fn: unknown) => {
     if (fn === "hotel-photos") return Promise.resolve({ data: { photos: googlePhotos }, error: null });
     return Promise.resolve({ data: { url: "https://cdn.example/imported.jpg" }, error: null });
   });
@@ -207,7 +207,7 @@ describe("HotelPhotoGallery", () => {
     expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("link http ou https válido");
     expect(invoke).not.toHaveBeenCalledWith("import-quote-image", expect.anything());
 
-    invoke.mockImplementation((fn: string) =>
+    invoke.mockImplementation((fn: unknown) =>
       fn === "hotel-photos"
         ? Promise.resolve({ data: { photos: googlePhotos }, error: null })
         : Promise.resolve({ data: null, error: new Error("falhou") }),
@@ -220,7 +220,7 @@ describe("HotelPhotoGallery", () => {
     expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(0));
 
     // Duplicado
-    invoke.mockImplementation((fn: string) =>
+    invoke.mockImplementation((fn: unknown) =>
       fn === "hotel-photos"
         ? Promise.resolve({ data: { photos: googlePhotos }, error: null })
         : Promise.resolve({ data: { url: "https://cdn.example/dup.jpg" }, error: null }),
