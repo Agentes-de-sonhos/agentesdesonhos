@@ -118,19 +118,52 @@ export function AgencyQuickQuote({
 
   const setValue = useCallback(
     (name: string, value: string) => {
-      setValuesByService((prev) => ({ ...prev, [service.key]: { ...prev[service.key], [name]: value } }));
+      setValuesByService((prev) => {
+        const next: ServiceValues = { ...prev[service.key], [name]: value };
+        // "Somente ida" (aéreo/transfer) descarta a data final do período.
+        if (service.period && periodMode(service, next) === "single") next[service.period.end] = "";
+        return { ...prev, [service.key]: next };
+      });
+      if (name === "criancas") {
+        const count = Math.max(0, Math.min(12, Number(value) || 0));
+        setAgesByService((prev) => ({ ...prev, [service.key]: syncChildAges(prev[service.key] ?? [], count) }));
+      }
       setQuickErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
     },
-    [service.key],
+    [service],
   );
 
   const setDates = useCallback(
     (next: { start: string; end: string }) => {
+      const period = service.period;
+      if (!period) return;
       setValuesByService((prev) => ({
         ...prev,
-        [service.key]: { ...prev[service.key], data_ida: next.start, data_volta: next.end },
+        [service.key]: { ...prev[service.key], [period.start]: next.start, [period.end]: next.end },
       }));
-      setQuickErrors((prev) => ({ ...prev, data_ida: "", data_volta: "", periodo: "" }));
+      setQuickErrors((prev) => ({ ...prev, [period.start]: "", [period.end]: "", periodo: "" }));
+    },
+    [service],
+  );
+
+  /** Idade de cada criança: mantida por serviço e serializada no payload. */
+  const setAge = useCallback(
+    (index: number, value: string) => {
+      setAgesByService((prev) => {
+        const current = syncChildAges(prev[service.key] ?? [], Math.max(index + 1, (prev[service.key] ?? []).length));
+        current[index] = value;
+        setValuesByService((values) => ({
+          ...values,
+          [service.key]: { ...values[service.key], idades_criancas: formatChildAges(current) },
+        }));
+        return { ...prev, [service.key]: current };
+      });
+      setQuickErrors((prev) => {
+        if (!prev[`child_age_${index}`]) return prev;
+        const next = { ...prev };
+        delete next[`child_age_${index}`];
+        return next;
+      });
     },
     [service.key],
   );
@@ -163,10 +196,17 @@ export function AgencyQuickQuote({
     if (isAereo && multi) {
       const routeErrors = validateRouteLegs(String(values.origem ?? ""), legs);
       Object.assign(relevant, routeErrors);
-    } else if (isAereo) {
-      if (found.data_ida) relevant.periodo = "Selecione a data de ida.";
-      else if (found.data_volta) relevant.periodo = found.data_volta;
+    } else if (service.period) {
+      // O período é um campo só: o erro aparece uma única vez, abaixo dele.
+      const { start, end } = service.period;
+      delete relevant[start];
+      delete relevant[end];
+      if (found[start]) relevant.periodo = "Selecione a data inicial.";
+      else if (found[end]) relevant.periodo = found[end];
     }
+
+    // Idades das crianças são obrigatórias sempre que houver crianças.
+    Object.assign(relevant, childCount > 0 ? validateChildAges(ages, childCount) : {});
 
     setQuickErrors(relevant);
     if (Object.keys(relevant).length) return;
@@ -181,7 +221,7 @@ export function AgencyQuickQuote({
       }));
     }
     onOpenChange(true);
-  }, [service, values, fields, onOpenChange, isAereo, multi, legs]);
+  }, [service, values, fields, onOpenChange, isAereo, multi, legs, ages, childCount]);
 
   return (
     <>
