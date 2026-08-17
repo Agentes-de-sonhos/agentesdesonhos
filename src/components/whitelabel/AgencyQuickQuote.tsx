@@ -4,21 +4,18 @@ import {
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { AgencyQuoteJourney } from "@/components/whitelabel/AgencyQuoteJourney";
 import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
-import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
+import { ServiceInitialFields } from "@/components/whitelabel/ServiceInitialFields";
 import { isEditorialTheme } from "@/lib/agencySiteTheme";
 import {
-  REQUEST_SERVICES, initialServiceValues, isMultiRoute, quickQuoteFields, serviceByKey, validateQuickStep,
+  REQUEST_SERVICES, initialBlockFields, initialServiceValues, isMultiRoute, periodMode, serviceByKey,
+  validateQuickStep,
   type ServiceValues,
 } from "@/lib/agencySiteRequests";
 import {
-  emptyRouteLegs, routeIsActionable, serializeRoute, validateRouteLegs, type RouteLeg,
+  emptyRouteLegs, formatChildAges, serializeRoute, syncChildAges, validateChildAges, validateRouteLegs,
+  type RouteLeg,
 } from "@/lib/agencyQuoteJourney";
 
 const ICONS: Record<string, typeof Plane> = {
