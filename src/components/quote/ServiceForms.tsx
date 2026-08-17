@@ -8,6 +8,7 @@ import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Chevron
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
+import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
 import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
