@@ -435,6 +435,15 @@ export function validateServiceDates(service: RequestService, values: ServiceVal
     }
   }
 
+  if (service.key === "transfer") {
+    const out = asDate(values, "data");
+    const back = asDate(values, "data_volta");
+    if (values.sentido === "Ida e volta") {
+      if (out && back && back < out) errors.data_volta = "A volta não pode ser antes da ida.";
+      if (out && !back) errors.data_volta = "Informe a data da volta.";
+    }
+  }
+
   if (service.key === "aereo") {
     const out = asDate(values, "data_ida");
     const back = asDate(values, "data_volta");
