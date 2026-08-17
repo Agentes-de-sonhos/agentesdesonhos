@@ -12,7 +12,6 @@ import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
 import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import {
   getEffectiveQuoteTotal,
-  isPackagePricing,
   hidesIndividualAmounts,
   getInvestmentPresentationLayout,
   PACKAGE_INCLUDED_LABEL,

@@ -12,7 +12,6 @@ import { parsePaymentMethods } from "@/lib/paymentMethods";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
 import {
   getEffectiveQuoteTotal,
-  isPackagePricing,
   hidesIndividualAmounts,
   PACKAGE_TOTAL_LABEL,
 } from "@/lib/quotePricing";

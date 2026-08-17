@@ -42,7 +42,6 @@ import {
 } from "@/lib/quoteEntryExtras";
 import {
   getEffectiveQuoteTotal,
-  isPackagePricing,
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
