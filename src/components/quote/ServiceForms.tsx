@@ -1589,6 +1589,14 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   const defaultAdultPrice = init?.adult_price ?? init?.price ?? initialData?.amount ?? 0;
   const defaultChildPrice = init?.child_price ?? 0;
 
+  // Composição tarifária exclusiva deste ingresso. Legado (sem composição)
+  // é derivado do global sem recalcular o valor já salvo.
+  const [composition, setComposition] = useState<AttractionFareComposition>(() =>
+    normalizeComposition((init as any)?.fare_composition, { adults: adultsCount, children: childrenCount }),
+  );
+  const [compositionError, setCompositionError] = useState<string | null>(null);
+  const handleValidity = useCallback((error: string | null) => setCompositionError(error), []);
+
   const form = useForm<z.infer<typeof attractionSchema>>({
     resolver: zodResolver(attractionSchema),
     defaultValues: {
@@ -1605,15 +1613,19 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
   const adultPrice = form.watch("adult_price");
   const childPrice = form.watch("child_price");
 
-  const totalAdults = adultPrice * adultsCount;
-  const totalChildren = childPrice * childrenCount;
-  const totalAmount = totalAdults + totalChildren;
-  const totalQuantity = adultsCount + childrenCount;
+  const counts = composition.counts;
+  const totalAdults = adultPrice * counts.adult;
+  const totalChildren = childPrice * counts.child;
+  const totalAmount = computeAttractionTotal({ counts, adultPrice, childPrice });
+  const paxOutOfSync = needsReview(composition, { adults: adultsCount, children: childrenCount });
 
   const handleSubmit = (values: z.infer<typeof attractionSchema>) => {
-    const computedTotalAdults = values.adult_price * adultsCount;
-    const computedTotalChildren = values.child_price * childrenCount;
-    const total = computedTotalAdults + computedTotalChildren;
+    if (compositionError || paxOutOfSync) return;
+    const total = computeAttractionTotal({
+      counts: composition.counts,
+      adultPrice: values.adult_price,
+      childPrice: values.child_price,
+    });
     const displayName = [values.product_name, values.ticket_type].filter(Boolean).join(" | ");
 
     onSubmit(
@@ -1622,7 +1634,12 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
         product_name: values.product_name,
         ticket_type: values.ticket_type || "",
         date: format(values.date, "yyyy-MM-dd"),
-        quantity: totalQuantity,
+        quantity: fareTotalQuantity(composition.counts),
+        fare_composition: composition,
+        adult_quantity: composition.counts.adult,
+        child_quantity: composition.counts.child,
+        free_quantity: composition.counts.free,
+        billable_quantity: billableQuantity(composition.counts),
         adult_price: values.adult_price,
         child_price: values.child_price,
         price: total,
@@ -1676,9 +1693,9 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
               <FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
               </FormControl>
-              {adultsCount > 0 && adultPrice > 0 && (
+              {counts.adult > 0 && adultPrice > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  {adultsCount} adulto{adultsCount > 1 ? "s" : ""} × {formatCurrencyInline(adultPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalAdults)}</span>
+                  {counts.adult} adulto{counts.adult > 1 ? "s" : ""} × {formatCurrencyInline(adultPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalAdults)}</span>
                 </p>
               )}
               <FormMessage />
@@ -1690,15 +1707,22 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
               <FormControl>
                 <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
               </FormControl>
-              {childrenCount > 0 && childPrice > 0 && (
+              {counts.child > 0 && childPrice > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  {childrenCount} criança{childrenCount > 1 ? "s" : ""} × {formatCurrencyInline(childPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalChildren)}</span>
+                  {counts.child} criança{counts.child > 1 ? "s" : ""} × {formatCurrencyInline(childPrice)} = <span className="font-medium text-foreground">{formatCurrencyInline(totalChildren)}</span>
                 </p>
               )}
               <FormMessage />
             </FormItem>
           )} />
         </div>
+
+        <AttractionFareCompositionEditor
+          value={composition}
+          onChange={setComposition}
+          pax={{ adults: adultsCount, children: childrenCount }}
+          onValidityChange={handleValidity}
+        />
 
         {/* Total breakdown */}
         {(adultPrice > 0 || childPrice > 0) && (
@@ -1708,8 +1732,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
               <span className="text-lg font-bold text-primary">{formatCurrencyInline(totalAmount)}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {adultsCount} adulto{adultsCount > 1 ? "s" : ""}
-              {childrenCount > 0 ? ` + ${childrenCount} criança${childrenCount > 1 ? "s" : ""}` : ""}
+              {formatCompositionLabel(counts)}
+              {counts.free > 0 ? " · gratuitos não são cobrados" : ""}
             </p>
           </div>
         )}
@@ -1720,9 +1744,14 @@ function AttractionForm({ onSubmit, onCancel, isLoading, tripStartDate, tripEndD
 
         {photoSlot}
         {renderPaymentSlot(paymentSlot, totalAmount)}
+        {(compositionError || paxOutOfSync) && (
+          <p className="text-xs text-destructive">
+            {compositionError || "Atualize a composição tarifária deste ingresso antes de salvar."}
+          </p>
+        )}
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
+          <Button type="submit" disabled={isLoading || !!compositionError || paxOutOfSync}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
         </div>
       </form>
     </Form>
