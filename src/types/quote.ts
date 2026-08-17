@@ -236,6 +236,17 @@ export interface AttractionData {
   price: number;
   adult_price?: number;
   child_price?: number;
+  /**
+   * Composição tarifária EXCLUSIVA deste ingresso (adulto/criança/gratuito),
+   * independente da composição global do orçamento. Ausente em dados legados.
+   */
+  fare_composition?: import("@/lib/attractionFareComposition").AttractionFareComposition;
+  /** Quantidades derivadas da composição (cache para telas públicas/PDF). */
+  adult_quantity?: number;
+  child_quantity?: number;
+  free_quantity?: number;
+  /** Quantidade cobrada (adultos + crianças, sem gratuitos). */
+  billable_quantity?: number;
 }
 
 export interface InsuranceData {
