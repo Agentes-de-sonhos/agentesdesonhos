@@ -364,7 +364,7 @@ export function formFields(
   options: { isPrimary?: boolean; isComplement?: boolean; values?: ServiceValues } = {},
 ): RequestField[] {
   const values = options.values ?? {};
-  const quickNames = new Set(quickQuoteFields(service, 6).map((f) => f.name));
+  const quickNames = new Set(initialBlockFields(service).map((f) => f.name));
   const quickErrors = options.isPrimary ? validateQuickStep(service, values) : {};
 
   return service.fields.filter((field) => {
@@ -526,7 +526,7 @@ export function validateQuickStep(service: RequestService, values: ServiceValues
   const errors: Record<string, string> = {};
   const multi = isMultiRoute(service, values);
 
-  for (const field of quickQuoteFields(service, 6)) {
+  for (const field of initialBlockFields(service)) {
     if (!field.required) continue;
     if (multi && skipForMultiRoute(field.name)) continue;
     const raw = values[field.name];
