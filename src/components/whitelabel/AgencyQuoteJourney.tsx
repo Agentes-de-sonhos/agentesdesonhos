@@ -894,18 +894,6 @@ export function AgencyQuoteJourney({
                     </p>
                     <h3 className="mt-1 text-base font-semibold text-foreground">{activeService.label}</h3>
                   </div>
-                  {!isComplement && onEditQuickValues && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        onOpenChange(false);
-                        onEditQuickValues();
-                      }}
-                    >
-                      <Pencil className="mr-2 h-3.5 w-3.5" /> Editar dados iniciais
-                    </Button>
-                  )}
                 </div>
                 <dl className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
                   {contextLines.map((item) => (
