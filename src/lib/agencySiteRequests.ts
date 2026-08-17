@@ -308,12 +308,35 @@ export function initialServiceValues(service: RequestService): ServiceValues {
  * The full form (AgencyRequestCenter) keeps every field — this is presentation only.
  */
 export function quickQuoteFields(service: RequestService, max = 4): RequestField[] {
+  return initialBlockFields(service).slice(0, max);
+}
+
+/**
+ * BLOCO INICIAL do serviço (primeira dobra), na ordem declarada e sem limite:
+ * é a estrutura única e compartilhada por todos os sites white label.
+ */
+export function initialBlockFields(service: RequestService): RequestField[] {
   const explicit = service.fields.filter((f) => f.origin === "quick" && f.type !== "textarea");
-  if (explicit.length) return explicit.slice(0, max);
+  if (explicit.length) return explicit;
   const usable = service.fields.filter((f) => f.type !== "textarea" && f.type !== "checkbox");
   const required = usable.filter((f) => f.required);
   const optional = usable.filter((f) => !f.required);
-  return [...required, ...optional].slice(0, max);
+  return [...required, ...optional].slice(0, 4);
+}
+
+/**
+ * O período do serviço é um intervalo (ida e volta / check-in e check-out) ou
+ * uma data simples? `null` quando o serviço não trabalha com período único.
+ */
+export function periodMode(service: RequestService, values: ServiceValues): "range" | "single" | null {
+  if (!service.period) return null;
+  const range = service.period.rangeWhen ? service.period.rangeWhen(values) : true;
+  return range ? "range" : "single";
+}
+
+/** Nomes de campo cobertos pelo campo único de período. */
+export function periodFieldNames(service: RequestService): string[] {
+  return service.period ? [service.period.start, service.period.end] : [];
 }
 
 /** O valor informado para o campo é utilizável? */
