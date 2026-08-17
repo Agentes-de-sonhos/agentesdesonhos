@@ -135,16 +135,17 @@ export function normalizeComposition(
   const list = Array.isArray(source?.passengers) ? source!.passengers : null;
   if (!list || list.length === 0) return buildDefaultComposition(pax, childrenAges);
 
-  const passengers: FarePassenger[] = list.map((p, i) => {
-    const base: FareBase = (p as any)?.base === 'child' ? 'child' : 'adult';
-    const category = (['adult', 'child', 'free'] as FareCategory[]).includes((p as any)?.category)
-      ? ((p as any).category as FareCategory)
+  const passengers: FarePassenger[] = list.map((raw, i) => {
+    const p = (raw ?? {}) as Record<string, unknown>;
+    const base: FareBase = p.base === 'child' ? 'child' : 'adult';
+    const category = (['adult', 'child', 'free'] as FareCategory[]).includes(p.category as FareCategory)
+      ? (p.category as FareCategory)
       : base;
-    const ageRaw = (p as any)?.age;
+    const ageRaw = p.age;
     return {
-      id: String((p as any)?.id || makeId(base, i)),
+      id: String(p.id || makeId(base, i)),
       base,
-      label: String((p as any)?.label || (base === 'adult' ? `Adulto ${i + 1}` : `Criança ${i + 1}`)),
+      label: String(p.label || (base === 'adult' ? `Adulto ${i + 1}` : `Criança ${i + 1}`)),
       age: Number.isFinite(Number(ageRaw)) ? Number(ageRaw) : null,
       category,
     };
@@ -325,14 +326,15 @@ export function totalQuantity(counts: FareCounts): number {
 }
 
 /** Leitura tolerante para telas públicas/PDF, sem depender do orçamento. */
-export function readCompositionCounts(data: any): FareCounts | null {
-  const raw = data?.fare_composition;
+export function readCompositionCounts(data: unknown): FareCounts | null {
+  const record = (data ?? {}) as Record<string, unknown>;
+  const raw = record.fare_composition as { passengers?: unknown } | undefined;
   if (raw && Array.isArray(raw.passengers) && raw.passengers.length > 0) {
     return deriveCounts(normalizeComposition(raw, { adults: 0, children: 0 }).passengers);
   }
-  const adult = clampCount(data?.adult_quantity);
-  const child = clampCount(data?.child_quantity);
-  const free = clampCount(data?.free_quantity);
+  const adult = clampCount(record.adult_quantity);
+  const child = clampCount(record.child_quantity);
+  const free = clampCount(record.free_quantity);
   if (adult + child + free > 0) return { adult, child, free };
   return null;
 }
