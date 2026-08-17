@@ -13,6 +13,8 @@ import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionF
 import {
   getEffectiveQuoteTotal,
   isPackagePricing,
+  hidesIndividualAmounts,
+  getInvestmentPresentationLayout,
   PACKAGE_INCLUDED_LABEL,
   PACKAGE_TOTAL_LABEL,
 } from "@/lib/quotePricing";
