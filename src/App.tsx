@@ -212,6 +212,7 @@ const App = () => (
               }
             />
             <Route path="/agende" element={<Agende />} />
+            <Route path="/__dev-gallery" element={<DevGalleryHarness />} />
             <Route path="/planos" element={<Planos />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/experiencias/orlando-magic/demo" element={<OrlandoMagicLandingPage />} />
