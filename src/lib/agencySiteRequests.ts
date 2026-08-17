@@ -562,8 +562,10 @@ export function validateContactStep(contact: ContactValues): Record<string, stri
   }
   if (email && !EMAIL_RE.test(email)) errors.lead_email = "Informe um e-mail válido.";
   if (!phone && !email) {
-    errors.lead_phone = "Informe seu WhatsApp ou e-mail.";
-    errors.lead_email = "Informe seu WhatsApp ou e-mail.";
+    const message =
+      "Informe um WhatsApp ou e-mail para que a agência possa entrar em contato com você.";
+    errors.lead_phone = message;
+    errors.lead_email = message;
   }
   if (!contact.consent) errors.consent = "É necessário aceitar o uso dos seus dados para contato.";
   return errors;
