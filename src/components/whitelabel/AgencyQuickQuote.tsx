@@ -4,21 +4,18 @@ import {
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { AgencyQuoteJourney } from "@/components/whitelabel/AgencyQuoteJourney";
 import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
-import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
+import { ServiceInitialFields } from "@/components/whitelabel/ServiceInitialFields";
 import { isEditorialTheme } from "@/lib/agencySiteTheme";
 import {
-  REQUEST_SERVICES, initialServiceValues, isMultiRoute, quickQuoteFields, serviceByKey, validateQuickStep,
+  REQUEST_SERVICES, initialBlockFields, initialServiceValues, isMultiRoute, periodMode, serviceByKey,
+  validateQuickStep,
   type ServiceValues,
 } from "@/lib/agencySiteRequests";
 import {
-  emptyRouteLegs, routeIsActionable, serializeRoute, validateRouteLegs, type RouteLeg,
+  emptyRouteLegs, formatChildAges, serializeRoute, syncChildAges, validateChildAges, validateRouteLegs,
+  type RouteLeg,
 } from "@/lib/agencyQuoteJourney";
 
 const ICONS: Record<string, typeof Plane> = {
@@ -63,6 +60,7 @@ export function AgencyQuickQuote({
   const railWrapRef = useRef<HTMLDivElement | null>(null);
   const [quickErrors, setQuickErrors] = useState<Record<string, string>>({});
   const [legsByService, setLegsByService] = useState<Record<string, RouteLeg[]>>({});
+  const [agesByService, setAgesByService] = useState<Record<string, string[]>>({});
 
   const [valuesByService, setValuesByService] = useState<Record<string, ServiceValues>>(() => {
     const initial: Record<string, ServiceValues> = {};
@@ -70,21 +68,21 @@ export function AgencyQuickQuote({
     return initial;
   });
   const values = valuesByService[service.key] ?? initialServiceValues(service);
-  const tripType = String(values.tipo_viagem ?? "");
   const isAereo = service.key === "aereo";
   const multi = isMultiRoute(service, values);
   const legs = legsByService[service.key] ?? emptyRouteLegs();
+  const childCount = Math.max(0, Math.min(12, Number(String(values.criancas ?? "0")) || 0));
+  const ages = syncChildAges(agesByService[service.key] ?? [], childCount);
 
-  // No aéreo, datas e destino saem dos controles dedicados (calendário/rota).
-  const fields = useMemo(() => {
-    const list = quickQuoteFields(service, 6);
-    if (service.key !== "aereo") return list;
-    return list.filter((f) => {
-      if (f.name === "data_ida" || f.name === "data_volta") return false;
-      if (f.name === "destino") return !multi;
-      return true;
-    });
-  }, [service, multi]);
+  // No aéreo multidestinos, destino e datas saem do editor estruturado de rota.
+  const hiddenFields = useMemo(
+    () => (isAereo && multi ? ["destino", "data_ida", "data_volta"] : []),
+    [isAereo, multi],
+  );
+  const fields = useMemo(
+    () => initialBlockFields(service).filter((f) => !hiddenFields.includes(f.name)),
+    [service, hiddenFields],
+  );
 
   // Rail horizontal das categorias (preset editorial): linha única, sem barra
   // de rolagem visível e setas discretas quando os rótulos não couberem.
@@ -120,19 +118,52 @@ export function AgencyQuickQuote({
 
   const setValue = useCallback(
     (name: string, value: string) => {
-      setValuesByService((prev) => ({ ...prev, [service.key]: { ...prev[service.key], [name]: value } }));
+      setValuesByService((prev) => {
+        const next: ServiceValues = { ...prev[service.key], [name]: value };
+        // "Somente ida" (aéreo/transfer) descarta a data final do período.
+        if (service.period && periodMode(service, next) === "single") next[service.period.end] = "";
+        return { ...prev, [service.key]: next };
+      });
+      if (name === "criancas") {
+        const count = Math.max(0, Math.min(12, Number(value) || 0));
+        setAgesByService((prev) => ({ ...prev, [service.key]: syncChildAges(prev[service.key] ?? [], count) }));
+      }
       setQuickErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
     },
-    [service.key],
+    [service],
   );
 
   const setDates = useCallback(
     (next: { start: string; end: string }) => {
+      const period = service.period;
+      if (!period) return;
       setValuesByService((prev) => ({
         ...prev,
-        [service.key]: { ...prev[service.key], data_ida: next.start, data_volta: next.end },
+        [service.key]: { ...prev[service.key], [period.start]: next.start, [period.end]: next.end },
       }));
-      setQuickErrors((prev) => ({ ...prev, data_ida: "", data_volta: "", periodo: "" }));
+      setQuickErrors((prev) => ({ ...prev, [period.start]: "", [period.end]: "", periodo: "" }));
+    },
+    [service],
+  );
+
+  /** Idade de cada criança: mantida por serviço e serializada no payload. */
+  const setAge = useCallback(
+    (index: number, value: string) => {
+      setAgesByService((prev) => {
+        const current = syncChildAges(prev[service.key] ?? [], Math.max(index + 1, (prev[service.key] ?? []).length));
+        current[index] = value;
+        setValuesByService((values) => ({
+          ...values,
+          [service.key]: { ...values[service.key], idades_criancas: formatChildAges(current) },
+        }));
+        return { ...prev, [service.key]: current };
+      });
+      setQuickErrors((prev) => {
+        if (!prev[`child_age_${index}`]) return prev;
+        const next = { ...prev };
+        delete next[`child_age_${index}`];
+        return next;
+      });
     },
     [service.key],
   );
@@ -165,10 +196,17 @@ export function AgencyQuickQuote({
     if (isAereo && multi) {
       const routeErrors = validateRouteLegs(String(values.origem ?? ""), legs);
       Object.assign(relevant, routeErrors);
-    } else if (isAereo) {
-      if (found.data_ida) relevant.periodo = "Selecione a data de ida.";
-      else if (found.data_volta) relevant.periodo = found.data_volta;
+    } else if (service.period) {
+      // O período é um campo só: o erro aparece uma única vez, abaixo dele.
+      const { start, end } = service.period;
+      delete relevant[start];
+      delete relevant[end];
+      if (found[start]) relevant.periodo = "Selecione a data inicial.";
+      else if (found[end]) relevant.periodo = found[end];
     }
+
+    // Idades das crianças são obrigatórias sempre que houver crianças.
+    Object.assign(relevant, childCount > 0 ? validateChildAges(ages, childCount) : {});
 
     setQuickErrors(relevant);
     if (Object.keys(relevant).length) return;
@@ -183,7 +221,7 @@ export function AgencyQuickQuote({
       }));
     }
     onOpenChange(true);
-  }, [service, values, fields, onOpenChange, isAereo, multi, legs]);
+  }, [service, values, fields, onOpenChange, isAereo, multi, legs, ages, childCount]);
 
   return (
     <>
@@ -268,74 +306,18 @@ export function AgencyQuickQuote({
               : "grid gap-3 border-t border-border/60 pt-4 md:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:items-end"
           }
         >
-          {fields.map((field) => {
-            const id = `quick-${field.name}`;
-            const value = String(values[field.name] ?? "");
-            const error = quickErrors[field.name];
-            return (
-              <div key={field.name} className="min-w-0">
-                <Label
-                  htmlFor={id}
-                  className={
-                    editorial
-                      ? "text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
-                      : "text-xs font-medium text-muted-foreground"
-                  }
-                >
-                  {field.label}
-                </Label>
-                {field.type === "select" ? (
-                  <Select value={value} onValueChange={(v) => setValue(field.name, v)}>
-                    <SelectTrigger
-                      id={id}
-                      aria-invalid={!!error}
-                      aria-describedby={error ? `${id}-error` : undefined}
-                      className={editorial ? "mt-2 h-12 rounded-lg" : "mt-1.5 h-11 rounded-xl"}
-                    >
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(field.options ?? []).map((option) => (
-                        <SelectItem key={option} value={option}>{option}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    id={id}
-                    className={editorial ? "mt-2 h-12 rounded-lg" : "mt-1.5 h-11 rounded-xl"}
-                    type={field.type === "number" ? "number" : field.type}
-                    inputMode={field.type === "number" ? "numeric" : undefined}
-                    min={field.min}
-                    max={field.max}
-                    placeholder={field.placeholder}
-                    value={value}
-                    aria-invalid={!!error}
-                    aria-describedby={error ? `${id}-error` : undefined}
-                    onChange={(e) => setValue(field.name, e.target.value)}
-                  />
-                )}
-                {error && (
-                  <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-destructive">{error}</p>
-                )}
-              </div>
-            );
-          })}
-
-          {isAereo && !multi && (
-            <TripDatePicker
-              id="quick-periodo"
-              label={tripType === "Somente ida" ? "Data da ida" : "Ida e volta"}
-              mode={tripType === "Somente ida" ? "single" : "range"}
-              start={String(values.data_ida ?? "")}
-              end={String(values.data_volta ?? "")}
-              onChange={setDates}
-              editorial={editorial}
-              required
-              error={quickErrors.periodo || quickErrors.data_ida || quickErrors.data_volta}
-              className="md:col-span-2"
-            />
-          )}
+          <ServiceInitialFields
+            service={service}
+            values={values}
+            ages={ages}
+            errors={quickErrors}
+            editorial={editorial}
+            idPrefix="quick"
+            onValue={setValue}
+            onDates={setDates}
+            onAgeChange={setAge}
+            hidden={hiddenFields}
+          />
 
           <Button
             size="lg"

@@ -17,10 +17,13 @@ import {
 import { EDITORIAL_ROOT_CLASS, isEditorialTheme } from "@/lib/agencySiteTheme";
 import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
 import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
+import { LocationSearchInput } from "@/components/whitelabel/LocationSearchInput";
+import { DestinationTagsInput } from "@/components/whitelabel/DestinationTagsInput";
 import {
   CONTACT_CHANNELS, CONTACT_TIMES, EMPTY_CONTACT,
   describeServiceValues, fieldIsVisible, formFields, initialServiceValues, isMultiRoute,
-  mergeServiceValues, quickQuoteFields, serviceByKey, validateContactStep, validateServiceStep,
+  mergeServiceValues, periodFieldNames, periodMode, quickQuoteFields, serviceByKey,
+  validateContactStep, validateServiceStep,
   type ContactValues, type RequestField, type RequestService, type ServiceValues,
 } from "@/lib/agencySiteRequests";
 import {
@@ -72,6 +75,41 @@ function FieldControl({
           <Label htmlFor={id} className="text-sm font-normal">{field.label}</Label>
         </div>
       </div>
+    );
+  }
+
+  if (field.search) {
+    return (
+      <LocationSearchInput
+        id={id}
+        label={field.label}
+        kind={field.search}
+        value={String(value ?? "")}
+        onChange={onChange}
+        placeholder={field.placeholder}
+        error={error}
+        help={field.help}
+        required={field.required}
+        editorial={editorial}
+        className={field.span === 2 ? "sm:col-span-2" : ""}
+      />
+    );
+  }
+
+  if (field.type === "tags") {
+    return (
+      <DestinationTagsInput
+        id={id}
+        label={field.label}
+        value={String(value ?? "")}
+        onChange={onChange}
+        placeholder={field.placeholder}
+        error={error}
+        help={field.help}
+        required={field.required}
+        editorial={editorial}
+        className={field.span === 2 ? "sm:col-span-2" : ""}
+      />
     );
   }
 
@@ -230,14 +268,20 @@ export function AgencyQuoteJourney({
 
   const activeIsMultiRoute = activeService.key === "aereo" && isMultiRoute(activeService, activeValues);
 
-  /** Ida e volta do aéreo: um único calendário de período no lugar de dois campos. */
+  /**
+   * Período do serviço: um único calendário no lugar de dois campos de data.
+   * Vale para todos os serviços com período (aéreo, hospedagem, carro, seguro
+   * e transfer de ida e volta) — nunca duas caixas separadas.
+   */
+  const periodNames = useMemo(() => periodFieldNames(activeService), [activeService]);
   const rangeDates = useMemo(() => {
-    if (activeService.key !== "aereo" || activeIsMultiRoute) return null;
-    const showsIda = visibleFields.some((f) => f.name === "data_ida");
-    const showsVolta = visibleFields.some((f) => f.name === "data_volta");
-    if (!showsIda && !showsVolta) return null;
-    return { range: String(activeValues.tipo_viagem ?? "") !== "Somente ida" && showsVolta };
-  }, [activeService.key, activeIsMultiRoute, visibleFields, activeValues.tipo_viagem]);
+    if (activeIsMultiRoute || !activeService.period) return null;
+    const mode = periodMode(activeService, activeValues);
+    if (!mode) return null;
+    const shown = visibleFields.some((f) => periodNames.includes(f.name));
+    if (!shown) return null;
+    return { mode, label: mode === "single" ? activeService.period.singleLabel ?? activeService.period.label : activeService.period.label };
+  }, [activeService, activeIsMultiRoute, visibleFields, activeValues, periodNames]);
 
   const renderedFields = useMemo(
     () =>
@@ -245,10 +289,10 @@ export function AgencyQuoteJourney({
         activeIsMultiRoute
           ? f.name !== "destino" && f.name !== "data_ida" && f.name !== "data_volta"
           : rangeDates
-          ? f.name !== "data_ida" && f.name !== "data_volta"
+          ? !periodNames.includes(f.name)
           : true,
       ),
-    [visibleFields, activeIsMultiRoute, rangeDates],
+    [visibleFields, activeIsMultiRoute, rangeDates, periodNames],
   );
 
   const updateLegs = useCallback((next: RouteLeg[]) => {
@@ -261,9 +305,11 @@ export function AgencyQuoteJourney({
   }, []);
 
   const setDates = useCallback((next: { start: string; end: string }) => {
-    setActiveValues((prev) => ({ ...prev, data_ida: next.start, data_volta: next.end }));
-    setErrors((prev) => ({ ...prev, data_ida: "", data_volta: "", periodo: "" }));
-  }, []);
+    const period = activeService.period;
+    if (!period) return;
+    setActiveValues((prev) => ({ ...prev, [period.start]: next.start, [period.end]: next.end }));
+    setErrors((prev) => ({ ...prev, [period.start]: "", [period.end]: "", periodo: "" }));
+  }, [activeService]);
 
   const exposesChildren = visibleFields.some((f) => f.name === "criancas");
   const childCount = exposesChildren
@@ -318,9 +364,12 @@ export function AgencyQuoteJourney({
 
     if (activeIsMultiRoute) {
       Object.assign(relevant, validateRouteLegs(String(activeValues.origem ?? ""), legs));
-    } else if (rangeDates) {
-      if (found.data_ida) relevant.periodo = "Selecione a data de ida.";
-      else if (found.data_volta) relevant.periodo = found.data_volta;
+    } else if (rangeDates && activeService.period) {
+      const { start, end } = activeService.period;
+      delete relevant[start];
+      delete relevant[end];
+      if (found[start]) relevant.periodo = "Selecione a data inicial.";
+      else if (found[end]) relevant.periodo = found[end];
     }
 
     // Idades das crianças são obrigatórias sempre que houver crianças.
@@ -521,14 +570,14 @@ export function AgencyQuoteJourney({
                   {rangeDates && (
                     <TripDatePicker
                       id="wlq-periodo"
-                      label={rangeDates.range ? "Ida e volta" : "Data da ida"}
-                      mode={rangeDates.range ? "range" : "single"}
-                      start={String(activeValues.data_ida ?? "")}
-                      end={String(activeValues.data_volta ?? "")}
+                      label={rangeDates.label}
+                      mode={rangeDates.mode}
+                      start={String(activeValues[activeService.period!.start] ?? "")}
+                      end={String(activeValues[activeService.period!.end] ?? "")}
                       onChange={setDates}
                       editorial={editorial}
                       required
-                      error={errors.periodo || errors.data_ida || errors.data_volta || undefined}
+                      error={errors.periodo || undefined}
                       className="sm:col-span-2"
                     />
                   )}

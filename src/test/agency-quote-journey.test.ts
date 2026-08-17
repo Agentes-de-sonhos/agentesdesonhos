@@ -45,7 +45,9 @@ describe("jornada contextual", () => {
   it("não repete no modal o que já veio preenchido na cotação rápida", () => {
     const names = formFields(aereo, { isPrimary: true, values: quick }).map((f) => f.name);
     for (const field of quickQuoteFields(aereo, 5)) expect(names).not.toContain(field.name);
-    expect(names).toContain("adultos");
+    // Passageiros já entram no bloco inicial; o modal só pede o que falta.
+    expect(names).not.toContain("adultos");
+    expect(names).toContain("classe");
   });
 
   it("expõe no modal os campos iniciais que faltam (CTA externo sem cotação rápida)", () => {

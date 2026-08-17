@@ -6,7 +6,10 @@
  * The tenant is ALWAYS resolved on the server from the hostname.
  */
 
-export type FieldType = "text" | "number" | "date" | "time" | "select" | "textarea" | "checkbox";
+export type FieldType = "text" | "number" | "date" | "time" | "select" | "textarea" | "checkbox" | "tags";
+
+/** Tipo de busca estruturada aplicada a um campo de texto de local. */
+export type LocationSearchKind = "city" | "airport" | "port";
 
 /**
  * De onde o valor do campo vem na jornada contextual:
@@ -30,8 +33,24 @@ export interface RequestField {
   max?: number;
   help?: string;
   origin?: FieldOrigin;
+  /** Busca estruturada aplicada ao campo de texto (cidade/aeroporto/porto). */
+  search?: LocationSearchKind;
   /** Só renderiza quando o campo indicado estiver marcado (checkbox). */
   visibleWhen?: string;
+}
+
+/**
+ * Período único do serviço: dois campos de data ("YYYY-MM-DD") apresentados em
+ * UM só campo visual com um só calendário de intervalo. Quando `rangeWhen`
+ * devolve `false`, o mesmo campo vira data simples (apenas `start`).
+ */
+export interface ServicePeriod {
+  label: string;
+  singleLabel?: string;
+  start: string;
+  end: string;
+  rangeWhen?: (values: ServiceValues) => boolean;
+  help?: string;
 }
 
 export interface RequestService {
@@ -40,10 +59,14 @@ export interface RequestService {
   /** Short line shown above the fields. */
   intro: string;
   fields: RequestField[];
+  /** Datas inicial/final unificadas em um único campo de período. */
+  period?: ServicePeriod;
 }
 
-const PAX_ADULTS: RequestField = { name: "adultos", label: "Adultos", type: "number", required: true, min: 1, max: 30, origin: "standalone" };
-const PAX_KIDS: RequestField = { name: "criancas", label: "Crianças", type: "number", min: 0, max: 12, origin: "standalone" };
+/** Adultos / Crianças / idades: padrão único de viajantes dos oito serviços. */
+const PAX_ADULTS: RequestField = { name: "adultos", label: "Adultos", type: "number", required: true, min: 1, max: 30, origin: "quick" };
+const PAX_KIDS: RequestField = { name: "criancas", label: "Crianças", type: "number", min: 0, max: 12, origin: "quick" };
+const PAX_AGES: RequestField = { name: "idades_criancas", label: "Idades das crianças", type: "text", span: 2, origin: "context" };
 const OBS: RequestField = { name: "observacoes", label: "Observações", type: "textarea", span: 2, placeholder: "Conte detalhes que ajudem a montar a melhor opção." };
 
 export const REQUEST_SERVICES: RequestService[] = [
@@ -51,19 +74,26 @@ export const REQUEST_SERVICES: RequestService[] = [
     key: "aereo",
     label: "Aéreo",
     intro: "Confirme quem viaja e as preferências de voo. Buscamos as melhores combinações de rota e tarifa.",
+    period: {
+      label: "Ida e volta",
+      singleLabel: "Data da ida",
+      start: "data_ida",
+      end: "data_volta",
+      rangeWhen: (values) => String(values.tipo_viagem ?? "") !== "Somente ida",
+    },
     fields: [
       { name: "tipo_viagem", label: "Tipo da viagem", type: "select", required: true, options: ["Ida e volta", "Somente ida", "Multidestinos"], origin: "quick" },
-      { name: "origem", label: "Origem", type: "text", required: true, placeholder: "Cidade ou aeroporto de saída", origin: "quick" },
-      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou aeroporto de chegada", origin: "quick" },
+      { name: "origem", label: "Origem", type: "text", required: true, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
+      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
       { name: "data_ida", label: "Data de ida", type: "date", required: true, origin: "quick" },
       { name: "data_volta", label: "Data de volta", type: "date", origin: "quick" },
+      PAX_ADULTS,
+      PAX_KIDS,
+      PAX_AGES,
       // Serialização da rota estruturada montada na primeira dobra (nunca digitada
       // como texto livre): mantida para compatibilidade do payload/CRM.
       { name: "rota_multidestinos", label: "Destinos da viagem", type: "textarea", span: 2, origin: "context" },
       { name: "classe", label: "Classe", type: "select", options: ["Econômica", "Econômica premium", "Executiva", "Primeira classe", "Indiferente"] },
-      { name: "adultos", label: "Adultos", type: "number", required: true, min: 1, max: 30 },
-      { name: "criancas", label: "Crianças", type: "number", min: 0, max: 12 },
-      { name: "idades_criancas", label: "Idades das crianças", type: "text", span: 2, origin: "context" },
       { name: "flexibilidade", label: "Flexibilidade de datas", type: "select", options: ["Datas fixas", "Até 2 dias", "Até 1 semana", "Totalmente flexível"] },
       { name: "bagagem", label: "Bagagem", type: "select", options: ["Somente de mão", "1 bagagem despachada", "2 ou mais despachadas", "Indiferente"] },
       { name: "voo_direto", label: "Prefiro voo direto", type: "checkbox", span: 2 },
@@ -74,11 +104,20 @@ export const REQUEST_SERVICES: RequestService[] = [
     key: "hospedagem",
     label: "Hospedagem",
     intro: "Conte o destino e o perfil da estadia para selecionarmos as melhores opções.",
+    period: {
+      label: "Período da hospedagem",
+      start: "check_in",
+      end: "check_out",
+      help: "Check-in e check-out no mesmo calendário.",
+    },
     fields: [
-      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade, região ou hotel desejado", origin: "standalone" },
+      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou região", origin: "quick", search: "city" },
+      { name: "check_in", label: "Check-in", type: "date", required: true, origin: "quick" },
+      { name: "check_out", label: "Check-out", type: "date", required: true, origin: "quick" },
+      PAX_ADULTS,
+      PAX_KIDS,
+      PAX_AGES,
       { name: "tipo_hospedagem", label: "Tipo de hospedagem", type: "select", options: ["Hotel", "Resort", "Pousada", "Apart-hotel", "Casa/apartamento", "Indiferente"] },
-      { name: "check_in", label: "Check-in", type: "date", required: true, help: "Pode ser diferente das datas do voo." },
-      { name: "check_out", label: "Check-out", type: "date", required: true },
       { name: "quartos", label: "Quartos", type: "number", required: true, min: 1, max: 15 },
       {
         name: "categoria",
@@ -93,9 +132,6 @@ export const REQUEST_SERVICES: RequestService[] = [
           "Indiferente — quero recomendações",
         ],
       },
-      PAX_ADULTS,
-      PAX_KIDS,
-      { name: "idades_criancas", label: "Idades das crianças", type: "text", span: 2, origin: "context" },
       { name: "regime", label: "Regime", type: "select", options: ["Sem refeições", "Café da manhã", "Meia pensão", "Pensão completa", "All inclusive", "Indiferente"] },
       { name: "necessidades_especiais", label: "Necessidades especiais", type: "text", placeholder: "Ex.: quarto acessível, andar baixo" },
       OBS,
@@ -105,13 +141,21 @@ export const REQUEST_SERVICES: RequestService[] = [
     key: "carro",
     label: "Aluguel de Carro",
     intro: "Informe cidade e período para cotarmos com a cobertura adequada. Horários são alinhados depois.",
+    period: {
+      label: "Período da locação",
+      start: "retirada_data",
+      end: "devolucao_data",
+      help: "Retirada e devolução no mesmo calendário.",
+    },
     fields: [
-      { name: "retirada_local", label: "Cidade ou local geral de retirada", type: "text", required: true, span: 2, placeholder: "Cidade ou região", origin: "standalone" },
-      { name: "retirada_data", label: "Data da retirada", type: "date", required: true, help: "Pode divergir das datas do voo." },
-      { name: "devolucao_data", label: "Data da devolução", type: "date", required: true },
+      { name: "retirada_local", label: "Destino ou local de retirada", type: "text", required: true, span: 2, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
+      { name: "retirada_data", label: "Data da retirada", type: "date", required: true, origin: "quick" },
+      { name: "devolucao_data", label: "Data da devolução", type: "date", required: true, origin: "quick" },
+      PAX_ADULTS,
+      PAX_KIDS,
+      PAX_AGES,
       { name: "devolucao_outra_localidade", label: "Devolver em outra localidade", type: "checkbox", span: 2 },
       { name: "devolucao_cidade", label: "Cidade da devolução", type: "text", span: 2, placeholder: "Cidade onde o carro será entregue", visibleWhen: "devolucao_outra_localidade" },
-      { name: "passageiros", label: "Passageiros", type: "number", required: true, min: 1, max: 15, origin: "context" },
       { name: "categoria_veiculo", label: "Categoria do veículo", type: "select", options: ["Econômico", "Intermediário", "SUV", "Minivan", "Premium", "Indiferente"] },
       OBS,
     ],
@@ -120,14 +164,23 @@ export const REQUEST_SERVICES: RequestService[] = [
     key: "transfer",
     label: "Transfer",
     intro: "Traslados privativos ou compartilhados. O horário exato é confirmado com o consultor.",
+    period: {
+      label: "Ida e volta",
+      singleLabel: "Data do serviço",
+      start: "data",
+      end: "data_volta",
+      rangeWhen: (values) => String(values.sentido ?? "") !== "Somente ida",
+    },
     fields: [
-      { name: "origem", label: "Origem", type: "text", required: true, placeholder: "Cidade, aeroporto ou hotel", origin: "standalone" },
-      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade, aeroporto ou hotel", origin: "standalone" },
-      { name: "data", label: "Data ou início do período", type: "date", required: true },
-      { name: "sentido", label: "Sentido", type: "select", required: true, options: ["Somente ida", "Ida e volta"] },
-      { name: "modalidade", label: "Modalidade", type: "select", options: ["Privativo", "Compartilhado", "Indiferente"] },
+      { name: "destino", label: "Destino ou local do serviço", type: "text", required: true, span: 2, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
+      { name: "sentido", label: "Tipo de transfer", type: "select", required: true, options: ["Ida e volta", "Somente ida"], origin: "quick" },
+      { name: "data", label: "Data do serviço", type: "date", required: true, origin: "quick" },
+      { name: "data_volta", label: "Data da volta", type: "date", origin: "quick" },
+      PAX_ADULTS,
+      PAX_KIDS,
+      PAX_AGES,
+      { name: "modalidade", label: "Modalidade", type: "select", options: ["Privativo", "Compartilhado", "Indiferente"], origin: "quick" },
       { name: "numero_voo", label: "Número do voo (opcional)", type: "text", placeholder: "Ex.: LA3456" },
-      { name: "passageiros", label: "Passageiros", type: "number", required: true, min: 1, max: 60, origin: "context" },
       OBS,
     ],
   },
@@ -136,13 +189,13 @@ export const REQUEST_SERVICES: RequestService[] = [
     label: "Ingressos e Atrações",
     intro: "Parques, passeios e experiências com datas organizadas.",
     fields: [
-      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou região", origin: "standalone" },
-      { name: "atracao", label: "Atração desejada", type: "text", required: true, placeholder: "Parque, show, passeio ou experiência" },
-      { name: "data", label: "Data ou início do período", type: "date", required: true },
-      { name: "dias", label: "Quantidade de dias", type: "number", min: 1, max: 30 },
+      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou região", origin: "quick", search: "city" },
+      { name: "atracao", label: "Atração desejada", type: "text", required: true, placeholder: "Ex.: Beto Carrero World, Disney, Universal", origin: "quick" },
+      { name: "data", label: "Data da visita", type: "date", required: true, origin: "quick" },
+      { name: "dias", label: "Quantidade de dias", type: "number", min: 1, max: 30, origin: "quick", help: "Dias de utilização ou de visita." },
       PAX_ADULTS,
       PAX_KIDS,
-      { name: "idades_criancas", label: "Idades das crianças", type: "text", span: 2, origin: "context" },
+      PAX_AGES,
       OBS,
     ],
   },
@@ -150,12 +203,20 @@ export const REQUEST_SERVICES: RequestService[] = [
     key: "seguro",
     label: "Seguro Viagem",
     intro: "Coberturas adequadas ao destino, à duração e ao perfil dos viajantes.",
+    period: {
+      label: "Período da viagem",
+      start: "inicio",
+      end: "fim",
+      help: "Início e fim da cobertura no mesmo calendário.",
+    },
     fields: [
-      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "País ou região", origin: "standalone" },
-      { name: "tipo_viagem", label: "Tipo de viagem", type: "select", options: ["Lazer", "Negócios", "Estudos", "Intercâmbio", "Esportes"] },
-      { name: "inicio", label: "Início da viagem", type: "date", required: true },
-      { name: "fim", label: "Fim da viagem", type: "date", required: true },
-      { name: "viajantes", label: "Quantidade de viajantes", type: "number", required: true, min: 1, max: 30, origin: "context" },
+      { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou região", origin: "quick", search: "city" },
+      { name: "inicio", label: "Início da viagem", type: "date", required: true, origin: "quick" },
+      { name: "fim", label: "Fim da viagem", type: "date", required: true, origin: "quick" },
+      PAX_ADULTS,
+      PAX_KIDS,
+      PAX_AGES,
+      { name: "tipo_viagem", label: "Tipo de viagem", type: "select", options: ["Lazer", "Negócios", "Estudos", "Intercâmbio", "Esportes"], origin: "quick" },
       { name: "idades", label: "Idades dos adultos (opcional)", type: "text", span: 2, placeholder: "Ex.: 34 e 36 anos", help: "As idades das crianças já vêm do contexto da viagem." },
       { name: "cobertura", label: "Cobertura de interesse", type: "select", span: 2, options: ["Básica", "Intermediária", "Ampla", "Exigida por visto/consulado", "Não sei, quero orientação"] },
       OBS,
@@ -166,13 +227,13 @@ export const REQUEST_SERVICES: RequestService[] = [
     label: "Cruzeiros",
     intro: "Itinerários, cabines e categorias explicados com clareza antes de decidir.",
     fields: [
-      { name: "destino", label: "Região ou itinerário", type: "text", required: true, placeholder: "Ex.: Caribe, Mediterrâneo, Costa brasileira" },
-      { name: "porto_embarque", label: "Porto de embarque (opcional)", type: "text" },
-      { name: "data", label: "Data ou início do período", type: "date", required: true },
-      { name: "duracao", label: "Duração (noites)", type: "number", min: 1, max: 200 },
+      { name: "destino", label: "Região desejada", type: "text", required: true, placeholder: "Ex.: Caribe", origin: "quick" },
+      { name: "data", label: "Data inicial", type: "date", required: true, origin: "quick" },
+      { name: "duracao", label: "Duração (noites)", type: "number", min: 1, max: 200, origin: "quick" },
       PAX_ADULTS,
       PAX_KIDS,
-      { name: "idades_criancas", label: "Idades das crianças", type: "text", span: 2, origin: "context" },
+      PAX_AGES,
+      { name: "porto_embarque", label: "Porto de embarque", type: "text", span: 2, placeholder: "Ex.: Santos, Porto de Santos, Miami, Port Canaveral", origin: "quick", search: "port" },
       { name: "cabines", label: "Quantidade de cabines", type: "number", min: 1, max: 20 },
       { name: "preferencia_cabine", label: "Preferência de cabine", type: "select", options: ["Interna", "Externa", "Varanda", "Suíte", "Indiferente"] },
       { name: "companhia_navio", label: "Companhia ou navio (opcional)", type: "text", span: 2 },
@@ -184,15 +245,15 @@ export const REQUEST_SERVICES: RequestService[] = [
     label: "Pacotes e Circuitos",
     intro: "Roteiros completos, sob medida ou prontos, com apoio do início ao fim.",
     fields: [
-      { name: "origem", label: "Origem", type: "text", required: true, placeholder: "Cidade de saída", origin: "quick" },
-      { name: "destinos", label: "Destino(s)", type: "text", required: true, span: 2, placeholder: "Ex.: Itália e Grécia", origin: "quick" },
-      { name: "data", label: "Data ou início do período", type: "date", origin: "quick" },
+      { name: "origem", label: "Origem", type: "text", required: true, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
+      { name: "destinos", label: "Destinos", type: "tags", required: true, span: 2, placeholder: "Digite e pressione Enter — ex.: Itália", origin: "quick" },
+      { name: "data", label: "Data inicial", type: "date", origin: "quick" },
+      { name: "duracao", label: "Duração (dias)", type: "number", min: 1, max: 120, origin: "quick" },
+      PAX_ADULTS,
+      PAX_KIDS,
+      PAX_AGES,
       { name: "flexibilidade", label: "Flexibilidade", type: "select", options: ["Datas fixas", "Mês definido", "Semestre definido", "Totalmente flexível"] },
-      { name: "duracao", label: "Duração (dias)", type: "number", min: 1, max: 120 },
       { name: "estilo", label: "Estilo da viagem", type: "select", options: ["Romântica", "Família", "Amigos", "Aventura", "Cultural", "Relaxamento", "Lua de mel"] },
-      { name: "adultos", label: "Adultos", type: "number", required: true, min: 1, max: 30 },
-      { name: "criancas", label: "Crianças", type: "number", min: 0, max: 12 },
-      { name: "idades_criancas", label: "Idades das crianças", type: "text", span: 2, origin: "context" },
       { name: "servicos_desejados", label: "Serviços desejados", type: "text", span: 2, placeholder: "Ex.: aéreo, hotéis, transfers, passeios, seguro" },
       { name: "faixa_investimento", label: "Faixa de investimento (opcional)", type: "text", span: 2, placeholder: "Ex.: até R$ 20.000 no total" },
       OBS,
@@ -247,12 +308,35 @@ export function initialServiceValues(service: RequestService): ServiceValues {
  * The full form (AgencyRequestCenter) keeps every field — this is presentation only.
  */
 export function quickQuoteFields(service: RequestService, max = 4): RequestField[] {
+  return initialBlockFields(service).slice(0, max);
+}
+
+/**
+ * BLOCO INICIAL do serviço (primeira dobra), na ordem declarada e sem limite:
+ * é a estrutura única e compartilhada por todos os sites white label.
+ */
+export function initialBlockFields(service: RequestService): RequestField[] {
   const explicit = service.fields.filter((f) => f.origin === "quick" && f.type !== "textarea");
-  if (explicit.length) return explicit.slice(0, max);
+  if (explicit.length) return explicit;
   const usable = service.fields.filter((f) => f.type !== "textarea" && f.type !== "checkbox");
   const required = usable.filter((f) => f.required);
   const optional = usable.filter((f) => !f.required);
-  return [...required, ...optional].slice(0, max);
+  return [...required, ...optional].slice(0, 4);
+}
+
+/**
+ * O período do serviço é um intervalo (ida e volta / check-in e check-out) ou
+ * uma data simples? `null` quando o serviço não trabalha com período único.
+ */
+export function periodMode(service: RequestService, values: ServiceValues): "range" | "single" | null {
+  if (!service.period) return null;
+  const range = service.period.rangeWhen ? service.period.rangeWhen(values) : true;
+  return range ? "range" : "single";
+}
+
+/** Nomes de campo cobertos pelo campo único de período. */
+export function periodFieldNames(service: RequestService): string[] {
+  return service.period ? [service.period.start, service.period.end] : [];
 }
 
 /** O valor informado para o campo é utilizável? */
@@ -275,17 +359,24 @@ export function fieldHasValue(field: RequestField, values: ServiceValues): boole
  * `standalone` sai quando o serviço entrou como complemento (herda do
  * contexto) e `context` nunca é digitado.
  */
+/**
+ * Campos que um serviço COMPLEMENTAR sempre herda do contexto da viagem
+ * (destino e composição de passageiros) — não são pedidos outra vez.
+ */
+const COMPLEMENT_INHERITED = new Set(["destino", "origem", "adultos", "criancas", "idades_criancas"]);
+
 export function formFields(
   service: RequestService,
   options: { isPrimary?: boolean; isComplement?: boolean; values?: ServiceValues } = {},
 ): RequestField[] {
   const values = options.values ?? {};
-  const quickNames = new Set(quickQuoteFields(service, 6).map((f) => f.name));
+  const quickNames = new Set(initialBlockFields(service).map((f) => f.name));
   const quickErrors = options.isPrimary ? validateQuickStep(service, values) : {};
 
   return service.fields.filter((field) => {
     if (field.origin === "context") return false;
     if (field.origin === "standalone" && options.isComplement) return false;
+    if (options.isComplement && COMPLEMENT_INHERITED.has(field.name)) return false;
     if (options.isPrimary && quickNames.has(field.name)) {
       const satisfied = fieldHasValue(field, values) && !quickErrors[field.name];
       return !satisfied;
@@ -374,6 +465,15 @@ export function validateServiceDates(service: RequestService, values: ServiceVal
     }
   }
 
+  if (service.key === "transfer") {
+    const out = asDate(values, "data");
+    const back = asDate(values, "data_volta");
+    if (values.sentido === "Ida e volta") {
+      if (out && back && back < out) errors.data_volta = "A volta não pode ser antes da ida.";
+      if (out && !back) errors.data_volta = "Informe a data da volta.";
+    }
+  }
+
   if (service.key === "aereo") {
     const out = asDate(values, "data_ida");
     const back = asDate(values, "data_volta");
@@ -433,7 +533,7 @@ export function validateQuickStep(service: RequestService, values: ServiceValues
   const errors: Record<string, string> = {};
   const multi = isMultiRoute(service, values);
 
-  for (const field of quickQuoteFields(service, 6)) {
+  for (const field of initialBlockFields(service)) {
     if (!field.required) continue;
     if (multi && skipForMultiRoute(field.name)) continue;
     const raw = values[field.name];
