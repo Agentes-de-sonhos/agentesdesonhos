@@ -22,7 +22,7 @@ describe("Etapa 2 — bloco de cálculo removido", () => {
 
   it("a UI de precificação existe apenas no item Investimento", () => {
     expect(pageSource).toContain("<QuoteInvestmentDisplayCard");
-    expect(pageSource.match(/QuoteInvestmentDisplayCard/g)?.length).toBe(2); // import + uso
+    expect(pageSource.match(/QuoteInvestmentDisplayCard/g)?.length).toBe(3); // import (nome + path) + uso
     expect(pageSource).not.toContain('id="hide-investment-total"');
   });
 });
