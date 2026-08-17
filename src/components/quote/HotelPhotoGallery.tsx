@@ -19,10 +19,18 @@ import {
   dedupeImageRefs,
   dropStaleGoogleRefs,
   galleryCounterLabel,
+  hasStaleGoogleRefs,
   imageRefOrigin,
+  isSameImageRefList,
   isValidHttpImageUrl,
   removeImageRef,
 } from "@/lib/quoteHotelGallery";
+import type { AddImageResult } from "@/lib/quoteHotelGallery";
+
+export const HOTEL_GALLERY_PENDING_MESSAGE =
+  "A galeria de fotos está em edição. Clique em “Salvar galeria” para confirmar as fotos desta hospedagem.";
+export const HOTEL_GALLERY_STALE_MESSAGE =
+  "As fotos salvas pertencem ao hotel anterior. Revise a galeria e clique em “Salvar galeria”.";
 
 interface HotelPhotoGalleryProps {
   /** Fotos confirmadas (fonte da verdade do formulário). */
@@ -32,6 +40,11 @@ interface HotelPhotoGalleryProps {
   placeId?: string | null;
   /** `true` quando o serviço já existe (edição) — evita abrir edição sozinho. */
   hasSavedService?: boolean;
+  /**
+   * Informa ao formulário que a galeria tem alterações não confirmadas ou está
+   * inconsistente com o hotel atual — o submit deve ser bloqueado até Salvar.
+   */
+  onPendingChange?: (pending: boolean) => void;
 }
 
 /**
@@ -46,6 +59,7 @@ export function HotelPhotoGallery({
   onImageUrlsChange,
   placeId,
   hasSavedService,
+  onPendingChange,
 }: HotelPhotoGalleryProps) {
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -53,6 +67,7 @@ export function HotelPhotoGallery({
 
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [draft, setDraft] = useState<string[]>([]);
+  const draftRef = useRef<string[]>([]);
   const [feedback, setFeedback] = useState<{ tone: "error" | "info"; text: string } | null>(null);
   const [urlOpen, setUrlOpen] = useState(false);
   const [urlValue, setUrlValue] = useState("");
@@ -63,19 +78,25 @@ export function HotelPhotoGallery({
   const active = mode === "edit" ? draft : saved;
   const atLimit = active.length >= MAX_HOTEL_GALLERY_IMAGES;
 
+  const applyDraft = useCallback((next: string[]) => {
+    draftRef.current = next;
+    setDraft(next);
+  }, []);
+
   const openEdit = useCallback(
     (base?: string[]) => {
-      setDraft(dedupeImageRefs(base ?? imageUrls ?? []));
+      applyDraft(dedupeImageRefs(base ?? imageUrls ?? []));
       setFeedback(null);
       setUrlOpen(false);
       setUrlValue("");
       setMode("edit");
     },
-    [imageUrls],
+    [imageUrls, applyDraft],
   );
 
   // Primeiro hotel selecionado → abre edição e busca sugestões.
-  // Troca de hotel → descarta referências Google do hotel anterior.
+  // Troca de hotel → limpa as referências Google antigas SOMENTE no rascunho.
+  // As fotos confirmadas nunca são alteradas fora de "Salvar galeria".
   useEffect(() => {
     if (!placeId) {
       seenPlace.current = placeId ?? null;
@@ -84,34 +105,28 @@ export function HotelPhotoGallery({
     const previous = seenPlace.current;
     seenPlace.current = placeId;
     if (previous && previous !== placeId) {
-      const cleaned = dropStaleGoogleRefs(imageUrls || [], placeId);
-      if (cleaned.length !== (imageUrls || []).length) onImageUrlsChange(cleaned);
-      openEdit(cleaned);
+      openEdit(dropStaleGoogleRefs(imageUrls || [], placeId));
       return;
     }
     if (!previous && !hasSavedService) openEdit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [placeId]);
 
-  const tryAdd = useCallback((ref: string) => {
-    let ok = false;
-    setDraft((prev) => {
-      const res = addImageRef(prev, ref);
-      if (res.ok) {
-        ok = true;
-        setFeedback(null);
-        return res.urls;
-      }
-      setFeedback({ tone: "error", text: res.error || HOTEL_GALLERY_LIMIT_MESSAGE });
-      return res.urls;
-    });
-    return ok;
-  }, []);
+  /**
+   * Adição determinística: calcula o resultado a partir do rascunho atual
+   * (ref sincronizada) — nunca depende do retorno do updater do setState.
+   */
+  const tryAdd = useCallback((ref: string): AddImageResult => {
+    const res = addImageRef(draftRef.current, ref);
+    applyDraft(res.urls);
+    setFeedback(res.ok ? null : { tone: "error", text: res.error || HOTEL_GALLERY_LIMIT_MESSAGE });
+    return res;
+  }, [applyDraft]);
 
   const handleRemove = useCallback((ref: string) => {
-    setDraft((prev) => removeImageRef(prev, ref));
+    applyDraft(removeImageRef(draftRef.current, ref));
     setFeedback(null);
-  }, []);
+  }, [applyDraft]);
 
   const handleGoogleSelected = useCallback((urls: string[]) => {
     urls.forEach((u) => tryAdd(u));
@@ -123,11 +138,11 @@ export function HotelPhotoGallery({
       setFeedback({ tone: "error", text: "Informe um link http ou https válido de imagem." });
       return;
     }
-    if (containsImageRef(draft, candidate)) {
+    if (containsImageRef(draftRef.current, candidate)) {
       setFeedback({ tone: "error", text: "Esta foto já está na galeria." });
       return;
     }
-    if (draft.length >= MAX_HOTEL_GALLERY_IMAGES) {
+    if (draftRef.current.length >= MAX_HOTEL_GALLERY_IMAGES) {
       setFeedback({ tone: "error", text: HOTEL_GALLERY_LIMIT_MESSAGE });
       return;
     }
@@ -146,7 +161,10 @@ export function HotelPhotoGallery({
         });
         return;
       }
-      if (tryAdd(importedUrl)) {
+      // A importação é idempotente: a mesma URL de origem devolve sempre o
+      // mesmo arquivo. Comparamos antes de adicionar para não duplicar.
+      const res = tryAdd(importedUrl);
+      if (res.ok) {
         setUrlValue("");
         setUrlOpen(false);
       }
@@ -155,7 +173,7 @@ export function HotelPhotoGallery({
     } finally {
       setUrlLoading(false);
     }
-  }, [urlValue, draft, tryAdd]);
+  }, [urlValue, tryAdd]);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -166,7 +184,7 @@ export function HotelPhotoGallery({
       setFeedback({ tone: "error", text: invalid });
       return;
     }
-    if (draft.length >= MAX_HOTEL_GALLERY_IMAGES) {
+    if (draftRef.current.length >= MAX_HOTEL_GALLERY_IMAGES) {
       setFeedback({ tone: "error", text: HOTEL_GALLERY_LIMIT_MESSAGE });
       return;
     }
@@ -191,7 +209,8 @@ export function HotelPhotoGallery({
         .from("quote-images")
         .upload(`${user.id}/quotes/thumb_${fileId}.webp`, result.thumb, { upsert: true, contentType: "image/webp" });
       const { data: urlData } = supabase.storage.from("quote-images").getPublicUrl(fullPath);
-      if (tryAdd(urlData.publicUrl)) setFeedback(null);
+      const res = tryAdd(urlData.publicUrl);
+      if (res.ok) setFeedback(null);
     } catch {
       setFeedback({ tone: "error", text: "Erro ao processar a imagem." });
     } finally {
@@ -200,7 +219,7 @@ export function HotelPhotoGallery({
   };
 
   const handleSave = () => {
-    onImageUrlsChange(dedupeImageRefs(draft));
+    onImageUrlsChange(dedupeImageRefs(draftRef.current));
     setFeedback(null);
     setUrlOpen(false);
     setUrlValue("");
@@ -208,12 +227,21 @@ export function HotelPhotoGallery({
   };
 
   const handleCancel = () => {
-    setDraft([]);
+    applyDraft([]);
     setFeedback(null);
     setUrlOpen(false);
     setUrlValue("");
     setMode("view");
   };
+
+  // Pendência = rascunho diferente das salvas, ou fotos salvas de outro hotel.
+  const staleSaved = hasStaleGoogleRefs(saved, placeId);
+  const dirtyDraft = mode === "edit" && !isSameImageRefList(draft, saved);
+  const pending = staleSaved || dirtyDraft;
+  useEffect(() => {
+    onPendingChange?.(pending);
+  }, [pending, onPendingChange]);
+  useEffect(() => () => onPendingChange?.(false), [onPendingChange]);
 
   const showSection = !!placeId || saved.length > 0;
   if (!showSection) {
@@ -409,6 +437,11 @@ export function HotelPhotoGallery({
       {mode === "edit" && atLimit && (
         <p className="text-xs text-destructive" data-testid="hotel-gallery-limit">
           {HOTEL_GALLERY_LIMIT_MESSAGE}
+        </p>
+      )}
+      {staleSaved && (
+        <p className="text-xs text-destructive" data-testid="hotel-gallery-stale">
+          {HOTEL_GALLERY_STALE_MESSAGE}
         </p>
       )}
       {feedback && (

@@ -13,6 +13,8 @@ import {
   imageRefOrigin,
   isValidHttpImageUrl,
   dropStaleGoogleRefs,
+  isSameImageRefList,
+  hasStaleGoogleRefs,
 } from "@/lib/quoteHotelGallery";
 
 const invoke = vi.fn();
@@ -71,14 +73,24 @@ describe("quoteHotelGallery (regras)", () => {
     expect(dedupeImageRefs([...list, "https://cdn.example/a.jpg"])).toHaveLength(1);
   });
 
-  it("remove por referência e identifica a origem", () => {
+  it("remove por referência e identifica as três origens", () => {
     const g = makeGplaceRef("P1", 0);
     expect(removeImageRef([g, "https://x.com/a.jpg"], g)).toEqual(["https://x.com/a.jpg"]);
     expect(imageRefOrigin(g)).toBe("google");
     expect(imageRefOrigin("https://p.supabase.co/storage/v1/object/public/quote-images/u/quotes/a.webp")).toBe("upload");
+    expect(
+      imageRefOrigin("https://p.supabase.co/storage/v1/object/public/quote-images/u/quotes/url-abc123.jpg"),
+    ).toBe("url");
     expect(imageRefOrigin("https://site.com/foto.jpg")).toBe("url");
   });
 
+
+  it("compara listas e detecta fotos de hotel anterior", () => {
+    expect(isSameImageRefList(["https://x.com/a.jpg"], ["https://X.com/a.jpg/"])).toBe(true);
+    expect(isSameImageRefList(["https://x.com/a.jpg"], [])).toBe(false);
+    expect(hasStaleGoogleRefs([makeGplaceRef("OLD", 0)], "NEW")).toBe(true);
+    expect(hasStaleGoogleRefs([makeGplaceRef("NEW", 0), "https://x.com/a.jpg"], "NEW")).toBe(false);
+  });
   it("aceita somente http/https em URL manual", () => {
     expect(isValidHttpImageUrl("https://site.com/f.jpg")).toBe(true);
     expect(isValidHttpImageUrl("javascript:alert(1)")).toBe(false);
@@ -256,5 +268,105 @@ describe("HotelPhotoGallery", () => {
     render(<HotelPhotoGallery imageUrls={[]} onImageUrlsChange={vi.fn()} placeId={null} />);
     expect(screen.getByTestId("hotel-gallery-empty")).toBeInTheDocument();
     expect(screen.getByText("Galeria de fotos")).toBeInTheDocument();
+  });
+
+  it("trocar de hotel NÃO confirma nada: zero chamadas até Salvar galeria", async () => {
+    const onChange = vi.fn();
+    const old = makeGplaceRef("OLD", 0);
+    const { rerender } = render(
+      <HotelPhotoGallery imageUrls={[old, "https://x.com/a.jpg"]} onImageUrlsChange={onChange} placeId="OLD" hasSavedService />,
+    );
+    rerender(
+      <HotelPhotoGallery imageUrls={[old, "https://x.com/a.jpg"]} onImageUrlsChange={onChange} placeId="NEW" hasSavedService />,
+    );
+    await findSuggestions();
+    // O rascunho já está limpo (só a URL manual), mas as salvas seguem intactas.
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(1));
+    // Inconsistência sinalizada ao formulário (submit bloqueado até confirmar).
+    expect(screen.getByTestId("hotel-gallery-stale")).toBeInTheDocument();
+
+    // Cancelar mantém exatamente as fotos salvas anteriores.
+    fireEvent.click(screen.getByLabelText("Cancelar edição da galeria"));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(2));
+
+    fireEvent.click(screen.getByLabelText("Editar galeria de fotos"));
+    fireEvent.click(screen.getAllByLabelText("Remover foto da galeria")[0]);
+    fireEvent.click(screen.getByLabelText("Salvar galeria de fotos"));
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("informa pendência ao formulário e limpa ao salvar", async () => {
+    const onPending = vi.fn();
+    render(
+      <HotelPhotoGallery imageUrls={[]} onImageUrlsChange={vi.fn()} placeId="P1" hasSavedService onPendingChange={onPending} />,
+    );
+    expect(onPending).toHaveBeenLastCalledWith(false);
+    fireEvent.click(screen.getByLabelText("Editar galeria de fotos"));
+    await findSuggestions();
+    fireEvent.click(await screen.findByLabelText("Selecionar foto 1"));
+    await waitFor(() => expect(onPending).toHaveBeenLastCalledWith(true));
+    fireEvent.click(screen.getByLabelText("Salvar galeria de fotos"));
+    await waitFor(() => expect(onPending).toHaveBeenLastCalledWith(false));
+  });
+
+  it("após URL importada com sucesso o formulário fecha e limpa", async () => {
+    render(<HotelPhotoGallery imageUrls={[]} onImageUrlsChange={vi.fn()} placeId="P1" hasSavedService />);
+    fireEvent.click(screen.getByLabelText("Editar galeria de fotos"));
+    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
+    fireEvent.change(screen.getByPlaceholderText("Cole aqui o link direto da imagem"), {
+      target: { value: "https://site.com/quarto.jpg" },
+    });
+    fireEvent.click(screen.getByLabelText("Adicionar foto"));
+    await waitFor(() => expect(screen.queryByTestId("hotel-gallery-url-form")).toBeNull());
+    expect(screen.queryByTestId("hotel-gallery-feedback")).toBeNull();
+    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
+    expect((screen.getByPlaceholderText("Cole aqui o link direto da imagem") as HTMLInputElement).value).toBe("");
+  });
+
+  it("mesma URL importada não duplica na sessão nem após salvar/reabrir", async () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <HotelPhotoGallery imageUrls={[]} onImageUrlsChange={onChange} placeId="P1" hasSavedService />,
+    );
+    const imported = "https://p.supabase.co/storage/v1/object/public/quote-images/user-1/quotes/url-hash1.jpg";
+    invoke.mockImplementation((fn: unknown) =>
+      fn === "hotel-photos"
+        ? Promise.resolve({ data: { photos: googlePhotos }, error: null })
+        : Promise.resolve({ data: { url: imported }, error: null }),
+    );
+    const addByUrl = async (value: string) => {
+      if (!screen.queryByTestId("hotel-gallery-url-form")) {
+        fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
+      }
+      fireEvent.change(await screen.findByPlaceholderText("Cole aqui o link direto da imagem"), {
+        target: { value },
+      });
+      fireEvent.click(screen.getByLabelText("Adicionar foto"));
+    };
+
+    fireEvent.click(screen.getByLabelText("Editar galeria de fotos"));
+    await addByUrl("https://site.com/quarto.jpg");
+    await waitFor(() =>
+      expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(1)),
+    );
+    // Mesma sessão: importação idempotente devolve a mesma URL → sem duplicar.
+    await addByUrl("https://site.com/quarto.jpg?utm=1");
+    await waitFor(() =>
+      expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("já está na galeria"),
+    );
+    expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(1));
+
+    // Salvar e reabrir com a foto persistida: colar de novo também não duplica.
+    fireEvent.click(screen.getByLabelText("Salvar galeria de fotos"));
+    expect(onChange).toHaveBeenCalledWith([imported]);
+    rerender(<HotelPhotoGallery imageUrls={[imported]} onImageUrlsChange={onChange} placeId="P1" hasSavedService />);
+    fireEvent.click(screen.getByLabelText("Editar galeria de fotos"));
+    await addByUrl("https://site.com/quarto.jpg");
+    await waitFor(() =>
+      expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("já está na galeria"),
+    );
+    expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(1));
   });
 });

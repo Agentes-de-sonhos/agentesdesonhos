@@ -2,6 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
   fetchRemoteImage,
   extensionForContentType,
+  normalizeRemoteImageUrl,
+  sha256Hex,
 } from "../_shared/remote-image-fetch.ts";
 
 const corsHeaders = {
@@ -44,6 +46,22 @@ Deno.serve(async (req) => {
     const rawUrl = typeof body.url === "string" ? body.url.trim() : "";
     if (!rawUrl || rawUrl.length > 2048) return json({ error: "Link inválido." }, 400);
 
+    // Identidade determinística: a mesma URL de origem sempre aponta para o
+    // mesmo arquivo (`url-<sha256>.<ext>`), então reimportar não duplica.
+    const hash = await sha256Hex(normalizeRemoteImageUrl(rawUrl));
+    const folder = `${user.id}/quotes`;
+    const baseName = `url-${hash}`;
+    const { data: existing } = await supabase.storage
+      .from("quote-images")
+      .list(folder, { search: baseName, limit: 5 });
+    const found = existing?.find((f) => f.name.startsWith(`${baseName}.`));
+    if (found) {
+      const { data: pubExisting } = supabase.storage
+        .from("quote-images")
+        .getPublicUrl(`${folder}/${found.name}`);
+      return json({ url: pubExisting.publicUrl, reused: true });
+    }
+
     let image;
     try {
       image = await fetchRemoteImage(rawUrl);
@@ -52,10 +70,10 @@ Deno.serve(async (req) => {
     }
 
     const ext = extensionForContentType(image.contentType);
-    const path = `${user.id}/quotes/${crypto.randomUUID()}.${ext}`;
+    const path = `${folder}/${baseName}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("quote-images")
-      .upload(path, image.bytes, { contentType: image.contentType, upsert: false });
+      .upload(path, image.bytes, { contentType: image.contentType, upsert: true });
 
     if (uploadError) {
       console.error("import-quote-image upload failed", uploadError.message);

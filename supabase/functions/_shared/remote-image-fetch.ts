@@ -3,7 +3,9 @@
  *
  * Regras: somente http/https, bloqueio de localhost/loopback/link-local e
  * faixas privadas IPv4/IPv6, revalidação de cada redirect, timeout e limite
- * de tamanho, e Content-Type de imagem permitido (sem SVG/HTML).
+ * de tamanho, Content-Type de imagem permitido (sem SVG/HTML) e — decisivo —
+ * validação da assinatura real dos bytes (magic bytes). Um servidor que
+ * declara `image/png` mas devolve HTML/executável é rejeitado.
  */
 
 export const ALLOWED_IMAGE_TYPES = [
@@ -18,6 +20,63 @@ export const ALLOWED_IMAGE_TYPES = [
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8MB
 const FETCH_TIMEOUT_MS = 12_000;
 const MAX_REDIRECTS = 3;
+
+/**
+ * Detecta o tipo real da imagem pela assinatura dos bytes.
+ * Retorna `null` quando o conteúdo não é uma das imagens suportadas.
+ */
+export function sniffImageType(bytes: Uint8Array): string | null {
+  const b = bytes;
+  if (b.length < 12) return null;
+  // JPEG: FF D8 FF
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg";
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  if (
+    b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47 &&
+    b[4] === 0x0d && b[5] === 0x0a && b[6] === 0x1a && b[7] === 0x0a
+  ) return "image/png";
+  // GIF: GIF87a / GIF89a
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38 && (b[4] === 0x37 || b[4] === 0x39) && b[5] === 0x61) {
+    return "image/gif";
+  }
+  const ascii = (start: number, len: number) =>
+    String.fromCharCode(...b.slice(start, start + len)).toLowerCase();
+  // WEBP: "RIFF"…"WEBP"
+  if (ascii(0, 4) === "riff" && ascii(8, 4) === "webp") return "image/webp";
+  // AVIF/HEIF-family: "ftyp" + brand
+  if (ascii(4, 4) === "ftyp") {
+    const brand = ascii(8, 4);
+    if (brand === "avif" || brand === "avis") return "image/avif";
+  }
+  return null;
+}
+
+/**
+ * Normalização canônica da URL de origem — base da identidade determinística
+ * da importação (mesmo link ⇒ mesmo arquivo, sem duplicar no bucket).
+ */
+export function normalizeRemoteImageUrl(raw: string): string {
+  const value = (raw || "").trim();
+  try {
+    const u = new URL(value);
+    u.hash = "";
+    u.hostname = u.hostname.toLowerCase();
+    u.protocol = u.protocol.toLowerCase();
+    const path = u.pathname.replace(/\/+$/, "");
+    return `${u.protocol}//${u.host}${path}${u.search}`;
+  } catch {
+    return value;
+  }
+}
+
+/** SHA-256 hex de um texto (identidade estável da URL de origem). */
+export async function sha256Hex(input: string | Uint8Array): Promise<string> {
+  const data = typeof input === "string" ? new TextEncoder().encode(input) : input;
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 function isPrivateIPv4(host: string): boolean {
   const m = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
@@ -135,7 +194,12 @@ export async function fetchRemoteImage(rawUrl: string): Promise<FetchedImage> {
     if (buf.byteLength === 0) throw new Error("Não foi possível carregar a imagem deste link.");
     if (buf.byteLength > MAX_IMAGE_BYTES) throw new Error("A imagem é muito grande (máx. 8 MB).");
 
-    return { bytes: buf, contentType };
+    // Header pode ser falsificado: o tipo real vem da assinatura dos bytes.
+    const sniffed = sniffImageType(buf);
+    if (!sniffed) {
+      throw new Error("O conteúdo deste link não é uma imagem válida (JPG, PNG, WEBP, GIF ou AVIF).");
+    }
+    return { bytes: buf, contentType: sniffed };
   }
 
   throw new Error("Não foi possível carregar a imagem deste link.");
