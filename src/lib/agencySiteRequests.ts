@@ -23,6 +23,12 @@ export type FieldOrigin = "quick" | "standalone" | "context" | "always";
 export interface RequestField {
   name: string;
   label: string;
+  /**
+   * Rótulo curto usado APENAS no bloco inicial compartilhado (linha única do
+   * desktop). Quando ausente, o bloco inicial usa `label`. As etapas
+   * posteriores da jornada sempre usam `label`.
+   */
+  shortLabel?: string;
   type: FieldType;
   required?: boolean;
   placeholder?: string;
@@ -148,7 +154,7 @@ export const REQUEST_SERVICES: RequestService[] = [
       help: "Retirada e devolução no mesmo calendário.",
     },
     fields: [
-      { name: "retirada_local", label: "Destino ou local de retirada", type: "text", required: true, span: 2, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
+      { name: "retirada_local", label: "Destino ou local de retirada", shortLabel: "Local de retirada", type: "text", required: true, span: 2, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
       { name: "retirada_data", label: "Data da retirada", type: "date", required: true, origin: "quick" },
       { name: "devolucao_data", label: "Data da devolução", type: "date", required: true, origin: "quick" },
       PAX_ADULTS,
@@ -172,7 +178,7 @@ export const REQUEST_SERVICES: RequestService[] = [
       rangeWhen: (values) => String(values.sentido ?? "") !== "Somente ida",
     },
     fields: [
-      { name: "destino", label: "Destino ou local do serviço", type: "text", required: true, span: 2, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
+      { name: "destino", label: "Destino ou local do serviço", shortLabel: "Local do serviço", type: "text", required: true, span: 2, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
       { name: "sentido", label: "Tipo de transfer", type: "select", required: true, options: ["Ida e volta", "Somente ida"], origin: "quick" },
       { name: "data", label: "Data do serviço", type: "date", required: true, origin: "quick" },
       { name: "data_volta", label: "Data da volta", type: "date", origin: "quick" },
@@ -192,7 +198,7 @@ export const REQUEST_SERVICES: RequestService[] = [
       { name: "destino", label: "Destino", type: "text", required: true, placeholder: "Cidade ou região", origin: "quick", search: "city" },
       { name: "atracao", label: "Atração desejada", type: "text", required: true, placeholder: "Ex.: Beto Carrero World, Disney, Universal", origin: "quick" },
       { name: "data", label: "Data da visita", type: "date", required: true, origin: "quick" },
-      { name: "dias", label: "Quantidade de dias", type: "number", min: 1, max: 30, origin: "quick", help: "Dias de utilização ou de visita." },
+      { name: "dias", label: "Quantidade de dias", shortLabel: "Dias", type: "number", min: 1, max: 30, origin: "quick", help: "Dias de utilização ou de visita." },
       PAX_ADULTS,
       PAX_KIDS,
       PAX_AGES,
@@ -229,7 +235,7 @@ export const REQUEST_SERVICES: RequestService[] = [
     fields: [
       { name: "destino", label: "Região desejada", type: "text", required: true, placeholder: "Ex.: Caribe", origin: "quick" },
       { name: "data", label: "Data inicial", type: "date", required: true, origin: "quick" },
-      { name: "duracao", label: "Duração (noites)", type: "number", min: 1, max: 200, origin: "quick" },
+      { name: "duracao", label: "Duração (noites)", shortLabel: "Noites", type: "number", min: 1, max: 200, origin: "quick" },
       PAX_ADULTS,
       PAX_KIDS,
       PAX_AGES,
@@ -248,7 +254,7 @@ export const REQUEST_SERVICES: RequestService[] = [
       { name: "origem", label: "Origem", type: "text", required: true, placeholder: "Cidade, aeroporto ou código IATA", origin: "quick", search: "airport" },
       { name: "destinos", label: "Destinos", type: "tags", required: true, span: 2, placeholder: "Digite e pressione Enter — ex.: Itália", origin: "quick" },
       { name: "data", label: "Data inicial", type: "date", origin: "quick" },
-      { name: "duracao", label: "Duração (dias)", type: "number", min: 1, max: 120, origin: "quick" },
+      { name: "duracao", label: "Duração (dias)", shortLabel: "Dias", type: "number", min: 1, max: 120, origin: "quick" },
       PAX_ADULTS,
       PAX_KIDS,
       PAX_AGES,
