@@ -359,6 +359,12 @@ export function fieldHasValue(field: RequestField, values: ServiceValues): boole
  * `standalone` sai quando o serviço entrou como complemento (herda do
  * contexto) e `context` nunca é digitado.
  */
+/**
+ * Campos que um serviço COMPLEMENTAR sempre herda do contexto da viagem
+ * (destino e composição de passageiros) — não são pedidos outra vez.
+ */
+const COMPLEMENT_INHERITED = new Set(["destino", "origem", "adultos", "criancas", "idades_criancas"]);
+
 export function formFields(
   service: RequestService,
   options: { isPrimary?: boolean; isComplement?: boolean; values?: ServiceValues } = {},
@@ -370,6 +376,7 @@ export function formFields(
   return service.fields.filter((field) => {
     if (field.origin === "context") return false;
     if (field.origin === "standalone" && options.isComplement) return false;
+    if (options.isComplement && COMPLEMENT_INHERITED.has(field.name)) return false;
     if (options.isPrimary && quickNames.has(field.name)) {
       const satisfied = fieldHasValue(field, values) && !quickErrors[field.name];
       return !satisfied;
