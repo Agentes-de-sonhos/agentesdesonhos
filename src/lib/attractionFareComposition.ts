@@ -192,12 +192,47 @@ export function isCustomized(comp: AttractionFareComposition): boolean {
 }
 
 /**
- * O ingresso ficou dessincronizado da composição global do orçamento
- * (o agente mudou passageiros DEPOIS de personalizar o ingresso).
+ * O ingresso está fora de sincronia com a composição global do orçamento
+ * (a base registrada difere dos passageiros atuais). Isso NÃO significa,
+ * por si só, que exista revisão manual pendente — ver `classifyFareSync`.
  */
-export function needsReview(comp: AttractionFareComposition, pax: PaxSnapshot): boolean {
+export function isOutOfSync(comp: AttractionFareComposition, pax: PaxSnapshot): boolean {
   const base = compositionBase(comp);
   return base.adults !== clampCount(pax.adults) || base.children !== clampCount(pax.children);
+}
+
+export type FareSyncStatus = 'in_sync' | 'default_outdated' | 'customized_outdated';
+
+/**
+ * Decisão explícita e testável:
+ * - `in_sync`: nada a fazer;
+ * - `default_outdated`: composição padrão (não personalizada) desatualizada →
+ *   deve acompanhar automaticamente os passageiros da viagem, sem bloquear;
+ * - `customized_outdated`: composição realmente personalizada desatualizada →
+ *   preserva as escolhas, sinaliza e bloqueia até revisão do agente.
+ */
+export function classifyFareSync(comp: AttractionFareComposition, pax: PaxSnapshot): FareSyncStatus {
+  if (!isOutOfSync(comp, pax)) return 'in_sync';
+  return isCustomized(comp) ? 'customized_outdated' : 'default_outdated';
+}
+
+/** Somente composições PERSONALIZADAS desatualizadas exigem revisão manual. */
+export function needsReview(comp: AttractionFareComposition, pax: PaxSnapshot): boolean {
+  return classifyFareSync(comp, pax) === 'customized_outdated';
+}
+
+/**
+ * Retorna a composição padrão já sincronizada quando (e somente quando) o
+ * ingresso usa composição padrão desatualizada. Nos outros casos devolve
+ * `null` — chamada idempotente, segura para efeitos/persistência.
+ */
+export function autoSyncDefaultComposition(
+  comp: AttractionFareComposition,
+  pax: PaxSnapshot,
+  childrenAges?: (number | null | undefined)[] | null,
+): AttractionFareComposition | null {
+  if (classifyFareSync(comp, pax) !== 'default_outdated') return null;
+  return buildDefaultComposition(pax, childrenAges);
 }
 
 /**
@@ -279,11 +314,20 @@ export function validateAgeRule(rule: FareAgeRule): string | null {
     return 'A idade máxima de gratuidade deve ser menor que a idade mínima de criança.';
   }
   const adult = rule.adult_min_age;
-  if (adult != null && max != null && Number(adult) <= Number(max)) {
-    return 'O início da idade adulta deve ser maior que a idade máxima infantil.';
-  }
-  if (adult != null && free != null && Number(adult) <= Number(free)) {
-    return 'O início da idade adulta deve ser maior que a idade máxima de gratuidade.';
+  if (adult != null) {
+    if (free != null && Number(adult) <= Number(free)) {
+      return 'O início da idade adulta deve ser maior que a idade máxima de gratuidade.';
+    }
+    if (max != null && Number(adult) <= Number(max)) {
+      return 'O início da idade adulta deve ser maior que a idade máxima infantil.';
+    }
+    // Faixa infantil aberta no topo alcançaria a idade adulta: ambíguo.
+    if (max == null && min != null && Number(adult) > Number(min)) {
+      return 'Informe a idade máxima infantil para não sobrepor o início da idade adulta.';
+    }
+    if (max == null && min != null && Number(adult) <= Number(min)) {
+      return 'O início da idade adulta deve ser maior que a idade mínima de criança.';
+    }
   }
   return null;
 }
@@ -335,6 +379,43 @@ export function billableQuantity(counts: FareCounts): number {
 
 export function totalQuantity(counts: FareCounts): number {
   return billableQuantity(counts) + (counts.free || 0);
+}
+
+/**
+ * Patch idempotente para persistir a sincronização automática de um ingresso
+ * com composição PADRÃO desatualizada. Retorna `null` quando não há nada a
+ * fazer (em sincronia, personalizado ou legado sem `fare_composition`).
+ */
+export function buildAttractionSyncPatch(
+  data: unknown,
+  pax: PaxSnapshot,
+  childrenAges?: (number | null | undefined)[] | null,
+): { service_data: Record<string, unknown>; amount: number } | null {
+  const record = (data ?? {}) as Record<string, unknown>;
+  // Legado sem composição persistida: preserva valores até o agente editar.
+  if (!record.fare_composition) return null;
+  const current = normalizeComposition(record.fare_composition, pax, childrenAges);
+  const synced = autoSyncDefaultComposition(current, pax, childrenAges);
+  if (!synced) return null;
+
+  const counts = synced.counts;
+  const adultPrice = Number(record.adult_price) || 0;
+  const childPrice = Number(record.child_price) || 0;
+  const amount = computeAttractionTotal({ counts, adultPrice, childPrice });
+
+  return {
+    service_data: {
+      ...record,
+      fare_composition: synced,
+      adult_quantity: counts.adult,
+      child_quantity: counts.child,
+      free_quantity: counts.free,
+      billable_quantity: billableQuantity(counts),
+      quantity: totalQuantity(counts),
+      price: amount,
+    },
+    amount,
+  };
 }
 
 /** Leitura tolerante para telas públicas/PDF, sem depender do orçamento. */

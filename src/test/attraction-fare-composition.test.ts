@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
   applyAgeRule,
+  autoSyncDefaultComposition,
+  buildAttractionSyncPatch,
+  classifyFareSync,
   billableQuantity,
   buildDefaultComposition,
   computeAttractionTotal,
@@ -142,5 +145,84 @@ describe('regra etária com início adulto', () => {
     });
     expect(ruled.counts).toEqual({ adult: 2, child: 0, free: 1 });
     expect(ruled.counts.adult + ruled.counts.child + ruled.counts.free).toBe(3);
+  });
+});
+
+describe('sincronização automática da composição padrão', () => {
+  const base = { adults: 2, children: 2 };
+
+  it('padrão persistido 2+2 acompanha viagem 3+1, sem revisão, e recalcula total', () => {
+    const persisted = buildDefaultComposition(base);
+    const trip = { adults: 3, children: 1 };
+    expect(classifyFareSync(persisted, trip)).toBe('default_outdated');
+    expect(needsReview(persisted, trip)).toBe(false);
+
+    const synced = autoSyncDefaultComposition(persisted, trip)!;
+    expect(synced.counts).toEqual({ adult: 3, child: 1, free: 0 });
+    expect(classifyFareSync(synced, trip)).toBe('in_sync');
+    expect(computeAttractionTotal({ counts: synced.counts, adultPrice: 100, childPrice: 50 })).toBe(350);
+  });
+
+  it('customizado (3 adultos + 1 criança sobre base 2+2) é preservado e exige revisão', () => {
+    let comp = buildDefaultComposition(base);
+    comp = setPassengerCategory(comp, comp.passengers[2].id, 'adult');
+    expect(comp.counts).toEqual({ adult: 3, child: 1, free: 0 });
+    const trip = { adults: 3, children: 2 };
+    expect(classifyFareSync(comp, trip)).toBe('customized_outdated');
+    expect(needsReview(comp, trip)).toBe(true);
+    expect(autoSyncDefaultComposition(comp, trip)).toBeNull();
+    expect(comp.counts).toEqual({ adult: 3, child: 1, free: 0 });
+  });
+
+  it('patch de persistência é idempotente e não duplica', () => {
+    const data = {
+      fare_composition: buildDefaultComposition(base),
+      adult_price: 100,
+      child_price: 50,
+      adult_quantity: 2,
+      child_quantity: 2,
+    };
+    const trip = { adults: 3, children: 1 };
+    const patch = buildAttractionSyncPatch(data, trip)!;
+    expect(patch.amount).toBe(350);
+    expect(patch.service_data.adult_quantity).toBe(3);
+    expect(patch.service_data.child_quantity).toBe(1);
+    expect(patch.service_data.free_quantity).toBe(0);
+    expect(patch.service_data.billable_quantity).toBe(4);
+    expect(patch.service_data.quantity).toBe(4);
+    expect(buildAttractionSyncPatch(patch.service_data, trip)).toBeNull();
+  });
+
+  it('legado sem fare_composition e serviços não-attraction não são tocados', () => {
+    expect(buildAttractionSyncPatch({ price: 900, quantity: 3 }, { adults: 1, children: 0 })).toBeNull();
+    expect(buildAttractionSyncPatch({ provider: 'Seguro', price: 300 }, { adults: 4, children: 0 })).toBeNull();
+  });
+
+  it('customizado inconsistente bloqueia publicação/PDF; padrão sincronizado não bloqueia', () => {
+    const trip = { adults: 3, children: 1 };
+    const custom = setPassengerCategory(buildDefaultComposition(base), buildDefaultComposition(base).passengers[2].id, 'free');
+    const defaultSynced = buildDefaultComposition(trip);
+    const services = [
+      { type: 'attraction', comp: custom },
+      { type: 'attraction', comp: defaultSynced },
+      { type: 'insurance', comp: null },
+    ];
+    const blocking = services.filter((s) => s.type === 'attraction' && s.comp && needsReview(s.comp, trip));
+    expect(blocking).toHaveLength(1);
+    expect(needsReview(defaultSynced, trip)).toBe(false);
+  });
+});
+
+describe('regra etária sem sobreposição', () => {
+  it('rejeita faixa infantil aberta junto com início adulto', () => {
+    expect(validateAgeRule({ enabled: true, child_min_age: 3, adult_min_age: 12 })).toBeTruthy();
+    expect(validateAgeRule({ enabled: true, child_min_age: 3, adult_min_age: 2 })).toBeTruthy();
+  });
+
+  it('aceita regras parciais coerentes', () => {
+    expect(validateAgeRule({ enabled: true, free_max_age: 2 })).toBeNull();
+    expect(validateAgeRule({ enabled: true, adult_min_age: 12 })).toBeNull();
+    expect(validateAgeRule({ enabled: true, free_max_age: 2, adult_min_age: 12 })).toBeNull();
+    expect(validateAgeRule({ enabled: true, free_max_age: 2, child_min_age: 3, child_max_age: 11, adult_min_age: 12 })).toBeNull();
   });
 });
