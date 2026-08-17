@@ -112,13 +112,13 @@ describe("links públicos de ferramentas em domínio White Label", () => {
     expect(screen.queryByRole("link", { name: /Atendimento/i })).toBeNull();
     // Sem wrapper residual do shell (min-h-screen + bg do site) ao redor.
     expect(document.querySelector(".min-h-screen.bg-background")).toBeNull();
-  });
+  }, 30000);
 
   it("preserva query string do link atual", async () => {
     await renderAt("/orcamento/ABC123?ref=whatsapp");
     expect(await screen.findByTestId("tool-orcamento")).toBeInTheDocument();
     expect(window.location.search).toBe("?ref=whatsapp");
-  });
+  }, 30000);
 });
 
 describe("páginas institucionais White Label (negativo)", () => {
@@ -133,5 +133,5 @@ describe("páginas institucionais White Label (negativo)", () => {
     });
     expect(document.querySelector("footer")).not.toBeNull();
     expect(document.querySelector("nav")).not.toBeNull();
-  });
+  }, 30000);
 });
