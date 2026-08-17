@@ -1537,6 +1537,13 @@ export default function GerarOrcamento() {
 
           return (
           <div className="space-y-4">
+                  <QuoteInvestmentDisplayCard
+                    quote={quote}
+                    hideTotal={hideInvestmentTotal}
+                    onChangeHideTotal={(hide) => handleToggleHideInvestmentTotal(hide)}
+                    onSavePricing={(input) => setPricingMode(input)}
+                    savingPricing={isSavingPricingMode}
+                  />
                   {/* Nova lógica: O QUE exibir para o cliente (3 opções consolidadas) */}
                   <div className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
