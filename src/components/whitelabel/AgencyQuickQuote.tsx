@@ -306,74 +306,18 @@ export function AgencyQuickQuote({
               : "grid gap-3 border-t border-border/60 pt-4 md:grid-cols-[repeat(auto-fit,minmax(140px,1fr))] md:items-end"
           }
         >
-          {fields.map((field) => {
-            const id = `quick-${field.name}`;
-            const value = String(values[field.name] ?? "");
-            const error = quickErrors[field.name];
-            return (
-              <div key={field.name} className="min-w-0">
-                <Label
-                  htmlFor={id}
-                  className={
-                    editorial
-                      ? "text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
-                      : "text-xs font-medium text-muted-foreground"
-                  }
-                >
-                  {field.label}
-                </Label>
-                {field.type === "select" ? (
-                  <Select value={value} onValueChange={(v) => setValue(field.name, v)}>
-                    <SelectTrigger
-                      id={id}
-                      aria-invalid={!!error}
-                      aria-describedby={error ? `${id}-error` : undefined}
-                      className={editorial ? "mt-2 h-12 rounded-lg" : "mt-1.5 h-11 rounded-xl"}
-                    >
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(field.options ?? []).map((option) => (
-                        <SelectItem key={option} value={option}>{option}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input
-                    id={id}
-                    className={editorial ? "mt-2 h-12 rounded-lg" : "mt-1.5 h-11 rounded-xl"}
-                    type={field.type === "number" ? "number" : field.type}
-                    inputMode={field.type === "number" ? "numeric" : undefined}
-                    min={field.min}
-                    max={field.max}
-                    placeholder={field.placeholder}
-                    value={value}
-                    aria-invalid={!!error}
-                    aria-describedby={error ? `${id}-error` : undefined}
-                    onChange={(e) => setValue(field.name, e.target.value)}
-                  />
-                )}
-                {error && (
-                  <p id={`${id}-error`} role="alert" className="mt-1 text-xs text-destructive">{error}</p>
-                )}
-              </div>
-            );
-          })}
-
-          {isAereo && !multi && (
-            <TripDatePicker
-              id="quick-periodo"
-              label={tripType === "Somente ida" ? "Data da ida" : "Ida e volta"}
-              mode={tripType === "Somente ida" ? "single" : "range"}
-              start={String(values.data_ida ?? "")}
-              end={String(values.data_volta ?? "")}
-              onChange={setDates}
-              editorial={editorial}
-              required
-              error={quickErrors.periodo || quickErrors.data_ida || quickErrors.data_volta}
-              className="md:col-span-2"
-            />
-          )}
+          <ServiceInitialFields
+            service={service}
+            values={values}
+            ages={ages}
+            errors={quickErrors}
+            editorial={editorial}
+            idPrefix="quick"
+            onValue={setValue}
+            onDates={setDates}
+            onAgeChange={setAge}
+            hidden={hiddenFields}
+          />
 
           <Button
             size="lg"
