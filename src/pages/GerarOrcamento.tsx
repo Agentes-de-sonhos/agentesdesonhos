@@ -34,7 +34,11 @@ import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { QuoteServicesOrganizer } from "@/components/quote/QuoteServicesOrganizer";
-import { needsReview as fareNeedsReview, normalizeComposition as normalizeFareComposition } from "@/lib/attractionFareComposition";
+import {
+  buildAttractionSyncPatch,
+  needsReview as fareNeedsReview,
+  normalizeComposition as normalizeFareComposition,
+} from "@/lib/attractionFareComposition";
 import { QuotePricingModeCard } from "@/components/quote/QuotePricingModeCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
@@ -776,8 +780,9 @@ export default function GerarOrcamento() {
   };
 
   /**
-   * Ingressos cuja composição tarifária ficou dessincronizada da composição
-   * global do orçamento (o agente mudou passageiros depois de personalizar).
+   * Ingressos PERSONALIZADOS cuja composição tarifária ficou dessincronizada
+   * da composição global (o agente mudou passageiros depois de personalizar).
+   * Composições padrão nunca entram aqui: elas são sincronizadas automaticamente.
    */
   const attractionsNeedingReview = useMemo(() => {
     if (!quote) return [] as { id: string; label: string }[];
@@ -798,6 +803,48 @@ export default function GerarOrcamento() {
       }));
   }, [quote]);
 
+  /**
+   * Ingressos com composição PADRÃO desatualizada: sincronizados e persistidos
+   * automaticamente (idempotente) quando os passageiros da viagem mudam.
+   * Ingressos personalizados e outros tipos de serviço não são tocados.
+   */
+  const pendingFareSync = useMemo(() => {
+    if (!quote) return [] as { id: string; service_data: Record<string, unknown>; amount: number }[];
+    const pax = { adults: Number(quote.adults_count) || 0, children: Number(quote.children_count) || 0 };
+    return (quote.services || [])
+      .filter((s) => s.service_type === "attraction")
+      .map((s) => {
+        const patch = buildAttractionSyncPatch(s.service_data, pax);
+        return patch ? { id: s.id, ...patch } : null;
+      })
+      .filter(Boolean) as { id: string; service_data: Record<string, unknown>; amount: number }[];
+  }, [quote]);
+
+  const fareSyncRunning = useRef(false);
+  const fareSyncSignature = pendingFareSync.map((p) => `${p.id}:${p.amount}`).join("|");
+
+  useEffect(() => {
+    if (!quote || !fareSyncSignature || fareSyncRunning.current) return;
+    fareSyncRunning.current = true;
+    (async () => {
+      try {
+        for (const item of pendingFareSync) {
+          await updateService({
+            serviceId: item.id,
+            service_data: item.service_data as any,
+            amount: item.amount,
+          });
+        }
+      } catch (e) {
+        console.error("Falha ao sincronizar composição tarifária dos ingressos", e);
+      } finally {
+        fareSyncRunning.current = false;
+      }
+    })();
+    // Assinatura idempotente evita loop de autosave.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fareSyncSignature]);
+
   const blockForFareReview = () => {
     if (attractionsNeedingReview.length === 0) return false;
     toast({
@@ -808,15 +855,30 @@ export default function GerarOrcamento() {
     return true;
   };
 
+  /**
+   * Janela de persistência: nunca publicar/gerar PDF com valores antigos
+   * enquanto a sincronização automática dos ingressos padrão não terminar.
+   */
+  const blockForFareSync = () => {
+    if (pendingFareSync.length === 0) return false;
+    toast({
+      title: "Sincronizando os ingressos",
+      description: "Atualizando as quantidades tarifárias com os passageiros da viagem. Tente novamente em instantes.",
+    });
+    return true;
+  };
+
   const handleGeneratePDF = async () => {
     if (!quote) return;
     if (blockForFareReview()) return;
+    if (blockForFareSync()) return;
     await generateQuotePDF(quote, agentProfile);
   };
 
   const handlePublish = async () => {
     if (!quote) return;
     if (blockForFareReview()) return;
+    if (blockForFareSync()) return;
 
     const token = quote.share_token || await publishQuote(quote.id);
 
