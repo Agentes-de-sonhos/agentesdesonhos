@@ -40,6 +40,7 @@ import {
   normalizeComposition as normalizeFareComposition,
 } from "@/lib/attractionFareComposition";
 import { QuotePricingModeCard } from "@/components/quote/QuotePricingModeCard";
+import { QuoteInvestmentDisplayCard } from "@/components/quote/QuoteInvestmentDisplayCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -1317,11 +1318,6 @@ export default function GerarOrcamento() {
               onToggle={() => toggleSection("services")}
             >
               <div className="space-y-4">
-                <QuotePricingModeCard
-                  quote={quote}
-                  onSave={(input) => setPricingMode(input)}
-                  saving={isSavingPricingMode}
-                />
                 {attractionsNeedingReview.length > 0 && (
                   <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
                     <AlertTriangle className="h-4 w-4 shrink-0" />
