@@ -16,7 +16,7 @@ describe("integração da galeria de hospedagem", () => {
   it("o público resolve as imagens salvas (image_urls + gplace://)", () => {
     const carousel = read("src/components/quote/ServiceImageCarousel.tsx");
     expect(carousel).toContain("useServiceImages");
-    const publico = read("src/components/quote/QuoteServiceCard.tsx");
+    const publico = read("src/pages/OrcamentoPublico.tsx");
     expect(publico).toMatch(/image_urls/);
   });
 
