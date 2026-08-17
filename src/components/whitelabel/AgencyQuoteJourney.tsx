@@ -268,7 +268,10 @@ export interface AgencyQuoteJourneyProps {
   quickValues: ServiceValues;
   /** Rota estruturada de multidestinos vinda da cotação rápida (aéreo). */
   quickRoute?: RouteLeg[];
-  /** Volta o foco para a cotação rápida sem perder os detalhes preenchidos. */
+  /**
+   * @deprecated Mantido apenas por compatibilidade de props: a jornada nunca
+   * fecha o modal para editar. A edição acontece dentro da própria janela.
+   */
   onEditQuickValues?: () => void;
   privacyUrl?: string;
   termsUrl?: string;
@@ -289,7 +292,6 @@ export function AgencyQuoteJourney({
   primaryService,
   quickValues,
   quickRoute,
-  onEditQuickValues,
   privacyUrl = "/politicasdeprivacidade",
   termsUrl = "/termosdeuso",
 }: AgencyQuoteJourneyProps) {
@@ -892,18 +894,6 @@ export function AgencyQuoteJourney({
                     </p>
                     <h3 className="mt-1 text-base font-semibold text-foreground">{activeService.label}</h3>
                   </div>
-                  {!isComplement && onEditQuickValues && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        onOpenChange(false);
-                        onEditQuickValues();
-                      }}
-                    >
-                      <Pencil className="mr-2 h-3.5 w-3.5" /> Editar dados iniciais
-                    </Button>
-                  )}
                 </div>
                 <dl className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
                   {contextLines.map((item) => (

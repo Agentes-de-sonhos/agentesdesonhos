@@ -26,13 +26,17 @@ function quick(overrides: Record<string, string> = {}) {
   };
 }
 
-function open(overrides: Record<string, string> = {}) {
+function open(
+  overrides: Record<string, string> = {},
+  props: { onOpenChange?: (open: boolean) => void; onEditQuickValues?: () => void } = {},
+) {
   return render(
     <AgencyQuoteJourney
       hostname="100limites.tur.br"
       agencyName="100 Limites Viagens"
       open
-      onOpenChange={() => {}}
+      onOpenChange={props.onOpenChange ?? (() => {})}
+      onEditQuickValues={props.onEditQuickValues}
       primaryService="aereo"
       quickValues={quick(overrides)}
     />,
@@ -127,7 +131,7 @@ describe("pop-up da jornada de cotação White Label", () => {
     fireEvent.click(screen.getByLabelText(/autorizo o uso dos meus dados/i));
     fireEvent.click(screen.getByRole("button", { name: /enviar solicitação/i }));
     expect(submitMock).toHaveBeenCalledTimes(1);
-    const payload = submitMock.mock.calls[0][0] as Record<string, unknown>;
+    const payload = (submitMock.mock.calls[0] as unknown[])[0] as Record<string, unknown>;
     expect(payload.service_key).toBe("aereo");
     expect(payload.lead_name).toBe("Maria Souza");
   });
@@ -157,5 +161,36 @@ describe("pop-up da jornada de cotação White Label", () => {
     fireEvent.change(screen.getByLabelText(/quartos/i), { target: { value: "1" } });
     fireEvent.click(continueBtn());
     expect(screen.getByText("Revise sua solicitação")).toBeInTheDocument();
+  });
+
+  it("editar na revisão não fecha o modal e preserva os demais dados", () => {
+    const onOpenChange = vi.fn();
+    const onEditQuickValues = vi.fn();
+    open({}, { onOpenChange, onEditQuickValues });
+
+    // Nenhuma ação da etapa inicial leva para fora do modal.
+    expect(screen.queryByRole("button", { name: /editar dados iniciais/i })).toBeNull();
+
+    fireEvent.change(screen.getByLabelText(/adultos/i), { target: { value: "3" } });
+    fireEvent.click(continueBtn());
+    fireEvent.click(continueBtn());
+    fireEvent.change(screen.getByLabelText(/nome/i), { target: { value: "Maria Souza" } });
+    fireEvent.change(screen.getByLabelText(/e-mail/i), { target: { value: "maria@exemplo.com" } });
+    fireEvent.click(screen.getByLabelText(/autorizo o uso dos meus dados/i));
+    fireEvent.click(screen.getByRole("button", { name: /revisar solicitação/i }));
+
+    // "Dados gerais da viagem" abre o formulário interno do serviço inicial.
+    fireEvent.click(screen.getAllByRole("button", { name: /^editar$/i })[0]);
+    expect(screen.getByText("Confirme quem viaja e as preferências de voo")).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onEditQuickValues).not.toHaveBeenCalled();
+
+    // Dados preservados e retorno ao resumo com o contato intacto.
+    expect(screen.getByLabelText(/adultos/i)).toHaveValue(3);
+    fireEvent.click(continueBtn());
+    expect(screen.getByText("Revise sua solicitação")).toBeInTheDocument();
+    expect(screen.getByText("maria@exemplo.com")).toBeInTheDocument();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onEditQuickValues).not.toHaveBeenCalled();
   });
 });
