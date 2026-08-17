@@ -299,7 +299,7 @@ export function HotelPhotoGallery({
                     type="button"
                     aria-label="Remover foto da galeria"
                     onClick={() => handleRemove(ref)}
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-90 hover:opacity-100"
+                    className="absolute top-1 right-1 h-5 w-5 shadow-sm rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-90 hover:opacity-100"
                   >
                     <X className="h-3 w-3" />
                   </button>
