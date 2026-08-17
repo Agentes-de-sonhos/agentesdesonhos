@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
+import { AlertTriangle, ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
