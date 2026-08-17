@@ -11,6 +11,7 @@ import {
   normalizeComposition,
   readCompositionCounts,
   reconcileComposition,
+  setPassengerAge,
   setPassengerCategory,
   totalQuantity,
   validateAgeRule,
