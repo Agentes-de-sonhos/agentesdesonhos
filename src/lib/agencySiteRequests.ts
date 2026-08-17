@@ -33,6 +33,8 @@ export interface RequestField {
   max?: number;
   help?: string;
   origin?: FieldOrigin;
+  /** Busca estruturada aplicada ao campo de texto (cidade/aeroporto/porto). */
+  search?: LocationSearchKind;
   /** Só renderiza quando o campo indicado estiver marcado (checkbox). */
   visibleWhen?: string;
 }
