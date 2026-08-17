@@ -226,3 +226,44 @@ describe('regra etária sem sobreposição', () => {
     expect(validateAgeRule({ enabled: true, free_max_age: 2, child_min_age: 3, child_max_age: 11, adult_min_age: 12 })).toBeNull();
   });
 });
+
+describe('detecção de personalização por passageiro (swap com contagem igual)', () => {
+  const base = { adults: 2, children: 2 };
+
+  it('swap Adulto↔Criança mantém 2+2 mas é personalizado e nunca auto-sincroniza', () => {
+    let comp = buildDefaultComposition(base);
+    comp = setPassengerCategory(comp, 'adult-1', 'child');
+    comp = setPassengerCategory(comp, 'child-1', 'adult');
+    // contagens agregadas idênticas ao padrão
+    expect(comp.counts).toEqual({ adult: 2, child: 2, free: 0 });
+    expect(comp.age_rule.enabled).toBe(false);
+    expect(isCustomized(comp)).toBe(true);
+
+    const trip = { adults: 3, children: 1 };
+    expect(classifyFareSync(comp, trip)).toBe('customized_outdated');
+    expect(autoSyncDefaultComposition(comp, trip)).toBeNull();
+    expect(needsReview(comp, trip)).toBe(true);
+    expect(buildAttractionSyncPatch({ fare_composition: comp, adult_price: 100, child_price: 50 }, trip)).toBeNull();
+    // escolhas individuais preservadas
+    expect(comp.passengers.map((p) => p.category)).toEqual(['child', 'adult', 'adult', 'child']);
+  });
+
+  it('composição realmente padrão (counts derivados) continua auto-sincronizando', () => {
+    const comp = buildDefaultComposition(base);
+    expect(comp.passengers.every((p) => p.category === p.base)).toBe(true);
+    expect(isCustomized(comp)).toBe(false);
+    const trip = { adults: 3, children: 1 };
+    expect(classifyFareSync(comp, trip)).toBe('default_outdated');
+    expect(autoSyncDefaultComposition(comp, trip)?.counts).toEqual({ adult: 3, child: 1, free: 0 });
+    expect(needsReview(comp, trip)).toBe(false);
+  });
+
+  it('normalização preserva o mapeamento individual do swap', () => {
+    let comp = buildDefaultComposition(base);
+    comp = setPassengerCategory(comp, 'adult-1', 'child');
+    comp = setPassengerCategory(comp, 'child-1', 'adult');
+    const round = normalizeComposition(JSON.parse(JSON.stringify(comp)), base);
+    expect(isCustomized(round)).toBe(true);
+    expect(round.counts).toEqual({ adult: 2, child: 2, free: 0 });
+  });
+});
