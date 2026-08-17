@@ -83,7 +83,7 @@ export function QuotePricingModeCard({ quote, onSave, saving, embedded }: Props)
     },
   ];
 
-  const Wrapper: any = embedded ? "div" : "section";
+  const Wrapper = embedded ? "div" : "section";
 
   return (
     <Wrapper className={cn("space-y-3", !embedded && "rounded-xl border bg-card p-4 shadow-sm")}>
