@@ -69,7 +69,7 @@ export function DestinationTagsInput({
   const describedBy = error ? `${id}-error` : help ? `${id}-help` : undefined;
 
   return (
-    <div className={cn("min-w-0", className)}>
+    <div className={cn("relative min-w-0", className)}>
       <Label
         htmlFor={id}
         className={
