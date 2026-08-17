@@ -99,6 +99,9 @@ export function ServiceInitialFields({
         }
 
         const id = `${idPrefix}-${field.name}`;
+        // Rótulo curto (quando declarado) evita corte/quebra na linha única do
+        // desktop; as etapas posteriores da jornada seguem com o rótulo longo.
+        const fieldLabel = field.shortLabel ?? field.label;
         const value = String(values[field.name] ?? "");
         const error = errors[field.name];
         const spanCls = field.span === 2 ? "md:col-span-2 lg:col-span-1" : undefined;
@@ -108,7 +111,7 @@ export function ServiceInitialFields({
             <LocationSearchInput
               key={field.name}
               id={id}
-              label={field.label}
+              label={fieldLabel}
               kind={field.search}
               value={value}
               onChange={(next) => onValue(field.name, next)}
@@ -127,7 +130,7 @@ export function ServiceInitialFields({
             <DestinationTagsInput
               key={field.name}
               id={id}
-              label={field.label}
+              label={fieldLabel}
               value={value}
               onChange={(next) => onValue(field.name, next)}
               placeholder={field.placeholder}
@@ -145,7 +148,7 @@ export function ServiceInitialFields({
             <TripDatePicker
               key={field.name}
               id={id}
-              label={field.label}
+              label={fieldLabel}
               mode="single"
               start={value}
               onChange={({ start }) => onValue(field.name, start)}
@@ -161,7 +164,7 @@ export function ServiceInitialFields({
         return (
           <div key={field.name} className={cn("relative min-w-0", spanCls)}>
             <Label htmlFor={id} className={labelCls}>
-              {field.label}
+              {fieldLabel}
               {field.required && <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>}
             </Label>
             {field.type === "select" ? (
