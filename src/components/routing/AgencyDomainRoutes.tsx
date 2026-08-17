@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { shouldRenderUnderConstruction } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
+import { AGENCY_PUBLIC_TOOL_ROUTES } from "@/lib/agencyPublicToolRoutes";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
@@ -55,6 +56,14 @@ function CodePage({
   return <FaturaPublica agencySlugOverride={info.agency_slug} codeOverride={code} />;
 }
 
+/**
+ * Ferramentas/documentos públicos são standalone: nenhum wrapper extra além do
+ * próprio componente (sem shell, sem padding/min-height herdado).
+ */
+function StandaloneTool({ info, kind }: { info: AgencyDomainInfo; kind: Parameters<typeof CodePage>[0]["kind"] }) {
+  return <CodePage info={info} kind={kind} />;
+}
+
 function Ofertas({ info }: { info: AgencyDomainInfo }) {
   return <VitrinePublica slugOverride={info.public_slug || info.agency_slug} />;
 }
@@ -83,6 +92,18 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
           {/* Preview protegido por senha: tela isolada, sem o chrome do site. */}
           <Route path="/preview" element={<AgencyPreviewGate info={info} />} />
 
+          {/*
+            Rotas públicas de ferramentas/documentos: renderizadas FORA do
+            shell institucional (sem cabeçalho, menu, CTA e rodapé).
+          */}
+          {AGENCY_PUBLIC_TOOL_ROUTES.map((r) => (
+            <Route
+              key={r.path}
+              path={r.path}
+              element={<StandaloneTool info={info} kind={r.kind} />}
+            />
+          ))}
+
           {/* Todas as demais rotas mantêm o chrome atual do site white label. */}
           <Route
             element={
@@ -94,10 +115,6 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
             {!construction && <Route path="/" element={<AgencySiteHome info={info} />} />}
             <Route path="/area-do-cliente" element={<AgencyClientArea info={info} />} />
             <Route path="/ofertas" element={<Ofertas info={info} />} />
-            <Route path="/orcamento/:code" element={<CodePage info={info} kind="orcamento" />} />
-            <Route path="/roteiro/:code" element={<CodePage info={info} kind="roteiro" />} />
-            <Route path="/carteira/:code" element={<CodePage info={info} kind="carteira" />} />
-            <Route path="/fatura/:code" element={<CodePage info={info} kind="fatura" />} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
             <Route path="*" element={<LinkUnavailable />} />
