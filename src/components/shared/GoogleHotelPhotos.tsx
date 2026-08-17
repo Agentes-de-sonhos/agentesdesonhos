@@ -24,6 +24,12 @@ interface GoogleHotelPhotosProps {
   buttonLabel?: string;
   /** Open-state heading. Default "Fotos do Google" */
   headingLabel?: string;
+  /** Controlled use: always render the gallery open, without the toggle button. */
+  alwaysOpen?: boolean;
+  /** Controlled use: blocks new selections (e.g. gallery limit reached). */
+  disabled?: boolean;
+  /** Controlled use: hides the internal selected counter. */
+  hideCounter?: boolean;
 }
 
 // In-memory cache to avoid re-fetching
@@ -38,6 +44,9 @@ export function GoogleHotelPhotos({
   loadingLabel = "Buscando fotos do hotel...",
   buttonLabel,
   headingLabel = "Fotos do Google",
+  alwaysOpen = false,
+  disabled = false,
+  hideCounter = false,
 }: GoogleHotelPhotosProps) {
   const [photos, setPhotos] = useState<GooglePhoto[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,9 +90,10 @@ export function GoogleHotelPhotos({
     if (isSelected) {
       onPhotoRemoved?.(existingUrls.includes(ref) ? ref : photo.url);
     } else {
+      if (disabled) return;
       onPhotosSelected([ref]);
     }
-  }, [photos, existingUrls, onPhotosSelected, onPhotoRemoved, placeId]);
+  }, [photos, existingUrls, onPhotosSelected, onPhotoRemoved, placeId, disabled]);
 
   const isPhotoSelected = useCallback(
     (photo: GooglePhoto, index: number) =>
@@ -104,7 +114,7 @@ export function GoogleHotelPhotos({
     );
   }
 
-  if (!showGallery) {
+  if (!showGallery && !alwaysOpen) {
     return (
       <Button
         type="button"
@@ -131,9 +141,11 @@ export function GoogleHotelPhotos({
             Selecione as fotos que deseja utilizar. As fotos são adicionadas automaticamente conforme forem selecionadas.
           </p>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setShowGallery(false)} className="text-xs h-7 shrink-0">
-          Fechar
-        </Button>
+        {!alwaysOpen && (
+          <Button type="button" variant="ghost" size="sm" onClick={() => setShowGallery(false)} className="text-xs h-7 shrink-0">
+            Fechar
+          </Button>
+        )}
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
@@ -144,11 +156,14 @@ export function GoogleHotelPhotos({
               key={i}
               type="button"
               onClick={() => togglePhoto(i)}
+              aria-label={isSelected ? `Remover foto ${i + 1} da galeria` : `Selecionar foto ${i + 1}`}
+              aria-pressed={isSelected}
+              disabled={disabled && !isSelected}
               className={`relative shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
                 isSelected
                   ? "border-primary ring-2 ring-primary/30"
                   : "border-transparent hover:border-primary/40"
-              }`}
+              } ${disabled && !isSelected ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               <img
                 src={photo.thumb_url}
@@ -167,11 +182,13 @@ export function GoogleHotelPhotos({
         })}
       </div>
 
-      <div className="flex items-center justify-end">
-        <span className="text-xs text-muted-foreground">
-          {selectedCount} foto{selectedCount === 1 ? "" : "s"} selecionada{selectedCount === 1 ? "" : "s"}
-        </span>
-      </div>
+      {!hideCounter && (
+        <div className="flex items-center justify-end">
+          <span className="text-xs text-muted-foreground">
+            {selectedCount} foto{selectedCount === 1 ? "" : "s"} selecionada{selectedCount === 1 ? "" : "s"}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

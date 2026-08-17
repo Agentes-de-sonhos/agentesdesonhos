@@ -8,6 +8,7 @@ import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Chevron
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
+import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
 import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -2660,7 +2661,7 @@ import { optimizeImage, validateImageFile, formatFileSize } from "@/utils/imageO
 
 const MAX_IMAGES_PER_SERVICE = 5;
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other'; hasSavedService?: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -2813,38 +2814,12 @@ function ResolvedThumb({ imageRef, placeId, alt, className }: { imageRef: string
   // Hotel mode
   if (hotelMode) {
     return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          {placeId && (
-            <div className="flex-1">
-              <GoogleHotelPhotos
-                placeId={placeId}
-                onPhotosSelected={handleGooglePhotosSelected}
-                onPhotoRemoved={handleGooglePhotoRemoved}
-                existingUrls={imageUrls}
-                autoShow
-              />
-            </div>
-          )}
-          {canAddMore && (
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 transition-colors shrink-0"
-              title="Enviar foto própria"
-            >
-              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
-              {uploading ? "Otimizando..." : "Upload"}
-            </button>
-          )}
-        </div>
-        {statusLine}
-        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
-        {!placeId && imageUrls.length === 0 && (
-          <p className="text-xs text-muted-foreground italic">Selecione um hotel acima para carregar fotos automaticamente</p>
-        )}
-      </div>
+      <HotelPhotoGallery
+        imageUrls={imageUrls}
+        onImageUrlsChange={onImageUrlsChange}
+        placeId={placeId}
+        hasSavedService={hasSavedService}
+      />
     );
   }
 
@@ -3243,6 +3218,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
       placeId={placeId}
       hotelMode={isHotel}
       placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : 'other'}
+      hasSavedService={!!initialData}
     />
   );
   const formProps = {
