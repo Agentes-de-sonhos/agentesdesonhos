@@ -23,6 +23,12 @@ export type FieldOrigin = "quick" | "standalone" | "context" | "always";
 export interface RequestField {
   name: string;
   label: string;
+  /**
+   * Rótulo curto usado APENAS no bloco inicial compartilhado (linha única do
+   * desktop). Quando ausente, o bloco inicial usa `label`. As etapas
+   * posteriores da jornada sempre usam `label`.
+   */
+  shortLabel?: string;
   type: FieldType;
   required?: boolean;
   placeholder?: string;
