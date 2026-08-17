@@ -28,9 +28,9 @@ export const INITIAL_GRID_TEMPLATES: Record<string, string> = {
   // local de retirada | período | adultos | crianças | CTA
   carro:
     "lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_minmax(0,4.5rem)_minmax(0,4.5rem)_minmax(0,7.5rem)]",
-  // destino | tipo de transfer | período | adultos | crianças | CTA
+  // destino | tipo de transfer | período | adultos | crianças | modalidade | CTA
   transfer:
-    "lg:grid-cols-[minmax(0,1.2fr)_minmax(0,9rem)_minmax(0,1.4fr)_minmax(0,4.5rem)_minmax(0,4.5rem)_minmax(0,7.5rem)]",
+    "lg:grid-cols-[minmax(0,1.15fr)_minmax(0,8.5rem)_minmax(0,1.35fr)_minmax(0,4.5rem)_minmax(0,4.5rem)_minmax(0,8.5rem)_minmax(0,7.5rem)]",
   // destino | atração | data | dias | adultos | crianças | CTA
   ingressos:
     "lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(0,1.3fr)_minmax(0,5rem)_minmax(0,4.5rem)_minmax(0,4.5rem)_minmax(0,7.5rem)]",
