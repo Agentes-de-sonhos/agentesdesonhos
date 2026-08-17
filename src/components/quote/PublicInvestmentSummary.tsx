@@ -12,7 +12,7 @@ import { parsePaymentMethods } from "@/lib/paymentMethods";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
 import {
   getEffectiveQuoteTotal,
-  isPackagePricing,
+  hidesIndividualAmounts,
   PACKAGE_TOTAL_LABEL,
 } from "@/lib/quotePricing";
 
@@ -187,7 +187,8 @@ export function PublicInvestmentSummary({
 }: PublicInvestmentSummaryProps) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = useMemo(() => makeFmt(currency), [currency]);
-  const packageMode = isPackagePricing(quote);
+  // Total manual em modalidade detalhada/agrupada mantém os valores individuais.
+  const packageMode = hidesIndividualAmounts(quote);
   const totalAll = useMemo(
     () => getEffectiveQuoteTotal(quote, services),
     [quote, services],

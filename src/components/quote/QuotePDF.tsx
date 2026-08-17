@@ -12,7 +12,8 @@ import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
 import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import {
   getEffectiveQuoteTotal,
-  isPackagePricing,
+  hidesIndividualAmounts,
+  getInvestmentPresentationLayout,
   PACKAGE_INCLUDED_LABEL,
   PACKAGE_TOTAL_LABEL,
 } from "@/lib/quotePricing";
@@ -361,7 +362,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   const useServicePayment = (quote as any).use_service_payment || 
     quote.services?.some((s: any) => s.is_custom_payment === true) || false;
 
-  const packagePricing = isPackagePricing(quote);
+  // Valores individuais só desaparecem quando o cliente vê apenas o total consolidado.
+  const packagePricing = hidesIndividualAmounts(quote);
   // No modo pacote nenhum valor individual aparece no PDF.
   const showDetailedPrices = (quote as any).show_detailed_prices !== false && !packagePricing;
 
@@ -972,7 +974,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           if (quote.show_investment_section === false) return '';
           // Respeita a mesma regra do link público: quando o total do
           // investimento está oculto, não renderiza o bloco de total no PDF.
-          if ((quote as any).hide_investment_total === true) return '';
+          // No modo consolidado o total é sempre apresentado ao cliente.
+          if ((quote as any).hide_investment_total === true
+            && getInvestmentPresentationLayout(quote) !== 'consolidated') return '';
 
           return `
             <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
