@@ -11,6 +11,7 @@ import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
 import { AttractionFareCompositionEditor } from "@/components/quote/AttractionFareCompositionEditor";
 import {
+  autoSyncDefaultComposition,
   billableQuantity,
   computeAttractionTotal,
   formatCompositionLabel,
