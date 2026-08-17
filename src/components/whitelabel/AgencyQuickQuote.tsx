@@ -60,6 +60,7 @@ export function AgencyQuickQuote({
   const railWrapRef = useRef<HTMLDivElement | null>(null);
   const [quickErrors, setQuickErrors] = useState<Record<string, string>>({});
   const [legsByService, setLegsByService] = useState<Record<string, RouteLeg[]>>({});
+  const [agesByService, setAgesByService] = useState<Record<string, string[]>>({});
 
   const [valuesByService, setValuesByService] = useState<Record<string, ServiceValues>>(() => {
     const initial: Record<string, ServiceValues> = {};
@@ -67,21 +68,21 @@ export function AgencyQuickQuote({
     return initial;
   });
   const values = valuesByService[service.key] ?? initialServiceValues(service);
-  const tripType = String(values.tipo_viagem ?? "");
   const isAereo = service.key === "aereo";
   const multi = isMultiRoute(service, values);
   const legs = legsByService[service.key] ?? emptyRouteLegs();
+  const childCount = Math.max(0, Math.min(12, Number(String(values.criancas ?? "0")) || 0));
+  const ages = syncChildAges(agesByService[service.key] ?? [], childCount);
 
-  // No aéreo, datas e destino saem dos controles dedicados (calendário/rota).
-  const fields = useMemo(() => {
-    const list = quickQuoteFields(service, 6);
-    if (service.key !== "aereo") return list;
-    return list.filter((f) => {
-      if (f.name === "data_ida" || f.name === "data_volta") return false;
-      if (f.name === "destino") return !multi;
-      return true;
-    });
-  }, [service, multi]);
+  // No aéreo multidestinos, destino e datas saem do editor estruturado de rota.
+  const hiddenFields = useMemo(
+    () => (isAereo && multi ? ["destino", "data_ida", "data_volta"] : []),
+    [isAereo, multi],
+  );
+  const fields = useMemo(
+    () => initialBlockFields(service).filter((f) => !hiddenFields.includes(f.name)),
+    [service, hiddenFields],
+  );
 
   // Rail horizontal das categorias (preset editorial): linha única, sem barra
   // de rolagem visível e setas discretas quando os rótulos não couberem.
