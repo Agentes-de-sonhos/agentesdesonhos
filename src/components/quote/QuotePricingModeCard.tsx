@@ -19,13 +19,15 @@ interface Props {
   quote: any;
   onSave: (input: { pricingMode: QuotePricingMode; packageTotal?: number | null }) => void | Promise<unknown>;
   saving?: boolean;
+  /** Renderiza sem o container de card (usado dentro do item Investimento do wizard). */
+  embedded?: boolean;
 }
 
 /**
  * Escolha entre somar os serviços ou usar um valor fechado de pacote.
  * O valor de cada serviço permanece salvo — apenas deixa de compor o total.
  */
-export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
+export function QuotePricingModeCard({ quote, onSave, saving, embedded }: Props) {
   const mode = getQuotePricingMode(quote);
   const { currency } = getQuoteCurrencyInfo(quote);
   const servicesSum = sumServiceAmounts(quote?.services);
@@ -70,7 +72,7 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
     {
       value: "itemized",
       title: "Somar os serviços",
-      description: "O total do orçamento é a soma dos valores de cada serviço.",
+      description: "O total do orçamento será calculado pela soma dos valores de todos os serviços.",
       Icon: Calculator,
     },
     {
@@ -81,10 +83,14 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
     },
   ];
 
+  const Wrapper = embedded ? "div" : "section";
+
   return (
-    <section className="space-y-3 rounded-xl border bg-card p-4 shadow-sm">
+    <Wrapper className={cn("space-y-3", !embedded && "rounded-xl border bg-card p-4 shadow-sm")}>
       <div className="space-y-1">
-        <Label className="text-sm font-semibold">Como calcular o valor do orçamento?</Label>
+        <Label className="text-sm font-semibold">
+          {embedded ? "Como calcular o valor total?" : "Como calcular o valor do orçamento?"}
+        </Label>
         <p className="text-xs text-muted-foreground">
           Você pode somar os serviços ou apresentar um valor fechado de pacote. Trocar o modo não apaga
           os valores já cadastrados nos serviços.
@@ -132,7 +138,12 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
             value={packageTotal}
             onValueChange={(v) => { setPackageTotal(v); setError(null); }}
             aria-label="Valor total do pacote"
+            placeholder="R$ 0,00"
           />
+          <p className="text-xs text-muted-foreground">
+            Informe o valor final que será apresentado ao cliente. Os valores cadastrados nos serviços
+            serão preservados.
+          </p>
           {error && <p role="alert" className="text-xs font-medium text-destructive">{error}</p>}
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Button
@@ -160,6 +171,6 @@ export function QuotePricingModeCard({ quote, onSave, saving }: Props) {
         </Badge>
         {saving && <span className="text-xs text-muted-foreground">Salvando…</span>}
       </div>
-    </section>
+    </Wrapper>
   );
 }

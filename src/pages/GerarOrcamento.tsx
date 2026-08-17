@@ -39,7 +39,7 @@ import {
   needsReview as fareNeedsReview,
   normalizeComposition as normalizeFareComposition,
 } from "@/lib/attractionFareComposition";
-import { QuotePricingModeCard } from "@/components/quote/QuotePricingModeCard";
+import { QuoteInvestmentDisplayCard } from "@/components/quote/QuoteInvestmentDisplayCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -1317,11 +1317,6 @@ export default function GerarOrcamento() {
               onToggle={() => toggleSection("services")}
             >
               <div className="space-y-4">
-                <QuotePricingModeCard
-                  quote={quote}
-                  onSave={(input) => setPricingMode(input)}
-                  saving={isSavingPricingMode}
-                />
                 {attractionsNeedingReview.length > 0 && (
                   <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
                     <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -1541,6 +1536,13 @@ export default function GerarOrcamento() {
 
           return (
           <div className="space-y-4">
+                  <QuoteInvestmentDisplayCard
+                    quote={quote}
+                    hideTotal={hideInvestmentTotal}
+                    onChangeHideTotal={(hide) => handleToggleHideInvestmentTotal(hide)}
+                    onSavePricing={(input) => setPricingMode(input)}
+                    savingPricing={isSavingPricingMode}
+                  />
                   {/* Nova lógica: O QUE exibir para o cliente (3 opções consolidadas) */}
                   <div className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm font-medium">O que exibir para o cliente?</Label>
@@ -1589,28 +1591,6 @@ export default function GerarOrcamento() {
                       </div>
                     )}
 
-                    {/* Ocultar total do investimento — disponível nos modos detalhados */}
-                    {(effectiveLayout === "ungrouped" || effectiveLayout === "grouped") && (
-                      <div className="mt-2 flex items-start gap-3 rounded-xl border border-border bg-muted/30 p-3 transition-colors">
-                        <div className="mt-0.5 shrink-0">
-                          <input
-                            id="hide-investment-total"
-                            type="checkbox"
-                            checked={hideInvestmentTotal}
-                            onChange={(e) => handleToggleHideInvestmentTotal(e.target.checked)}
-                            className="h-4 w-4 rounded border-muted-foreground/40 text-primary focus:ring-primary"
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <label htmlFor="hide-investment-total" className="cursor-pointer text-sm font-medium">
-                            Ocultar o valor total do investimento
-                          </label>
-                          <p className="text-xs text-muted-foreground">
-                            Esconde o investimento total consolidado no final do orçamento público. O cliente continua vendo os valores e condições de pagamento de cada serviço individualmente.
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {effectiveLayout === "consolidated" && (
