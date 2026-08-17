@@ -30,11 +30,16 @@ describe("integração da galeria de hospedagem", () => {
     const fn = read("supabase/functions/import-quote-image/index.ts");
     expect(fn).toContain("supabase.auth.getUser()");
     expect(fn).not.toContain("SERVICE_ROLE");
-    expect(fn).toContain("${user.id}/quotes/");
+    expect(fn).toContain("${user.id}/quotes");
+    // Identidade determinística: mesma URL ⇒ mesmo arquivo `url-<sha256>`.
+    expect(fn).toContain("url-${hash}");
+    expect(fn).toContain("normalizeRemoteImageUrl");
     const helper = read("supabase/functions/_shared/remote-image-fetch.ts");
     expect(helper).toContain("isPrivateIPv4");
     expect(helper).toContain("isPrivateIPv6");
     expect(helper).toContain('redirect: "manual"');
     expect(helper).not.toContain("image/svg");
+    // Content-Type falsificado não passa: o tipo real vem dos magic bytes.
+    expect(helper).toContain("sniffImageType(buf)");
   });
 });

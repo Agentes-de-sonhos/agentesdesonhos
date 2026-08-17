@@ -2661,7 +2661,7 @@ import { optimizeImage, validateImageFile, formatFileSize } from "@/utils/imageO
 
 const MAX_IMAGES_PER_SERVICE = 5;
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other'; hasSavedService?: boolean }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -2819,6 +2819,7 @@ function ResolvedThumb({ imageRef, placeId, alt, className }: { imageRef: string
         onImageUrlsChange={onImageUrlsChange}
         placeId={placeId}
         hasSavedService={hasSavedService}
+        onPendingChange={onGalleryPendingChange}
       />
     );
   }
@@ -3203,13 +3204,25 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [placeId, setPlaceId] = useState<string | null>(null);
+  const [galleryPending, setGalleryPending] = useState(false);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
+  const isHotel = serviceType === 'hotel';
+
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
+    // Hospedagem: nada é salvo enquanto a galeria tiver alterações pendentes —
+    // as fotos jamais mudam silenciosamente.
+    if (isHotel && galleryPending) {
+      toast({
+        title: "Confirme a galeria de fotos",
+        description: "Clique em “Salvar galeria” (ou remova as fotos do hotel anterior) antes de salvar a hospedagem.",
+        variant: "destructive",
+      });
+      return;
+    }
     return onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
-  const isHotel = serviceType === 'hotel';
   const photoSlotElement = (
     <ServiceImageUpload
       imageUrls={serviceImageUrls}
@@ -3219,6 +3232,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
       hotelMode={isHotel}
       placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : 'other'}
       hasSavedService={!!initialData}
+      onGalleryPendingChange={isHotel ? setGalleryPending : undefined}
     />
   );
   const formProps = {

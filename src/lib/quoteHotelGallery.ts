@@ -91,11 +91,34 @@ export function removeImageRef(list: string[], ref: string): string[] {
   return dedupeImageRefs(list).filter((r) => !isSameImageRef(r, ref));
 }
 
+/**
+ * Prefixo do nome de arquivo usado pela Edge Function `import-quote-image`
+ * (`url-<sha256>.<ext>`): torna a origem "URL" reconhecível de forma
+ * persistente, mesmo depois de salvar e reabrir o orçamento.
+ */
+export const URL_IMPORT_FILE_PREFIX = "url-";
+
 /** Origem discreta exibida na miniatura, quando identificável. */
 export function imageRefOrigin(ref: string): HotelGalleryOrigin {
   if (isGoogleImageRef(ref)) return "google";
-  if (/\/storage\/v1\/object\/public\/quote-images\//i.test(ref)) return "upload";
+  const bucketMatch = /\/storage\/v1\/object\/public\/quote-images\/(.+)$/i.exec((ref || "").trim());
+  if (bucketMatch) {
+    const fileName = decodeURIComponent(bucketMatch[1].split("?")[0]).split("/").pop() || "";
+    return fileName.startsWith(URL_IMPORT_FILE_PREFIX) ? "url" : "upload";
+  }
   return "url";
+}
+
+/** Compara duas listas de referências (ordem + conteúdo normalizados). */
+export function isSameImageRefList(a: string[], b: string[]): boolean {
+  const x = dedupeImageRefs(a || []).map(normalizeImageRef);
+  const y = dedupeImageRefs(b || []).map(normalizeImageRef);
+  return x.length === y.length && x.every((v, i) => v === y[i]);
+}
+
+/** Há referências salvas que pertencem a outro hotel (inconsistência). */
+export function hasStaleGoogleRefs(list: string[], placeId?: string | null): boolean {
+  return (list || []).some((r) => isStaleGoogleRef(r, placeId));
 }
 
 export const ORIGIN_LABEL: Record<HotelGalleryOrigin, string> = {

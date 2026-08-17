@@ -3,7 +3,9 @@
  *
  * Regras: somente http/https, bloqueio de localhost/loopback/link-local e
  * faixas privadas IPv4/IPv6, revalidação de cada redirect, timeout e limite
- * de tamanho, e Content-Type de imagem permitido (sem SVG/HTML).
+ * de tamanho, Content-Type de imagem permitido (sem SVG/HTML) e — decisivo —
+ * validação da assinatura real dos bytes (magic bytes). Um servidor que
+ * declara `image/png` mas devolve HTML/executável é rejeitado.
  */
 
 export const ALLOWED_IMAGE_TYPES = [
@@ -14,6 +16,15 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/gif",
   "image/avif",
 ];
+
+import {
+  sniffImageType,
+  extensionForContentType,
+  normalizeRemoteImageUrl,
+  sha256Hex,
+} from "./image-signature.ts";
+
+export { sniffImageType, extensionForContentType, normalizeRemoteImageUrl, sha256Hex };
 
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8MB
 const FETCH_TIMEOUT_MS = 12_000;
@@ -135,18 +146,14 @@ export async function fetchRemoteImage(rawUrl: string): Promise<FetchedImage> {
     if (buf.byteLength === 0) throw new Error("Não foi possível carregar a imagem deste link.");
     if (buf.byteLength > MAX_IMAGE_BYTES) throw new Error("A imagem é muito grande (máx. 8 MB).");
 
-    return { bytes: buf, contentType };
+    // Header pode ser falsificado: o tipo real vem da assinatura dos bytes.
+    const sniffed = sniffImageType(buf);
+    if (!sniffed) {
+      throw new Error("O conteúdo deste link não é uma imagem válida (JPG, PNG, WEBP, GIF ou AVIF).");
+    }
+    return { bytes: buf, contentType: sniffed };
   }
 
   throw new Error("Não foi possível carregar a imagem deste link.");
 }
 
-export function extensionForContentType(contentType: string): string {
-  switch (contentType) {
-    case "image/png": return "png";
-    case "image/webp": return "webp";
-    case "image/gif": return "gif";
-    case "image/avif": return "avif";
-    default: return "jpg";
-  }
-}
