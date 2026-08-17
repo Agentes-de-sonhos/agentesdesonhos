@@ -94,6 +94,26 @@ export function formatChildAges(ages: string[]): string {
   return `${labels.slice(0, -1).join(", ")} e ${labels[labels.length - 1]}`;
 }
 
+/**
+ * Inverso de `formatChildAges`: recupera as idades já informadas no bloco
+ * inicial (que trafegam como texto no payload) para não perguntar duas vezes.
+ */
+export function parseChildAges(text: string, count: number): string[] {
+  const parts = String(text ?? "")
+    .split(/\s*(?:,|;|\se\s)\s*/i)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const ages = parts.map((part) => {
+    const byLabel = CHILD_AGE_OPTIONS.find((option) => option.label.toLowerCase() === part.toLowerCase());
+    if (byLabel) return byLabel.value;
+    const match = /(\d{1,2})/.exec(part);
+    if (!match) return "";
+    const age = Number(match[1]);
+    return age >= 0 && age <= 17 ? String(age) : "";
+  });
+  return syncChildAges(ages, count);
+}
+
 export function totalTravelers(context: TripContext): number {
   return Math.max(1, (context.adultos || 0) + (context.criancas || 0));
 }
