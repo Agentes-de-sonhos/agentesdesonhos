@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
+import { AlertTriangle, ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
@@ -34,6 +34,7 @@ import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { QuoteServicesOrganizer } from "@/components/quote/QuoteServicesOrganizer";
+import { needsReview as fareNeedsReview, normalizeComposition as normalizeFareComposition } from "@/lib/attractionFareComposition";
 import { QuotePricingModeCard } from "@/components/quote/QuotePricingModeCard";
 import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
@@ -774,13 +775,48 @@ export default function GerarOrcamento() {
     navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
   };
 
+  /**
+   * Ingressos cuja composição tarifária ficou dessincronizada da composição
+   * global do orçamento (o agente mudou passageiros depois de personalizar).
+   */
+  const attractionsNeedingReview = useMemo(() => {
+    if (!quote) return [] as { id: string; label: string }[];
+    const pax = { adults: Number(quote.adults_count) || 0, children: Number(quote.children_count) || 0 };
+    return (quote.services || [])
+      .filter((s) => s.service_type === "attraction")
+      .filter((s) => {
+        const data = s.service_data as any;
+        if (!data?.fare_composition) return false;
+        return fareNeedsReview(normalizeFareComposition(data.fare_composition, pax), pax);
+      })
+      .map((s) => ({
+        id: s.id,
+        label:
+          [(s.service_data as any)?.product_name, (s.service_data as any)?.ticket_type]
+            .filter(Boolean)
+            .join(" | ") || (s.service_data as any)?.name || "Ingresso",
+      }));
+  }, [quote]);
+
+  const blockForFareReview = () => {
+    if (attractionsNeedingReview.length === 0) return false;
+    toast({
+      title: "Revise a composição tarifária dos ingressos",
+      description: `Atualize: ${attractionsNeedingReview.map((a) => a.label).join(", ")}.`,
+      variant: "destructive",
+    });
+    return true;
+  };
+
   const handleGeneratePDF = async () => {
     if (!quote) return;
+    if (blockForFareReview()) return;
     await generateQuotePDF(quote, agentProfile);
   };
 
   const handlePublish = async () => {
     if (!quote) return;
+    if (blockForFareReview()) return;
 
     const token = quote.share_token || await publishQuote(quote.id);
 
@@ -1223,6 +1259,15 @@ export default function GerarOrcamento() {
                   onSave={(input) => setPricingMode(input)}
                   saving={isSavingPricingMode}
                 />
+                {attractionsNeedingReview.length > 0 && (
+                  <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    <span className="min-w-0 flex-1">
+                      A composição de passageiros mudou. Revise a composição tarifária de:{" "}
+                      <span className="font-medium">{attractionsNeedingReview.map((a) => a.label).join(", ")}</span>.
+                    </span>
+                  </div>
+                )}
                 <QuoteServicesOrganizer
                     services={quote.services || []}
                     sections={quote.sections || []}

@@ -33,6 +33,7 @@ import CruiseCabinOptions from "@/components/quote/CruiseCabinOptions";
 import ShipVideoEmbed from "@/components/quote/ShipVideoEmbed";
 import { normalizeCruiseCabins, cabinOptionLabel } from "@/lib/cruiseCabins";
 import { buildPassengerLabel } from "@/lib/quotePassengers";
+import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import {
   computeExtrasTotal,
   computeExtraAmount,
@@ -629,6 +630,7 @@ function TransferBody({ data }: { data: any }) {
 }
 
 function AttractionBody({ data }: { data: any }) {
+  const fareCounts = readCompositionCounts(data);
   return (
     <div className="space-y-3">
       <div>
@@ -637,7 +639,10 @@ function AttractionBody({ data }: { data: any }) {
       </div>
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1 tabular-nums"><Calendar className="h-3.5 w-3.5" />{formatDateShort(data.date)}</span>
-        <span className="inline-flex items-center gap-1"><Ticket className="h-3.5 w-3.5" />Qtd: {data.quantity || 1}</span>
+        <span className="inline-flex items-center gap-1">
+          <Ticket className="h-3.5 w-3.5" />
+          {fareCounts ? formatCompositionLabel(fareCounts) : `Qtd: ${data.quantity || 1}`}
+        </span>
       </div>
       {(data.adult_price > 0 || data.child_price > 0) && (
         <div className="flex flex-wrap gap-2">

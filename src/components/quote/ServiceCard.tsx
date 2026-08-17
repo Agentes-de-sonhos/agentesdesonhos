@@ -12,6 +12,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useServiceImages } from "@/hooks/useServiceImages";
 import type { QuoteService, ServiceType } from "@/types/quote";
+import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, computeFlightStatus, type FlightStatus } from "./flight-wizard/flightStatus";
 import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
 import {
@@ -146,11 +147,14 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
         details.push(`Data: ${formatDate(data.date)}`);
       }
       break;
-    case "attraction":
+    case "attraction": {
       details.push(`Data: ${formatDate(data.date)}`);
+      const fareCounts = readCompositionCounts(data);
+      if (fareCounts) details.push(`Cobrança: ${formatCompositionLabel(fareCounts)}`);
       if (data.adult_price > 0) details.push(`Adulto: ${formatQuoteCurrency(data.adult_price, currency)}`);
       if (data.child_price > 0) details.push(`Criança: ${formatQuoteCurrency(data.child_price, currency)}`);
       break;
+    }
     case "insurance":
       details.push(`${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
       break;
