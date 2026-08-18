@@ -28,6 +28,7 @@ import { useClients, useOpportunities } from "@/hooks/useCRM";
 import { useOpportunityFollowups, type FollowupDraft } from "@/hooks/useOpportunityFollowups";
 import type { Opportunity } from "@/types/crm";
 import { ClientSelector } from "@/components/shared/ClientSelector";
+import { OpportunityRequestedServices } from "./OpportunityRequestedServices";
 
 const opportunitySchema = z.object({
   client_id: z.string().min(1, "Selecione um cliente"),
@@ -46,13 +47,25 @@ interface OpportunityFormProps {
   opportunity?: Opportunity;
   onSuccess: () => void;
   onCancel: () => void;
+  /** "booking-request" rola e destaca o bloco de serviços solicitados. */
+  focusSection?: "booking-request";
 }
 
-export function OpportunityForm({ opportunity, onSuccess, onCancel }: OpportunityFormProps) {
+export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection }: OpportunityFormProps) {
   const { clients } = useClients();
   const { createOpportunity, updateOpportunity, isCreating } = useOpportunities();
   const { followups: existingFollowups, syncFollowups, isSyncing } =
     useOpportunityFollowups(opportunity?.id);
+  const bookingSectionRef = useRef<HTMLDivElement | null>(null);
+
+  // Ação "Visualizar serviços solicitados": mesmo modal, rolado até o bloco.
+  useEffect(() => {
+    if (focusSection !== "booking-request") return;
+    const t = window.setTimeout(() => {
+      bookingSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [focusSection, opportunity?.id]);
 
   const [followupDrafts, setFollowupDrafts] = useState<FollowupDraft[]>([]);
   const hydratedForIdRef = useRef<string | null>(null);
@@ -154,6 +167,15 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel }: Opportunit
         className="flex flex-col flex-1 min-h-0"
       >
         <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 -mr-1">
+
+        {opportunity?.id && (
+          <div ref={bookingSectionRef}>
+            <OpportunityRequestedServices
+              opportunityId={opportunity.id}
+              autoFocus={focusSection === "booking-request"}
+            />
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <FormField
