@@ -81,7 +81,8 @@ export function requestedItemLabel(item: BookingRequestItemRow): string {
   const name = str(item?.service_name);
   // service_name genérico não informa nada: usa o rótulo humano do tipo.
   if (name && !generic.has(name.toLowerCase())) return name;
-  return bookingItemLabel(item);
+  const typed = serviceTypeLabel(str(item?.service_type) || undefined);
+  return typed || bookingItemLabel(item);
 }
 
 function quoteServiceLabel(s: QuoteServiceRow): string {
