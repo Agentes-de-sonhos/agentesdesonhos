@@ -285,7 +285,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Marque os serviços que deseja solicitar. Itens marcados como incluídos fazem parte da
+              Vamos passar serviço por serviço para você decidir o que quer reservar. Itens incluídos fazem parte da
               proposta e não podem ser retirados.
             </p>
           )}
