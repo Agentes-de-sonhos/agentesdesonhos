@@ -34,6 +34,7 @@ import {
   buildBookingSelectionModel,
   effectiveSelectionIds,
   initialBookingSelection,
+  quoteHasLinkedClient,
   toggleBookingSelection,
   validateBookingContact,
   validateBookingSelection,
@@ -87,6 +88,11 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = (v: number) => formatQuoteCurrency(v, currency);
 
+  // Orçamento nominal: o cliente já está cadastrado na agência. Não pedimos nome,
+  // WhatsApp nem e-mail de novo — o servidor resolve a identidade pela própria
+  // quote e ignora qualquer contato enviado pelo navegador.
+  const hasLinkedClient = quoteHasLinkedClient(quote);
+
   const selectionIds = effectiveSelectionIds(model, selected);
   const selectionError = validateBookingSelection(model, selected);
   const { total, label: totalLabel } = bookingSelectionTotal(quote, model, selected);
@@ -111,7 +117,13 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   };
 
   const submit = async () => {
-    const contactError = validateBookingContact({ name, whatsapp, email, disclaimerAccepted: accepted });
+    const contactError = validateBookingContact({
+      name,
+      whatsapp,
+      email,
+      disclaimerAccepted: accepted,
+      hasLinkedClient,
+    });
     if (contactError) {
       setError(contactError);
       return;
@@ -128,9 +140,10 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
           agency_slug: agencySlug,
           code: publicCode,
           selected_service_ids: selectionIds,
-          client_name: name.trim(),
-          client_email: email.trim(),
-          client_whatsapp: whatsapp.trim(),
+          // Nunca enviamos contato quando o orçamento é nominal.
+          client_name: hasLinkedClient ? "" : name.trim(),
+          client_email: hasLinkedClient ? "" : email.trim(),
+          client_whatsapp: hasLinkedClient ? "" : whatsapp.trim(),
           client_notes: notes.trim() || null,
           disclaimer_accepted: true,
           // Retry seguro: a mesma chave devolve o mesmo pedido, sem duplicar.
