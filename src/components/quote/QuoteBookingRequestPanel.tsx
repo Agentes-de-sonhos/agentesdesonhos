@@ -384,6 +384,18 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
+                {hasLinkedClient ? (
+                  <div className="space-y-1 rounded-xl border border-border/50 bg-muted/20 p-3 sm:col-span-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Seus dados
+                    </p>
+                    <p className="text-sm text-foreground">
+                      Este orçamento foi montado especialmente para você: a agência já tem seus
+                      dados de contato e vai retornar pelos canais combinados.
+                    </p>
+                  </div>
+                ) : (
+                <>
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="br-name" className="text-xs">Nome completo *</Label>
                   <Input
@@ -419,6 +431,8 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                 <p className="text-[11px] text-muted-foreground sm:col-span-2">
                   Informe pelo menos WhatsApp ou e-mail.
                 </p>
+                </>
+                )}
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="br-notes" className="text-xs">Observações (opcional)</Label>
                   <Textarea
