@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 import { AlertTriangle, CheckCircle2, ClipboardList, Circle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { formatQuoteCurrency } from "@/lib/quoteCurrency";
+import { formatQuoteCurrency, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { BOOKING_ITEMS_SELECT, SELECTION_MODE_LABEL } from "@/lib/bookingRequestItems";
 import {
   buildRequestedServicesView,
@@ -25,7 +25,7 @@ interface Props {
   autoFocus?: boolean;
 }
 
-function ServiceRow({ service, currency }: { service: RequestedServiceView; currency: string }) {
+function ServiceRow({ service, currency }: { service: RequestedServiceView; currency: QuoteCurrency }) {
   return (
     <li
       className={`rounded-lg border p-2.5 ${
@@ -111,7 +111,7 @@ export function OpportunityRequestedServices({ opportunityId, autoFocus }: Props
   if (!data) return null;
 
   const { request, view } = data;
-  const currency = request.currency || "BRL";
+  const currency = ((request.currency as QuoteCurrency) || "BRL") as QuoteCurrency;
 
   return (
     <section
