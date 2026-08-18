@@ -86,7 +86,8 @@ export function ServiceRequestTransition({
         ref={cardRef}
         tabIndex={-1}
         className={cn(
-          "w-[92vw] max-w-[520px] rounded-[22px] border border-border/60 bg-card p-8 text-center shadow-2xl outline-none",
+          "w-[92vw] max-w-[520px] rounded-[22px] border border-border/60 bg-card p-8 text-center outline-none",
+          "shadow-[0_32px_80px_-24px_rgba(0,0,0,0.55)]",
           "wl-transition-card",
         )}
       >
