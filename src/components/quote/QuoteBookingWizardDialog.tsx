@@ -190,10 +190,7 @@ export function QuoteBookingWizardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="flex max-h-[92dvh] w-[95vw] max-w-[560px] flex-col gap-0 overflow-hidden p-0"
-        hideClose
-      >
+      <DialogContent className="flex max-h-[92dvh] w-[95vw] max-w-[560px] flex-col gap-0 overflow-hidden p-0">
         {/* Cabeçalho: progresso e contexto */}
         <div className="shrink-0 border-b border-border/50 bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3 sm:px-5">
           <div className="flex items-start gap-3">
@@ -209,16 +206,7 @@ export function QuoteBookingWizardDialog({
                       .join(" • ")}
               </p>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 shrink-0"
-              onClick={() => onOpenChange(false)}
-              aria-label="Fechar e continuar depois"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <span className="w-8 shrink-0" aria-hidden />
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/15">
             <div
