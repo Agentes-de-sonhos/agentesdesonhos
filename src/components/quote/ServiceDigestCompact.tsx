@@ -1,5 +1,5 @@
 import { serviceCompactDigest } from "@/lib/quoteServiceDigest";
-import { ResolvedServiceImage } from "@/components/quote/ResolvedServiceImage";
+import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
 import type { QuoteService } from "@/types/quote";
 
@@ -23,8 +23,8 @@ export function ServiceDigestCompact({
     <div className="flex min-w-0 flex-1 items-start gap-3">
       {thumb && (
         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-muted">
-          <ResolvedServiceImage
-            src={thumb}
+          <ResolvedServiceThumb
+            imageRef={thumb}
             alt={digest.title}
             placeId={resolveServicePlaceId(service)}
             className="h-full w-full max-w-full object-cover"
