@@ -168,6 +168,8 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
 
   const notesCount = notesCounts[opportunity.id] || 0;
   const appliedLabels = byOpportunity[opportunity.id] || [];
+  // A ação só aparece quando existe pedido de reserva ativo nesta oportunidade.
+  const { hasBookingRequest } = useHasBookingRequest(opportunity.id);
 
   const clientForm = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -442,14 +444,16 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                     <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem
-                  onClick={() => {
-                    setEditFocus("booking-request");
-                    setIsEditing(true);
-                  }}
-                >
-                  <ClipboardList className="mr-2 h-4 w-4" /> Visualizar serviços solicitados
-                </DropdownMenuItem>
+                {hasBookingRequest && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setEditFocus("booking-request");
+                      setIsEditing(true);
+                    }}
+                  >
+                    <ClipboardList className="mr-2 h-4 w-4" /> Visualizar serviços solicitados
+                  </DropdownMenuItem>
+                )}
                 {canEditClient && (
                   <DropdownMenuItem onClick={handleEditClientClick}>
                     <User className="mr-2 h-4 w-4" /> Editar cliente
