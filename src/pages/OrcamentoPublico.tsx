@@ -45,6 +45,7 @@ import {
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
+import { QuoteBookingRequestPanel } from "@/components/quote/QuoteBookingRequestPanel";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
