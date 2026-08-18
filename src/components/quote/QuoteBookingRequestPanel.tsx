@@ -352,7 +352,9 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               <DialogHeader className="space-y-1">
                 <DialogTitle className="text-lg">Confirmar solicitação de reserva</DialogTitle>
                 <DialogDescription>
-                  Revise os serviços e informe como a agência pode falar com você.
+                  {hasLinkedClient
+                    ? "Revise os serviços que deseja solicitar e confirme o envio."
+                    : "Revise os serviços e informe como a agência pode falar com você."}
                 </DialogDescription>
               </DialogHeader>
 
