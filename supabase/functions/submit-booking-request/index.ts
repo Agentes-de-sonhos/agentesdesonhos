@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { hashClientIp, validateBookingRequestPayload } from "./validate.ts";
+import { deliverBookingNotifications } from "./notify.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -68,6 +69,12 @@ Deno.serve(async (req) => {
   const result = (data ?? {}) as Record<string, unknown>;
   if (result.error) return json({ error: String(result.error) }, 400);
 
+  // Avisos apenas no primeiro envio válido: replay idempotente não notifica.
+  let notifications: { sent: number; failed: number; skipped: number } | null = null;
+  if (result.duplicate !== true && typeof result.request_id === "string") {
+    notifications = await deliverBookingNotifications(supabase, result.request_id);
+  }
+
   return json({
     success: true,
     request_id: result.request_id ?? null,
@@ -78,6 +85,7 @@ Deno.serve(async (req) => {
     currency: result.currency ?? "BRL",
     public_access_token: result.public_access_token ?? null,
     duplicate: result.duplicate === true,
+    notifications,
     message:
       "Recebemos sua solicitação de reserva. Ela ainda não é uma confirmação: a agência vai reconfirmar serviços, disponibilidade e valores e retornar o contato.",
   });

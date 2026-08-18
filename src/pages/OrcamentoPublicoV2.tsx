@@ -80,7 +80,12 @@ export default function OrcamentoPublicoV2({
 
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
-      <OrcamentoPublico quoteOverride={quote} agentProfileOverride={agentProfile} />
+      <OrcamentoPublico
+        quoteOverride={quote}
+        agentProfileOverride={agentProfile}
+        agencySlugOverride={agencySlug}
+        accessCodeOverride={accessCode}
+      />
     </Suspense>
   );
 }

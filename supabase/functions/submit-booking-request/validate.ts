@@ -48,13 +48,21 @@ export function validateBookingRequestPayload(
   const client_name = text(body.client_name, 200);
   if (client_name.length < 2) return { ok: false, error: "Informe seu nome completo." };
 
+  // Contato: nome + WhatsApp OU nome + e-mail (alinhado ao restante do White Label).
   const client_email = text(body.client_email, 200).toLowerCase();
-  if (!EMAIL_RE.test(client_email)) return { ok: false, error: "Informe um e-mail válido." };
+  const emailOk = client_email.length > 0 && EMAIL_RE.test(client_email);
+  if (client_email.length > 0 && !emailOk) {
+    return { ok: false, error: "Informe um e-mail válido." };
+  }
 
   const whatsappRaw = text(body.client_whatsapp, 40);
   const whatsappDigits = digits(whatsappRaw);
-  if (whatsappDigits.length < 10 || whatsappDigits.length > 15) {
+  const whatsappOk = whatsappDigits.length >= 10 && whatsappDigits.length <= 15;
+  if (whatsappRaw.length > 0 && !whatsappOk) {
     return { ok: false, error: "Informe um WhatsApp válido com DDD." };
+  }
+  if (!emailOk && !whatsappOk) {
+    return { ok: false, error: "Informe WhatsApp ou e-mail para a agência entrar em contato." };
   }
 
   if (body.disclaimer_accepted !== true) {
@@ -71,8 +79,8 @@ export function validateBookingRequestPayload(
       code,
       selected_service_ids: ids,
       client_name,
-      client_email,
-      client_whatsapp: whatsappRaw,
+      client_email: emailOk ? client_email : "",
+      client_whatsapp: whatsappOk ? whatsappRaw : "",
       client_notes: text(body.client_notes, 2000) || null,
       disclaimer_accepted: true,
       idempotency_key,

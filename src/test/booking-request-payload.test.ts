@@ -65,3 +65,29 @@ describe("validateBookingRequestPayload", () => {
     if (r.ok) expect(r.data.client_notes?.length).toBe(2000);
   });
 });
+
+describe("contato flexível: nome + WhatsApp OU e-mail", () => {
+  it("aceita nome + WhatsApp sem e-mail", () => {
+    const r = validateBookingRequestPayload({ ...base, client_email: "" });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data.client_email).toBe("");
+      expect(r.data.client_whatsapp).toBe("(11) 98888-7777");
+    }
+  });
+
+  it("aceita nome + e-mail sem WhatsApp", () => {
+    const r = validateBookingRequestPayload({ ...base, client_whatsapp: "" });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data.client_whatsapp).toBe("");
+      expect(r.data.client_email).toBe("maria@exemplo.com");
+    }
+  });
+
+  it("rejeita ausência dos dois canais", () => {
+    const r = validateBookingRequestPayload({ ...base, client_email: "", client_whatsapp: "" });
+    expect(r.ok).toBe(false);
+    expect(r.ok === false && r.error).toMatch(/WhatsApp ou e-mail/i);
+  });
+});

@@ -10446,6 +10446,68 @@ export type Database = {
           },
         ]
       }
+      quote_booking_request_deliveries: {
+        Row: {
+          agency_id: string
+          attempts: number
+          channel: string
+          created_at: string
+          error_message: string | null
+          id: string
+          provider_message_id: string | null
+          recipient_email: string | null
+          recipient_kind: string
+          recipient_phone: string | null
+          request_id: string
+          sent_at: string | null
+          skipped_reason: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          attempts?: number
+          channel: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email?: string | null
+          recipient_kind: string
+          recipient_phone?: string | null
+          request_id: string
+          sent_at?: string | null
+          skipped_reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          attempts?: number
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          recipient_email?: string | null
+          recipient_kind?: string
+          recipient_phone?: string | null
+          request_id?: string
+          sent_at?: string | null
+          skipped_reason?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_booking_request_deliveries_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "quote_booking_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quote_booking_request_events: {
         Row: {
           actor_team_member_id: string | null
@@ -10606,12 +10668,12 @@ export type Database = {
         }
         Insert: {
           agency_id: string
-          client_email: string
+          client_email?: string
           client_final_accepted_at?: string | null
           client_id?: string | null
           client_name: string
           client_notes?: string | null
-          client_whatsapp: string
+          client_whatsapp?: string
           created_at?: string
           currency?: string
           disclaimer_accepted_at?: string
@@ -14774,6 +14836,10 @@ export type Database = {
           wallets_count: number
         }[]
       }
+      agency_can_use_booking_requests: {
+        Args: { _agency_id: string }
+        Returns: boolean
+      }
       agency_community_flags: {
         Args: { _agency: string }
         Returns: {
@@ -14812,6 +14878,10 @@ export type Database = {
           status: Database["public"]["Enums"]["team_member_status"]
           team_name: string
         }[]
+      }
+      booking_request_start_review: {
+        Args: { p_request_id: string }
+        Returns: Json
       }
       can_chat_externally: { Args: { _uid: string }; Returns: boolean }
       can_chat_internally: { Args: { _uid: string }; Returns: boolean }
@@ -14900,6 +14970,16 @@ export type Database = {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
       }
+      complete_booking_request_delivery: {
+        Args: {
+          p_delivery_id: string
+          p_error?: string
+          p_provider_message_id?: string
+          p_recipient_email?: string
+          p_status: string
+        }
+        Returns: undefined
+      }
       complete_lead_form_delivery: {
         Args: {
           p_delivery_id: string
@@ -14954,6 +15034,7 @@ export type Database = {
         Args: { p_id: string; p_nonce_hash: string }
         Returns: string
       }
+      current_agency_can_use_booking_requests: { Args: never; Returns: boolean }
       current_agency_entitlements: {
         Args: never
         Returns: {
@@ -15452,6 +15533,31 @@ export type Database = {
       news_today_sp: { Args: never; Returns: string }
       news_week_start_sp: { Args: { p_ref?: string }; Returns: string }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
+      pending_booking_request_deliveries: {
+        Args: { p_request_id: string }
+        Returns: {
+          agency_name: string
+          agency_user_id: string
+          channel: string
+          client_email: string
+          client_name: string
+          client_notes: string
+          client_whatsapp: string
+          currency: string
+          delivery_id: string
+          destination: string
+          opportunity_id: string
+          protocol: string
+          quote_id: string
+          recipient_email: string
+          recipient_kind: string
+          service_names: string
+          status: string
+          total_estimated: number
+          trip_title: string
+          version: number
+        }[]
+      }
       product_landing_next_notify_at: {
         Args: {
           p_days: string[]

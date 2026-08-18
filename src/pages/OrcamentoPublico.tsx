@@ -45,6 +45,7 @@ import {
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
+import { QuoteBookingRequestPanel } from "@/components/quote/QuoteBookingRequestPanel";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -1167,7 +1168,7 @@ function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
   );
 }
 
-export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null } = {}) {
+export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride, agencySlugOverride, accessCodeOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null; agencySlugOverride?: string; accessCodeOverride?: string } = {}) {
   const params = useParams<{ token: string }>();
   const token = tokenOverride ?? params.token;
   const { quote: fetchedQuote, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
@@ -1770,6 +1771,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
             <p className="text-sm text-foreground/85 leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
           </div>
+        )}
+
+        {/* ─── Solicitação de reserva (White Label Premium) ─── */}
+        {(quote as any).booking_requests_enabled === true && (
+          <QuoteBookingRequestPanel
+            quote={quote as any}
+            agentProfile={agentProfile as any}
+            agencySlugOverride={agencySlugOverride}
+            accessCodeOverride={accessCodeOverride}
+          />
         )}
 
         {/* ─── Validity ─── */}
