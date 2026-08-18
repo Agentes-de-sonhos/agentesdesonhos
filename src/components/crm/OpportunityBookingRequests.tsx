@@ -9,7 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { formatQuoteCurrency } from "@/lib/quoteCurrency";
-import { serviceTypeLabel } from "@/lib/operationServiceMap";
+import {
+  BOOKING_ITEMS_SELECT,
+  SELECTION_MODE_LABEL,
+  bookingItemAmount,
+  bookingItemLabel,
+  type BookingRequestItemRow,
+} from "@/lib/bookingRequestItems";
 
 /**
  * Solicitações de reserva recebidas pelo orçamento público (White Label Premium).
@@ -45,7 +51,7 @@ export function OpportunityBookingRequests({ opportunityId }: Props) {
       const { data, error } = await supabase
         .from("quote_booking_requests")
         .select(
-          "id, protocol, version, status, client_name, client_email, client_whatsapp, client_notes, total_estimated, currency, created_at, quote_id, quote_booking_request_items(id, service_type, title, amount, selection_mode)",
+          "id, protocol, version, status, client_name, client_email, client_whatsapp, client_notes, total_estimated, currency, created_at, quote_id, quote_booking_request_items(id, service_type, service_name, amount_snapshot, selection_mode_snapshot, quantity)",
         )
         .eq("opportunity_id", opportunityId)
         .order("created_at", { ascending: false });
@@ -88,7 +94,7 @@ export function OpportunityBookingRequests({ opportunityId }: Props) {
   return (
     <div className="space-y-2">
       {requests.map((req: any) => {
-        const items = (req.quote_booking_request_items || []) as any[];
+        const items = (req.quote_booking_request_items || []) as BookingRequestItemRow[];
         const isNew = req.status === "received";
         const contact = [req.client_whatsapp, req.client_email].filter(Boolean).join(" · ");
         return (
@@ -139,18 +145,27 @@ export function OpportunityBookingRequests({ opportunityId }: Props) {
                   Serviços selecionados ({items.length})
                 </p>
                 <ul className="space-y-1 text-sm">
-                  {items.map((it) => (
-                    <li key={it.id} className="flex items-baseline justify-between gap-3">
-                      <span className="min-w-0 flex-1">
-                        {it.title || serviceTypeLabel(it.service_type)}
-                      </span>
-                      {Number(it.amount) > 0 && (
-                        <span className="shrink-0 font-medium">
-                          {formatQuoteCurrency(Number(it.amount), req.currency || "BRL")}
+                  {items.map((it) => {
+                    const label = bookingItemLabel(it);
+                    const amount = bookingItemAmount(it);
+                    return (
+                      <li key={it.id} className="flex items-baseline justify-between gap-3">
+                        <span className="min-w-0 flex-1">
+                          {label}
+                          {SELECTION_MODE_LABEL[it.selection_mode_snapshot || ""] && (
+                            <span className="ml-1.5 text-xs text-muted-foreground">
+                              ({SELECTION_MODE_LABEL[it.selection_mode_snapshot || ""]})
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </li>
-                  ))}
+                        {amount > 0 && (
+                          <span className="shrink-0 font-medium">
+                            {formatQuoteCurrency(amount, req.currency || "BRL")}
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
 

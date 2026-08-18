@@ -137,8 +137,9 @@ export async function deliverBookingNotifications(
     for (const row of rows) {
       let to = row.recipient_email ?? "";
 
-      // Destinatário da agência: e-mail da conta titular (nunca exposto ao público).
-      if (row.recipient_kind === "agency" && !to) {
+      // Agência titular ou consultor autor: o RPC devolve o user id correto por
+      // recipient_kind. E-mail resolvido no servidor, nunca exposto ao público.
+      if (row.recipient_kind !== "client" && !to) {
         try {
           const { data: userRes } = await supabase.auth.admin.getUserById(row.agency_user_id);
           to = userRes?.user?.email ?? "";

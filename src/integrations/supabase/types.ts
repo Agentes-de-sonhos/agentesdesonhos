@@ -14866,6 +14866,10 @@ export type Database = {
         Args: { _agency_id: string; _key: string }
         Returns: boolean
       }
+      agency_public_slug_matches: {
+        Args: { p_quote_user_id: string; p_slug: string }
+        Returns: boolean
+      }
       agency_team_directory: {
         Args: never
         Returns: {
