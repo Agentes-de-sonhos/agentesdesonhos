@@ -81,6 +81,7 @@ import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
 import { QuickLabelPicker } from "./QuickLabelPicker";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
+import { useHasBookingRequest } from "@/hooks/useHasBookingRequest";
 import {
   useOpportunityNotesCounts,
   useOpportunityLabelAssignments,
