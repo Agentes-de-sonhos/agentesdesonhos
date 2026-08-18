@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup, act, fireEvent } from "@testing-library/react";
+import { ServiceRequestTransition } from "@/components/whitelabel/ServiceRequestTransition";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import {
   TRANSITION_DURATION_MS, TRANSITION_MESSAGES, TRANSITION_TITLE, messageIndexAt,
@@ -63,7 +64,6 @@ describe("microtransição da solicitação white label", () => {
 describe("overlay isolado", () => {
   it("exibe título, subtítulo e chama onFinished ao fim dos ~3s", () => {
     const onFinished = vi.fn();
-    const { ServiceRequestTransition } = require("@/components/whitelabel/ServiceRequestTransition");
     render(<ServiceRequestTransition open serviceKey="aereo" onFinished={onFinished} />);
     expect(screen.getByTestId("wl-request-transition")).toBeTruthy();
     expect(screen.getByText(TRANSITION_TITLE)).toBeTruthy();
@@ -74,7 +74,6 @@ describe("overlay isolado", () => {
   });
 
   it("nada renderiza quando fechado", () => {
-    const { ServiceRequestTransition } = require("@/components/whitelabel/ServiceRequestTransition");
     render(<ServiceRequestTransition open={false} serviceKey="aereo" onFinished={() => {}} />);
     expect(screen.queryByTestId("wl-request-transition")).toBeNull();
   });
