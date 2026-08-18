@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { OpportunityNotesTimeline } from "./OpportunityNotesTimeline";
+import { OpportunityBookingRequests } from "./OpportunityBookingRequests";
 import { OpportunityLabelPicker } from "./OpportunityLabelPicker";
 import {
   useOpportunityLabelAssignments,
@@ -427,6 +428,14 @@ export function OpportunityDetailsDrawer({
           <section>
             <SectionTitle icon={StickyNote}>Anotações</SectionTitle>
             <OpportunityNotesTimeline opportunityId={opportunity.id} />
+          </section>
+
+          <Separator />
+
+          {/* SECTION 5 — Solicitações de reserva (orçamento web) */}
+          <section>
+            <SectionTitle icon={ClipboardList}>Solicitação de reserva</SectionTitle>
+            <OpportunityBookingRequests opportunityId={opportunity.id} />
           </section>
         </div>
       </SheetContent>
