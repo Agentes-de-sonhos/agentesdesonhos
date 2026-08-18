@@ -169,3 +169,36 @@ describe("descrição curta", () => {
     expect(serviceDigestShortDescription(svc("hotel", { description: "   " }))).toBeNull();
   });
 });
+
+describe("regressões da revisão final", () => {
+  it("car_rental com rental_company e car_type mostra a categoria", () => {
+    expect(
+      serviceDigestTitle(svc("car_rental", { rental_company: "Avis Car Rental", car_type: "suv" })),
+    ).toBe("Locação de SUV");
+  });
+
+  it("rental_company só aparece sem nome/modelo e sem categoria", () => {
+    expect(serviceDigestTitle(svc("car_rental", { rental_company: "Avis Car Rental" }))).toBe(
+      "Avis Car Rental",
+    );
+  });
+
+  it("todos os resumos do fluxo usam ServiceDigestCompact com withThumb", async () => {
+    const fs = await import("node:fs");
+    const files = [
+      "src/components/quote/QuoteBookingRequestPanel.tsx",
+      "src/components/quote/QuoteBookingWizardDialog.tsx",
+    ];
+    for (const file of files) {
+      const source = fs.readFileSync(file, "utf8");
+      const usages = source.match(/<ServiceDigestCompact[^>]*>/g) || [];
+      expect(usages.length).toBeGreaterThan(0);
+      for (const usage of usages) expect(usage).toContain("withThumb");
+    }
+    // Pop-up final: lista "Serviços solicitados" com miniatura e sem contatos nominais.
+    const panel = fs.readFileSync("src/components/quote/QuoteBookingRequestPanel.tsx", "utf8");
+    expect(panel).toContain("<ServiceDigestCompact service={s} withThumb />");
+    expect(panel).toContain("overflow-x-hidden");
+    expect(panel).toContain("{!hasLinkedClient && (");
+  });
+});
