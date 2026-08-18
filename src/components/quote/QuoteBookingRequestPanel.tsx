@@ -470,8 +470,9 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                 </ul>
               </div>
               <p className="text-sm text-muted-foreground">
-                A agência vai reconfirmar serviços, disponibilidade e valores e entrará em contato
-                pelo canal informado. Esta solicitação ainda não é uma reserva confirmada.
+                A agência vai reconfirmar serviços, disponibilidade e valores e entrará em contato{" "}
+                {hasLinkedClient ? "pelos canais cadastrados" : "pelo canal informado"}. Esta
+                solicitação ainda não é uma reserva confirmada.
               </p>
               <Button type="button" className="w-full" onClick={() => setOpen(false)}>
                 Fechar
