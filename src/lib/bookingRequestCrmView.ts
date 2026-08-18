@@ -40,6 +40,50 @@ export interface RequestedServicesView {
 
 const str = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
 
+/**
+ * Rótulo específico do item selecionado, lido do SNAPSHOT imutável.
+ * Os snapshots reais gravam `service_name` genérico ("hotel", "flight"),
+ * então preferimos o nome comercial guardado no snapshot antes do fallback.
+ * Nada aqui altera o snapshot: apenas leitura.
+ */
+export function requestedItemLabel(item: BookingRequestItemRow): string {
+  const snap = ((item as any)?.snapshot || {}) as Record<string, any>;
+  const data = (snap.service_data && typeof snap.service_data === "object" ? snap.service_data : {}) as Record<string, any>;
+  const generic = new Set([
+    "hotel",
+    "flight",
+    "insurance",
+    "transfer",
+    "attraction",
+    "cruise",
+    "car_rental",
+    "rail_transport",
+    "circuit",
+    "other",
+  ]);
+  const specific = [
+    snap.option_label,
+    data.custom_title,
+    data.name,
+    data.hotel_name,
+    data.airline,
+    data.provider,
+    data.rental_company,
+    data.ship_name,
+    data.circuit_name,
+    data.company_name,
+    data.product_name,
+  ]
+    .map(str)
+    .find((v) => v.length > 0);
+  if (specific) return specific;
+
+  const name = str(item?.service_name);
+  // service_name genérico não informa nada: usa o rótulo humano do tipo.
+  if (name && !generic.has(name.toLowerCase())) return name;
+  return bookingItemLabel(item);
+}
+
 function quoteServiceLabel(s: QuoteServiceRow): string {
   const data = (s.service_data || {}) as Record<string, unknown>;
   return (
@@ -79,7 +123,7 @@ export function buildRequestedServicesView(input: {
   const selected: RequestedServiceView[] = items.map((it, index) => ({
     key: it.id || `item-${index}`,
     selected: true,
-    label: bookingItemLabel(it),
+    label: requestedItemLabel(it),
     serviceType: serviceTypeLabel(it.service_type || "") || "Serviço",
     amount: bookingItemAmount(it),
     quantity: Math.max(1, Number(it.quantity) || 1),
