@@ -1,12 +1,16 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BadgeCheck,
   CheckCircle2,
+  Check,
   ClipboardCheck,
   Info,
+  ListChecks,
   Loader2,
   Lock,
+  Pencil,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,12 +37,21 @@ import {
   bookingSelectionTotal,
   buildBookingSelectionModel,
   effectiveSelectionIds,
-  initialBookingSelection,
   quoteHasLinkedClient,
-  toggleBookingSelection,
   validateBookingContact,
   validateBookingSelection,
 } from "@/lib/quoteBookingSelection";
+import {
+  bookingWizardProgress,
+  bookingWizardStorageKey,
+  buildBookingWizardSteps,
+  decidedSelectionIds,
+  parseStoredWizardState,
+  pruneBookingDecisions,
+  type BookingDecisionMap,
+} from "@/lib/quoteBookingWizard";
+import { QuoteBookingWizardDialog } from "@/components/quote/QuoteBookingWizardDialog";
+import { serviceDigestSubtitle, serviceDigestTitle } from "@/lib/quoteServiceDigest";
 
 interface Props {
   quote: Quote;
@@ -73,7 +86,15 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
     [quote, services, groups],
   );
 
-  const [selected, setSelected] = useState<string[]>(() => initialBookingSelection(model));
+  // Escolha assistida: o cliente decide um serviço por vez, na ordem do orçamento.
+  const steps = useMemo(
+    () => buildBookingWizardSteps(model, quote.sections || [], groups),
+    [model, quote.sections, groups],
+  );
+  const storageKey = bookingWizardStorageKey(String(quote.id || ""));
+  const [decisions, setDecisions] = useState<BookingDecisionMap>({});
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardStart, setWizardStart] = useState<"flow" | "review">("flow");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -84,6 +105,31 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const idempotencyKey = useRef<string>(crypto.randomUUID());
+
+  // Retoma escolhas anteriores (o cliente pode fechar a página e voltar depois).
+  useEffect(() => {
+    if (!quote.id) return;
+    try {
+      const stored = parseStoredWizardState(localStorage.getItem(storageKey));
+      setDecisions(pruneBookingDecisions(steps, stored.decisions));
+    } catch {
+      /* armazenamento indisponível: segue sem retomar */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quote.id, steps.length]);
+
+  const updateDecisions = (next: BookingDecisionMap) => {
+    const pruned = pruneBookingDecisions(steps, next);
+    setDecisions(pruned);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ decisions: pruned, reviewed: false }));
+    } catch {
+      /* ignora falha de armazenamento */
+    }
+  };
+
+  const selected = useMemo(() => decidedSelectionIds(decisions), [decisions]);
+  const progress = bookingWizardProgress(steps, decisions);
 
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = (v: number) => formatQuoteCurrency(v, currency);
@@ -181,43 +227,38 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
 
   if (services.length === 0) return null;
 
-  const renderRow = (service: QuoteService, mode: "locked" | "checkbox" | "radio") => {
-    const checked = selectionIds.includes(service.id);
+  const renderLockedRow = (service: QuoteService) => {
     const amount = Number((service as any).amount) || 0;
-    const showAmount = !model.hideAmounts && amount > 0;
     return (
-      <label
+      <div
         key={service.id}
-        className={`flex items-start gap-3 rounded-xl border p-3 sm:p-4 transition-colors ${
-          checked ? "border-primary/50 bg-primary/5" : "border-border/50 bg-card hover:bg-muted/40"
-        } ${mode === "locked" ? "cursor-default" : "cursor-pointer"}`}
+        className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 sm:p-4"
       >
-        {mode === "locked" ? (
-          <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Lock className="h-3 w-3" aria-hidden="true" />
-          </span>
-        ) : (
-          <Checkbox
-            checked={checked}
-            className={mode === "radio" ? "rounded-full" : undefined}
-            onCheckedChange={() => setSelected((prev) => toggleBookingSelection(model, prev, service.id))}
-            aria-label={`Selecionar ${serviceTitle(service)}`}
-          />
-        )}
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-foreground">{serviceTitle(service)}</span>
-          {mode === "locked" && (
-            <span className="mt-0.5 block text-[11px] font-medium uppercase tracking-wide text-primary/80">
-              Incluído
-            </span>
-          )}
+        <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <Lock className="h-3 w-3" aria-hidden="true" />
         </span>
-        {showAmount && (
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-foreground">
+            {serviceDigestTitle(service)}
+          </span>
+          <span className="mt-0.5 block text-[11px] font-medium uppercase tracking-wide text-primary/80">
+            Incluído na proposta
+          </span>
+        </span>
+        {!model.hideAmounts && amount > 0 && (
           <span className="shrink-0 text-sm font-semibold text-foreground">{fmt(amount)}</span>
         )}
-      </label>
+      </div>
     );
   };
+
+  const openWizard = (start: "flow" | "review") => {
+    setWizardStart(start);
+    setWizardOpen(true);
+  };
+
+  const chosenSteps = steps.filter((s) => decisions[s.serviceId] === "yes");
+  const noChoicesYet = progress.decided === 0;
 
   return (
     <section className="animate-fade-up" aria-labelledby="booking-request-title">
@@ -244,40 +285,106 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Marque os serviços que deseja solicitar. Itens marcados como incluídos fazem parte da
+              Vamos passar serviço por serviço para você decidir o que quer reservar. Itens incluídos fazem parte da
               proposta e não podem ser retirados.
             </p>
           )}
 
-          <div className="space-y-2">
-            {model.packageMode
-              ? services.map((s) => renderRow(s, "locked"))
-              : (
-                <>
-                  {model.requiredServices.map((s) => renderRow(s, "locked"))}
-                  {model.optionalServices.map((s) => renderRow(s, "checkbox"))}
-                  {model.groups.map(({ group, services: groupServices }) => (
-                    <div key={group.id} className="rounded-xl border border-dashed border-border/60 p-3">
-                      <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold text-foreground">{group.title}</p>
-                        <Badge variant="secondary" className="text-[10px]">
-                          {group.group_type === "alternative"
-                            ? "Escolha 1 opção"
-                            : group.max_select
-                              ? `Escolha de ${group.min_select ?? 0} a ${group.max_select}`
-                              : `Escolha ${group.min_select ?? 0} ou mais`}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2">
-                        {groupServices.map((s) =>
-                          renderRow(s, group.group_type === "alternative" ? "radio" : "checkbox"),
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </>
+          {model.packageMode ? (
+            <div className="space-y-2">{services.map(renderLockedRow)}</div>
+          ) : (
+            <div className="space-y-3">
+              {model.requiredServices.length > 0 && (
+                <div className="space-y-2">{model.requiredServices.map(renderLockedRow)}</div>
               )}
-          </div>
+
+              {noChoicesYet ? (
+                <div className="space-y-3 rounded-2xl border border-primary/25 bg-primary/5 p-4 text-center">
+                  <Sparkles className="mx-auto h-6 w-6 text-primary" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-foreground">
+                      Vamos escolher juntos, um serviço por vez
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Mostramos cada serviço com fotos, datas e detalhes. Você decide se quer
+                      reservar ou seguir para o próximo — e pode voltar quando quiser.
+                    </p>
+                  </div>
+                  <Button type="button" size="lg" className="w-full gap-2" onClick={() => openWizard("flow")}>
+                    <ListChecks className="h-4 w-4" />
+                    Escolher meus serviços ({steps.length})
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Suas escolhas ({chosenSteps.length})
+                    </p>
+                    <Badge variant={progress.complete ? "secondary" : "outline"} className="text-[10px]">
+                      {progress.decided} de {progress.total} serviços avaliados
+                    </Badge>
+                  </div>
+
+                  {chosenSteps.length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-border/60 bg-muted/20 p-3 text-sm text-muted-foreground">
+                      Você ainda não escolheu nenhum serviço para reservar.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {chosenSteps.map((s) => {
+                        const amount = Number((s.service as any).amount) || 0;
+                        const subtitle = serviceDigestSubtitle(s.service);
+                        return (
+                          <div
+                            key={s.serviceId}
+                            className="flex items-start gap-3 rounded-xl border border-primary/40 bg-primary/5 p-3 sm:p-4"
+                          >
+                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-semibold text-foreground">
+                                {serviceDigestTitle(s.service)}
+                              </span>
+                              {subtitle && (
+                                <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                                  {subtitle}
+                                </span>
+                              )}
+                            </span>
+                            {!model.hideAmounts && amount > 0 && (
+                              <span className="shrink-0 text-sm font-semibold text-foreground">
+                                {fmt(amount)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full gap-2"
+                      onClick={() => openWizard("review")}
+                    >
+                      <ListChecks className="h-4 w-4" /> Ver resumo das escolhas
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full gap-2"
+                      onClick={() => openWizard("flow")}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      {progress.complete ? "Editar escolhas" : "Continuar escolhendo"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="rounded-2xl border border-border/50 bg-muted/30 p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -300,18 +407,41 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
             </p>
           )}
 
-          <Button
-            type="button"
-            size="lg"
-            className="w-full gap-2"
-            onClick={openDialog}
-            disabled={!!selectionError}
-          >
-            <BadgeCheck className="h-4 w-4" />
-            {bookingCtaLabel(model, selectionIds.length)}
-          </Button>
+          {(model.packageMode || !noChoicesYet) && (
+            <Button
+              type="button"
+              size="lg"
+              className="w-full gap-2"
+              onClick={openDialog}
+              disabled={!!selectionError || (!model.packageMode && selectionIds.length === 0)}
+            >
+              <BadgeCheck className="h-4 w-4" />
+              {bookingCtaLabel(model, selectionIds.length)}
+            </Button>
+          )}
         </div>
       </div>
+
+      {!model.packageMode && steps.length > 0 && (
+        <QuoteBookingWizardDialog
+          open={wizardOpen}
+          onOpenChange={setWizardOpen}
+          steps={steps}
+          decisions={decisions}
+          onDecisionsChange={updateDecisions}
+          includedServices={model.requiredServices}
+          formatAmount={fmt}
+          hideAmounts={model.hideAmounts}
+          totalLabel={totalLabel}
+          selectedTotal={total}
+          selectionError={selectionError}
+          startAt={wizardStart}
+          onRequest={() => {
+            setWizardOpen(false);
+            openDialog();
+          }}
+        />
+      )}
 
       <Dialog open={open} onOpenChange={(v) => (submitting ? null : setOpen(v))}>
         <DialogContent className="max-h-[92dvh] w-[95vw] max-w-[560px] overflow-y-auto">
