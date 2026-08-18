@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   applyBookingDecision,
@@ -6,6 +7,12 @@ import {
   decidedSelectionIds,
   firstPendingStepIndex,
   parseStoredWizardState,
+  bookingWizardCountsLabel,
+  bookingWizardDecisionCounts,
+  clampStepIndex,
+  isLastStepIndex,
+  nextStepIndex,
+  previousStepIndex,
   pruneBookingDecisions,
   stepProgressLabel,
 } from "@/lib/quoteBookingWizard";
@@ -118,5 +125,91 @@ describe("parseStoredWizardState", () => {
   it("recupera decisões válidas", () => {
     const state = parseStoredWizardState(JSON.stringify({ decisions: { a: "yes", b: "x" }, reviewed: true }));
     expect(state).toEqual({ decisions: { a: "yes" }, reviewed: true });
+  });
+});
+/* --------------------------------------------------------------------------
+ * Navegação livre: steps é fonte imutável (revisão de usabilidade).
+ * ----------------------------------------------------------------------- */
+describe("navegação livre e contagens", () => {
+  const many = Array.from({ length: 13 }, (_, i) => svc(`s${i + 1}`));
+  const model13 = buildBookingSelectionModel(quote({ services: many }), many, []);
+  const steps13 = buildBookingWizardSteps(model13, [], []);
+
+  it("mantém 13 passos após decisões yes/no", () => {
+    let decisions: any = {};
+    steps13.forEach((s, i) => {
+      decisions = applyBookingDecision(steps13, decisions, s.serviceId, i % 2 ? "no" : "yes");
+    });
+    expect(steps13).toHaveLength(13);
+    expect(buildBookingWizardSteps(model13, [], [])).toHaveLength(13);
+    expect(pruneBookingDecisions(steps13, decisions)).toEqual(decisions);
+  });
+
+  it("next/previous alcançam todos os índices independentemente do status", () => {
+    const decisions: any = { s1: "no", s2: "yes" };
+    let i = 0;
+    const visited = [i];
+    while (!isLastStepIndex(steps13, i)) {
+      i = nextStepIndex(steps13, i);
+      visited.push(i);
+    }
+    expect(visited).toEqual([...Array(13).keys()]);
+    expect(previousStepIndex(steps13, 0)).toBe(0);
+    expect(previousStepIndex(steps13, 6)).toBe(5);
+    expect(nextStepIndex(steps13, 12)).toBe(12);
+    expect(clampStepIndex(steps13, 99)).toBe(12);
+    expect(clampStepIndex(steps13, -5)).toBe(0);
+    expect(decisions.s1).toBe("no");
+  });
+
+  it("conta selecionados, recusados e pendentes", () => {
+    const counts = bookingWizardDecisionCounts(steps13, { s1: "yes", s2: "yes", s3: "no" } as any);
+    expect(counts).toEqual({ selected: 2, rejected: 1, pending: 10, decided: 3, total: 13 });
+    expect(bookingWizardCountsLabel(counts)).toBe("2 selecionados, 1 recusado e 10 pendentes");
+    expect(
+      bookingWizardCountsLabel(bookingWizardDecisionCounts(steps13.slice(0, 3), { s1: "yes", s2: "no" } as any)),
+    ).toBe("1 selecionado, 1 recusado e 1 pendente");
+  });
+
+  it("posições seguem a ordem original (clicar no item 7 = índice 6)", () => {
+    expect(steps13[6].position).toBe(7);
+    expect(steps13.map((s) => s.serviceId)).toEqual(many.map((s) => s.id));
+  });
+});
+
+describe("regressão de UI do pop-up", () => {
+  const dialog = readFileSync("src/components/quote/QuoteBookingWizardDialog.tsx", "utf8");
+
+  it("mantém Próximo serviço separado de Ver resumo e Ver todos", () => {
+    expect(dialog).toContain("Próximo serviço");
+    expect(dialog).toContain("Ir para o resumo");
+    expect(dialog).toContain("Ver resumo");
+    expect(dialog).toContain("Ver todos os serviços");
+    expect(dialog).toContain("Serviço anterior");
+  });
+
+  it("usa aria-pressed nas decisões e aria-current no modo todos", () => {
+    expect(dialog).toContain('aria-pressed={decided === "yes"}');
+    expect(dialog).toContain('aria-pressed={decided === "no"}');
+    expect(dialog).toContain('aria-current={current ? "true" : undefined}');
+  });
+
+  it("edição não força resumo nem fecha o pop-up", () => {
+    expect(dialog).toContain("editingSession.current && !wasPending");
+    expect(dialog).toContain("if (!editingSession.current) showMode(\"review\")");
+  });
+
+  it("review oferece voltar ao serviço e ver todos", () => {
+    expect(dialog).toContain("Voltar ao serviço {index + 1}");
+  });
+
+  it("sem overflow horizontal", () => {
+    expect(dialog).toContain("overflow-x-hidden");
+    expect(dialog).toContain("[overflow-wrap:anywhere]");
+  });
+
+  it("status do modo todos não depende só de cor", () => {
+    expect(dialog).toContain("Selecionado para reserva");
+    expect(dialog).toContain("Ainda não avaliado");
   });
 });

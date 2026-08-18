@@ -87,7 +87,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const storageKey = bookingWizardStorageKey(String(quote.id || ""));
   const [decisions, setDecisions] = useState<BookingDecisionMap>({});
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [wizardStart, setWizardStart] = useState<"flow" | "review">("flow");
+  const [wizardStart, setWizardStart] = useState<"flow" | "all" | "review">("flow");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -242,7 +242,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
     );
   };
 
-  const openWizard = (start: "flow" | "review") => {
+  const openWizard = (start: "flow" | "all" | "review") => {
     setWizardStart(start);
     setWizardOpen(true);
   };
@@ -355,7 +355,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                       type="button"
                       variant="outline"
                       className="w-full gap-2"
-                      onClick={() => openWizard("flow")}
+                      onClick={() => openWizard(progress.complete ? "all" : "flow")}
                     >
                       <Pencil className="h-4 w-4" />
                       {progress.complete ? "Editar escolhas" : "Continuar escolhendo"}
