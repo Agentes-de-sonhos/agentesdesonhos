@@ -147,6 +147,28 @@ function ServiceStepCard({
   );
 }
 
+function StatusPill({ decision }: { decision?: "yes" | "no" }) {
+  if (decision === "yes") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+        <Check className="h-3 w-3" aria-hidden="true" /> Selecionado para reserva
+      </span>
+    );
+  }
+  if (decision === "no") {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+        <X className="h-3 w-3" aria-hidden="true" /> Não quero este serviço
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+      <Clock className="h-3 w-3" aria-hidden="true" /> Ainda não avaliado
+    </span>
+  );
+}
+
 export function QuoteBookingWizardDialog({
   open,
   onOpenChange,
@@ -163,69 +185,118 @@ export function QuoteBookingWizardDialog({
   startAt = "flow",
 }: Props) {
   const progress = bookingWizardProgress(steps, decisions);
+  const counts = bookingWizardDecisionCounts(steps, decisions);
+  const countsLabel = bookingWizardCountsLabel(counts);
   const [index, setIndex] = useState(0);
-  const [mode, setMode] = useState<"flow" | "review">(startAt);
+  const [mode, setMode] = useState<WizardMode>(startAt);
   // Transição leve e discreta ao trocar de serviço.
   const [animKey, setAnimKey] = useState(0);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  /** true quando o pop-up foi aberto já com decisões (sessão de edição). */
+  const editingSession = useRef(false);
 
   useEffect(() => {
     if (!open) return;
+    editingSession.current = Object.keys(decisions || {}).length > 0;
     setMode(startAt);
     const pending = firstPendingStepIndex(steps, decisions);
-    setIndex(pending >= 0 ? pending : Math.max(0, steps.length - 1));
+    setIndex(pending >= 0 ? pending : 0);
     setAnimKey((k) => k + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, startAt]);
 
+  // Ao trocar de serviço/modo, o conteúdo rolável volta ao topo.
+  useEffect(() => {
+    bodyRef.current?.scrollTo?.({ top: 0 });
+  }, [animKey]);
+
   const step = steps[index];
   const decided = step ? decisions[step.serviceId] : undefined;
+  const lastStep = isLastStepIndex(steps, index);
 
   const selectedSteps = useMemo(
     () => steps.filter((s) => decisions[s.serviceId] === "yes"),
     [steps, decisions],
   );
 
-  const goTo = (nextIndex: number) => {
-    setIndex(Math.max(0, Math.min(steps.length - 1, nextIndex)));
+  const goTo = (nextIndex: number, nextMode: WizardMode = "flow") => {
+    setIndex(clampStepIndex(steps, nextIndex));
+    setMode(nextMode);
+    setAnimKey((k) => k + 1);
+  };
+
+  const showMode = (nextMode: WizardMode) => {
+    setMode(nextMode);
     setAnimKey((k) => k + 1);
   };
 
   const decide = (decision: "yes" | "no") => {
     if (!step) return;
+    const wasPending = !decisions[step.serviceId];
     const next = applyBookingDecision(steps, decisions, step.serviceId, decision);
     onDecisionsChange(next);
+
+    // Sessão de edição: nunca fecha, nunca força o resumo, permanece no serviço.
+    if (editingSession.current && !wasPending) return;
+
     const pending = firstPendingStepIndex(steps, next, index + 1);
     if (pending >= 0) {
       goTo(pending);
       return;
     }
-    setMode("review");
-    setAnimKey((k) => k + 1);
-  };
-
-  const editChoices = () => {
-    setMode("flow");
-    goTo(0);
+    if (!editingSession.current) showMode("review");
   };
 
   const includedCount = includedServices.length;
+
+  const headerTitle =
+    mode === "review"
+      ? "Revise o que você escolheu"
+      : mode === "all"
+        ? "Todos os serviços do orçamento"
+        : "Escolha o que deseja reservar";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="box-border flex max-h-[92dvh] w-[95vw] min-w-0 max-w-[min(560px,95vw)] flex-col gap-0 overflow-x-hidden overflow-y-hidden p-0">
         {/* Cabeçalho: progresso e contexto */}
-        <div className="shrink-0 border-b border-border/50 bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3 sm:px-5">
-          <div className="flex items-start gap-3">
+        <div className="min-w-0 shrink-0 border-b border-border/50 bg-gradient-to-r from-primary/10 to-primary/5 px-4 py-3 sm:px-5">
+          <div className="flex min-w-0 items-start gap-3">
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-sm font-bold tracking-tight sm:text-base">
-                {mode === "review" ? "Revise o que você escolheu" : "Escolha o que deseja reservar"}
+                {headerTitle}
               </DialogTitle>
-              <p className="mt-0.5 break-words text-[11px] font-medium text-muted-foreground">
-                {mode === "review"
-                  ? `${selectedSteps.length} serviço(s) escolhido(s) de ${steps.length}`
-                  : [stepProgressLabel(step, steps.length), step?.sectionTitle, step?.blockTitle]
-                      .filter(Boolean)
-                      .join(" • ")}
+              {mode === "flow" ? (
+                <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-[11px] font-bold"
+                    onClick={() => showMode("all")}
+                  >
+                    <LayoutGrid className="h-3 w-3" aria-hidden="true" />
+                    {stepProgressLabel(step, steps.length) || "Ver todos os serviços"}
+                  </Button>
+                  {[step?.sectionTitle, step?.blockTitle].filter(Boolean).length > 0 && (
+                    <span className="min-w-0 break-words text-[11px] font-medium text-muted-foreground [overflow-wrap:anywhere]">
+                      {[step?.sectionTitle, step?.blockTitle].filter(Boolean).join(" • ")}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="mt-1 h-7 gap-1 px-2 text-[11px] font-bold"
+                  onClick={() => showMode("all")}
+                >
+                  <LayoutGrid className="h-3 w-3" aria-hidden="true" /> Ver todos os serviços
+                </Button>
+              )}
+              <p className="mt-1 break-words text-[11px] font-medium text-muted-foreground [overflow-wrap:anywhere]">
+                {countsLabel}
               </p>
             </div>
             <span className="w-8 shrink-0" aria-hidden />
@@ -241,9 +312,13 @@ export function QuoteBookingWizardDialog({
         </div>
 
         {/* Corpo */}
-        <div key={animKey} className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 animate-fade-up sm:px-5">
+        <div
+          ref={bodyRef}
+          key={animKey}
+          className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 animate-fade-up sm:px-5"
+        >
           {mode === "flow" && step && (
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4">
               {step.blockTitle && (
                 <div className="flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 px-3 py-2">
                   <Layers className="h-3.5 w-3.5 text-primary" />
@@ -273,8 +348,51 @@ export function QuoteBookingWizardDialog({
             </div>
           )}
 
+          {mode === "all" && (
+            <ul className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2">
+              {steps.map((s, i) => {
+                const digest = serviceCompactDigest(s.service);
+                const dateSummary =
+                  serviceDigestDateSummary(s.service) ||
+                  digest.dateLines.map((l) => l.value).join(" • ") ||
+                  null;
+                const status = decisions[s.serviceId];
+                const current = i === index;
+                return (
+                  <li key={s.serviceId} className="min-w-0">
+                    <button
+                      type="button"
+                      aria-current={current ? "true" : undefined}
+                      onClick={() => goTo(i, "flow")}
+                      className={cn(
+                        "flex w-full min-w-0 flex-col items-start gap-1 rounded-xl border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        current ? "border-primary bg-primary/5" : "border-border/60 bg-card hover:bg-muted/40",
+                      )}
+                    >
+                      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                        Serviço {i + 1}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary/80">
+                        {digest.typeLabel}
+                      </span>
+                      <span className="w-full min-w-0 break-words text-sm font-semibold text-foreground [overflow-wrap:anywhere]">
+                        {digest.title}
+                      </span>
+                      {dateSummary && (
+                        <span className="w-full min-w-0 break-words text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                          {dateSummary}
+                        </span>
+                      )}
+                      <StatusPill decision={status} />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
           {mode === "review" && (
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4">
               {selectedSteps.length === 0 && includedCount === 0 ? (
                 <div className="space-y-2 rounded-2xl border border-border/60 bg-muted/30 p-4 text-center">
                   <Sparkles className="mx-auto h-6 w-6 text-primary" />
@@ -319,10 +437,7 @@ export function QuoteBookingWizardDialog({
                             type="button"
                             variant="link"
                             className="h-auto p-0 text-[11px] font-semibold"
-                            onClick={() => {
-                              setMode("flow");
-                              goTo(steps.findIndex((x) => x.serviceId === s.serviceId));
-                            }}
+                            onClick={() => goTo(steps.findIndex((x) => x.serviceId === s.serviceId), "flow")}
                           >
                             <Pencil className="mr-1 h-3 w-3" /> Alterar esta escolha
                           </Button>
@@ -367,54 +482,118 @@ export function QuoteBookingWizardDialog({
 
         {/* Ações */}
         <div className="min-w-0 shrink-0 border-t border-border/50 bg-card px-4 py-3 sm:px-5">
-          {mode === "flow" ? (
+          {mode === "flow" && (
             <div className="min-w-0 space-y-2">
               <div className="grid min-w-0 gap-2 sm:grid-cols-2">
                 <Button
                   type="button"
                   size="lg"
-                  className="h-12 w-full gap-2 text-base"
+                  aria-pressed={decided === "yes"}
+                  className={cn(
+                    "h-12 w-full gap-2 text-base",
+                    decided === "yes" && "ring-2 ring-primary ring-offset-2",
+                  )}
+                  variant={decided === "no" ? "outline" : "default"}
                   onClick={() => decide("yes")}
                 >
-                  <Check className="h-4 w-4" /> Quero reservar
+                  {decided === "yes" ? <CheckCircle2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                  Quero reservar
                 </Button>
                 <Button
                   type="button"
                   size="lg"
-                  variant="outline"
-                  className="h-12 w-full gap-2 text-base"
+                  aria-pressed={decided === "no"}
+                  variant={decided === "no" ? "secondary" : "outline"}
+                  className={cn(
+                    "h-12 w-full gap-2 text-base",
+                    decided === "no" && "ring-2 ring-destructive/60 ring-offset-2 text-destructive",
+                  )}
                   onClick={() => decide("no")}
                 >
                   <X className="h-4 w-4" /> Não quero este serviço
                 </Button>
               </div>
-              <div className="flex items-center justify-between gap-2">
+
+              <div className="grid min-w-0 grid-cols-2 gap-2">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="gap-1"
-                  onClick={() => goTo(index - 1)}
+                  className="min-w-0 gap-1"
+                  onClick={() => goTo(previousStepIndex(steps, index), "flow")}
                   disabled={index === 0}
                 >
-                  <ArrowLeft className="h-3.5 w-3.5" /> Voltar
+                  <ArrowLeft className="h-3.5 w-3.5" /> Serviço anterior
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="gap-1"
-                  onClick={() => {
-                    setMode("review");
-                    setAnimKey((k) => k + 1);
-                  }}
+                  className="min-w-0 gap-1"
+                  onClick={() => (lastStep ? showMode("review") : goTo(nextStepIndex(steps, index), "flow"))}
+                >
+                  {lastStep ? "Ir para o resumo" : "Próximo serviço"}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="min-w-0 gap-1"
+                  onClick={() => showMode("all")}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" /> Ver todos os serviços
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="min-w-0 gap-1"
+                  onClick={() => showMode("review")}
                 >
                   Ver resumo <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
-          ) : (
-            <div className="space-y-2">
+          )}
+
+          {mode === "all" && (
+            <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full min-w-0 gap-2"
+                onClick={() => goTo(index, "flow")}
+              >
+                <ArrowLeft className="h-4 w-4" /> Voltar ao serviço {index + 1}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full min-w-0 gap-2"
+                onClick={() => showMode("review")}
+              >
+                Ver resumo <ChevronRight className="h-4 w-4" />
+              </Button>
+              {counts.pending > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="w-full min-w-0 gap-2 sm:col-span-2"
+                  onClick={() => {
+                    const pending = firstPendingStepIndex(steps, decisions);
+                    goTo(pending >= 0 ? pending : index, "flow");
+                  }}
+                >
+                  Ir para o próximo pendente <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+          )}
+
+          {mode === "review" && (
+            <div className="min-w-0 space-y-2">
               <Button
                 type="button"
                 size="lg"
@@ -424,14 +603,24 @@ export function QuoteBookingWizardDialog({
               >
                 <CheckCircle2 className="h-4 w-4" /> Solicitar reserva dos serviços selecionados
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full gap-2"
-                onClick={editChoices}
-              >
-                <Pencil className="h-4 w-4" /> Editar escolhas
-              </Button>
+              <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full min-w-0 gap-2"
+                  onClick={() => showMode("all")}
+                >
+                  <LayoutGrid className="h-4 w-4" /> Ver todos os serviços
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full min-w-0 gap-2"
+                  onClick={() => goTo(index, "flow")}
+                >
+                  <Pencil className="h-4 w-4" /> Voltar ao serviço {index + 1}
+                </Button>
+              </div>
             </div>
           )}
         </div>
