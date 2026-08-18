@@ -165,6 +165,71 @@ export function bookingWizardProgress(
   return { decided, total: steps.length, complete: steps.length > 0 && decided === steps.length };
 }
 
+/* ---------------------------------------------------------------------------
+ * Contagens e navegação por índice.
+ * `steps` é a fonte imutável: nada aqui filtra a lista por decisão.
+ * ------------------------------------------------------------------------ */
+
+export interface BookingWizardDecisionCounts {
+  selected: number;
+  rejected: number;
+  pending: number;
+  decided: number;
+  total: number;
+}
+
+export function bookingWizardDecisionCounts(
+  steps: BookingWizardStep[],
+  decisions: BookingDecisionMap,
+): BookingWizardDecisionCounts {
+  let selected = 0;
+  let rejected = 0;
+  for (const step of steps) {
+    const decision = decisions?.[step.serviceId];
+    if (decision === "yes") selected++;
+    else if (decision === "no") rejected++;
+  }
+  const total = steps.length;
+  const decided = selected + rejected;
+  return { selected, rejected, pending: Math.max(0, total - decided), decided, total };
+}
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** "3 selecionados, 1 recusado e 2 pendentes" (singular correto quando 1). */
+export function bookingWizardCountsLabel(counts: BookingWizardDecisionCounts): string {
+  return [
+    plural(counts.selected, "selecionado", "selecionados"),
+    plural(counts.rejected, "recusado", "recusados"),
+    plural(counts.pending, "pendente", "pendentes"),
+  ]
+    .slice(0, 2)
+    .join(", ")
+    .concat(` e ${plural(counts.pending, "pendente", "pendentes")}`);
+}
+
+/** Mantém o índice dentro dos limites reais da lista de passos. */
+export function clampStepIndex(steps: BookingWizardStep[], index: number): number {
+  if (!steps.length) return 0;
+  if (!Number.isFinite(index)) return 0;
+  return Math.max(0, Math.min(steps.length - 1, Math.trunc(index)));
+}
+
+/** Próximo serviço por posição, ignorando o status yes/no/pendente. */
+export function nextStepIndex(steps: BookingWizardStep[], index: number): number {
+  return clampStepIndex(steps, clampStepIndex(steps, index) + 1);
+}
+
+/** Serviço anterior por posição, ignorando o status yes/no/pendente. */
+export function previousStepIndex(steps: BookingWizardStep[], index: number): number {
+  return clampStepIndex(steps, clampStepIndex(steps, index) - 1);
+}
+
+/** true quando o índice é o último passo (rodapé mostra "Ir para o resumo"). */
+export function isLastStepIndex(steps: BookingWizardStep[], index: number): boolean {
+  return steps.length > 0 && clampStepIndex(steps, index) === steps.length - 1;
+}
+
 /** Rótulo de progresso amigável: "Serviço 3 de 10". */
 export function stepProgressLabel(step: BookingWizardStep | undefined, total: number): string {
   if (!step || total === 0) return "";
