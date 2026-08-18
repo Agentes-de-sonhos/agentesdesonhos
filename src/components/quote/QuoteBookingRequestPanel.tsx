@@ -42,8 +42,10 @@ import {
 interface Props {
   quote: Quote;
   agentProfile?: AgentProfile | null;
-  /** Slug da agência quando o link já vem resolvido pelo domínio White Label. */
+  /** Slug da agência quando o link já vem resolvido pela rota/domínio White Label. */
   agencySlugOverride?: string;
+  /** Código público do orçamento vindo da rota (fonte preferida). */
+  accessCodeOverride?: string;
 }
 
 interface SuccessState {
@@ -62,7 +64,7 @@ function serviceTitle(service: QuoteService): string {
   );
 }
 
-export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverride }: Props) {
+export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverride, accessCodeOverride }: Props) {
   const services = (quote.services || []) as QuoteService[];
   const groups = ((quote as any).choice_groups || []) as QuoteChoiceGroup[];
   const model = useMemo(
@@ -92,7 +94,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
 
   const agencySlug =
     agencySlugOverride || agencyNameToSlug((agentProfile as any)?.agency_name || "");
-  const publicCode = (quote as any).public_access_code as string | undefined;
+  const publicCode = accessCodeOverride || ((quote as any).public_access_code as string | undefined);
   const canSubmit = !!agencySlug && !!publicCode;
 
   const selectedServices = services.filter((s) => selectionIds.includes(s.id));

@@ -1168,7 +1168,7 @@ function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
   );
 }
 
-export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null } = {}) {
+export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride, agencySlugOverride, accessCodeOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null; agencySlugOverride?: string; accessCodeOverride?: string } = {}) {
   const params = useParams<{ token: string }>();
   const token = tokenOverride ?? params.token;
   const { quote: fetchedQuote, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
@@ -1775,7 +1775,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
         {/* ─── Solicitação de reserva (White Label Premium) ─── */}
         {(quote as any).booking_requests_enabled === true && (
-          <QuoteBookingRequestPanel quote={quote as any} agentProfile={agentProfile as any} />
+          <QuoteBookingRequestPanel
+            quote={quote as any}
+            agentProfile={agentProfile as any}
+            agencySlugOverride={agencySlugOverride}
+            accessCodeOverride={accessCodeOverride}
+          />
         )}
 
         {/* ─── Validity ─── */}
