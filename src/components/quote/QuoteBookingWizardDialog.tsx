@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   Check,
   CheckCircle2,
   ChevronRight,
+  Clock,
   Info,
   Layers,
+  LayoutGrid,
   Pencil,
   Sparkles,
   X,
@@ -15,17 +18,26 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
-import { serviceCompactDigest } from "@/lib/quoteServiceDigest";
+import { serviceCompactDigest, serviceDigestDateSummary } from "@/lib/quoteServiceDigest";
 import { ServiceDigestCompact } from "@/components/quote/ServiceDigestCompact";
 import {
   applyBookingDecision,
+  bookingWizardCountsLabel,
+  bookingWizardDecisionCounts,
   bookingWizardProgress,
+  clampStepIndex,
   firstPendingStepIndex,
+  isLastStepIndex,
+  nextStepIndex,
+  previousStepIndex,
   stepProgressLabel,
   type BookingDecisionMap,
   type BookingWizardStep,
 } from "@/lib/quoteBookingWizard";
 import type { QuoteService } from "@/types/quote";
+import { cn } from "@/lib/utils";
+
+type WizardMode = "flow" | "all" | "review";
 
 interface Props {
   open: boolean;
@@ -46,7 +58,7 @@ interface Props {
   /** Bloqueio informado pelas regras de seleção (ex.: bloco obrigatório). */
   selectionError?: string | null;
   /** Passo inicial: "review" abre direto no resumo final. */
-  startAt?: "flow" | "review";
+  startAt?: WizardMode;
 }
 
 function ServiceStepCard({
