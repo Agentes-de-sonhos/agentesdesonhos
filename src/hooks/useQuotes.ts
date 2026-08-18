@@ -112,6 +112,8 @@ export function useQuotes() {
         .insert({
           user_id: user.id,
           client_name: `${source.client_name} (cópia)`,
+          // Mantém o vínculo com o cliente do CRM: a cópia continua nominal.
+          client_id: (source as any).client_id ?? null,
           adults_count: source.adults_count,
           children_count: source.children_count,
           destination: source.destination,

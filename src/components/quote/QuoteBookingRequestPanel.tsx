@@ -142,7 +142,6 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const selectionIds = effectiveSelectionIds(model, selected);
   const selectionError = validateBookingSelection(model, selected);
   const { total, label: totalLabel } = bookingSelectionTotal(quote, model, selected);
-  const disclaimerText = (quote.booking_disclaimer || "").trim() || BOOKING_REQUEST_DISCLAIMER;
 
   const agencySlug =
     agencySlugOverride || agencyNameToSlug((agentProfile as any)?.agency_name || "");
@@ -484,7 +483,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                 <DialogTitle className="text-lg">Confirmar solicitação de reserva</DialogTitle>
                 <DialogDescription>
                   {hasLinkedClient
-                    ? "Revise os serviços que deseja solicitar e confirme o envio."
+                    ? "Revise os serviços e confirme sua solicitação."
                     : "Revise os serviços e informe como a agência pode falar com você."}
                 </DialogDescription>
               </DialogHeader>
@@ -517,17 +516,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                {hasLinkedClient ? (
-                  <div className="space-y-1 rounded-xl border border-border/50 bg-muted/20 p-3 sm:col-span-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Seus dados
-                    </p>
-                    <p className="text-sm text-foreground">
-                      Este orçamento foi montado especialmente para você: a agência já tem seus
-                      dados de contato e vai retornar pelos canais combinados.
-                    </p>
-                  </div>
-                ) : (
+                {!hasLinkedClient && (
                 <>
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="br-name" className="text-xs">Nome completo *</Label>
@@ -586,13 +575,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                   aria-label="Aceito o aviso sobre a solicitação de reserva"
                 />
                 <span className="text-[12px] leading-relaxed text-muted-foreground">
-                  {disclaimerText}
-                  {disclaimerText !== BOOKING_REQUEST_DISCLAIMER && (
-                    <>
-                      {" "}
-                      <span className="block pt-1">{BOOKING_REQUEST_DISCLAIMER}</span>
-                    </>
-                  )}
+                  {BOOKING_REQUEST_DISCLAIMER}
                 </span>
               </label>
 
