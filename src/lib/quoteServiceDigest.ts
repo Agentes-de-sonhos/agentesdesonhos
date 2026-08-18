@@ -114,11 +114,14 @@ export function serviceDigestTitle(service: QuoteService): string {
       real = first(data.product_name, data.provider, data.company_name, data.name, data.custom_title);
       break;
     case "car_rental": {
-      real = first(data.car_model, data.vehicle_model, data.product_name, data.name, data.rental_company);
+      // Nome/modelo real primeiro; depois a categoria ("Locação de SUV");
+      // fornecedor apenas quando não há nome/modelo nem categoria.
+      real = first(data.car_model, data.vehicle_model, data.product_name, data.name);
       if (!real) {
         const category = first(data.car_type, data.car_category, data.vehicle_category);
         if (category) real = `Locação de ${humanize(category)}`;
       }
+      if (!real) real = first(data.rental_company, data.provider, data.company_name);
       break;
     }
     case "flight": {

@@ -230,7 +230,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
           <Lock className="h-3 w-3" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
-          <ServiceDigestCompact service={service} />
+          <ServiceDigestCompact service={service} withThumb />
           <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide text-primary/80">
             Incluído na proposta
           </span>
@@ -481,7 +481,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                         key={s.id}
                         className="flex w-full min-w-0 max-w-full flex-wrap items-start gap-2 border-b border-border/40 pb-2 last:border-0 last:pb-0"
                       >
-                        <ServiceDigestCompact service={s} />
+                        <ServiceDigestCompact service={s} withThumb />
                         {!model.hideAmounts && amount > 0 && (
                           <span className="ml-auto break-words font-medium">{fmt(amount)}</span>
                         )}

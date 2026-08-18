@@ -280,7 +280,7 @@ export function QuoteBookingWizardDialog({
                     >
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                       <div className="min-w-0 flex-1">
-                        <ServiceDigestCompact service={service} />
+                        <ServiceDigestCompact service={service} withThumb />
                         <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-primary/80">
                           Já incluído na proposta
                         </p>
