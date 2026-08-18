@@ -196,12 +196,12 @@ export function bookingWizardDecisionCounts(
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-/** "3 selecionados, 1 recusado e 2 pendentes" (singular correto quando 1). */
+/** "3 selecionados · 1 recusado · 2 pendentes" (singular correto quando 1). */
 export function bookingWizardCountsLabel(counts: BookingWizardDecisionCounts): string {
   const selected = plural(counts.selected, "selecionado", "selecionados");
   const rejected = plural(counts.rejected, "recusado", "recusados");
   const pending = plural(counts.pending, "pendente", "pendentes");
-  return `${selected}, ${rejected} e ${pending}`;
+  return `${selected} · ${rejected} · ${pending}`;
 }
 
 /** Mantém o índice dentro dos limites reais da lista de passos. */
