@@ -101,7 +101,7 @@ describe("oportunidade única e correta", () => {
 
 describe("conversão para Operação", () => {
   it("copia somente o pedido ativo mais recente, sem duplicar", () => {
-    const fn = sql.split("import_booking_request_into_operation")[2] || sql;
+    const fn = sql.slice(sql.indexOf("FUNCTION public.import_booking_request_into_operation"));
     expect(fn).toContain("NOT IN ('superseded', 'cancelled', 'expired')");
     expect(fn).toContain("os.source_quote_service_id = v_item.source_quote_service_id");
     expect(fn).toContain("SET operation_service_id = v_service_id");
