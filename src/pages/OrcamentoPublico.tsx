@@ -1772,6 +1772,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </div>
         )}
 
+        {/* ─── Solicitação de reserva (White Label Premium) ─── */}
+        {(quote as any).booking_requests_enabled === true && (
+          <QuoteBookingRequestPanel quote={quote as any} agentProfile={agentProfile as any} />
+        )}
+
         {/* ─── Validity ─── */}
         <div className="text-center space-y-1">
           {validUntil && (
