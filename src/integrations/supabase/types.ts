@@ -14883,6 +14883,13 @@ export type Database = {
           team_name: string
         }[]
       }
+      booking_request_negotiation_stage: {
+        Args: { _user_id: string }
+        Returns: {
+          legacy_key: string
+          stage_id: string
+        }[]
+      }
       booking_request_start_review: {
         Args: { p_request_id: string }
         Returns: Json
@@ -15452,6 +15459,10 @@ export type Database = {
         Returns: boolean
       }
       immutable_unaccent: { Args: { "": string }; Returns: string }
+      import_booking_request_into_operation: {
+        Args: { p_operation_id: string }
+        Returns: number
+      }
       inherit_stage_permissions: {
         Args: {
           _new_stage_id: string
@@ -15726,6 +15737,10 @@ export type Database = {
         Returns: boolean
       }
       supplier_slug_exists: { Args: { p_slug: string }; Returns: boolean }
+      sync_booking_request_opportunity: {
+        Args: { p_request_id: string }
+        Returns: string
+      }
       team_access_profiles: {
         Args: never
         Returns: {
