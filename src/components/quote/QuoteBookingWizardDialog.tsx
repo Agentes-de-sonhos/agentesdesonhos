@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
-import { serviceCompactDigest, serviceDigestTitle } from "@/lib/quoteServiceDigest";
+import { serviceCompactDigest } from "@/lib/quoteServiceDigest";
 import { ServiceDigestCompact } from "@/components/quote/ServiceDigestCompact";
 import {
   applyBookingDecision,
@@ -25,7 +25,7 @@ import {
   type BookingDecisionMap,
   type BookingWizardStep,
 } from "@/lib/quoteBookingWizard";
-import type { QuoteService, ServiceType } from "@/types/quote";
+import type { QuoteService } from "@/types/quote";
 
 interface Props {
   open: boolean;
