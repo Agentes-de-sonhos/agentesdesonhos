@@ -51,7 +51,8 @@ import {
   type BookingDecisionMap,
 } from "@/lib/quoteBookingWizard";
 import { QuoteBookingWizardDialog } from "@/components/quote/QuoteBookingWizardDialog";
-import { serviceDigestSubtitle, serviceDigestTitle } from "@/lib/quoteServiceDigest";
+import { serviceDigestTitle } from "@/lib/quoteServiceDigest";
+import { ServiceDigestCompact } from "@/components/quote/ServiceDigestCompact";
 
 interface Props {
   quote: Quote;
@@ -67,16 +68,8 @@ interface SuccessState {
   services: string[];
 }
 
-function serviceTitle(service: QuoteService): string {
-  const data = (service.service_data as any) || {};
-  return (
-    (service.option_label && String(service.option_label).trim()) ||
-    (data.custom_title && String(data.custom_title).trim()) ||
-    (data.name && String(data.name).trim()) ||
-    (data.hotel_name && String(data.hotel_name).trim()) ||
-    String(service.service_type)
-  );
-}
+/** Título único do serviço, resolvido pelo digest compartilhado. */
+const serviceTitle = (service: QuoteService): string => serviceDigestTitle(service);
 
 export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverride, accessCodeOverride }: Props) {
   const services = (quote.services || []) as QuoteService[];
@@ -231,21 +224,19 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
     return (
       <div
         key={service.id}
-        className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 sm:p-4"
+        className="flex w-full min-w-0 max-w-full flex-wrap items-start gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 sm:p-4"
       >
         <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-md bg-primary/10 text-primary">
           <Lock className="h-3 w-3" aria-hidden="true" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-foreground">
-            {serviceDigestTitle(service)}
-          </span>
-          <span className="mt-0.5 block text-[11px] font-medium uppercase tracking-wide text-primary/80">
+          <ServiceDigestCompact service={service} />
+          <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide text-primary/80">
             Incluído na proposta
           </span>
         </span>
         {!model.hideAmounts && amount > 0 && (
-          <span className="shrink-0 text-sm font-semibold text-foreground">{fmt(amount)}</span>
+          <span className="ml-auto break-words text-sm font-semibold text-foreground">{fmt(amount)}</span>
         )}
       </div>
     );
@@ -333,25 +324,15 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                     <div className="space-y-2">
                       {chosenSteps.map((s) => {
                         const amount = Number((s.service as any).amount) || 0;
-                        const subtitle = serviceDigestSubtitle(s.service);
                         return (
                           <div
                             key={s.serviceId}
-                            className="flex items-start gap-3 rounded-xl border border-primary/40 bg-primary/5 p-3 sm:p-4"
+                            className="flex w-full min-w-0 max-w-full flex-wrap items-start gap-3 rounded-xl border border-primary/40 bg-primary/5 p-3 sm:p-4"
                           >
                             <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            <span className="min-w-0 flex-1">
-                              <span className="block text-sm font-semibold text-foreground">
-                                {serviceDigestTitle(s.service)}
-                              </span>
-                              {subtitle && (
-                                <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                                  {subtitle}
-                                </span>
-                              )}
-                            </span>
+                            <ServiceDigestCompact service={s.service} withThumb />
                             {!model.hideAmounts && amount > 0 && (
-                              <span className="shrink-0 text-sm font-semibold text-foreground">
+                              <span className="ml-auto break-words text-sm font-semibold text-foreground">
                                 {fmt(amount)}
                               </span>
                             )}
@@ -443,7 +424,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
       )}
 
       <Dialog open={open} onOpenChange={(v) => (submitting ? null : setOpen(v))}>
-        <DialogContent className="max-h-[92dvh] w-[95vw] max-w-[560px] overflow-y-auto">
+        <DialogContent className="box-border max-h-[92dvh] w-[95vw] min-w-0 max-w-[min(560px,95vw)] overflow-x-hidden overflow-y-auto">
           {success ? (
             <div className="space-y-4 text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
@@ -462,7 +443,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Serviços solicitados
                 </p>
-                <ul className="list-disc space-y-0.5 pl-4 text-sm text-foreground">
+                <ul className="list-disc space-y-0.5 pl-4 text-sm text-foreground [overflow-wrap:anywhere]">
                   {success.services.map((s, i) => (
                     <li key={`${s}-${i}`}>{s}</li>
                   ))}
@@ -488,18 +469,21 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="rounded-xl border border-border/50 bg-muted/30 p-3">
+              <div className="min-w-0 rounded-xl border border-border/50 bg-muted/30 p-3">
                 <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Serviços solicitados ({selectedServices.length})
                 </p>
-                <ul className="space-y-1 text-sm">
+                <ul className="space-y-2 text-sm">
                   {selectedServices.map((s) => {
                     const amount = Number((s as any).amount) || 0;
                     return (
-                      <li key={s.id} className="flex items-baseline justify-between gap-3">
-                        <span className="min-w-0 flex-1 truncate">{serviceTitle(s)}</span>
+                      <li
+                        key={s.id}
+                        className="flex w-full min-w-0 max-w-full flex-wrap items-start gap-2 border-b border-border/40 pb-2 last:border-0 last:pb-0"
+                      >
+                        <ServiceDigestCompact service={s} />
                         {!model.hideAmounts && amount > 0 && (
-                          <span className="shrink-0 font-medium">{fmt(amount)}</span>
+                          <span className="ml-auto break-words font-medium">{fmt(amount)}</span>
                         )}
                       </li>
                     );
