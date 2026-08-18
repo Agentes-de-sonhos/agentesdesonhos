@@ -46,9 +46,10 @@ export function validateBookingRequestPayload(
   }
 
   const client_name = text(body.client_name, 200);
-  if (client_name.length < 2) return { ok: false, error: "Informe seu nome completo." };
-
-  // Contato: nome + WhatsApp OU nome + e-mail (alinhado ao restante do White Label).
+  // Orcamento nominal (com cliente cadastrado) nao pede contato: o banco resolve a
+  // identidade pelo quotes.client_id e IGNORA o que vier do navegador. Aqui apenas
+  // validamos o FORMATO do que foi enviado; a obrigatoriedade do contato passou a ser
+  // decidida no RPC (fallback de orcamento sem cliente vinculado).
   const client_email = text(body.client_email, 200).toLowerCase();
   const emailOk = client_email.length > 0 && EMAIL_RE.test(client_email);
   if (client_email.length > 0 && !emailOk) {
@@ -61,8 +62,8 @@ export function validateBookingRequestPayload(
   if (whatsappRaw.length > 0 && !whatsappOk) {
     return { ok: false, error: "Informe um WhatsApp válido com DDD." };
   }
-  if (!emailOk && !whatsappOk) {
-    return { ok: false, error: "Informe WhatsApp ou e-mail para a agência entrar em contato." };
+  if (client_name.length > 0 && client_name.length < 2) {
+    return { ok: false, error: "Informe seu nome completo." };
   }
 
   if (body.disclaimer_accepted !== true) {
