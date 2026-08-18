@@ -165,10 +165,10 @@ describe("navegação livre e contagens", () => {
   it("conta selecionados, recusados e pendentes", () => {
     const counts = bookingWizardDecisionCounts(steps13, { s1: "yes", s2: "yes", s3: "no" } as any);
     expect(counts).toEqual({ selected: 2, rejected: 1, pending: 10, decided: 3, total: 13 });
-    expect(bookingWizardCountsLabel(counts)).toBe("2 selecionados, 1 recusado e 10 pendentes");
+    expect(bookingWizardCountsLabel(counts)).toBe("2 selecionados · 1 recusado · 10 pendentes");
     expect(
       bookingWizardCountsLabel(bookingWizardDecisionCounts(steps13.slice(0, 3), { s1: "yes", s2: "no" } as any)),
-    ).toBe("1 selecionado, 1 recusado e 1 pendente");
+    ).toBe("1 selecionado · 1 recusado · 1 pendente");
   });
 
   it("posições seguem a ordem original (clicar no item 7 = índice 6)", () => {
@@ -211,5 +211,31 @@ describe("regressão de UI do pop-up", () => {
   it("status do modo todos não depende só de cor", () => {
     expect(dialog).toContain("Selecionado para reserva");
     expect(dialog).toContain("Ainda não avaliado");
+  });
+});
+
+describe("estado visual dos botões de decisão", () => {
+  const dialog = readFileSync("src/components/quote/QuoteBookingWizardDialog.tsx", "utf8");
+
+  it("pendente não deixa nenhum botão com aparência primária/selecionada", () => {
+    expect(dialog).toContain('variant={decided === "yes" ? "default" : "outline"}');
+    expect(dialog).toContain('variant={decided === "no" ? "secondary" : "outline"}');
+    expect(dialog).not.toContain('variant={decided === "no" ? "outline" : "default"}');
+  });
+
+  it("yes e no ficam selecionados com ring e aria-pressed coerente", () => {
+    expect(dialog).toContain('decided === "yes" && "ring-2 ring-primary ring-offset-2"');
+    expect(dialog).toContain('decided === "no" && "ring-2 ring-destructive/60 ring-offset-2 text-destructive"');
+    expect(dialog).toContain('aria-pressed={decided === "yes"}');
+    expect(dialog).toContain('aria-pressed={decided === "no"}');
+  });
+
+  it("controles quebram sem overflow em telas estreitas", () => {
+    expect(dialog.match(/whitespace-normal/g)?.length ?? 0).toBeGreaterThanOrEqual(8);
+    expect(dialog).toContain("h-auto min-h-10 w-full min-w-0 max-w-full gap-1 whitespace-normal py-2 text-center leading-tight");
+    expect(dialog).toContain("h-4 w-4 shrink-0");
+    expect(dialog).toContain("h-3.5 w-3.5 shrink-0");
+    expect(dialog).toContain("overflow-x-hidden");
+    expect(dialog).not.toContain('className="h-12 w-full gap-2 text-base"');
   });
 });

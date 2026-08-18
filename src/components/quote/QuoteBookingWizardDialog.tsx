@@ -489,14 +489,18 @@ export function QuoteBookingWizardDialog({
                   type="button"
                   size="lg"
                   aria-pressed={decided === "yes"}
+                  variant={decided === "yes" ? "default" : "outline"}
                   className={cn(
-                    "h-12 w-full gap-2 text-base",
+                    "h-auto min-h-12 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center text-base leading-tight",
                     decided === "yes" && "ring-2 ring-primary ring-offset-2",
                   )}
-                  variant={decided === "no" ? "outline" : "default"}
                   onClick={() => decide("yes")}
                 >
-                  {decided === "yes" ? <CheckCircle2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                  {decided === "yes" ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <Check className="h-4 w-4 shrink-0" />
+                  )}
                   Quero reservar
                 </Button>
                 <Button
@@ -505,12 +509,12 @@ export function QuoteBookingWizardDialog({
                   aria-pressed={decided === "no"}
                   variant={decided === "no" ? "secondary" : "outline"}
                   className={cn(
-                    "h-12 w-full gap-2 text-base",
+                    "h-auto min-h-12 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center text-base leading-tight",
                     decided === "no" && "ring-2 ring-destructive/60 ring-offset-2 text-destructive",
                   )}
                   onClick={() => decide("no")}
                 >
-                  <X className="h-4 w-4" /> Não quero este serviço
+                  <X className="h-4 w-4 shrink-0" /> Não quero este serviço
                 </Button>
               </div>
 
@@ -519,39 +523,39 @@ export function QuoteBookingWizardDialog({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="min-w-0 gap-1"
+                  className="h-auto min-h-10 w-full min-w-0 max-w-full gap-1 whitespace-normal py-2 text-center leading-tight"
                   onClick={() => goTo(previousStepIndex(steps, index), "flow")}
                   disabled={index === 0}
                 >
-                  <ArrowLeft className="h-3.5 w-3.5" /> Serviço anterior
+                  <ArrowLeft className="h-3.5 w-3.5 shrink-0" /> Serviço anterior
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="min-w-0 gap-1"
+                  className="h-auto min-h-10 w-full min-w-0 max-w-full gap-1 whitespace-normal py-2 text-center leading-tight"
                   onClick={() => (lastStep ? showMode("review") : goTo(nextStepIndex(steps, index), "flow"))}
                 >
                   {lastStep ? "Ir para o resumo" : "Próximo serviço"}
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="min-w-0 gap-1"
+                  className="h-auto min-h-10 w-full min-w-0 max-w-full gap-1 whitespace-normal py-2 text-center leading-tight"
                   onClick={() => showMode("all")}
                 >
-                  <LayoutGrid className="h-3.5 w-3.5" /> Ver todos os serviços
+                  <LayoutGrid className="h-3.5 w-3.5 shrink-0" /> Ver todos os serviços
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="min-w-0 gap-1"
+                  className="h-auto min-h-10 w-full min-w-0 max-w-full gap-1 whitespace-normal py-2 text-center leading-tight"
                   onClick={() => showMode("review")}
                 >
-                  Ver resumo <ChevronRight className="h-3.5 w-3.5" />
+                  Ver resumo <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                 </Button>
               </div>
             </div>
@@ -562,31 +566,31 @@ export function QuoteBookingWizardDialog({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full min-w-0 gap-2"
+                className="h-auto min-h-11 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center leading-tight"
                 onClick={() => goTo(index, "flow")}
               >
-                <ArrowLeft className="h-4 w-4" /> Voltar ao serviço {index + 1}
+                <ArrowLeft className="h-4 w-4 shrink-0" /> Voltar ao serviço {index + 1}
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full min-w-0 gap-2"
+                className="h-auto min-h-11 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center leading-tight"
                 onClick={() => showMode("review")}
               >
-                Ver resumo <ChevronRight className="h-4 w-4" />
+                Ver resumo <ChevronRight className="h-4 w-4 shrink-0" />
               </Button>
               {counts.pending > 0 && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="w-full min-w-0 gap-2 sm:col-span-2"
+                  className="h-auto min-h-10 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center leading-tight sm:col-span-2"
                   onClick={() => {
                     const pending = firstPendingStepIndex(steps, decisions);
                     goTo(pending >= 0 ? pending : index, "flow");
                   }}
                 >
-                  Ir para o próximo pendente <ArrowRight className="h-3.5 w-3.5" />
+                  Ir para o próximo pendente <ArrowRight className="h-3.5 w-3.5 shrink-0" />
                 </Button>
               )}
             </div>
@@ -597,28 +601,28 @@ export function QuoteBookingWizardDialog({
               <Button
                 type="button"
                 size="lg"
-                className="h-12 w-full gap-2 text-base"
+                className="h-auto min-h-12 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center text-base leading-tight"
                 onClick={onRequest}
                 disabled={selectedSteps.length === 0 && includedCount === 0}
               >
-                <CheckCircle2 className="h-4 w-4" /> Solicitar reserva dos serviços selecionados
+                <CheckCircle2 className="h-4 w-4 shrink-0" /> Solicitar reserva dos serviços selecionados
               </Button>
               <div className="grid min-w-0 gap-2 sm:grid-cols-2">
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full min-w-0 gap-2"
+                  className="h-auto min-h-11 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center leading-tight"
                   onClick={() => showMode("all")}
                 >
-                  <LayoutGrid className="h-4 w-4" /> Ver todos os serviços
+                  <LayoutGrid className="h-4 w-4 shrink-0" /> Ver todos os serviços
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full min-w-0 gap-2"
+                  className="h-auto min-h-11 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center leading-tight"
                   onClick={() => goTo(index, "flow")}
                 >
-                  <Pencil className="h-4 w-4" /> Voltar ao serviço {index + 1}
+                  <Pencil className="h-4 w-4 shrink-0" /> Voltar ao serviço {index + 1}
                 </Button>
               </div>
             </div>
