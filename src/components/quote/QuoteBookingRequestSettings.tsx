@@ -12,11 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Crown, Loader2, Plus, Trash2, Info } from "lucide-react";
+import { Globe, Loader2, Plus, Trash2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { serviceTypeLabel } from "@/lib/operationServiceMap";
-import { useAgencyEntitlements, AGENCY_ENTITLEMENTS } from "@/hooks/useAgencyEntitlements";
+import { useBookingRequestCapability } from "@/hooks/useBookingRequestCapability";
 import {
   useQuoteBookingConfig,
   SELECTION_MODE_HINTS,
@@ -36,8 +36,9 @@ const DEFAULT_DISCLAIMER =
   "Esta é uma solicitação de reserva. Serviços, disponibilidade e valores serão reconfirmados pela agência antes da conclusão.";
 
 export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
-  const { hasAgencyEntitlement, loading: loadingEntitlements } = useAgencyEntitlements();
-  const allowed = hasAgencyEntitlement(AGENCY_ENTITLEMENTS.booking_requests);
+  // Elegibilidade resolvida no servidor: Premium ativo + White Label ativo.
+  const { canUseBookingRequests, loading: loadingCapability } = useBookingRequestCapability();
+  const allowed = canUseBookingRequests;
 
   const {
     groups,
@@ -57,8 +58,8 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
   const [newGroupTitle, setNewGroupTitle] = useState("");
   const [newGroupType, setNewGroupType] = useState<"alternative" | "free">("alternative");
 
-  // Não expor nada a agência sem entitlement.
-  if (loadingEntitlements || !allowed) return null;
+  // Não expor nada a agência não elegível (o banco também rejeita a ativação direta).
+  if (loadingCapability || !allowed) return null;
 
   const services: QuoteService[] = quote?.services || [];
 
@@ -144,14 +145,17 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
     <div className="space-y-5 rounded-xl border border-amber-300/60 bg-amber-50/40 dark:bg-amber-500/5 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Crown className="h-4 w-4 text-amber-500" />
-            <p className="text-sm font-semibold">Pedido de reserva pelo orçamento web</p>
-            <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px]">VIP</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Globe className="h-4 w-4 text-amber-500" />
+            <p className="text-sm font-semibold">Solicitação de reserva pelo orçamento web</p>
+            <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px]">
+              White Label Premium
+            </Badge>
           </div>
           <p className="text-xs text-muted-foreground max-w-prose">
-            Permite que o cliente escolha serviços no link público e envie um pedido para a sua
-            análise. A seleção do cliente <strong>não confirma reserva</strong> — nada é vendido
+            O cliente seleciona os serviços no link público e envia uma solicitação para a sua
+            análise. Isso <strong>não confirma reserva, disponibilidade nem valores</strong>: você
+            reconfirma tudo e retorna o contato. Nada é vendido, cobrado ou reservado
             automaticamente.
           </p>
         </div>
