@@ -59,3 +59,23 @@ describe("microtransição da solicitação white label", () => {
     expect(transitionMotif("desconhecido")).toBe("map");
   });
 });
+
+describe("overlay isolado", () => {
+  it("exibe título, subtítulo e chama onFinished ao fim dos ~3s", () => {
+    const onFinished = vi.fn();
+    const { ServiceRequestTransition } = require("@/components/whitelabel/ServiceRequestTransition");
+    render(<ServiceRequestTransition open serviceKey="aereo" onFinished={onFinished} />);
+    expect(screen.getByTestId("wl-request-transition")).toBeTruthy();
+    expect(screen.getByText(TRANSITION_TITLE)).toBeTruthy();
+    expect(screen.getByText(TRANSITION_MESSAGES[0])).toBeTruthy();
+    expect(onFinished).not.toHaveBeenCalled();
+    act(() => { vi.advanceTimersByTime(TRANSITION_DURATION_MS + 50); });
+    expect(onFinished).toHaveBeenCalledTimes(1);
+  });
+
+  it("nada renderiza quando fechado", () => {
+    const { ServiceRequestTransition } = require("@/components/whitelabel/ServiceRequestTransition");
+    render(<ServiceRequestTransition open={false} serviceKey="aereo" onFinished={() => {}} />);
+    expect(screen.queryByTestId("wl-request-transition")).toBeNull();
+  });
+});
