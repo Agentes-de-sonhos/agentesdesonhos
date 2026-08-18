@@ -1,5 +1,7 @@
 // Pure payload validation for the public booking-request endpoint.
 // Kept dependency-free so it can be unit-tested from the app test suite.
+// v3: orçamento nominal envia nome/e-mail/WhatsApp vazios; a exigência de contato
+// vive no RPC (fallback sem client_id). Não reintroduzir obrigatoriedade aqui.
 
 export const MAX_SELECTED_SERVICES = 100;
 

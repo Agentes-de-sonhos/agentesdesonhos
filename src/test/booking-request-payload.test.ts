@@ -95,3 +95,31 @@ describe("contato flexível: nome + WhatsApp OU e-mail", () => {
     }
   });
 });
+
+describe("payload nominal (has_linked_client=true)", () => {
+  it("aceita nome, e-mail e WhatsApp todos vazios", () => {
+    const r = validateBookingRequestPayload({
+      ...base,
+      client_name: "",
+      client_email: "",
+      client_whatsapp: "",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data.client_name).toBe("");
+      expect(r.data.client_email).toBe("");
+      expect(r.data.client_whatsapp).toBe("");
+    }
+  });
+
+  it("aceita campos ausentes do corpo", () => {
+    const { client_name, client_email, client_whatsapp, ...rest } = base;
+    expect(validateBookingRequestPayload(rest).ok).toBe(true);
+  });
+
+  it("mantém validação de formato quando valores não estão vazios", () => {
+    expect(validateBookingRequestPayload({ ...base, client_name: "A" }).ok).toBe(false);
+    expect(validateBookingRequestPayload({ ...base, client_email: "nao-email" }).ok).toBe(false);
+    expect(validateBookingRequestPayload({ ...base, client_whatsapp: "12" }).ok).toBe(false);
+  });
+});
