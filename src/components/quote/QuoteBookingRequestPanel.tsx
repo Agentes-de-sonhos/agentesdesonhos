@@ -86,7 +86,15 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
     [quote, services, groups],
   );
 
-  const [selected, setSelected] = useState<string[]>(() => initialBookingSelection(model));
+  // Escolha assistida: o cliente decide um serviço por vez, na ordem do orçamento.
+  const steps = useMemo(
+    () => buildBookingWizardSteps(model, quote.sections || [], groups),
+    [model, quote.sections, groups],
+  );
+  const storageKey = bookingWizardStorageKey(String(quote.id || ""));
+  const [decisions, setDecisions] = useState<BookingDecisionMap>({});
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardStart, setWizardStart] = useState<"flow" | "review">("flow");
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -97,6 +105,31 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const idempotencyKey = useRef<string>(crypto.randomUUID());
+
+  // Retoma escolhas anteriores (o cliente pode fechar a página e voltar depois).
+  useEffect(() => {
+    if (!quote.id) return;
+    try {
+      const stored = parseStoredWizardState(localStorage.getItem(storageKey));
+      setDecisions(pruneBookingDecisions(steps, stored.decisions));
+    } catch {
+      /* armazenamento indisponível: segue sem retomar */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quote.id, steps.length]);
+
+  const updateDecisions = (next: BookingDecisionMap) => {
+    const pruned = pruneBookingDecisions(steps, next);
+    setDecisions(pruned);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ decisions: pruned, reviewed: false }));
+    } catch {
+      /* ignora falha de armazenamento */
+    }
+  };
+
+  const selected = useMemo(() => decidedSelectionIds(decisions), [decisions]);
+  const progress = bookingWizardProgress(steps, decisions);
 
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = (v: number) => formatQuoteCurrency(v, currency);
