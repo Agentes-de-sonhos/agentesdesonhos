@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Tag,
   User,
+  ClipboardList,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -140,6 +141,8 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
     !currentStage ||
     currentStage.position < quoteSentStage.position;
   const [isEditing, setIsEditing] = useState(false);
+  // Reutiliza o MESMO modal de edição, apenas focado no bloco do pedido de reserva.
+  const [editFocus, setEditFocus] = useState<"booking-request" | undefined>(undefined);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -439,6 +442,14 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                     <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem
+                  onClick={() => {
+                    setEditFocus("booking-request");
+                    setIsEditing(true);
+                  }}
+                >
+                  <ClipboardList className="mr-2 h-4 w-4" /> Visualizar serviços solicitados
+                </DropdownMenuItem>
                 {canEditClient && (
                   <DropdownMenuItem onClick={handleEditClientClick}>
                     <User className="mr-2 h-4 w-4" /> Editar cliente
@@ -536,7 +547,13 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
         </CardContent>
       </Card>
 
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+      <Dialog
+        open={isEditing}
+        onOpenChange={(open) => {
+          setIsEditing(open);
+          if (!open) setEditFocus(undefined);
+        }}
+      >
         <DialogContent
           className="sm:max-w-4xl max-h-[90vh] flex flex-col"
           onOpenAutoFocus={(e) => e.preventDefault()}
@@ -546,6 +563,7 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
           </DialogHeader>
           <OpportunityForm
             opportunity={opportunity}
+            focusSection={editFocus}
             onSuccess={() => setIsEditing(false)}
             onCancel={() => setIsEditing(false)}
           />

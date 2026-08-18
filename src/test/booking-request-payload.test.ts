@@ -85,9 +85,13 @@ describe("contato flexível: nome + WhatsApp OU e-mail", () => {
     }
   });
 
-  it("rejeita ausência dos dois canais", () => {
+  // Orçamentos nominais não pedem contato: quem exige é o banco, no fallback sem client_id.
+  it("aceita ausência dos dois canais e deixa a exigência para o banco", () => {
     const r = validateBookingRequestPayload({ ...base, client_email: "", client_whatsapp: "" });
-    expect(r.ok).toBe(false);
-    expect(r.ok === false && r.error).toMatch(/WhatsApp ou e-mail/i);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data.client_email).toBe("");
+      expect(r.data.client_whatsapp).toBe("");
+    }
   });
 });

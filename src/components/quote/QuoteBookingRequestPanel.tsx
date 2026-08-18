@@ -34,6 +34,7 @@ import {
   buildBookingSelectionModel,
   effectiveSelectionIds,
   initialBookingSelection,
+  quoteHasLinkedClient,
   toggleBookingSelection,
   validateBookingContact,
   validateBookingSelection,
@@ -87,6 +88,11 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = (v: number) => formatQuoteCurrency(v, currency);
 
+  // Orçamento nominal: o cliente já está cadastrado na agência. Não pedimos nome,
+  // WhatsApp nem e-mail de novo — o servidor resolve a identidade pela própria
+  // quote e ignora qualquer contato enviado pelo navegador.
+  const hasLinkedClient = quoteHasLinkedClient(quote);
+
   const selectionIds = effectiveSelectionIds(model, selected);
   const selectionError = validateBookingSelection(model, selected);
   const { total, label: totalLabel } = bookingSelectionTotal(quote, model, selected);
@@ -111,7 +117,13 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   };
 
   const submit = async () => {
-    const contactError = validateBookingContact({ name, whatsapp, email, disclaimerAccepted: accepted });
+    const contactError = validateBookingContact({
+      name,
+      whatsapp,
+      email,
+      disclaimerAccepted: accepted,
+      hasLinkedClient,
+    });
     if (contactError) {
       setError(contactError);
       return;
@@ -128,9 +140,10 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
           agency_slug: agencySlug,
           code: publicCode,
           selected_service_ids: selectionIds,
-          client_name: name.trim(),
-          client_email: email.trim(),
-          client_whatsapp: whatsapp.trim(),
+          // Nunca enviamos contato quando o orçamento é nominal.
+          client_name: hasLinkedClient ? "" : name.trim(),
+          client_email: hasLinkedClient ? "" : email.trim(),
+          client_whatsapp: hasLinkedClient ? "" : whatsapp.trim(),
           client_notes: notes.trim() || null,
           disclaimer_accepted: true,
           // Retry seguro: a mesma chave devolve o mesmo pedido, sem duplicar.
@@ -339,7 +352,9 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               <DialogHeader className="space-y-1">
                 <DialogTitle className="text-lg">Confirmar solicitação de reserva</DialogTitle>
                 <DialogDescription>
-                  Revise os serviços e informe como a agência pode falar com você.
+                  {hasLinkedClient
+                    ? "Revise os serviços que deseja solicitar e confirme o envio."
+                    : "Revise os serviços e informe como a agência pode falar com você."}
                 </DialogDescription>
               </DialogHeader>
 
@@ -371,6 +386,18 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
+                {hasLinkedClient ? (
+                  <div className="space-y-1 rounded-xl border border-border/50 bg-muted/20 p-3 sm:col-span-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Seus dados
+                    </p>
+                    <p className="text-sm text-foreground">
+                      Este orçamento foi montado especialmente para você: a agência já tem seus
+                      dados de contato e vai retornar pelos canais combinados.
+                    </p>
+                  </div>
+                ) : (
+                <>
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="br-name" className="text-xs">Nome completo *</Label>
                   <Input
@@ -406,6 +433,8 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                 <p className="text-[11px] text-muted-foreground sm:col-span-2">
                   Informe pelo menos WhatsApp ou e-mail.
                 </p>
+                </>
+                )}
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="br-notes" className="text-xs">Observações (opcional)</Label>
                   <Textarea

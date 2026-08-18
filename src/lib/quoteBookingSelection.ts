@@ -165,7 +165,15 @@ export function validateBookingContact(input: {
   whatsapp: string;
   email: string;
   disclaimerAccepted: boolean;
+  /** Orçamento nominal: identidade vem do cadastro, sem pedir contato de novo. */
+  hasLinkedClient?: boolean;
 }): string | null {
+  if (input.hasLinkedClient) {
+    if (!input.disclaimerAccepted) {
+      return "É necessário aceitar o aviso de que o pedido não confirma a reserva.";
+    }
+    return null;
+  }
   if (input.name.trim().length < 2) return "Informe seu nome completo.";
   const digits = input.whatsapp.replace(/\D/g, "");
   const hasWhats = digits.length >= 10 && digits.length <= 15;
@@ -177,4 +185,12 @@ export function validateBookingContact(input: {
     return "É necessário aceitar o aviso de que o pedido não confirma a reserva.";
   }
   return null;
+}
+
+/**
+ * true quando o orçamento é nominal (tem cliente cadastrado na agência).
+ * O payload público nunca traz o client_id — apenas este sinal.
+ */
+export function quoteHasLinkedClient(quote: any): boolean {
+  return quote?.has_linked_client === true;
 }
