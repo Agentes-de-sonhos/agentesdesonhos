@@ -1,18 +1,21 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BadgeCheck,
   CheckCircle2,
+  Check,
   ClipboardCheck,
   Info,
+  ListChecks,
   Loader2,
   Lock,
+  Pencil,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,12 +36,21 @@ import {
   bookingSelectionTotal,
   buildBookingSelectionModel,
   effectiveSelectionIds,
-  initialBookingSelection,
   quoteHasLinkedClient,
-  toggleBookingSelection,
   validateBookingContact,
   validateBookingSelection,
 } from "@/lib/quoteBookingSelection";
+import {
+  bookingWizardProgress,
+  bookingWizardStorageKey,
+  buildBookingWizardSteps,
+  decidedSelectionIds,
+  parseStoredWizardState,
+  pruneBookingDecisions,
+  type BookingDecisionMap,
+} from "@/lib/quoteBookingWizard";
+import { QuoteBookingWizardDialog } from "@/components/quote/QuoteBookingWizardDialog";
+import { serviceDigestSubtitle, serviceDigestTitle } from "@/lib/quoteServiceDigest";
 
 interface Props {
   quote: Quote;
