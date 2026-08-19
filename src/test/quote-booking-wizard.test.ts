@@ -217,15 +217,19 @@ describe("regressão de UI do pop-up", () => {
 describe("estado visual dos botões de decisão", () => {
   const dialog = readFileSync("src/components/quote/QuoteBookingWizardDialog.tsx", "utf8");
 
-  it("pendente não deixa nenhum botão com aparência primária/selecionada", () => {
-    expect(dialog).toContain('variant={decided === "yes" ? "default" : "outline"}');
-    expect(dialog).toContain('variant={decided === "no" ? "secondary" : "outline"}');
-    expect(dialog).not.toContain('variant={decided === "no" ? "outline" : "default"}');
+  it("negativa em vermelho à esquerda e positiva em azul à direita", () => {
+    const noIndex = dialog.indexOf("Não quero este serviço");
+    const yesIndex = dialog.indexOf("Quero solicitar este serviço");
+    expect(noIndex).toBeGreaterThan(-1);
+    expect(yesIndex).toBeGreaterThan(noIndex);
+    expect(dialog).toContain("hover:bg-red-600");
+    expect(dialog).toContain("hover:bg-blue-600");
+    expect(dialog).not.toContain("Quero reservar<");
   });
 
-  it("yes e no ficam selecionados com ring e aria-pressed coerente", () => {
-    expect(dialog).toContain('decided === "yes" && "ring-2 ring-primary ring-offset-2"');
-    expect(dialog).toContain('decided === "no" && "ring-2 ring-destructive/60 ring-offset-2 text-destructive"');
+  it("estados selecionados e aria-pressed coerentes", () => {
+    expect(dialog).toContain('bg-blue-600 text-white [&_svg]:text-white');
+    expect(dialog).toContain('border-red-600 bg-red-50 text-red-700');
     expect(dialog).toContain('aria-pressed={decided === "yes"}');
     expect(dialog).toContain('aria-pressed={decided === "no"}');
   });
