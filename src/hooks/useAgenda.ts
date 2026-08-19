@@ -197,7 +197,7 @@ export function useAgenda(year?: number) {
       const endDate = `${currentYear}-12-31`;
       const { data, error } = await supabase
         .from("opportunity_followups" as any)
-        .select("id, follow_up_date, note, opportunity_id, created_by, opportunity:opportunities(destination, client:clients(name))")
+        .select("id, follow_up_date, follow_up_at, time_zone, note, opportunity_id, created_by, opportunity:opportunities(destination, client:clients(name))")
         .eq("created_by", user.id)
         .gte("follow_up_date", startDate)
         .lte("follow_up_date", endDate)
@@ -575,8 +575,9 @@ export function useAgenda(year?: number) {
         title,
         description: fu.note || null,
         event_type: 'followup',
-        event_date: fu.follow_up_date,
-        event_time: null,
+        event_date: followupCivilDate(fu.follow_up_at, fu.time_zone, fu.follow_up_date),
+        // Legado (só data) segue all-day; com follow_up_at exibimos o horário.
+        event_time: followupEventTime(fu.follow_up_at, fu.time_zone),
         color: eventTypeColors['followup'],
         isPreset: false,
         opportunity_id: fu.opportunity_id,
@@ -628,8 +629,8 @@ export function useAgenda(year?: number) {
         title,
         description: fu.note || null,
         event_type: 'followup',
-        event_date: fu.follow_up_date,
-        event_time: null,
+        event_date: followupCivilDate(fu.follow_up_at, fu.time_zone, fu.follow_up_date),
+        event_time: followupEventTime(fu.follow_up_at, fu.time_zone),
         color: eventTypeColors['followup'],
         isPreset: false,
         opportunity_id: fu.opportunity_id,

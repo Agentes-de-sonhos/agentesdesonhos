@@ -30,6 +30,13 @@ import {
   safeHttpUrl, safeText, teamPermissionFilter, validateDestination, validateIsoDate, validateName,
   type BridgeError,
 } from "../_shared/extensionBridge.ts";
+import {
+  agendaDeepLink, buildOpportunityUpdate, civilDayWindow, civilDateInTimeZone, clampLimit,
+  clientDeepLink, createQuoteDeepLink, opportunityDeepLink, publicAgendaEvent, publicClientCompany,
+  publicCompany, publicFollowup, publicOperation, publicOpportunityHistory, publicOpportunityNote,
+  publicQuote, publicTrip, validateFollowupFilter, validateIsoDateTime, validateRelationshipType,
+  validateTimeZone,
+} from "../_shared/extensionBridge.ts";
 
 const corsHeaders = {
   // A extensão chama de origens `chrome-extension://<id>` e não usa cookies:
@@ -51,6 +58,20 @@ const fail = (e: BridgeError) => json({ error: e.error }, e.status);
 const PERMISSION_KEYS = [
   "clients.view", "clients.create",
   "opportunities.view", "opportunities.create", "opportunities.edit",
+];
+
+/**
+ * Chaves adicionais usadas pelo painel "Hoje" e pelas leituras 0.4.
+ * Somente chaves REAIS já usadas pela plataforma.
+ */
+const PERMISSION_KEYS_V04 = [
+  "clients.edit", "clients.delete",
+  "agenda.view", "agenda.edit",
+  "dashboard.view",
+  "operations.view",
+  "quotes.view",
+  "tasks.view", "tasks.edit",
+  "opportunities.generate_quote",
 ];
 
 Deno.serve(async (req) => {
@@ -225,7 +246,10 @@ Deno.serve(async (req) => {
           agencyId,
           teamMemberId,
           mode: isTeamMember ? "collaborator" : "master",
-          permissions: Object.fromEntries(PERMISSION_KEYS.map(k => [k, can(k)])),
+          permissions: Object.fromEntries(
+            [...PERMISSION_KEYS, ...PERMISSION_KEYS_V04].map(k => [k, can(k)]),
+          ),
+          extension_api_version: "0.4",
           stages: stages.map(s => ({
             id: s.id, name: s.name, legacy_key: s.legacy_key, position: s.position,
             color: s.color, can_view: s.can_view, can_edit: s.can_edit, can_move: s.can_move,
@@ -476,7 +500,16 @@ Deno.serve(async (req) => {
       case "create_followup": {
         const denied = requirePermission("opportunities.edit");
         if (denied) return fail(denied);
-        const followUpDate = validateIsoDate(body.followUpDate);
+        // 0.4: aceita `followUpAt` (ISO 8601 COM offset) ou o legado `followUpDate`.
+        const timeZone = validateTimeZone(body.timeZone);
+        const followUpAt = validateIsoDateTime(body.followUpAt);
+        if (body.followUpAt !== undefined && body.followUpAt !== null && !followUpAt) {
+          return fail({ status: 400, error: "Informe o horário do follow-up em ISO 8601 com fuso (ex.: 2026-08-20T14:30:00-03:00)." });
+        }
+        // A data civil vem do fuso validado — nunca de um split simples em UTC.
+        const followUpDate = followUpAt
+          ? civilDateInTimeZone(followUpAt, timeZone)
+          : validateIsoDate(body.followUpDate);
         if (!followUpDate) return fail({ status: 400, error: "Informe a data do follow-up no formato AAAA-MM-DD." });
         const opp = await loadOpportunity(body.opportunityId);
         if (!opp) return fail({ status: 404, error: "Oportunidade não encontrada." });
@@ -487,9 +520,12 @@ Deno.serve(async (req) => {
             opportunity_id: opp.id as string,
             user_id: agencyId,
             follow_up_date: followUpDate,
+            follow_up_at: followUpAt,
+            time_zone: followUpAt ? timeZone : null,
+            created_by: user.id,
             note: safeText(body.note, 1000) || null,
           })
-          .select("id, follow_up_date, note, created_at")
+          .select("id, opportunity_id, follow_up_date, follow_up_at, time_zone, note, created_at")
           .single();
         if (error) {
           console.error("create_followup:", error.message);
@@ -497,10 +533,511 @@ Deno.serve(async (req) => {
         }
 
         await client.from("opportunities")
-          .update({ follow_up_date: followUpDate })
+          .update({ follow_up_date: followUpDate, follow_up_at: followUpAt })
           .eq("id", opp.id as string);
 
-        return json({ followup: data }, 201);
+        return json({ followup: publicFollowup(data as Record<string, unknown>) }, 201);
+      }
+
+      // ══════════════════════════════════════════════════════════════════════
+      // Versão 0.4
+      // ══════════════════════════════════════════════════════════════════════
+
+      // ── j) dashboard_today ──────────────────────────────────────────────
+      case "dashboard_today": {
+        const win = civilDayWindow(body.timeZone, clampInt(body.horizonDays, 1, 30, 7));
+        const limit = clampLimit(body.limit, 20, 50);
+
+        // Follow-ups: SEMPRE individuais (created_by = user.id). Não vaza
+        // agenda/follow-up de colegas da mesma agência.
+        let overdue: Record<string, unknown>[] = [];
+        let today: Record<string, unknown>[] = [];
+        let upcoming: Record<string, unknown>[] = [];
+        if (can("opportunities.view")) {
+          const followupColumns =
+            "id, opportunity_id, follow_up_date, follow_up_at, time_zone, note, created_at, " +
+            "opportunity:opportunities(destination, client_id, client:clients(name))";
+          const base = () => client
+            .from("opportunity_followups")
+            .select(followupColumns)
+            .eq("user_id", agencyId)
+            .eq("created_by", user.id);
+
+          const [ov, td, up] = await Promise.all([
+            base().lt("follow_up_date", win.today).order("follow_up_date", { ascending: false }).limit(limit),
+            base().eq("follow_up_date", win.today).order("follow_up_at", { ascending: true }).limit(limit),
+            base().gt("follow_up_date", win.today).lte("follow_up_date", win.horizon_date)
+              .order("follow_up_date", { ascending: true }).limit(limit),
+          ]);
+          overdue = (ov.data ?? []) as Record<string, unknown>[];
+          today = (td.data ?? []) as Record<string, unknown>[];
+          upcoming = (up.data ?? []) as Record<string, unknown>[];
+        }
+
+        // Agenda pessoal do usuário autenticado, sem eventos apagados.
+        let events: Record<string, unknown>[] = [];
+        if (can("agenda.view")) {
+          const { data } = await client
+            .from("agency_events")
+            .select("id, title, event_type, event_date, event_time, start_at, time_zone, all_day")
+            .eq("user_id", user.id)
+            .is("deleted_at", null)
+            .gte("event_date", win.today)
+            .lte("event_date", win.horizon_date)
+            .order("event_date", { ascending: true })
+            .limit(limit);
+          events = (data ?? []) as Record<string, unknown>[];
+        }
+
+        // Viagens/operações da agência (RLS + permissões decidem a visibilidade).
+        // Nenhum dado financeiro é devolvido.
+        let operations: Record<string, unknown>[] = [];
+        let trips: Record<string, unknown>[] = [];
+        if (can("operations.view")) {
+          const [ops, trs] = await Promise.all([
+            client.from("operations")
+              .select("id, title, destination, travel_start_date, travel_end_date, passengers_count, stage")
+              .eq("user_id", agencyId)
+              .gte("travel_start_date", win.today)
+              .order("travel_start_date", { ascending: true })
+              .limit(limit),
+            client.from("trips")
+              .select("id, trip_title, destination, start_date, end_date, status")
+              .eq("user_id", agencyId)
+              .gte("start_date", win.today)
+              .order("start_date", { ascending: true })
+              .limit(limit),
+          ]);
+          operations = (ops.data ?? []) as Record<string, unknown>[];
+          trips = (trs.data ?? []) as Record<string, unknown>[];
+        }
+
+        return json({
+          time_zone: win.time_zone,
+          today: win.today,
+          horizon_date: win.horizon_date,
+          followups: {
+            overdue: overdue.map(publicFollowup),
+            today: today.map(publicFollowup),
+            upcoming: upcoming.map(publicFollowup),
+          },
+          events: events.map(publicAgendaEvent),
+          operations: operations.map(publicOperation),
+          trips: trips.map(publicTrip),
+          counts: {
+            followups_overdue: overdue.length,
+            followups_today: today.length,
+            followups_upcoming: upcoming.length,
+            events: events.length,
+            operations: operations.length,
+            trips: trips.length,
+          },
+          links: { agenda_url: agendaDeepLink(win.today) },
+        });
+      }
+
+      // ── k) get_contact_summary ──────────────────────────────────────────
+      case "get_contact_summary": {
+        const denied = requirePermission("clients.view");
+        if (denied) return fail(denied);
+        if (!isUuid(body.contactId)) return fail({ status: 400, error: "Contato inválido." });
+        const contactId = body.contactId as string;
+
+        const { data: contact } = await client
+          .from("clients")
+          .select("id, name, phone, email, status, created_at")
+          .eq("id", contactId)
+          .eq("user_id", agencyId)
+          .maybeSingle();
+        if (!contact) return fail({ status: 404, error: "Contato não encontrado." });
+
+        const [{ data: companies }, { data: opps }] = await Promise.all([
+          client.from("client_companies")
+            .select("id, client_id, company_id, relationship_type, is_primary, company:companies(id, name, trade_name, cnpj_normalized, email, phone, created_at)")
+            .eq("user_id", agencyId)
+            .eq("client_id", contactId)
+            .order("is_primary", { ascending: false })
+            .limit(10),
+          client.from("opportunities")
+            .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at, travel_context, company_id, pipeline_stage:pipeline_stages(name, legacy_key)")
+            .eq("user_id", agencyId)
+            .eq("client_id", contactId)
+            .order("created_at", { ascending: false })
+            .limit(10),
+        ]);
+
+        const stages = await loadStages();
+        const visibleIds = new Set(stages.map(s => s.id));
+        const visibleOpps = ((opps ?? []) as Record<string, unknown>[])
+          .filter(r => !isTeamMember || !r.stage_id || visibleIds.has(r.stage_id as string));
+        const oppIds = visibleOpps.map(r => r.id as string);
+
+        const [followupsRes, notesRes, historyRes, quotesRes, operationsRes, tripsRes] = await Promise.all([
+          oppIds.length
+            ? client.from("opportunity_followups")
+                .select("id, opportunity_id, follow_up_date, follow_up_at, time_zone, note, created_at")
+                .eq("user_id", agencyId).in("opportunity_id", oppIds)
+                .order("follow_up_date", { ascending: false }).limit(10)
+            : Promise.resolve({ data: [] as unknown[] }),
+          oppIds.length
+            ? client.from("opportunity_notes").select("id, content, created_at")
+                .in("opportunity_id", oppIds).order("created_at", { ascending: false }).limit(5)
+            : Promise.resolve({ data: [] as unknown[] }),
+          oppIds.length
+            ? client.from("opportunity_history").select("id, from_stage, to_stage, changed_at")
+                .in("opportunity_id", oppIds).order("changed_at", { ascending: false }).limit(5)
+            : Promise.resolve({ data: [] as unknown[] }),
+          can("quotes.view")
+            ? client.from("quotes")
+                .select("id, trip_title, destination, status, start_date, end_date, created_at")
+                .eq("user_id", agencyId).eq("client_id", contactId)
+                .order("created_at", { ascending: false }).limit(10)
+            : Promise.resolve({ data: [] as unknown[] }),
+          can("operations.view")
+            ? client.from("operations")
+                .select("id, title, destination, travel_start_date, travel_end_date, passengers_count, stage")
+                .eq("user_id", agencyId).eq("client_id", contactId)
+                .order("travel_start_date", { ascending: false }).limit(10)
+            : Promise.resolve({ data: [] as unknown[] }),
+          can("operations.view")
+            ? client.from("trips")
+                .select("id, trip_title, destination, start_date, end_date, status")
+                .eq("user_id", agencyId).eq("client_id", contactId)
+                .order("start_date", { ascending: false }).limit(10)
+            : Promise.resolve({ data: [] as unknown[] }),
+        ]);
+
+        return json({
+          contact: publicContact(contact as Record<string, unknown>),
+          companies: ((companies ?? []) as Record<string, unknown>[]).map(publicClientCompany),
+          opportunities: visibleOpps.map(r => ({
+            ...publicOpportunity(r),
+            travel_context: (r.travel_context as string) ?? "personal",
+            company_id: (r.company_id as string) ?? null,
+            opportunity_url: opportunityDeepLink(r.id as string),
+            create_quote_url: createQuoteDeepLink(r.id as string),
+          })),
+          followups: ((followupsRes.data ?? []) as Record<string, unknown>[]).map(publicFollowup),
+          notes: ((notesRes.data ?? []) as Record<string, unknown>[]).map(publicOpportunityNote),
+          history: ((historyRes.data ?? []) as Record<string, unknown>[]).map(publicOpportunityHistory),
+          quotes: ((quotesRes.data ?? []) as Record<string, unknown>[]).map(publicQuote),
+          operations: ((operationsRes.data ?? []) as Record<string, unknown>[]).map(publicOperation),
+          trips: ((tripsRes.data ?? []) as Record<string, unknown>[]).map(publicTrip),
+          links: {
+            client_url: clientDeepLink(contactId),
+            agenda_url: agendaDeepLink(null),
+          },
+        });
+      }
+
+      // ── l) update_opportunity ───────────────────────────────────────────
+      case "update_opportunity": {
+        const denied = requirePermission("opportunities.edit");
+        if (denied) return fail(denied);
+        const opp = await loadOpportunity(body.opportunityId);
+        if (!opp) return fail({ status: 404, error: "Oportunidade não encontrada." });
+
+        const { patch, error: patchError } = buildOpportunityUpdate(body);
+        if (patchError) return fail(patchError);
+
+        // Empresa precisa ser da mesma agência (o banco também valida).
+        if (patch.company_id) {
+          const { data: company } = await client
+            .from("companies").select("id")
+            .eq("id", patch.company_id as string).eq("user_id", agencyId).maybeSingle();
+          if (!company) return fail({ status: 404, error: "Empresa não encontrada nesta agência." });
+        }
+
+        const { data, error } = await client
+          .from("opportunities")
+          .update(patch)
+          .eq("id", opp.id as string)
+          .eq("user_id", agencyId)
+          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at, travel_context, company_id")
+          .maybeSingle();
+        if (error || !data) {
+          console.error("update_opportunity:", error?.message);
+          return fail({ status: 403, error: "Não foi possível atualizar a oportunidade." });
+        }
+        const row = data as Record<string, unknown>;
+        return json({
+          opportunity: {
+            ...publicOpportunity(row),
+            travel_context: (row.travel_context as string) ?? "personal",
+            company_id: (row.company_id as string) ?? null,
+            opportunity_url: opportunityDeepLink(row.id as string),
+            create_quote_url: createQuoteDeepLink(row.id as string),
+          },
+        });
+      }
+
+      // ── m) list_followups ───────────────────────────────────────────────
+      case "list_followups": {
+        const denied = requirePermission("opportunities.view");
+        if (denied) return fail(denied);
+        const filter = validateFollowupFilter(body.filter);
+        const win = civilDayWindow(body.timeZone, clampInt(body.horizonDays, 1, 30, 7));
+        const limit = clampLimit(body.limit, 20, 50);
+
+        let query = client
+          .from("opportunity_followups")
+          .select("id, opportunity_id, follow_up_date, follow_up_at, time_zone, note, created_at, opportunity:opportunities(destination, client_id, client:clients(name))")
+          .eq("user_id", agencyId)
+          .eq("created_by", user.id);
+
+        if (filter === "overdue") query = query.lt("follow_up_date", win.today);
+        else if (filter === "today") query = query.eq("follow_up_date", win.today);
+        else if (filter === "upcoming") {
+          query = query.gt("follow_up_date", win.today).lte("follow_up_date", win.horizon_date);
+        }
+
+        const { data } = await query
+          .order("follow_up_date", { ascending: filter !== "overdue" })
+          .limit(limit);
+        return json({
+          filter,
+          time_zone: win.time_zone,
+          today: win.today,
+          followups: ((data ?? []) as Record<string, unknown>[]).map(publicFollowup),
+        });
+      }
+
+      // ── n) update_followup ──────────────────────────────────────────────
+      case "update_followup": {
+        const denied = requirePermission("opportunities.edit");
+        if (denied) return fail(denied);
+        if (!isUuid(body.followupId)) return fail({ status: 400, error: "Follow-up inválido." });
+
+        // Autoria + agência: RLS é a autoridade, o filtro aqui é defesa extra.
+        const { data: existing } = await client
+          .from("opportunity_followups")
+          .select("id, opportunity_id, created_by, user_id")
+          .eq("id", body.followupId as string)
+          .eq("user_id", agencyId)
+          .eq("created_by", user.id)
+          .maybeSingle();
+        if (!existing) return fail({ status: 404, error: "Follow-up não encontrado." });
+
+        const timeZone = validateTimeZone(body.timeZone);
+        const patch: Record<string, unknown> = {};
+        if (body.followUpAt !== undefined) {
+          if (body.followUpAt === null) {
+            patch.follow_up_at = null;
+            patch.time_zone = null;
+          } else {
+            const at = validateIsoDateTime(body.followUpAt);
+            if (!at) return fail({ status: 400, error: "Informe o horário do follow-up em ISO 8601 com fuso." });
+            patch.follow_up_at = at;
+            patch.time_zone = timeZone;
+            patch.follow_up_date = civilDateInTimeZone(at, timeZone);
+          }
+        }
+        if (patch.follow_up_at === undefined && body.followUpDate !== undefined) {
+          const date = validateIsoDate(body.followUpDate);
+          if (!date) return fail({ status: 400, error: "Informe a data do follow-up no formato AAAA-MM-DD." });
+          patch.follow_up_date = date;
+        }
+        if (patch.follow_up_at === null && body.followUpDate !== undefined) {
+          const date = validateIsoDate(body.followUpDate);
+          if (date) patch.follow_up_date = date;
+        }
+        if (body.note !== undefined) patch.note = safeText(body.note, 1000) || null;
+        if (Object.keys(patch).length === 0) {
+          return fail({ status: 400, error: "Nenhum campo válido para atualizar." });
+        }
+
+        const { data, error } = await client
+          .from("opportunity_followups")
+          .update(patch)
+          .eq("id", existing.id as string)
+          .select("id, opportunity_id, follow_up_date, follow_up_at, time_zone, note, created_at")
+          .maybeSingle();
+        if (error || !data) {
+          console.error("update_followup:", error?.message);
+          return fail({ status: 403, error: "Não foi possível atualizar o follow-up." });
+        }
+        return json({ followup: publicFollowup(data as Record<string, unknown>) });
+      }
+
+      // ── o) complete_followup ────────────────────────────────────────────
+      // Mesma semântica da Agenda: concluir remove o follow-up (e o trigger
+      // cria a lápide no espelho da agenda).
+      case "complete_followup": {
+        const denied = requirePermission("opportunities.edit");
+        if (denied) return fail(denied);
+        if (!isUuid(body.followupId)) return fail({ status: 400, error: "Follow-up inválido." });
+
+        const { data: existing } = await client
+          .from("opportunity_followups")
+          .select("id, opportunity_id")
+          .eq("id", body.followupId as string)
+          .eq("user_id", agencyId)
+          .eq("created_by", user.id)
+          .maybeSingle();
+        if (!existing) return fail({ status: 404, error: "Follow-up não encontrado." });
+
+        const { error } = await client
+          .from("opportunity_followups")
+          .delete()
+          .eq("id", existing.id as string);
+        if (error) {
+          console.error("complete_followup:", error.message);
+          return fail({ status: 403, error: "Não foi possível concluir o follow-up." });
+        }
+        return json({ followup_id: existing.id, completed: true });
+      }
+
+      // ── p) list_companies / search_companies ────────────────────────────
+      case "list_companies":
+      case "search_companies": {
+        const denied = requirePermission("clients.view");
+        if (denied) return fail(denied);
+        const limit = clampLimit(body.limit, 20, 50);
+        const term = safeText(body.query ?? body.name, 120);
+
+        let query = client
+          .from("companies")
+          .select("id, name, trade_name, cnpj_normalized, email, phone, created_at")
+          .eq("user_id", agencyId);
+        if (action === "search_companies") {
+          if (term.length < 2) {
+            return fail({ status: 400, error: "Informe pelo menos 2 caracteres da empresa." });
+          }
+          query = query.ilike("name", ilikeContainsPattern(term));
+        }
+
+        const { data } = await query.order("name", { ascending: true }).limit(limit);
+        return json({ companies: ((data ?? []) as Record<string, unknown>[]).map(publicCompany) });
+      }
+
+      // ── q) create_company ───────────────────────────────────────────────
+      case "create_company": {
+        const denied = requirePermission("clients.create");
+        if (denied) return fail(denied);
+        const nameCheck = validateName(body.name);
+        if (!nameCheck.valid) return fail(nameCheck.error);
+        const cnpj = normalizePhone(body.cnpj);
+
+        const { data, error } = await client
+          .from("companies")
+          .insert({
+            user_id: agencyId,
+            name: nameCheck.value,
+            trade_name: safeText(body.tradeName, 160) || null,
+            cnpj_normalized: cnpj.length >= 11 ? cnpj.slice(0, 20) : null,
+            email: safeText(body.email, 160) || null,
+            phone: safeText(body.phone, 32) || null,
+            notes: safeText(body.notes, 2000) || null,
+          })
+          .select("id, name, trade_name, cnpj_normalized, email, phone, created_at")
+          .single();
+        if (error) {
+          console.error("create_company:", error.message);
+          return fail({ status: 403, error: "Não foi possível criar a empresa." });
+        }
+        return json({ company: publicCompany(data as Record<string, unknown>) }, 201);
+      }
+
+      // ── r) link_contact_company / unlink_contact_company ────────────────
+      case "link_contact_company": {
+        const denied = requirePermission("clients.edit");
+        if (denied) return fail(denied);
+        if (!isUuid(body.contactId)) return fail({ status: 400, error: "Contato inválido." });
+        if (!isUuid(body.companyId)) return fail({ status: 400, error: "Empresa inválida." });
+
+        const [{ data: contact }, { data: company }] = await Promise.all([
+          client.from("clients").select("id").eq("id", body.contactId as string).eq("user_id", agencyId).maybeSingle(),
+          client.from("companies").select("id").eq("id", body.companyId as string).eq("user_id", agencyId).maybeSingle(),
+        ]);
+        if (!contact) return fail({ status: 404, error: "Contato não encontrado." });
+        if (!company) return fail({ status: 404, error: "Empresa não encontrada nesta agência." });
+
+        const { data, error } = await client
+          .from("client_companies")
+          .insert({
+            user_id: agencyId,
+            client_id: body.contactId as string,
+            company_id: body.companyId as string,
+            relationship_type: validateRelationshipType(body.relationshipType),
+            is_primary: body.isPrimary === true,
+          })
+          .select("id, client_id, company_id, relationship_type, is_primary, company:companies(id, name, trade_name, cnpj_normalized, email, phone, created_at)")
+          .maybeSingle();
+        if (error) {
+          if (/duplicate key|unique/i.test(error.message)) {
+            return json({ error: "Este contato já está vinculado a esta empresa." }, 409);
+          }
+          console.error("link_contact_company:", error.message);
+          return fail({ status: 403, error: "Não foi possível vincular a empresa." });
+        }
+        return json({ link: publicClientCompany(data as Record<string, unknown>) }, 201);
+      }
+
+      case "unlink_contact_company": {
+        const denied = requirePermission("clients.edit");
+        if (denied) return fail(denied);
+        if (!isUuid(body.contactId)) return fail({ status: 400, error: "Contato inválido." });
+        if (!isUuid(body.companyId)) return fail({ status: 400, error: "Empresa inválida." });
+
+        const { error } = await client
+          .from("client_companies")
+          .delete()
+          .eq("user_id", agencyId)
+          .eq("client_id", body.contactId as string)
+          .eq("company_id", body.companyId as string);
+        if (error) {
+          console.error("unlink_contact_company:", error.message);
+          return fail({ status: 403, error: "Não foi possível desvincular a empresa." });
+        }
+        return json({ unlinked: true });
+      }
+
+      case "list_contact_companies": {
+        const denied = requirePermission("clients.view");
+        if (denied) return fail(denied);
+        if (!isUuid(body.contactId)) return fail({ status: 400, error: "Contato inválido." });
+        const { data } = await client
+          .from("client_companies")
+          .select("id, client_id, company_id, relationship_type, is_primary, company:companies(id, name, trade_name, cnpj_normalized, email, phone, created_at)")
+          .eq("user_id", agencyId)
+          .eq("client_id", body.contactId as string)
+          .order("is_primary", { ascending: false })
+          .limit(clampLimit(body.limit, 10, 25));
+        return json({ companies: ((data ?? []) as Record<string, unknown>[]).map(publicClientCompany) });
+      }
+
+      // ── s) leituras vinculadas à oportunidade ──────────────────────────
+      case "list_opportunity_quotes":
+      case "list_opportunity_operations": {
+        const permission = action === "list_opportunity_quotes" ? "quotes.view" : "operations.view";
+        const denied = requirePermission(permission);
+        if (denied) return fail(denied);
+        const opp = await loadOpportunity(body.opportunityId);
+        if (!opp) return fail({ status: 404, error: "Oportunidade não encontrada." });
+        const limit = clampLimit(body.limit, 10, 25);
+
+        if (action === "list_opportunity_quotes") {
+          const { data } = await client
+            .from("quotes")
+            .select("id, trip_title, destination, status, start_date, end_date, created_at")
+            .eq("user_id", agencyId)
+            .eq("opportunity_id", opp.id as string)
+            .order("created_at", { ascending: false })
+            .limit(limit);
+          return json({
+            quotes: ((data ?? []) as Record<string, unknown>[]).map(publicQuote),
+            create_quote_url: createQuoteDeepLink(opp.id as string),
+          });
+        }
+
+        const { data } = await client
+          .from("operations")
+          .select("id, title, destination, travel_start_date, travel_end_date, passengers_count, stage")
+          .eq("user_id", agencyId)
+          .eq("opportunity_id", opp.id as string)
+          .order("travel_start_date", { ascending: false })
+          .limit(limit);
+        return json({ operations: ((data ?? []) as Record<string, unknown>[]).map(publicOperation) });
       }
     }
 

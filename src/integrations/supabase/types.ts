@@ -2370,6 +2370,51 @@ export type Database = {
         }
         Relationships: []
       }
+      client_companies: {
+        Row: {
+          client_id: string
+          company_id: string
+          created_at: string
+          id: string
+          is_primary: boolean
+          relationship_type: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          relationship_type?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          relationship_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_companies_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_subcategories: {
         Row: {
           category_id: string
@@ -3373,6 +3418,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      companies: {
+        Row: {
+          cnpj_normalized: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          trade_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cnpj_normalized?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cnpj_normalized?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          trade_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       connections: {
         Row: {
@@ -8982,11 +9066,13 @@ export type Database = {
           assigned_team_member_id: string | null
           children_count: number
           client_id: string
+          company_id: string | null
           created_at: string
           created_by_team_member_id: string | null
           destination: string
           end_date: string | null
           estimated_value: number
+          follow_up_at: string | null
           follow_up_date: string | null
           id: string
           notes: string | null
@@ -8996,6 +9082,7 @@ export type Database = {
           stage_entered_at: string | null
           stage_id: string | null
           start_date: string | null
+          travel_context: string
           updated_at: string
           user_id: string
         }
@@ -9004,11 +9091,13 @@ export type Database = {
           assigned_team_member_id?: string | null
           children_count?: number
           client_id: string
+          company_id?: string | null
           created_at?: string
           created_by_team_member_id?: string | null
           destination: string
           end_date?: string | null
           estimated_value?: number
+          follow_up_at?: string | null
           follow_up_date?: string | null
           id?: string
           notes?: string | null
@@ -9018,6 +9107,7 @@ export type Database = {
           stage_entered_at?: string | null
           stage_id?: string | null
           start_date?: string | null
+          travel_context?: string
           updated_at?: string
           user_id: string
         }
@@ -9026,11 +9116,13 @@ export type Database = {
           assigned_team_member_id?: string | null
           children_count?: number
           client_id?: string
+          company_id?: string | null
           created_at?: string
           created_by_team_member_id?: string | null
           destination?: string
           end_date?: string | null
           estimated_value?: number
+          follow_up_at?: string | null
           follow_up_date?: string | null
           id?: string
           notes?: string | null
@@ -9040,6 +9132,7 @@ export type Database = {
           stage_entered_at?: string | null
           stage_id?: string | null
           start_date?: string | null
+          travel_context?: string
           updated_at?: string
           user_id?: string
         }
@@ -9059,6 +9152,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "opportunities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "opportunities_stage_id_fkey"
             columns: ["stage_id"]
             isOneToOne: false
@@ -9071,30 +9171,36 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          follow_up_at: string | null
           follow_up_date: string
           id: string
           note: string | null
           opportunity_id: string
+          time_zone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          follow_up_at?: string | null
           follow_up_date: string
           id?: string
           note?: string | null
           opportunity_id: string
+          time_zone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          follow_up_at?: string | null
           follow_up_date?: string
           id?: string
           note?: string | null
           opportunity_id?: string
+          time_zone?: string | null
           updated_at?: string
           user_id?: string
         }

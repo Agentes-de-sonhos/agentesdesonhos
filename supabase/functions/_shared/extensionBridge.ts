@@ -29,6 +29,21 @@ export const ACTIONS = [
   'update_opportunity_stage',
   'register_budget_sent',
   'create_followup',
+  // ── versão 0.4 ────────────────────────────────────────────────────────────
+  'dashboard_today',
+  'get_contact_summary',
+  'update_opportunity',
+  'list_followups',
+  'update_followup',
+  'complete_followup',
+  'list_companies',
+  'search_companies',
+  'create_company',
+  'link_contact_company',
+  'unlink_contact_company',
+  'list_contact_companies',
+  'list_opportunity_quotes',
+  'list_opportunity_operations',
 ] as const
 
 export type BridgeAction = typeof ACTIONS[number]
@@ -316,4 +331,378 @@ export function assertPermissionReadOk(...errors: (unknown | null | undefined)[]
     return { status: 403, error: 'Não foi possível validar suas permissões. Tente novamente.' }
   }
   return null
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Versão 0.4 — helpers puros de fuso, limites, empresas e deep links
+// ═════════════════════════════════════════════════════════════════════════════
+
+/** Fuso civil padrão da plataforma quando o cliente não envia um válido. */
+export const DEFAULT_TIME_ZONE = 'America/Sao_Paulo'
+
+/**
+ * Base segura do app para deep links. NUNCA é lida do body da requisição:
+ * uma URL enviada pelo cliente poderia induzir o usuário a um domínio hostil.
+ */
+export const APP_BASE_URL = 'https://app.agentesdesonhos.com.br'
+
+/** Valida um identificador IANA de fuso; qualquer coisa inválida cai no default. */
+export function validateTimeZone(value: unknown): string {
+  if (typeof value !== 'string') return DEFAULT_TIME_ZONE
+  const tz = value.trim().slice(0, 64)
+  if (!/^[A-Za-z][A-Za-z0-9_+\-]*(\/[A-Za-z0-9_+\-]+)*$/.test(tz)) return DEFAULT_TIME_ZONE
+  try {
+    new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(new Date())
+    return tz
+  } catch {
+    return DEFAULT_TIME_ZONE
+  }
+}
+
+/**
+ * ISO 8601 com offset explícito (`Z` ou `±HH:MM`).
+ * Recusa datetime "flutuante" (sem offset), que seria ambíguo entre fusos.
+ */
+const ISO_OFFSET_RE = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}:\d{2})$/
+
+export function validateIsoDateTime(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const raw = value.trim()
+  if (!ISO_OFFSET_RE.test(raw)) return null
+  const ms = Date.parse(raw.replace(' ', 'T'))
+  if (!Number.isFinite(ms)) return null
+  return new Date(ms).toISOString()
+}
+
+function tzParts(instantMs: number, timeZone: string) {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    hour12: false,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  })
+  const out: Record<string, string> = {}
+  for (const p of fmt.formatToParts(new Date(instantMs))) {
+    if (p.type !== 'literal') out[p.type] = p.value
+  }
+  return {
+    year: Number(out.year),
+    month: Number(out.month),
+    day: Number(out.day),
+    hour: Number(out.hour === '24' ? '0' : out.hour),
+    minute: Number(out.minute),
+    second: Number(out.second),
+  }
+}
+
+function tzOffsetMs(instantMs: number, timeZone: string): number {
+  const p = tzParts(instantMs, timeZone)
+  const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second)
+  return asUtc - Math.floor(instantMs / 1000) * 1000
+}
+
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+/**
+ * Data civil (YYYY-MM-DD) de um instante dentro de um fuso.
+ * NÃO usa `toISOString().split('T')`, que muda o dia fora do UTC.
+ */
+export function civilDateInTimeZone(instant: string | number | Date, timeZone: string): string {
+  const tz = validateTimeZone(timeZone)
+  const ms = instant instanceof Date ? instant.getTime()
+    : typeof instant === 'number' ? instant
+    : Date.parse(instant)
+  if (!Number.isFinite(ms)) return ''
+  const p = tzParts(ms, tz)
+  return `${p.year}-${pad2(p.month)}-${pad2(p.day)}`
+}
+
+/** Hora civil (HH:MM) de um instante dentro de um fuso. */
+export function civilTimeInTimeZone(instant: string | number | Date, timeZone: string): string {
+  const tz = validateTimeZone(timeZone)
+  const ms = instant instanceof Date ? instant.getTime()
+    : typeof instant === 'number' ? instant
+    : Date.parse(instant)
+  if (!Number.isFinite(ms)) return ''
+  const p = tzParts(ms, tz)
+  return `${pad2(p.hour)}:${pad2(p.minute)}`
+}
+
+/** Instante UTC correspondente a uma data/hora civil de um fuso. */
+export function zonedCivilToUtcIso(dateStr: string, timeStr: string, timeZone: string): string {
+  const tz = validateTimeZone(timeZone)
+  const naive = Date.parse(`${dateStr}T${timeStr}Z`)
+  if (!Number.isFinite(naive)) return ''
+  const first = tzOffsetMs(naive, tz)
+  let utc = naive - first
+  const second = tzOffsetMs(utc, tz)
+  if (second !== first) utc = naive - second
+  return new Date(utc).toISOString()
+}
+
+export interface CivilDayWindow {
+  time_zone: string
+  today: string
+  start_utc: string
+  end_utc: string
+  horizon_date: string
+  horizon_end_utc: string
+}
+
+/**
+ * Janela do dia civil (e horizonte de N dias) no fuso informado, para o painel
+ * "Hoje". Tudo derivado do fuso validado — nunca de um split simples em UTC.
+ */
+export function civilDayWindow(timeZone: unknown, horizonDays = 7, now: Date = new Date()): CivilDayWindow {
+  const tz = validateTimeZone(timeZone)
+  const today = civilDateInTimeZone(now, tz)
+  const [y, m, d] = today.split('-').map(Number)
+  const horizon = new Date(Date.UTC(y, m - 1, d + Math.max(1, Math.min(60, horizonDays))))
+  const horizonDate = `${horizon.getUTCFullYear()}-${pad2(horizon.getUTCMonth() + 1)}-${pad2(horizon.getUTCDate())}`
+  return {
+    time_zone: tz,
+    today,
+    start_utc: zonedCivilToUtcIso(today, '00:00:00', tz),
+    end_utc: zonedCivilToUtcIso(today, '23:59:59', tz),
+    horizon_date: horizonDate,
+    horizon_end_utc: zonedCivilToUtcIso(horizonDate, '23:59:59', tz),
+  }
+}
+
+/** Limite de paginação seguro para as coleções devolvidas à extensão. */
+export function clampLimit(value: unknown, fallback: number, max: number): number {
+  const n = Number(value)
+  if (!Number.isFinite(n) || n <= 0) return Math.min(fallback, max)
+  return Math.min(Math.trunc(n), max)
+}
+
+export const FOLLOWUP_FILTERS = ['overdue', 'today', 'upcoming', 'all'] as const
+export type FollowupFilter = typeof FOLLOWUP_FILTERS[number]
+
+export function validateFollowupFilter(value: unknown): FollowupFilter {
+  return typeof value === 'string' && (FOLLOWUP_FILTERS as readonly string[]).includes(value)
+    ? value as FollowupFilter
+    : 'today'
+}
+
+export const RELATIONSHIP_TYPES = ['employee', 'owner', 'buyer', 'traveler', 'other'] as const
+
+export function validateRelationshipType(value: unknown): string {
+  return typeof value === 'string' && (RELATIONSHIP_TYPES as readonly string[]).includes(value)
+    ? value
+    : 'employee'
+}
+
+export const TRAVEL_CONTEXTS = ['personal', 'corporate'] as const
+
+export function validateTravelContext(value: unknown): 'personal' | 'corporate' | null {
+  return value === 'personal' || value === 'corporate' ? value : null
+}
+
+/**
+ * Contexto de viagem coerente com a empresa: corporativo exige empresa,
+ * pessoal proíbe. Espelha a constraint do banco para dar erro amigável antes.
+ */
+export function assertTravelContextPair(
+  context: 'personal' | 'corporate',
+  companyId: string | null,
+): BridgeError | null {
+  if (context === 'corporate' && !companyId) {
+    return { status: 400, error: 'Viagem corporativa exige uma empresa vinculada.' }
+  }
+  if (context === 'personal' && companyId) {
+    return { status: 400, error: 'Viagem pessoal não aceita empresa vinculada.' }
+  }
+  return null
+}
+
+/** CNPJ nunca sai bruto: apenas indicação mascarada com os 4 últimos dígitos. */
+export function maskDocument(value: unknown): string | null {
+  const digits = normalizePhone(value)
+  if (digits.length < 4) return null
+  return `••••${digits.slice(-4)}`
+}
+
+// ── Deep links calculados no servidor ────────────────────────────────────────
+
+export function clientDeepLink(clientId: string): string | null {
+  return isUuid(clientId) ? `${APP_BASE_URL}/gestao-clientes/clientes?client=${clientId}` : null
+}
+
+export function opportunityDeepLink(opportunityId: string): string | null {
+  return isUuid(opportunityId) ? `${APP_BASE_URL}/gestao-clientes/funil?opportunity=${opportunityId}` : null
+}
+
+export function createQuoteDeepLink(opportunityId: string): string | null {
+  return isUuid(opportunityId)
+    ? `${APP_BASE_URL}/ferramentas-ia/gerar-orcamento?opportunity=${opportunityId}`
+    : null
+}
+
+export function agendaDeepLink(date?: string | null): string {
+  const iso = validateIsoDate(date)
+  return iso ? `${APP_BASE_URL}/agenda?date=${iso}` : `${APP_BASE_URL}/agenda`
+}
+
+// ── Serializadores de payload mínimo ────────────────────────────────────────
+
+/** Empresa devolvida à extensão: sem CNPJ bruto. */
+export function publicCompany(row: Record<string, unknown> | null) {
+  if (!row) return null
+  return {
+    id: row.id as string,
+    name: (row.name as string) ?? '',
+    trade_name: (row.trade_name as string) ?? null,
+    cnpj_masked: maskDocument(row.cnpj_normalized),
+    email: (row.email as string) ?? null,
+    phone: (row.phone as string) ?? null,
+    created_at: (row.created_at as string) ?? null,
+  }
+}
+
+export function publicClientCompany(row: Record<string, unknown>) {
+  const company = (row.company ?? null) as Record<string, unknown> | null
+  return {
+    id: row.id as string,
+    client_id: (row.client_id as string) ?? null,
+    company_id: (row.company_id as string) ?? null,
+    relationship_type: (row.relationship_type as string) ?? null,
+    is_primary: row.is_primary === true,
+    company: publicCompany(company),
+  }
+}
+
+/** Follow-up devolvido à extensão, com horário quando existir. */
+export function publicFollowup(row: Record<string, unknown>) {
+  const opp = (row.opportunity ?? null) as Record<string, unknown> | null
+  const client = (opp?.client ?? null) as Record<string, unknown> | null
+  return {
+    id: row.id as string,
+    opportunity_id: (row.opportunity_id as string) ?? null,
+    follow_up_date: (row.follow_up_date as string) ?? null,
+    follow_up_at: (row.follow_up_at as string) ?? null,
+    time_zone: (row.time_zone as string) ?? null,
+    all_day: !row.follow_up_at,
+    note: (row.note as string) ?? null,
+    created_at: (row.created_at as string) ?? null,
+    destination: (opp?.destination as string) ?? null,
+    client_id: (opp?.client_id as string) ?? null,
+    client_name: (client?.name as string) ?? null,
+    opportunity_url: opportunityDeepLink((row.opportunity_id as string) ?? ''),
+  }
+}
+
+/** Evento de agenda devolvido à extensão. */
+export function publicAgendaEvent(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    title: (row.title as string) ?? '',
+    event_type: (row.event_type as string) ?? null,
+    event_date: (row.event_date as string) ?? null,
+    event_time: (row.event_time as string) ?? null,
+    start_at: (row.start_at as string) ?? null,
+    time_zone: (row.time_zone as string) ?? null,
+    all_day: row.all_day === true || !row.event_time,
+    agenda_url: agendaDeepLink((row.event_date as string) ?? null),
+  }
+}
+
+/** Operação/viagem: nada financeiro (sale_amount, pagamentos) sai daqui. */
+export function publicOperation(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    title: (row.title as string) ?? '',
+    destination: (row.destination as string) ?? null,
+    travel_start_date: (row.travel_start_date as string) ?? null,
+    travel_end_date: (row.travel_end_date as string) ?? null,
+    passengers_count: (row.passengers_count as number) ?? null,
+    stage: (row.stage as string) ?? null,
+  }
+}
+
+export function publicTrip(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    trip_title: (row.trip_title as string) ?? null,
+    destination: (row.destination as string) ?? null,
+    start_date: (row.start_date as string) ?? null,
+    end_date: (row.end_date as string) ?? null,
+    status: (row.status as string) ?? null,
+  }
+}
+
+export function publicQuote(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    trip_title: (row.trip_title as string) ?? null,
+    destination: (row.destination as string) ?? null,
+    status: (row.status as string) ?? null,
+    start_date: (row.start_date as string) ?? null,
+    end_date: (row.end_date as string) ?? null,
+    created_at: (row.created_at as string) ?? null,
+  }
+}
+
+export function publicOpportunityNote(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    content: safeText(row.content, 500),
+    created_at: (row.created_at as string) ?? null,
+  }
+}
+
+export function publicOpportunityHistory(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    from_stage: (row.from_stage as string) ?? null,
+    to_stage: (row.to_stage as string) ?? null,
+    // `opportunity_history` usa `changed_at` como marca temporal.
+    changed_at: (row.changed_at as string) ?? null,
+  }
+}
+
+/**
+ * Campos de atualização de oportunidade aceitos pela extensão.
+ * Somente colunas REAIS da tabela `opportunities`.
+ */
+export function buildOpportunityUpdate(body: Record<string, unknown>): {
+  patch: Record<string, unknown>
+  error: BridgeError | null
+} {
+  const patch: Record<string, unknown> = {}
+
+  if ('destination' in body) {
+    const check = validateDestination(body.destination)
+    if (!check.valid) return { patch: {}, error: check.error }
+    patch.destination = check.value
+  }
+  if ('startDate' in body) patch.start_date = validateIsoDate(body.startDate)
+  if ('endDate' in body) patch.end_date = validateIsoDate(body.endDate)
+  if ('notes' in body) patch.notes = safeText(body.notes, 2000) || null
+  if ('estimatedValue' in body) patch.estimated_value = safeAmount(body.estimatedValue)
+
+  const hasAdults = 'adultsCount' in body
+  const hasChildren = 'childrenCount' in body
+  if (hasAdults) patch.adults_count = clampInt(body.adultsCount, 0, 99, 1)
+  if (hasChildren) patch.children_count = clampInt(body.childrenCount, 0, 99, 0)
+  if ('passengersCount' in body || hasAdults || hasChildren) {
+    const a = hasAdults ? (patch.adults_count as number) : 0
+    const c = hasChildren ? (patch.children_count as number) : 0
+    patch.passengers_count = clampInt(body.passengersCount, 1, 199, Math.max(1, a + c))
+  }
+
+  if ('travelContext' in body || 'companyId' in body) {
+    const context = validateTravelContext(body.travelContext)
+    if (!context) return { patch: {}, error: { status: 400, error: 'Contexto de viagem inválido (personal ou corporate).' } }
+    const companyId = isUuid(body.companyId) ? (body.companyId as string) : null
+    const pairError = assertTravelContextPair(context, companyId)
+    if (pairError) return { patch: {}, error: pairError }
+    patch.travel_context = context
+    patch.company_id = companyId
+  }
+
+  if (Object.keys(patch).length === 0) {
+    return { patch: {}, error: { status: 400, error: 'Nenhum campo válido para atualizar.' } }
+  }
+  return { patch, error: null }
 }
