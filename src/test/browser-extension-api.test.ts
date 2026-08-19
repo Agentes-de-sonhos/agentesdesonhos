@@ -329,7 +329,8 @@ describe('0.4 · filtros e vínculos', () => {
     expect(validateFollowupFilter('today')).toBe('today')
     expect(validateFollowupFilter('upcoming')).toBe('upcoming')
     expect(validateFollowupFilter('all')).toBe('all')
-    expect(validateFollowupFilter('qualquer')).toBe('all')
+    // Filtro desconhecido cai no dia corrente (menor payload possível).
+    expect(validateFollowupFilter('qualquer')).toBe('today')
   })
 
   it('valida tipo de relacionamento com empresa', () => {
