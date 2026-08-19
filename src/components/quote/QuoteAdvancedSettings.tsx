@@ -6,6 +6,7 @@ import { DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
 import {
   CURRENCY_OPTIONS,
   getCurrencySymbol,
@@ -72,7 +73,7 @@ export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle }: Prop
   const body = (
     <div className="space-y-5">
       <div className="space-y-1">
-        <p className="text-sm font-semibold">Moeda do orçamento</p>
+        {typeof open !== "boolean" && <p className="text-sm font-semibold">Moeda do orçamento</p>}
         <p className="text-xs text-muted-foreground">
           Altere a moeda a qualquer momento. Os valores cadastrados nos serviços não são modificados —
           apenas a forma como eles são apresentados no link público, no PDF e no total do orçamento.
