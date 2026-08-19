@@ -112,6 +112,29 @@ describe('payloads mínimos', () => {
     expect(out.stage_name).toBe('Orçamento enviado')
     expect(out.stage_legacy_key).toBe('quote_sent')
   })
+  it('payload público traz campos de edição e links, sem CNPJ', () => {
+    const out = publicOpportunity({
+      id: S2, destination: 'Orlando', adults_count: 2, children_count: 1, notes: 'obs',
+      follow_up_at: '2026-08-20T14:00:00-03:00', travel_context: 'corporate', company_id: S1,
+      company: { name: 'Acme', trade_name: 'Acme LTDA', cnpj_normalized: '12345678000199' },
+    })
+    expect(out.adults_count).toBe(2)
+    expect(out.children_count).toBe(1)
+    expect(out.notes).toBe('obs')
+    expect(out.follow_up_at).toBe('2026-08-20T14:00:00-03:00')
+    expect(out.travel_context).toBe('corporate')
+    expect(out.company_id).toBe(S1)
+    expect(out.company_name).toBe('Acme')
+    expect(out.opportunity_url).toContain(`opportunity=${S2}`)
+    expect(out.create_quote_url).toContain(`gerar-orcamento?opportunity=${S2}`)
+    expect(JSON.stringify(out)).not.toContain('12345678000199')
+  })
+  it('mantém default personal/null quando 0.3 não envia contexto', () => {
+    const out = publicOpportunity({ id: S2, destination: 'Orlando' })
+    expect(out.travel_context).toBe('personal')
+    expect(out.company_id).toBeNull()
+    expect(out.company_name).toBeNull()
+  })
   it('nota de orçamento inclui URL só quando existe', () => {
     expect(budgetSentNote(null)).toBe('Orçamento enviado pelo WhatsApp.')
     expect(budgetSentNote('https://x/y')).toContain('https://x/y')
