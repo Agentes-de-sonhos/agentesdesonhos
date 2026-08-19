@@ -58,13 +58,36 @@ export function useAgencySiteRequest(hostname: string) {
         },
       });
 
+      const result = (data ?? {}) as {
+        error?: string;
+        success?: boolean;
+        duplicate?: boolean;
+        trace?: string;
+      };
+
       if (fnError) {
         setState("error");
-        setError("Não foi possível enviar sua solicitação agora. Tente novamente em instantes.");
+        // Em respostas non-2xx o corpo vem em fnError.context (FunctionsHttpError):
+        // é ali que está a mensagem específica de campo inválido e o código de rastreio.
+        let body: { error?: string; trace?: string } = {};
+        try {
+          const ctx = (fnError as unknown as { context?: Response }).context;
+          if (ctx && typeof ctx.clone === "function") body = await ctx.clone().json();
+        } catch {
+          /* corpo não-JSON: mantém a mensagem amigável */
+        }
+        setError(
+          body.error ??
+            result.error ??
+            "Não foi possível enviar sua solicitação agora. Tente novamente em instantes.",
+        );
+        console.error("[agency-site-request] falha no envio", {
+          trace: body.trace ?? result.trace ?? null,
+          detail: fnError.message,
+        });
         return { error: true as const };
       }
 
-      const result = (data ?? {}) as { error?: string; success?: boolean; duplicate?: boolean };
       if (result.error) {
         setState("error");
         setError(result.error);

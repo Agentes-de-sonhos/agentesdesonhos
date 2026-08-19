@@ -25,9 +25,36 @@ function clean(value: unknown, max: number): string | null {
   return out.length ? out : null;
 }
 
+const DETAIL_KEY_RE = /^[a-z0-9_]{1,60}$/;
+const MAX_DETAIL_KEYS = 40;
+
+/**
+ * Flat, sanitized string map for the `details` jsonb column.
+ * Only shallow string/number/boolean values with safe keys survive — nested
+ * objects/arrays are dropped so the browser can never inject arbitrary JSON.
+ */
+function cleanDetails(value: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!value || typeof value !== "object" || Array.isArray(value)) return out;
+  for (const [rawKey, rawValue] of Object.entries(value as Record<string, unknown>)) {
+    if (Object.keys(out).length >= MAX_DETAIL_KEYS) break;
+    const key = rawKey.trim().toLowerCase();
+    if (!DETAIL_KEY_RE.test(key)) continue;
+    let text: string | null = null;
+    if (typeof rawValue === "string") text = clean(rawValue, 400);
+    else if (typeof rawValue === "number" && Number.isFinite(rawValue)) text = String(rawValue);
+    else if (typeof rawValue === "boolean") text = rawValue ? "true" : "false";
+    if (text) out[key] = text;
+  }
+  return out;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
+
+  // Código de rastreamento: aparece no log e na resposta de erro interno.
+  const trace = crypto.randomUUID().slice(0, 8);
 
   const ip = getClientIP(req);
   const rate = await checkRateLimit(ip, "submit-agency-site-request", 10, 60);
@@ -94,19 +121,38 @@ Deno.serve(async (req) => {
     { auth: { persistSession: false } },
   );
 
-  const { data, error } = await supabase.rpc("submit_agency_site_request", {
-    p_hostname: hostname,
-    p_payload: payload,
-  });
-
-  if (error) {
-    console.error("[submit-agency-site-request] rpc-error", error.message);
-    return json({ error: "Não foi possível registrar sua solicitação agora. Tente novamente." }, 500);
+  let data: unknown;
+  try {
+    const res = await supabase.rpc("submit_agency_site_request", {
+      p_hostname: hostname,
+      p_payload: payload,
+    });
+    if (res.error) {
+      console.error("[submit-agency-site-request] rpc-error", trace, res.error.message);
+      return json(
+        { error: "Não foi possível registrar sua solicitação agora. Tente novamente.", trace },
+        500,
+      );
+    }
+    data = res.data;
+  } catch (err) {
+    console.error("[submit-agency-site-request] unexpected", trace, String(err));
+    return json(
+      { error: "Não foi possível registrar sua solicitação agora. Tente novamente.", trace },
+      500,
+    );
   }
 
   const result = (data ?? {}) as Record<string, unknown>;
   if (result.error) return json({ error: String(result.error) }, 400);
 
+  console.log(
+    "[submit-agency-site-request] ok",
+    trace,
+    hostname,
+    serviceKey,
+    result.duplicate === true ? "duplicate" : "created",
+  );
   return json({
     success: true,
     request_id: result.request_id ?? null,
