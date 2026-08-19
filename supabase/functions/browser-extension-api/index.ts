@@ -35,7 +35,7 @@ import {
   clientDeepLink, createQuoteDeepLink, opportunityDeepLink, publicAgendaEvent, publicClientCompany,
   publicCompany, publicFollowup, publicOperation, publicOpportunityHistory, publicOpportunityNote,
   publicQuote, publicTrip, validateFollowupFilter, validateIsoDateTime, validateRelationshipType,
-  validateTimeZone,
+  validateTimeZone, validateTravelContext, assertTravelContextPair,
 } from "../_shared/extensionBridge.ts";
 
 const corsHeaders = {
@@ -390,7 +390,7 @@ Deno.serve(async (req) => {
 
         const { data } = await client
           .from("opportunities")
-          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at, pipeline_stage:pipeline_stages(name, legacy_key)")
+          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, adults_count, children_count, estimated_value, notes, follow_up_date, follow_up_at, travel_context, company_id, created_at, pipeline_stage:pipeline_stages(name, legacy_key), company:companies(name, trade_name)")
           .eq("user_id", agencyId)
           .eq("client_id", contactId as string)
           .order("created_at", { ascending: false })
@@ -430,6 +430,31 @@ Deno.serve(async (req) => {
           .from("clients").select("id").eq("id", contactId as string).eq("user_id", agencyId).maybeSingle();
         if (!contact) return fail({ status: 404, error: "Contato não encontrado." });
 
+        // Contexto de viagem: default 0.3-compatível (personal / sem empresa).
+        const travelContext = "travelContext" in body
+          ? validateTravelContext(body.travelContext)
+          : "personal";
+        if (!travelContext) {
+          return fail({ status: 400, error: "Contexto de viagem inválido (personal ou corporate)." });
+        }
+        const companyId = isUuid(body.companyId) ? (body.companyId as string) : null;
+        const pairError = assertTravelContextPair(travelContext, companyId);
+        if (pairError) return fail(pairError);
+
+        if (travelContext === "corporate" && companyId) {
+          const { data: company } = await client
+            .from("companies").select("id")
+            .eq("id", companyId).eq("user_id", agencyId).maybeSingle();
+          if (!company) return fail({ status: 404, error: "Empresa não encontrada nesta agência." });
+          const { data: link } = await client
+            .from("client_companies").select("id")
+            .eq("user_id", agencyId)
+            .eq("company_id", companyId)
+            .eq("client_id", contactId as string)
+            .maybeSingle();
+          if (!link) return fail({ status: 400, error: "Empresa não está vinculada a este contato." });
+        }
+
         const { data: firstStage } = await client
           .from("pipeline_stages")
           .select("id, name, legacy_key")
@@ -456,11 +481,13 @@ Deno.serve(async (req) => {
             estimated_value: safeAmount(body.estimatedValue),
             notes: safeText(body.notes, 2000) || null,
             follow_up_date: validateIsoDate(body.followUpDate),
+            travel_context: travelContext,
+            company_id: companyId,
             stage: (firstStage?.legacy_key as string | null) || "new_contact",
             stage_id: (firstStage?.id as string | null) ?? null,
             ...(isTeamMember ? { created_by_team_member_id: teamMemberId } : {}),
           })
-          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at")
+          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, adults_count, children_count, estimated_value, notes, follow_up_date, follow_up_at, travel_context, company_id, created_at, company:companies(name, trade_name)")
           .single();
         if (error) {
           console.error("create_opportunity:", error.message);
@@ -659,7 +686,7 @@ Deno.serve(async (req) => {
             .order("is_primary", { ascending: false })
             .limit(10),
           client.from("opportunities")
-            .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at, travel_context, company_id, pipeline_stage:pipeline_stages(name, legacy_key)")
+            .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, adults_count, children_count, estimated_value, notes, follow_up_date, follow_up_at, created_at, travel_context, company_id, pipeline_stage:pipeline_stages(name, legacy_key), company:companies(name, trade_name)")
             .eq("user_id", agencyId)
             .eq("client_id", contactId)
             .order("created_at", { ascending: false })
@@ -710,13 +737,7 @@ Deno.serve(async (req) => {
         return json({
           contact: publicContact(contact as Record<string, unknown>),
           companies: ((companies ?? []) as Record<string, unknown>[]).map(publicClientCompany),
-          opportunities: visibleOpps.map(r => ({
-            ...publicOpportunity(r),
-            travel_context: (r.travel_context as string) ?? "personal",
-            company_id: (r.company_id as string) ?? null,
-            opportunity_url: opportunityDeepLink(r.id as string),
-            create_quote_url: createQuoteDeepLink(r.id as string),
-          })),
+          opportunities: visibleOpps.map(publicOpportunity),
           followups: ((followupsRes.data ?? []) as Record<string, unknown>[]).map(publicFollowup),
           notes: ((notesRes.data ?? []) as Record<string, unknown>[]).map(publicOpportunityNote),
           history: ((historyRes.data ?? []) as Record<string, unknown>[]).map(publicOpportunityHistory),
@@ -740,12 +761,21 @@ Deno.serve(async (req) => {
         const { patch, error: patchError } = buildOpportunityUpdate(body);
         if (patchError) return fail(patchError);
 
-        // Empresa precisa ser da mesma agência (o banco também valida).
+        // Empresa precisa ser da mesma agência E vinculada ao cliente da oportunidade.
         if (patch.company_id) {
           const { data: company } = await client
             .from("companies").select("id")
             .eq("id", patch.company_id as string).eq("user_id", agencyId).maybeSingle();
           if (!company) return fail({ status: 404, error: "Empresa não encontrada nesta agência." });
+          const oppClientId = (opp as Record<string, unknown>).client_id as string | null;
+          if (!oppClientId) return fail({ status: 400, error: "Oportunidade sem contato vinculado." });
+          const { data: link } = await client
+            .from("client_companies").select("id")
+            .eq("user_id", agencyId)
+            .eq("company_id", patch.company_id as string)
+            .eq("client_id", oppClientId)
+            .maybeSingle();
+          if (!link) return fail({ status: 400, error: "Empresa não está vinculada a este contato." });
         }
 
         const { data, error } = await client
@@ -753,22 +783,14 @@ Deno.serve(async (req) => {
           .update(patch)
           .eq("id", opp.id as string)
           .eq("user_id", agencyId)
-          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at, travel_context, company_id")
+          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, adults_count, children_count, estimated_value, notes, follow_up_date, follow_up_at, created_at, travel_context, company_id, company:companies(name, trade_name)")
           .maybeSingle();
         if (error || !data) {
           console.error("update_opportunity:", error?.message);
           return fail({ status: 403, error: "Não foi possível atualizar a oportunidade." });
         }
         const row = data as Record<string, unknown>;
-        return json({
-          opportunity: {
-            ...publicOpportunity(row),
-            travel_context: (row.travel_context as string) ?? "personal",
-            company_id: (row.company_id as string) ?? null,
-            opportunity_url: opportunityDeepLink(row.id as string),
-            create_quote_url: createQuoteDeepLink(row.id as string),
-          },
-        });
+        return json({ opportunity: publicOpportunity(row) });
       }
 
       // ── m) list_followups ───────────────────────────────────────────────

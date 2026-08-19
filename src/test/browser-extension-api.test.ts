@@ -112,6 +112,29 @@ describe('payloads mínimos', () => {
     expect(out.stage_name).toBe('Orçamento enviado')
     expect(out.stage_legacy_key).toBe('quote_sent')
   })
+  it('payload público traz campos de edição e links, sem CNPJ', () => {
+    const out = publicOpportunity({
+      id: S2, destination: 'Orlando', adults_count: 2, children_count: 1, notes: 'obs',
+      follow_up_at: '2026-08-20T14:00:00-03:00', travel_context: 'corporate', company_id: S1,
+      company: { name: 'Acme', trade_name: 'Acme LTDA', cnpj_normalized: '12345678000199' },
+    })
+    expect(out.adults_count).toBe(2)
+    expect(out.children_count).toBe(1)
+    expect(out.notes).toBe('obs')
+    expect(out.follow_up_at).toBe('2026-08-20T14:00:00-03:00')
+    expect(out.travel_context).toBe('corporate')
+    expect(out.company_id).toBe(S1)
+    expect(out.company_name).toBe('Acme')
+    expect(out.opportunity_url).toContain(`opportunity=${S2}`)
+    expect(out.create_quote_url).toContain(`gerar-orcamento?opportunity=${S2}`)
+    expect(JSON.stringify(out)).not.toContain('12345678000199')
+  })
+  it('mantém default personal/null quando 0.3 não envia contexto', () => {
+    const out = publicOpportunity({ id: S2, destination: 'Orlando' })
+    expect(out.travel_context).toBe('personal')
+    expect(out.company_id).toBeNull()
+    expect(out.company_name).toBeNull()
+  })
   it('nota de orçamento inclui URL só quando existe', () => {
     expect(budgetSentNote(null)).toBe('Orçamento enviado pelo WhatsApp.')
     expect(budgetSentNote('https://x/y')).toContain('https://x/y')
@@ -433,6 +456,31 @@ describe('0.4 · buildOpportunityUpdate', () => {
 
 describe('0.4 · isolamento no index.ts', () => {
   const src = readFileSync(resolve(__dirname, '../../supabase/functions/browser-extension-api/index.ts'), 'utf8')
+
+  it('create_opportunity grava par válido de contexto/empresa', () => {
+    const block = src.slice(src.indexOf('case "create_opportunity"'), src.indexOf('case "update_opportunity_stage"'))
+    expect(block).toContain('validateTravelContext(body.travelContext)')
+    expect(block).toContain('assertTravelContextPair(travelContext, companyId)')
+    expect(block).toContain('travel_context: travelContext')
+    expect(block).toContain('company_id: companyId')
+  })
+
+  it('0.3 sem campos continua personal/null', () => {
+    const block = src.slice(src.indexOf('case "create_opportunity"'), src.indexOf('case "update_opportunity_stage"'))
+    expect(block).toContain('"travelContext" in body')
+    expect(block).toContain('? validateTravelContext(body.travelContext)\n          : "personal"')
+    expect(block).toContain('isUuid(body.companyId) ? (body.companyId as string) : null')
+  })
+
+  it('empresa não vinculada ao contato é recusada em create e update', () => {
+    const create = src.slice(src.indexOf('case "create_opportunity"'), src.indexOf('case "update_opportunity_stage"'))
+    expect(create).toContain('.from("client_companies")')
+    expect(create).toContain('Empresa não está vinculada a este contato.')
+    const update = src.slice(src.indexOf('case "update_opportunity"'), src.indexOf('case "list_followups"'))
+    expect(update).toContain('.from("client_companies")')
+    expect(update).toContain('Empresa não está vinculada a este contato.')
+    expect(update).toContain('opp as Record<string, unknown>).client_id')
+  })
 
   it('dashboard_today usa follow-ups do próprio usuário', () => {
     const block = src.slice(src.indexOf('case "dashboard_today"'), src.indexOf('case "get_contact_summary"'))

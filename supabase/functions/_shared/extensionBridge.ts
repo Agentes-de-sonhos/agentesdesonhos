@@ -258,8 +258,10 @@ export function mergeContactMatches(
 /** Oportunidade devolvida à extensão: apenas campos mínimos. */
 export function publicOpportunity(row: Record<string, unknown>) {
   const stage = (row.pipeline_stage ?? null) as Record<string, unknown> | null
+  const company = (row.company ?? null) as Record<string, unknown> | null
+  const id = row.id as string
   return {
-    id: row.id as string,
+    id,
     destination: (row.destination as string) ?? '',
     stage_id: (row.stage_id as string) ?? null,
     stage_name: (stage?.name as string) ?? (row.stage as string) ?? null,
@@ -267,9 +269,18 @@ export function publicOpportunity(row: Record<string, unknown>) {
     start_date: (row.start_date as string) ?? null,
     end_date: (row.end_date as string) ?? null,
     passengers_count: (row.passengers_count as number) ?? null,
+    adults_count: (row.adults_count as number) ?? null,
+    children_count: (row.children_count as number) ?? null,
     estimated_value: (row.estimated_value as number) ?? null,
+    notes: (row.notes as string) ?? null,
     follow_up_date: (row.follow_up_date as string) ?? null,
+    follow_up_at: (row.follow_up_at as string) ?? null,
+    travel_context: (row.travel_context as string) ?? 'personal',
+    company_id: (row.company_id as string) ?? null,
+    company_name: (company?.name as string) ?? (company?.trade_name as string) ?? null,
     created_at: (row.created_at as string) ?? null,
+    opportunity_url: opportunityDeepLink(id),
+    create_quote_url: createQuoteDeepLink(id),
   }
 }
 
