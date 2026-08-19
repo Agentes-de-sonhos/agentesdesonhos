@@ -55,7 +55,7 @@ Content-Type: application/json
 | `create_contact` | `name`, `phone?` | `201 { contact }` · `409 { error, contact }` em telefone duplicado |
 | `list_opportunities` | `contactId` | `{ opportunities: [...] }` (máx. 50, etapas visíveis) |
 | `get_pipeline_stages` | — | `{ stages: [{ id, name, legacy_key, position, color, can_view, can_edit, can_move }] }` |
-| `create_opportunity` | `contactId`, `destination`, `startDate?`, `endDate?`, `passengersCount?`, `adultsCount?`, `childrenCount?`, `estimatedValue?`, `notes?`, `followUpDate?` | `201 { opportunity }` |
+| `create_opportunity` | `contactId`, `destination`, `startDate?`, `endDate?`, `passengersCount?`, `adultsCount?`, `childrenCount?`, `estimatedValue?`, `notes?`, `followUpDate?`, `travelContext?` (`personal` default / `corporate`), `companyId?` | `201 { opportunity }` |
 | `update_opportunity_stage` | `opportunityId`, `stageId` | `{ opportunity_id, stage }` |
 | `register_budget_sent` | `opportunityId`, `budgetUrl?` | `{ opportunity_id, stage }` (etapa `quote_sent`) |
 | `create_followup` | `opportunityId`, `followUpDate` (AAAA-MM-DD), `note?` | `201 { followup }` |
@@ -182,3 +182,15 @@ A função devolve apenas campos mínimos: id, nome, telefone, e-mail, status e
 datas do contato; destino, etapa, datas, passageiros e valor da oportunidade.
 **Nunca** retorna CPF/CNPJ, documentos, credenciais, tokens ou dados de outras
 agências. Nenhuma mensagem de WhatsApp é enviada por esta função.
+
+### Payload de oportunidade (`publicOpportunity`)
+
+`id`, `destination`, `stage_id`, `stage_name`, `stage_legacy_key`, `start_date`, `end_date`,
+`passengers_count`, `adults_count`, `children_count`, `estimated_value`, `notes`,
+`follow_up_date`, `follow_up_at`, `travel_context`, `company_id`, `company_name`, `created_at`,
+`opportunity_url`, `create_quote_url`.
+
+Regras: `travel_context` é `personal` por default (compatível com 0.3) e nesse caso `company_id`
+é sempre `null`; `corporate` exige `companyId` de uma empresa da mesma agência **e** vinculada ao
+contato em `client_companies` (caso contrário 400/404 amigável). CNPJ nunca é devolvido — apenas
+`company_name` (nome ou nome fantasia).
