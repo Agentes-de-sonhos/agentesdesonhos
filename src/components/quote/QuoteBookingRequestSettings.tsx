@@ -15,7 +15,8 @@ import {
 import { Globe, Loader2, Plus, Trash2, Info } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { serviceTypeLabel } from "@/lib/operationServiceMap";
+import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
+import { ServiceDigestCompact } from "@/components/quote/ServiceDigestCompact";
 import { useBookingRequestCapability } from "@/hooks/useBookingRequestCapability";
 import {
   useQuoteBookingConfig,
@@ -28,6 +29,9 @@ import { groupHint, requiresGroup, validateBookingConfig } from "@/lib/quoteBook
 interface Props {
   quote: any;
   onUpdated?: () => void;
+  /** Quando informado, o bloco é renderizado como seção expansível. */
+  open?: boolean;
+  onToggle?: () => void;
 }
 
 const MODES: QuoteSelectionMode[] = ["optional", "required", "alternative", "free"];
@@ -35,7 +39,7 @@ const MODES: QuoteSelectionMode[] = ["optional", "required", "alternative", "fre
 const DEFAULT_DISCLAIMER =
   "Esta é uma solicitação de reserva. Serviços, disponibilidade e valores serão reconfirmados pela agência antes da conclusão.";
 
-export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
+export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }: Props) {
   // Elegibilidade resolvida no servidor: Premium ativo + White Label ativo.
   const { canUseBookingRequests, loading: loadingCapability } = useBookingRequestCapability();
   const allowed = canUseBookingRequests;
@@ -141,17 +145,33 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
     }
   };
 
-  return (
-    <div className="space-y-5 rounded-xl border border-amber-300/60 bg-amber-50/40 dark:bg-amber-500/5 p-4">
+  const collapsible = typeof open === "boolean" && !!onToggle;
+  const configuredCount = services.filter(
+    (s) => (s.selection_mode || "optional") !== "optional",
+  ).length;
+
+  const toggleSwitch = (
+    <Switch
+      checked={enabled}
+      disabled={updateQuoteBooking.isPending}
+      onCheckedChange={handleToggle}
+      aria-label="Permitir que o cliente selecione serviços e solicite reserva"
+    />
+  );
+
+  const body = (
+    <div className="space-y-5">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <Globe className="h-4 w-4 text-amber-500" />
-            <p className="text-sm font-semibold">Solicitação de reserva pelo orçamento web</p>
-            <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px]">
-              White Label Premium
-            </Badge>
-          </div>
+          {!collapsible && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Globe className="h-4 w-4 text-amber-500" />
+              <p className="text-sm font-semibold">Solicitação de reserva pelo orçamento web</p>
+              <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px]">
+                White Label Premium
+              </Badge>
+            </div>
+          )}
           <p className="text-xs text-muted-foreground max-w-prose">
             O cliente seleciona os serviços no link público e envia uma solicitação para a sua
             análise. Isso <strong>não confirma reserva, disponibilidade nem valores</strong>: você
@@ -159,12 +179,7 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
             automaticamente.
           </p>
         </div>
-        <Switch
-          checked={enabled}
-          disabled={updateQuoteBooking.isPending}
-          onCheckedChange={handleToggle}
-          aria-label="Permitir que o cliente selecione serviços e solicite reserva"
-        />
+        {!collapsible && toggleSwitch}
       </div>
 
       <div className="space-y-1.5">
@@ -278,16 +293,10 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
                   key={s.id}
                   className="rounded-lg border border-border bg-background p-3 space-y-2"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {s.option_label || serviceTypeLabel(s.service_type)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {serviceTypeLabel(s.service_type)}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+                    {/* Fonte ÚNICA de identificação (mesma do orçamento público). */}
+                    <ServiceDigestCompact service={s} withThumb />
+                    <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
                       <Select value={mode} onValueChange={(v: any) => handleMode(s, v)}>
                         <SelectTrigger className="h-8 w-[150px] text-xs">
                           <SelectValue />
@@ -335,5 +344,38 @@ export function QuoteBookingRequestSettings({ quote, onUpdated }: Props) {
         )}
       </div>
     </div>
+  );
+
+  if (!collapsible) {
+    return (
+      <div className="rounded-xl border border-amber-300/60 bg-amber-50/40 dark:bg-amber-500/5 p-4">
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <AdvancedSettingsSection
+      className="border-amber-300/60 bg-amber-50/40 dark:bg-amber-500/5"
+      title="Solicitação de reserva pelo orçamento web"
+      icon={<Globe className="h-4 w-4 text-amber-500" />}
+      badge={
+        <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px]">
+          White Label Premium
+        </Badge>
+      }
+      summary={
+        <>
+          {enabled ? "Ativada" : "Desativada"}
+          {configuredCount > 0 &&
+            ` · ${configuredCount} ${configuredCount === 1 ? "serviço com regra configurada" : "serviços com regras configuradas"}`}
+        </>
+      }
+      open={open!}
+      onToggle={onToggle!}
+      headerAction={toggleSwitch}
+    >
+      {body}
+    </AdvancedSettingsSection>
   );
 }
