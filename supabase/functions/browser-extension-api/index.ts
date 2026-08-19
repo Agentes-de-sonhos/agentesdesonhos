@@ -390,7 +390,7 @@ Deno.serve(async (req) => {
 
         const { data } = await client
           .from("opportunities")
-          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at, pipeline_stage:pipeline_stages(name, legacy_key)")
+          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, adults_count, children_count, estimated_value, notes, follow_up_date, follow_up_at, travel_context, company_id, created_at, pipeline_stage:pipeline_stages(name, legacy_key), company:companies(name, trade_name)")
           .eq("user_id", agencyId)
           .eq("client_id", contactId as string)
           .order("created_at", { ascending: false })
@@ -430,6 +430,31 @@ Deno.serve(async (req) => {
           .from("clients").select("id").eq("id", contactId as string).eq("user_id", agencyId).maybeSingle();
         if (!contact) return fail({ status: 404, error: "Contato não encontrado." });
 
+        // Contexto de viagem: default 0.3-compatível (personal / sem empresa).
+        const travelContext = "travelContext" in body
+          ? validateTravelContext(body.travelContext)
+          : "personal";
+        if (!travelContext) {
+          return fail({ status: 400, error: "Contexto de viagem inválido (personal ou corporate)." });
+        }
+        const companyId = isUuid(body.companyId) ? (body.companyId as string) : null;
+        const pairError = assertTravelContextPair(travelContext, companyId);
+        if (pairError) return fail(pairError);
+
+        if (travelContext === "corporate" && companyId) {
+          const { data: company } = await client
+            .from("companies").select("id")
+            .eq("id", companyId).eq("user_id", agencyId).maybeSingle();
+          if (!company) return fail({ status: 404, error: "Empresa não encontrada nesta agência." });
+          const { data: link } = await client
+            .from("client_companies").select("id")
+            .eq("user_id", agencyId)
+            .eq("company_id", companyId)
+            .eq("client_id", contactId as string)
+            .maybeSingle();
+          if (!link) return fail({ status: 400, error: "Empresa não está vinculada a este contato." });
+        }
+
         const { data: firstStage } = await client
           .from("pipeline_stages")
           .select("id, name, legacy_key")
@@ -456,11 +481,13 @@ Deno.serve(async (req) => {
             estimated_value: safeAmount(body.estimatedValue),
             notes: safeText(body.notes, 2000) || null,
             follow_up_date: validateIsoDate(body.followUpDate),
+            travel_context: travelContext,
+            company_id: companyId,
             stage: (firstStage?.legacy_key as string | null) || "new_contact",
             stage_id: (firstStage?.id as string | null) ?? null,
             ...(isTeamMember ? { created_by_team_member_id: teamMemberId } : {}),
           })
-          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, estimated_value, follow_up_date, created_at")
+          .select("id, destination, stage, stage_id, start_date, end_date, passengers_count, adults_count, children_count, estimated_value, notes, follow_up_date, follow_up_at, travel_context, company_id, created_at, company:companies(name, trade_name)")
           .single();
         if (error) {
           console.error("create_opportunity:", error.message);
