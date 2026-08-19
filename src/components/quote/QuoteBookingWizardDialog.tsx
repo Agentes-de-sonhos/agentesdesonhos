@@ -319,6 +319,13 @@ export function QuoteBookingWizardDialog({
         >
           {mode === "flow" && step && (
             <div className="min-w-0 space-y-4">
+              <p className="flex gap-2 rounded-xl border border-border/50 bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>
+                  Você está apenas escolhendo quais serviços deseja solicitar. A reserva só será
+                  confirmada depois do retorno da agência.
+                </span>
+              </p>
               {step.blockTitle && (
                 <div className="flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 px-3 py-2">
                   <Layers className="h-3.5 w-3.5 text-primary" />

@@ -10,7 +10,6 @@ import {
   Lock,
   Pencil,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
