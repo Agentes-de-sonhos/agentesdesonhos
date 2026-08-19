@@ -69,6 +69,17 @@ Deno.serve(async (req) => {
   const result = (data ?? {}) as Record<string, unknown>;
   if (result.error) return json({ error: String(result.error) }, 400);
 
+  // Número do processo de reserva (File): criado pelo gatilho de travel_files.
+  let fileNumber: string | null = null;
+  if (typeof result.request_id === "string") {
+    const { data: file } = await supabase
+      .from("travel_files")
+      .select("file_number_display")
+      .or(`root_request_id.eq.${result.request_id},current_request_id.eq.${result.request_id}`)
+      .maybeSingle();
+    fileNumber = (file?.file_number_display as string | undefined) ?? null;
+  }
+
   // Avisos apenas no primeiro envio válido: replay idempotente não notifica.
   let notifications: { sent: number; failed: number; skipped: number } | null = null;
   if (result.duplicate !== true && typeof result.request_id === "string") {
@@ -79,6 +90,7 @@ Deno.serve(async (req) => {
     success: true,
     request_id: result.request_id ?? null,
     protocol: result.protocol ?? null,
+    file_number: fileNumber,
     version: result.version ?? 1,
     status: result.status ?? "received",
     total_estimated: result.total_estimated ?? 0,

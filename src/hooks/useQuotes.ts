@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { parseQuoteDeleteError } from "@/lib/travelFiles";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
@@ -84,10 +85,15 @@ export function useQuotes() {
 
   const deleteQuoteMutation = useMutation({
     mutationFn: async (id: string) => {
-      // Delete services first, then the quote
-      await supabase.from("quote_services").delete().eq("quote_id", id);
+      // Orçamento com processo de reserva (File) é preservado como origem da venda:
+      // o banco bloqueia a exclusão e devolvemos mensagem de negócio.
       const { error } = await supabase.from("quotes").delete().eq("id", id);
-      if (error) throw error;
+      if (error) {
+        const blocked = parseQuoteDeleteError(error.message);
+        if (blocked) throw new Error(blocked);
+        throw error;
+      }
+      await supabase.from("quote_services").delete().eq("quote_id", id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });

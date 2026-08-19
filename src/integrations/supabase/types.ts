@@ -653,6 +653,27 @@ export type Database = {
           },
         ]
       }
+      agency_file_counters: {
+        Row: {
+          agency_id: string
+          created_at: string
+          last_number: number
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          last_number?: number
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          last_number?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agency_membership: {
         Row: {
           agency_id: string
@@ -13689,6 +13710,268 @@ export type Database = {
         }
         Relationships: []
       }
+      travel_file_services: {
+        Row: {
+          agency_id: string
+          city: string | null
+          commission_amount: number | null
+          cost_amount: number | null
+          country: string | null
+          created_at: string
+          currency: string
+          destination: string | null
+          end_date: string | null
+          file_id: string
+          id: string
+          is_required: boolean
+          passengers_count: number | null
+          passengers_snapshot: Json
+          product_name: string
+          quantity: number
+          reconfirmed_amount: number | null
+          request_item_id: string | null
+          requested_amount: number
+          responsible_team_member_id: string | null
+          service_type: string
+          snapshot: Json
+          sold_amount: number | null
+          source_quote_service_id: string | null
+          start_date: string | null
+          status: string
+          supplier_id: string | null
+          supplier_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          city?: string | null
+          commission_amount?: number | null
+          cost_amount?: number | null
+          country?: string | null
+          created_at?: string
+          currency?: string
+          destination?: string | null
+          end_date?: string | null
+          file_id: string
+          id?: string
+          is_required?: boolean
+          passengers_count?: number | null
+          passengers_snapshot?: Json
+          product_name: string
+          quantity?: number
+          reconfirmed_amount?: number | null
+          request_item_id?: string | null
+          requested_amount?: number
+          responsible_team_member_id?: string | null
+          service_type: string
+          snapshot?: Json
+          sold_amount?: number | null
+          source_quote_service_id?: string | null
+          start_date?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          city?: string | null
+          commission_amount?: number | null
+          cost_amount?: number | null
+          country?: string | null
+          created_at?: string
+          currency?: string
+          destination?: string | null
+          end_date?: string | null
+          file_id?: string
+          id?: string
+          is_required?: boolean
+          passengers_count?: number | null
+          passengers_snapshot?: Json
+          product_name?: string
+          quantity?: number
+          reconfirmed_amount?: number | null
+          request_item_id?: string | null
+          requested_amount?: number
+          responsible_team_member_id?: string | null
+          service_type?: string
+          snapshot?: Json
+          sold_amount?: number | null
+          source_quote_service_id?: string | null
+          start_date?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_file_services_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "travel_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_file_views: {
+        Row: {
+          agency_id: string
+          file_id: string
+          id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          agency_id: string
+          file_id: string
+          id?: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          agency_id?: string
+          file_id?: string
+          id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_file_views_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "travel_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      travel_files: {
+        Row: {
+          adults_count: number
+          agency_id: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          children_count: number
+          client_id: string | null
+          completed_at: string | null
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          current_request_id: string | null
+          destinations: string[]
+          end_date: string | null
+          file_number: number
+          file_number_display: string | null
+          final_sale_amount: number | null
+          financial_status: string
+          id: string
+          opened_at: string
+          operation_id: string | null
+          operational_status: string
+          operations_responsible_team_member_id: string | null
+          opportunity_id: string | null
+          original_responsible_team_member_id: string | null
+          passengers_count: number
+          passengers_snapshot: Json
+          pricing_mode: string
+          primary_destination: string | null
+          protocol_snapshot: string | null
+          quote_id: string | null
+          reconfirmed_amount: number | null
+          requested_amount: number
+          responsible_team_member_id: string | null
+          responsible_user_id: string | null
+          revision: number
+          root_request_id: string
+          start_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          adults_count?: number
+          agency_id: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          children_count?: number
+          client_id?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          current_request_id?: string | null
+          destinations?: string[]
+          end_date?: string | null
+          file_number: number
+          file_number_display?: string | null
+          final_sale_amount?: number | null
+          financial_status?: string
+          id?: string
+          opened_at?: string
+          operation_id?: string | null
+          operational_status?: string
+          operations_responsible_team_member_id?: string | null
+          opportunity_id?: string | null
+          original_responsible_team_member_id?: string | null
+          passengers_count?: number
+          passengers_snapshot?: Json
+          pricing_mode?: string
+          primary_destination?: string | null
+          protocol_snapshot?: string | null
+          quote_id?: string | null
+          reconfirmed_amount?: number | null
+          requested_amount?: number
+          responsible_team_member_id?: string | null
+          responsible_user_id?: string | null
+          revision?: number
+          root_request_id: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          adults_count?: number
+          agency_id?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          children_count?: number
+          client_id?: string | null
+          completed_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          current_request_id?: string | null
+          destinations?: string[]
+          end_date?: string | null
+          file_number?: number
+          file_number_display?: string | null
+          final_sale_amount?: number | null
+          financial_status?: string
+          id?: string
+          opened_at?: string
+          operation_id?: string | null
+          operational_status?: string
+          operations_responsible_team_member_id?: string | null
+          opportunity_id?: string | null
+          original_responsible_team_member_id?: string | null
+          passengers_count?: number
+          passengers_snapshot?: Json
+          pricing_mode?: string
+          primary_destination?: string | null
+          protocol_snapshot?: string | null
+          quote_id?: string | null
+          reconfirmed_amount?: number | null
+          requested_amount?: number
+          responsible_team_member_id?: string | null
+          responsible_user_id?: string | null
+          revision?: number
+          root_request_id?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       travel_requirements_consultations: {
         Row: {
           client_id: string | null
@@ -14883,6 +15166,10 @@ export type Database = {
           team_name: string
         }[]
       }
+      booking_request_file_number: {
+        Args: { p_request_id: string }
+        Returns: string
+      }
       booking_request_negotiation_stage: {
         Args: { _user_id: string }
         Returns: {
@@ -15062,6 +15349,7 @@ export type Database = {
         Args: { _review_id: string }
         Returns: boolean
       }
+      delete_quote_safely: { Args: { p_quote_id: string }; Returns: undefined }
       effective_subscription: {
         Args: never
         Returns: {
@@ -15100,6 +15388,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      ensure_travel_file: { Args: { p_request_id: string }; Returns: string }
       fn_calc_commission_amount: {
         Args: {
           p_sale_price: number
@@ -15547,6 +15836,10 @@ export type Database = {
       }
       news_today_sp: { Args: never; Returns: string }
       news_week_start_sp: { Args: { p_ref?: string }; Returns: string }
+      next_agency_file_number: {
+        Args: { p_agency_id: string }
+        Returns: number
+      }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
       pending_booking_request_deliveries: {
         Args: { p_request_id: string }
