@@ -60,6 +60,85 @@ Content-Type: application/json
 | `register_budget_sent` | `opportunityId`, `budgetUrl?` | `{ opportunity_id, stage }` (etapa `quote_sent`) |
 | `create_followup` | `opportunityId`, `followUpDate` (AAAA-MM-DD), `note?` | `201 { followup }` |
 
+### Ações da versão 0.4 (aditivas — 0.3 continua funcionando)
+
+| Ação | Permissão | Entrada | Retorno |
+|---|---|---|---|
+| `dashboard_today` | `opportunities.view` / `agenda.view` / `operations.view` (parcial por bloco) | `timeZone?`, `horizonDays?` (1–30, default 7), `limit?` (≤50) | `followups {overdue, today, upcoming}`, `events`, `operations`, `trips`, `counts`, `links.agenda_url` |
+| `get_contact_summary` | `clients.view` (+ `quotes.view` / `operations.view` para os blocos) | `contactId` | contato mínimo, empresas, oportunidades (com deep links), follow-ups, notas, histórico, orçamentos, operações, viagens |
+| `update_opportunity` | `opportunities.edit` | `opportunityId` + campos seguros (`destination`, `startDate`, `endDate`, `adultsCount`, `childrenCount`, `passengersCount`, `estimatedValue`, `notes`, `travelContext`, `companyId`) | `{ opportunity }` |
+| `list_followups` | `opportunities.view` | `filter` (`overdue`/`today`/`upcoming`/`all`), `timeZone?`, `horizonDays?`, `limit?` | `{ filter, today, followups }` |
+| `update_followup` | `opportunities.edit` | `followupId`, `followUpAt?`/`followUpDate?`, `timeZone?`, `note?` | `{ followup }` |
+| `complete_followup` | `opportunities.edit` | `followupId` | `{ followup_id, completed: true }` |
+| `list_companies` | `clients.view` | `limit?` | `{ companies }` |
+| `search_companies` | `clients.view` | `query` (mín. 2 caracteres), `limit?` | `{ companies }` |
+| `create_company` | `clients.create` | `name`, `tradeName?`, `cnpj?`, `email?`, `phone?`, `notes?` | `201 { company }` |
+| `link_contact_company` | `clients.edit` | `contactId`, `companyId`, `relationshipType?`, `isPrimary?` | `201 { link }` · `409` se já vinculado |
+| `unlink_contact_company` | `clients.edit` | `contactId`, `companyId` | `{ unlinked: true }` |
+| `list_contact_companies` | `clients.view` | `contactId`, `limit?` | `{ companies }` |
+| `list_opportunity_quotes` | `quotes.view` | `opportunityId`, `limit?` | `{ quotes, create_quote_url }` |
+| `list_opportunity_operations` | `operations.view` | `opportunityId`, `limit?` | `{ operations }` |
+
+### Follow-up com horário e fuso (0.4)
+
+- Colunas aditivas: `opportunity_followups.follow_up_at timestamptz NULL`,
+  `opportunity_followups.time_zone text NULL` e `opportunities.follow_up_at`.
+  `follow_up_date` **continua existindo** e permanece sincronizado.
+- `create_followup` aceita `followUpAt` em **ISO 8601 com offset**
+  (`2026-08-20T14:30:00-03:00` ou `...Z`) **ou** o legado `followUpDate`.
+  Sem offset a entrada é recusada (`400`) porque o horário seria ambíguo.
+- A data civil (`follow_up_date`) é derivada pelo `timeZone` validado
+  (default `America/Sao_Paulo`), nunca por split simples em UTC.
+- Registros antigos, com apenas `follow_up_date`, continuam **all-day**:
+  nenhum horário é inventado na migração.
+- O espelho em `agency_events` recebe `event_time`, `start_at`, `time_zone` e
+  `all_day` coerentes; a Agenda do app mostra o horário quando existir.
+- `created_by` é gravado explicitamente como `user.id`, além do trigger.
+
+### Empresas (modelo opcional, 0.4)
+
+- `companies`: `user_id` (agência), `name` obrigatório, `trade_name`,
+  `cnpj_normalized`, `email`, `phone`, `notes`. RLS multi-tenant igual a `clients`.
+- `client_companies` (N:N): `client_id`, `company_id`,
+  `relationship_type` (`employee|owner|buyer|traveler|other`), `is_primary`,
+  `unique(client_id, company_id)`.
+- `opportunities.travel_context` (`personal` default | `corporate`) e
+  `company_id`: contexto corporativo **exige** empresa; pessoal exige empresa nula.
+- Empresa, cliente e oportunidade precisam pertencer à **mesma agência**
+  (validado por trigger no banco, além dos filtros da função).
+- Cadastro de cliente **não** passa a exigir empresa. Oportunidades antigas não
+  foram alteradas.
+
+### Deep links (sempre calculados no servidor)
+
+A base é uma constante da função (`APP_BASE_URL`); nenhuma URL recebida no body
+é usada para montar links.
+
+- `client_url` → `/gestao-clientes/clientes?client=<uuid>`
+- `opportunity_url` → `/gestao-clientes/funil?opportunity=<uuid>`
+- `create_quote_url` → `/ferramentas-ia/gerar-orcamento?opportunity=<uuid>`
+- `agenda_url` → `/agenda?date=<AAAA-MM-DD>`
+
+A tela **Gerar Orçamento** passou a aceitar `?opportunity=<uuid>` para acesso
+externo autenticado: a oportunidade e o cliente são lidos via RLS e alimentam o
+mesmo prefill de `location.state` (que continua funcionando). Sem permissão ou
+com id inexistente, aparece um aviso amigável e nada é pré-preenchido. Nenhum
+dado pessoal vai na URL — apenas o UUID.
+
+### Privacidade adicional da 0.4
+
+- `dashboard_today` e `list_followups` devolvem **somente** follow-ups criados
+  pelo usuário autenticado (`created_by = auth.uid()`): agenda de colegas nunca
+  é exposta. Eventos de agenda também são filtrados por `user_id = auth.uid()` e
+  ignoram registros apagados.
+- Operações e viagens não trazem nenhum campo financeiro.
+- Empresas devolvem apenas `cnpj_masked` (`••••1234`); CNPJ bruto e notas
+  internas nunca saem.
+- Toda coleção tem limite explícito (padrão 10–20, teto 50).
+- O service client permanece restrito às três tabelas de permissões de equipe:
+  não toca `companies`, `client_companies`, `opportunity_followups` nem
+  `agency_events`.
+
 ### Regras de negócio aplicadas
 
 - Telefone é normalizado no servidor (somente dígitos) e comparado com a coluna

@@ -766,7 +766,7 @@ export default function GerarOrcamento() {
   };
 
   // Pre-fill data coming from a CRM opportunity (via navigation state)
-  const opportunityPrefill = (location.state as {
+  type OpportunityPrefill = {
     opportunity_id?: string;
     client_id?: string;
     client_name?: string;
@@ -775,7 +775,58 @@ export default function GerarOrcamento() {
     end_date?: string | null;
     adults_count?: number;
     children_count?: number;
-  } | null) || null;
+  };
+  const statePrefill = (location.state as OpportunityPrefill | null) || null;
+
+  // Deep link externo (extensão do navegador): /ferramentas-ia/gerar-orcamento?opportunity=<uuid>
+  // Somente UUID no parâmetro — nenhum dado pessoal viaja na URL.
+  const [linkPrefill, setLinkPrefill] = useState<OpportunityPrefill | null>(null);
+  const [linkPrefillError, setLinkPrefillError] = useState<string | null>(null);
+  const opportunityParam = new URLSearchParams(location.search).get("opportunity");
+
+  useEffect(() => {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!opportunityParam || statePrefill?.opportunity_id) return;
+    if (!UUID_RE.test(opportunityParam)) {
+      setLinkPrefillError("Link de oportunidade inválido. O orçamento foi aberto em branco.");
+      return;
+    }
+    let active = true;
+    (async () => {
+      // O RLS decide o que este usuário pode ler: sem permissão, não pré-preenche.
+      const { data, error } = await supabase
+        .from("opportunities")
+        .select("id, client_id, destination, start_date, end_date, adults_count, children_count, client:clients(name)")
+        .eq("id", opportunityParam)
+        .maybeSingle();
+      if (!active) return;
+      if (error || !data) {
+        setLinkPrefillError("Não foi possível carregar esta oportunidade. O orçamento foi aberto em branco.");
+        return;
+      }
+      setLinkPrefillError(null);
+      setLinkPrefill({
+        opportunity_id: data.id,
+        client_id: (data as any).client_id ?? undefined,
+        client_name: (data as any).client?.name ?? undefined,
+        destination: (data as any).destination ?? undefined,
+        start_date: (data as any).start_date ?? null,
+        end_date: (data as any).end_date ?? null,
+        adults_count: (data as any).adults_count ?? undefined,
+        children_count: (data as any).children_count ?? undefined,
+      });
+    })();
+    return () => { active = false; };
+  }, [opportunityParam, statePrefill?.opportunity_id]);
+
+  useEffect(() => {
+    if (linkPrefillError) {
+      toast({ title: "Oportunidade não carregada", description: linkPrefillError, variant: "destructive" });
+    }
+  }, [linkPrefillError, toast]);
+
+  // `location.state` continua tendo prioridade e funcionando como antes.
+  const opportunityPrefill = statePrefill ?? linkPrefill;
 
   const handleCreateQuote = async (formData: QuoteFormData) => {
     const newQuote = await createQuote({
