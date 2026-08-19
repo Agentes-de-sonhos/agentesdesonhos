@@ -1802,14 +1802,22 @@ export default function GerarOrcamento() {
           />
         )}
         renderAdvanced={() => (
-          <div className="space-y-6">
+          <div className="space-y-3">
             <QuoteAdvancedSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+              open={advancedSection === "currency"}
+              onToggle={() =>
+                setAdvancedSection((prev) => (prev === "currency" ? null : "currency"))
+              }
             />
             <QuoteBookingRequestSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+              open={advancedSection === "booking"}
+              onToggle={() =>
+                setAdvancedSection((prev) => (prev === "booking" ? null : "booking"))
+              }
             />
           </div>
         )}
