@@ -64,8 +64,10 @@ export function AdvancedSettingsSection({
           open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
         )}
       >
-        <div className="overflow-hidden">
-          <div className="border-t px-3 sm:px-4 py-4">{children}</div>
+        <div className="overflow-hidden" aria-hidden={!open}>
+          <div className={cn("border-t px-3 sm:px-4 py-4", !open && "pointer-events-none")}>
+            {children}
+          </div>
         </div>
       </div>
     </section>
