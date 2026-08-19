@@ -6,6 +6,7 @@ import { DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
 import {
   CURRENCY_OPTIONS,
   getCurrencySymbol,
@@ -17,9 +18,12 @@ import {
 interface Props {
   quote: any;
   onUpdated?: () => void;
+  /** Quando informado, o bloco é renderizado como seção expansível. */
+  open?: boolean;
+  onToggle?: () => void;
 }
 
-export function QuoteAdvancedSettings({ quote, onUpdated }: Props) {
+export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle }: Props) {
   const { toast } = useToast();
   const initial = getQuoteCurrencyInfo(quote);
   const [currency, setCurrency] = useState<QuoteCurrency>(initial.currency);
@@ -64,10 +68,12 @@ export function QuoteAdvancedSettings({ quote, onUpdated }: Props) {
   const showConversion = currency !== "BRL";
   const showRate = showConversion && mode === "conversion";
 
-  return (
-    <section className="rounded-xl border bg-card p-4 shadow-sm space-y-5">
+  const currencyOption = CURRENCY_OPTIONS.find((c) => c.value === currency);
+
+  const body = (
+    <div className="space-y-5">
       <div className="space-y-1">
-        <p className="text-sm font-semibold">Moeda do orçamento</p>
+        {typeof open !== "boolean" && <p className="text-sm font-semibold">Moeda do orçamento</p>}
         <p className="text-xs text-muted-foreground">
           Altere a moeda a qualquer momento. Os valores cadastrados nos serviços não são modificados —
           apenas a forma como eles são apresentados no link público, no PDF e no total do orçamento.
@@ -168,6 +174,27 @@ export function QuoteAdvancedSettings({ quote, onUpdated }: Props) {
         </Badge>
         {saving && <span className="text-xs text-muted-foreground">Salvando…</span>}
       </div>
-    </section>
+    </div>
+  );
+
+  if (typeof open !== "boolean" || !onToggle) {
+    return <section className="rounded-xl border bg-card p-4 shadow-sm">{body}</section>;
+  }
+
+  return (
+    <AdvancedSettingsSection
+      title="Moeda do orçamento"
+      icon={<DollarSign className="h-4 w-4 text-primary" />}
+      summary={
+        <>
+          {currencyOption?.flag} {currencyOption?.label} ({getCurrencySymbol(currency)})
+          {currency !== "BRL" && (mode === "fixed" ? " · Moeda fixa" : " · Conversão automática")}
+        </>
+      }
+      open={open}
+      onToggle={onToggle}
+    >
+      {body}
+    </AdvancedSettingsSection>
   );
 }

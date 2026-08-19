@@ -488,6 +488,8 @@ export default function GerarOrcamento() {
   };
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
+  /** Etapa 6 — seção expansível aberta (uma por vez, para reduzir a altura). */
+  const [advancedSection, setAdvancedSection] = useState<"currency" | "booking" | null>(null);
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
@@ -1802,14 +1804,22 @@ export default function GerarOrcamento() {
           />
         )}
         renderAdvanced={() => (
-          <div className="space-y-6">
+          <div className="space-y-3">
             <QuoteAdvancedSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+              open={advancedSection === "currency"}
+              onToggle={() =>
+                setAdvancedSection((prev) => (prev === "currency" ? null : "currency"))
+              }
             />
             <QuoteBookingRequestSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+              open={advancedSection === "booking"}
+              onToggle={() =>
+                setAdvancedSection((prev) => (prev === "booking" ? null : "booking"))
+              }
             />
           </div>
         )}
