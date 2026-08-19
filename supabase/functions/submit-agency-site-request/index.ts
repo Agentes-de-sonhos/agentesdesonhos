@@ -25,6 +25,30 @@ function clean(value: unknown, max: number): string | null {
   return out.length ? out : null;
 }
 
+const DETAIL_KEY_RE = /^[a-z0-9_]{1,60}$/;
+const MAX_DETAIL_KEYS = 40;
+
+/**
+ * Flat, sanitized string map for the `details` jsonb column.
+ * Only shallow string/number/boolean values with safe keys survive — nested
+ * objects/arrays are dropped so the browser can never inject arbitrary JSON.
+ */
+function cleanDetails(value: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!value || typeof value !== "object" || Array.isArray(value)) return out;
+  for (const [rawKey, rawValue] of Object.entries(value as Record<string, unknown>)) {
+    if (Object.keys(out).length >= MAX_DETAIL_KEYS) break;
+    const key = rawKey.trim().toLowerCase();
+    if (!DETAIL_KEY_RE.test(key)) continue;
+    let text: string | null = null;
+    if (typeof rawValue === "string") text = clean(rawValue, 400);
+    else if (typeof rawValue === "number" && Number.isFinite(rawValue)) text = String(rawValue);
+    else if (typeof rawValue === "boolean") text = rawValue ? "true" : "false";
+    if (text) out[key] = text;
+  }
+  return out;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
