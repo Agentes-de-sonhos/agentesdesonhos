@@ -111,8 +111,8 @@ export function QuoteSettingsModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl w-[95vw] max-h-[calc(100vh-48px)] p-0 flex flex-col gap-0 overflow-hidden">
-        <DialogHeader className="px-4 sm:px-6 pt-5 pb-4 border-b space-y-0">
+      <DialogContent className="max-w-5xl w-[96vw] h-[min(92vh,900px)] max-h-[calc(100vh-32px)] p-0 flex flex-col gap-0 overflow-hidden">
+        <DialogHeader className="shrink-0 px-4 sm:px-6 pt-5 pb-4 border-b space-y-0">
           <DialogTitle className="text-base sm:text-lg">Configurações do Orçamento</DialogTitle>
           <DialogDescription className="text-xs">
             Seis passos rápidos para definir como o cliente verá este orçamento.
@@ -122,7 +122,7 @@ export function QuoteSettingsModal({
         {/* Compact numbered stepper */}
         <nav
           aria-label="Passos das configurações"
-          className="border-b bg-muted/30 px-3 sm:px-6 py-2.5 overflow-x-auto"
+          className="shrink-0 border-b bg-muted/30 px-3 sm:px-6 py-2.5 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <ol className="flex w-max items-center gap-1.5 mx-auto">
             {STEPS.map((s, i) => {
@@ -162,7 +162,7 @@ export function QuoteSettingsModal({
           </ol>
         </nav>
 
-        <div className="flex-1 overflow-y-auto bg-muted/20 px-4 sm:px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-muted/20 px-4 sm:px-6 py-5">
           <header className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="flex items-start gap-2.5 min-w-0">
               <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -182,7 +182,7 @@ export function QuoteSettingsModal({
           {content[active]}
         </div>
 
-        <div className="border-t bg-background px-4 sm:px-6 py-3 flex items-center justify-between gap-2">
+        <div className="shrink-0 border-t bg-background px-4 sm:px-6 py-3 flex items-center justify-between gap-2">
           <Button
             variant="ghost"
             size="sm"

@@ -488,6 +488,8 @@ export default function GerarOrcamento() {
   };
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
+  /** Etapa 6 — seção expansível aberta (uma por vez, para reduzir a altura). */
+  const [advancedSection, setAdvancedSection] = useState<"currency" | "booking" | null>(null);
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
