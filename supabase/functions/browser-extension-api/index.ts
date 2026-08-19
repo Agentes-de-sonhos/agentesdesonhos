@@ -35,7 +35,7 @@ import {
   clientDeepLink, createQuoteDeepLink, opportunityDeepLink, publicAgendaEvent, publicClientCompany,
   publicCompany, publicFollowup, publicOperation, publicOpportunityHistory, publicOpportunityNote,
   publicQuote, publicTrip, validateFollowupFilter, validateIsoDateTime, validateRelationshipType,
-  validateTimeZone,
+  validateTimeZone, validateTravelContext, assertTravelContextPair,
 } from "../_shared/extensionBridge.ts";
 
 const corsHeaders = {
