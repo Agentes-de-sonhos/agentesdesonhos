@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,10 @@ import {
   Link2,
   Plus,
 } from "lucide-react";
+import { Ticket } from "lucide-react";
+import { ReservasTab } from "@/components/reservas/ReservasTab";
+import { useTravelFiles, useQuoteFileNumbers } from "@/hooks/useTravelFiles";
+import { useBookingRequestCapability } from "@/hooks/useBookingRequestCapability";
 import { ClientAvatar, getPersonInitials } from "@/components/shared/ClientAvatar";
 import {
   ItineraryListItem,
@@ -242,9 +246,18 @@ function TypeBadge({ type }: { type: ProjectType }) {
 
 export default function MeusProjetos() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { plan, isPromotor } = useSubscription();
   const isStartPlan = !isPromotor && plan === "start";
-  const [activeTab, setActiveTab] = useState(isStartPlan ? "roteiros" : "orcamentos");
+  const [activeTab, setActiveTabState] = useState(
+    searchParams.get("tab") || (isStartPlan ? "roteiros" : "orcamentos"),
+  );
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", tab);
+    setSearchParams(next, { replace: true });
+  };
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
@@ -256,6 +269,9 @@ export default function MeusProjetos() {
   const { itineraries, isLoading: itinerariesLoading, deleteItinerary } = useItineraries();
   const { templates } = useItineraryTemplates();
   const { notes } = useNotes();
+  const { canUseBookingRequests } = useBookingRequestCapability();
+  const { files: travelFiles, unreadCount: filesUnread } = useTravelFiles(canUseBookingRequests);
+  const { quoteFiles } = useQuoteFileNumbers(canUseBookingRequests);
 
   const normalized = useMemo(
     () => normalizeItems(quotes, trips, itineraries),
@@ -330,6 +346,8 @@ export default function MeusProjetos() {
         return normalized.itineraries.length;
       case "modelos":
         return templates.length;
+      case "reservas":
+        return travelFiles.length;
       case "bloco-notas":
         return notes.length;
       default:
@@ -429,6 +447,16 @@ export default function MeusProjetos() {
                 {item.name}
               </p>
               <TypeBadge type={item.type} />
+              {item.type === "quote" && quoteFiles[item.id] && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/reservas/${quoteFiles[item.id].id}`)}
+                  className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary transition-colors hover:bg-primary/15"
+                >
+                  <Ticket className="h-3 w-3" />
+                  Reserva solicitada · File nº {quoteFiles[item.id].number}
+                </button>
+              )}
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">
@@ -662,6 +690,21 @@ export default function MeusProjetos() {
                     {getTabCount("modelos")}
                   </Badge>
                 </TabsTrigger>
+                {canUseBookingRequests && (
+                  <TabsTrigger
+                    value="reservas"
+                    className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                  >
+                    <Ticket className="h-4 w-4" />
+                    <span className="hidden sm:inline">Reservas</span>
+                    <Badge
+                      variant={filesUnread > 0 ? "default" : "secondary"}
+                      className="text-[10px] px-1.5 py-0 ml-1"
+                    >
+                      {filesUnread > 0 ? filesUnread : getTabCount("reservas")}
+                    </Badge>
+                  </TabsTrigger>
+                )}
                 {!isStartPlan && (
                   <TabsTrigger
                     value="bloco-notas"
@@ -780,6 +823,11 @@ export default function MeusProjetos() {
             <TabsContent value="modelos" className="mt-5">
               <TemplatesGrid />
             </TabsContent>
+            {canUseBookingRequests && (
+              <TabsContent value="reservas" className="mt-5">
+                <ReservasTab />
+              </TabsContent>
+            )}
             {!isStartPlan && (
               <TabsContent value="bloco-notas" className="mt-5">
                 <BlocoNotasContent />

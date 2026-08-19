@@ -63,8 +63,12 @@ interface Props {
   accessCodeOverride?: string;
 }
 
+import { formatFileNumber } from "@/lib/travelFiles";
+
 interface SuccessState {
   protocol: string;
+  /** Número do processo de reserva (File) gerado pela agência. */
+  fileNumber: string;
   services: string[];
 }
 
@@ -208,6 +212,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
       }
       setSuccess({
         protocol: String((data as any)?.protocol || ""),
+        fileNumber: formatFileNumber((data as any)?.file_number),
         services: selectedServices.map(serviceTitle),
       });
     } catch {
@@ -433,12 +438,25 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               <DialogHeader className="space-y-1">
                 <DialogTitle className="text-center text-lg">Solicitação enviada</DialogTitle>
                 <DialogDescription className="text-center">
-                  Guarde o número do seu protocolo.
+                  {success.fileNumber
+                    ? "Guarde o número do seu processo de reserva."
+                    : "Guarde o número do seu protocolo."}
                 </DialogDescription>
               </DialogHeader>
-              <p className="rounded-xl border border-border/60 bg-muted/40 px-4 py-3 text-base font-bold tracking-wide">
-                {success.protocol}
-              </p>
+              <div className="rounded-xl border border-border/60 bg-muted/40 px-4 py-3">
+                {success.fileNumber ? (
+                  <>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      Processo de reserva
+                    </p>
+                    <p className="text-lg font-bold tabular-nums tracking-wide text-foreground">
+                      nº {success.fileNumber}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-base font-bold tracking-wide">{success.protocol}</p>
+                )}
+              </div>
               <div className="rounded-xl border border-border/50 p-3 text-left">
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Serviços solicitados
