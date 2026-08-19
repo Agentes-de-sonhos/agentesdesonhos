@@ -58,13 +58,28 @@ export function useAgencySiteRequest(hostname: string) {
         },
       });
 
+      const result = (data ?? {}) as {
+        error?: string;
+        success?: boolean;
+        duplicate?: boolean;
+        trace?: string;
+      };
+
       if (fnError) {
         setState("error");
-        setError("Não foi possível enviar sua solicitação agora. Tente novamente em instantes.");
+        // Mensagem específica quando o servidor explicou o problema (campo inválido).
+        if (result.error) {
+          setError(result.error);
+        } else {
+          setError("Não foi possível enviar sua solicitação agora. Tente novamente em instantes.");
+        }
+        console.error("[agency-site-request] falha no envio", {
+          trace: result.trace ?? null,
+          detail: fnError.message,
+        });
         return { error: true as const };
       }
 
-      const result = (data ?? {}) as { error?: string; success?: boolean; duplicate?: boolean };
       if (result.error) {
         setState("error");
         setError(result.error);
