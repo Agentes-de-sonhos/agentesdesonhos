@@ -820,8 +820,10 @@ export default function GerarOrcamento() {
   }, [opportunityParam, statePrefill?.opportunity_id]);
 
   useEffect(() => {
-    if (linkPrefillError) toast.error(linkPrefillError);
-  }, [linkPrefillError]);
+    if (linkPrefillError) {
+      toast({ title: "Oportunidade não carregada", description: linkPrefillError, variant: "destructive" });
+    }
+  }, [linkPrefillError, toast]);
 
   // `location.state` continua tendo prioridade e funcionando como antes.
   const opportunityPrefill = statePrefill ?? linkPrefill;
