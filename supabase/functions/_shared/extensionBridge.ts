@@ -490,7 +490,7 @@ export const RELATIONSHIP_TYPES = ['employee', 'owner', 'buyer', 'traveler', 'ot
 export function validateRelationshipType(value: unknown): string {
   return typeof value === 'string' && (RELATIONSHIP_TYPES as readonly string[]).includes(value)
     ? value
-    : 'employee'
+    : 'other'
 }
 
 export const TRAVEL_CONTEXTS = ['personal', 'corporate'] as const

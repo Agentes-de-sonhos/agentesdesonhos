@@ -364,7 +364,7 @@ describe('0.4 · payload mínimo e privacidade', () => {
     const raw = JSON.stringify(company)
     expect(raw).not.toContain('12345678000199')
     expect(raw).not.toContain('segredo interno')
-    expect(company.document_masked).toMatch(/\d{4}$/)
+    expect(company!.cnpj_masked).toMatch(/\d{4}$/)
   })
 
   it('follow-up expõe data, horário e fuso', () => {
