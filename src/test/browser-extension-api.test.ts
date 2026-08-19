@@ -7,6 +7,11 @@ import {
   assertPermissionReadOk, assertTeamMembershipBinding, teamPermissionFilter,
   isUsablePhone, isUuid, normalizePhone, publicContact, publicOpportunity, safeAmount,
   safeHttpUrl, safeText, validateDestination, validateIsoDate, validateName,
+  APP_BASE_URL, DEFAULT_TIME_ZONE, agendaDeepLink, buildOpportunityUpdate, civilDateInTimeZone,
+  civilDayWindow, civilTimeInTimeZone, clampLimit, clientDeepLink, createQuoteDeepLink,
+  opportunityDeepLink, publicCompany, publicFollowup, publicOperation, assertTravelContextPair,
+  validateFollowupFilter, validateIsoDateTime, validateRelationshipType, validateTimeZone,
+  validateTravelContext,
 } from '../../supabase/functions/_shared/extensionBridge'
 
 const S1 = '11111111-1111-4111-8111-111111111111'
@@ -254,5 +259,203 @@ describe('phoneMatchVariants', () => {
     expect(phoneMatchVariants('')).toEqual([])
     expect(phoneMatchVariants('1234')).toEqual([])
     expect(phoneMatchVariants('1234567890123456')).toEqual([])
+  })
+})
+
+// ════════════════════════════════════════════════════════════════════════════
+// Piloto 0.4
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('0.4 · fuso e timestamp de follow-up', () => {
+  it('aceita fusos válidos e cai no padrão seguro', () => {
+    expect(validateTimeZone('America/Sao_Paulo')).toBe('America/Sao_Paulo')
+    expect(validateTimeZone('Europe/Lisbon')).toBe('Europe/Lisbon')
+    expect(validateTimeZone('Marte/Olympus')).toBe(DEFAULT_TIME_ZONE)
+    expect(validateTimeZone(undefined)).toBe(DEFAULT_TIME_ZONE)
+    expect(validateTimeZone(42)).toBe(DEFAULT_TIME_ZONE)
+  })
+
+  it('exige offset explícito no ISO 8601', () => {
+    expect(validateIsoDateTime('2026-08-20T14:30:00-03:00')).toBeTruthy()
+    expect(validateIsoDateTime('2026-08-20T17:30:00Z')).toBeTruthy()
+    // Sem fuso o horário é ambíguo: recusar.
+    expect(validateIsoDateTime('2026-08-20T14:30:00')).toBeNull()
+    expect(validateIsoDateTime('2026-08-20')).toBeNull()
+    expect(validateIsoDateTime('amanhã às 14h')).toBeNull()
+    expect(validateIsoDateTime(null)).toBeNull()
+  })
+
+  it('deriva a data civil pelo fuso, sem shift de UTC', () => {
+    // 23:30 em São Paulo = 02:30 UTC do dia seguinte. O dia civil é o day 20.
+    expect(civilDateInTimeZone('2026-08-21T02:30:00Z', 'America/Sao_Paulo')).toBe('2026-08-20')
+    expect(civilDateInTimeZone('2026-08-21T02:30:00Z', 'UTC')).toBe('2026-08-21')
+    expect(civilTimeInTimeZone('2026-08-21T02:30:00Z', 'America/Sao_Paulo')).toBe('23:30')
+  })
+
+  it('janela do dia civil respeita o horizonte', () => {
+    const win = civilDayWindow('America/Sao_Paulo', 7, new Date('2026-08-20T12:00:00Z'))
+    expect(win.today).toBe('2026-08-20')
+    expect(win.horizon_date).toBe('2026-08-27')
+    expect(win.time_zone).toBe('America/Sao_Paulo')
+  })
+})
+
+describe('0.4 · allowlist de ações', () => {
+  const novas = [
+    'dashboard_today', 'get_contact_summary', 'update_opportunity',
+    'list_followups', 'update_followup', 'complete_followup',
+    'list_companies', 'search_companies', 'create_company',
+    'link_contact_company', 'unlink_contact_company', 'list_contact_companies',
+    'list_opportunity_quotes', 'list_opportunity_operations',
+  ]
+
+  it('inclui as ações 0.4 e preserva as 0.3', () => {
+    novas.forEach(a => expect(ACTIONS).toContain(a))
+    ;['context', 'lookup_contact', 'create_followup'].forEach(a => expect(ACTIONS).toContain(a))
+    expect(assertAction('dashboard_today')).toBeNull()
+    expect(assertAction('send_whatsapp')?.status).toBe(400)
+    expect(assertAction('drop_table')?.status).toBe(400)
+  })
+
+  it('cada ação nova tem handler no index.ts', () => {
+    const src = readFileSync(resolve(__dirname, '../../supabase/functions/browser-extension-api/index.ts'), 'utf8')
+    novas.forEach(a => expect(src).toContain(`case "${a}"`))
+  })
+})
+
+describe('0.4 · filtros e vínculos', () => {
+  it('valida filtro de follow-up', () => {
+    expect(validateFollowupFilter('overdue')).toBe('overdue')
+    expect(validateFollowupFilter('today')).toBe('today')
+    expect(validateFollowupFilter('upcoming')).toBe('upcoming')
+    expect(validateFollowupFilter('all')).toBe('all')
+    expect(validateFollowupFilter('qualquer')).toBe('all')
+  })
+
+  it('valida tipo de relacionamento com empresa', () => {
+    expect(validateRelationshipType('owner')).toBe('owner')
+    expect(validateRelationshipType('inventado')).toBe('other')
+  })
+
+  it('contexto de viagem exige coerência com empresa', () => {
+    expect(validateTravelContext('corporate')).toBe('corporate')
+    expect(validateTravelContext('bogus')).toBeNull()
+    expect(assertTravelContextPair('corporate', null)?.status).toBe(400)
+    expect(assertTravelContextPair('personal', S1)?.status).toBe(400)
+    expect(assertTravelContextPair('corporate', S1)).toBeNull()
+    expect(assertTravelContextPair('personal', null)).toBeNull()
+  })
+
+  it('clampLimit nunca ultrapassa o teto', () => {
+    expect(clampLimit(999, 20, 50)).toBe(50)
+    expect(clampLimit(undefined, 20, 50)).toBe(20)
+    expect(clampLimit(5, 20, 50)).toBe(5)
+    expect(clampLimit(-3, 20, 50)).toBe(20)
+  })
+})
+
+describe('0.4 · payload mínimo e privacidade', () => {
+  it('empresa nunca devolve CNPJ bruto', () => {
+    const company = publicCompany({
+      id: S1, name: 'Acme Viagens', trade_name: 'Acme',
+      cnpj_normalized: '12345678000199', email: 'a@b.com', phone: '11999999999',
+      notes: 'segredo interno', created_at: '2026-01-01',
+    })
+    const raw = JSON.stringify(company)
+    expect(raw).not.toContain('12345678000199')
+    expect(raw).not.toContain('segredo interno')
+    expect(company.document_masked).toMatch(/\d{4}$/)
+  })
+
+  it('follow-up expõe data, horário e fuso', () => {
+    const fu = publicFollowup({
+      id: S1, opportunity_id: S2, follow_up_date: '2026-08-20',
+      follow_up_at: '2026-08-20T17:30:00Z', time_zone: 'America/Sao_Paulo',
+      note: 'ligar', created_at: '2026-08-01',
+    })
+    expect(fu.follow_up_date).toBe('2026-08-20')
+    expect(fu.follow_up_at).toBe('2026-08-20T17:30:00Z')
+    expect(fu.time_zone).toBe('America/Sao_Paulo')
+  })
+
+  it('operações e viagens não trazem dados financeiros', () => {
+    const op = publicOperation({
+      id: S1, title: 'Viagem', destination: 'Lisboa', travel_start_date: '2026-09-01',
+      travel_end_date: '2026-09-10', passengers_count: 2, stage: 'negociacao',
+      total_value: 55000, commission_amount: 3000,
+    })
+    const raw = JSON.stringify(op)
+    expect(raw).not.toContain('55000')
+    expect(raw).not.toContain('3000')
+  })
+})
+
+describe('0.4 · deep links calculados no servidor', () => {
+  it('usa a base fixa do app, nunca uma URL do body', () => {
+    expect(clientDeepLink(S1)).toBe(`${APP_BASE_URL}/gestao-clientes/clientes?client=${S1}`)
+    expect(opportunityDeepLink(S1)).toBe(`${APP_BASE_URL}/gestao-clientes/funil?opportunity=${S1}`)
+    expect(createQuoteDeepLink(S1)).toBe(`${APP_BASE_URL}/ferramentas-ia/gerar-orcamento?opportunity=${S1}`)
+    expect(agendaDeepLink('2026-08-20')).toContain(`${APP_BASE_URL}/agenda`)
+    expect(APP_BASE_URL.startsWith('https://')).toBe(true)
+  })
+
+  it('recusa id inválido em vez de montar link quebrado', () => {
+    expect(clientDeepLink('nao-uuid' as string)).toBeNull()
+    expect(opportunityDeepLink('' as string)).toBeNull()
+    expect(createQuoteDeepLink('1' as string)).toBeNull()
+  })
+})
+
+describe('0.4 · buildOpportunityUpdate', () => {
+  it('aceita somente colunas reais e sanitiza', () => {
+    const { patch, error } = buildOpportunityUpdate({
+      destination: 'Lisboa', estimatedValue: '9.999,50', notes: 'nota',
+      adultsCount: 2, childrenCount: 1, stage: 'hack', user_id: 'hack',
+    })
+    expect(error).toBeNull()
+    expect(patch.destination).toBe('Lisboa')
+    expect(patch.adults_count).toBe(2)
+    expect(patch.children_count).toBe(1)
+    expect(patch.passengers_count).toBe(3)
+    expect(patch).not.toHaveProperty('stage')
+    expect(patch).not.toHaveProperty('user_id')
+  })
+
+  it('recusa patch vazio e contexto corporativo sem empresa', () => {
+    expect(buildOpportunityUpdate({}).error?.status).toBe(400)
+    expect(buildOpportunityUpdate({ travelContext: 'corporate' }).error?.status).toBe(400)
+    const ok = buildOpportunityUpdate({ travelContext: 'corporate', companyId: S1 })
+    expect(ok.error).toBeNull()
+    expect(ok.patch.company_id).toBe(S1)
+  })
+})
+
+describe('0.4 · isolamento no index.ts', () => {
+  const src = readFileSync(resolve(__dirname, '../../supabase/functions/browser-extension-api/index.ts'), 'utf8')
+
+  it('dashboard_today usa follow-ups do próprio usuário', () => {
+    const block = src.slice(src.indexOf('case "dashboard_today"'), src.indexOf('case "get_contact_summary"'))
+    expect(block).toContain('.eq("created_by", user.id)')
+    expect(block).toContain('.eq("user_id", agencyId)')
+    expect(block).toContain('.is("deleted_at", null)')
+    expect(block).not.toMatch(/total_value|commission/i)
+  })
+
+  it('adminRead/service role não toca nas tabelas novas', () => {
+    const adminUses = src.match(/adminRead[\s\S]{0,200}?from\("([a-z_]+)"/g) ?? []
+    adminUses.forEach(u => {
+      expect(u).not.toContain('companies')
+      expect(u).not.toContain('client_companies')
+      expect(u).not.toContain('opportunity_followups')
+      expect(u).not.toContain('agency_events')
+    })
+  })
+
+  it('mutações de empresa exigem permissão de clientes', () => {
+    const block = src.slice(src.indexOf('case "create_company"'), src.indexOf('case "link_contact_company"'))
+    expect(block).toContain('requirePermission("clients.create")')
+    const link = src.slice(src.indexOf('case "link_contact_company"'), src.indexOf('case "unlink_contact_company"'))
+    expect(link).toContain('requirePermission("clients.edit")')
+    expect(link).toContain('.eq("user_id", agencyId)')
   })
 })
