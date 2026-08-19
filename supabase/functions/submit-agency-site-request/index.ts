@@ -53,6 +53,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
 
+  // Código de rastreamento: aparece no log e na resposta de erro interno.
+  const trace = crypto.randomUUID().slice(0, 8);
+
   const ip = getClientIP(req);
   const rate = await checkRateLimit(ip, "submit-agency-site-request", 10, 60);
   if (!rate.allowed) return rateLimitResponse(corsHeaders, rate.retryAfterMs);
@@ -118,19 +121,38 @@ Deno.serve(async (req) => {
     { auth: { persistSession: false } },
   );
 
-  const { data, error } = await supabase.rpc("submit_agency_site_request", {
-    p_hostname: hostname,
-    p_payload: payload,
-  });
-
-  if (error) {
-    console.error("[submit-agency-site-request] rpc-error", error.message);
-    return json({ error: "Não foi possível registrar sua solicitação agora. Tente novamente." }, 500);
+  let data: unknown;
+  try {
+    const res = await supabase.rpc("submit_agency_site_request", {
+      p_hostname: hostname,
+      p_payload: payload,
+    });
+    if (res.error) {
+      console.error("[submit-agency-site-request] rpc-error", trace, res.error.message);
+      return json(
+        { error: "Não foi possível registrar sua solicitação agora. Tente novamente.", trace },
+        500,
+      );
+    }
+    data = res.data;
+  } catch (err) {
+    console.error("[submit-agency-site-request] unexpected", trace, String(err));
+    return json(
+      { error: "Não foi possível registrar sua solicitação agora. Tente novamente.", trace },
+      500,
+    );
   }
 
   const result = (data ?? {}) as Record<string, unknown>;
   if (result.error) return json({ error: String(result.error) }, 400);
 
+  console.log(
+    "[submit-agency-site-request] ok",
+    trace,
+    hostname,
+    serviceKey,
+    result.duplicate === true ? "duplicate" : "created",
+  );
   return json({
     success: true,
     request_id: result.request_id ?? null,
