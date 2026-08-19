@@ -492,36 +492,48 @@ export function QuoteBookingWizardDialog({
           {mode === "flow" && (
             <div className="min-w-0 space-y-2">
               <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+                {/* Ação negativa à ESQUERDA (vermelho) */}
                 <Button
                   type="button"
                   size="lg"
-                  aria-pressed={decided === "yes"}
-                  variant={decided === "yes" ? "default" : "outline"}
+                  variant="outline"
+                  aria-pressed={decided === "no"}
                   className={cn(
                     "h-auto min-h-12 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center text-base leading-tight",
-                    decided === "yes" && "ring-2 ring-primary ring-offset-2",
+                    "border-red-300 hover:border-red-600 hover:bg-red-600 hover:text-white focus-visible:border-red-600 focus-visible:bg-red-600 focus-visible:text-white [&:hover_svg]:text-white [&:focus-visible_svg]:text-white",
+                    decided === "no"
+                      ? "border-red-600 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300"
+                      : "bg-background text-foreground",
+                  )}
+                  onClick={() => decide("no")}
+                >
+                  <X
+                    className={cn("h-4 w-4 shrink-0", decided === "no" ? "text-red-600" : "text-red-600")}
+                    aria-hidden="true"
+                  />
+                  Não quero este serviço
+                </Button>
+                {/* Ação positiva à DIREITA (azul) */}
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  aria-pressed={decided === "yes"}
+                  className={cn(
+                    "h-auto min-h-12 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center text-base leading-tight",
+                    "border-blue-600 hover:bg-blue-600 hover:text-white focus-visible:bg-blue-600 focus-visible:text-white [&:hover_svg]:text-white [&:focus-visible_svg]:text-white",
+                    decided === "yes"
+                      ? "bg-blue-600 text-white [&_svg]:text-white"
+                      : "bg-blue-50/60 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300",
                   )}
                   onClick={() => decide("yes")}
                 >
                   {decided === "yes" ? (
-                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
                   ) : (
-                    <Check className="h-4 w-4 shrink-0" />
+                    <Check className="h-4 w-4 shrink-0 text-blue-600" aria-hidden="true" />
                   )}
-                  Quero reservar
-                </Button>
-                <Button
-                  type="button"
-                  size="lg"
-                  aria-pressed={decided === "no"}
-                  variant={decided === "no" ? "secondary" : "outline"}
-                  className={cn(
-                    "h-auto min-h-12 w-full min-w-0 max-w-full gap-2 whitespace-normal py-2 text-center text-base leading-tight",
-                    decided === "no" && "ring-2 ring-destructive/60 ring-offset-2 text-destructive",
-                  )}
-                  onClick={() => decide("no")}
-                >
-                  <X className="h-4 w-4 shrink-0" /> Não quero este serviço
+                  Quero solicitar este serviço
                 </Button>
               </div>
 
