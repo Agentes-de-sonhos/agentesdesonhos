@@ -434,6 +434,31 @@ describe('0.4 · buildOpportunityUpdate', () => {
 describe('0.4 · isolamento no index.ts', () => {
   const src = readFileSync(resolve(__dirname, '../../supabase/functions/browser-extension-api/index.ts'), 'utf8')
 
+  it('create_opportunity grava par válido de contexto/empresa', () => {
+    const block = src.slice(src.indexOf('case "create_opportunity"'), src.indexOf('case "update_opportunity_stage"'))
+    expect(block).toContain('validateTravelContext(body.travelContext)')
+    expect(block).toContain('assertTravelContextPair(travelContext, companyId)')
+    expect(block).toContain('travel_context: travelContext')
+    expect(block).toContain('company_id: companyId')
+  })
+
+  it('0.3 sem campos continua personal/null', () => {
+    const block = src.slice(src.indexOf('case "create_opportunity"'), src.indexOf('case "update_opportunity_stage"'))
+    expect(block).toContain('"travelContext" in body')
+    expect(block).toContain('? validateTravelContext(body.travelContext)\n          : "personal"')
+    expect(block).toContain('isUuid(body.companyId) ? (body.companyId as string) : null')
+  })
+
+  it('empresa não vinculada ao contato é recusada em create e update', () => {
+    const create = src.slice(src.indexOf('case "create_opportunity"'), src.indexOf('case "update_opportunity_stage"'))
+    expect(create).toContain('.from("client_companies")')
+    expect(create).toContain('Empresa não está vinculada a este contato.')
+    const update = src.slice(src.indexOf('case "update_opportunity"'), src.indexOf('case "list_followups"'))
+    expect(update).toContain('.from("client_companies")')
+    expect(update).toContain('Empresa não está vinculada a este contato.')
+    expect(update).toContain('opp as Record<string, unknown>).client_id')
+  })
+
   it('dashboard_today usa follow-ups do próprio usuário', () => {
     const block = src.slice(src.indexOf('case "dashboard_today"'), src.indexOf('case "get_contact_summary"'))
     expect(block).toContain('.eq("created_by", user.id)')
