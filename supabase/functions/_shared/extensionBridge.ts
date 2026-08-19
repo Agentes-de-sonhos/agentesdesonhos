@@ -673,7 +673,7 @@ export function buildOpportunityUpdate(body: Record<string, unknown>): {
 
   if ('destination' in body) {
     const check = validateDestination(body.destination)
-    if (!check.valid) return { patch: {}, error: check.error }
+    if (check.valid === false) return { patch: {}, error: check.error }
     patch.destination = check.value
   }
   if ('startDate' in body) patch.start_date = validateIsoDate(body.startDate)

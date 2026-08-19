@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
+import { followupCivilDate, followupEventTime } from "@/lib/followupTime";
 
 // Debounced fire-and-forget Google Calendar sync trigger.
 // Avoids spamming the edge function when the user makes several edits in a row.
