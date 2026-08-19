@@ -10,7 +10,6 @@ import {
   Lock,
   Pencil,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -254,6 +253,18 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
 
   const chosenSteps = steps.filter((s) => decisions[s.serviceId] === "yes");
   const noChoicesYet = progress.decided === 0;
+  // Estado 3: solicitação já enviada — não volta ao estado inicial nem permite reenvio.
+  const submitted = !!success;
+  const compactState = !model.packageMode && noChoicesYet && !submitted;
+  const showSummary = model.packageMode || (!noChoicesYet && !submitted);
+
+  const headerTitle = model.packageMode
+    ? "Solicitar reserva deste pacote"
+    : submitted
+      ? "Solicitação enviada à agência"
+      : noChoicesYet
+        ? "Quer solicitar a reserva?"
+        : "Escolha o que deseja reservar";
 
   return (
     <section className="animate-fade-up" aria-labelledby="booking-request-title">
@@ -267,7 +278,7 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               Próximo passo
             </p>
             <h2 id="booking-request-title" className="text-base font-bold tracking-tight sm:text-lg">
-              {model.packageMode ? "Solicitar reserva deste pacote" : "Escolha o que deseja reservar"}
+              {headerTitle}
             </h2>
           </div>
         </div>
@@ -278,40 +289,72 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               Este orçamento tem valor fechado de pacote: todos os serviços abaixo são solicitados
               em conjunto.
             </p>
+          ) : compactState ? (
+            <p className="text-sm text-muted-foreground">
+              Escolha os serviços que deseja solicitar à agência.
+            </p>
+          ) : submitted ? (
+            <p className="text-sm text-muted-foreground">
+              A agência irá reconfirmar disponibilidade, valores e condições antes de efetivar os
+              serviços.
+            </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Vamos passar serviço por serviço para você decidir o que quer reservar. Itens incluídos fazem parte da
-              proposta e não podem ser retirados.
+              Confira os serviços escolhidos ou continue avaliando as opções do orçamento.
             </p>
           )}
 
           {model.packageMode ? (
             <div className="space-y-2">{services.map(renderLockedRow)}</div>
+          ) : compactState ? (
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => openWizard("flow")}
+                className="w-full rounded-2xl border border-primary/30 bg-primary/5 p-4 text-left transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground">
+                  <ListChecks className="h-4 w-4" aria-hidden="true" />
+                  Escolher serviços
+                </span>
+                <span className="mt-3 block text-center text-[12px] leading-relaxed text-muted-foreground">
+                  Nenhuma reserva será feita agora. Você apenas indicará os serviços que deseja
+                  solicitar.
+                </span>
+              </button>
+            </div>
+          ) : submitted ? (
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                <div className="min-w-0 space-y-1">
+                  <p className="text-sm font-bold text-foreground">Solicitação enviada à agência</p>
+                  {success?.fileNumber && (
+                    <p className="text-xs font-semibold tabular-nums text-muted-foreground">
+                      Processo de reserva nº {success.fileNumber}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-2">
+                {selectedServices.map((service) => (
+                  <div
+                    key={service.id}
+                    className="flex w-full min-w-0 max-w-full flex-wrap items-start gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 sm:p-4"
+                  >
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <ServiceDigestCompact service={service} withThumb />
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <div className="space-y-3">
               {model.requiredServices.length > 0 && (
                 <div className="space-y-2">{model.requiredServices.map(renderLockedRow)}</div>
               )}
 
-              {noChoicesYet ? (
-                <div className="space-y-3 rounded-2xl border border-primary/25 bg-primary/5 p-4 text-center">
-                  <Sparkles className="mx-auto h-6 w-6 text-primary" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-foreground">
-                      Vamos escolher juntos, um serviço por vez
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Mostramos cada serviço com fotos, datas e detalhes. Você decide se quer
-                      reservar ou seguir para o próximo — e pode voltar quando quiser.
-                    </p>
-                  </div>
-                  <Button type="button" size="lg" className="w-full gap-2" onClick={() => openWizard("flow")}>
-                    <ListChecks className="h-4 w-4" />
-                    Escolher meus serviços ({steps.length})
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
+              <div className="space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Suas escolhas ({chosenSteps.length})
@@ -366,11 +409,11 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
                       {progress.complete ? "Editar escolhas" : "Continuar escolhendo"}
                     </Button>
                   </div>
-                </div>
-              )}
+              </div>
             </div>
           )}
 
+          {showSummary && (
           <div className="rounded-2xl border border-border/50 bg-muted/30 p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -385,14 +428,15 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               <span>{BOOKING_REQUEST_DISCLAIMER}</span>
             </p>
           </div>
+          )}
 
-          {selectionError && (
+          {showSummary && selectionError && (
             <p className="text-xs font-medium text-destructive" role="alert">
               {selectionError}
             </p>
           )}
 
-          {(model.packageMode || !noChoicesYet) && (
+          {showSummary && (
             <Button
               type="button"
               size="lg"
