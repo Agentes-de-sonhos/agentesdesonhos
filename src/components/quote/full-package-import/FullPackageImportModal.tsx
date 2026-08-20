@@ -175,6 +175,14 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   /* reset when closed */
   useEffect(() => {
     if (!open) {
+      // Encerra qualquer importação em andamento e descarta timers/controller.
+      canceledByUserRef.current = true;
+      abortRef.current?.abort();
+      if (slowTimerRef.current) { clearTimeout(slowTimerRef.current); slowTimerRef.current = null; }
+      if (timeoutTimerRef.current) { clearTimeout(timeoutTimerRef.current); timeoutTimerRef.current = null; }
+      abortRef.current = null;
+      canceledByUserRef.current = false;
+      setSlowNotice(false);
       setStep("select-types");
       setExpected(new Set());
       setUploadFile(null);
@@ -192,6 +200,14 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }, [open]);
+
+  /* limpeza em unmount */
+  useEffect(() => () => {
+    abortRef.current?.abort();
+    if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+    if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
+  }, []);
+
 
   const toggleType = (t: ServiceType) => {
     setExpected((prev) => {
