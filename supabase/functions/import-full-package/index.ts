@@ -326,29 +326,55 @@ Deno.serve(async (req) => {
       userContent.push({ type: "image_url", image_url: { url: `data:${mime};base64,${fileBase64}` } });
     }
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userContent },
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0,
-        max_tokens: 16000,
-      }),
-    });
+    const tAiStart = Date.now();
+    let aiResp: Response;
+    try {
+      aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: userContent },
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0,
+          max_tokens: 16000,
+        }),
+        signal: AbortSignal.timeout(AI_TIMEOUT_MS),
+      });
+    } catch (e) {
+      const name = (e as { name?: string } | null)?.name;
+      const isTimeout = name === "TimeoutError" || name === "AbortError";
+      console.error(JSON.stringify({
+        fn: "import-full-package",
+        event: isTimeout ? "ai_timeout" : "ai_fetch_error",
+        ms_prepare: tAiStart - tStart,
+        ms_ai: Date.now() - tAiStart,
+        ms_total: Date.now() - tStart,
+        has_file: !!fileBase64,
+        text_chars: text?.length ?? 0,
+      }));
+      if (isTimeout) {
+        return fail("ai_timeout", "ai_timeout", "A análise ultrapassou o tempo esperado. Tente novamente ou use um PDF menor.", 504);
+      }
+      return fail("sent_to_ai", "ai_error", "Falha na chamada à IA. Tente novamente.", 502);
+    }
+    const msAi = Date.now() - tAiStart;
 
     stage = "ai_response";
     if (aiResp.status === 429) return fail(stage, "rate_limited", "Muitas requisições. Aguarde alguns segundos e tente novamente.", 429);
     if (aiResp.status === 402) return fail(stage, "credits_exhausted", "Créditos de IA esgotados. Adicione saldo em Configurações > Workspace > Uso.", 402);
+    if (aiResp.status === 504 || aiResp.status === 524) {
+      return fail("ai_timeout", "ai_timeout", "A análise ultrapassou o tempo esperado. Tente novamente ou use um PDF menor.", 504);
+    }
     if (!aiResp.ok) {
       const t = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, t.slice(0, 500));
       return fail(stage, "ai_error", `Falha na chamada à IA (HTTP ${aiResp.status}).`, 502, { raw_ai_response: t.slice(0, 2000) });
     }
+
 
     const aiJson = await aiResp.json();
     const choice = aiJson?.choices?.[0];
