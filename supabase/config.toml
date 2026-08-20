@@ -115,3 +115,6 @@ verify_jwt = false
 
 [functions.verify-agency-preview]
 verify_jwt = false
+
+[functions.fx-rate]
+verify_jwt = false

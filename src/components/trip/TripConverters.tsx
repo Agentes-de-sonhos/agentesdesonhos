@@ -9,6 +9,8 @@ import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsCon
 import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
 import { TripBudgetDialog } from "@/components/wallet/TripBudgetDialog";
+import { convertWithRate, fxRateUrl, isValidRate, parseAmount } from "@/lib/fxConversion";
+
 
 // Simple destination -> currency inference (best-effort)
 const COUNTRY_CURRENCY: Record<string, { code: string; symbol: string; name: string }> = {
@@ -83,18 +85,24 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
     queryKey: ["fx", target],
     queryFn: async () => {
       if (target === "BRL") return 1;
-      const res = await fetch(`https://api.frankfurter.dev/v1/latest?from=${target}&to=BRL`);
+      // Edge Function própria: cobre ARS/CLP (o Frankfurter direto retornava 404).
+      const res = await fetch(fxRateUrl(target, "BRL"), {
+        headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
+      });
       if (!res.ok) throw new Error("fx");
       const j = await res.json();
-      return j.rates.BRL as number; // 1 target = X BRL
+      if (!isValidRate(j?.rate)) throw new Error("fx");
+      return j.rate as number; // 1 target = X BRL
     },
+
     staleTime: 1000 * 60 * 60,
     enabled: open,
   });
 
-  const num = parseFloat(amount.replace(",", ".")) || 0;
-  const result = rate ? (direction === "BRL_TO" ? num / rate : num * rate) : 0;
+  const num = parseAmount(amount);
+  const result = rate ? convertWithRate(num, rate, direction) : 0;
   const targetInfo = CURRENCIES.find((c) => c.code === target);
+
 
   const fmt = (v: number, code: string) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: code }).format(v);
