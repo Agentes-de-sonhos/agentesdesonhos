@@ -706,20 +706,29 @@ function SourceStep({
   );
 }
 
-function ProcessingStep({ step }: { step: number }) {
+function ProcessingStep({
+  step, slowNotice, onCancel,
+}: { step: number; slowNotice: boolean; onCancel: () => void }) {
   return (
     <div className="rounded-xl border bg-muted/30 p-8 text-center space-y-3">
       <Loader2 className="h-10 w-10 animate-spin mx-auto text-primary" />
       <p className="text-sm font-medium">{PROGRESS_STEPS[step]}</p>
-      <div className="flex justify-center gap-1">
-        {PROGRESS_STEPS.map((_, i) => (
-          <span key={i} className={`h-1.5 w-8 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
-        ))}
-      </div>
-      <p className="text-xs text-muted-foreground">A análise multimodal de um pacote completo pode levar até 60 segundos.</p>
+      <p className="text-xs text-muted-foreground">
+        A leitura de um pacote completo normalmente leva de 15 a 40 segundos.
+      </p>
+      {slowNotice && (
+        <div className="mx-auto max-w-md flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-left">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
+          <span>{IMPORT_MESSAGES.slow}</span>
+        </div>
+      )}
+      <Button variant="outline" size="sm" onClick={onCancel}>
+        <X className="h-4 w-4 mr-1" /> Cancelar importação
+      </Button>
     </div>
   );
 }
+
 
 function SummaryStep({
   response, blocks, statusByBlock, onGoToReview, onJumpTo,
