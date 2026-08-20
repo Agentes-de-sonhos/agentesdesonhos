@@ -83,18 +83,26 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
     queryKey: ["fx", target],
     queryFn: async () => {
       if (target === "BRL") return 1;
-      const res = await fetch(`https://api.frankfurter.dev/v1/latest?from=${target}&to=BRL`);
-      if (!res.ok) throw new Error("fx");
-      const j = await res.json();
-      return j.rates.BRL as number; // 1 target = X BRL
+      // Edge Function própria: cobre ARS/CLP (o Frankfurter direto retornava 404).
+      const { data, error } = await supabase.functions.invoke("fx-rate", {
+        method: "GET",
+        body: undefined,
+        headers: undefined,
+        // @ts-expect-error - query params suportados pelo cliente
+        query: undefined,
+      });
+      if (error) throw error;
+      if (!isValidRate(data?.rate)) throw new Error("fx");
+      return data.rate as number; // 1 target = X BRL
     },
     staleTime: 1000 * 60 * 60,
     enabled: open,
   });
 
-  const num = parseFloat(amount.replace(",", ".")) || 0;
-  const result = rate ? (direction === "BRL_TO" ? num / rate : num * rate) : 0;
+  const num = parseAmount(amount);
+  const result = rate ? convertWithRate(num, rate, direction) : 0;
   const targetInfo = CURRENCIES.find((c) => c.code === target);
+
 
   const fmt = (v: number, code: string) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: code }).format(v);
