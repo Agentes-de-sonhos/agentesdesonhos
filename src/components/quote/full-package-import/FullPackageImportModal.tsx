@@ -29,6 +29,15 @@ import {
   type QuotePricingMode,
 } from "@/lib/quotePricing";
 import { createPricingDecisionGate } from "@/lib/importPricingGate";
+import {
+  IMPORT_CLIENT_TIMEOUT_MS,
+  IMPORT_MESSAGES,
+  IMPORT_SLOW_NOTICE_MS,
+  classifyImportFailure,
+  fileToBase64Async,
+  shouldSendFileBase64,
+} from "@/lib/fullPackageImportPayload";
+
 
 /* ─────────────── Types ─────────────── */
 
@@ -108,22 +117,12 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_MIME = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
 
 const PROGRESS_STEPS = [
-  "Analisando o pacote completo...",
-  "Separando serviços (aéreo, hotel, transfer, passeios)...",
-  "Extraindo datas, valores e detalhes de cada bloco...",
-  "Preparando a tela de revisão...",
+  "Enviando o material para análise...",
+  "A IA está lendo o documento...",
+  "Identificando os serviços do pacote...",
+  "Finalizando a leitura...",
 ];
 
-async function fileToBase64(file: File): Promise<string> {
-  const buf = await file.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
-  }
-  return btoa(binary);
-}
 
 type Step = "select-types" | "source" | "processing" | "summary" | "review";
 type ReviewStatus = "pending" | "confirmed" | "skipped";
