@@ -9,6 +9,8 @@ import { MeasurementsConverterDialog } from "@/components/wallet/MeasurementsCon
 import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
 import { TripBudgetDialog } from "@/components/wallet/TripBudgetDialog";
+import { convertWithRate, fxRateUrl, isValidRate, parseAmount } from "@/lib/fxConversion";
+
 
 // Simple destination -> currency inference (best-effort)
 const COUNTRY_CURRENCY: Record<string, { code: string; symbol: string; name: string }> = {
