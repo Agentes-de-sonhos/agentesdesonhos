@@ -84,17 +84,15 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
     queryFn: async () => {
       if (target === "BRL") return 1;
       // Edge Function própria: cobre ARS/CLP (o Frankfurter direto retornava 404).
-      const { data, error } = await supabase.functions.invoke("fx-rate", {
-        method: "GET",
-        body: undefined,
-        headers: undefined,
-        // @ts-expect-error - query params suportados pelo cliente
-        query: undefined,
+      const res = await fetch(fxRateUrl(target, "BRL"), {
+        headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string },
       });
-      if (error) throw error;
-      if (!isValidRate(data?.rate)) throw new Error("fx");
-      return data.rate as number; // 1 target = X BRL
+      if (!res.ok) throw new Error("fx");
+      const j = await res.json();
+      if (!isValidRate(j?.rate)) throw new Error("fx");
+      return j.rate as number; // 1 target = X BRL
     },
+
     staleTime: 1000 * 60 * 60,
     enabled: open,
   });
