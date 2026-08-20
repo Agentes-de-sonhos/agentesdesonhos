@@ -264,11 +264,16 @@ function extractJSON(raw: string): unknown {
   return JSON.parse(cleaned);
 }
 
+/** Limite da chamada ao gateway de IA (abaixo do limite do frontend: 90s). */
+const AI_TIMEOUT_MS = 70_000;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const tStart = Date.now();
   let stage = "init";
   let rawAi = "";
   try {
+
     const authHeader = req.headers.get("Authorization") || "";
     if (!authHeader.startsWith("Bearer ")) return fail(stage, "unauthorized", "Não autorizado.", 401);
 
