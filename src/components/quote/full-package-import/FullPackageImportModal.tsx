@@ -539,7 +539,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
             />
           )}
           {step === "processing" && (
-            <ProcessingStep step={progressStep} />
+            <ProcessingStep step={progressStep} slowNotice={slowNotice} onCancel={cancelImport} />
           )}
           {step === "summary" && aiResponse && (
             <SummaryStep
