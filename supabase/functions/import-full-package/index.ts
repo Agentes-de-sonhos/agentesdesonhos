@@ -398,7 +398,9 @@ Deno.serve(async (req) => {
       return fail(stage, "parse_error", "A IA retornou uma resposta sem estrutura reconhecível. Tente novamente com um arquivo mais nítido.", 422, { raw_ai_response: rawAi });
     }
 
+    const tNormalizeStart = Date.now();
     // Normalize
+
     const blocks = Array.isArray(parsed.blocks) ? parsed.blocks : [];
     const tripMeta = (parsed.trip_meta && typeof parsed.trip_meta === "object") ? parsed.trip_meta : {};
     const warnings = Array.isArray(parsed.warnings) ? parsed.warnings.filter((w: unknown) => typeof w === "string") : [];
