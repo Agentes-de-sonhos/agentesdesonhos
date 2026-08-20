@@ -577,6 +577,8 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           <StepIndicator step={step} />
           <StepActions
             step={step}
+            onCancelImport={cancelImport}
+
             expected={expected}
             uploadFile={uploadFile}
             pastedText={pastedText}
