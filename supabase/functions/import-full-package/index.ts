@@ -459,7 +459,22 @@ Deno.serve(async (req) => {
       console.warn("persist log threw:", e);
     }
 
+    // Log estruturado sem dados pessoais.
+    console.log(JSON.stringify({
+      fn: "import-full-package",
+      event: "success",
+      source_kind: sourceKind,
+      has_file: !!fileBase64,
+      text_chars: text?.length ?? 0,
+      blocks: normalized.length,
+      ms_prepare: tAiStart - tStart,
+      ms_ai: msAi,
+      ms_normalize: Date.now() - tNormalizeStart,
+      ms_total: Date.now() - tStart,
+    }));
+
     return json({
+
       success: true,
       import_id: importId,
       source_kind: sourceKind,
