@@ -15947,6 +15947,10 @@ export type Database = {
         Returns: number
       }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
+      opportunity_visible: {
+        Args: { _opportunity_id: string }
+        Returns: boolean
+      }
       pending_booking_request_deliveries: {
         Args: { p_request_id: string }
         Returns: {
