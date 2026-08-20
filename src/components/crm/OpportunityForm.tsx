@@ -233,6 +233,37 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
             )}
           />
 
+          {isMaster && (
+            <FormField
+              control={form.control}
+              name="assigned_team_member_id"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Responsável</FormLabel>
+                  <Select value={field.value || "__owner__"} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o responsável" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="__owner__">Eu (proprietária da conta)</SelectItem>
+                      {teamMembers
+                        .filter((m) => m.status === "active")
+                        .map((m) => (
+                          <SelectItem key={m.id} value={m.id}>
+                            {m.full_name}
+                            {m.role_title ? ` — ${m.role_title}` : ""}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
           <FormField
             control={form.control}
             name="start_date"
