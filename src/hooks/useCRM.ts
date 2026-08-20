@@ -384,6 +384,7 @@ export function useOpportunities() {
       estimated_value: number;
       notes?: string;
       follow_up_date?: string;
+      assigned_team_member_id?: string | null;
     }) => {
       if (!ensurePermission('opportunities.create')) denyAction();
       if (!user) throw new Error("Not authenticated");

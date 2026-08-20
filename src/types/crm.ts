@@ -72,6 +72,9 @@ export interface Opportunity {
   stage_entered_at: string;
   follow_up_date: string | null;
   position?: number;
+  /** Colaborador responsável (agency_team_members.id). Null = proprietária. */
+  assigned_team_member_id?: string | null;
+  created_by_team_member_id?: string | null;
   created_at: string;
   updated_at: string;
   client?: Client;
