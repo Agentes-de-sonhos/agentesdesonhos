@@ -264,11 +264,16 @@ function extractJSON(raw: string): unknown {
   return JSON.parse(cleaned);
 }
 
+/** Limite da chamada ao gateway de IA (abaixo do limite do frontend: 90s). */
+const AI_TIMEOUT_MS = 70_000;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const tStart = Date.now();
   let stage = "init";
   let rawAi = "";
   try {
+
     const authHeader = req.headers.get("Authorization") || "";
     if (!authHeader.startsWith("Bearer ")) return fail(stage, "unauthorized", "Não autorizado.", 401);
 
@@ -326,29 +331,55 @@ Deno.serve(async (req) => {
       userContent.push({ type: "image_url", image_url: { url: `data:${mime};base64,${fileBase64}` } });
     }
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userContent },
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0,
-        max_tokens: 16000,
-      }),
-    });
+    const tAiStart = Date.now();
+    let aiResp: Response;
+    try {
+      aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: userContent },
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0,
+          max_tokens: 16000,
+        }),
+        signal: AbortSignal.timeout(AI_TIMEOUT_MS),
+      });
+    } catch (e) {
+      const name = (e as { name?: string } | null)?.name;
+      const isTimeout = name === "TimeoutError" || name === "AbortError";
+      console.error(JSON.stringify({
+        fn: "import-full-package",
+        event: isTimeout ? "ai_timeout" : "ai_fetch_error",
+        ms_prepare: tAiStart - tStart,
+        ms_ai: Date.now() - tAiStart,
+        ms_total: Date.now() - tStart,
+        has_file: !!fileBase64,
+        text_chars: text?.length ?? 0,
+      }));
+      if (isTimeout) {
+        return fail("ai_timeout", "ai_timeout", "A análise ultrapassou o tempo esperado. Tente novamente ou use um PDF menor.", 504);
+      }
+      return fail("sent_to_ai", "ai_error", "Falha na chamada à IA. Tente novamente.", 502);
+    }
+    const msAi = Date.now() - tAiStart;
 
     stage = "ai_response";
     if (aiResp.status === 429) return fail(stage, "rate_limited", "Muitas requisições. Aguarde alguns segundos e tente novamente.", 429);
     if (aiResp.status === 402) return fail(stage, "credits_exhausted", "Créditos de IA esgotados. Adicione saldo em Configurações > Workspace > Uso.", 402);
+    if (aiResp.status === 504 || aiResp.status === 524) {
+      return fail("ai_timeout", "ai_timeout", "A análise ultrapassou o tempo esperado. Tente novamente ou use um PDF menor.", 504);
+    }
     if (!aiResp.ok) {
       const t = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, t.slice(0, 500));
       return fail(stage, "ai_error", `Falha na chamada à IA (HTTP ${aiResp.status}).`, 502, { raw_ai_response: t.slice(0, 2000) });
     }
+
 
     const aiJson = await aiResp.json();
     const choice = aiJson?.choices?.[0];
@@ -367,7 +398,9 @@ Deno.serve(async (req) => {
       return fail(stage, "parse_error", "A IA retornou uma resposta sem estrutura reconhecível. Tente novamente com um arquivo mais nítido.", 422, { raw_ai_response: rawAi });
     }
 
+    const tNormalizeStart = Date.now();
     // Normalize
+
     const blocks = Array.isArray(parsed.blocks) ? parsed.blocks : [];
     const tripMeta = (parsed.trip_meta && typeof parsed.trip_meta === "object") ? parsed.trip_meta : {};
     const warnings = Array.isArray(parsed.warnings) ? parsed.warnings.filter((w: unknown) => typeof w === "string") : [];
@@ -426,7 +459,22 @@ Deno.serve(async (req) => {
       console.warn("persist log threw:", e);
     }
 
+    // Log estruturado sem dados pessoais.
+    console.log(JSON.stringify({
+      fn: "import-full-package",
+      event: "success",
+      source_kind: sourceKind,
+      has_file: !!fileBase64,
+      text_chars: text?.length ?? 0,
+      blocks: normalized.length,
+      ms_prepare: tAiStart - tStart,
+      ms_ai: msAi,
+      ms_normalize: Date.now() - tNormalizeStart,
+      ms_total: Date.now() - tStart,
+    }));
+
     return json({
+
       success: true,
       import_id: importId,
       source_kind: sourceKind,

@@ -29,6 +29,15 @@ import {
   type QuotePricingMode,
 } from "@/lib/quotePricing";
 import { createPricingDecisionGate } from "@/lib/importPricingGate";
+import {
+  IMPORT_CLIENT_TIMEOUT_MS,
+  IMPORT_MESSAGES,
+  IMPORT_SLOW_NOTICE_MS,
+  classifyImportFailure,
+  fileToBase64Async,
+  shouldSendFileBase64,
+} from "@/lib/fullPackageImportPayload";
+
 
 /* ─────────────── Types ─────────────── */
 
@@ -108,22 +117,12 @@ const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_MIME = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp"];
 
 const PROGRESS_STEPS = [
-  "Analisando o pacote completo...",
-  "Separando serviços (aéreo, hotel, transfer, passeios)...",
-  "Extraindo datas, valores e detalhes de cada bloco...",
-  "Preparando a tela de revisão...",
+  "Enviando o material para análise...",
+  "A IA está lendo o documento...",
+  "Identificando os serviços do pacote...",
+  "Finalizando a leitura...",
 ];
 
-async function fileToBase64(file: File): Promise<string> {
-  const buf = await file.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)));
-  }
-  return btoa(binary);
-}
 
 type Step = "select-types" | "source" | "processing" | "summary" | "review";
 type ReviewStatus = "pending" | "confirmed" | "skipped";
@@ -149,6 +148,12 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   const [packageTotal, setPackageTotal] = useState<number | null>(null);
   const [pricingMismatchWarning, setPricingMismatchWarning] = useState<string | null>(null);
   const [pricingError, setPricingError] = useState<string | null>(null);
+  const [slowNotice, setSlowNotice] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timeoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canceledByUserRef = useRef(false);
+
   /** Portão de persistência da decisão (idempotente e serializado). */
   const pricingGateRef = useRef(createPricingDecisionGate(async () => {}));
   const pricingDecisionRef = useRef<((d: { pricingMode: QuotePricingMode; packageTotal: number | null }) => Promise<void> | void) | undefined>(onPricingDecision);
@@ -170,6 +175,14 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   /* reset when closed */
   useEffect(() => {
     if (!open) {
+      // Encerra qualquer importação em andamento e descarta timers/controller.
+      canceledByUserRef.current = true;
+      abortRef.current?.abort();
+      if (slowTimerRef.current) { clearTimeout(slowTimerRef.current); slowTimerRef.current = null; }
+      if (timeoutTimerRef.current) { clearTimeout(timeoutTimerRef.current); timeoutTimerRef.current = null; }
+      abortRef.current = null;
+      canceledByUserRef.current = false;
+      setSlowNotice(false);
       setStep("select-types");
       setExpected(new Set());
       setUploadFile(null);
@@ -187,6 +200,14 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }, [open]);
+
+  /* limpeza em unmount */
+  useEffect(() => () => {
+    abortRef.current?.abort();
+    if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+    if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
+  }, []);
+
 
   const toggleType = (t: ServiceType) => {
     setExpected((prev) => {
@@ -209,6 +230,19 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
     setUploadFile(file);
   };
 
+  /** Encerra timers e libera o controller, sem tocar em resultados já concluídos. */
+  const clearImportRuntime = () => {
+    if (slowTimerRef.current) { clearTimeout(slowTimerRef.current); slowTimerRef.current = null; }
+    if (timeoutTimerRef.current) { clearTimeout(timeoutTimerRef.current); timeoutTimerRef.current = null; }
+    abortRef.current = null;
+    canceledByUserRef.current = false;
+  };
+
+  const cancelImport = () => {
+    canceledByUserRef.current = true;
+    abortRef.current?.abort();
+  };
+
   const startImport = async () => {
     const hasText = pastedText.trim().length > 0;
     if (!uploadFile && !hasText) {
@@ -219,8 +253,20 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       toast({ title: "Texto muito longo", description: "Máximo 60.000 caracteres.", variant: "destructive" });
       return;
     }
+
+    // Nunca reaproveita controller/timers de uma execução anterior.
+    abortRef.current?.abort();
+    clearImportRuntime();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    canceledByUserRef.current = false;
+
     setStep("processing");
     setHardError(null);
+    setSlowNotice(false);
+    slowTimerRef.current = setTimeout(() => setSlowNotice(true), IMPORT_SLOW_NOTICE_MS);
+    timeoutTimerRef.current = setTimeout(() => controller.abort(), IMPORT_CLIENT_TIMEOUT_MS);
+
     let storagePath: string | null = null;
     try {
       const { data: userRes } = await supabase.auth.getUser();
@@ -237,8 +283,9 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           storagePath = null;
         }
       }
+      if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
 
-      const fileBase64 = uploadFile ? await fileToBase64(uploadFile) : undefined;
+      // 1) Texto primeiro (pdf.js no cliente).
       let text = hasText ? pastedText.trim() : "";
       if (uploadFile && uploadFile.type === "application/pdf") {
         try {
@@ -248,6 +295,16 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           console.warn("PDF text extraction failed:", e);
         }
       }
+      if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
+
+      // 2) Base64 SOMENTE quando o texto não é suficiente (ou é imagem).
+      const needsBinary = shouldSendFileBase64({
+        hasFile: !!uploadFile,
+        mimeType: uploadFile?.type,
+        extractedText: text,
+      });
+      const fileBase64 = needsBinary && uploadFile ? await fileToBase64Async(uploadFile) : undefined;
+      if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
 
       const { data, error } = await supabase.functions.invoke("import-full-package", {
         body: {
@@ -259,10 +316,12 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           storagePath,
           expectedTypes: Array.from(expected),
         },
+        signal: controller.signal,
       });
 
       let body: any = data;
       if (error) {
+        if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
         try {
           const ctx = (error as any)?.context;
           if (ctx && typeof ctx.json === "function") body = await ctx.json();
@@ -270,7 +329,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       }
 
       if (!body || body.success === false || !Array.isArray(body.blocks)) {
-        const msg = body?.error_message || body?.error || "Não foi possível analisar o pacote. Tente novamente.";
+        const msg = body?.error_message || body?.error || IMPORT_MESSAGES.generic;
         setHardError(msg);
         toast({ title: "Erro na importação", description: msg, variant: "destructive" });
         setStep("source");
@@ -306,12 +365,24 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
 
       setStep("summary");
     } catch (e: any) {
-      const msg = e?.message || "Falha ao processar o pacote.";
+      const kind = classifyImportFailure(e, canceledByUserRef.current);
+      const msg =
+        kind === "canceled" ? IMPORT_MESSAGES.canceled
+        : kind === "timeout" ? IMPORT_MESSAGES.timeout
+        : (e?.message || IMPORT_MESSAGES.generic);
       setHardError(msg);
-      toast({ title: "Erro", description: msg, variant: "destructive" });
+      toast({
+        title: kind === "canceled" ? "Importação cancelada" : kind === "timeout" ? "Tempo excedido" : "Erro",
+        description: msg,
+        variant: kind === "canceled" ? "default" : "destructive",
+      });
       setStep("source");
+    } finally {
+      clearImportRuntime();
+      setSlowNotice(false);
     }
   };
+
 
   const goToReview = () => {
     setActiveBlockIdx(0);
@@ -468,7 +539,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
             />
           )}
           {step === "processing" && (
-            <ProcessingStep step={progressStep} />
+            <ProcessingStep step={progressStep} slowNotice={slowNotice} onCancel={cancelImport} />
           )}
           {step === "summary" && aiResponse && (
             <SummaryStep
@@ -506,6 +577,8 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           <StepIndicator step={step} />
           <StepActions
             step={step}
+            onCancelImport={cancelImport}
+
             expected={expected}
             uploadFile={uploadFile}
             pastedText={pastedText}
@@ -635,20 +708,29 @@ function SourceStep({
   );
 }
 
-function ProcessingStep({ step }: { step: number }) {
+function ProcessingStep({
+  step, slowNotice, onCancel,
+}: { step: number; slowNotice: boolean; onCancel: () => void }) {
   return (
     <div className="rounded-xl border bg-muted/30 p-8 text-center space-y-3">
       <Loader2 className="h-10 w-10 animate-spin mx-auto text-primary" />
       <p className="text-sm font-medium">{PROGRESS_STEPS[step]}</p>
-      <div className="flex justify-center gap-1">
-        {PROGRESS_STEPS.map((_, i) => (
-          <span key={i} className={`h-1.5 w-8 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />
-        ))}
-      </div>
-      <p className="text-xs text-muted-foreground">A análise multimodal de um pacote completo pode levar até 60 segundos.</p>
+      <p className="text-xs text-muted-foreground">
+        A leitura de um pacote completo normalmente leva de 15 a 40 segundos.
+      </p>
+      {slowNotice && (
+        <div className="mx-auto max-w-md flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-left">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
+          <span>{IMPORT_MESSAGES.slow}</span>
+        </div>
+      )}
+      <Button variant="outline" size="sm" onClick={onCancel}>
+        <X className="h-4 w-4 mr-1" /> Cancelar importação
+      </Button>
     </div>
   );
 }
+
 
 function SummaryStep({
   response, blocks, statusByBlock, onGoToReview, onJumpTo,
@@ -1094,8 +1176,10 @@ function StepActions(props: {
   onClose: () => void;
   onPrevBlock: () => void;
   onNextBlock: () => void;
+  onCancelImport: () => void;
 }) {
-  const { step, expected, uploadFile, pastedText, blocks, statusByBlock, bulkImporting, onImportAll, onBack, onNext, onClose, onPrevBlock, onNextBlock } = props;
+  const { step, expected, uploadFile, pastedText, blocks, statusByBlock, bulkImporting, onImportAll, onBack, onNext, onClose, onPrevBlock, onNextBlock, onCancelImport } = props;
+
 
   if (step === "select-types") {
     return (
@@ -1118,8 +1202,16 @@ function StepActions(props: {
     );
   }
   if (step === "processing") {
-    return <Button variant="ghost" disabled><Loader2 className="h-4 w-4 animate-spin mr-1" /> Aguarde…</Button>;
+    return (
+      <div className="flex gap-2 items-center">
+        <span className="text-xs text-muted-foreground hidden sm:inline">Analisando com IA…</span>
+        <Button variant="outline" onClick={onCancelImport}>
+          <X className="h-4 w-4 mr-1" /> Cancelar importação
+        </Button>
+      </div>
+    );
   }
+
   if (step === "summary") {
     const pending = blocks.filter((b) => statusByBlock[b.id] === "pending").length;
     return (
