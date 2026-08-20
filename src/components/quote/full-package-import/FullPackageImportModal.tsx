@@ -1198,8 +1198,16 @@ function StepActions(props: {
     );
   }
   if (step === "processing") {
-    return <Button variant="ghost" disabled><Loader2 className="h-4 w-4 animate-spin mr-1" /> Aguarde…</Button>;
+    return (
+      <div className="flex gap-2 items-center">
+        <span className="text-xs text-muted-foreground hidden sm:inline">Analisando com IA…</span>
+        <Button variant="outline" onClick={onCancelImport}>
+          <X className="h-4 w-4 mr-1" /> Cancelar importação
+        </Button>
+      </div>
+    );
   }
+
   if (step === "summary") {
     const pending = blocks.filter((b) => statusByBlock[b.id] === "pending").length;
     return (
