@@ -131,3 +131,25 @@ describe("FullPackageImportModal — timeout, cancelamento e payload", () => {
     expect(screen.getByText(/ultrapassou o tempo esperado/i)).toBeTruthy();
   });
 });
+
+describe("FullPackageImportModal — timeout do cliente (90s)", () => {
+  it("encerra o loading e permite tentar novamente", async () => {
+    vi.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    invokeMock.mockReset();
+    invokeMock.mockImplementation((_name: string, opts: any) =>
+      new Promise((_resolve, reject) => {
+        opts.signal.addEventListener("abort", () =>
+          reject(Object.assign(new Error("aborted"), { name: "AbortError" })),
+        );
+      }),
+    );
+    await openAndStart(user);
+    await vi.advanceTimersByTimeAsync(21_000);
+    expect(screen.getByText(/demorando um pouco mais que o normal/i)).toBeTruthy();
+    await vi.advanceTimersByTimeAsync(70_000);
+    await vi.waitFor(() => expect(screen.getByRole("button", { name: /Analisar com IA/i })).toBeTruthy());
+    expect(screen.getByText(/ultrapassou o tempo esperado/i)).toBeTruthy();
+    vi.useRealTimers();
+  });
+});
