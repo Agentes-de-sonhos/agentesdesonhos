@@ -46,3 +46,9 @@ export function parseAmount(raw: string): number {
   const n = parseFloat((raw ?? '').replace(',', '.'));
   return Number.isFinite(n) ? n : 0;
 }
+
+/** URL da Edge Function `fx-rate` (GET com query params). */
+export function fxRateUrl(from: string, to: string): string {
+  const base = import.meta.env.VITE_SUPABASE_URL as string;
+  return `${base}/functions/v1/fx-rate?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+}
