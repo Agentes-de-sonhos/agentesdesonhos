@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useClients, useOpportunities } from "@/hooks/useCRM";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useTeamMembers } from "@/hooks/useTeamMembers";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOpportunityFollowups, type FollowupDraft } from "@/hooks/useOpportunityFollowups";
 import type { Opportunity } from "@/types/crm";
 import { ClientSelector } from "@/components/shared/ClientSelector";
@@ -39,6 +42,7 @@ const opportunitySchema = z.object({
   children_count: z.number().min(0, "Não pode ser negativo"),
   estimated_value: z.number().min(0),
   notes: z.string().optional(),
+  assigned_team_member_id: z.string().optional(),
 });
 
 type FormData = z.infer<typeof opportunitySchema>;
@@ -53,6 +57,8 @@ interface OpportunityFormProps {
 
 export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection }: OpportunityFormProps) {
   const { clients } = useClients();
+  const { isMaster } = usePermissions();
+  const { data: teamMembers = [] } = useTeamMembers();
   const { createOpportunity, updateOpportunity, isCreating } = useOpportunities();
   const { followups: existingFollowups, syncFollowups, isSyncing } =
     useOpportunityFollowups(opportunity?.id);
@@ -104,6 +110,7 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
       children_count: opportunity?.children_count ?? 0,
       estimated_value: opportunity?.estimated_value || 0,
       notes: opportunity?.notes || "",
+      assigned_team_member_id: opportunity?.assigned_team_member_id || "__owner__",
     },
   });
 
@@ -128,6 +135,14 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
       // the deleted follow-up to reappear on reopen.
       follow_up_date: firstDate ?? null,
     };
+
+    // Somente a conta proprietária pode definir/alterar o responsável.
+    if (isMaster) {
+      (payload as Record<string, unknown>).assigned_team_member_id =
+        data.assigned_team_member_id && data.assigned_team_member_id !== "__owner__"
+          ? data.assigned_team_member_id
+          : null;
+    }
 
     let opportunityId = opportunity?.id;
     if (opportunity) {
