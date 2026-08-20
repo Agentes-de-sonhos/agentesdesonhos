@@ -1174,8 +1174,10 @@ function StepActions(props: {
   onClose: () => void;
   onPrevBlock: () => void;
   onNextBlock: () => void;
+  onCancelImport: () => void;
 }) {
-  const { step, expected, uploadFile, pastedText, blocks, statusByBlock, bulkImporting, onImportAll, onBack, onNext, onClose, onPrevBlock, onNextBlock } = props;
+  const { step, expected, uploadFile, pastedText, blocks, statusByBlock, bulkImporting, onImportAll, onBack, onNext, onClose, onPrevBlock, onNextBlock, onCancelImport } = props;
+
 
   if (step === "select-types") {
     return (
