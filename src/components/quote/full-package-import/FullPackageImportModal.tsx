@@ -148,6 +148,12 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
   const [packageTotal, setPackageTotal] = useState<number | null>(null);
   const [pricingMismatchWarning, setPricingMismatchWarning] = useState<string | null>(null);
   const [pricingError, setPricingError] = useState<string | null>(null);
+  const [slowNotice, setSlowNotice] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timeoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canceledByUserRef = useRef(false);
+
   /** Portão de persistência da decisão (idempotente e serializado). */
   const pricingGateRef = useRef(createPricingDecisionGate(async () => {}));
   const pricingDecisionRef = useRef<((d: { pricingMode: QuotePricingMode; packageTotal: number | null }) => Promise<void> | void) | undefined>(onPricingDecision);
@@ -208,6 +214,19 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
     setUploadFile(file);
   };
 
+  /** Encerra timers e libera o controller, sem tocar em resultados já concluídos. */
+  const clearImportRuntime = () => {
+    if (slowTimerRef.current) { clearTimeout(slowTimerRef.current); slowTimerRef.current = null; }
+    if (timeoutTimerRef.current) { clearTimeout(timeoutTimerRef.current); timeoutTimerRef.current = null; }
+    abortRef.current = null;
+    canceledByUserRef.current = false;
+  };
+
+  const cancelImport = () => {
+    canceledByUserRef.current = true;
+    abortRef.current?.abort();
+  };
+
   const startImport = async () => {
     const hasText = pastedText.trim().length > 0;
     if (!uploadFile && !hasText) {
@@ -218,8 +237,20 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       toast({ title: "Texto muito longo", description: "Máximo 60.000 caracteres.", variant: "destructive" });
       return;
     }
+
+    // Nunca reaproveita controller/timers de uma execução anterior.
+    abortRef.current?.abort();
+    clearImportRuntime();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    canceledByUserRef.current = false;
+
     setStep("processing");
     setHardError(null);
+    setSlowNotice(false);
+    slowTimerRef.current = setTimeout(() => setSlowNotice(true), IMPORT_SLOW_NOTICE_MS);
+    timeoutTimerRef.current = setTimeout(() => controller.abort(), IMPORT_CLIENT_TIMEOUT_MS);
+
     let storagePath: string | null = null;
     try {
       const { data: userRes } = await supabase.auth.getUser();
@@ -236,8 +267,9 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           storagePath = null;
         }
       }
+      if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
 
-      const fileBase64 = uploadFile ? await fileToBase64(uploadFile) : undefined;
+      // 1) Texto primeiro (pdf.js no cliente).
       let text = hasText ? pastedText.trim() : "";
       if (uploadFile && uploadFile.type === "application/pdf") {
         try {
@@ -247,6 +279,16 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           console.warn("PDF text extraction failed:", e);
         }
       }
+      if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
+
+      // 2) Base64 SOMENTE quando o texto não é suficiente (ou é imagem).
+      const needsBinary = shouldSendFileBase64({
+        hasFile: !!uploadFile,
+        mimeType: uploadFile?.type,
+        extractedText: text,
+      });
+      const fileBase64 = needsBinary && uploadFile ? await fileToBase64Async(uploadFile) : undefined;
+      if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
 
       const { data, error } = await supabase.functions.invoke("import-full-package", {
         body: {
@@ -258,10 +300,12 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
           storagePath,
           expectedTypes: Array.from(expected),
         },
+        signal: controller.signal,
       });
 
       let body: any = data;
       if (error) {
+        if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
         try {
           const ctx = (error as any)?.context;
           if (ctx && typeof ctx.json === "function") body = await ctx.json();
@@ -269,7 +313,7 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
       }
 
       if (!body || body.success === false || !Array.isArray(body.blocks)) {
-        const msg = body?.error_message || body?.error || "Não foi possível analisar o pacote. Tente novamente.";
+        const msg = body?.error_message || body?.error || IMPORT_MESSAGES.generic;
         setHardError(msg);
         toast({ title: "Erro na importação", description: msg, variant: "destructive" });
         setStep("source");
@@ -305,12 +349,24 @@ export function FullPackageImportModal({ open, onOpenChange, quoteId, onConfirmS
 
       setStep("summary");
     } catch (e: any) {
-      const msg = e?.message || "Falha ao processar o pacote.";
+      const kind = classifyImportFailure(e, canceledByUserRef.current);
+      const msg =
+        kind === "canceled" ? IMPORT_MESSAGES.canceled
+        : kind === "timeout" ? IMPORT_MESSAGES.timeout
+        : (e?.message || IMPORT_MESSAGES.generic);
       setHardError(msg);
-      toast({ title: "Erro", description: msg, variant: "destructive" });
+      toast({
+        title: kind === "canceled" ? "Importação cancelada" : kind === "timeout" ? "Tempo excedido" : "Erro",
+        description: msg,
+        variant: kind === "canceled" ? "default" : "destructive",
+      });
       setStep("source");
+    } finally {
+      clearImportRuntime();
+      setSlowNotice(false);
     }
   };
+
 
   const goToReview = () => {
     setActiveBlockIdx(0);
