@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe, Loader2, Plus, Trash2, Info } from "lucide-react";
+import { Globe, Loader2, Plus, Trash2, Info, Check } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
