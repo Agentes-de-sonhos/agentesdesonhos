@@ -4,6 +4,7 @@
  */
 import { describe, expect, it, afterEach } from "vitest";
 import { render, cleanup } from "@testing-library/react";
+import { readFileSync } from "node:fs";
 import {
   BOOKING_FLOATING_BOTTOM,
   BOOKING_SELECTION_BAR_ATTR,
@@ -37,6 +38,15 @@ describe("bookingSelectionBar", () => {
     expect(BOOKING_FLOATING_BOTTOM).toContain(BOOKING_SELECTION_BAR_HEIGHT_VAR);
     expect(BOOKING_FLOATING_BOTTOM).toContain("env(safe-area-inset-bottom");
     expect(BOOKING_FLOATING_BOTTOM).toMatch(/0\.75rem/);
+  });
+});
+
+describe("reserva de espaço inferior", () => {
+  it("index.css reserva padding-bottom no body enquanto a barra está ativa", () => {
+    const css = readFileSync("src/index.css", "utf8");
+    expect(css).toContain("body[data-booking-selection-bar]");
+    expect(css).toMatch(/padding-bottom:\s*calc\(var\(--booking-selection-bar-height/);
+    expect(css).toMatch(/min-width:\s*1024px/);
   });
 });
 
