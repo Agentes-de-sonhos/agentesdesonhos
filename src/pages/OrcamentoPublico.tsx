@@ -1593,7 +1593,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               <p className="text-sm text-muted-foreground">Toque em cada item para ver os detalhes completos.</p>
             </div>
             {(() => {
-              const renderCard = (service: QuoteService) => {
+              const renderCard = (service: QuoteService, collapsible = true) => {
                 const index = quote.services!.findIndex((s) => s.id === service.id);
                 return (
                   <CollapsibleServiceCard
@@ -1604,6 +1604,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     onToggle={() => handleToggleService(index)}
                     showPaymentPerService={isNewLayout ? false : useServicePayment}
                     quote={quote}
+                    collapsible={collapsible}
                     showInvestmentInline={
                       investmentLayout === "ungrouped" && showDetailedPrices
                     }
@@ -1616,7 +1617,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
               // Sem seções manuais → comportamento atual, inalterado.
               if (groups.length === 0) {
-                return <div className="space-y-3">{quote.services!.map(renderCard)}</div>;
+                return <div className="space-y-3">{quote.services!.map((s) => renderCard(s))}</div>;
               }
 
               return (
@@ -1627,12 +1628,15 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                       title={group.section.title}
                       count={group.services.length}
                     >
-                      <div className="space-y-3">{group.services.map(renderCard)}</div>
+                      {/* Dentro de um grupo o único nível colapsável é o acordeão. */}
+                      <div className="space-y-3">{group.services.map((s) => renderCard(s, false))}</div>
                     </PublicSectionAccordion>
                   ))}
                   {layout.unsectioned.length > 0 && (
-                    <div className="space-y-3 pt-1">{layout.unsectioned.map(renderCard)}</div>
+                    <div className="space-y-3 pt-1">{layout.unsectioned.map((s) => renderCard(s))}</div>
                   )}
+                </div>
+
                 </div>
               );
             })()}
