@@ -960,13 +960,13 @@ function CollapsibleServiceCard({
 
         <div className="overflow-hidden">
         <div className="px-5 py-4 space-y-4">
-          {isOpen && (() => {
+          {expanded && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
               <ServiceImageCarousel images={imgs} alt={getServiceLabel(service)} disableExpand placeId={resolveServicePlaceId(service)} />
             ) : null;
           })()}
-          {isOpen && (() => {
+          {expanded && (() => {
             const name = getServiceName(service);
             // Para "other" sem company_name, evita exibir título genérico duplicado
             if (service.service_type === "other" && !((service.service_data as any)?.company_name)) return null;
@@ -974,10 +974,10 @@ function CollapsibleServiceCard({
             if (hasCustomLayout) return null;
             return <p className="text-base font-semibold text-foreground tracking-tight">{name}</p>;
           })()}
-          {isOpen && hasCustomLayout && (
+          {expanded && hasCustomLayout && (
             <ServiceBody service={service} quote={quote} />
           )}
-          {isOpen && !hasCustomLayout && chipItems.length > 0 && (
+          {expanded && !hasCustomLayout && chipItems.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {chipItems.map((d, i) => (
                 <div
@@ -996,7 +996,7 @@ function CollapsibleServiceCard({
               ))}
             </div>
           )}
-          {isOpen && !hasCustomLayout && freeItems.length > 0 && (
+          {expanded && !hasCustomLayout && freeItems.length > 0 && (
             <div className="space-y-2">
               {freeItems.map((d, i) => (
                 <p key={i} className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
@@ -1005,21 +1005,21 @@ function CollapsibleServiceCard({
               ))}
             </div>
           )}
-          {isOpen && service.description && (
+          {expanded && service.description && (
             <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
               <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
                 <FormattedText>{service.description}</FormattedText>
               </p>
             </div>
           )}
-          {isOpen && service.service_type === "attraction" && (service.service_data as any)?.notes && (
+          {expanded && service.service_type === "attraction" && (service.service_data as any)?.notes && (
             <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
               <p className="text-sm text-foreground/80 leading-relaxed italic whitespace-pre-wrap">
                 <FormattedText>{(service.service_data as any).notes}</FormattedText>
               </p>
             </div>
           )}
-          {isOpen && showInvestmentInline && !hotelHasMultipleRooms && (
+          {expanded && showInvestmentInline && !hotelHasMultipleRooms && (
             <ServiceInvestmentInline service={service} quote={quote} />
           )}
         </div>
