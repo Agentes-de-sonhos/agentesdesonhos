@@ -15317,6 +15317,10 @@ export type Database = {
         Args: { p_request_id: string }
         Returns: Json
       }
+      build_public_quote_payload: {
+        Args: { p_quote: Database["public"]["Tables"]["quotes"]["Row"] }
+        Returns: Json
+      }
       can_chat_externally: { Args: { _uid: string }; Returns: boolean }
       can_chat_internally: { Args: { _uid: string }; Returns: boolean }
       can_see_agency_user: { Args: { _target: string }; Returns: boolean }
@@ -15753,6 +15757,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_public_quote_documents: {
+        Args: { p_quote_id: string }
+        Returns: {
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+        }[]
+      }
       get_public_sales_landing: { Args: { p_slug: string }; Returns: Json }
       get_public_tour_guide: { Args: { _id: string }; Returns: Json }
       get_public_trip_itinerary_v2: {
@@ -15765,6 +15779,10 @@ export type Database = {
       }
       get_quote_by_public_code: {
         Args: { p_agency_slug: string; p_code: string }
+        Returns: Json
+      }
+      get_quote_by_share_token: {
+        Args: { p_share_token: string }
         Returns: Json
       }
       get_quote_sections_by_share_token: {
