@@ -1384,6 +1384,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: "Retorno" });
 
   return (
+    <BookingCartProvider
+      quote={quote as any}
+      agentProfile={agentProfile as any}
+      agencySlugOverride={agencySlugOverride}
+      accessCodeOverride={accessCodeOverride}
+    >
     <div
       className="min-h-screen bg-[hsl(var(--background))]"
       style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
