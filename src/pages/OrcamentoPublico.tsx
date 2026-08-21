@@ -1565,7 +1565,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         )}
 
         {/* ─── Documentos anexados (integrados ao roteiro, logo após os serviços) ─── */}
-        <PublicQuoteDocuments quoteId={quote.id} />
+        <PublicQuoteDocuments
+          shareToken={agencySlugOverride && accessCodeOverride ? undefined : token}
+          agencySlug={agencySlugOverride}
+          accessCode={accessCodeOverride}
+        />
 
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
         {useNewInvestmentLayout && (
