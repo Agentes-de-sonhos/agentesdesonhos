@@ -14947,30 +14947,6 @@ export type Database = {
           user_id: string | null
           years_experience: number | null
         }
-        Insert: {
-          bio?: string | null
-          created_at?: string | null
-          entry_method?: string | null
-          id?: string | null
-          segments?: string[] | null
-          specialties?: string[] | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_experience?: number | null
-        }
-        Update: {
-          bio?: string | null
-          created_at?: string | null
-          entry_method?: string | null
-          id?: string | null
-          segments?: string[] | null
-          specialties?: string[] | null
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-          years_experience?: number | null
-        }
         Relationships: []
       }
       profiles_public: {
@@ -14992,44 +14968,6 @@ export type Database = {
           state: string | null
           user_id: string | null
           years_in_business: number | null
-        }
-        Insert: {
-          agency_logo_url?: string | null
-          agency_name?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          cover_image_url?: string | null
-          help_offer?: string | null
-          name?: string | null
-          niche?: string | null
-          niches?: string[] | null
-          partnership_interests?: string[] | null
-          phone?: string | null
-          services?: string[] | null
-          specialties?: string[] | null
-          state?: string | null
-          user_id?: string | null
-          years_in_business?: number | null
-        }
-        Update: {
-          agency_logo_url?: string | null
-          agency_name?: string | null
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          cover_image_url?: string | null
-          help_offer?: string | null
-          name?: string | null
-          niche?: string | null
-          niches?: string[] | null
-          partnership_interests?: string[] | null
-          phone?: string | null
-          services?: string[] | null
-          specialties?: string[] | null
-          state?: string | null
-          user_id?: string | null
-          years_in_business?: number | null
         }
         Relationships: []
       }
