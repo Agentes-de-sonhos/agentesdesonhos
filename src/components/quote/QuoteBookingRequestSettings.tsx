@@ -49,6 +49,7 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     updateQuoteBooking,
     createGroup,
     renameGroup,
+    updateGroupLimits,
     deleteGroup,
     setServiceSelection,
   } = useQuoteBookingConfig(quote?.id);
