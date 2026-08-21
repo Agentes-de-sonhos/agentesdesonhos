@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe, Loader2, Plus, Trash2, Info } from "lucide-react";
+import { Globe, Loader2, Plus, Trash2, Info, Check } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
@@ -24,7 +23,7 @@ import {
   SELECTION_MODE_LABELS,
 } from "@/hooks/useQuoteBookingConfig";
 import type { QuoteSelectionMode, QuoteService } from "@/types/quote";
-import { groupHint, requiresGroup, validateBookingConfig } from "@/lib/quoteBookingRules";
+import { groupHint, requiresGroup } from "@/lib/quoteBookingRules";
 
 interface Props {
   quote: any;
@@ -54,7 +53,6 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     setServiceSelection,
   } = useQuoteBookingConfig(quote?.id);
 
-  const [enabled, setEnabled] = useState<boolean>(!!quote?.booking_requests_enabled);
   const [disclaimer, setDisclaimer] = useState<string>(
     quote?.booking_disclaimer || DEFAULT_DISCLAIMER
   );
@@ -76,25 +74,6 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     }
   };
 
-  const handleToggle = async (checked: boolean) => {
-    if (checked) {
-      const errors = validateBookingConfig(services as any, groups);
-      if (errors.length > 0) {
-        toast.error("Corrija a configuração dos serviços antes de ativar", {
-          description: errors.slice(0, 3).join(" • "),
-        });
-        return;
-      }
-    }
-    setEnabled(checked);
-    // Desativar preserva grupos e modos dos serviços para reativação futura.
-    await persist({ booking_requests_enabled: checked });
-    toast.success(
-      checked
-        ? "Seleção de serviços ativada no orçamento web."
-        : "Seleção desativada. Sua configuração de serviços e grupos foi preservada."
-    );
-  };
 
   const handleCreateGroup = async () => {
     if (!newGroupTitle.trim()) {
@@ -150,13 +129,14 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     (s) => (s.selection_mode || "optional") !== "optional",
   ).length;
 
-  const toggleSwitch = (
-    <Switch
-      checked={enabled}
-      disabled={updateQuoteBooking.isPending}
-      onCheckedChange={handleToggle}
-      aria-label="Permitir que o cliente selecione serviços e solicite reserva"
-    />
+  const alwaysOnBadge = (
+    <Badge
+      variant="secondary"
+      className="text-[10px] shrink-0"
+      title="Ativada automaticamente para agências Premium com site White Label ativo"
+    >
+      <Check className="h-3 w-3 mr-1" /> Sempre ativa
+    </Badge>
   );
 
   const body = (
@@ -173,14 +153,16 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
             </div>
           )}
           <p className="text-xs text-muted-foreground max-w-prose">
-            O cliente seleciona os serviços no link público e envia uma solicitação para a sua
-            análise. Isso <strong>não confirma reserva, disponibilidade nem valores</strong>: você
-            reconfirma tudo e retorna o contato. Nada é vendido, cobrado ou reservado
-            automaticamente.
+            Este recurso está <strong>sempre ativo</strong> nos seus orçamentos, porque sua agência
+            é Premium com site White Label ativo. O cliente seleciona os serviços no link público e
+            envia uma solicitação para a sua análise. Isso{" "}
+            <strong>não confirma reserva, disponibilidade nem valores</strong>: você reconfirma tudo
+            e retorna o contato. Nada é vendido, cobrado ou reservado automaticamente.
           </p>
         </div>
-        {!collapsible && toggleSwitch}
+        {!collapsible && alwaysOnBadge}
       </div>
+
 
       <div className="space-y-1.5">
         <Label className="text-xs">Prazo para o cliente responder (opcional)</Label>
@@ -366,14 +348,15 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
       }
       summary={
         <>
-          {enabled ? "Ativada" : "Desativada"}
+          Sempre ativa
           {configuredCount > 0 &&
             ` · ${configuredCount} ${configuredCount === 1 ? "serviço com regra configurada" : "serviços com regras configuradas"}`}
         </>
       }
       open={open!}
       onToggle={onToggle!}
-      headerAction={toggleSwitch}
+      headerAction={alwaysOnBadge}
+
     >
       {body}
     </AdvancedSettingsSection>
