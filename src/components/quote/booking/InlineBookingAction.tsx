@@ -25,7 +25,7 @@ export function InlineBookingAction({
     return (
       <div
         className={cn(
-          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.06] px-3 py-1.5 text-[11px] font-semibold text-primary",
+          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground",
           className,
         )}
         data-booking-inline-action="locked"
@@ -57,21 +57,23 @@ export function InlineBookingAction({
         data-booking-inline-action={selected ? "selected" : "add"}
         data-service-id={service.id}
         className={cn(
-          "relative inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          "relative inline-flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full shadow-md transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-95",
           selected
-            ? "border-primary bg-primary text-primary-foreground shadow-sm"
-            : "border-border/70 bg-card text-foreground hover:border-primary/60 hover:bg-primary/5",
+            ? "bg-success text-success-foreground shadow-success/30 hover:brightness-105 focus-visible:ring-success"
+            : "bg-primary text-primary-foreground shadow-primary/30 hover:brightness-110 focus-visible:ring-primary",
         )}
       >
         {selected ? (
-          <Check className="h-[18px] w-[18px]" aria-hidden="true" />
+          <Check className="h-6 w-6" strokeWidth={2.75} aria-hidden="true" />
         ) : (
           <>
-            <ShoppingCart className="h-[18px] w-[18px]" aria-hidden="true" />
-            <Plus
-              className="absolute -right-0.5 -top-0.5 h-3.5 w-3.5 rounded-full bg-primary p-[1px] text-primary-foreground"
+            <ShoppingCart className="h-[22px] w-[22px]" strokeWidth={2.25} aria-hidden="true" />
+            <span
+              className="absolute -right-0.5 -top-0.5 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-card shadow-sm"
               aria-hidden="true"
-            />
+            >
+              <Plus className="h-3 w-3 text-primary" strokeWidth={3} />
+            </span>
           </>
         )}
       </button>

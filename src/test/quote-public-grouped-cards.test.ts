@@ -56,6 +56,17 @@ describe("cards agrupados x individuais no orçamento público", () => {
     expect(action).toBeGreaterThan(footer);
   });
 
+  it("faixa de ação do carrinho é azul-clara, full width e alinhada à direita", () => {
+    const i = src.indexOf("data-booking-action-row");
+    expect(i).toBeGreaterThan(0);
+    const row = src.slice(i, i + 400);
+    expect(row).toMatch(/bg-primary\/\[0\.07\]/);
+    expect(row).toMatch(/border-t-2 border-primary\/25/);
+    expect(row).toMatch(/w-full/);
+    expect(row).toMatch(/justify-end/);
+    expect(row).toMatch(/py-3\.5/);
+  });
+
   it("grupo com um único serviço também vira bloco não colapsável", () => {
     const layout = buildQuoteSectionLayout([section("s1", "Transporte Privativo", 0)], [service("a", 0, "s1")]);
     const groups = visibleSectionGroups(layout);
