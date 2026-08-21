@@ -284,10 +284,10 @@ describe("conjunto de escolha distribuído em duas seções", () => {
   it("troca exclusiva global entre seções e validação min/max global", () => {
     const { model, showcase } = build(services, groups, sections);
     const block = showcase.blocks.find((b) => b.kind === "choice")!;
-    const first = applyShowcaseSelection(showcase, [], "a");
-    expect(first.selected).toEqual(["a"]);
-    const swapped = applyShowcaseSelection(showcase, first.selected, "b");
-    expect(swapped.selected).toEqual(["b"]);
+    const first = applyShowcaseSelection(block, [], "a");
+    expect(first).toEqual(["a"]);
+    const swapped = applyShowcaseSelection(block, first, "b");
+    expect(swapped).toEqual(["b"]);
     expect(blockValidation(block, []).ok).toBe(false);
     expect(blockValidation(block, ["b"]).ok).toBe(true);
     expect(showcaseValidation(showcase, ["b"]).ok).toBe(true);
