@@ -49,6 +49,7 @@ export function BookingCartDialog() {
   if (!cart.enabled) return null;
 
   const success = cart.success;
+  const hasLinkedClient = cart.hasLinkedClient;
   const amountOf = (service: QuoteService) => {
     if (cart.hideAmounts) return null;
     const amount = Number((service as any).amount) || 0;
@@ -61,7 +62,7 @@ export function BookingCartDialog() {
       whatsapp,
       email,
       disclaimerAccepted: accepted,
-      hasLinkedClient: cart.hasLinkedClient,
+      hasLinkedClient,
     });
     if (contactError) {
       setLocalError(contactError);
@@ -96,9 +97,9 @@ export function BookingCartDialog() {
             <DialogDescription>
               {success
                 ? "A agência vai reconfirmar disponibilidade, valores e condições."
-                : cart.hasLinkedClient
-                  ? "Revise os serviços selecionados e envie sua solicitação."
-                  : "Revise os serviços selecionados e informe como a agência pode falar com você."}
+                : hasLinkedClient
+                  ? "Revise os serviços e confirme sua solicitação."
+                  : "Revise os serviços e informe como a agência pode falar com você."}
             </DialogDescription>
           </DialogHeader>
 
@@ -132,7 +133,7 @@ export function BookingCartDialog() {
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Esta solicitação ainda não é uma reserva confirmada. A agência entrará em contato{" "}
-                  {cart.hasLinkedClient ? "pelos canais cadastrados" : "pelo canal informado"}.
+                  {hasLinkedClient ? "pelos canais cadastrados" : "pelo canal informado"}.
                 </p>
               </div>
             ) : isEmpty ? (
@@ -241,7 +242,7 @@ export function BookingCartDialog() {
                     Revisão e envio
                   </p>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {!cart.hasLinkedClient && (
+                    {!hasLinkedClient && (
                       <>
                         <div className="space-y-1.5 sm:col-span-2">
                           <Label htmlFor="br-name" className="text-xs">
