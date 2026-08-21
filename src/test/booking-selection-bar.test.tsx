@@ -60,6 +60,16 @@ describe("MySelectionBar", () => {
     expect(isBookingSelectionBarActive()).toBe(false);
   });
 
+  it("é renderizada via portal no body (fixed real, sem containing block)", () => {
+    const view = render(
+      <div style={{ transform: "translateY(0)" }}>
+        <MySelectionBar {...props} />
+      </div>,
+    );
+    const bar = view.getByTestId("my-selection-bar");
+    expect(bar.parentElement).toBe(document.body);
+  });
+
   it("continua ativo com itens selecionados", () => {
     render(<MySelectionBar {...props} count={2} total={300} />);
     expect(isBookingSelectionBarActive()).toBe(true);
