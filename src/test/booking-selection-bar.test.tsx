@@ -12,7 +12,8 @@ import {
   isBookingSelectionBarActive,
   setBookingSelectionBarActive,
 } from "@/lib/bookingSelectionBar";
-import { MySelectionBar } from "@/components/quote/booking/MySelectionPanel";
+import { BookingCartLauncher } from "@/components/quote/booking/BookingCartLauncher";
+import { BookingCartProvider } from "@/components/quote/booking/BookingCartContext";
 
 afterEach(() => {
   cleanup();
@@ -50,38 +51,46 @@ describe("reserva de espaço inferior", () => {
   });
 });
 
-describe("MySelectionBar", () => {
-  const props = {
-    count: 0,
-    totalLabel: "Total",
-    total: null,
-    formatAmount: (v: number) => `R$ ${v}`,
-    onOpen: () => {},
+describe("carrinho flutuante do orçamento público", () => {
+  const quote = {
+    id: "q-bar",
+    booking_requests_enabled: true,
+    public_access_code: "CODE",
+    services: [{ id: "s1", service_type: "hotel", amount: 10, selection_mode: "optional", service_data: {} }],
+    sections: [],
+    choice_groups: [],
+  } as any;
+
+  const renderLauncher = (wrapper?: (node: React.ReactNode) => React.ReactNode) => {
+    const node = (
+      <BookingCartProvider quote={quote}>
+        <BookingCartLauncher />
+      </BookingCartProvider>
+    );
+    return render(<>{wrapper ? wrapper(node) : node}</>);
   };
 
-  it("ativa o marcador enquanto montada e o remove ao desmontar", () => {
-    const view = render(<MySelectionBar {...props} />);
+  it("ativa o marcador enquanto montado e o remove ao desmontar", () => {
+    const view = renderLauncher();
     expect(isBookingSelectionBarActive()).toBe(true);
-    const bar = view.getByTestId("my-selection-bar");
-    expect(bar.className).toContain("fixed");
-    expect(bar.className).toContain("bottom-0");
-    expect(bar.className).toContain("lg:hidden");
     view.unmount();
     expect(isBookingSelectionBarActive()).toBe(false);
   });
 
-  it("é renderizada via portal no body (fixed real, sem containing block)", () => {
-    const view = render(
-      <div style={{ transform: "translateY(0)" }}>
-        <MySelectionBar {...props} />
-      </div>,
-    );
-    const bar = view.getByTestId("my-selection-bar");
-    expect(bar.parentElement).toBe(document.body);
+  it("é renderizado via portal no body (fixed real, sem containing block)", () => {
+    const view = renderLauncher((node) => (
+      <div style={{ transform: "translateY(0)" }}>{node}</div>
+    ));
+    const buttons = view.getAllByRole("button", { name: /Abrir minha solicitação de reserva/i });
+    expect(buttons.length).toBe(2);
+    for (const btn of buttons) {
+      expect(btn.parentElement?.parentElement).toBe(document.body);
+      expect(btn.className).toContain("fixed");
+    }
   });
 
-  it("continua ativo com itens selecionados", () => {
-    render(<MySelectionBar {...props} count={2} total={300} />);
-    expect(isBookingSelectionBarActive()).toBe(true);
+  it("não usa mais a barra inferior larga", () => {
+    renderLauncher();
+    expect(document.querySelector('[data-testid="my-selection-bar"]')).toBeNull();
   });
 });
