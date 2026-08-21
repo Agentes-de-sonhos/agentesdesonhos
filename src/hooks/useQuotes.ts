@@ -5,7 +5,7 @@ import { parseQuoteDeleteError } from "@/lib/travelFiles";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { awardGamificationPoints, POINTS_CONFIG } from "@/lib/gamification";
-import type { Quote, QuoteSection, QuoteService, QuoteFormData, ServiceType, ServiceData } from "@/types/quote";
+import type { Quote, QuoteSection, QuoteSectionMetaInput, QuoteService, QuoteFormData, ServiceType, ServiceData } from "@/types/quote";
 import {
   computeQuoteTotalForPersistence,
   getQuotePricingMode,
