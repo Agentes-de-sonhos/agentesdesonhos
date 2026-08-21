@@ -4,7 +4,7 @@
 
 **Banco**
 - `quote_sections` (42 linhas): `id, quote_id, user_id, title, order_index`. É puramente visual — nenhum campo semântico (destino, período, tipo).
-- `quote_service_choice_groups` (5 linhas, todas `alternative`): `title, group_type ('alternative'|'free'), min_select, max_select, order_index`. Já existe o conceito de "conjunto de escolha", mas **não é vinculado a uma seção** e não tem flag de obrigatoriedade explícita.
+- `quote_service_choice_groups` (5 linhas, todas `alternative`, todas com `min_select=1, max_select=1`): `title, group_type ('alternative'|'free'), min_select, max_select, order_index`. Já existe o conceito de "conjunto de escolha", mas não é vinculado a uma seção. Há `CHECK quote_choice_groups_alternative_single` (alternative ⇒ min=1 e max=1) e o trigger `normalize_quote_choice_group` que força esses valores.
 - `quote_services`: `section_id`, `selection_mode ('optional'|'required'|'alternative'|'free')`, `choice_group_id`. Hoje em produção: 2375 `optional` e 13 `alternative`.
 - Fluxo de pedido já pronto e funcionando: `submit_quote_booking_request` (valida grupos no servidor, cria `quote_booking_requests` + `quote_booking_request_items` com snapshots, protocolo, `public_access_token`, idempotência), `sync_booking_request_opportunity`, `booking_request_file_number`, `booking_request_negotiation_stage`, `import_booking_request_into_operation`, deliveries/notificações (`pending_booking_request_deliveries`, `complete_booking_request_delivery`). 3 pedidos reais registrados.
 - `get_quote_by_public_code` **já devolve** `services`, `sections` e `choice_groups` (com min/max), além de `booking_requests_enabled` e `has_linked_client`, sem expor `client_id`.
@@ -19,14 +19,19 @@
 ## 2. Alterações de banco (mínimas, todas aditivas)
 
 1. `quote_sections`: adicionar `kind text default 'free'` (`'free'|'structured'`), `destination text`, `start_date date`, `end_date date`, `service_type text` — todos nulos/default, então seções antigas continuam sendo "grupo livre".
-2. `quote_service_choice_groups`: adicionar `section_id uuid references quote_sections(id) on delete set null`, `is_required boolean default false`, `service_type text`.
-3. Nada é removido nem renomeado. `min_select/max_select` continuam a fonte da regra (`alternative` = 1 de N; `free` = múltipla com min/max). "Serviço único" continua sendo serviço sem grupo (`optional`/`required`).
-4. `submit_quote_booking_request`: única mudança é passar a exigir escolha em grupo `free` apenas quando `is_required = true` (hoje usa só `min_select`) — mantendo compatibilidade quando a coluna é `false`.
+2. `quote_service_choice_groups`: adicionar apenas `service_type text`. **Não** haverá coluna `is_required` e **não** haverá `section_id` (ver item 4 abaixo).
+3. **Fonte única de obrigatoriedade: `min_select`.** O toggle "Obrigatório/Opcional" da interface grava exclusivamente `min_select` (obrigatório ⇒ `min_select = 1`; opcional ⇒ `min_select = 0`). `max_select` cuida somente do limite superior. Nenhum outro campo, flag ou `selection_mode` participa da decisão de obrigatoriedade — não existe precedência a resolver porque não existe segunda fonte.
+4. **Escolha única opcional passa a ser possível** relaxando o que hoje trava isso:
+   - substituir o CHECK `quote_choice_groups_alternative_single` por `group_type <> 'alternative' OR (max_select = 1 AND min_select IN (0,1))`;
+   - ajustar `normalize_quote_choice_group` para forçar apenas `max_select := 1` quando `group_type='alternative'`, preservando o `min_select` informado (`0` ou `1`, com fallback `1` quando nulo).
+   Resultado: única obrigatória = `min 1 / max 1`; única opcional = `min 0 / max 1`; múltipla = `min 0..n / max n|null`.
+5. `submit_quote_booking_request`: a validação de grupo passa a ser genérica por `min_select`/`max_select` (`count >= min_select` e, quando `max_select` não é nulo, `count <= max_select`), substituindo o caso especial "alternative exige exatamente 1". Para `min 1 / max 1` o resultado é idêntico ao atual.
+6. Nada é removido além do CHECK reescrito. "Serviço único" continua sendo serviço sem grupo (`optional`/`required`).
 
 ## 3. Componentes modificados
 
 - `QuoteServicesOrganizer.tsx` — editor de seção ganha alternância Livre/Estruturada e os campos opcionais (destino, período, tipo).
-- `QuoteBookingRequestSettings.tsx` / `useQuoteBookingConfig.ts` / `quoteBookingRules.ts` — criar grupos `free`, marcar grupo como obrigatório, vincular grupo a uma seção; sugestões de agrupamento (mesmo tipo + período) apenas como **sugestão**, nunca automáticas.
+- `QuoteBookingRequestSettings.tsx` / `useQuoteBookingConfig.ts` / `quoteBookingRules.ts` — criar grupos `free`, toggle Obrigatório/Opcional gravando só `min_select`, limite opcional em `max_select`; sugestões de agrupamento (mesmo tipo + período) apenas como **sugestão**, nunca automáticas. O conjunto não recebe seção manualmente: sua seção é derivada dos serviços que o compõem.
 - `OrcamentoPublico.tsx` — passa a renderizar a nova vitrine de seleção quando `booking_requests_enabled`.
 - `QuoteBookingRequestPanel.tsx` — deixa de abrir o wizard; passa a hospedar o estado da seleção + a barra "Minha seleção" + revisão/contato/envio (estados Compacto / Resumo / Sucesso já existentes são preservados).
 - `get_quote_by_public_code` — incluir os novos campos de seção/grupo no payload.
@@ -42,19 +47,27 @@
 
 ## 5. Regras de seleção propostas
 
-- Conjunto `alternative`: escolha única — selecionar outra opção troca automaticamente, sem perguntar sobre a anterior; feedback "Opção atualizada".
-- Conjunto `free`: múltipla livre, respeitando `min_select`/`max_select` quando definidos.
+- Conjunto `alternative` (`max_select = 1`): escolha única — selecionar outra opção troca automaticamente, sem perguntar sobre a anterior; feedback "Opção atualizada". Com `min_select = 0` o cliente pode não escolher nenhuma; com `min_select = 1` precisa escolher uma.
+- Conjunto `free`: múltipla, respeitando `min_select` (0 = opcional) e `max_select` quando definido.
 - Serviço sem grupo: `optional` = adicionar/remover; `required` = sempre incluído e não removível.
 - Pacote fechado (`pricing_mode = 'package'`) continua bloqueado, com tudo incluído.
-- Bloqueio de envio somente para conjunto explicitamente obrigatório (`alternative`, ou `free` com `is_required`/`min_select > 0`).
+- Bloqueio de envio **exclusivamente** quando `min_select >= 1` não é atendido — mesma expressão no cliente (`quoteBookingSelection.ts`) e no RPC.
 - Nenhuma inferência: dois hotéis no mesmo destino/período só competem se a agência os colocar no mesmo conjunto.
+
+### Coerência entre conjunto e seção
+
+A coluna `section_id` no conjunto seria uma segunda fonte de verdade sobre onde o conjunto aparece e poderia divergir do `section_id` dos serviços. Por isso ela é **eliminada da proposta**: `quoteChoiceSets.ts` deriva a seção do conjunto a partir dos serviços que o integram (a seção do primeiro serviço na ordem salva). Consequências:
+
+- Um conjunto cujos serviços estão em seções diferentes é renderizado uma única vez, na seção do primeiro serviço, e a UI da agência exibe um aviso ("as opções deste conjunto estão em seções diferentes") com ação de mover todas para a mesma seção — sem bloquear o envio.
+- O servidor não precisa validar coerência alguma: a regra de escolha depende só de `choice_group_id`, `min_select` e `max_select`, e a seção é apenas apresentação.
 
 ## 6. Compatibilidade com orçamentos existentes
 
 - Orçamento sem seções: os serviços aparecem em um bloco único "Sua viagem", cada um como serviço único.
 - Seções antigas: `kind = 'free'`, sem destino/período — renderizam como hoje (só título).
 - Serviços `optional` sem grupo: comportamento idêntico ao atual (adicionar/remover).
-- Os 13 serviços `alternative` existentes e seus 5 grupos passam a ser exibidos como conjunto de escolha única — mesma regra que o servidor já valida.
+- **Grupos legados preservados (verificado):** os 5 grupos existentes estão todos com `group_type='alternative', min_select=1, max_select=1`. Como a obrigatoriedade continua sendo lida de `min_select`, eles permanecem obrigatórios exatamente como hoje, e os 13 serviços `alternative` mantêm `choice_group_id`/`selection_mode` intactos. A migração **não faz UPDATE em dados** — apenas troca o CHECK e o trigger para *permitir* `min_select=0`; nenhum grupo legado opcional é convertido em obrigatório (e não existe nenhum grupo opcional hoje).
+- Nova regra genérica do RPC (`count >= min_select` e `count <= max_select`) devolve resultado idêntico ao atual para `min 1 / max 1`.
 - Os 3 pedidos já registrados e todo o histórico/CRM permanecem intactos: nenhuma coluna de `quote_booking_requests*` muda.
 
 ## 7. UX desktop
@@ -67,7 +80,8 @@ Cards em coluna única, imagem proporcional, zero rolagem horizontal; barra infe
 
 ## 9. Riscos e regressões
 
-- Divergência entre validação do cliente e do servidor em grupos `free` obrigatórios — mitigado mantendo `quoteBookingSelection.ts` como fonte única e espelhando a regra no RPC.
+- Divergência entre validação do cliente e do servidor — mitigado com uma única expressão (`min_select`/`max_select`) espelhada em `quoteBookingSelection.ts` e no RPC.
+- Relaxar o CHECK/trigger de `alternative` é irreversível na direção "dados"; mitigado por não alterar nenhuma linha existente.
 - Remover o wizard afeta os testes existentes (`quote-booking-wizard.test.ts`, `quote-booking-selection.test.ts`) — serão reescritos para a nova árvore.
 - Decisões salvas em localStorage pela chave `booking-wizard:<quoteId>` ficam órfãs — nova chave versionada, com descarte silencioso da antiga.
 - Orçamentos com muitos serviços podem pesar no mobile — imagens via `ResolvedServiceImage` com lazy loading.
@@ -75,9 +89,18 @@ Cards em coluna única, imagem proporcional, zero rolagem horizontal; barra infe
 
 ## 10. Etapas de implementação
 
-1. Migração aditiva (seções estruturadas + campos de grupo) e atualização de `get_quote_by_public_code`.
-2. `quoteChoiceSets.ts` + testes puros das regras (única / múltipla / serviço único / obrigatoriedade / numeração por conjunto).
-3. UI da agência: seção estruturada e conjuntos (criar `free`, marcar obrigatório, vincular à seção, sugestões não automáticas).
-4. Vitrine pública: cards, detalhes, conjuntos, microinteração.
+1. Migração mínima: campos de seção estruturada, `service_type` no conjunto, CHECK e trigger de `alternative` relaxados para aceitar `min_select ∈ {0,1}` com `max_select = 1`; `get_quote_by_public_code` passa a devolver os novos campos.
+2. `quoteChoiceSets.ts` + testes puros (única obrigatória, única opcional, múltipla com min/max, serviço único, numeração "Opção N" por conjunto, seção derivada dos serviços).
+3. UI da agência: seção Livre/Estruturada, criação de conjuntos `free`, toggle Obrigatório/Opcional gravando `min_select`, aviso de conjunto com serviços em seções diferentes, sugestões não automáticas.
+4. Vitrine pública: cards, "Ver detalhes", conjuntos, microinteração.
 5. "Minha seleção" + revisão + envio pelo RPC atual; remoção do wizard sequencial.
-6. Ajuste do RPC para grupo `free` obrigatório e testes de regressão do fluxo ponta a ponta (pedido → protocolo/file → oportunidade CRM → notificações), incluindo domínio White Label e orçamentos legados.
+6. Ajuste do RPC para a validação genérica por `min_select`/`max_select` e bateria de regressão ponta a ponta:
+   - acesso **anônimo** (sem sessão) ao link público;
+   - identificação da agência pelo **domínio White Label** e pelo formato `/{agency_slug}/{access_code}`;
+   - respeito integral a `hide_service_amounts`, valores detalhados e pacote fechado (nenhum valor inventado ou distribuído);
+   - **idempotência** do envio (mesma `idempotency_key` retorna o pedido existente, sem duplicar);
+   - geração/preservação de **protocolo e número de file** (`generate_booking_request_protocol`, `booking_request_file_number`);
+   - **CRM**: oportunidade única em etapa de Negociação (`sync_booking_request_opportunity`, `booking_request_negotiation_stage`) e importação em operação existente;
+   - **notificações/deliveries** (`pending_booking_request_deliveries`, `complete_booking_request_delivery`) e histórico do pedido;
+   - orçamentos **legados** (sem seções, sem grupos) e os 5 grupos existentes continuam funcionando;
+   - responsividade: smartphone pequeno/grande, tablet e desktop, sem rolagem horizontal.
