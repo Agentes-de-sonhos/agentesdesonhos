@@ -15757,8 +15757,18 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_public_quote_documents: {
-        Args: { p_quote_id: string }
+      get_public_quote_documents_by_public_code: {
+        Args: { p_agency_slug: string; p_code: string }
+        Returns: {
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+        }[]
+      }
+      get_public_quote_documents_by_share_token: {
+        Args: { p_share_token: string }
         Returns: {
           file_name: string
           file_path: string

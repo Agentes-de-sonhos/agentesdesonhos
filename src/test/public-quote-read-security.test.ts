@@ -25,8 +25,14 @@ describe("segurança da leitura pública de orçamentos", () => {
     expect(publicQuoteHook).not.toContain('from("quote_entry_extras")');
   });
 
-  it("documentos públicos são lidos por RPC", () => {
-    expect(publicPage).toContain("get_public_quote_documents");
+  it("documentos públicos são lidos por RPC atrelada ao link", () => {
+    expect(publicPage).toContain("get_public_quote_documents_by_share_token");
+    expect(publicPage).toContain("get_public_quote_documents_by_public_code");
     expect(publicPage).not.toContain('from("quote_documents")');
+  });
+
+  it("frontend não usa mais a RPC antiga por UUID do orçamento", () => {
+    expect(publicPage).not.toContain('rpc("get_public_quote_documents"');
+    expect(publicPage).not.toContain("p_quote_id");
   });
 });
