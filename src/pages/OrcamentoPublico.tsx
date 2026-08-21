@@ -1825,15 +1825,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </div>
         )}
 
-        {/* ─── Solicitação de reserva (White Label Premium) ─── */}
-        {(quote as any).booking_requests_enabled === true && (
-          <QuoteBookingRequestPanel
-            quote={quote as any}
-            agentProfile={agentProfile as any}
-            agencySlugOverride={agencySlugOverride}
-            accessCodeOverride={accessCodeOverride}
-          />
-        )}
+        {/* ─── Acesso ao carrinho (mesma revisão do carrinho fixo) ─── */}
+        <BookingCartCta />
 
         {/* ─── Validity ─── */}
         <div className="text-center space-y-1">
