@@ -1041,7 +1041,7 @@ function CollapsibleServiceCard({
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
                 <CreditCard className="h-4 w-4 text-primary" />
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/70">Parcelamento</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/70">Condições de pagamento</span>
             </div>
             <span className="text-lg sm:text-xl font-bold tracking-tight text-primary break-words leading-snug tabular-nums">
               {display}
@@ -1590,7 +1590,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <div className="text-center space-y-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Sua experiência</p>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Serviços incluídos</h2>
-              <p className="text-sm text-muted-foreground">Toque em cada item para ver os detalhes completos.</p>
+              <p className="text-sm text-muted-foreground">Consulte abaixo os detalhes de cada serviço.</p>
             </div>
             {(() => {
               const renderCard = (service: QuoteService, collapsible = true) => {
