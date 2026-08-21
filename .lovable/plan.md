@@ -66,7 +66,8 @@ A coluna `section_id` no conjunto seria uma segunda fonte de verdade sobre onde 
 - Orçamento sem seções: os serviços aparecem em um bloco único "Sua viagem", cada um como serviço único.
 - Seções antigas: `kind = 'free'`, sem destino/período — renderizam como hoje (só título).
 - Serviços `optional` sem grupo: comportamento idêntico ao atual (adicionar/remover).
-- Os 13 serviços `alternative` existentes e seus 5 grupos passam a ser exibidos como conjunto de escolha única — mesma regra que o servidor já valida.
+- **Grupos legados preservados (verificado):** os 5 grupos existentes estão todos com `group_type='alternative', min_select=1, max_select=1`. Como a obrigatoriedade continua sendo lida de `min_select`, eles permanecem obrigatórios exatamente como hoje, e os 13 serviços `alternative` mantêm `choice_group_id`/`selection_mode` intactos. A migração **não faz UPDATE em dados** — apenas troca o CHECK e o trigger para *permitir* `min_select=0`; nenhum grupo legado opcional é convertido em obrigatório (e não existe nenhum grupo opcional hoje).
+- Nova regra genérica do RPC (`count >= min_select` e `count <= max_select`) devolve resultado idêntico ao atual para `min 1 / max 1`.
 - Os 3 pedidos já registrados e todo o histórico/CRM permanecem intactos: nenhuma coluna de `quote_booking_requests*` muda.
 
 ## 7. UX desktop
