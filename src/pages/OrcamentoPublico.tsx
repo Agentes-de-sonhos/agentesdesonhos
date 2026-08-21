@@ -1216,7 +1216,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     },
     enabled: !!quote?.user_id && !agentProfileOverride,
   });
-  const agentProfile = agentProfileOverride ?? fetchedAgentProfile;
+  const agentProfile = agentProfileOverride ?? fetchedTokenAgentProfile ?? fetchedAgentProfile;
 
   if (isLoading) {
     return (
