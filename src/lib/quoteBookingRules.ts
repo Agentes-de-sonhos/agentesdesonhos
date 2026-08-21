@@ -5,10 +5,17 @@ export const GROUPED_MODES: QuoteSelectionMode[] = ["alternative", "free"];
 
 export const requiresGroup = (mode: QuoteSelectionMode) => GROUPED_MODES.includes(mode);
 
-/** Grupos "alternative" sempre operam como escolha única. */
-export function normalizeGroupLimits(group_type: "alternative" | "free") {
+/**
+ * Grupos "alternative" operam com máximo 1. A obrigatoriedade vem de
+ * `min_select` (0 = escolha única opcional, 1 = obrigatória) e o padrão de
+ * novos conjuntos permanece obrigatório para preservar o comportamento antigo.
+ */
+export function normalizeGroupLimits(
+  group_type: "alternative" | "free",
+  required = true,
+) {
   return group_type === "alternative"
-    ? { min_select: 1, max_select: 1 as number | null }
+    ? { min_select: required ? 1 : 0, max_select: 1 as number | null }
     : { min_select: 0, max_select: null as number | null };
 }
 

@@ -110,7 +110,8 @@ export function useQuoteBookingConfig(quoteId?: string) {
       optionCount: number;
     }) => {
       if (payload.group_type === "alternative") {
-        const limits = normalizeGroupLimits("alternative");
+        // Escolha única: máx. sempre 1; min 0 (opcional) ou 1 (obrigatória).
+        const limits = normalizeGroupLimits("alternative", (payload.min_select ?? 0) > 0);
         const { error } = await supabase
           .from("quote_service_choice_groups")
           .update(limits as any)

@@ -5,9 +5,12 @@ import { cn } from "@/lib/utils";
 import { BookingServiceCard } from "@/components/quote/booking/BookingServiceCard";
 import { BookingServiceDetails } from "@/components/quote/booking/BookingServiceDetails";
 import {
+  blockRequiresChoice,
   blockStatus,
   blockValidation,
   cardAction,
+  groupMax,
+  selectionBlockedReason,
   sectionMetaChips,
   type ShowcaseBlock,
   type ShowcaseModel,
@@ -97,11 +100,15 @@ export function QuoteBookingShowcase({
                 </Badge>
               </div>
 
-              {block.kind === "choice" && (
+              {block.kind === "choice" && block.group && (
                 <p className="text-[12px] text-muted-foreground">
-                  {block.group?.group_type === "alternative"
-                    ? "Escolha 1 opção. Ao selecionar outra, a troca é automática."
-                    : "Você pode selecionar mais de uma opção."}
+                  {groupMax(block.group) === 1
+                    ? blockRequiresChoice(block)
+                      ? "Escolha 1 opção. Ao selecionar outra, a troca é automática."
+                      : "Você pode escolher 1 opção — ou nenhuma."
+                    : groupMax(block.group) != null
+                      ? `Você pode selecionar até ${groupMax(block.group)} opção(ões).`
+                      : "Você pode selecionar mais de uma opção."}
                 </p>
               )}
 
@@ -119,6 +126,10 @@ export function QuoteBookingShowcase({
                     action={action}
                     selected={selected.includes(option.service.id) || action === "locked"}
                     amountLabel={amountLabel(option.service)}
+                    blockedReason={selectionBlockedReason(block, selected, option.service.id)}
+                    canDeselect={
+                      action === "toggle" || (action === "radio" && !blockRequiresChoice(block))
+                    }
                     onToggle={() => onToggle(block, option.service.id)}
                     onDetails={() => setDetails(option.service)}
                   />

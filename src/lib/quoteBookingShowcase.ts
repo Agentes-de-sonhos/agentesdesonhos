@@ -110,21 +110,25 @@ export interface ShowcaseModel {
   packageMode: boolean;
 }
 
-/** Conjunto é obrigatório quando exige no mínimo 1 escolha. */
+/**
+ * Obrigatoriedade vem SEMPRE de `min_select`, nunca do tipo do conjunto.
+ * Escolha única opcional = min 0 / max 1. Obrigatória = min 1 / max 1.
+ */
 export function groupIsRequired(group: QuoteChoiceGroup): boolean {
-  if (group.group_type === "alternative") return true; // o servidor exige exatamente 1
-  return (group.min_select ?? 0) > 0;
+  return groupMin(group) > 0;
 }
 
 export function groupMax(group: QuoteChoiceGroup): number | null {
-  if (group.group_type === "alternative") return 1;
+  if (group.group_type === "alternative") return group.max_select ?? 1;
   return group.max_select ?? null;
 }
 
 export function groupMin(group: QuoteChoiceGroup): number {
-  if (group.group_type === "alternative") return 1;
-  return Math.max(0, group.min_select ?? 0);
+  const min = Math.max(0, group.min_select ?? 0);
+  if (group.group_type === "alternative") return Math.min(min, 1);
+  return min;
 }
+
 
 /**
  * Monta os blocos da vitrine na ordem real do orçamento:
@@ -243,11 +247,14 @@ export function blockStatus(block: ShowcaseBlock, selected: readonly string[]): 
       : { label: "Opcional", tone: "neutral" };
   }
   const group = block.group!;
-  if (group.group_type === "alternative") {
-    return count === 1
-      ? { label: "1 opção escolhida", tone: "done" }
-      : { label: "Escolha 1 opção", tone: "pending" };
+  const isSingleChoice = groupMax(group) === 1;
+  if (isSingleChoice) {
+    if (count === 1) return { label: "1 opção escolhida", tone: "done" };
+    return groupMin(group) > 0
+      ? { label: "Escolha 1 opção", tone: "pending" }
+      : { label: "Opcional · escolha 1", tone: "neutral" };
   }
+
   const min = groupMin(group);
   const max = groupMax(group);
   if (min > 0 && count < min) {
@@ -262,20 +269,25 @@ export function blockStatus(block: ShowcaseBlock, selected: readonly string[]): 
   };
 }
 
-/** Mensagem específica de validação do bloco (null quando válido). */
+/**
+ * Mensagem específica de validação do bloco (null quando válido).
+ * O servidor rejeita apenas abaixo de `min_select` ou acima de `max_select`.
+ */
 export function blockValidation(block: ShowcaseBlock, selected: readonly string[]): string | null {
   if (block.kind !== "choice" || !block.group) return null;
   const group = block.group;
   const count = blockSelectedCount(block, selected);
-  if (group.group_type === "alternative") {
-    return count === 1 ? null : `Escolha exatamente 1 opção em "${group.title}".`;
-  }
   const min = groupMin(group);
   const max = groupMax(group);
-  if (count < min) return `Escolha pelo menos ${min} opção(ões) em "${group.title}".`;
+  if (count < min) {
+    return min === 1 && max === 1
+      ? `Escolha 1 opção em "${group.title}".`
+      : `Escolha pelo menos ${min} opção(ões) em "${group.title}".`;
+  }
   if (max != null && count > max) return `Escolha no máximo ${max} opção(ões) em "${group.title}".`;
   return null;
 }
+
 
 /** true quando o bloco já atingiu o máximo e novas escolhas apenas trocam. */
 export function blockAtLimit(block: ShowcaseBlock, selected: readonly string[]): boolean {
@@ -286,22 +298,55 @@ export function blockAtLimit(block: ShowcaseBlock, selected: readonly string[]):
 }
 
 /**
- * Ação de um card. `radio` = conjunto de escolha única (trocar sem perguntar),
+ * Ação de um card. `radio` = conjunto de escolha única (máx. 1 opção),
  * `locked` = incluído na proposta, `toggle` = adicionar/remover.
  */
 export type CardAction = "radio" | "toggle" | "locked";
 
 export function cardAction(block: ShowcaseBlock): CardAction {
   if (block.kind === "included") return "locked";
-  if (block.kind === "choice" && block.group?.group_type === "alternative") return "radio";
+  if (block.kind === "choice" && block.group && groupMax(block.group) === 1) return "radio";
   return "toggle";
+}
+
+/** true quando a escolha única do bloco é obrigatória (não pode ficar vazia). */
+export function blockRequiresChoice(block: ShowcaseBlock): boolean {
+  if (block.kind !== "choice" || !block.group) return false;
+  return groupMin(block.group) > 0;
+}
+
+/**
+ * Motivo pelo qual o clique não pode ser aplicado (null quando pode).
+ * Nunca removemos nada em silêncio: o cliente precisa decidir.
+ */
+export function selectionBlockedReason(
+  block: ShowcaseBlock,
+  selected: readonly string[],
+  serviceId: string,
+): string | null {
+  if (block.kind !== "choice" || !block.group) return null;
+  const isSelected = selected.includes(serviceId);
+  const group = block.group;
+  const max = groupMax(group);
+
+  // Escolha única obrigatória: clicar na opção já escolhida não esvazia o conjunto.
+  if (max === 1 && isSelected && groupMin(group) > 0) {
+    return `"${group.title}" exige 1 opção. Selecione outra opção para trocar.`;
+  }
+  // Múltipla escolha no limite: mantém a seleção e pede remoção consciente.
+  if (!isSelected && max != null && max > 1 && blockSelectedCount(block, selected) >= max) {
+    return `Você já escolheu ${max} opção(ões) em "${group.title}". Remova uma opção para escolher esta.`;
+  }
+  return null;
 }
 
 /**
  * Aplica o clique em um card da vitrine.
- * - escolha única: seleciona esta e remove as concorrentes (troca automática);
- * - múltipla escolha: alterna respeitando `max_select` (ao atingir o limite,
- *   um novo clique substitui a escolha mais antiga do conjunto);
+ * - escolha única: seleciona esta e remove a concorrente (troca automática);
+ *   quando obrigatória, clicar na já selecionada não esvazia o conjunto;
+ *   quando opcional, o clique remove;
+ * - múltipla escolha: alterna respeitando `max_select` — ao atingir o limite o
+ *   clique é ignorado (nada é removido em silêncio, ver `selectionBlockedReason`);
  * - avulso: alterna;
  * - incluído/pacote: sem efeito.
  */
@@ -314,6 +359,7 @@ export function applyShowcaseSelection(
   if (action === "locked") return [...selected];
   const inBlock = block.options.some((o) => o.service.id === serviceId);
   if (!inBlock) return [...selected];
+  if (selectionBlockedReason(block, selected, serviceId)) return [...selected];
 
   if (action === "radio") {
     const others = new Set(block.options.map((o) => o.service.id));
@@ -322,20 +368,9 @@ export function applyShowcaseSelection(
   }
 
   if (selected.includes(serviceId)) return selected.filter((id) => id !== serviceId);
-
-  const max = block.group ? groupMax(block.group) : null;
-  if (max != null) {
-    const chosen = block.options
-      .map((o) => o.service.id)
-      .filter((id) => selected.includes(id));
-    if (chosen.length >= max) {
-      const dropCount = chosen.length - max + 1;
-      const drop = new Set(chosen.slice(0, dropCount));
-      return [...selected.filter((id) => !drop.has(id)), serviceId];
-    }
-  }
   return [...selected, serviceId];
 }
+
 
 /** Primeira mensagem de validação da vitrine inteira (null quando pode enviar). */
 export function showcaseValidation(

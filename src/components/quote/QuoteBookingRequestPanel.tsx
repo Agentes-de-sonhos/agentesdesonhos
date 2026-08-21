@@ -43,12 +43,14 @@ import {
   legacyWizardStorageKey,
   pruneShowcaseSelection,
   resolveInitialSelection,
+  selectionBlockedReason,
   selectionCount,
   serializeSelection,
   showcaseStorageKey,
   showcaseValidation,
   type ShowcaseBlock,
 } from "@/lib/quoteBookingShowcase";
+
 import { QuoteBookingShowcase } from "@/components/quote/booking/QuoteBookingShowcase";
 import { MySelectionBar, MySelectionPanel } from "@/components/quote/booking/MySelectionPanel";
 import { serviceDigestTitle } from "@/lib/quoteServiceDigest";
@@ -95,7 +97,10 @@ export function QuoteBookingRequestPanel({
   const legacyKey = legacyWizardStorageKey(String(quote.id || ""));
   const [selected, setSelected] = useState<string[]>([]);
   const [selectionOpen, setSelectionOpen] = useState(false);
+  /** Aviso quando o clique não pode ser aplicado (limite/escolha obrigatória). */
+  const [blockedNotice, setBlockedNotice] = useState<string | null>(null);
   const [showErrors, setShowErrors] = useState(false);
+
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -135,16 +140,29 @@ export function QuoteBookingRequestPanel({
   };
 
   const handleToggle = (block: ShowcaseBlock, serviceId: string) => {
+    const blocked = selectionBlockedReason(block, selected, serviceId);
+    if (blocked) {
+      setBlockedNotice(blocked);
+      return;
+    }
+    setBlockedNotice(null);
     updateSelection(applyShowcaseSelection(block, selected, serviceId));
   };
 
   const handleRemove = (block: ShowcaseBlock | null, serviceId: string) => {
     if (block) {
+      const blocked = selectionBlockedReason(block, selected, serviceId);
+      if (blocked) {
+        setBlockedNotice(blocked);
+        return;
+      }
+      setBlockedNotice(null);
       updateSelection(applyShowcaseSelection(block, selected, serviceId));
       return;
     }
     updateSelection(selected.filter((id) => id !== serviceId));
   };
+
 
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = (v: number) => formatQuoteCurrency(v, currency);
@@ -357,15 +375,26 @@ export function QuoteBookingRequestPanel({
               </div>
             </div>
           ) : (
-            <QuoteBookingShowcase
-              showcase={showcase}
-              selected={selected}
-              hideAmounts={model.hideAmounts}
-              formatAmount={fmt}
-              onToggle={handleToggle}
-              showErrors={showErrors}
-            />
+            <>
+              <QuoteBookingShowcase
+                showcase={showcase}
+                selected={selected}
+                hideAmounts={model.hideAmounts}
+                formatAmount={fmt}
+                onToggle={handleToggle}
+                showErrors={showErrors}
+              />
+              {blockedNotice && (
+                <p
+                  className="rounded-xl border border-amber-300/60 bg-amber-50 p-3 text-xs font-medium text-amber-800"
+                  role="status"
+                >
+                  {blockedNotice}
+                </p>
+              )}
+            </>
           )}
+
 
           {!submitted && (
             <div className="rounded-2xl border border-border/50 bg-muted/30 p-4">
