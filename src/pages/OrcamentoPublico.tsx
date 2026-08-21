@@ -1033,16 +1033,22 @@ function CollapsibleServiceCard({
         const display = getServicePaymentDisplay(service.amount, payConfig, feeInfo);
         if (!display) return null;
         return (
-          <div className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-3 flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-0.5">
-              <CreditCard className="h-4 w-4 text-primary" />
+          <div
+            className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-4 flex flex-col items-center gap-2 text-center"
+            data-service-payment-footer={service.id}
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                <CreditCard className="h-4 w-4 text-primary" />
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/70">Parcelamento</span>
             </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/70">Parcelamento</span>
-              <span className="text-sm font-bold text-primary break-words leading-snug">{display}</span>
-            </div>
+            <span className="text-lg sm:text-xl font-bold tracking-tight text-primary break-words leading-snug tabular-nums">
+              {display}
+            </span>
           </div>
         );
+
       })()}
       {/* Ação inline de seleção — canto inferior direito do serviço. */}
       <BookingServiceActionRow service={service} />
