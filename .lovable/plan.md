@@ -125,3 +125,11 @@ Cards em coluna única, imagem proporcional, zero rolagem horizontal; barra infe
    - **notificações/deliveries** (`pending_booking_request_deliveries`, `complete_booking_request_delivery`) e histórico do pedido;
    - orçamentos **legados** (sem seções, sem grupos) e os 5 grupos existentes continuam funcionando;
    - responsividade: smartphone pequeno/grande, tablet e desktop, sem rolagem horizontal.
+7. Regressão específica de **elegibilidade White Label** (comparativa, sempre pela fonte de verdade, nunca por lista fixa):
+   - **conta White Label atual** (Premium + `agency_public_domains.is_active`): vê vitrine, conjuntos e "Minha seleção"; envio funciona ponta a ponta;
+   - **conta que recebe White Label depois**: com o domínio inativo/ausente o link público mostra o layout atual; ao ativar a linha em `agency_public_domains` (sem qualquer deploy), o mesmo link passa a exibir a nova experiência e a UI interna libera as novas configurações;
+   - **conta sem White Label** (inclusive Premium sem domínio ativo e não-Premium com domínio): layout público idêntico ao atual — snapshot antes/depois, nenhum componente novo montado, nenhuma chave de localStorage nova, e o RPC continua devolvendo `booking_requests_enabled = false`;
+   - **acesso por domínio personalizado** de conta elegível: nova UX presente, tema/branding White Label preservados;
+   - **acesso por URL pública alternativa/fallback** (`/{agency_slug}/{access_code}` com slug do perfil, `/orcamento/:token`, `seuorcamento.tur.br`): mesmo resultado do domínio personalizado, comprovando que o gate não depende do hostname;
+   - **tentativa de envio forçada** por conta não elegível (chamada direta ao RPC/Edge Function): rejeitada no servidor;
+   - **compatibilidade de dados**: as colunas novas continuam existindo para todas as contas (requisito 7), mas nenhuma superfície de UI nova é exibida a contas não elegíveis.
