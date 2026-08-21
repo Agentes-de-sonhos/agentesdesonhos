@@ -187,7 +187,7 @@ describe("regressões da revisão final", () => {
     const fs = await import("node:fs");
     const files = [
       "src/components/quote/QuoteBookingRequestPanel.tsx",
-      "src/components/quote/QuoteBookingWizardDialog.tsx",
+      "src/components/quote/booking/MySelectionPanel.tsx",
     ];
     for (const file of files) {
       const source = fs.readFileSync(file, "utf8");
