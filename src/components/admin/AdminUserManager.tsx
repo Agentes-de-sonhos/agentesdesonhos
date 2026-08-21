@@ -65,7 +65,7 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { clearImpersonationData, setImpersonationData, type ImpersonationData } from "@/lib/impersonation";
 import { UserFeatureAccessDialog } from "./UserFeatureAccessDialog";
-import { AgencyEntitlementsDialog } from "./AgencyEntitlementsDialog";
+import { WhiteLabelAdminDialog } from "./WhiteLabelAdminDialog";
 import { PLAN_LABELS, type SubscriptionPlan } from "@/types/subscription";
 import { AdminUserUsageReport } from "./AdminUserUsageReport";
 import {
@@ -128,7 +128,7 @@ export function AdminUserManager() {
   const [newUser, setNewUser] = useState({ name: "", email: "", phone: "", agency_name: "", role: "agente", plan: "essencial", password: "" });
   const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [featureAccessUser, setFeatureAccessUser] = useState<UserWithDetails | null>(null);
-  const [entitlementsUser, setEntitlementsUser] = useState<UserWithDetails | null>(null);
+  const [whiteLabelUser, setWhiteLabelUser] = useState<UserWithDetails | null>(null);
   const [setupLinkUser, setSetupLinkUser] = useState<UserWithDetails | null>(null);
   const [setupLinkUrl, setSetupLinkUrl] = useState<string>("");
   const { toast } = useToast();
@@ -748,11 +748,11 @@ export function AdminUserManager() {
                         {kind === "master" && <Button
                           variant="ghost"
                           size="icon"
-                          title="Pacote VIP da agência"
+                          title="White Label da agência"
                           className="text-amber-500 hover:text-amber-600"
-                          onClick={() => setEntitlementsUser(user)}
+                          onClick={() => setWhiteLabelUser(user)}
                         >
-                          <Crown className="h-4 w-4" />
+                          <Globe className="h-4 w-4" />
                         </Button>}
                         {can.resetPassword && <Button
                           variant="ghost"
@@ -1022,13 +1022,13 @@ export function AdminUserManager() {
           />
         )}
 
-        {/* Agency VIP Entitlements Dialog */}
-        {entitlementsUser && (
-          <AgencyEntitlementsDialog
-            open={!!entitlementsUser}
-            onOpenChange={(open) => !open && setEntitlementsUser(null)}
-            userId={entitlementsUser.user_id}
-            userName={entitlementsUser.agency_name || entitlementsUser.name}
+        {/* White Label administration */}
+        {whiteLabelUser && (
+          <WhiteLabelAdminDialog
+            open={!!whiteLabelUser}
+            onOpenChange={(open) => !open && setWhiteLabelUser(null)}
+            userId={whiteLabelUser.user_id}
+            userName={whiteLabelUser.agency_name || whiteLabelUser.name}
           />
         )}
 
