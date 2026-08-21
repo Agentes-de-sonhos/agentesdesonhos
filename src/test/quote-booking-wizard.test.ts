@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   applyBookingDecision,
@@ -177,69 +177,24 @@ describe("navegação livre e contagens", () => {
   });
 });
 
-describe("regressão de UI do pop-up", () => {
-  const dialog = readFileSync("src/components/quote/QuoteBookingWizardDialog.tsx", "utf8");
+describe("regressão de UI da vitrine de reserva", () => {
+  const card = readFileSync("src/components/quote/booking/BookingServiceCard.tsx", "utf8");
+  const showcase = readFileSync("src/components/quote/booking/QuoteBookingShowcase.tsx", "utf8");
+  const selection = readFileSync("src/components/quote/booking/MySelectionPanel.tsx", "utf8");
 
-  it("mantém Próximo serviço separado de Ver resumo e Ver todos", () => {
-    expect(dialog).toContain("Próximo serviço");
-    expect(dialog).toContain("Ir para o resumo");
-    expect(dialog).toContain("Ver resumo");
-    expect(dialog).toContain("Ver todos os serviços");
-    expect(dialog).toContain("Serviço anterior");
+  it("o pop-up sequencial antigo não existe mais", () => {
+    expect(existsSync("src/components/quote/QuoteBookingWizardDialog.tsx")).toBe(false);
   });
 
-  it("usa aria-pressed nas decisões e aria-current no modo todos", () => {
-    expect(dialog).toContain('aria-pressed={decided === "yes"}');
-    expect(dialog).toContain('aria-pressed={decided === "no"}');
-    expect(dialog).toContain('aria-current={current ? "true" : undefined}');
+  it("cards expõem estado de seleção acessível", () => {
+    expect(card).toContain("aria-pressed={!locked ? selected : undefined}");
   });
 
-  it("edição não força resumo nem fecha o pop-up", () => {
-    expect(dialog).toContain("editingSession.current && !wasPending");
-    expect(dialog).toContain("if (!editingSession.current) showMode(\"review\")");
+  it("Minha Seleção usa o resumo compacto com miniatura", () => {
+    expect(selection).toContain("<ServiceDigestCompact service={entry.service} withThumb />");
   });
 
-  it("review oferece voltar ao serviço e ver todos", () => {
-    expect(dialog).toContain("Voltar ao serviço {index + 1}");
-  });
-
-  it("sem overflow horizontal", () => {
-    expect(dialog).toContain("overflow-x-hidden");
-    expect(dialog).toContain("[overflow-wrap:anywhere]");
-  });
-
-  it("status do modo todos não depende só de cor", () => {
-    expect(dialog).toContain("Selecionado para reserva");
-    expect(dialog).toContain("Ainda não avaliado");
-  });
-});
-
-describe("estado visual dos botões de decisão", () => {
-  const dialog = readFileSync("src/components/quote/QuoteBookingWizardDialog.tsx", "utf8");
-
-  it("negativa em vermelho à esquerda e positiva em azul à direita", () => {
-    const noIndex = dialog.indexOf("Não quero este serviço");
-    const yesIndex = dialog.indexOf("Quero solicitar este serviço");
-    expect(noIndex).toBeGreaterThan(-1);
-    expect(yesIndex).toBeGreaterThan(noIndex);
-    expect(dialog).toContain("hover:bg-red-600");
-    expect(dialog).toContain("hover:bg-blue-600");
-    expect(dialog).not.toContain("Quero reservar<");
-  });
-
-  it("estados selecionados e aria-pressed coerentes", () => {
-    expect(dialog).toContain('bg-blue-600 text-white [&_svg]:text-white');
-    expect(dialog).toContain('border-red-600 bg-red-50 text-red-700');
-    expect(dialog).toContain('aria-pressed={decided === "yes"}');
-    expect(dialog).toContain('aria-pressed={decided === "no"}');
-  });
-
-  it("controles quebram sem overflow em telas estreitas", () => {
-    expect(dialog.match(/whitespace-normal/g)?.length ?? 0).toBeGreaterThanOrEqual(8);
-    expect(dialog).toContain("h-auto min-h-10 w-full min-w-0 max-w-full gap-1 whitespace-normal py-2 text-center leading-tight");
-    expect(dialog).toContain("h-4 w-4 shrink-0");
-    expect(dialog).toContain("h-3.5 w-3.5 shrink-0");
-    expect(dialog).toContain("overflow-x-hidden");
-    expect(dialog).not.toContain('className="h-12 w-full gap-2 text-base"');
+  it("vitrine organiza os serviços por blocos", () => {
+    expect(showcase).toContain("showcase.blocks.map");
   });
 });
