@@ -1216,6 +1216,25 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   });
   const agentProfile = agentProfileOverride ?? fetchedTokenAgentProfile ?? fetchedAgentProfile;
 
+  // Hooks precisam vir ANTES de qualquer retorno antecipado: a resolução do
+  // hero é calculada aqui para manter a ordem de hooks estável entre o estado
+  // de carregamento e o orçamento carregado.
+  const introImagesRaw: string[] = ((quote as any)?.destination_intro_images || []) as string[];
+  const heroFallbackService =
+    quote?.services?.find((s) => s.image_url) ||
+    quote?.services?.find((s) => (s as any).image_urls?.length) ||
+    null;
+  const heroFallbackRef: string | null =
+    (heroFallbackService as any)?.image_url ||
+    (heroFallbackService as any)?.image_urls?.[0] ||
+    null;
+  const { src: resolvedHeroFallback, onError: onHeroFallbackError } = useResolvedServiceImage(
+    introImagesRaw[0] ? null : heroFallbackRef,
+    heroFallbackService ? resolveServicePlaceId(heroFallbackService) : null,
+  );
+
+
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
