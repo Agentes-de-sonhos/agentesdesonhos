@@ -1637,7 +1637,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   )}
                 </div>
 
-                </div>
               );
             })()}
           </section>
