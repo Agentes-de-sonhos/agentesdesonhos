@@ -898,45 +898,66 @@ function CollapsibleServiceCard({
   const hotelHasMultipleRooms = type === "hotel" && Array.isArray(hotelRooms) && hotelRooms.length > 1;
   const effectiveShowPrice = showPrice && !hotelHasMultipleRooms;
 
+  const headerInner = (
+    <>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
+          {SERVICE_ICONS[type]}
+        </div>
+        <div className="flex flex-col items-start gap-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold uppercase tracking-wide">{getServiceLabel(service)}</span>
+            {service.option_label && (
+              <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
+                <Tag className="h-3 w-3" />
+                {service.option_label}
+              </Badge>
+            )}
+          </div>
+          <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
+            {summary}
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {effectiveShowPrice && (
+          <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
+        )}
+        {collapsible && (
+          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`} />
+        )}
+      </div>
+    </>
+  );
+
   return (
-    <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
-      {/* Clickable header */}
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
-            {SERVICE_ICONS[type]}
-          </div>
-          <div className="flex flex-col items-start gap-0.5">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold uppercase tracking-wide">{getServiceLabel(service)}</span>
-              {service.option_label && (
-                <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
-                  <Tag className="h-3 w-3" />
-                  {service.option_label}
-                </Badge>
-              )}
-            </div>
-            <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
-              {summary}
-            </span>
-          </div>
+    <div
+      className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80"
+      data-service-card={service.id}
+      data-collapsible={collapsible ? "true" : "false"}
+    >
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
+        >
+          {headerInner}
+        </button>
+      ) : (
+        <div
+          className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between`}
+          data-service-card-header="static"
+        >
+          {headerInner}
         </div>
-        <div className="flex items-center gap-3">
-          {effectiveShowPrice && (
-            <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
-          )}
-          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
-        </div>
-      </button>
+      )}
       {/* Collapsible body */}
       <div
         className="grid transition-all duration-300 ease-in-out"
-        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr", opacity: isOpen ? 1 : 0 }}
+        style={{ gridTemplateRows: expanded ? "1fr" : "0fr", opacity: expanded ? 1 : 0 }}
       >
+
         <div className="overflow-hidden">
         <div className="px-5 py-4 space-y-4">
           {isOpen && (() => {
