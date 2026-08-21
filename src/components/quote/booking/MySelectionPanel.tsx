@@ -183,8 +183,31 @@ interface BarProps {
  * Nunca cobre conteúdo — a página reserva espaço equivalente.
  */
 export function MySelectionBar({ count, totalLabel, total, formatAmount, onOpen }: BarProps) {
+  const barRef = useRef<HTMLDivElement | null>(null);
+
+  // Publica presença + altura real para que o WhatsApp flutuante suba acima.
+  useEffect(() => {
+    const el = barRef.current;
+    const sync = () => setBookingSelectionBarActive(true, el?.offsetHeight);
+    sync();
+    let observer: ResizeObserver | null = null;
+    if (el && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(sync);
+      observer.observe(el);
+    }
+    return () => {
+      observer?.disconnect();
+      setBookingSelectionBarActive(false);
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_30px_-20px_rgba(0,0,0,0.4)] backdrop-blur lg:hidden">
+    <div
+      ref={barRef}
+      data-testid="my-selection-bar"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_30px_-20px_rgba(0,0,0,0.4)] backdrop-blur lg:hidden"
+    >
+
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
