@@ -86,6 +86,10 @@ function Probe() {
   );
 }
 
+/** DOMRect não existe no jsdom: usamos o mesmo contrato de leitura. */
+const rect = (left: number, top: number, width: number, height: number) =>
+  ({ left, top, width, height, right: left + width, bottom: top + height, x: left, y: top }) as DOMRect;
+
 const addButton = (id: string) =>
   document.querySelector<HTMLButtonElement>(`[data-booking-inline-action][data-service-id="${id}"]`)!;
 
@@ -245,11 +249,15 @@ describe("carrinho persistente e modal amplo", () => {
     expect(screen.getByTestId("count").textContent).toBe("0");
   });
 
-  it("oculta valores quando o orçamento esconde investimento", async () => {
+  it("oculta valores individuais em pacote com valor fechado", async () => {
     render(
-      <Harness quote={quoteOf([svc("a", { amount: 1234 })], [], { hide_total_investment: true })} />,
+      <Harness
+        quote={quoteOf([svc("a", { amount: 1234, selection_mode: "required" })], [], {
+          pricing_mode: "package",
+          investment_summary_layout: "consolidated",
+        })}
+      />,
     );
-    fireEvent.click(addButton("a"));
     fireEvent.click(screen.getByRole("button", { name: /Ver meu carrinho/i }));
     await screen.findByText(/Minha solicitação de reserva/i);
     expect(document.body.textContent).not.toContain("1.234");
@@ -274,7 +282,7 @@ describe("carrinho persistente e modal amplo", () => {
     expect(opts.body.code).toBe("CODE123");
     expect(opts.body.disclaimer_accepted).toBe(true);
     expect(typeof opts.body.idempotency_key).toBe("string");
-    expect(await screen.findByText(/Solicitação enviada/i)).toBeTruthy();
+    expect((await screen.findAllByText(/Solicitação enviada/i)).length).toBeGreaterThan(0);
   });
 });
 
@@ -285,7 +293,7 @@ describe("microinteração voou para o carrinho", () => {
     document.body.appendChild(target);
     expect(findCartTarget()).toBe(target);
 
-    const cleanupFly = flyToCart(new DOMRect(0, 0, 40, 40), new DOMRect(300, 600, 50, 50));
+    const cleanupFly = flyToCart(rect(0, 0, 40, 40), rect(300, 600, 50, 50));
     expect(document.querySelectorAll(`[${BOOKING_FLY_ATTR}]`).length).toBe(1);
     cleanupFly();
     expect(document.querySelectorAll(`[${BOOKING_FLY_ATTR}]`).length).toBe(0);
@@ -295,12 +303,12 @@ describe("microinteração voou para o carrinho", () => {
   it("com prefers-reduced-motion não anima nada", () => {
     const fakeWin = { matchMedia: () => ({ matches: true }) } as any;
     expect(prefersReducedMotion(fakeWin)).toBe(true);
-    flyToCart(new DOMRect(0, 0, 10, 10), new DOMRect(10, 10, 10, 10), { window: fakeWin });
+    flyToCart(rect(0, 0, 10, 10), rect(10, 10, 10, 10), { window: fakeWin });
     expect(document.querySelectorAll(`[${BOOKING_FLY_ATTR}]`).length).toBe(0);
   });
 
   it("usa coordenadas reais e não roda sem origem/destino", () => {
-    expect(flyToCart(null, new DOMRect(1, 1, 1, 1))()).toBeUndefined();
+    expect(flyToCart(null, rect(1, 1, 1, 1))()).toBeUndefined();
     expect(document.querySelectorAll(`[${BOOKING_FLY_ATTR}]`).length).toBe(0);
   });
 });

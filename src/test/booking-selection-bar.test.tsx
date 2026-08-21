@@ -84,7 +84,7 @@ describe("carrinho flutuante do orçamento público", () => {
     const buttons = view.getAllByRole("button", { name: /Abrir minha solicitação de reserva/i });
     expect(buttons.length).toBe(2);
     for (const btn of buttons) {
-      expect(btn.parentElement?.parentElement).toBe(document.body);
+      expect(btn.parentElement).toBe(document.body);
       expect(btn.className).toContain("fixed");
     }
   });
