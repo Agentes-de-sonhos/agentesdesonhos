@@ -10974,27 +10974,39 @@ export type Database = {
       quote_sections: {
         Row: {
           created_at: string
+          destination: string | null
+          end_date: string | null
           id: string
           order_index: number
           quote_id: string
+          service_type: string | null
+          start_date: string | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          destination?: string | null
+          end_date?: string | null
           id?: string
           order_index?: number
           quote_id: string
+          service_type?: string | null
+          start_date?: string | null
           title: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          destination?: string | null
+          end_date?: string | null
           id?: string
           order_index?: number
           quote_id?: string
+          service_type?: string | null
+          start_date?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -15736,9 +15748,13 @@ export type Database = {
       get_quote_sections_by_share_token: {
         Args: { p_share_token: string }
         Returns: {
+          destination: string
+          end_date: string
           id: string
           order_index: number
           quote_id: string
+          service_type: string
+          start_date: string
           title: string
         }[]
       }
