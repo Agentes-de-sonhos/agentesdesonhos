@@ -5,13 +5,11 @@ import {
   Check,
   ClipboardCheck,
   Info,
-  ListChecks,
   Loader2,
   Lock,
-  Pencil,
   ShieldCheck,
+  ShoppingBag,
 } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,20 +36,24 @@ import {
   effectiveSelectionIds,
   quoteHasLinkedClient,
   validateBookingContact,
-  validateBookingSelection,
 } from "@/lib/quoteBookingSelection";
 import {
-  bookingWizardProgress,
-  bookingWizardStorageKey,
-  buildBookingWizardSteps,
-  decidedSelectionIds,
-  parseStoredWizardState,
-  pruneBookingDecisions,
-  type BookingDecisionMap,
-} from "@/lib/quoteBookingWizard";
-import { QuoteBookingWizardDialog } from "@/components/quote/QuoteBookingWizardDialog";
+  applyShowcaseSelection,
+  buildBookingShowcase,
+  legacyWizardStorageKey,
+  pruneShowcaseSelection,
+  resolveInitialSelection,
+  selectionCount,
+  serializeSelection,
+  showcaseStorageKey,
+  showcaseValidation,
+  type ShowcaseBlock,
+} from "@/lib/quoteBookingShowcase";
+import { QuoteBookingShowcase } from "@/components/quote/booking/QuoteBookingShowcase";
+import { MySelectionBar, MySelectionPanel } from "@/components/quote/booking/MySelectionPanel";
 import { serviceDigestTitle } from "@/lib/quoteServiceDigest";
 import { ServiceDigestCompact } from "@/components/quote/ServiceDigestCompact";
+import { formatFileNumber } from "@/lib/travelFiles";
 
 interface Props {
   quote: Quote;
@@ -61,8 +63,6 @@ interface Props {
   /** Código público do orçamento vindo da rota (fonte preferida). */
   accessCodeOverride?: string;
 }
-
-import { formatFileNumber } from "@/lib/travelFiles";
 
 interface SuccessState {
   protocol: string;
@@ -74,23 +74,28 @@ interface SuccessState {
 /** Título único do serviço, resolvido pelo digest compartilhado. */
 const serviceTitle = (service: QuoteService): string => serviceDigestTitle(service);
 
-export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverride, accessCodeOverride }: Props) {
+export function QuoteBookingRequestPanel({
+  quote,
+  agentProfile,
+  agencySlugOverride,
+  accessCodeOverride,
+}: Props) {
   const services = (quote.services || []) as QuoteService[];
   const groups = ((quote as any).choice_groups || []) as QuoteChoiceGroup[];
   const model = useMemo(
     () => buildBookingSelectionModel(quote, services, groups),
     [quote, services, groups],
   );
-
-  // Escolha assistida: o cliente decide um serviço por vez, na ordem do orçamento.
-  const steps = useMemo(
-    () => buildBookingWizardSteps(model, quote.sections || [], groups),
+  const showcase = useMemo(
+    () => buildBookingShowcase(model, quote.sections || [], groups),
     [model, quote.sections, groups],
   );
-  const storageKey = bookingWizardStorageKey(String(quote.id || ""));
-  const [decisions, setDecisions] = useState<BookingDecisionMap>({});
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [wizardStart, setWizardStart] = useState<"flow" | "all" | "review">("flow");
+
+  const storageKey = showcaseStorageKey(String(quote.id || ""));
+  const legacyKey = legacyWizardStorageKey(String(quote.id || ""));
+  const [selected, setSelected] = useState<string[]>([]);
+  const [selectionOpen, setSelectionOpen] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -102,30 +107,44 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const [success, setSuccess] = useState<SuccessState | null>(null);
   const idempotencyKey = useRef<string>(crypto.randomUUID());
 
-  // Retoma escolhas anteriores (o cliente pode fechar a página e voltar depois).
+  // Retoma a seleção anterior e converte a seleção antiga do wizard, se existir.
   useEffect(() => {
     if (!quote.id) return;
     try {
-      const stored = parseStoredWizardState(localStorage.getItem(storageKey));
-      setDecisions(pruneBookingDecisions(steps, stored.decisions));
+      const { selected: initial, migrated } = resolveInitialSelection(
+        model,
+        localStorage.getItem(storageKey),
+        localStorage.getItem(legacyKey),
+      );
+      setSelected(initial);
+      if (migrated) localStorage.setItem(storageKey, serializeSelection(initial));
     } catch {
       /* armazenamento indisponível: segue sem retomar */
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quote.id, steps.length]);
+  }, [quote.id, services.length]);
 
-  const updateDecisions = (next: BookingDecisionMap) => {
-    const pruned = pruneBookingDecisions(steps, next);
-    setDecisions(pruned);
+  const updateSelection = (next: string[]) => {
+    const pruned = pruneShowcaseSelection(model, next);
+    setSelected(pruned);
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ decisions: pruned, reviewed: false }));
+      localStorage.setItem(storageKey, serializeSelection(pruned));
     } catch {
       /* ignora falha de armazenamento */
     }
   };
 
-  const selected = useMemo(() => decidedSelectionIds(decisions), [decisions]);
-  const progress = bookingWizardProgress(steps, decisions);
+  const handleToggle = (block: ShowcaseBlock, serviceId: string) => {
+    updateSelection(applyShowcaseSelection(block, selected, serviceId));
+  };
+
+  const handleRemove = (block: ShowcaseBlock | null, serviceId: string) => {
+    if (block) {
+      updateSelection(applyShowcaseSelection(block, selected, serviceId));
+      return;
+    }
+    updateSelection(selected.filter((id) => id !== serviceId));
+  };
 
   const { currency } = getQuoteCurrencyInfo(quote);
   const fmt = (v: number) => formatQuoteCurrency(v, currency);
@@ -136,8 +155,9 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
   const hasLinkedClient = quoteHasLinkedClient(quote);
 
   const selectionIds = effectiveSelectionIds(model, selected);
-  const selectionError = validateBookingSelection(model, selected);
+  const selectionError = showcaseValidation(showcase, model, selected);
   const { total, label: totalLabel } = bookingSelectionTotal(quote, model, selected);
+  const count = selectionCount(model, selected);
 
   const agencySlug =
     agencySlugOverride || agencyNameToSlug((agentProfile as any)?.agency_name || "");
@@ -148,12 +168,14 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
 
   const openDialog = () => {
     if (selectionError) {
-      toast.error(selectionError);
+      setShowErrors(true);
+      setSelectionOpen(false);
       return;
     }
     idempotencyKey.current = crypto.randomUUID();
     setError(null);
     setSuccess(null);
+    setSelectionOpen(false);
     setOpen(true);
   };
 
@@ -240,31 +262,23 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
           </span>
         </span>
         {!model.hideAmounts && amount > 0 && (
-          <span className="ml-auto break-words text-sm font-semibold text-foreground">{fmt(amount)}</span>
+          <span className="ml-auto break-words text-sm font-semibold text-foreground">
+            {fmt(amount)}
+          </span>
         )}
       </div>
     );
   };
 
-  const openWizard = (start: "flow" | "all" | "review") => {
-    setWizardStart(start);
-    setWizardOpen(true);
-  };
-
-  const chosenSteps = steps.filter((s) => decisions[s.serviceId] === "yes");
-  const noChoicesYet = progress.decided === 0;
-  // Estado 3: solicitação já enviada — não volta ao estado inicial nem permite reenvio.
+  // Estado final: solicitação já enviada — não volta ao início nem permite reenvio.
   const submitted = !!success;
-  const compactState = !model.packageMode && noChoicesYet && !submitted;
-  const showSummary = model.packageMode || (!noChoicesYet && !submitted);
+  const ctaLabel = bookingCtaLabel(model, selectionIds.length);
 
   const headerTitle = model.packageMode
     ? "Solicitar reserva deste pacote"
     : submitted
       ? "Solicitação enviada à agência"
-      : noChoicesYet
-        ? "Quer solicitar a reserva?"
-        : "Escolha o que deseja reservar";
+      : "Escolha o que deseja reservar";
 
   return (
     <section className="animate-fade-up" aria-labelledby="booking-request-title">
@@ -281,6 +295,20 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               {headerTitle}
             </h2>
           </div>
+          {!model.packageMode && !submitted && (
+            <Button
+              type="button"
+              variant="outline"
+              className="hidden shrink-0 gap-2 bg-white/70 lg:inline-flex"
+              onClick={() => setSelectionOpen(true)}
+            >
+              <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+              Minha seleção
+              <Badge variant="secondary" className="text-[10px]">
+                {count}
+              </Badge>
+            </Button>
+          )}
         </div>
 
         <div className="space-y-4 px-5 py-5 sm:px-6">
@@ -289,10 +317,6 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               Este orçamento tem valor fechado de pacote: todos os serviços abaixo são solicitados
               em conjunto.
             </p>
-          ) : compactState ? (
-            <p className="text-sm text-muted-foreground">
-              Escolha os serviços que deseja solicitar à agência.
-            </p>
           ) : submitted ? (
             <p className="text-sm text-muted-foreground">
               A agência irá reconfirmar disponibilidade, valores e condições antes de efetivar os
@@ -300,29 +324,13 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Confira os serviços escolhidos ou continue avaliando as opções do orçamento.
+              Explore as opções, compare e selecione o que deseja solicitar. Nada é reservado,
+              vendido ou cobrado nesta etapa.
             </p>
           )}
 
           {model.packageMode ? (
             <div className="space-y-2">{services.map(renderLockedRow)}</div>
-          ) : compactState ? (
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() => openWizard("flow")}
-                className="w-full rounded-2xl border border-primary/30 bg-primary/5 p-4 text-left transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <span className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground">
-                  <ListChecks className="h-4 w-4" aria-hidden="true" />
-                  Escolher serviços
-                </span>
-                <span className="mt-3 block text-center text-[12px] leading-relaxed text-muted-foreground">
-                  Nenhuma reserva será feita agora. Você apenas indicará os serviços que deseja
-                  solicitar.
-                </span>
-              </button>
-            </div>
           ) : submitted ? (
             <div className="space-y-3">
               <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
@@ -349,127 +357,81 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              {model.requiredServices.length > 0 && (
-                <div className="space-y-2">{model.requiredServices.map(renderLockedRow)}</div>
-              )}
+            <QuoteBookingShowcase
+              showcase={showcase}
+              selected={selected}
+              hideAmounts={model.hideAmounts}
+              formatAmount={fmt}
+              onToggle={handleToggle}
+              showErrors={showErrors}
+            />
+          )}
 
-              <div className="space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Suas escolhas ({chosenSteps.length})
-                    </p>
-                    <Badge variant={progress.complete ? "secondary" : "outline"} className="text-[10px]">
-                      {progress.decided} de {progress.total} serviços avaliados
-                    </Badge>
-                  </div>
-
-                  {chosenSteps.length === 0 ? (
-                    <p className="rounded-xl border border-dashed border-border/60 bg-muted/20 p-3 text-sm text-muted-foreground">
-                      Você ainda não escolheu nenhum serviço para reservar.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {chosenSteps.map((s) => {
-                        const amount = Number((s.service as any).amount) || 0;
-                        return (
-                          <div
-                            key={s.serviceId}
-                            className="flex w-full min-w-0 max-w-full flex-wrap items-start gap-3 rounded-xl border border-primary/40 bg-primary/5 p-3 sm:p-4"
-                          >
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            <ServiceDigestCompact service={s.service} withThumb />
-                            {!model.hideAmounts && amount > 0 && (
-                              <span className="ml-auto break-words text-sm font-semibold text-foreground">
-                                {fmt(amount)}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={() => openWizard("review")}
-                    >
-                      <ListChecks className="h-4 w-4" /> Ver resumo das escolhas
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={() => openWizard(progress.complete ? "all" : "flow")}
-                    >
-                      <Pencil className="h-4 w-4" />
-                      {progress.complete ? "Editar escolhas" : "Continuar escolhendo"}
-                    </Button>
-                  </div>
+          {!submitted && (
+            <div className="rounded-2xl border border-border/50 bg-muted/30 p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {totalLabel}
+                </p>
+                <p className="text-lg font-bold text-foreground">
+                  {total != null ? fmt(total) : "A confirmar com a agência"}
+                </p>
               </div>
+              <p className="mt-2 flex gap-2 text-[12px] leading-relaxed text-muted-foreground">
+                <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>{BOOKING_REQUEST_DISCLAIMER}</span>
+              </p>
             </div>
           )}
 
-          {showSummary && (
-          <div className="rounded-2xl border border-border/50 bg-muted/30 p-4">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {totalLabel}
-              </p>
-              <p className="text-lg font-bold text-foreground">
-                {total != null ? fmt(total) : "A confirmar com a agência"}
-              </p>
-            </div>
-            <p className="mt-2 flex gap-2 text-[12px] leading-relaxed text-muted-foreground">
-              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span>{BOOKING_REQUEST_DISCLAIMER}</span>
-            </p>
-          </div>
-          )}
-
-          {showSummary && selectionError && (
+          {!submitted && showErrors && selectionError && (
             <p className="text-xs font-medium text-destructive" role="alert">
               {selectionError}
             </p>
           )}
 
-          {showSummary && (
+          {!submitted && (
             <Button
               type="button"
               size="lg"
-              className="w-full gap-2"
+              className="min-h-[48px] w-full gap-2"
               onClick={openDialog}
-              disabled={!!selectionError || (!model.packageMode && selectionIds.length === 0)}
             >
               <BadgeCheck className="h-4 w-4" />
-              {bookingCtaLabel(model, selectionIds.length)}
+              {ctaLabel}
             </Button>
           )}
         </div>
       </div>
 
-      {!model.packageMode && steps.length > 0 && (
-        <QuoteBookingWizardDialog
-          open={wizardOpen}
-          onOpenChange={setWizardOpen}
-          steps={steps}
-          decisions={decisions}
-          onDecisionsChange={updateDecisions}
-          includedServices={model.requiredServices}
-          formatAmount={fmt}
-          hideAmounts={model.hideAmounts}
-          totalLabel={totalLabel}
-          selectedTotal={total}
-          selectionError={selectionError}
-          startAt={wizardStart}
-          onRequest={() => {
-            setWizardOpen(false);
-            openDialog();
-          }}
-        />
+      {/* Espaço reservado para a barra fixa não cobrir o conteúdo no mobile. */}
+      {!model.packageMode && !submitted && <div aria-hidden="true" className="h-24 lg:hidden" />}
+
+      {!model.packageMode && !submitted && (
+        <>
+          <MySelectionBar
+            count={count}
+            totalLabel={totalLabel}
+            total={total}
+            formatAmount={fmt}
+            onOpen={() => setSelectionOpen(true)}
+          />
+          <MySelectionPanel
+            open={selectionOpen}
+            onOpenChange={setSelectionOpen}
+            showcase={showcase}
+            selected={selected}
+            count={count}
+            hideAmounts={model.hideAmounts}
+            formatAmount={fmt}
+            totalLabel={totalLabel}
+            total={total}
+            validationError={selectionError}
+            ctaLabel={ctaLabel}
+            onRemove={handleRemove}
+            onSubmit={openDialog}
+          />
+        </>
       )}
 
       <Dialog open={open} onOpenChange={(v) => (submitting ? null : setOpen(v))}>
@@ -563,46 +525,54 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
 
               <div className="grid gap-3 sm:grid-cols-2">
                 {!hasLinkedClient && (
-                <>
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="br-name" className="text-xs">Nome completo *</Label>
-                  <Input
-                    id="br-name"
-                    value={name}
-                    maxLength={200}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Seu nome"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="br-whats" className="text-xs">WhatsApp</Label>
-                  <Input
-                    id="br-whats"
-                    value={whatsapp}
-                    maxLength={40}
-                    inputMode="tel"
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="br-email" className="text-xs">E-mail</Label>
-                  <Input
-                    id="br-email"
-                    type="email"
-                    value={email}
-                    maxLength={200}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="voce@email.com"
-                  />
-                </div>
-                <p className="text-[11px] text-muted-foreground sm:col-span-2">
-                  Informe pelo menos WhatsApp ou e-mail.
-                </p>
-                </>
+                  <>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="br-name" className="text-xs">
+                        Nome completo *
+                      </Label>
+                      <Input
+                        id="br-name"
+                        value={name}
+                        maxLength={200}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Seu nome"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="br-whats" className="text-xs">
+                        WhatsApp
+                      </Label>
+                      <Input
+                        id="br-whats"
+                        value={whatsapp}
+                        maxLength={40}
+                        inputMode="tel"
+                        onChange={(e) => setWhatsapp(e.target.value)}
+                        placeholder="(11) 99999-9999"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="br-email" className="text-xs">
+                        E-mail
+                      </Label>
+                      <Input
+                        id="br-email"
+                        type="email"
+                        value={email}
+                        maxLength={200}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="voce@email.com"
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground sm:col-span-2">
+                      Informe pelo menos WhatsApp ou e-mail.
+                    </p>
+                  </>
                 )}
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="br-notes" className="text-xs">Observações (opcional)</Label>
+                  <Label htmlFor="br-notes" className="text-xs">
+                    Observações (opcional)
+                  </Label>
                   <Textarea
                     id="br-notes"
                     rows={3}
@@ -633,7 +603,11 @@ export function QuoteBookingRequestPanel({ quote, agentProfile, agencySlugOverri
 
               <div className="flex flex-col gap-2 sm:flex-row-reverse">
                 <Button type="button" className="w-full gap-2" onClick={submit} disabled={submitting}>
-                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                  {submitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="h-4 w-4" />
+                  )}
                   {submitting ? "Enviando…" : "Enviar solicitação"}
                 </Button>
                 <Button
