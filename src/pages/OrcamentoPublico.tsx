@@ -809,20 +809,23 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
   }
 
   return (
-    <div className="pt-4 mt-2 border-t border-border/50 space-y-2">
+    <div
+      className="pt-5 mt-3 border-t border-border/50 space-y-3 text-center"
+      data-service-investment-inline={service.id}
+    >
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
         Condições de pagamento
       </p>
       {rows.length > 0 && (
-        <div className="space-y-1">
+        <div className="space-y-2">
           {rows.map((r, i) => (
-            <p key={i} className="leading-snug flex flex-wrap items-baseline gap-x-1.5">
-              <span className="text-xs sm:text-sm text-muted-foreground">{r.label}:</span>
+            <p key={i} className="leading-snug flex flex-wrap items-baseline justify-center gap-x-2">
+              <span className="text-sm sm:text-base text-muted-foreground">{r.label}:</span>
               <span
                 className={
                   r.emphasis
                     ? "text-lg sm:text-xl font-bold tracking-tight text-primary tabular-nums"
-                    : "text-sm font-semibold text-foreground tabular-nums"
+                    : "text-base font-semibold text-foreground tabular-nums"
                 }
               >
                 {r.value}
@@ -831,12 +834,12 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
           ))}
         </div>
       )}
-      <div className="flex flex-wrap items-baseline gap-x-1.5 text-xs sm:text-sm text-foreground/80">
+      <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-sm sm:text-base text-foreground/80">
         <span className="text-muted-foreground">Valor do serviço:</span>
         <span className="font-semibold text-foreground tabular-nums">{fmt(amount)}</span>
       </div>
       {methodLabel && (
-        <div className="flex flex-wrap items-baseline gap-x-1.5 text-xs sm:text-sm text-foreground/80">
+        <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-xs sm:text-sm text-foreground/80">
           <span className="text-muted-foreground">Forma de pagamento:</span>
           <span className="font-medium text-foreground">{methodLabel}</span>
         </div>
@@ -844,6 +847,7 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
     </div>
   );
 }
+
 
 function CollapsibleServiceCard({
   service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote, showInvestmentInline = false,
