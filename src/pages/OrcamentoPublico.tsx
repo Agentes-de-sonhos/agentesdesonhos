@@ -851,9 +851,18 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
 
 function CollapsibleServiceCard({
   service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote, showInvestmentInline = false,
+  collapsible = true,
 }: {
   service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean; quote?: Quote; showInvestmentInline?: boolean;
+  /**
+   * Quando false (serviços dentro de grupos/seções reais), o card não colapsa:
+   * o cabeçalho deixa de ser interativo, o ChevronDown desaparece e o conteúdo
+   * é sempre completo. Abrir/fechar passa a ser papel do PublicSectionAccordion.
+   */
+  collapsible?: boolean;
 }) {
+  const expanded = collapsible ? isOpen : true;
+
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
   const colorClass = SERVICE_COLORS[type] || SERVICE_COLORS.other;
