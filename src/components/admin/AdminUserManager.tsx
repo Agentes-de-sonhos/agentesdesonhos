@@ -47,7 +47,7 @@ import {
   CreditCard,
   UserPlus,
   KeyRound,
-  Crown,
+  Globe,
   Trash2,
   Eye,
   EyeOff,
