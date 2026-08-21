@@ -144,6 +144,29 @@ export function buildBookingShowcase(
   const groupById = new Map((groups || []).map((g) => [g.id, g]));
   const blocks: ShowcaseBlock[] = [];
 
+  /**
+   * Conjuntos de escolha são independentes de seção/pasta: um mesmo
+   * `choice_group_id` pode ter membros em seções diferentes. Por isso os
+   * membros são coletados na ordem global real do orçamento e cada conjunto
+   * gera exatamente UM bloco, posicionado na primeira ocorrência real.
+   */
+  const globalOrder: QuoteService[] = [
+    ...layout.groups.flatMap((g) => g.services),
+    ...layout.unsectioned,
+  ];
+  const groupMembers = new Map<string, QuoteService[]>();
+  if (!model.packageMode) {
+    for (const service of globalOrder) {
+      if (modeOf(service) === "required") continue;
+      const gid = (service as any).choice_group_id as string | null | undefined;
+      if (!gid || !groupById.has(gid)) continue;
+      const list = groupMembers.get(gid);
+      if (list) list.push(service);
+      else groupMembers.set(gid, [service]);
+    }
+  }
+  const emittedGroups = new Set<string>();
+
   const buildScope = (section: QuoteSection | null, services: QuoteService[]) => {
     const meta = sectionMeta(section);
     const sectionId = section?.id ?? null;
@@ -176,22 +199,24 @@ export function buildBookingShowcase(
       const groupId = (service as any).choice_group_id as string | null | undefined;
       const group = groupId ? groupById.get(groupId) : undefined;
       if (group && !model.packageMode) {
-        const siblings = services.filter(
-          (s) => (s as any).choice_group_id === group.id && !emitted.has(s.id),
-        );
-        siblings.forEach((s) => emitted.add(s.id));
+        emitted.add(service.id);
+        // O bloco já foi emitido na seção da primeira ocorrência: não duplica.
+        if (emittedGroups.has(group.id)) continue;
+        emittedGroups.add(group.id);
+        const members = groupMembers.get(group.id) ?? [service];
         blocks.push({
-          key: `group:${group.id}:${sectionId ?? "root"}`,
+          key: `group:${group.id}`,
           kind: "choice",
           sectionId,
           sectionTitle,
           sectionMeta: meta,
           group,
           title: group.title,
-          options: siblings.map((service, index) => ({ service, optionNumber: index + 1 })),
+          options: members.map((s, index) => ({ service: s, optionNumber: index + 1 })),
         });
         continue;
       }
+
 
       emitted.add(service.id);
       blocks.push({
