@@ -123,7 +123,21 @@ describe("ação inline nos cards do orçamento", () => {
     render(<Harness quote={quoteOf([svc("a")])} />);
     expect(addButton("a").getAttribute("aria-label")).toBe("Adicionar à solicitação de reserva");
     expect(addButton("a").getAttribute("title")).toBe("Adicionar à solicitação de reserva");
-    expect(addButton("a").className).toContain("h-11");
+    expect(addButton("a").className).toContain("h-[52px]");
+    expect(addButton("a").className).toContain("w-[52px]");
+    expect(addButton("a").className).toContain("bg-primary");
+    // carrinho branco + bolha do "+"
+    expect(addButton("a").querySelector("svg.lucide-shopping-cart")).toBeTruthy();
+    expect(addButton("a").querySelector("span.bg-card svg")).toBeTruthy();
+  });
+
+  it("estado selecionado usa cor semântica de sucesso com check", () => {
+    render(<Harness quote={quoteOf([svc("a")])} />);
+    fireEvent.click(addButton("a"));
+    const btn = addButton("a");
+    expect(btn.className).toContain("bg-success");
+    expect(btn.querySelector("svg.lucide-check")).toBeTruthy();
+    expect(btn.getAttribute("aria-label")).toContain("remover");
   });
 
   it("serviço incluído aparece como não interativo", () => {
@@ -131,6 +145,7 @@ describe("ação inline nos cards do orçamento", () => {
     const el = document.querySelector('[data-booking-inline-action="locked"]')!;
     expect(el.tagName).not.toBe("BUTTON");
     expect(el.textContent).toContain("Incluído");
+    expect((el as HTMLElement).className).not.toContain("bg-primary");
     expect(screen.getByTestId("count").textContent).toBe("1");
   });
 
