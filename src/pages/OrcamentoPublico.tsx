@@ -1078,12 +1078,10 @@ function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ["public-quote-documents", quoteId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("quote_documents")
-        .select("id, file_name, file_path, file_type, file_size")
-        .eq("quote_id", quoteId)
-        .eq("is_public", true)
-        .order("created_at", { ascending: true });
+      // Segurança: leitura via RPC SECURITY DEFINER (sem acesso anônimo à tabela).
+      const { data, error } = await (supabase as any).rpc("get_public_quote_documents", {
+        p_quote_id: quoteId,
+      });
       if (error) return [] as PublicDocument[];
       return (data || []) as PublicDocument[];
     },
@@ -1171,7 +1169,7 @@ function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
 export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride, agencySlugOverride, accessCodeOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null; agencySlugOverride?: string; accessCodeOverride?: string } = {}) {
   const params = useParams<{ token: string }>();
   const token = tokenOverride ?? params.token;
-  const { quote: fetchedQuote, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
+  const { quote: fetchedQuote, agentProfile: fetchedTokenAgentProfile, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
   const quote = quoteOverride ?? fetchedQuote;
   const isLoading = quoteOverride ? false : isFetching;
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
@@ -1216,7 +1214,26 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     },
     enabled: !!quote?.user_id && !agentProfileOverride,
   });
-  const agentProfile = agentProfileOverride ?? fetchedAgentProfile;
+  const agentProfile = agentProfileOverride ?? fetchedTokenAgentProfile ?? fetchedAgentProfile;
+
+  // Hooks precisam vir ANTES de qualquer retorno antecipado: a resolução do
+  // hero é calculada aqui para manter a ordem de hooks estável entre o estado
+  // de carregamento e o orçamento carregado.
+  const introImagesRaw: string[] = ((quote as any)?.destination_intro_images || []) as string[];
+  const heroFallbackService =
+    quote?.services?.find((s) => s.image_url) ||
+    quote?.services?.find((s) => (s as any).image_urls?.length) ||
+    null;
+  const heroFallbackRef: string | null =
+    (heroFallbackService as any)?.image_url ||
+    (heroFallbackService as any)?.image_urls?.[0] ||
+    null;
+  const { src: resolvedHeroFallback, onError: onHeroFallbackError } = useResolvedServiceImage(
+    introImagesRaw[0] ? null : heroFallbackRef,
+    heroFallbackService ? resolveServicePlaceId(heroFallbackService) : null,
+  );
+
+
 
   if (isLoading) {
     return (
@@ -1287,20 +1304,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   // ── Smart trip summary derived from services
   const introImages: string[] = (quote as any).destination_intro_images || [];
   const introText: string | null = (quote as any).destination_intro_text || null;
-  // Fallback do hero: primeira imagem de serviço, que pode ser uma referência
-  // `gplace://` — resolvida abaixo para nunca chegar crua ao <img>.
-  const heroFallbackService =
-    quote.services?.find((s) => s.image_url) ||
-    quote.services?.find((s) => (s as any).image_urls?.length) ||
-    null;
-  const heroFallbackRef: string | null =
-    (heroFallbackService as any)?.image_url ||
-    (heroFallbackService as any)?.image_urls?.[0] ||
-    null;
-  const { src: resolvedHeroFallback, onError: onHeroFallbackError } = useResolvedServiceImage(
-    introImages[0] ? null : heroFallbackRef,
-    heroFallbackService ? resolveServicePlaceId(heroFallbackService) : null,
-  );
+  // Fallback do hero resolvido acima (hooks antes dos retornos antecipados).
   const heroImage = introImages[0] || resolvedHeroFallback || null;
   const tripTitle = (quote as any).trip_title as string | undefined;
 
