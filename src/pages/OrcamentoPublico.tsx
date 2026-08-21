@@ -1010,6 +1010,8 @@ function CollapsibleServiceCard({
           </div>
         );
       })()}
+      {/* Ação inline de seleção — canto inferior direito do serviço. */}
+      <BookingServiceActionRow service={service} />
     </div>
   );
 }
