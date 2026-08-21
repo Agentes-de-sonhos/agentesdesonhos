@@ -195,6 +195,6 @@ describe("regressão de UI da vitrine de reserva", () => {
   });
 
   it("vitrine organiza os serviços por blocos", () => {
-    expect(showcase).toContain("buildBookingShowcase");
+    expect(showcase).toContain("showcase.blocks.map");
   });
 });
