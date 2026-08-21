@@ -46,7 +46,11 @@ import {
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
-import { QuoteBookingRequestPanel } from "@/components/quote/QuoteBookingRequestPanel";
+import { BookingCartProvider, useBookingCart } from "@/components/quote/booking/BookingCartContext";
+import { BookingCartLauncher } from "@/components/quote/booking/BookingCartLauncher";
+import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog";
+import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
+import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -1006,9 +1010,26 @@ function CollapsibleServiceCard({
           </div>
         );
       })()}
+      {/* Ação inline de seleção — canto inferior direito do serviço. */}
+      <BookingServiceActionRow service={service} />
     </div>
   );
 }
+
+/**
+ * Faixa discreta com a ação de seleção do serviço. Só existe quando o
+ * orçamento tem solicitação de reserva habilitada (o provider decide).
+ */
+function BookingServiceActionRow({ service }: { service: QuoteService }) {
+  const cart = useBookingCart();
+  if (!cart.enabled || !cart.stateFor(service.id)) return null;
+  return (
+    <div className="flex items-center justify-end gap-2 border-t border-border/40 bg-muted/20 px-4 py-2">
+      <InlineBookingAction service={service} />
+    </div>
+  );
+}
+
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -1363,6 +1384,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: "Retorno" });
 
   return (
+    <BookingCartProvider
+      quote={quote as any}
+      agentProfile={agentProfile as any}
+      agencySlugOverride={agencySlugOverride}
+      accessCodeOverride={accessCodeOverride}
+    >
     <div
       className="min-h-screen bg-[hsl(var(--background))]"
       style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
@@ -1804,15 +1831,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           </div>
         )}
 
-        {/* ─── Solicitação de reserva (White Label Premium) ─── */}
-        {(quote as any).booking_requests_enabled === true && (
-          <QuoteBookingRequestPanel
-            quote={quote as any}
-            agentProfile={agentProfile as any}
-            agencySlugOverride={agencySlugOverride}
-            accessCodeOverride={accessCodeOverride}
-          />
-        )}
+        {/* ─── Acesso ao carrinho (mesma revisão do carrinho fixo) ─── */}
+        <BookingCartCta />
 
         {/* ─── Validity ─── */}
         <div className="text-center space-y-1">
@@ -1953,6 +1973,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
       {/* ─── Floating mobile CTA — aparece ao rolar para baixo, recolhido no topo ─── */}
       {whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
+
+      {/* ─── Carrinho persistente + modal amplo de solicitação ─── */}
+      <BookingCartLauncher />
+      <BookingCartDialog />
     </div>
+    </BookingCartProvider>
   );
 }

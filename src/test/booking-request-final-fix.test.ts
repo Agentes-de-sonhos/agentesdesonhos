@@ -63,7 +63,7 @@ describe("ação do CRM condicionada a pedido ativo", () => {
 });
 
 describe("texto de sucesso do link público", () => {
-  const panel = readFileSync("src/components/quote/QuoteBookingRequestPanel.tsx", "utf8");
+  const panel = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 
   it("usa canais cadastrados para orçamento nominal e canal informado no fallback", () => {
     expect(panel).toContain('hasLinkedClient ? "pelos canais cadastrados" : "pelo canal informado"');

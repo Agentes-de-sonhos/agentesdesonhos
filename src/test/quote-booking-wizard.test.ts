@@ -177,24 +177,25 @@ describe("navegação livre e contagens", () => {
   });
 });
 
-describe("regressão de UI da vitrine de reserva", () => {
-  const card = readFileSync("src/components/quote/booking/BookingServiceCard.tsx", "utf8");
-  const showcase = readFileSync("src/components/quote/booking/QuoteBookingShowcase.tsx", "utf8");
-  const selection = readFileSync("src/components/quote/booking/MySelectionPanel.tsx", "utf8");
+describe("regressão de UI da seleção inline", () => {
+  const inline = readFileSync("src/components/quote/booking/InlineBookingAction.tsx", "utf8");
+  const dialog = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 
   it("o pop-up sequencial antigo não existe mais", () => {
     expect(existsSync("src/components/quote/QuoteBookingWizardDialog.tsx")).toBe(false);
   });
 
-  it("cards expõem estado de seleção acessível", () => {
-    expect(card).toContain("aria-pressed={!locked ? selected : undefined}");
+  it("a segunda vitrine pública não existe mais", () => {
+    expect(existsSync("src/components/quote/booking/QuoteBookingShowcase.tsx")).toBe(false);
+    expect(existsSync("src/components/quote/booking/BookingServiceCard.tsx")).toBe(false);
   });
 
-  it("Minha Seleção usa o resumo compacto com miniatura", () => {
-    expect(selection).toContain("<ServiceDigestCompact service={entry.service} withThumb />");
+  it("a ação inline expõe estado de seleção acessível", () => {
+    expect(inline).toContain("aria-pressed={selected}");
+    expect(inline).toContain("aria-label={label}");
   });
 
-  it("vitrine organiza os serviços por blocos", () => {
-    expect(showcase).toContain("showcase.blocks.map");
+  it("o modal amplo usa o resumo compacto com miniatura", () => {
+    expect(dialog).toContain("<ServiceDigestCompact service={entry.service} withThumb />");
   });
 });

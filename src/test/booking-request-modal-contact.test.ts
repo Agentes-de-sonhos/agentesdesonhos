@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { BOOKING_REQUEST_DISCLAIMER, quoteHasLinkedClient } from "@/lib/quoteBookingSelection";
 
-const panel = readFileSync("src/components/quote/QuoteBookingRequestPanel.tsx", "utf8");
+const panel = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 const quotesHook = readFileSync("src/hooks/useQuotes.ts", "utf8");
 
 describe("modal final de solicitação de reserva", () => {
@@ -31,8 +31,9 @@ describe("modal final de solicitação de reserva", () => {
   });
 
   it("o aviso obrigatório aparece uma única vez no checkbox", () => {
-    const checkbox = panel.slice(panel.indexOf("<Checkbox"));
-    const occurrences = checkbox.split("BOOKING_REQUEST_DISCLAIMER").length - 1;
+    const start = panel.indexOf("<Checkbox");
+    const label = panel.slice(start, panel.indexOf("</label>", start));
+    const occurrences = label.split("BOOKING_REQUEST_DISCLAIMER").length - 1;
     expect(occurrences).toBe(1);
     expect(panel).not.toContain("disclaimerText");
     expect(BOOKING_REQUEST_DISCLAIMER.startsWith("Esta é uma solicitação de reserva.")).toBe(true);
