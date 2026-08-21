@@ -150,13 +150,14 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     (s) => (s.selection_mode || "optional") !== "optional",
   ).length;
 
-  const toggleSwitch = (
-    <Switch
-      checked={enabled}
-      disabled={updateQuoteBooking.isPending}
-      onCheckedChange={handleToggle}
-      aria-label="Permitir que o cliente selecione serviços e solicite reserva"
-    />
+  const alwaysOnBadge = (
+    <Badge
+      variant="secondary"
+      className="text-[10px] shrink-0"
+      title="Ativada automaticamente para agências Premium com site White Label ativo"
+    >
+      <Check className="h-3 w-3 mr-1" /> Sempre ativa
+    </Badge>
   );
 
   const body = (
@@ -173,14 +174,16 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
             </div>
           )}
           <p className="text-xs text-muted-foreground max-w-prose">
-            O cliente seleciona os serviços no link público e envia uma solicitação para a sua
-            análise. Isso <strong>não confirma reserva, disponibilidade nem valores</strong>: você
-            reconfirma tudo e retorna o contato. Nada é vendido, cobrado ou reservado
-            automaticamente.
+            Este recurso está <strong>sempre ativo</strong> nos seus orçamentos, porque sua agência
+            é Premium com site White Label ativo. O cliente seleciona os serviços no link público e
+            envia uma solicitação para a sua análise. Isso{" "}
+            <strong>não confirma reserva, disponibilidade nem valores</strong>: você reconfirma tudo
+            e retorna o contato. Nada é vendido, cobrado ou reservado automaticamente.
           </p>
         </div>
-        {!collapsible && toggleSwitch}
+        {!collapsible && alwaysOnBadge}
       </div>
+
 
       <div className="space-y-1.5">
         <Label className="text-xs">Prazo para o cliente responder (opcional)</Label>
