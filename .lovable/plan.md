@@ -4,7 +4,7 @@
 
 **Banco**
 - `quote_sections` (42 linhas): `id, quote_id, user_id, title, order_index`. É puramente visual — nenhum campo semântico (destino, período, tipo).
-- `quote_service_choice_groups` (5 linhas, todas `alternative`): `title, group_type ('alternative'|'free'), min_select, max_select, order_index`. Já existe o conceito de "conjunto de escolha", mas **não é vinculado a uma seção** e não tem flag de obrigatoriedade explícita.
+- `quote_service_choice_groups` (5 linhas, todas `alternative`, todas com `min_select=1, max_select=1`): `title, group_type ('alternative'|'free'), min_select, max_select, order_index`. Já existe o conceito de "conjunto de escolha", mas não é vinculado a uma seção. Há `CHECK quote_choice_groups_alternative_single` (alternative ⇒ min=1 e max=1) e o trigger `normalize_quote_choice_group` que força esses valores.
 - `quote_services`: `section_id`, `selection_mode ('optional'|'required'|'alternative'|'free')`, `choice_group_id`. Hoje em produção: 2375 `optional` e 13 `alternative`.
 - Fluxo de pedido já pronto e funcionando: `submit_quote_booking_request` (valida grupos no servidor, cria `quote_booking_requests` + `quote_booking_request_items` com snapshots, protocolo, `public_access_token`, idempotência), `sync_booking_request_opportunity`, `booking_request_file_number`, `booking_request_negotiation_stage`, `import_booking_request_into_operation`, deliveries/notificações (`pending_booking_request_deliveries`, `complete_booking_request_delivery`). 3 pedidos reais registrados.
 - `get_quote_by_public_code` **já devolve** `services`, `sections` e `choice_groups` (com min/max), além de `booking_requests_enabled` e `has_linked_client`, sem expor `client_id`.
