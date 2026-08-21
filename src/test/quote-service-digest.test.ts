@@ -186,8 +186,7 @@ describe("regressões da revisão final", () => {
   it("todos os resumos do fluxo usam ServiceDigestCompact com withThumb", async () => {
     const fs = await import("node:fs");
     const files = [
-      "src/components/quote/QuoteBookingRequestPanel.tsx",
-      "src/components/quote/booking/MySelectionPanel.tsx",
+      "src/components/quote/booking/BookingCartDialog.tsx",
     ];
     for (const file of files) {
       const source = fs.readFileSync(file, "utf8");
@@ -196,8 +195,8 @@ describe("regressões da revisão final", () => {
       for (const usage of usages) expect(usage).toContain("withThumb");
     }
     // Pop-up final: lista "Serviços solicitados" com miniatura e sem contatos nominais.
-    const panel = fs.readFileSync("src/components/quote/QuoteBookingRequestPanel.tsx", "utf8");
-    expect(panel).toContain("<ServiceDigestCompact service={s} withThumb />");
+    const panel = fs.readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
+    expect(panel).toContain("<ServiceDigestCompact service={entry.service} withThumb />");
     expect(panel).toContain("overflow-x-hidden");
     expect(panel).toContain("{!hasLinkedClient && (");
   });
