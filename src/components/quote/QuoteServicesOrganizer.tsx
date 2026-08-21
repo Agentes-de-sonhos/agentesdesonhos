@@ -21,13 +21,120 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { ServiceCard, ServiceList } from "@/components/quote/ServiceCard";
-import type { QuoteSection, QuoteService } from "@/types/quote";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { QuoteSection, QuoteSectionMetaInput, QuoteService } from "@/types/quote";
+import { SERVICE_TYPE_LABELS } from "@/lib/quoteServiceDigest";
 import type { QuoteCurrency } from "@/lib/quoteCurrency";
 import {
   buildQuoteSectionLayout, flattenServiceOrder, moveServiceInLayout, type QuoteSectionLayout,
 } from "@/lib/quoteSections";
 
 const UNSECTIONED = "__unsectioned__";
+
+/** Nenhum metadado preenchido = "Grupo livre" (comportamento legado). */
+const EMPTY_META: SectionMetaState = {
+  destination: "",
+  start_date: "",
+  end_date: "",
+  service_type: "",
+};
+
+interface SectionMetaState {
+  destination: string;
+  start_date: string;
+  end_date: string;
+  service_type: string;
+}
+
+const metaFromSection = (section: QuoteSection): SectionMetaState => ({
+  destination: section.destination || "",
+  start_date: section.start_date || "",
+  end_date: section.end_date || "",
+  service_type: section.service_type || "",
+});
+
+const normalizeMeta = (meta: SectionMetaState): QuoteSectionMetaInput => ({
+  destination: meta.destination.trim() || null,
+  start_date: meta.start_date || null,
+  end_date: meta.end_date || null,
+  service_type: meta.service_type || null,
+});
+
+/**
+ * Campos OPCIONAIS da seção estruturada. Em branco, a seção continua sendo um
+ * grupo livre: nada aqui cria regra comercial nem altera valores.
+ */
+function SectionMetaFields({
+  idPrefix,
+  value,
+  onChange,
+}: {
+  idPrefix: string;
+  value: SectionMetaState;
+  onChange: (next: SectionMetaState) => void;
+}) {
+  const set = (patch: Partial<SectionMetaState>) => onChange({ ...value, ...patch });
+  const structured = !!(value.destination || value.start_date || value.end_date || value.service_type);
+
+  return (
+    <div className="space-y-3 rounded-xl border border-border/60 bg-muted/20 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Contexto da seção (opcional)
+        </p>
+        <Badge variant="secondary" className="text-[10px]">
+          {structured ? "Seção estruturada" : "Grupo livre"}
+        </Badge>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor={`${idPrefix}-section-destination`} className="text-xs">Destino</Label>
+        <Input
+          id={`${idPrefix}-section-destination`}
+          value={value.destination}
+          onChange={(e) => set({ destination: e.target.value })}
+          placeholder="Orlando, EUA"
+        />
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor={`${idPrefix}-section-start`} className="text-xs">Data inicial</Label>
+          <Input
+            id={`${idPrefix}-section-start`}
+            type="date"
+            value={value.start_date}
+            onChange={(e) => set({ start_date: e.target.value })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor={`${idPrefix}-section-end`} className="text-xs">Data final</Label>
+          <Input
+            id={`${idPrefix}-section-end`}
+            type="date"
+            value={value.end_date}
+            onChange={(e) => set({ end_date: e.target.value })}
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs">Tipo de serviço</Label>
+        <Select
+          value={value.service_type || "__none__"}
+          onValueChange={(v) => set({ service_type: v === "__none__" ? "" : v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sem tipo definido" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">Sem tipo definido</SelectItem>
+            {Object.entries(SERVICE_TYPE_LABELS).map(([key, label]) => (
+              <SelectItem key={key} value={key}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
 
 interface Props {
   services: QuoteService[];
@@ -38,8 +145,10 @@ interface Props {
   /** Flat reorder, used when the quote has no manual sections. */
   onReorderServices: (orderedIds: string[]) => void;
   onSaveLayout: (rows: { id: string; section_id: string | null; order_index: number }[]) => Promise<unknown> | void;
-  onCreateSection: (title: string) => Promise<unknown> | void;
-  onRenameSection: (args: { sectionId: string; title: string }) => Promise<unknown> | void;
+  onCreateSection: (input: { title: string } & QuoteSectionMetaInput) => Promise<unknown> | void;
+  onRenameSection: (
+    args: { sectionId: string; title: string } & QuoteSectionMetaInput,
+  ) => Promise<unknown> | void;
   onDeleteSection: (sectionId: string) => Promise<unknown> | void;
   onReorderSections: (orderedIds: string[]) => Promise<unknown> | void;
   onAddServiceToSection?: (sectionId: string) => void;
@@ -56,6 +165,8 @@ export function QuoteServicesOrganizer({
   const [newTitle, setNewTitle] = useState("");
   const [renaming, setRenaming] = useState<QuoteSection | null>(null);
   const [renameTitle, setRenameTitle] = useState("");
+  const [newMeta, setNewMeta] = useState<SectionMetaState>(EMPTY_META);
+  const [editMeta, setEditMeta] = useState<SectionMetaState>(EMPTY_META);
   const [deleting, setDeleting] = useState<QuoteSection | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
@@ -191,7 +302,11 @@ export function QuoteServicesOrganizer({
                       onToggle={() =>
                         setCollapsed((prev) => ({ ...prev, [group.section.id]: !prev[group.section.id] }))
                       }
-                      onRename={() => { setRenaming(group.section); setRenameTitle(group.section.title); }}
+                      onRename={() => {
+                        setRenaming(group.section);
+                        setRenameTitle(group.section.title);
+                        setEditMeta(metaFromSection(group.section));
+                      }}
                       onDelete={() => setDeleting(group.section)}
                       onAddService={onAddServiceToSection ? () => onAddServiceToSection(group.section.id) : undefined}
                     >
@@ -229,31 +344,35 @@ export function QuoteServicesOrganizer({
 
       {/* Criar seção */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Nova seção</DialogTitle>
             <DialogDescription>
               Ex.: Orlando, Miami, Parte aérea ou Opção premium.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="section-title">Nome da seção</Label>
-            <Input
-              id="section-title"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Orlando"
-              autoFocus
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="section-title">Nome da seção</Label>
+              <Input
+                id="section-title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Orlando"
+                autoFocus
+              />
+            </div>
+            <SectionMetaFields idPrefix="new" value={newMeta} onChange={setNewMeta} />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>Cancelar</Button>
             <Button
               disabled={!newTitle.trim()}
               onClick={async () => {
-                await onCreateSection(newTitle.trim());
+                await onCreateSection({ title: newTitle.trim(), ...normalizeMeta(newMeta) });
                 setCreateOpen(false);
                 setNewTitle("");
+                setNewMeta(EMPTY_META);
               }}
             >
               Criar seção
@@ -262,27 +381,39 @@ export function QuoteServicesOrganizer({
         </DialogContent>
       </Dialog>
 
-      {/* Renomear seção */}
+      {/* Editar seção */}
       <Dialog open={!!renaming} onOpenChange={(o) => !o && setRenaming(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Renomear seção</DialogTitle>
+            <DialogTitle>Editar seção</DialogTitle>
+            <DialogDescription>
+              Deixe destino, datas e tipo em branco para manter um grupo livre.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="section-rename">Nome da seção</Label>
-            <Input
-              id="section-rename"
-              value={renameTitle}
-              onChange={(e) => setRenameTitle(e.target.value)}
-              autoFocus
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="section-rename">Nome da seção</Label>
+              <Input
+                id="section-rename"
+                value={renameTitle}
+                onChange={(e) => setRenameTitle(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <SectionMetaFields idPrefix="edit" value={editMeta} onChange={setEditMeta} />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRenaming(null)}>Cancelar</Button>
             <Button
               disabled={!renameTitle.trim()}
               onClick={async () => {
-                if (renaming) await onRenameSection({ sectionId: renaming.id, title: renameTitle.trim() });
+                if (renaming) {
+                  await onRenameSection({
+                    sectionId: renaming.id,
+                    title: renameTitle.trim(),
+                    ...normalizeMeta(editMeta),
+                  });
+                }
                 setRenaming(null);
               }}
             >

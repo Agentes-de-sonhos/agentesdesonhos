@@ -339,3 +339,95 @@ export function serviceDigestDateSummary(service: QuoteService): string | null {
   if (lines.length === 0) return null;
   return lines.map((l) => `${l.label}: ${l.value}`).join(" · ");
 }
+
+/* ------------------------------------------------------------------ vitrine */
+
+/**
+ * Destaques curtos e comparáveis do serviço, usados nos cards da vitrine
+ * pública (chips). Usa somente dados já cadastrados — nunca duplica cadastro
+ * e nunca substitui o nome real do serviço.
+ */
+export function serviceDigestHighlights(service: QuoteService): string[] {
+  const d = (service.service_data || {}) as any;
+  const out: string[] = [];
+  const push = (value: unknown) => {
+    const clean = str(value);
+    if (clean && !out.includes(clean)) out.push(clean);
+  };
+
+  switch (service.service_type) {
+    case "hotel": {
+      push(d.meal_plan);
+      const rooms = Array.isArray(d.rooms) ? d.rooms : [];
+      if (rooms.length > 0) {
+        const total = rooms.reduce((acc: number, r: any) => acc + (Number(r?.quantity) || 0), 0);
+        if (total > 0) push(`${total} apartamento${total > 1 ? "s" : ""}`);
+        const types = Array.from(
+          new Set(rooms.map((r: any) => str(r?.room_type)).filter(Boolean) as string[]),
+        );
+        types.slice(0, 2).forEach(push);
+      } else {
+        push(d.room_type);
+      }
+      break;
+    }
+    case "flight": {
+      push(d.airline);
+      push(d.baggage);
+      if (d.includes_boarding_fee) push("Taxas incluídas");
+      break;
+    }
+    case "transfer": {
+      if (d.service_category === "private") push("Privativo");
+      if (d.service_category === "regular") push("Regular");
+      push(d.vehicle_type);
+      break;
+    }
+    case "car_rental": {
+      push(d.car_type);
+      push(d.rental_company);
+      break;
+    }
+    case "cruise": {
+      push(d.cabin_type);
+      push(d.ship_name);
+      break;
+    }
+    case "insurance": {
+      push(d.plan_name);
+      push(d.coverage);
+      break;
+    }
+    case "attraction": {
+      push(d.ticket_type);
+      break;
+    }
+    default:
+      break;
+  }
+
+  const quantity = serviceDigestQuantity(service);
+  if (quantity) push(quantity);
+  return out.slice(0, 4);
+}
+
+export interface ServiceDetailRow {
+  label: string;
+  value: string;
+}
+
+/**
+ * Linhas de "Ver detalhes" — mesma informação do card, expandida, sem inventar
+ * campos que a agência não preencheu.
+ */
+export function serviceDigestDetailRows(service: QuoteService): ServiceDetailRow[] {
+  const rows: ServiceDetailRow[] = [];
+  const location = serviceDigestLocation(service);
+  if (location) rows.push({ label: "Local", value: location });
+  for (const line of serviceDigestDateLines(service)) {
+    rows.push({ label: line.label, value: line.value });
+  }
+  const highlights = serviceDigestHighlights(service);
+  if (highlights.length > 0) rows.push({ label: "Destaques", value: highlights.join(" · ") });
+  return rows;
+}

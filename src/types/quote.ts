@@ -56,9 +56,25 @@ export interface QuoteSection {
   quote_id: string;
   title: string;
   order_index: number;
+  /**
+   * Metadados OPCIONAIS de seção estruturada (destino/período/tipo).
+   * Todos nulos = "Grupo livre" (comportamento legado, sem migração).
+   */
+  destination?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  service_type?: string | null;
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+/** Campos editáveis de uma seção estruturada. */
+export interface QuoteSectionMetaInput {
+  destination?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  service_type?: string | null;
 }
 
 export interface QuoteService {

@@ -96,6 +96,43 @@ export function useQuoteBookingConfig(quoteId?: string) {
     onSuccess: invalidate,
   });
 
+  /**
+   * Ajusta mínimo/máximo de escolhas de um conjunto de múltipla escolha.
+   * `min_select > 0` = conjunto obrigatório; `min_select = 0` = opcional.
+   * Conjuntos de escolha única continuam fixos em 1/1.
+   */
+  const updateGroupLimits = useMutation({
+    mutationFn: async (payload: {
+      id: string;
+      group_type: "alternative" | "free";
+      min_select: number;
+      max_select: number | null;
+      optionCount: number;
+    }) => {
+      if (payload.group_type === "alternative") {
+        const limits = normalizeGroupLimits("alternative");
+        const { error } = await supabase
+          .from("quote_service_choice_groups")
+          .update(limits as any)
+          .eq("id", payload.id);
+        if (error) throw error;
+        return;
+      }
+      const upper = payload.optionCount > 0 ? payload.optionCount : null;
+      const max =
+        payload.max_select == null
+          ? null
+          : Math.max(1, upper ? Math.min(payload.max_select, upper) : payload.max_select);
+      const min = Math.max(0, Math.min(payload.min_select, max ?? upper ?? payload.min_select));
+      const { error } = await supabase
+        .from("quote_service_choice_groups")
+        .update({ min_select: min, max_select: max } as any)
+        .eq("id", payload.id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+
   /** Grupo excluído devolve os serviços vinculados para 'optional' (trigger no banco). */
   const deleteGroup = useMutation({
     mutationFn: async (id: string) => {
@@ -133,6 +170,7 @@ export function useQuoteBookingConfig(quoteId?: string) {
     updateQuoteBooking,
     createGroup,
     renameGroup,
+    updateGroupLimits,
     deleteGroup,
     setServiceSelection,
   };
