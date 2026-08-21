@@ -647,45 +647,36 @@ export function useQuote(id: string | undefined) {
 }
 
 export function usePublicQuote(token: string | undefined) {
-  const { data: quote, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["public-quote", token],
     queryFn: async () => {
       if (!token) return null;
-      const { data: quoteData, error: quoteError } = await supabase
-        .from("quotes").select("*").eq("share_token", token).eq("status", "published").maybeSingle();
-      if (quoteError) throw quoteError;
-      if (!quoteData) return null;
-
-      const { data: servicesData, error: servicesError } = await supabase
-        .from("quote_services").select("*").eq("quote_id", quoteData.id).order("order_index", { ascending: true });
-      if (servicesError) throw servicesError;
-
-      const { data: extrasData } = await (supabase as any)
-        .from("quote_entry_extras")
-        .select("*")
-        .eq("quote_id", quoteData.id)
-        .order("sort_order", { ascending: true });
-
-      // Segurança: seções não são lidas diretamente da tabela no fluxo público legado.
-      // A RPC SECURITY DEFINER valida token, status e expiração e retorna apenas campos visuais.
-      const { data: sectionsData } = await (supabase as any).rpc(
-        "get_quote_sections_by_share_token",
+      // Segurança: nenhuma leitura direta das tabelas. A RPC SECURITY DEFINER
+      // valida o token, o status e a expiração e devolve apenas a projeção pública.
+      const { data: result, error } = await (supabase as any).rpc(
+        "get_quote_by_share_token",
         { p_share_token: token },
       );
+      if (error) throw error;
+      if (!result || result.error) return null;
 
-      return {
-        ...quoteData,
-        services: servicesData.map((s) => ({
+      const quote = {
+        ...result.quote,
+        services: (result.services || []).map((s: any) => ({
           ...s,
           service_type: s.service_type as ServiceType,
           service_data: s.service_data as unknown as ServiceData,
         })),
-        sections: (sectionsData || []) as QuoteSection[],
-        entry_extras: extrasData || [],
+        sections: (result.sections || []) as QuoteSection[],
+        choice_groups: result.choice_groups || [],
+        entry_extras: result.entry_extras || [],
       } as Quote;
+
+      return { quote, agentProfile: result.agent_profile ?? null };
     },
     enabled: !!token,
   });
 
-  return { quote, isLoading };
+  return { quote: data?.quote ?? null, agentProfile: data?.agentProfile ?? null, isLoading };
 }
+
