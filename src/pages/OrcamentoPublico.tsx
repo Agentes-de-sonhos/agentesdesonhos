@@ -1064,7 +1064,10 @@ function BookingServiceActionRow({ service }: { service: QuoteService }) {
   const cart = useBookingCart();
   if (!cart.enabled || !cart.stateFor(service.id)) return null;
   return (
-    <div className="flex items-center justify-end gap-2 border-t border-border/40 bg-muted/20 px-4 py-2">
+    <div
+      data-booking-action-row
+      className="flex w-full items-center justify-end gap-2 border-t-2 border-primary/25 bg-primary/[0.07] px-4 py-3.5"
+    >
       <InlineBookingAction service={service} />
     </div>
   );
