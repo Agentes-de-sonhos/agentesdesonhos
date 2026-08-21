@@ -1,4 +1,7 @@
+import { useEffect, useRef } from "react";
 import { BadgeCheck, Info, Lock, MapPin, ShoppingBag, Trash2 } from "lucide-react";
+import { setBookingSelectionBarActive } from "@/lib/bookingSelectionBar";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
