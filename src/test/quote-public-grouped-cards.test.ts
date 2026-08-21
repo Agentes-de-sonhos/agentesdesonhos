@@ -85,6 +85,11 @@ describe("cards agrupados x individuais no orçamento público", () => {
     expect(accordion).toMatch(/aria-expanded=\{open\}/);
     expect(accordion).toMatch(/\{open && <div/);
   });
+
+  it("texto de apoio da seção é universal e válido para cards agrupados e individuais", () => {
+    expect(src).toMatch(/Consulte abaixo os detalhes de cada serviço\./);
+    expect(src).not.toMatch(/Toque em cada item para ver os detalhes completos/);
+  });
 });
 
 describe("apresentação dos pagamentos por serviço", () => {
@@ -105,6 +110,14 @@ describe("apresentação dos pagamentos por serviço", () => {
     expect(src).toMatch(/showPaymentPerService && !showInvestmentInline && !hotelHasMultipleRooms/);
     expect(src).toMatch(/flex flex-col items-center gap-2 text-center/);
     expect(src).toMatch(/text-lg sm:text-xl font-bold tracking-tight text-primary break-words leading-snug tabular-nums/);
+  });
+
+  it("título do footer customizado é 'Condições de pagamento' e não 'Parcelamento'", () => {
+    const footerStart = src.indexOf("data-service-payment-footer");
+    const footerEnd = src.indexOf("<BookingServiceActionRow service={service} />");
+    const footer = src.slice(footerStart, footerEnd);
+    expect(footer).toMatch(/Condições de pagamento/);
+    expect(footer).not.toMatch(/Parcelamento/);
   });
 
   it("valores ocultos: pacote fechado mostra apenas o rótulo de incluído", () => {
