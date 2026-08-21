@@ -47,12 +47,19 @@
 
 ## 5. Regras de seleção propostas
 
-- Conjunto `alternative`: escolha única — selecionar outra opção troca automaticamente, sem perguntar sobre a anterior; feedback "Opção atualizada".
-- Conjunto `free`: múltipla livre, respeitando `min_select`/`max_select` quando definidos.
+- Conjunto `alternative` (`max_select = 1`): escolha única — selecionar outra opção troca automaticamente, sem perguntar sobre a anterior; feedback "Opção atualizada". Com `min_select = 0` o cliente pode não escolher nenhuma; com `min_select = 1` precisa escolher uma.
+- Conjunto `free`: múltipla, respeitando `min_select` (0 = opcional) e `max_select` quando definido.
 - Serviço sem grupo: `optional` = adicionar/remover; `required` = sempre incluído e não removível.
 - Pacote fechado (`pricing_mode = 'package'`) continua bloqueado, com tudo incluído.
-- Bloqueio de envio somente para conjunto explicitamente obrigatório (`alternative`, ou `free` com `is_required`/`min_select > 0`).
+- Bloqueio de envio **exclusivamente** quando `min_select >= 1` não é atendido — mesma expressão no cliente (`quoteBookingSelection.ts`) e no RPC.
 - Nenhuma inferência: dois hotéis no mesmo destino/período só competem se a agência os colocar no mesmo conjunto.
+
+### Coerência entre conjunto e seção
+
+A coluna `section_id` no conjunto seria uma segunda fonte de verdade sobre onde o conjunto aparece e poderia divergir do `section_id` dos serviços. Por isso ela é **eliminada da proposta**: `quoteChoiceSets.ts` deriva a seção do conjunto a partir dos serviços que o integram (a seção do primeiro serviço na ordem salva). Consequências:
+
+- Um conjunto cujos serviços estão em seções diferentes é renderizado uma única vez, na seção do primeiro serviço, e a UI da agência exibe um aviso ("as opções deste conjunto estão em seções diferentes") com ação de mover todas para a mesma seção — sem bloquear o envio.
+- O servidor não precisa validar coerência alguma: a regra de escolha depende só de `choice_group_id`, `min_select` e `max_select`, e a seção é apenas apresentação.
 
 ## 6. Compatibilidade com orçamentos existentes
 
