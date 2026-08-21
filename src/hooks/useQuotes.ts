@@ -508,10 +508,22 @@ export function useQuote(id: string | undefined) {
     queryClient.invalidateQueries({ queryKey: ["quote", id] });
   };
 
+  /**
+   * Metadados OPCIONAIS de seção estruturada. Ausentes/vazios = Grupo livre
+   * (comportamento legado). Nunca inferimos regra comercial a partir deles.
+   */
+  const sectionMetaPayload = (input: QuoteSectionMetaInput | undefined) => ({
+    destination: input?.destination?.trim() ? input.destination.trim() : null,
+    start_date: input?.start_date || null,
+    end_date: input?.end_date || null,
+    service_type: input?.service_type || null,
+  });
+
   const createSectionMutation = useMutation({
-    mutationFn: async (title: string) => {
+    mutationFn: async (input: string | ({ title: string } & QuoteSectionMetaInput)) => {
       if (!id) throw new Error("Quote ID is required");
-      const clean = (title || "").trim();
+      const payload = typeof input === "string" ? { title: input } : input;
+      const clean = (payload.title || "").trim();
       if (!clean) throw new Error("Informe o nome da seção");
       const { data: last } = await (supabase as any)
         .from("quote_sections")
@@ -523,7 +535,13 @@ export function useQuote(id: string | undefined) {
       const nextOrder = ((last?.order_index as number | undefined) ?? -1) + 1;
       const { data, error } = await (supabase as any)
         .from("quote_sections")
-        .insert({ quote_id: id, user_id: user?.id, title: clean, order_index: nextOrder })
+        .insert({
+          quote_id: id,
+          user_id: user?.id,
+          title: clean,
+          order_index: nextOrder,
+          ...sectionMetaPayload(typeof input === "string" ? undefined : input),
+        })
         .select()
         .single();
       if (error) throw error;
@@ -539,21 +557,27 @@ export function useQuote(id: string | undefined) {
   });
 
   const renameSectionMutation = useMutation({
-    mutationFn: async ({ sectionId, title }: { sectionId: string; title: string }) => {
+    mutationFn: async ({
+      sectionId,
+      title,
+      ...meta
+    }: { sectionId: string; title: string } & QuoteSectionMetaInput) => {
       const clean = (title || "").trim();
       if (!clean) throw new Error("Informe o nome da seção");
+      const hasMeta =
+        "destination" in meta || "start_date" in meta || "end_date" in meta || "service_type" in meta;
       const { error } = await (supabase as any)
         .from("quote_sections")
-        .update({ title: clean })
+        .update({ title: clean, ...(hasMeta ? sectionMetaPayload(meta) : {}) })
         .eq("id", sectionId);
       if (error) throw error;
     },
     onSuccess: () => {
       invalidateQuote();
-      toast({ title: "Seção renomeada" });
+      toast({ title: "Seção atualizada" });
     },
     onError: (error) => {
-      toast({ title: "Erro ao renomear seção", description: (error as Error).message, variant: "destructive" });
+      toast({ title: "Erro ao salvar seção", description: (error as Error).message, variant: "destructive" });
     },
   });
 
