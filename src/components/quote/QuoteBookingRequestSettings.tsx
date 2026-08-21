@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,7 @@ import {
   SELECTION_MODE_LABELS,
 } from "@/hooks/useQuoteBookingConfig";
 import type { QuoteSelectionMode, QuoteService } from "@/types/quote";
-import { groupHint, requiresGroup, validateBookingConfig } from "@/lib/quoteBookingRules";
+import { groupHint, requiresGroup } from "@/lib/quoteBookingRules";
 
 interface Props {
   quote: any;
