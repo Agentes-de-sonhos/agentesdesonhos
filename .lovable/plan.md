@@ -19,9 +19,14 @@
 ## 2. Alterações de banco (mínimas, todas aditivas)
 
 1. `quote_sections`: adicionar `kind text default 'free'` (`'free'|'structured'`), `destination text`, `start_date date`, `end_date date`, `service_type text` — todos nulos/default, então seções antigas continuam sendo "grupo livre".
-2. `quote_service_choice_groups`: adicionar `section_id uuid references quote_sections(id) on delete set null`, `is_required boolean default false`, `service_type text`.
-3. Nada é removido nem renomeado. `min_select/max_select` continuam a fonte da regra (`alternative` = 1 de N; `free` = múltipla com min/max). "Serviço único" continua sendo serviço sem grupo (`optional`/`required`).
-4. `submit_quote_booking_request`: única mudança é passar a exigir escolha em grupo `free` apenas quando `is_required = true` (hoje usa só `min_select`) — mantendo compatibilidade quando a coluna é `false`.
+2. `quote_service_choice_groups`: adicionar apenas `service_type text`. **Não** haverá coluna `is_required` e **não** haverá `section_id` (ver item 4 abaixo).
+3. **Fonte única de obrigatoriedade: `min_select`.** O toggle "Obrigatório/Opcional" da interface grava exclusivamente `min_select` (obrigatório ⇒ `min_select = 1`; opcional ⇒ `min_select = 0`). `max_select` cuida somente do limite superior. Nenhum outro campo, flag ou `selection_mode` participa da decisão de obrigatoriedade — não existe precedência a resolver porque não existe segunda fonte.
+4. **Escolha única opcional passa a ser possível** relaxando o que hoje trava isso:
+   - substituir o CHECK `quote_choice_groups_alternative_single` por `group_type <> 'alternative' OR (max_select = 1 AND min_select IN (0,1))`;
+   - ajustar `normalize_quote_choice_group` para forçar apenas `max_select := 1` quando `group_type='alternative'`, preservando o `min_select` informado (`0` ou `1`, com fallback `1` quando nulo).
+   Resultado: única obrigatória = `min 1 / max 1`; única opcional = `min 0 / max 1`; múltipla = `min 0..n / max n|null`.
+5. `submit_quote_booking_request`: a validação de grupo passa a ser genérica por `min_select`/`max_select` (`count >= min_select` e, quando `max_select` não é nulo, `count <= max_select`), substituindo o caso especial "alternative exige exatamente 1". Para `min 1 / max 1` o resultado é idêntico ao atual.
+6. Nada é removido além do CHECK reescrito. "Serviço único" continua sendo serviço sem grupo (`optional`/`required`).
 
 ## 3. Componentes modificados
 
