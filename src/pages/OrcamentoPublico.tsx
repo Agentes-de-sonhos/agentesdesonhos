@@ -1171,7 +1171,7 @@ function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
 export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride, agencySlugOverride, accessCodeOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null; agencySlugOverride?: string; accessCodeOverride?: string } = {}) {
   const params = useParams<{ token: string }>();
   const token = tokenOverride ?? params.token;
-  const { quote: fetchedQuote, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
+  const { quote: fetchedQuote, agentProfile: fetchedTokenAgentProfile, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
   const quote = quoteOverride ?? fetchedQuote;
   const isLoading = quoteOverride ? false : isFetching;
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
