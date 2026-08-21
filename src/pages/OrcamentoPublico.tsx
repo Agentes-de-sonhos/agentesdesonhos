@@ -46,7 +46,11 @@ import {
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
-import { QuoteBookingRequestPanel } from "@/components/quote/QuoteBookingRequestPanel";
+import { BookingCartProvider } from "@/components/quote/booking/BookingCartContext";
+import { BookingCartLauncher } from "@/components/quote/booking/BookingCartLauncher";
+import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog";
+import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
+import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
