@@ -1078,12 +1078,10 @@ function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ["public-quote-documents", quoteId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("quote_documents")
-        .select("id, file_name, file_path, file_type, file_size")
-        .eq("quote_id", quoteId)
-        .eq("is_public", true)
-        .order("created_at", { ascending: true });
+      // Segurança: leitura via RPC SECURITY DEFINER (sem acesso anônimo à tabela).
+      const { data, error } = await (supabase as any).rpc("get_public_quote_documents", {
+        p_quote_id: quoteId,
+      });
       if (error) return [] as PublicDocument[];
       return (data || []) as PublicDocument[];
     },
