@@ -31,7 +31,7 @@
 ## 3. Componentes modificados
 
 - `QuoteServicesOrganizer.tsx` — editor de seção ganha alternância Livre/Estruturada e os campos opcionais (destino, período, tipo).
-- `QuoteBookingRequestSettings.tsx` / `useQuoteBookingConfig.ts` / `quoteBookingRules.ts` — criar grupos `free`, marcar grupo como obrigatório, vincular grupo a uma seção; sugestões de agrupamento (mesmo tipo + período) apenas como **sugestão**, nunca automáticas.
+- `QuoteBookingRequestSettings.tsx` / `useQuoteBookingConfig.ts` / `quoteBookingRules.ts` — criar grupos `free`, toggle Obrigatório/Opcional gravando só `min_select`, limite opcional em `max_select`; sugestões de agrupamento (mesmo tipo + período) apenas como **sugestão**, nunca automáticas. O conjunto não recebe seção manualmente: sua seção é derivada dos serviços que o compõem.
 - `OrcamentoPublico.tsx` — passa a renderizar a nova vitrine de seleção quando `booking_requests_enabled`.
 - `QuoteBookingRequestPanel.tsx` — deixa de abrir o wizard; passa a hospedar o estado da seleção + a barra "Minha seleção" + revisão/contato/envio (estados Compacto / Resumo / Sucesso já existentes são preservados).
 - `get_quote_by_public_code` — incluir os novos campos de seção/grupo no payload.
