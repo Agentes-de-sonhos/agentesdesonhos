@@ -16,6 +16,27 @@
 
 **Conclusão:** o backend do pedido está correto e não precisa ser reconstruído. O que falta é (a) semântica no grupo/seção e (b) uma UX de vitrine no lugar do wizard sequencial.
 
+## 1.1 Escopo obrigatório — somente contas com White Label
+
+Toda a evolução (cards selecionáveis, conjuntos de escolha, seções estruturadas e "Minha seleção") vale **exclusivamente** para agências com White Label habilitado, atuais e futuras.
+
+**Fonte de verdade já existente (verificada no banco):** a função `public.agency_can_use_booking_requests(_agency_id uuid)` (SECURITY DEFINER, STABLE), que exige simultaneamente:
+- assinatura ativa em `public.subscriptions` com `plan = 'premium'` e `is_active`, vigência válida (`expires_at` nulo ou futuro);
+- pelo menos uma linha ativa em `public.agency_public_domains` (`user_id = agência`, `is_active = true`) — este é o sinal de White Label habilitado.
+
+Derivadas dessa mesma função, já em uso:
+- `public.current_agency_can_use_booking_requests()` → consumida pelo hook `src/hooks/useBookingRequestCapability.ts` (UI interna da agência);
+- `public.get_quote_by_public_code(p_agency_slug, p_code)` → já resolve a agência com `resolve_agency_id_for_user(quote.user_id)`, chama `agency_can_use_booking_requests` e devolve `quote.booking_requests_enabled` **calculado no servidor**, sem sessão do visitante.
+
+Portanto **não é necessário criar entitlement novo** (requisito 5 não se aplica): a fonte de verdade existe, é dinâmica e é avaliada por consulta — nenhuma lista de `agency_id`, slug, domínio ou nome de cliente será introduzida em nenhum ponto.
+
+**Como o gate é aplicado**
+- Experiência pública do passageiro: a nova vitrine só é montada quando `quote.booking_requests_enabled === true` (valor vindo do RPC). Quando `false`, `OrcamentoPublico.tsx` renderiza exatamente o layout atual de seções — mesmo componente, mesmos estilos, nenhum ramo novo executado. Sem regressão visual ou comportamental para contas sem White Label.
+- Configuração da agência: as novas opções (seção Estruturada, criação de conjuntos, toggle Obrigatório/Opcional, limites) ficam atrás de `useBookingRequestCapability()`; contas não elegíveis seguem vendo apenas seções livres como hoje.
+- Servidor continua a autoridade: `submit_quote_booking_request` mantém a revalidação de elegibilidade, então nem um cliente adulterado consegue enviar pedido em conta não elegível.
+- Como a elegibilidade é uma consulta (não um valor copiado), qualquer conta que passe a ter White Label ativo + Premium recebe a nova experiência **na sessão seguinte / próximo carregamento do link público**, sem migração nem alteração de código.
+- Cobertura de rotas públicas: o gate depende só do `quote` retornado pelo RPC, que é o mesmo em qualquer caminho de acesso — domínio personalizado (`AgencyDomainGate`/`AgencyDomainRoutes`), rota `/{agency_slug}/{access_code}`, `/orcamento/:token` e domínio `seuorcamento.tur.br`. `agency_public_slug_matches` já aceita tanto o slug do domínio White Label ativo quanto o slug derivado do perfil (fallback), então nenhum caminho suportado perde a nova UX.
+
 ## 2. Alterações de banco (mínimas, todas aditivas)
 
 1. `quote_sections`: adicionar `kind text default 'free'` (`'free'|'structured'`), `destination text`, `start_date date`, `end_date date`, `service_type text` — todos nulos/default, então seções antigas continuam sendo "grupo livre".
@@ -104,3 +125,11 @@ Cards em coluna única, imagem proporcional, zero rolagem horizontal; barra infe
    - **notificações/deliveries** (`pending_booking_request_deliveries`, `complete_booking_request_delivery`) e histórico do pedido;
    - orçamentos **legados** (sem seções, sem grupos) e os 5 grupos existentes continuam funcionando;
    - responsividade: smartphone pequeno/grande, tablet e desktop, sem rolagem horizontal.
+7. Regressão específica de **elegibilidade White Label** (comparativa, sempre pela fonte de verdade, nunca por lista fixa):
+   - **conta White Label atual** (Premium + `agency_public_domains.is_active`): vê vitrine, conjuntos e "Minha seleção"; envio funciona ponta a ponta;
+   - **conta que recebe White Label depois**: com o domínio inativo/ausente o link público mostra o layout atual; ao ativar a linha em `agency_public_domains` (sem qualquer deploy), o mesmo link passa a exibir a nova experiência e a UI interna libera as novas configurações;
+   - **conta sem White Label** (inclusive Premium sem domínio ativo e não-Premium com domínio): layout público idêntico ao atual — snapshot antes/depois, nenhum componente novo montado, nenhuma chave de localStorage nova, e o RPC continua devolvendo `booking_requests_enabled = false`;
+   - **acesso por domínio personalizado** de conta elegível: nova UX presente, tema/branding White Label preservados;
+   - **acesso por URL pública alternativa/fallback** (`/{agency_slug}/{access_code}` com slug do perfil, `/orcamento/:token`, `seuorcamento.tur.br`): mesmo resultado do domínio personalizado, comprovando que o gate não depende do hostname;
+   - **tentativa de envio forçada** por conta não elegível (chamada direta ao RPC/Edge Function): rejeitada no servidor;
+   - **compatibilidade de dados**: as colunas novas continuam existindo para todas as contas (requisito 7), mas nenhuma superfície de UI nova é exibida a contas não elegíveis.
