@@ -24,6 +24,8 @@ async function fetchQuoteByPublicCode(agencySlug: string, code: string) {
         service_data: s.service_data as unknown as ServiceData,
       })),
       sections: result.sections || [],
+      choice_groups: result.choice_groups || [],
+      entry_extras: result.entry_extras || [],
     } as Quote,
     agentProfile: result.agent_profile as AgentProfile | null,
   };
