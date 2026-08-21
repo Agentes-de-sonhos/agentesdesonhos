@@ -288,9 +288,10 @@ describe("conjunto de escolha distribuído em duas seções", () => {
     expect(first).toEqual(["a"]);
     const swapped = applyShowcaseSelection(block, first, "b");
     expect(swapped).toEqual(["b"]);
-    expect(blockValidation(block, []).ok).toBe(false);
-    expect(blockValidation(block, ["b"]).ok).toBe(true);
-    expect(showcaseValidation(showcase, ["b"]).ok).toBe(true);
+    expect(blockValidation(block, [])).toBeTruthy();
+    expect(blockValidation(block, ["b"])).toBeNull();
+    expect(showcaseValidation(showcase, model, [])).toBeTruthy();
+    expect(showcaseValidation(showcase, model, ["b"])).toBeNull();
     expect(effectiveSelectionIds(model, ["b"])).toContain("b");
   });
 });
