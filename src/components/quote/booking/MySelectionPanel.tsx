@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { BadgeCheck, Info, Lock, MapPin, ShoppingBag, Trash2 } from "lucide-react";
 import { setBookingSelectionBarActive } from "@/lib/bookingSelectionBar";
 
@@ -204,7 +205,11 @@ export function MySelectionBar({ count, totalLabel, total, formatAmount, onOpen 
     };
   }, []);
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  // Portal para o <body>: evita que ancestrais com `transform`
+  // (ex.: animate-fade-up) criem um bloco de contenção e quebrem o `fixed`.
+  return createPortal(
     <div
       ref={barRef}
       data-testid="my-selection-bar"
@@ -225,6 +230,7 @@ export function MySelectionBar({ count, totalLabel, total, formatAmount, onOpen 
           Ver seleção
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
