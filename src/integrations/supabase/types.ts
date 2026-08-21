@@ -15225,6 +15225,36 @@ export type Database = {
           wallets_count: number
         }[]
       }
+      admin_whitelabel_set_domain_active: {
+        Args: { _domain_id: string; _is_active: boolean }
+        Returns: Json
+      }
+      admin_whitelabel_set_primary_domain: {
+        Args: { _domain_id: string }
+        Returns: Json
+      }
+      admin_whitelabel_set_subscription: {
+        Args: {
+          _clear_expires?: boolean
+          _expires_at?: string
+          _is_active?: boolean
+          _plan?: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      admin_whitelabel_status: { Args: { _user_id: string }; Returns: Json }
+      admin_whitelabel_upsert_domain: {
+        Args: {
+          _agency_slug: string
+          _domain_id?: string
+          _hostname: string
+          _is_active?: boolean
+          _is_primary?: boolean
+          _user_id: string
+        }
+        Returns: Json
+      }
       agency_can_use_booking_requests: {
         Args: { _agency_id: string }
         Returns: boolean
@@ -15946,6 +15976,7 @@ export type Database = {
         Args: { p_agency_id: string }
         Returns: number
       }
+      normalize_public_hostname: { Args: { _raw: string }; Returns: string }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
       opportunity_visible: {
         Args: { _opportunity_id: string }
@@ -16140,6 +16171,10 @@ export type Database = {
         Returns: boolean
       }
       supplier_slug_exists: { Args: { p_slug: string }; Returns: boolean }
+      sync_agency_booking_requests: {
+        Args: { _agency_id: string }
+        Returns: number
+      }
       sync_booking_request_opportunity: {
         Args: { p_request_id: string }
         Returns: string
