@@ -809,20 +809,23 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
   }
 
   return (
-    <div className="pt-4 mt-2 border-t border-border/50 space-y-2">
+    <div
+      className="pt-5 mt-3 border-t border-border/50 space-y-3 text-center"
+      data-service-investment-inline={service.id}
+    >
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
         Condições de pagamento
       </p>
       {rows.length > 0 && (
-        <div className="space-y-1">
+        <div className="space-y-2">
           {rows.map((r, i) => (
-            <p key={i} className="leading-snug flex flex-wrap items-baseline gap-x-1.5">
-              <span className="text-xs sm:text-sm text-muted-foreground">{r.label}:</span>
+            <p key={i} className="leading-snug flex flex-wrap items-baseline justify-center gap-x-2">
+              <span className="text-sm sm:text-base text-muted-foreground">{r.label}:</span>
               <span
                 className={
                   r.emphasis
                     ? "text-lg sm:text-xl font-bold tracking-tight text-primary tabular-nums"
-                    : "text-sm font-semibold text-foreground tabular-nums"
+                    : "text-base font-semibold text-foreground tabular-nums"
                 }
               >
                 {r.value}
@@ -831,12 +834,12 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
           ))}
         </div>
       )}
-      <div className="flex flex-wrap items-baseline gap-x-1.5 text-xs sm:text-sm text-foreground/80">
+      <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-sm sm:text-base text-foreground/80">
         <span className="text-muted-foreground">Valor do serviço:</span>
         <span className="font-semibold text-foreground tabular-nums">{fmt(amount)}</span>
       </div>
       {methodLabel && (
-        <div className="flex flex-wrap items-baseline gap-x-1.5 text-xs sm:text-sm text-foreground/80">
+        <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-xs sm:text-sm text-foreground/80">
           <span className="text-muted-foreground">Forma de pagamento:</span>
           <span className="font-medium text-foreground">{methodLabel}</span>
         </div>
@@ -845,11 +848,21 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
   );
 }
 
+
 function CollapsibleServiceCard({
   service, showPrice, isOpen, onToggle, showPaymentPerService = false, quote, showInvestmentInline = false,
+  collapsible = true,
 }: {
   service: QuoteService; showPrice: boolean; isOpen: boolean; onToggle: () => void; showPaymentPerService?: boolean; quote?: Quote; showInvestmentInline?: boolean;
+  /**
+   * Quando false (serviços dentro de grupos/seções reais), o card não colapsa:
+   * o cabeçalho deixa de ser interativo, o ChevronDown desaparece e o conteúdo
+   * é sempre completo. Abrir/fechar passa a ser papel do PublicSectionAccordion.
+   */
+  collapsible?: boolean;
 }) {
+  const expanded = collapsible ? isOpen : true;
+
   const type = service.service_type as ServiceType;
   const details = getServiceDetails(service);
   const colorClass = SERVICE_COLORS[type] || SERVICE_COLORS.other;
@@ -885,54 +898,75 @@ function CollapsibleServiceCard({
   const hotelHasMultipleRooms = type === "hotel" && Array.isArray(hotelRooms) && hotelRooms.length > 1;
   const effectiveShowPrice = showPrice && !hotelHasMultipleRooms;
 
+  const headerInner = (
+    <>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
+          {SERVICE_ICONS[type]}
+        </div>
+        <div className="flex flex-col items-start gap-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold uppercase tracking-wide">{getServiceLabel(service)}</span>
+            {service.option_label && (
+              <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
+                <Tag className="h-3 w-3" />
+                {service.option_label}
+              </Badge>
+            )}
+          </div>
+          <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
+            {summary}
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {effectiveShowPrice && (
+          <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
+        )}
+        {collapsible && (
+          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`} />
+        )}
+      </div>
+    </>
+  );
+
   return (
-    <div className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80">
-      {/* Clickable header */}
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
-            {SERVICE_ICONS[type]}
-          </div>
-          <div className="flex flex-col items-start gap-0.5">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold uppercase tracking-wide">{getServiceLabel(service)}</span>
-              {service.option_label && (
-                <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
-                  <Tag className="h-3 w-3" />
-                  {service.option_label}
-                </Badge>
-              )}
-            </div>
-            <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
-              {summary}
-            </span>
-          </div>
+    <div
+      className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80"
+      data-service-card={service.id}
+      data-collapsible={collapsible ? "true" : "false"}
+    >
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
+        >
+          {headerInner}
+        </button>
+      ) : (
+        <div
+          className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between`}
+          data-service-card-header="static"
+        >
+          {headerInner}
         </div>
-        <div className="flex items-center gap-3">
-          {effectiveShowPrice && (
-            <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
-          )}
-          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
-        </div>
-      </button>
+      )}
       {/* Collapsible body */}
       <div
         className="grid transition-all duration-300 ease-in-out"
-        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr", opacity: isOpen ? 1 : 0 }}
+        style={{ gridTemplateRows: expanded ? "1fr" : "0fr", opacity: expanded ? 1 : 0 }}
       >
+
         <div className="overflow-hidden">
         <div className="px-5 py-4 space-y-4">
-          {isOpen && (() => {
+          {expanded && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
               <ServiceImageCarousel images={imgs} alt={getServiceLabel(service)} disableExpand placeId={resolveServicePlaceId(service)} />
             ) : null;
           })()}
-          {isOpen && (() => {
+          {expanded && (() => {
             const name = getServiceName(service);
             // Para "other" sem company_name, evita exibir título genérico duplicado
             if (service.service_type === "other" && !((service.service_data as any)?.company_name)) return null;
@@ -940,10 +974,10 @@ function CollapsibleServiceCard({
             if (hasCustomLayout) return null;
             return <p className="text-base font-semibold text-foreground tracking-tight">{name}</p>;
           })()}
-          {isOpen && hasCustomLayout && (
+          {expanded && hasCustomLayout && (
             <ServiceBody service={service} quote={quote} />
           )}
-          {isOpen && !hasCustomLayout && chipItems.length > 0 && (
+          {expanded && !hasCustomLayout && chipItems.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {chipItems.map((d, i) => (
                 <div
@@ -962,7 +996,7 @@ function CollapsibleServiceCard({
               ))}
             </div>
           )}
-          {isOpen && !hasCustomLayout && freeItems.length > 0 && (
+          {expanded && !hasCustomLayout && freeItems.length > 0 && (
             <div className="space-y-2">
               {freeItems.map((d, i) => (
                 <p key={i} className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
@@ -971,21 +1005,21 @@ function CollapsibleServiceCard({
               ))}
             </div>
           )}
-          {isOpen && service.description && (
+          {expanded && service.description && (
             <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
               <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
                 <FormattedText>{service.description}</FormattedText>
               </p>
             </div>
           )}
-          {isOpen && service.service_type === "attraction" && (service.service_data as any)?.notes && (
+          {expanded && service.service_type === "attraction" && (service.service_data as any)?.notes && (
             <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
               <p className="text-sm text-foreground/80 leading-relaxed italic whitespace-pre-wrap">
                 <FormattedText>{(service.service_data as any).notes}</FormattedText>
               </p>
             </div>
           )}
-          {isOpen && showInvestmentInline && !hotelHasMultipleRooms && (
+          {expanded && showInvestmentInline && !hotelHasMultipleRooms && (
             <ServiceInvestmentInline service={service} quote={quote} />
           )}
         </div>
@@ -999,16 +1033,22 @@ function CollapsibleServiceCard({
         const display = getServicePaymentDisplay(service.amount, payConfig, feeInfo);
         if (!display) return null;
         return (
-          <div className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-3 flex items-start gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0 mt-0.5">
-              <CreditCard className="h-4 w-4 text-primary" />
+          <div
+            className="border-t border-primary/15 bg-gradient-to-r from-primary/[0.06] via-primary/[0.04] to-transparent px-5 py-4 flex flex-col items-center gap-2 text-center"
+            data-service-payment-footer={service.id}
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                <CreditCard className="h-4 w-4 text-primary" />
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/70">Parcelamento</span>
             </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary/70">Parcelamento</span>
-              <span className="text-sm font-bold text-primary break-words leading-snug">{display}</span>
-            </div>
+            <span className="text-lg sm:text-xl font-bold tracking-tight text-primary break-words leading-snug tabular-nums">
+              {display}
+            </span>
           </div>
         );
+
       })()}
       {/* Ação inline de seleção — canto inferior direito do serviço. */}
       <BookingServiceActionRow service={service} />
@@ -1553,7 +1593,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               <p className="text-sm text-muted-foreground">Toque em cada item para ver os detalhes completos.</p>
             </div>
             {(() => {
-              const renderCard = (service: QuoteService) => {
+              const renderCard = (service: QuoteService, collapsible = true) => {
                 const index = quote.services!.findIndex((s) => s.id === service.id);
                 return (
                   <CollapsibleServiceCard
@@ -1564,6 +1604,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     onToggle={() => handleToggleService(index)}
                     showPaymentPerService={isNewLayout ? false : useServicePayment}
                     quote={quote}
+                    collapsible={collapsible}
                     showInvestmentInline={
                       investmentLayout === "ungrouped" && showDetailedPrices
                     }
@@ -1576,7 +1617,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
               // Sem seções manuais → comportamento atual, inalterado.
               if (groups.length === 0) {
-                return <div className="space-y-3">{quote.services!.map(renderCard)}</div>;
+                return <div className="space-y-3">{quote.services!.map((s) => renderCard(s))}</div>;
               }
 
               return (
@@ -1587,13 +1628,15 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                       title={group.section.title}
                       count={group.services.length}
                     >
-                      <div className="space-y-3">{group.services.map(renderCard)}</div>
+                      {/* Dentro de um grupo o único nível colapsável é o acordeão. */}
+                      <div className="space-y-3">{group.services.map((s) => renderCard(s, false))}</div>
                     </PublicSectionAccordion>
                   ))}
                   {layout.unsectioned.length > 0 && (
-                    <div className="space-y-3 pt-1">{layout.unsectioned.map(renderCard)}</div>
+                    <div className="space-y-3 pt-1">{layout.unsectioned.map((s) => renderCard(s))}</div>
                   )}
                 </div>
+
               );
             })()}
           </section>
