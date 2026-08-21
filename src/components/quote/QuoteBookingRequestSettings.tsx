@@ -369,14 +369,15 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
       }
       summary={
         <>
-          {enabled ? "Ativada" : "Desativada"}
+          Sempre ativa
           {configuredCount > 0 &&
             ` · ${configuredCount} ${configuredCount === 1 ? "serviço com regra configurada" : "serviços com regras configuradas"}`}
         </>
       }
       open={open!}
       onToggle={onToggle!}
-      headerAction={toggleSwitch}
+      headerAction={alwaysOnBadge}
+
     >
       {body}
     </AdvancedSettingsSection>
