@@ -1304,20 +1304,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   // ── Smart trip summary derived from services
   const introImages: string[] = (quote as any).destination_intro_images || [];
   const introText: string | null = (quote as any).destination_intro_text || null;
-  // Fallback do hero: primeira imagem de serviço, que pode ser uma referência
-  // `gplace://` — resolvida abaixo para nunca chegar crua ao <img>.
-  const heroFallbackService =
-    quote.services?.find((s) => s.image_url) ||
-    quote.services?.find((s) => (s as any).image_urls?.length) ||
-    null;
-  const heroFallbackRef: string | null =
-    (heroFallbackService as any)?.image_url ||
-    (heroFallbackService as any)?.image_urls?.[0] ||
-    null;
-  const { src: resolvedHeroFallback, onError: onHeroFallbackError } = useResolvedServiceImage(
-    introImages[0] ? null : heroFallbackRef,
-    heroFallbackService ? resolveServicePlaceId(heroFallbackService) : null,
-  );
+  // Fallback do hero resolvido acima (hooks antes dos retornos antecipados).
   const heroImage = introImages[0] || resolvedHeroFallback || null;
   const tripTitle = (quote as any).trip_title as string | undefined;
 
