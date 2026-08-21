@@ -1,135 +1,128 @@
-# Orçamento público — seleção por cards e "Minha seleção"
+# Vitrine de serviços no orçamento público (White Label)
 
-## 1. Diagnóstico da estrutura atual (verificado)
+Substituir o wizard "quero/não quero" por uma experiência de explorar → comparar → selecionar → revisar → solicitar, sem checkout e sem confirmação automática, reaproveitando todo o backend atual de solicitação de reserva.
 
-**Banco**
-- `quote_sections` (42 linhas): `id, quote_id, user_id, title, order_index`. É puramente visual — nenhum campo semântico (destino, período, tipo).
-- `quote_service_choice_groups` (5 linhas, todas `alternative`, todas com `min_select=1, max_select=1`): `title, group_type ('alternative'|'free'), min_select, max_select, order_index`. Já existe o conceito de "conjunto de escolha", mas não é vinculado a uma seção. Há `CHECK quote_choice_groups_alternative_single` (alternative ⇒ min=1 e max=1) e o trigger `normalize_quote_choice_group` que força esses valores.
-- `quote_services`: `section_id`, `selection_mode ('optional'|'required'|'alternative'|'free')`, `choice_group_id`. Hoje em produção: 2375 `optional` e 13 `alternative`.
-- Fluxo de pedido já pronto e funcionando: `submit_quote_booking_request` (valida grupos no servidor, cria `quote_booking_requests` + `quote_booking_request_items` com snapshots, protocolo, `public_access_token`, idempotência), `sync_booking_request_opportunity`, `booking_request_file_number`, `booking_request_negotiation_stage`, `import_booking_request_into_operation`, deliveries/notificações (`pending_booking_request_deliveries`, `complete_booking_request_delivery`). 3 pedidos reais registrados.
-- `get_quote_by_public_code` **já devolve** `services`, `sections` e `choice_groups` (com min/max), além de `booking_requests_enabled` e `has_linked_client`, sem expor `client_id`.
+## 1. Diagnóstico da estrutura atual (nomes reais)
 
-**Frontend**
-- Configuração pela agência: `QuoteServicesOrganizer.tsx` (seções, drag-and-drop, `src/lib/quoteSections.ts`) e `QuoteBookingRequestSettings.tsx` + `useQuoteBookingConfig.ts` + `src/lib/quoteBookingRules.ts` (grupos e modo de seleção por serviço).
-- Público: `OrcamentoPublico.tsx` renderiza seções via `buildQuoteSectionLayout`; `QuoteBookingRequestPanel.tsx` monta o modelo (`src/lib/quoteBookingSelection.ts`) e abre `QuoteBookingWizardDialog.tsx` (653 linhas), que é justamente o fluxo sequencial "quero / não quero" por serviço (`src/lib/quoteBookingWizard.ts`, decisões `yes|no` persistidas em localStorage).
-- `src/lib/quoteServiceDigest.ts` + `ServiceDigestCompact.tsx` já resolvem nome real, thumb e resumo por tipo de serviço — reaproveitáveis nos cards.
+**Rotas públicas**
+- `/orcamento/:token` → `src/pages/OrcamentoPublico.tsx` (legado por `share_token`).
+- `/:agencySlug/:accessCode` e domínio White Label → `src/pages/OrcamentoPublicoV2.tsx` → RPC `get_quote_by_public_code` → renderiza o mesmo `OrcamentoPublico` via overrides (`quoteOverride`, `agencySlugOverride`, `accessCodeOverride`). `PublicCodeResolver` decide pelo hostname.
+- Leitura pública 100% por RPC `SECURITY DEFINER`: `get_quote_by_share_token`, `get_quote_by_public_code`, ambos usando `build_public_quote_payload(quotes)`, que devolve `quote` (sem `client_id`, `share_token`, `user_id`), `services`, `sections`, `choice_groups`, `entry_extras`, `agent_profile`, além de `booking_requests_enabled` já resolvido no servidor e `has_linked_client`. Documentos: `get_public_quote_documents_by_share_token` / `_by_public_code`. Não há `SELECT` anon direto nas tabelas.
 
-**Conclusão:** o backend do pedido está correto e não precisa ser reconstruído. O que falta é (a) semântica no grupo/seção e (b) uma UX de vitrine no lugar do wizard sequencial.
+**Organização do orçamento**
+- `public.quote_sections`: `id, quote_id, user_id, title, order_index, created_at, updated_at`. Sem destino/datas/tipo.
+- `public.quote_services.section_id` (uuid, nullable) + `order_index` (int, default 0). Hoje 108 de 2.398 serviços têm seção.
+- Puro: `src/lib/quoteSections.ts` (`buildQuoteSectionLayout`, `visibleSectionGroups`, `flattenServiceOrder`, `moveServiceInLayout`, `reorderSectionsByIds`) — coberto por `src/test/quote-sections.test.ts`.
+- Admin: `QuoteServicesOrganizer.tsx` (dnd-kit, criar/renomear/excluir/reordenar seções). Público: `PublicSectionAccordion.tsx` (acordeão colapsado com contador).
 
-## 1.1 Escopo obrigatório — somente contas com White Label
+**Conjuntos de escolha**
+- `public.quote_service_choice_groups`: `id, quote_id, user_id, title, group_type ('alternative' | 'free'), min_select (default 0), max_select (nullable), order_index`. Hoje 5 grupos, todos `alternative`; 13 serviços vinculados.
+- `quote_services.selection_mode` (default `'optional'`; valores `optional | required | alternative | free`) + `choice_group_id`. Triggers: `normalize_quote_choice_group`, `enforce_quote_service_selection_rules`, `enforce_quote_booking_entitlement`.
+- Admin: `QuoteBookingRequestSettings.tsx` + `useQuoteBookingConfig.ts` + regras puras `src/lib/quoteBookingRules.ts`.
 
-Toda a evolução (cards selecionáveis, conjuntos de escolha, seções estruturadas e "Minha seleção") vale **exclusivamente** para agências com White Label habilitado, atuais e futuras.
+**Seleção do passageiro (atual)**
+- `QuoteBookingRequestPanel.tsx` (655 linhas) + `QuoteBookingWizardDialog.tsx` (653 linhas) + regras `src/lib/quoteBookingWizard.ts` (passos sequenciais, decisão `yes`/`no`, troca automática em grupo `alternative`, progresso, `localStorage` em `booking-wizard:<quoteId>`) e `src/lib/quoteBookingSelection.ts` (`buildBookingSelectionModel`, `toggleBookingSelection`, `validateBookingSelection`, `bookingSelectionTotal`, `effectiveSelectionIds`, `BOOKING_REQUEST_DISCLAIMER`).
+- Resumo/cards: `src/lib/quoteServiceDigest.ts` + `ServiceDigestCompact.tsx` (tipo, nome real, local, datas, quantidade, thumb opcional via `ResolvedServiceThumb`).
+- Valores: `src/lib/quotePricing.ts` (`isPackagePricing`, `hidesIndividualAmounts`), `src/lib/quoteCurrency.ts`, `PublicInvestmentSummary.tsx`.
 
-**Fonte de verdade já existente (verificada no banco):** a função `public.agency_can_use_booking_requests(_agency_id uuid)` (SECURITY DEFINER, STABLE), que exige simultaneamente:
-- assinatura ativa em `public.subscriptions` com `plan = 'premium'` e `is_active`, vigência válida (`expires_at` nulo ou futuro);
-- pelo menos uma linha ativa em `public.agency_public_domains` (`user_id = agência`, `is_active = true`) — este é o sinal de White Label habilitado.
+**Envio**
+- Edge Function `submit-booking-request` (rate limit 8/60s, `validate.ts`, `notify.ts`, hash de IP) → RPC `submit_quote_booking_request` (SECURITY DEFINER, resolve preços/snapshots, protocolo, idempotência, versão, `public_access_token`).
+- Tabelas: `quote_booking_requests` (+ itens/eventos, tipos em `src/types/bookingRequest.ts`), `travel_files` (`formatFileNumber`), oportunidade no CRM (`ensure_client_and_opportunity_for_lead`, `booking_request_negotiation_stage`, `auto_create_operation_on_close`), `useHasBookingRequest.ts` no CRM.
 
-Derivadas dessa mesma função, já em uso:
-- `public.current_agency_can_use_booking_requests()` → consumida pelo hook `src/hooks/useBookingRequestCapability.ts` (UI interna da agência);
-- `public.get_quote_by_public_code(p_agency_slug, p_code)` → já resolve a agência com `resolve_agency_id_for_user(quote.user_id)`, chama `agency_can_use_booking_requests` e devolve `quote.booking_requests_enabled` **calculado no servidor**, sem sessão do visitante.
+## 2. O que já existe e será reaproveitado (sem alteração de contrato)
+- Toda a leitura pública por RPC e a projeção pública — a nova UX consome exatamente o mesmo payload.
+- `quoteSections.ts`, `quoteBookingSelection.ts`, `quoteServiceDigest.ts`, `ServiceDigestCompact`, `quotePricing`, `quoteCurrency`.
+- Edge Function, RPC de envio, protocolo/File, idempotência, histórico, notificações, oportunidade e operação: **nada muda**.
+- Grupos `alternative`/`free` com `min_select`/`max_select` já modelam escolha única e múltipla.
 
-Portanto **não é necessário criar entitlement novo** (requisito 5 não se aplica): a fonte de verdade existe, é dinâmica e é avaliada por consulta — nenhuma lista de `agency_id`, slug, domínio ou nome de cliente será introduzida em nenhum ponto.
+## 3. Lacunas entre atual e desejado
+1. UX pública é obrigatoriamente sequencial (`buildBookingWizardSteps` + decisão `yes`/`no` por serviço); não há vitrine navegável nem comparação lado a lado.
+2. Não existe componente persistente "Minha seleção" com contador (o resumo só aparece no fim do wizard).
+3. Não há "Ver detalhes" por serviço no fluxo de seleção (o digest é sempre compacto).
+4. Seção é apenas `title`: sem destino, período e tipo opcionais para agrupar/rotular a vitrine.
+5. Não há numeração "Opção 1, 2..." reiniciando por conjunto na UI pública.
+6. Grupos não têm vínculo com seção nem rótulo de obrigatoriedade explícito para exibição (`min_select` existe, mas não é comunicado).
+7. Estado da seleção é `decisions` (`yes`/`no`), não um carrinho de ids; falta migração suave desse `localStorage`.
+8. Sem status discreto por conjunto ("escolha 1 opção", "opcional", "3 de 5 selecionados").
 
-**Como o gate é aplicado**
-- Experiência pública do passageiro: a nova vitrine só é montada quando `quote.booking_requests_enabled === true` (valor vindo do RPC). Quando `false`, `OrcamentoPublico.tsx` renderiza exatamente o layout atual de seções — mesmo componente, mesmos estilos, nenhum ramo novo executado. Sem regressão visual ou comportamental para contas sem White Label.
-- Configuração da agência: as novas opções (seção Estruturada, criação de conjuntos, toggle Obrigatório/Opcional, limites) ficam atrás de `useBookingRequestCapability()`; contas não elegíveis seguem vendo apenas seções livres como hoje.
-- Servidor continua a autoridade: `submit_quote_booking_request` mantém a revalidação de elegibilidade, então nem um cliente adulterado consegue enviar pedido em conta não elegível.
-- Como a elegibilidade é uma consulta (não um valor copiado), qualquer conta que passe a ter White Label ativo + Premium recebe a nova experiência **na sessão seguinte / próximo carregamento do link público**, sem migração nem alteração de código.
-- Cobertura de rotas públicas: o gate depende só do `quote` retornado pelo RPC, que é o mesmo em qualquer caminho de acesso — domínio personalizado (`AgencyDomainGate`/`AgencyDomainRoutes`), rota `/{agency_slug}/{access_code}`, `/orcamento/:token` e domínio `seuorcamento.tur.br`. `agency_public_slug_matches` já aceita tanto o slug do domínio White Label ativo quanto o slug derivado do perfil (fallback), então nenhum caminho suportado perde a nova UX.
+## 4. Menor alteração estrutural no banco (proposta, sem migration)
+Tudo opcional e retrocompatível; se nada for aplicado, a nova UX ainda funciona (fallback do item 7).
 
-## 2. Alterações de banco (mínimas, todas aditivas)
+- `quote_sections`: `destination text NULL`, `start_date date NULL`, `end_date date NULL`, `service_type text NULL` (livre, validado no app com a lista hospedagem/aéreo/transfer/passeio/ingresso/seguro/cruzeiro/locação/pacote/outros). Nenhum default novo; `NULL` = Grupo livre (comportamento atual).
+- `quote_service_choice_groups`: `section_id uuid NULL REFERENCES quote_sections(id) ON DELETE SET NULL` e `is_required boolean NOT NULL DEFAULT false` (derivável de `min_select > 0`; a coluna só existe se quisermos separar "obrigatório" de "mínimo").
+- `build_public_quote_payload`: incluir os novos campos nas projeções de `sections` e `choice_groups` (mesma função, mesma assinatura — sem mudança de rota/token).
+- Nada de nova tabela, nenhuma coluna obrigatória, nenhum backfill.
 
-1. `quote_sections`: adicionar `kind text default 'free'` (`'free'|'structured'`), `destination text`, `start_date date`, `end_date date`, `service_type text` — todos nulos/default, então seções antigas continuam sendo "grupo livre".
-2. `quote_service_choice_groups`: adicionar apenas `service_type text`. **Não** haverá coluna `is_required` e **não** haverá `section_id` (ver item 4 abaixo).
-3. **Fonte única de obrigatoriedade: `min_select`.** O toggle "Obrigatório/Opcional" da interface grava exclusivamente `min_select` (obrigatório ⇒ `min_select = 1`; opcional ⇒ `min_select = 0`). `max_select` cuida somente do limite superior. Nenhum outro campo, flag ou `selection_mode` participa da decisão de obrigatoriedade — não existe precedência a resolver porque não existe segunda fonte.
-4. **Escolha única opcional passa a ser possível** relaxando o que hoje trava isso:
-   - substituir o CHECK `quote_choice_groups_alternative_single` por `group_type <> 'alternative' OR (max_select = 1 AND min_select IN (0,1))`;
-   - ajustar `normalize_quote_choice_group` para forçar apenas `max_select := 1` quando `group_type='alternative'`, preservando o `min_select` informado (`0` ou `1`, com fallback `1` quando nulo).
-   Resultado: única obrigatória = `min 1 / max 1`; única opcional = `min 0 / max 1`; múltipla = `min 0..n / max n|null`.
-5. `submit_quote_booking_request`: a validação de grupo passa a ser genérica por `min_select`/`max_select` (`count >= min_select` e, quando `max_select` não é nulo, `count <= max_select`), substituindo o caso especial "alternative exige exatamente 1". Para `min 1 / max 1` o resultado é idêntico ao atual.
-6. Nada é removido além do CHECK reescrito. "Serviço único" continua sendo serviço sem grupo (`optional`/`required`).
+## 5. Componentes existentes a modificar
+- `src/components/quote/QuoteBookingRequestPanel.tsx` — passa a orquestrar a vitrine + "Minha seleção" + pop-up final (mantém contato, disclaimer, submit e estado de sucesso intactos).
+- `src/components/quote/QuoteBookingWizardDialog.tsx` — deixa de ser o caminho obrigatório; mantido como modo "revisar passo a passo" opcional ou removido da rota principal no fim da Etapa 4.
+- `src/lib/quoteBookingSelection.ts` — reaproveitar `toggleBookingSelection`/`validateBookingSelection` como fonte única do carrinho (acrescentar validação por `min_select`/`max_select` e mensagem por conjunto).
+- `src/components/quote/QuoteServicesOrganizer.tsx` + `useQuotes.ts` — campos opcionais de seção (destino/datas/tipo) no diálogo de criação/edição.
+- `src/components/quote/QuoteBookingRequestSettings.tsx` + `useQuoteBookingConfig.ts` — expor `min_select`/`max_select` e obrigatoriedade do conjunto; opcionalmente vincular conjunto a uma seção.
+- `src/lib/quoteServiceDigest.ts` — acrescentar um nível "detalhes" (campos já cadastrados por tipo, com ênfase em hospedagem: quartos, regime, categoria, fotos).
+- `src/pages/OrcamentoPublico.tsx` — ponto de montagem da vitrine e do elemento persistente (sem alterar a apresentação da proposta em si).
 
-## 3. Componentes modificados
+## 6. Componentes novos sugeridos
+- `src/lib/quoteBookingShowcase.ts` — puro: monta a vitrine (seções → conjuntos → serviços), numeração de opções por conjunto, status por conjunto, validação agregada e serialização do carrinho.
+- `QuoteBookingShowcase.tsx` — lista de blocos da vitrine.
+- `BookingChoiceSetBlock.tsx` — cabeçalho do conjunto (nome, destino/período/tipo, status discreto) + grade de opções.
+- `BookingServiceCard.tsx` — card objetivo (thumb, tipo, nome, local, datas, valor conforme configuração) + "Ver detalhes" + ação Adicionar/Selecionar/Selecionado.
+- `BookingServiceDetailsSheet.tsx` — `Dialog` no desktop / `Sheet` inferior no mobile, com galeria e campos do tipo de serviço.
+- `MySelectionBar.tsx` — barra inferior fixa no mobile e botão/contador discreto no cabeçalho do desktop.
+- `MySelectionPanel.tsx` — resumo agrupado por seção (destino/período/tipo) com remover/trocar e CTA "Solicitar reserva".
 
-- `QuoteServicesOrganizer.tsx` — editor de seção ganha alternância Livre/Estruturada e os campos opcionais (destino, período, tipo).
-- `QuoteBookingRequestSettings.tsx` / `useQuoteBookingConfig.ts` / `quoteBookingRules.ts` — criar grupos `free`, toggle Obrigatório/Opcional gravando só `min_select`, limite opcional em `max_select`; sugestões de agrupamento (mesmo tipo + período) apenas como **sugestão**, nunca automáticas. O conjunto não recebe seção manualmente: sua seção é derivada dos serviços que o compõem.
-- `OrcamentoPublico.tsx` — passa a renderizar a nova vitrine de seleção quando `booking_requests_enabled`.
-- `QuoteBookingRequestPanel.tsx` — deixa de abrir o wizard; passa a hospedar o estado da seleção + a barra "Minha seleção" + revisão/contato/envio (estados Compacto / Resumo / Sucesso já existentes são preservados).
-- `get_quote_by_public_code` — incluir os novos campos de seção/grupo no payload.
+## 7. Regras exatas de seleção e validação
+- `selection_mode = 'required'`: sempre incluído, exibido como "Incluído na proposta", sem ação de remover.
+- Serviço avulso (`optional`, sem `choice_group_id`): adicionar/remover livre.
+- Conjunto `alternative`: escolher 1; selecionar outro troca automaticamente (`toggleBookingSelection` já faz isso). Bloqueia envio somente se `min_select >= 1`.
+- Conjunto `free`: nenhum/um/vários/todos; respeitar `min_select` (mínimo) e `max_select` (máximo, ao atingir o limite as demais opções mostram "trocar" em vez de "adicionar"). Sem `max_select` = ilimitado.
+- Pertencimento apenas por `choice_group_id`. Nunca inferir alternativa por destino/período/tipo.
+- Numeração "Opção N" reinicia em cada conjunto, na ordem de `order_index` dos serviços.
+- Pacote fechado (`isPackagePricing`): seleção bloqueada, tudo incluído, apenas "Solicitar reserva" (comportamento atual preservado).
+- Valores: respeitar `hidesIndividualAmounts` e a ocultação de total; quando ocultos, cards e resumo não exibem números.
+- Envio bloqueado só por: conjunto obrigatório sem mínimo atendido, `max_select` excedido, ou seleção vazia. Mensagens por conjunto, nunca genéricas.
+- **Fallback (orçamento antigo)**: sem `quote_sections` → uma lista única sem cabeçalho; sem `choice_groups` → todos os serviços como avulsos com adicionar/remover; seções sem os novos campos → Grupo livre (só o nome). Nenhum caso exige migração manual.
 
-## 4. Componentes novos
+## 8. UX desktop
+- Vitrine em coluna única de blocos; dentro de cada conjunto, grade de 2–3 cards comparáveis de altura uniforme.
+- Cabeçalho do conjunto: nome, chips discretos de destino/período/tipo e status ("Escolha 1 opção", "Opcional", "2 de 3 selecionados").
+- Card: thumb 4:3, tipo, nome real, local, datas, valor (quando permitido), "Ver detalhes" (Dialog) e ação primária.
+- Estado "Selecionado": borda/realce em token semântico, ícone de check, ações "Remover" / "Trocar por outra opção".
+- "Minha seleção": botão discreto com contador no cabeçalho fixo da proposta, abrindo painel lateral com o resumo agrupado e o CTA.
+- Microfeedback: transição curta no card + atualização do contador; sem toasts a cada clique.
 
-- `src/lib/quoteChoiceSets.ts` — monta a árvore `seção → conjunto de escolha → opções` a partir de sections/groups/services, numera "Opção N" **por conjunto**, e expõe o status do conjunto (escolhido / pendente / opcional).
-- `src/components/quote/public/SelectableServiceCard.tsx` — card objetivo (foto, nome, categoria, local, período, regime, valor conforme configuração) com "Ver detalhes" e ação de seleção.
-- `src/components/quote/public/ServiceDetailsSheet.tsx` — detalhes completos em sheet/modal responsivo.
-- `src/components/quote/public/ChoiceSetBlock.tsx` — título do conjunto + instrução ("Escolha uma das opções", "Escolha quantos desejar") + status.
-- `src/components/quote/public/MySelectionBar.tsx` — sacola persistente com contador (header/flutuante no desktop, barra inferior fixa no mobile) e drawer de resumo agrupado por seção.
-- `QuoteBookingWizardDialog.tsx` é mantido no repositório apenas durante a transição e removido na Etapa 5.
+## 9. UX mobile
+- Recomendação: **barra inferior fixa** ("Minha seleção · N itens" + "Solicitar reserva"), com `safe-area-inset-bottom`; escolhida em vez do botão flutuante porque acumula contador, valor opcional e CTA sem cobrir conteúdo.
+- Cards em coluna única, carrossel horizontal apenas para fotos (nunca rolagem horizontal de layout).
+- "Ver detalhes" e "Minha seleção" abrem `Sheet` inferior com scroll interno e swipe-down.
+- Conjunto com muitas opções: mostrar as 3 primeiras + "Ver todas as N opções".
+- Alvos de toque ≥ 44px; zero rolagem horizontal em 320px.
 
-## 5. Regras de seleção propostas
+## 10. Compatibilidade e rollout
+- Nenhum link, token, código ou slug muda; nenhuma rota nova.
+- Leitura pública continua exclusivamente pelas RPCs existentes — nenhum `SELECT` anon direto é reintroduzido.
+- Vitrine ativada pela mesma condição de hoje (`booking_requests_enabled` resolvido no servidor); orçamentos sem isso não mudam em nada.
+- Flag interna de UI (`showcase` vs `wizard`) durante as Etapas 2–4 para permitir voltar ao fluxo antigo sem novo deploy de banco.
+- Migração do `localStorage`: ler `booking-wizard:<quoteId>` e converter `yes` em itens do carrinho na primeira abertura; gravar no novo formato depois.
+- Sem mudanças em PDF, compartilhamento, CRM, carteira, roteiro, protocolo/File, idempotência, histórico, notificações e `agency_showcases` (vitrine pública permanece separada).
 
-- Conjunto `alternative` (`max_select = 1`): escolha única — selecionar outra opção troca automaticamente, sem perguntar sobre a anterior; feedback "Opção atualizada". Com `min_select = 0` o cliente pode não escolher nenhuma; com `min_select = 1` precisa escolher uma.
-- Conjunto `free`: múltipla, respeitando `min_select` (0 = opcional) e `max_select` quando definido.
-- Serviço sem grupo: `optional` = adicionar/remover; `required` = sempre incluído e não removível.
-- Pacote fechado (`pricing_mode = 'package'`) continua bloqueado, com tudo incluído.
-- Bloqueio de envio **exclusivamente** quando `min_select >= 1` não é atendido — mesma expressão no cliente (`quoteBookingSelection.ts`) e no RPC.
-- Nenhuma inferência: dois hotéis no mesmo destino/período só competem se a agência os colocar no mesmo conjunto.
+## 11. Riscos e testes
+| Risco | Mitigação / teste |
+|---|---|
+| Seleção divergente da validação do servidor | Regras puras em `quoteBookingShowcase.ts` espelhando `submit_quote_booking_request`; testes unitários de `min/max`, alternative, required |
+| Orçamento legado sem seções/grupos | Testes de fallback com listas vazias (padrão de `quote-sections.test.ts`) |
+| Pacote fechado permitir remover item | Teste explícito `packageMode` |
+| Vazamento de valores ocultos | Teste de render com `hidesIndividualAmounts` e total oculto |
+| Regressão dos 3 formatos de link | Playwright anônimo em `share_token`, `slug/código` e domínio White Label, verificando zero request ≥400 |
+| Duplicidade de pedido | Manter `idempotencyKey` por abertura do pop-up; teste do estado de sucesso |
+| Rolagem horizontal mobile | Verificação a 320/375px com screenshot |
 
-### Coerência entre conjunto e seção
+## 12. Etapas de implementação
+1. **Regras puras** — `quoteBookingShowcase.ts` + testes (carrinho, min/max, numeração, fallback, pacote). *Aceite:* suíte verde, nenhum componente alterado.
+2. **Vitrine pública (leitura)** — cards, detalhes e blocos de conjunto sobre o payload atual, ainda com o wizard como CTA. *Aceite:* os 3 links renderizam a vitrine sem erro e sem valores indevidos.
+3. **Minha seleção + envio** — barra/painel persistente, CTA, disclaimer e submit pela Edge Function atual. *Aceite:* pedido real gerado com protocolo/File e oportunidade no CRM, idêntico ao fluxo anterior.
+4. **Desligar o wizard obrigatório** — vitrine como caminho padrão; wizard vira revisão opcional. *Aceite:* nenhuma tela exige "quero/não quero".
+5. **Metadados opcionais de seção e conjunto** *(depende da aprovação do item 4 do banco)* — colunas opcionais, projeção na RPC e campos no admin. *Aceite:* orçamentos antigos inalterados; novos exibem destino/período/tipo.
+6. **Polimento e regressão** — responsividade, microfeedback, Playwright nos 3 formatos, `vite build` e suíte completa.
 
-A coluna `section_id` no conjunto seria uma segunda fonte de verdade sobre onde o conjunto aparece e poderia divergir do `section_id` dos serviços. Por isso ela é **eliminada da proposta**: `quoteChoiceSets.ts` deriva a seção do conjunto a partir dos serviços que o integram (a seção do primeiro serviço na ordem salva). Consequências:
-
-- Um conjunto cujos serviços estão em seções diferentes é renderizado uma única vez, na seção do primeiro serviço, e a UI da agência exibe um aviso ("as opções deste conjunto estão em seções diferentes") com ação de mover todas para a mesma seção — sem bloquear o envio.
-- O servidor não precisa validar coerência alguma: a regra de escolha depende só de `choice_group_id`, `min_select` e `max_select`, e a seção é apenas apresentação.
-
-## 6. Compatibilidade com orçamentos existentes
-
-- Orçamento sem seções: os serviços aparecem em um bloco único "Sua viagem", cada um como serviço único.
-- Seções antigas: `kind = 'free'`, sem destino/período — renderizam como hoje (só título).
-- Serviços `optional` sem grupo: comportamento idêntico ao atual (adicionar/remover).
-- **Grupos legados preservados (verificado):** os 5 grupos existentes estão todos com `group_type='alternative', min_select=1, max_select=1`. Como a obrigatoriedade continua sendo lida de `min_select`, eles permanecem obrigatórios exatamente como hoje, e os 13 serviços `alternative` mantêm `choice_group_id`/`selection_mode` intactos. A migração **não faz UPDATE em dados** — apenas troca o CHECK e o trigger para *permitir* `min_select=0`; nenhum grupo legado opcional é convertido em obrigatório (e não existe nenhum grupo opcional hoje).
-- Nova regra genérica do RPC (`count >= min_select` e `count <= max_select`) devolve resultado idêntico ao atual para `min 1 / max 1`.
-- Os 3 pedidos já registrados e todo o histórico/CRM permanecem intactos: nenhuma coluna de `quote_booking_requests*` muda.
-
-## 7. UX desktop
-
-Vitrine dentro da própria página do orçamento: seção com título, destino e período; conjuntos com instrução; cards em grade 2–3 colunas com "Ver detalhes" e "Selecionar esta opção"; "Minha seleção" fixa no topo/flutuante com contador; drawer lateral com resumo por seção; CTA "Enviar solicitação de reserva" com o aviso de que não há confirmação automática.
-
-## 8. UX mobile (prioritária)
-
-Cards em coluna única, imagem proporcional, zero rolagem horizontal; barra inferior fixa com 🛒 contador + "Revisar seleção"; drawer full-height para o resumo; sheet de detalhes responsivo com fechamento por swipe; microanimação curta (escala + check) no card ao selecionar, sem bloquear a rolagem; CTA nunca sobrepõe conteúdo (padding inferior compensado).
-
-## 9. Riscos e regressões
-
-- Divergência entre validação do cliente e do servidor — mitigado com uma única expressão (`min_select`/`max_select`) espelhada em `quoteBookingSelection.ts` e no RPC.
-- Relaxar o CHECK/trigger de `alternative` é irreversível na direção "dados"; mitigado por não alterar nenhuma linha existente.
-- Remover o wizard afeta os testes existentes (`quote-booking-wizard.test.ts`, `quote-booking-selection.test.ts`) — serão reescritos para a nova árvore.
-- Decisões salvas em localStorage pela chave `booking-wizard:<quoteId>` ficam órfãs — nova chave versionada, com descarte silencioso da antiga.
-- Orçamentos com muitos serviços podem pesar no mobile — imagens via `ResolvedServiceImage` com lazy loading.
-- Exibição de valores deve continuar respeitando `hide_service_amounts` / pacote fechado.
-
-## 10. Etapas de implementação
-
-1. Migração mínima: campos de seção estruturada, `service_type` no conjunto, CHECK e trigger de `alternative` relaxados para aceitar `min_select ∈ {0,1}` com `max_select = 1`; `get_quote_by_public_code` passa a devolver os novos campos.
-2. `quoteChoiceSets.ts` + testes puros (única obrigatória, única opcional, múltipla com min/max, serviço único, numeração "Opção N" por conjunto, seção derivada dos serviços).
-3. UI da agência: seção Livre/Estruturada, criação de conjuntos `free`, toggle Obrigatório/Opcional gravando `min_select`, aviso de conjunto com serviços em seções diferentes, sugestões não automáticas.
-4. Vitrine pública: cards, "Ver detalhes", conjuntos, microinteração.
-5. "Minha seleção" + revisão + envio pelo RPC atual; remoção do wizard sequencial.
-6. Ajuste do RPC para a validação genérica por `min_select`/`max_select` e bateria de regressão ponta a ponta:
-   - acesso **anônimo** (sem sessão) ao link público;
-   - identificação da agência pelo **domínio White Label** e pelo formato `/{agency_slug}/{access_code}`;
-   - respeito integral a `hide_service_amounts`, valores detalhados e pacote fechado (nenhum valor inventado ou distribuído);
-   - **idempotência** do envio (mesma `idempotency_key` retorna o pedido existente, sem duplicar);
-   - geração/preservação de **protocolo e número de file** (`generate_booking_request_protocol`, `booking_request_file_number`);
-   - **CRM**: oportunidade única em etapa de Negociação (`sync_booking_request_opportunity`, `booking_request_negotiation_stage`) e importação em operação existente;
-   - **notificações/deliveries** (`pending_booking_request_deliveries`, `complete_booking_request_delivery`) e histórico do pedido;
-   - orçamentos **legados** (sem seções, sem grupos) e os 5 grupos existentes continuam funcionando;
-   - responsividade: smartphone pequeno/grande, tablet e desktop, sem rolagem horizontal.
-7. Regressão específica de **elegibilidade White Label** (comparativa, sempre pela fonte de verdade, nunca por lista fixa):
-   - **conta White Label atual** (Premium + `agency_public_domains.is_active`): vê vitrine, conjuntos e "Minha seleção"; envio funciona ponta a ponta;
-   - **conta que recebe White Label depois**: com o domínio inativo/ausente o link público mostra o layout atual; ao ativar a linha em `agency_public_domains` (sem qualquer deploy), o mesmo link passa a exibir a nova experiência e a UI interna libera as novas configurações;
-   - **conta sem White Label** (inclusive Premium sem domínio ativo e não-Premium com domínio): layout público idêntico ao atual — snapshot antes/depois, nenhum componente novo montado, nenhuma chave de localStorage nova, e o RPC continua devolvendo `booking_requests_enabled = false`;
-   - **acesso por domínio personalizado** de conta elegível: nova UX presente, tema/branding White Label preservados;
-   - **acesso por URL pública alternativa/fallback** (`/{agency_slug}/{access_code}` com slug do perfil, `/orcamento/:token`, `seuorcamento.tur.br`): mesmo resultado do domínio personalizado, comprovando que o gate não depende do hostname;
-   - **tentativa de envio forçada** por conta não elegível (chamada direta ao RPC/Edge Function): rejeitada no servidor;
-   - **compatibilidade de dados**: as colunas novas continuam existindo para todas as contas (requisito 7), mas nenhuma superfície de UI nova é exibida a contas não elegíveis.
+Ordem recomendada: 1 → 2 → 3 → 4 → 6, com a Etapa 5 encaixada depois da 4 (ou adiada sem prejuízo).
