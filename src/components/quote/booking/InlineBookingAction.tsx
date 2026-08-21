@@ -25,7 +25,7 @@ export function InlineBookingAction({
     return (
       <div
         className={cn(
-          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.06] px-3 py-1.5 text-[11px] font-semibold text-primary",
+          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground",
           className,
         )}
         data-booking-inline-action="locked"
