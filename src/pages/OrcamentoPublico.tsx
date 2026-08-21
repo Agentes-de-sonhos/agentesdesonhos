@@ -1074,14 +1074,29 @@ function formatDocSize(bytes: number | null) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function PublicQuoteDocuments({ quoteId }: { quoteId: string }) {
+function PublicQuoteDocuments({
+  shareToken,
+  agencySlug,
+  accessCode,
+}: {
+  shareToken?: string;
+  agencySlug?: string;
+  accessCode?: string;
+}) {
+  const hasCredential = Boolean(shareToken) || Boolean(agencySlug && accessCode);
   const { data: documents = [], isLoading } = useQuery({
-    queryKey: ["public-quote-documents", quoteId],
+    queryKey: ["public-quote-documents", shareToken ?? null, agencySlug ?? null, accessCode ?? null],
+    enabled: hasCredential,
     queryFn: async () => {
-      // Segurança: leitura via RPC SECURITY DEFINER (sem acesso anônimo à tabela).
-      const { data, error } = await (supabase as any).rpc("get_public_quote_documents", {
-        p_quote_id: quoteId,
-      });
+      // Segurança: leitura via RPC SECURITY DEFINER exigindo posse do link (token ou slug+código).
+      const { data, error } = shareToken
+        ? await (supabase as any).rpc("get_public_quote_documents_by_share_token", {
+            p_share_token: shareToken,
+          })
+        : await (supabase as any).rpc("get_public_quote_documents_by_public_code", {
+            p_agency_slug: agencySlug,
+            p_code: accessCode,
+          });
       if (error) return [] as PublicDocument[];
       return (data || []) as PublicDocument[];
     },
