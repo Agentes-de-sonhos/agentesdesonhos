@@ -54,7 +54,6 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     setServiceSelection,
   } = useQuoteBookingConfig(quote?.id);
 
-  const [enabled, setEnabled] = useState<boolean>(!!quote?.booking_requests_enabled);
   const [disclaimer, setDisclaimer] = useState<string>(
     quote?.booking_disclaimer || DEFAULT_DISCLAIMER
   );
@@ -76,25 +75,6 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     }
   };
 
-  const handleToggle = async (checked: boolean) => {
-    if (checked) {
-      const errors = validateBookingConfig(services as any, groups);
-      if (errors.length > 0) {
-        toast.error("Corrija a configuração dos serviços antes de ativar", {
-          description: errors.slice(0, 3).join(" • "),
-        });
-        return;
-      }
-    }
-    setEnabled(checked);
-    // Desativar preserva grupos e modos dos serviços para reativação futura.
-    await persist({ booking_requests_enabled: checked });
-    toast.success(
-      checked
-        ? "Seleção de serviços ativada no orçamento web."
-        : "Seleção desativada. Sua configuração de serviços e grupos foi preservada."
-    );
-  };
 
   const handleCreateGroup = async () => {
     if (!newGroupTitle.trim()) {
