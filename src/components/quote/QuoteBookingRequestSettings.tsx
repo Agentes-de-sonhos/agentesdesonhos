@@ -185,29 +185,30 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
         />
       </div>
 
-      {/* Grupos de escolha */}
+      {/* Conjuntos de escolha */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <Label className="text-sm font-medium">Grupos de escolha</Label>
+          <Label className="text-sm font-medium">Conjuntos de escolha</Label>
           {loadingGroups && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
         </div>
         <p className="text-xs text-muted-foreground">
-          Use grupos para organizar opções concorrentes (ex.: “Hotéis em Orlando”).
+          Um conjunto reúne serviços que competem entre si (ex.: “Hotéis em Orlando”). O cliente vê
+          as opções numeradas e escolhe conforme a regra definida aqui.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-2">
           <Input
-            placeholder="Nome do grupo (ex.: Hotéis em Orlando)"
+            placeholder="Nome do conjunto (ex.: Hotéis em Orlando)"
             value={newGroupTitle}
             onChange={(e) => setNewGroupTitle(e.target.value)}
           />
           <Select value={newGroupType} onValueChange={(v: any) => setNewGroupType(v)}>
-            <SelectTrigger className="sm:w-[220px]">
+            <SelectTrigger className="sm:w-[240px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="alternative">Alternativa (escolhe 1)</SelectItem>
-              <SelectItem value="free">Livre (várias opções)</SelectItem>
+              <SelectItem value="alternative">Escolha única (o cliente escolhe 1)</SelectItem>
+              <SelectItem value="free">Múltipla escolha (nenhuma, uma ou várias)</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -217,40 +218,116 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
             disabled={createGroup.isPending}
             className="gap-1.5 shrink-0"
           >
-            <Plus className="h-4 w-4" /> Criar grupo
+            <Plus className="h-4 w-4" /> Criar conjunto
           </Button>
         </div>
 
         {groups.length > 0 && (
           <div className="space-y-2">
-            {groups.map((g) => (
-              <div
-                key={g.id}
-                className="flex items-center gap-2 rounded-lg border border-border bg-background p-2"
-              >
-                <Input
-                  defaultValue={g.title}
-                  onBlur={(e) => {
-                    const title = e.target.value.trim();
-                    if (title && title !== g.title) renameGroup.mutate({ id: g.id, title });
-                  }}
-                  className="h-8 text-sm"
-                />
-                <Badge variant="secondary" className="shrink-0 text-[10px]">
-                  {groupHint(g.group_type)}
-                </Badge>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive shrink-0"
-                  title="Excluir grupo (serviços voltam para Opcional)"
-                  onClick={() => deleteGroup.mutate(g.id)}
+            {groups.map((g) => {
+              const members = services.filter((s) => (s as any).choice_group_id === g.id);
+              const sectionIds = Array.from(
+                new Set(members.map((s) => ((s as any).section_id as string | null) ?? "__none__")),
+              );
+              const splitSections = sectionIds.length > 1;
+              const required = g.group_type === "alternative" || (g.min_select ?? 0) > 0;
+              return (
+                <div
+                  key={g.id}
+                  className="space-y-2 rounded-lg border border-border bg-background p-3"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      defaultValue={g.title}
+                      onBlur={(e) => {
+                        const title = e.target.value.trim();
+                        if (title && title !== g.title) renameGroup.mutate({ id: g.id, title });
+                      }}
+                      className="h-8 text-sm"
+                    />
+                    <Badge variant="secondary" className="shrink-0 text-[10px]">
+                      {groupHint(g.group_type)}
+                    </Badge>
+                    <Badge
+                      variant={required ? "default" : "outline"}
+                      className="shrink-0 text-[10px]"
+                      title="Calculado pelo mínimo de escolhas"
+                    >
+                      {required ? "Obrigatório" : "Opcional"}
+                    </Badge>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive shrink-0"
+                      title="Excluir conjunto (serviços voltam para Opcional)"
+                      onClick={() => deleteGroup.mutate(g.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {g.group_type === "free" ? (
+                    <div className="flex flex-wrap items-end gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-[11px]">Mínimo de escolhas</Label>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={Math.max(members.length, 1)}
+                          defaultValue={g.min_select ?? 0}
+                          className="h-8 w-[110px] text-sm"
+                          onBlur={(e) =>
+                            updateGroupLimits.mutate({
+                              id: g.id,
+                              group_type: "free",
+                              min_select: Number(e.target.value) || 0,
+                              max_select: g.max_select ?? null,
+                              optionCount: members.length,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[11px]">Máximo (vazio = sem limite)</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={Math.max(members.length, 1)}
+                          defaultValue={g.max_select ?? ""}
+                          className="h-8 w-[150px] text-sm"
+                          onBlur={(e) =>
+                            updateGroupLimits.mutate({
+                              id: g.id,
+                              group_type: "free",
+                              min_select: g.min_select ?? 0,
+                              max_select: e.target.value === "" ? null : Number(e.target.value),
+                              optionCount: members.length,
+                            })
+                          }
+                        />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Mínimo 0 deixa o conjunto opcional. {members.length} serviço(s) participando.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">
+                      Escolha única: o cliente seleciona exatamente 1 entre {members.length}{" "}
+                      opção(ões). Selecionar outra troca automaticamente.
+                    </p>
+                  )}
+
+                  {splitSections && (
+                    <p className="flex items-start gap-1 text-[11px] font-medium text-amber-600">
+                      <Info className="mt-0.5 h-3 w-3 shrink-0" />
+                      Este conjunto tem serviços em seções diferentes. Mantenha as opções
+                      concorrentes na mesma seção para o cliente comparar lado a lado.
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
