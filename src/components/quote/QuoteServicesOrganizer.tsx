@@ -229,31 +229,35 @@ export function QuoteServicesOrganizer({
 
       {/* Criar seção */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Nova seção</DialogTitle>
             <DialogDescription>
               Ex.: Orlando, Miami, Parte aérea ou Opção premium.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="section-title">Nome da seção</Label>
-            <Input
-              id="section-title"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Orlando"
-              autoFocus
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="section-title">Nome da seção</Label>
+              <Input
+                id="section-title"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Orlando"
+                autoFocus
+              />
+            </div>
+            <SectionMetaFields idPrefix="new" value={newMeta} onChange={setNewMeta} />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setCreateOpen(false)}>Cancelar</Button>
             <Button
               disabled={!newTitle.trim()}
               onClick={async () => {
-                await onCreateSection(newTitle.trim());
+                await onCreateSection({ title: newTitle.trim(), ...normalizeMeta(newMeta) });
                 setCreateOpen(false);
                 setNewTitle("");
+                setNewMeta(EMPTY_META);
               }}
             >
               Criar seção
@@ -262,27 +266,39 @@ export function QuoteServicesOrganizer({
         </DialogContent>
       </Dialog>
 
-      {/* Renomear seção */}
+      {/* Editar seção */}
       <Dialog open={!!renaming} onOpenChange={(o) => !o && setRenaming(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Renomear seção</DialogTitle>
+            <DialogTitle>Editar seção</DialogTitle>
+            <DialogDescription>
+              Deixe destino, datas e tipo em branco para manter um grupo livre.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="section-rename">Nome da seção</Label>
-            <Input
-              id="section-rename"
-              value={renameTitle}
-              onChange={(e) => setRenameTitle(e.target.value)}
-              autoFocus
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="section-rename">Nome da seção</Label>
+              <Input
+                id="section-rename"
+                value={renameTitle}
+                onChange={(e) => setRenameTitle(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <SectionMetaFields idPrefix="edit" value={editMeta} onChange={setEditMeta} />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRenaming(null)}>Cancelar</Button>
             <Button
               disabled={!renameTitle.trim()}
               onClick={async () => {
-                if (renaming) await onRenameSection({ sectionId: renaming.id, title: renameTitle.trim() });
+                if (renaming) {
+                  await onRenameSection({
+                    sectionId: renaming.id,
+                    title: renameTitle.trim(),
+                    ...normalizeMeta(editMeta),
+                  });
+                }
                 setRenaming(null);
               }}
             >
