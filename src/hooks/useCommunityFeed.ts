@@ -26,7 +26,7 @@ export function useCommunityFeed() {
         .select("user_id, name, avatar_url, agency_name")
         .in("user_id", userIds);
       const { data: members } = await supabase
-        .from("community_members")
+        .from("community_members_public")
         .select("user_id, specialties, status")
         .in("user_id", userIds);
 
