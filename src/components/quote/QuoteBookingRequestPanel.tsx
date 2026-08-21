@@ -435,7 +435,7 @@ export function QuoteBookingRequestPanel({
 
       {/* Espaço para barra fixa + flutuante do WhatsApp não cobrirem conteúdo/CTA. */}
       {!model.packageMode && !submitted && (
-        <div aria-hidden="true" data-testid="booking-bottom-spacer" className="h-44 lg:hidden" />
+        <div aria-hidden="true" data-testid="booking-bottom-spacer" className="h-24 lg:hidden" />
       )}
 
       {!model.packageMode && !submitted && (

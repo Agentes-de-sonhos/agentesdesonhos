@@ -545,3 +545,15 @@ img {
 /* Hide horizontal scrollbar on overflow rows (used on the wallet cover hero) */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Orçamento público (mobile): reserva espaço para a barra fixa "Minha Seleção"
+   e para os flutuantes posicionados acima dela, garantindo que o último card e
+   o CTA rolem completamente acima dos elementos fixos. */
+body[data-booking-selection-bar] {
+  padding-bottom: calc(var(--booking-selection-bar-height, 5rem) + 7rem);
+}
+@media (min-width: 1024px) {
+  body[data-booking-selection-bar] {
+    padding-bottom: 0;
+  }
+}
