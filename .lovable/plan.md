@@ -80,7 +80,8 @@ Cards em coluna única, imagem proporcional, zero rolagem horizontal; barra infe
 
 ## 9. Riscos e regressões
 
-- Divergência entre validação do cliente e do servidor em grupos `free` obrigatórios — mitigado mantendo `quoteBookingSelection.ts` como fonte única e espelhando a regra no RPC.
+- Divergência entre validação do cliente e do servidor — mitigado com uma única expressão (`min_select`/`max_select`) espelhada em `quoteBookingSelection.ts` e no RPC.
+- Relaxar o CHECK/trigger de `alternative` é irreversível na direção "dados"; mitigado por não alterar nenhuma linha existente.
 - Remover o wizard afeta os testes existentes (`quote-booking-wizard.test.ts`, `quote-booking-selection.test.ts`) — serão reescritos para a nova árvore.
 - Decisões salvas em localStorage pela chave `booking-wizard:<quoteId>` ficam órfãs — nova chave versionada, com descarte silencioso da antiga.
 - Orçamentos com muitos serviços podem pesar no mobile — imagens via `ResolvedServiceImage` com lazy loading.
@@ -88,9 +89,18 @@ Cards em coluna única, imagem proporcional, zero rolagem horizontal; barra infe
 
 ## 10. Etapas de implementação
 
-1. Migração aditiva (seções estruturadas + campos de grupo) e atualização de `get_quote_by_public_code`.
-2. `quoteChoiceSets.ts` + testes puros das regras (única / múltipla / serviço único / obrigatoriedade / numeração por conjunto).
-3. UI da agência: seção estruturada e conjuntos (criar `free`, marcar obrigatório, vincular à seção, sugestões não automáticas).
-4. Vitrine pública: cards, detalhes, conjuntos, microinteração.
+1. Migração mínima: campos de seção estruturada, `service_type` no conjunto, CHECK e trigger de `alternative` relaxados para aceitar `min_select ∈ {0,1}` com `max_select = 1`; `get_quote_by_public_code` passa a devolver os novos campos.
+2. `quoteChoiceSets.ts` + testes puros (única obrigatória, única opcional, múltipla com min/max, serviço único, numeração "Opção N" por conjunto, seção derivada dos serviços).
+3. UI da agência: seção Livre/Estruturada, criação de conjuntos `free`, toggle Obrigatório/Opcional gravando `min_select`, aviso de conjunto com serviços em seções diferentes, sugestões não automáticas.
+4. Vitrine pública: cards, "Ver detalhes", conjuntos, microinteração.
 5. "Minha seleção" + revisão + envio pelo RPC atual; remoção do wizard sequencial.
-6. Ajuste do RPC para grupo `free` obrigatório e testes de regressão do fluxo ponta a ponta (pedido → protocolo/file → oportunidade CRM → notificações), incluindo domínio White Label e orçamentos legados.
+6. Ajuste do RPC para a validação genérica por `min_select`/`max_select` e bateria de regressão ponta a ponta:
+   - acesso **anônimo** (sem sessão) ao link público;
+   - identificação da agência pelo **domínio White Label** e pelo formato `/{agency_slug}/{access_code}`;
+   - respeito integral a `hide_service_amounts`, valores detalhados e pacote fechado (nenhum valor inventado ou distribuído);
+   - **idempotência** do envio (mesma `idempotency_key` retorna o pedido existente, sem duplicar);
+   - geração/preservação de **protocolo e número de file** (`generate_booking_request_protocol`, `booking_request_file_number`);
+   - **CRM**: oportunidade única em etapa de Negociação (`sync_booking_request_opportunity`, `booking_request_negotiation_stage`) e importação em operação existente;
+   - **notificações/deliveries** (`pending_booking_request_deliveries`, `complete_booking_request_delivery`) e histórico do pedido;
+   - orçamentos **legados** (sem seções, sem grupos) e os 5 grupos existentes continuam funcionando;
+   - responsividade: smartphone pequeno/grande, tablet e desktop, sem rolagem horizontal.
