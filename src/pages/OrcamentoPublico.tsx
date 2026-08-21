@@ -1973,6 +1973,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
       {/* ─── Floating mobile CTA — aparece ao rolar para baixo, recolhido no topo ─── */}
       {whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
+
+      {/* ─── Carrinho persistente + modal amplo de solicitação ─── */}
+      <BookingCartLauncher />
+      <BookingCartDialog />
     </div>
+    </BookingCartProvider>
   );
 }
