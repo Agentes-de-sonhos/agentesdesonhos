@@ -231,7 +231,8 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
                 new Set(members.map((s) => ((s as any).section_id as string | null) ?? "__none__")),
               );
               const splitSections = sectionIds.length > 1;
-              const required = g.group_type === "alternative" || (g.min_select ?? 0) > 0;
+              // Obrigatoriedade vem sempre de min_select, nunca do tipo do conjunto.
+              const required = (g.min_select ?? 0) > 0;
               return (
                 <div
                   key={g.id}
@@ -313,10 +314,52 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
                       </p>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-muted-foreground">
-                      Escolha única: o cliente seleciona exatamente 1 entre {members.length}{" "}
-                      opção(ões). Selecionar outra troca automaticamente.
-                    </p>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Label className="text-[11px]">Este conjunto é</Label>
+                        <div className="flex overflow-hidden rounded-md border border-border">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={required ? "default" : "ghost"}
+                            className="h-7 rounded-none px-3 text-[11px]"
+                            onClick={() =>
+                              updateGroupLimits.mutate({
+                                id: g.id,
+                                group_type: "alternative",
+                                min_select: 1,
+                                max_select: 1,
+                                optionCount: members.length,
+                              })
+                            }
+                          >
+                            Obrigatório
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={!required ? "default" : "ghost"}
+                            className="h-7 rounded-none px-3 text-[11px]"
+                            onClick={() =>
+                              updateGroupLimits.mutate({
+                                id: g.id,
+                                group_type: "alternative",
+                                min_select: 0,
+                                max_select: 1,
+                                optionCount: members.length,
+                              })
+                            }
+                          >
+                            Opcional
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">
+                        {required
+                          ? `Escolha única obrigatória: o cliente seleciona 1 entre ${members.length} opção(ões). Selecionar outra troca automaticamente.`
+                          : `Escolha única opcional: o cliente pode escolher 1 entre ${members.length} opção(ões) — ou nenhuma.`}
+                      </p>
+                    </div>
                   )}
 
                   {splitSections && (

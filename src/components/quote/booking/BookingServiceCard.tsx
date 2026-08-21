@@ -19,6 +19,10 @@ interface Props {
   selected: boolean;
   /** Valor exibido, já formatado. null quando os valores ficam ocultos. */
   amountLabel: string | null;
+  /** Motivo pelo qual o clique não será aplicado (limite/escolha obrigatória). */
+  blockedReason?: string | null;
+  /** false quando clicar na opção já selecionada não pode esvaziar o conjunto. */
+  canDeselect?: boolean;
   onToggle: () => void;
   onDetails: () => void;
 }
@@ -34,6 +38,8 @@ export function BookingServiceCard({
   action,
   selected,
   amountLabel,
+  blockedReason = null,
+  canDeselect = true,
   onToggle,
   onDetails,
 }: Props) {
@@ -145,10 +151,15 @@ export function BookingServiceCard({
       </Button>
       {selected && !locked && (
         <p className="text-center text-[11px] text-muted-foreground">
-          {action === "radio"
+          {!canDeselect
             ? "Selecione outra opção para trocar."
-            : "Toque novamente para remover da seleção."}
+            : action === "radio"
+              ? "Toque novamente para remover, ou escolha outra opção para trocar."
+              : "Toque novamente para remover da seleção."}
         </p>
+      )}
+      {!selected && !locked && blockedReason && (
+        <p className="text-center text-[11px] font-medium text-amber-700">{blockedReason}</p>
       )}
     </div>
   );
