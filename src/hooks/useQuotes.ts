@@ -165,6 +165,11 @@ export function useQuotes() {
               user_id: user?.id,
               title: sec.title,
               order_index: sec.order_index,
+              // Metadados opcionais da seção estruturada seguem a duplicação.
+              destination: sec.destination ?? null,
+              start_date: sec.start_date ?? null,
+              end_date: sec.end_date ?? null,
+              service_type: sec.service_type ?? null,
             }))
           )
           .select();
