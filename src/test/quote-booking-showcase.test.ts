@@ -254,3 +254,43 @@ describe("persistência e migração do localStorage", () => {
     expect(resolved.migrated).toBe(false);
   });
 });
+
+describe("conjunto de escolha distribuído em duas seções", () => {
+  const sections = [
+    { id: "s1", title: "Seção 1", sort_order: 0 },
+    { id: "s2", title: "Seção 2", sort_order: 1 },
+  ] as any[];
+  const services = [
+    svc("a", { selection_mode: "alternative", choice_group_id: "g", section_id: "s1", sort_order: 0 }),
+    svc("outro", { section_id: "s1", sort_order: 1 }),
+    svc("b", { selection_mode: "alternative", choice_group_id: "g", section_id: "s2", sort_order: 2 }),
+  ];
+  const groups = [group("g", { min_select: 1, max_select: 1 })];
+
+  it("gera um único bloco global com opções 1..N e contexto da primeira seção", () => {
+    const { showcase } = build(services, groups, sections);
+    const choice = showcase.blocks.filter((b) => b.kind === "choice");
+    expect(choice).toHaveLength(1);
+    expect(choice[0].sectionId).toBe("s1");
+    expect(choice[0].options.map((o) => o.service.id)).toEqual(["a", "b"]);
+    expect(choice[0].options.map((o) => o.optionNumber)).toEqual([1, 2]);
+    // nenhum bloco duplicado na segunda seção
+    expect(showcase.blocks.filter((b) => b.group?.id === "g")).toHaveLength(1);
+    // chaves únicas
+    const keys = showcase.blocks.map((b) => b.key);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("troca exclusiva global entre seções e validação min/max global", () => {
+    const { model, showcase } = build(services, groups, sections);
+    const block = showcase.blocks.find((b) => b.kind === "choice")!;
+    const first = applyShowcaseSelection(showcase, [], "a");
+    expect(first.selected).toEqual(["a"]);
+    const swapped = applyShowcaseSelection(showcase, first.selected, "b");
+    expect(swapped.selected).toEqual(["b"]);
+    expect(blockValidation(block, []).ok).toBe(false);
+    expect(blockValidation(block, ["b"]).ok).toBe(true);
+    expect(showcaseValidation(showcase, ["b"]).ok).toBe(true);
+    expect(effectiveSelectionIds(model, ["b"])).toContain("b");
+  });
+});
