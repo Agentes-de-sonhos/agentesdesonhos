@@ -1405,8 +1405,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   // já aparecem dentro do card de cada serviço (faixa azul-clara), então o bloco
   // geral "Condições de Pagamento" não é renderizado (sem espaço vazio).
   // Modo investimento total / valor fechado de pacote mantém o bloco geral.
-  const perServicePaymentMode =
-    investmentLayout === "ungrouped" && showDetailedPrices && !hidesIndividualAmounts(quote);
+  const perServicePaymentMode = usesPerServicePaymentBlocks(quote);
+
 
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
