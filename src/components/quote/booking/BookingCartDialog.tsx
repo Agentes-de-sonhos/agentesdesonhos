@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   CheckCircle2,
-  ClipboardCheck,
   Loader2,
   Lock,
   MapPin,
@@ -236,10 +235,6 @@ export function BookingCartDialog() {
                 </div>
 
                 <div className="min-w-0 space-y-4 lg:rounded-2xl lg:border lg:border-border/50 lg:bg-muted/20 lg:p-4">
-                  <p className="flex items-center gap-2 text-sm font-bold text-foreground">
-                    <ClipboardCheck className="h-4 w-4 text-primary" aria-hidden="true" />
-                    Revisão e envio
-                  </p>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {!hasLinkedClient && (
                       <>
@@ -297,6 +292,7 @@ export function BookingCartDialog() {
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Preferências, datas alternativas, dúvidas…"
+                        className="border-primary/40 bg-background ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                       />
                     </div>
                     <div className="sm:col-span-2">
@@ -304,7 +300,7 @@ export function BookingCartDialog() {
                         type="button"
                         variant="outline"
                         data-booking-continue-body
-                        className="min-h-[44px] w-full sm:w-auto"
+                        className="min-h-[44px] w-full sm:w-auto border-border bg-muted font-medium text-foreground hover:bg-muted/80 hover:text-foreground"
                         onClick={() => cart.setCartOpen(false)}
                         disabled={cart.submitting}
                       >
