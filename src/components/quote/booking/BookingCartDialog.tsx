@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import {
   CheckCircle2,
   ClipboardCheck,
-  Info,
   Loader2,
   Lock,
   MapPin,
@@ -301,17 +300,6 @@ export function BookingCartDialog() {
                       />
                     </div>
                   </div>
-
-                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 bg-card p-3">
-                    <Checkbox
-                      checked={accepted}
-                      onCheckedChange={(v) => setAccepted(v === true)}
-                      aria-label="Aceito o aviso sobre a solicitação de reserva"
-                    />
-                    <span className="text-[12px] leading-relaxed text-muted-foreground">
-                      {BOOKING_REQUEST_DISCLAIMER}
-                    </span>
-                  </label>
                 </div>
               </div>
             )}
@@ -337,10 +325,20 @@ export function BookingCartDialog() {
                     </span>
                   </div>
                 )}
-                <p className="flex gap-2 text-[11px] leading-relaxed text-muted-foreground">
-                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  <span>{BOOKING_REQUEST_DISCLAIMER}</span>
-                </p>
+                {!isEmpty && (
+                  <label
+                    data-booking-disclaimer-accept
+                    className="flex cursor-pointer items-start gap-2.5 text-[11px] leading-relaxed text-muted-foreground"
+                  >
+                    <Checkbox
+                      className="mt-0.5"
+                      checked={accepted}
+                      onCheckedChange={(v) => setAccepted(v === true)}
+                      aria-label="Aceito o aviso sobre a solicitação de reserva"
+                    />
+                    <span>{BOOKING_REQUEST_DISCLAIMER}</span>
+                  </label>
+                )}
                 {(error || cart.validationError) && (
                   <p className="text-xs font-medium text-destructive" role="alert">
                     {error || cart.validationError}
