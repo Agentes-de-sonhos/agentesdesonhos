@@ -1,128 +1,106 @@
-# Vitrine de serviços no orçamento público (White Label)
+# Auditoria (somente leitura) — Notificações do pedido de reserva pelo orçamento público
 
-Substituir o wizard "quero/não quero" por uma experiência de explorar → comparar → selecionar → revisar → solicitar, sem checkout e sem confirmação automática, reaproveitando todo o backend atual de solicitação de reserva.
+HEAD auditado: `01dbbf2e`. Nenhum código, banco, função, template ou configuração foi alterado.
 
-## 1. Diagnóstico da estrutura atual (nomes reais)
+## 1. Onde o pedido é criado e onde as notificações disparam
 
-**Rotas públicas**
-- `/orcamento/:token` → `src/pages/OrcamentoPublico.tsx` (legado por `share_token`).
-- `/:agencySlug/:accessCode` e domínio White Label → `src/pages/OrcamentoPublicoV2.tsx` → RPC `get_quote_by_public_code` → renderiza o mesmo `OrcamentoPublico` via overrides (`quoteOverride`, `agencySlugOverride`, `accessCodeOverride`). `PublicCodeResolver` decide pelo hostname.
-- Leitura pública 100% por RPC `SECURITY DEFINER`: `get_quote_by_share_token`, `get_quote_by_public_code`, ambos usando `build_public_quote_payload(quotes)`, que devolve `quote` (sem `client_id`, `share_token`, `user_id`), `services`, `sections`, `choice_groups`, `entry_extras`, `agent_profile`, além de `booking_requests_enabled` já resolvido no servidor e `has_linked_client`. Documentos: `get_public_quote_documents_by_share_token` / `_by_public_code`. Não há `SELECT` anon direto nas tabelas.
+- Criação: RPC `public.submit_quote_booking_request` (SECURITY DEFINER), definição em `supabase/migrations/20260821190426_...sql`. Insere em `quote_booking_requests`, depois `quote_booking_request_items` (a partir de `quote_services` + `quote_service_choice_groups`), calcula total no banco, grava evento `request_received`, sincroniza CRM (`sync_booking_request_opportunity` ou `ensure_client_and_opportunity_for_lead`) e enfileira as linhas de aviso em `quote_booking_request_deliveries`.
+- Endpoint público: `supabase/functions/submit-booking-request/index.ts` — valida payload (`validate.ts`), rate limit 8/60s por IP, hash de IP, chama a RPC com service role. O navegador nunca escreve na tabela.
+- Disparo do e-mail: `supabase/functions/submit-booking-request/notify.ts` → `deliverBookingNotifications(supabase, request_id)`, chamado em `index.ts` apenas quando `result.duplicate !== true`. Drena a fila via RPC `pending_booking_request_deliveries` e fecha cada linha com `complete_booking_request_delivery`.
+- `travel_files` é criado por gatilho (`quote_booking_requests_ensure_file` → `ensure_travel_file`), independente da notificação.
 
-**Organização do orçamento**
-- `public.quote_sections`: `id, quote_id, user_id, title, order_index, created_at, updated_at`. Sem destino/datas/tipo.
-- `public.quote_services.section_id` (uuid, nullable) + `order_index` (int, default 0). Hoje 108 de 2.398 serviços têm seção.
-- Puro: `src/lib/quoteSections.ts` (`buildQuoteSectionLayout`, `visibleSectionGroups`, `flattenServiceOrder`, `moveServiceInLayout`, `reorderSectionsByIds`) — coberto por `src/test/quote-sections.test.ts`.
-- Admin: `QuoteServicesOrganizer.tsx` (dnd-kit, criar/renomear/excluir/reordenar seções). Público: `PublicSectionAccordion.tsx` (acordeão colapsado com contador).
+## 2. Destinatários que recebem e-mail hoje
 
-**Conjuntos de escolha**
-- `public.quote_service_choice_groups`: `id, quote_id, user_id, title, group_type ('alternative' | 'free'), min_select (default 0), max_select (nullable), order_index`. Hoje 5 grupos, todos `alternative`; 13 serviços vinculados.
-- `quote_services.selection_mode` (default `'optional'`; valores `optional | required | alternative | free`) + `choice_group_id`. Triggers: `normalize_quote_choice_group`, `enforce_quote_service_selection_rules`, `enforce_quote_booking_entitlement`.
-- Admin: `QuoteBookingRequestSettings.tsx` + `useQuoteBookingConfig.ts` + regras puras `src/lib/quoteBookingRules.ts`.
+Linhas criadas pela RPC (verificado na definição viva da função):
 
-**Seleção do passageiro (atual)**
-- `QuoteBookingRequestPanel.tsx` (655 linhas) + `QuoteBookingWizardDialog.tsx` (653 linhas) + regras `src/lib/quoteBookingWizard.ts` (passos sequenciais, decisão `yes`/`no`, troca automática em grupo `alternative`, progresso, `localStorage` em `booking-wizard:<quoteId>`) e `src/lib/quoteBookingSelection.ts` (`buildBookingSelectionModel`, `toggleBookingSelection`, `validateBookingSelection`, `bookingSelectionTotal`, `effectiveSelectionIds`, `BOOKING_REQUEST_DISCLAIMER`).
-- Resumo/cards: `src/lib/quoteServiceDigest.ts` + `ServiceDigestCompact.tsx` (tipo, nome real, local, datas, quantidade, thumb opcional via `ResolvedServiceThumb`).
-- Valores: `src/lib/quotePricing.ts` (`isPackagePricing`, `hidesIndividualAmounts`), `src/lib/quoteCurrency.ts`, `PublicInvestmentSummary.tsx`.
+| canal | recipient_kind | status inicial |
+|---|---|---|
+| internal | agency | `sent` (só registro, sem envio) |
+| email | agency | `pending` |
+| email | client | `pending` (apenas se o cliente informou e-mail) |
+| whatsapp | agency | `skipped` (motivo: "Nenhuma integracao de WhatsApp configurada") |
 
-**Envio**
-- Edge Function `submit-booking-request` (rate limit 8/60s, `validate.ts`, `notify.ts`, hash de IP) → RPC `submit_quote_booking_request` (SECURITY DEFINER, resolve preços/snapshots, protocolo, idempotência, versão, `public_access_token`).
-- Tabelas: `quote_booking_requests` (+ itens/eventos, tipos em `src/types/bookingRequest.ts`), `travel_files` (`formatFileNumber`), oportunidade no CRM (`ensure_client_and_opportunity_for_lead`, `booking_request_negotiation_stage`, `auto_create_operation_on_close`), `useHasBookingRequest.ts` no CRM.
+Distribuição real em produção confirma exatamente esses 4 tipos de linha (nenhuma linha `consultant`, nenhuma linha whatsapp diferente de `skipped`).
 
-## 2. O que já existe e será reaproveitado (sem alteração de contrato)
-- Toda a leitura pública por RPC e a projeção pública — a nova UX consome exatamente o mesmo payload.
-- `quoteSections.ts`, `quoteBookingSelection.ts`, `quoteServiceDigest.ts`, `ServiceDigestCompact`, `quotePricing`, `quoteCurrency`.
-- Edge Function, RPC de envio, protocolo/File, idempotência, histórico, notificações, oportunidade e operação: **nada muda**.
-- Grupos `alternative`/`free` com `min_select`/`max_select` já modelam escolha única e múltipla.
+- Resolução do endereço da agência: `pending_booking_request_deliveries` devolve `agency_user_id` = `r.agency_id` para `agency`; `notify.ts` busca o e-mail com `supabase.auth.admin.getUserById` (nunca exposto ao público). Sem e-mail → `skipped`.
+- Cliente: usa `recipient_email` gravado na fila (e-mail normalizado no servidor).
+- Divergência encontrada: `src/lib/bookingRequestRecipients.ts` (e os testes em `src/test/booking-request-review.test.ts`) especificam também um e-mail para o `consultant` autor quando `user_id <> agency_id`. A RPC viva NÃO cria essa linha (`'consultant'` não aparece no corpo da função). O renderer suporta o caso (`recipient_kind !== 'client'`), mas ele nunca acontece hoje.
+- Envio via Resend direto (`https://api.resend.com/emails`, `RESEND_API_KEY`), remetente fixo `Agentes de Sonhos <fernando.nobre@agentesdesonhos.com.br>` — não usa a infraestrutura de app emails/templates React (não existe `_shared/transactional-email-templates`).
 
-## 3. Lacunas entre atual e desejado
-1. UX pública é obrigatoriamente sequencial (`buildBookingWizardSteps` + decisão `yes`/`no` por serviço); não há vitrine navegável nem comparação lado a lado.
-2. Não existe componente persistente "Minha seleção" com contador (o resumo só aparece no fim do wizard).
-3. Não há "Ver detalhes" por serviço no fluxo de seleção (o digest é sempre compacto).
-4. Seção é apenas `title`: sem destino, período e tipo opcionais para agrupar/rotular a vitrine.
-5. Não há numeração "Opção 1, 2..." reiniciando por conjunto na UI pública.
-6. Grupos não têm vínculo com seção nem rótulo de obrigatoriedade explícito para exibição (`min_select` existe, mas não é comunicado).
-7. Estado da seleção é `decisions` (`yes`/`no`), não um carrinho de ids; falta migração suave desse `localStorage`.
-8. Sem status discreto por conjunto ("escolha 1 opção", "opcional", "3 de 5 selecionados").
+## 3. Assunto e conteúdo atuais
 
-## 4. Menor alteração estrutural no banco (proposta, sem migration)
-Tudo opcional e retrocompatível; se nada for aplicado, a nova UX ainda funciona (fallback do item 7).
+E-mail da agência (`renderAgencyEmail`):
+- Assunto: `Nova solicitação de reserva {protocol} — {trip_title || destination || "Orçamento"}`
+- Corpo: título `{protocol} · v{version}`; Cliente; Contato (`whatsapp · email`); Orçamento/destino; Serviços (string concatenada); Valor apresentado (Intl pt-BR); Observações (se houver); aviso "não é uma reserva confirmada"; botão "Abrir no CRM" → `https://app.agentesdesonhos.com.br/crm` (link genérico, sem id do pedido/file).
 
-- `quote_sections`: `destination text NULL`, `start_date date NULL`, `end_date date NULL`, `service_type text NULL` (livre, validado no app com a lista hospedagem/aéreo/transfer/passeio/ingresso/seguro/cruzeiro/locação/pacote/outros). Nenhum default novo; `NULL` = Grupo livre (comportamento atual).
-- `quote_service_choice_groups`: `section_id uuid NULL REFERENCES quote_sections(id) ON DELETE SET NULL` e `is_required boolean NOT NULL DEFAULT false` (derivável de `min_select > 0`; a coluna só existe se quisermos separar "obrigatório" de "mínimo").
-- `build_public_quote_payload`: incluir os novos campos nas projeções de `sections` e `choice_groups` (mesma função, mesma assinatura — sem mudança de rota/token).
-- Nada de nova tabela, nenhuma coluna obrigatória, nenhum backfill.
+E-mail do cliente (`renderClientEmail`):
+- Assunto: `Recebemos sua solicitação de reserva — {protocol}`
+- Corpo: saudação com nome; "Sua solicitação para {trip}"; **Protocolo**; **Serviços solicitados**; aviso de reconfirmação; assinatura `— {agency_name}`. Sem valores, sem datas, sem link.
 
-## 5. Componentes existentes a modificar
-- `src/components/quote/QuoteBookingRequestPanel.tsx` — passa a orquestrar a vitrine + "Minha seleção" + pop-up final (mantém contato, disclaimer, submit e estado de sucesso intactos).
-- `src/components/quote/QuoteBookingWizardDialog.tsx` — deixa de ser o caminho obrigatório; mantido como modo "revisar passo a passo" opcional ou removido da rota principal no fim da Etapa 4.
-- `src/lib/quoteBookingSelection.ts` — reaproveitar `toggleBookingSelection`/`validateBookingSelection` como fonte única do carrinho (acrescentar validação por `min_select`/`max_select` e mensagem por conjunto).
-- `src/components/quote/QuoteServicesOrganizer.tsx` + `useQuotes.ts` — campos opcionais de seção (destino/datas/tipo) no diálogo de criação/edição.
-- `src/components/quote/QuoteBookingRequestSettings.tsx` + `useQuoteBookingConfig.ts` — expor `min_select`/`max_select` e obrigatoriedade do conjunto; opcionalmente vincular conjunto a uma seção.
-- `src/lib/quoteServiceDigest.ts` — acrescentar um nível "detalhes" (campos já cadastrados por tipo, com ênfase em hospedagem: quartos, regime, categoria, fotos).
-- `src/pages/OrcamentoPublico.tsx` — ponto de montagem da vitrine e do elemento persistente (sem alterar a apresentação da proposta em si).
+## 4. Identificador exibido
 
-## 6. Componentes novos sugeridos
-- `src/lib/quoteBookingShowcase.ts` — puro: monta a vitrine (seções → conjuntos → serviços), numeração de opções por conjunto, status por conjunto, validação agregada e serialização do carrinho.
-- `QuoteBookingShowcase.tsx` — lista de blocos da vitrine.
-- `BookingChoiceSetBlock.tsx` — cabeçalho do conjunto (nome, destino/período/tipo, status discreto) + grade de opções.
-- `BookingServiceCard.tsx` — card objetivo (thumb, tipo, nome, local, datas, valor conforme configuração) + "Ver detalhes" + ação Adicionar/Selecionar/Selecionado.
-- `BookingServiceDetailsSheet.tsx` — `Dialog` no desktop / `Sheet` inferior no mobile, com galeria e campos do tipo de serviço.
-- `MySelectionBar.tsx` — barra inferior fixa no mobile e botão/contador discreto no cabeçalho do desktop.
-- `MySelectionPanel.tsx` — resumo agrupado por seção (destino/período/tipo) com remover/trocar e CTA "Solicitar reserva".
+Os dois e-mails usam **apenas `protocol`** (`PR-YYYYMMDD-XXXXXXXX`). O número oficial do processo (`travel_files.file_number_display`, "File nº 0000001") **não** aparece em nenhum e-mail: `pending_booking_request_deliveries` não retorna esse campo (confirmado na função viva — `file_number` não consta no corpo). O `file_number` é buscado só em `index.ts` para a resposta ao navegador. Conclusão: **o e-mail atual não usa o número de pedido oficial** definido na memória do projeto.
 
-## 7. Regras exatas de seleção e validação
-- `selection_mode = 'required'`: sempre incluído, exibido como "Incluído na proposta", sem ação de remover.
-- Serviço avulso (`optional`, sem `choice_group_id`): adicionar/remover livre.
-- Conjunto `alternative`: escolher 1; selecionar outro troca automaticamente (`toggleBookingSelection` já faz isso). Bloqueia envio somente se `min_select >= 1`.
-- Conjunto `free`: nenhum/um/vários/todos; respeitar `min_select` (mínimo) e `max_select` (máximo, ao atingir o limite as demais opções mostram "trocar" em vez de "adicionar"). Sem `max_select` = ilimitado.
-- Pertencimento apenas por `choice_group_id`. Nunca inferir alternativa por destino/período/tipo.
-- Numeração "Opção N" reinicia em cada conjunto, na ordem de `order_index` dos serviços.
-- Pacote fechado (`isPackagePricing`): seleção bloqueada, tudo incluído, apenas "Solicitar reserva" (comportamento atual preservado).
-- Valores: respeitar `hidesIndividualAmounts` e a ocultação de total; quando ocultos, cards e resumo não exibem números.
-- Envio bloqueado só por: conjunto obrigatório sem mínimo atendido, `max_select` excedido, ou seleção vazia. Mensagens por conjunto, nunca genéricas.
-- **Fallback (orçamento antigo)**: sem `quote_sections` → uma lista única sem cabeçalho; sem `choice_groups` → todos os serviços como avulsos com adicionar/remover; seções sem os novos campos → Grupo livre (só o nome). Nenhum caso exige migração manual.
+## 5. Dados que o renderer recebe hoje (`DeliveryRow`)
 
-## 8. UX desktop
-- Vitrine em coluna única de blocos; dentro de cada conjunto, grade de 2–3 cards comparáveis de altura uniforme.
-- Cabeçalho do conjunto: nome, chips discretos de destino/período/tipo e status ("Escolha 1 opção", "Opcional", "2 de 3 selecionados").
-- Card: thumb 4:3, tipo, nome real, local, datas, valor (quando permitido), "Ver detalhes" (Dialog) e ação primária.
-- Estado "Selecionado": borda/realce em token semântico, ícone de check, ações "Remover" / "Trocar por outra opção".
-- "Minha seleção": botão discreto com contador no cabeçalho fixo da proposta, abrindo painel lateral com o resumo agrupado e o CTA.
-- Microfeedback: transição curta no card + atualização do contador; sem toasts a cada clique.
+`delivery_id, channel, recipient_kind, recipient_email, protocol, version, status, client_name, client_email, client_whatsapp, client_notes, currency, total_estimated, quote_id, destination, trip_title, agency_name, agency_user_id, opportunity_id, service_names`.
 
-## 9. UX mobile
-- Recomendação: **barra inferior fixa** ("Minha seleção · N itens" + "Solicitar reserva"), com `safe-area-inset-bottom`; escolhida em vez do botão flutuante porque acumula contador, valor opcional e CTA sem cobrir conteúdo.
-- Cards em coluna única, carrossel horizontal apenas para fotos (nunca rolagem horizontal de layout).
-- "Ver detalhes" e "Minha seleção" abrem `Sheet` inferior com scroll interno e swipe-down.
-- Conjunto com muitas opções: mostrar as 3 primeiras + "Ver todas as N opções".
-- Alvos de toque ≥ 44px; zero rolagem horizontal em 320px.
+Ausentes: número do file, datas da viagem (`start_date`/`end_date`), passageiros (adultos/crianças), valores por serviço, tipo de serviço, quantidades, modo de precificação (itemizado/pacote), condições/forma de pagamento, link direto para o pedido no CRM ou para o token público, nome do consultor autor.
 
-## 10. Compatibilidade e rollout
-- Nenhum link, token, código ou slug muda; nenhuma rota nova.
-- Leitura pública continua exclusivamente pelas RPCs existentes — nenhum `SELECT` anon direto é reintroduzido.
-- Vitrine ativada pela mesma condição de hoje (`booking_requests_enabled` resolvido no servidor); orçamentos sem isso não mudam em nada.
-- Flag interna de UI (`showcase` vs `wizard`) durante as Etapas 2–4 para permitir voltar ao fluxo antigo sem novo deploy de banco.
-- Migração do `localStorage`: ler `booking-wizard:<quoteId>` e converter `yes` em itens do carrinho na primeira abertura; gravar no novo formato depois.
-- Sem mudanças em PDF, compartilhamento, CRM, carteira, roteiro, protocolo/File, idempotência, histórico, notificações e `agency_showcases` (vitrine pública permanece separada).
+## 6. Como `service_names` é montado
 
-## 11. Riscos e testes
-| Risco | Mitigação / teste |
-|---|---|
-| Seleção divergente da validação do servidor | Regras puras em `quoteBookingShowcase.ts` espelhando `submit_quote_booking_request`; testes unitários de `min/max`, alternative, required |
-| Orçamento legado sem seções/grupos | Testes de fallback com listas vazias (padrão de `quote-sections.test.ts`) |
-| Pacote fechado permitir remover item | Teste explícito `packageMode` |
-| Vazamento de valores ocultos | Teste de render com `hidesIndividualAmounts` e total oculto |
-| Regressão dos 3 formatos de link | Playwright anônimo em `share_token`, `slug/código` e domínio White Label, verificando zero request ≥400 |
-| Duplicidade de pedido | Manter `idempotencyKey` por abertura do pop-up; teste do estado de sucesso |
-| Rolagem horizontal mobile | Verificação a 320/375px com screenshot |
+`string_agg(i.service_name, ', ' ORDER BY i.service_name)` sobre `quote_booking_request_items` — apenas nomes concatenados em ordem alfabética, sem valores, sem tipo, sem quantidade, sem os `snapshot` jsonb. Nada de itens estruturados chega ao renderer.
 
-## 12. Etapas de implementação
-1. **Regras puras** — `quoteBookingShowcase.ts` + testes (carrinho, min/max, numeração, fallback, pacote). *Aceite:* suíte verde, nenhum componente alterado.
-2. **Vitrine pública (leitura)** — cards, detalhes e blocos de conjunto sobre o payload atual, ainda com o wizard como CTA. *Aceite:* os 3 links renderizam a vitrine sem erro e sem valores indevidos.
-3. **Minha seleção + envio** — barra/painel persistente, CTA, disclaimer e submit pela Edge Function atual. *Aceite:* pedido real gerado com protocolo/File e oportunidade no CRM, idêntico ao fluxo anterior.
-4. **Desligar o wizard obrigatório** — vitrine como caminho padrão; wizard vira revisão opcional. *Aceite:* nenhuma tela exige "quero/não quero".
-5. **Metadados opcionais de seção e conjunto** *(depende da aprovação do item 4 do banco)* — colunas opcionais, projeção na RPC e campos no admin. *Aceite:* orçamentos antigos inalterados; novos exibem destino/período/tipo.
-6. **Polimento e regressão** — responsividade, microfeedback, Playwright nos 3 formatos, `vite build` e suíte completa.
+## 7. WhatsApp
 
-Ordem recomendada: 1 → 2 → 3 → 4 → 6, com a Etapa 5 encaixada depois da 4 (ou adiada sem prejuízo).
+- Existe o canal na fila (`channel = 'whatsapp'`), sempre inserido com `status = 'skipped'` e `skipped_reason` fixo; `recipient_phone` é sempre `NULL` (por decisão: não gravar o telefone do cliente como telefone da agência).
+- `notify.ts` só reclama linhas `channel = 'email'` (filtro dentro do CTE `claimed`).
+- Nenhuma referência a Twilio, ContentSid, template WhatsApp ou provedor de mensageria em `supabase/functions` para esse fluxo. **Confirmado: nada é enviado por WhatsApp hoje** — apenas placeholder de auditoria.
+
+## 8. Dados já persistidos no servidor (base confiável para um resumo)
+
+- `quote_booking_requests`: protocol, version, root_request_id, quote_id, user_id, agency_id, client_id, opportunity_id, status, client_name/email/whatsapp/notes, disclaimer_accepted_at + disclaimer_text_snapshot, currency, total_estimated (recalculado no banco), revised_total, expires_at, public_access_token, idempotency_key, source_ip_hash.
+- `quote_booking_request_items`: service_type, service_name, `snapshot` jsonb (linha completa de `quote_services` menos timestamps → datas, cidade, fornecedor, condições de pagamento, imagens), amount_snapshot, quantity, selection_mode_snapshot, choice_group_snapshot, review_status.
+- `travel_files`: file_number/`file_number_display`, primary_destination, destinations[], start_date, end_date, adults/children/passengers_count + passengers_snapshot, currency, pricing_mode, requested_amount, status, responsible_team_member_id, opportunity_id, client_id. Além de `travel_file_services` (produto, fornecedor, cidade, datas, quantidade, valor, status).
+- `quotes`: destination, trip_title, pricing_mode, package_total_amount, total_amount, payment terms.
+
+Ou seja: já é possível montar um resumo completo sem confiar em nada enviado pelo navegador.
+
+## 9. Mudança mínima e segura para um resumo único (e-mail + WhatsApp)
+
+Escopo sugerido (não implementado):
+1. Estender `pending_booking_request_deliveries` para devolver, além do que já devolve: `file_number_display` (join em `travel_files` por `root_request_id`/`current_request_id`), `start_date`, `end_date`, `adults_count`, `children_count`, `pricing_mode`, `hides_individual_amounts` e um `items` jsonb agregado (`service_type`, `service_name`, `quantity`, `amount_snapshot`, datas e condições de pagamento extraídas do `snapshot`).
+2. Criar um único módulo compartilhado (ex. `supabase/functions/_shared/bookingRequestSummary.ts`) que receba essa linha e produza uma estrutura normalizada `BookingRequestSummary` + um array ordenado de blocos de texto (`lines`). E-mail HTML/texto e a futura mensagem de WhatsApp renderizam a partir do mesmo array, garantindo texto e ordem idênticos.
+3. `notify.ts` passa a usar esse módulo (2 variantes de audiência: `agency` e `client` — a do cliente omite dados internos), incluindo o número oficial "File nº". Nenhuma mudança de fila, idempotência ou canais.
+4. WhatsApp continua `skipped` até existir provedor; quando existir, basta o mesmo `lines` e uma nova função de envio, sem tocar no renderizador.
+
+## 10. Privacidade e segurança — pontos observados
+
+- Isolamento por agência: fila e RPCs são `SECURITY DEFINER` com `EXECUTE` revogado de `anon`/`authenticated` e concedido só a `service_role`; toda linha carrega `agency_id`. O resumo deve continuar derivando tudo do `request_id` (nunca de parâmetros do cliente).
+- Preços: totais e itens vêm de `quote_services`/`quote_booking_request_items` calculados no banco (`v_items_sum`, modo pacote com `package_total_amount`). O navegador envia somente ids de serviços — manter assim.
+- E-mail da agência resolvido server-side via `auth.admin.getUserById`; nunca exposto ao público. Manter.
+- Idempotência: `idempotency_key` na requisição + `ON CONFLICT DO NOTHING` na fila + `duplicate !== true` antes de notificar. Reenvios não geram novo aviso.
+- Logs: mensagens de erro sem PII (`provider-error status=...`, `rpc-error`), respostas ao público genéricas em português. Único cuidado a manter: não logar `to`, telefone, nome ou observações no futuro renderer.
+- Respeitar `hides_individual_amounts` do orçamento: se o orçamento oculta valores por serviço, o resumo do **cliente** não deve reintroduzi-los (o e-mail da agência pode conter os valores internos).
+
+## Payload recomendado para a mensagem compartilhada (proposta)
+
+```text
+BookingRequestSummary {
+  file_number_display: "0000123"      // identificador oficial na comunicação
+  protocol: "PR-20260822-AB12CD34"    // uso interno/técnico
+  version: 2
+  created_at
+  client: { name, email, whatsapp }   // omitido/parcial na versão do cliente
+  trip:   { title, destination, start_date, end_date, adults, children }
+  pricing:{ currency, mode: itemized|package, total, hide_item_amounts: bool }
+  items: [ { type, name, quantity, amount, start_date, end_date,
+             city, supplier, payment_terms } ]
+  notes: string|null
+  disclaimer: string                  // snapshot já persistido
+  links: { crm_file_url, public_request_url }  // por audiência
+  audience: "agency" | "client"
+}
+```
+
+Ordem única dos blocos (e-mail e WhatsApp): identificação (File nº / versão) → cliente e contatos → viagem (destino, datas, passageiros) → serviços solicitados (nome, quantidade, datas, valor quando permitido) → total e forma/condições de pagamento → observações → aviso de que não é reserva confirmada → link de ação.
