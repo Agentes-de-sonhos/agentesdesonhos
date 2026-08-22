@@ -7,6 +7,8 @@ import {
   serviceCompactDigest,
   serviceDigestDetailRows,
 } from "@/lib/quoteServiceDigest";
+import { buildServicePaymentConditions } from "@/lib/servicePaymentConditions";
+import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
 import type { QuoteService } from "@/types/quote";
 
 interface Props {
@@ -18,7 +20,12 @@ interface Props {
 /** Conteúdo de "Ver detalhes": Dialog no desktop, Sheet no mobile. */
 export function BookingServiceDetails({ service, amountLabel, onClose }: Props) {
   const isMobile = useIsMobile();
+  const cart = useBookingCart();
   const open = !!service;
+  const conditions = service
+    ? buildServicePaymentConditions(service as any, cart.quote as any, cart.formatAmount)
+    : null;
+  const showConditions = !!conditions && !conditions.packageMode && conditions.hasConditions;
   const digest = service ? serviceCompactDigest(service) : null;
   const rows = service ? serviceDigestDetailRows(service) : [];
 
@@ -63,6 +70,37 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
             Valor apresentado
           </p>
           <p className="text-lg font-bold text-foreground">{amountLabel}</p>
+
+          {showConditions && (
+            <div
+              className="mt-3 border-t border-border/50 pt-3 space-y-1"
+              data-service-detail-payment={service.id}
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Condições de pagamento
+              </p>
+              {conditions!.rows.map((row, i) => (
+                <p key={`${row.label}-${i}`} className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                  <span className="text-muted-foreground">{row.label}:</span>
+                  <span
+                    className={
+                      row.emphasis
+                        ? "font-bold text-primary tabular-nums"
+                        : "font-semibold text-foreground tabular-nums"
+                    }
+                  >
+                    {row.value}
+                  </span>
+                </p>
+              ))}
+              {conditions!.methodLabel && (
+                <p className="flex flex-wrap items-baseline gap-x-2 text-xs">
+                  <span className="text-muted-foreground">Forma de pagamento:</span>
+                  <span className="font-medium text-foreground">{conditions!.methodLabel}</span>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

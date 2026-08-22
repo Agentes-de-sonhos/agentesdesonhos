@@ -45,6 +45,8 @@ import {
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
+import { buildServicePaymentConditions } from "@/lib/servicePaymentConditions";
+
 import { usesPerServicePaymentBlocks } from "@/lib/quoteInvestmentDisplay";
 
 import { BookingCartProvider, useBookingCart } from "@/components/quote/booking/BookingCartContext";
@@ -749,10 +751,13 @@ function hasServiceInvestmentBand(service: QuoteService, quote?: Quote) {
 }
 
 function ServiceInvestmentInline({ service, quote }: { service: QuoteService; quote?: Quote }) {
-  const amount = Number(service.amount) || 0;
   const passengerLabel = buildServicePassengerLabel(service, quote);
+  const fmt = (v: number) => formatCurrency(v);
+  const conditions = buildServicePaymentConditions(service as any, quote as any, fmt);
+  const amount = conditions.amount;
+
   // Valor fechado de pacote: nenhum valor individual é exibido ao cliente.
-  if (quote && hidesIndividualAmounts(quote)) {
+  if (conditions.packageMode) {
     return (
       <div
         className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 text-center"
@@ -764,62 +769,9 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
   }
   if (amount <= 0) return null;
 
+  const rows = conditions.rows;
+  const methodLabel = conditions.methodLabel;
 
-  const fmt = (v: number) => formatCurrency(v);
-  const cfg = extractServicePaymentConfig(service as any);
-  const useServicePayment =
-    !!quote && (((quote as any).use_service_payment) || cfg.is_custom_payment);
-
-  type Row = { label: string; value: string; emphasis?: boolean };
-  const rows: Row[] = [];
-  let methodLabel: string | null = null;
-
-  if (useServicePayment && cfg.is_custom_payment && cfg.payment_type) {
-    const feeInfo = extractFlightFeeInfo(service as any);
-    const r = calculateServicePayment(amount, cfg, feeInfo);
-    methodLabel = cfg.payment_method ?? null;
-    if (r.type === "installments") {
-      if ("firstInstallmentValue" in r && r.firstInstallmentValue) {
-        rows.push({ label: "1ª parcela", value: fmt(r.firstInstallmentValue), emphasis: true });
-        rows.push({ label: `+ ${r.installmentCount - 1}x de`, value: fmt(r.installmentValue), emphasis: true });
-      } else {
-        rows.push({ label: `${r.installmentCount}x de`, value: fmt(r.installmentValue), emphasis: true });
-      }
-    } else if (r.type === "installments_with_entry") {
-      rows.push({ label: "Entrada", value: fmt(r.entryValue) });
-      rows.push({ label: `${r.installmentCount}x de`, value: fmt(r.installmentValue), emphasis: true });
-    } else {
-      rows.push({
-        label: r.hasDiscount ? "À vista (com desconto)" : "À vista",
-        value: fmt(r.hasDiscount ? r.discountedTotal : r.total),
-        emphasis: true,
-      });
-    }
-  } else if (quote) {
-    const mode = ((quote as any).payment_display_mode as string) || "full_payment";
-    const installments = Number((quote as any).installments_count) || 10;
-    const entryPct = Number((quote as any).entry_percentage) || 0;
-    const discountPct = Number((quote as any).full_payment_discount_percent) || 0;
-    methodLabel = formatPaymentMethodsInline((quote as any).payment_method_label) || null;
-
-    if (mode === "installments") {
-      rows.push({ label: `${installments}x de`, value: fmt(amount / (installments || 1)), emphasis: true });
-    } else if (mode === "installments_with_entry") {
-      const entry = amount * (entryPct / 100);
-      const rem = Math.max(0, amount - entry);
-      rows.push({ label: "Entrada", value: fmt(entry) });
-      rows.push({ label: `${installments}x de`, value: fmt(rem / (installments || 1)), emphasis: true });
-    } else if (mode === "full_payment") {
-      const v = amount * (1 - discountPct / 100);
-      rows.push({
-        label: discountPct > 0 ? `À vista (-${discountPct}%)` : "À vista",
-        value: fmt(v),
-        emphasis: true,
-      });
-    } else {
-      // total_only — nada além do total do serviço
-    }
-  }
 
   return (
     <div
