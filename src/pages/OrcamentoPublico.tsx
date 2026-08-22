@@ -1023,6 +1023,7 @@ function CollapsibleServiceCard({
             <ServiceInvestmentInline service={service} quote={quote} />
           )}
         </div>
+          {collapsible && expanded && <BookingServiceActionRow service={service} />}
         </div>
       </div>
       {/* Per-service payment footer — always visible (open or collapsed) */}
@@ -1050,8 +1051,10 @@ function CollapsibleServiceCard({
         );
 
       })()}
-      {/* Ação inline de seleção — canto inferior direito do serviço. */}
-      <BookingServiceActionRow service={service} />
+      {/* Ação inline de seleção — canto inferior direito do serviço.
+          Para serviços avulsos (collapsible=true), a ação fica dentro do corpo
+          colapsável e só aparece quando o card está expandido. */}
+      {!collapsible && <BookingServiceActionRow service={service} />}
     </div>
   );
 }
