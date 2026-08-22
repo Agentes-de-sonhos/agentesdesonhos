@@ -1097,6 +1097,7 @@ function MobileFloatingCta({ href }: { href: string }) {
   }, []);
   return (
     <div
+      data-mobile-position="bottom-left"
       className={`fixed left-4 z-40 sm:hidden transition-all duration-300 ease-out ${
         visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
       }`}
