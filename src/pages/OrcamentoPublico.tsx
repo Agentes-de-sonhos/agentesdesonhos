@@ -32,7 +32,7 @@ import CruiseItineraryTimeline from "@/components/quote/CruiseItineraryTimeline"
 import CruiseCabinOptions from "@/components/quote/CruiseCabinOptions";
 import ShipVideoEmbed from "@/components/quote/ShipVideoEmbed";
 import { normalizeCruiseCabins, cabinOptionLabel } from "@/lib/cruiseCabins";
-import { buildPassengerLabel } from "@/lib/quotePassengers";
+import { buildPassengerLabel, buildServicePassengerLabel } from "@/lib/quotePassengers";
 import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import {
   computeExtrasTotal,
@@ -741,15 +741,27 @@ function ServiceBody({ service, quote }: { service: QuoteService; quote?: Quote 
  * Reutiliza a mesma lógica global/custom por serviço já usada em
  * PublicInvestmentSummary, aplicada sobre o valor exato do serviço.
  */
+function hasServiceInvestmentBand(service: QuoteService, quote?: Quote) {
+  if (quote && hidesIndividualAmounts(quote)) return true;
+  return (Number(service.amount) || 0) > 0;
+}
+
 function ServiceInvestmentInline({ service, quote }: { service: QuoteService; quote?: Quote }) {
   const amount = Number(service.amount) || 0;
+  const passengerLabel = buildServicePassengerLabel(service, quote);
   // Valor fechado de pacote: nenhum valor individual é exibido ao cliente.
   if (quote && hidesIndividualAmounts(quote)) {
     return (
-      <p className="text-xs font-medium text-muted-foreground">{PACKAGE_INCLUDED_LABEL}</p>
+      <div
+        className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 text-center"
+        data-service-investment-inline={service.id}
+      >
+        <p className="text-xs font-medium text-muted-foreground">{PACKAGE_INCLUDED_LABEL}</p>
+      </div>
     );
   }
   if (amount <= 0) return null;
+
 
   const fmt = (v: number) => formatCurrency(v);
   const cfg = extractServicePaymentConfig(service as any);
@@ -809,7 +821,7 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
 
   return (
     <div
-      className="pt-5 mt-3 border-t border-border/50 space-y-3 text-center"
+      className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 space-y-3 text-center"
       data-service-investment-inline={service.id}
     >
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
@@ -833,9 +845,19 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
           ))}
         </div>
       )}
-      <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-sm sm:text-base text-foreground/80">
-        <span className="text-muted-foreground">Valor do serviço:</span>
-        <span className="font-semibold text-foreground tabular-nums">{fmt(amount)}</span>
+      <div className="space-y-1">
+        <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-sm sm:text-base text-foreground/80">
+          <span className="text-muted-foreground">Valor do serviço:</span>
+          <span className="font-semibold text-foreground tabular-nums">{fmt(amount)}</span>
+        </div>
+        {passengerLabel && (
+          <p
+            className="text-xs sm:text-[13px] font-medium text-muted-foreground break-words [overflow-wrap:anywhere]"
+            data-service-passenger-label={service.id}
+          >
+            Para {passengerLabel}
+          </p>
+        )}
       </div>
       {methodLabel && (
         <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-xs sm:text-sm text-foreground/80">
@@ -896,6 +918,10 @@ function CollapsibleServiceCard({
   const hotelRooms = type === "hotel" ? ((service.service_data as any)?.rooms || []) : [];
   const hotelHasMultipleRooms = type === "hotel" && Array.isArray(hotelRooms) && hotelRooms.length > 1;
   const effectiveShowPrice = showPrice && !hotelHasMultipleRooms;
+  // A faixa azul-clara de pagamento existe? Quando sim, a ação do carrinho é
+  // colada nela (sem divisória) formando um único bloco azul contínuo.
+  const investmentBandVisible =
+    expanded && showInvestmentInline && !hotelHasMultipleRooms && hasServiceInvestmentBand(service, quote);
 
   const headerInner = (
     <>
@@ -1018,11 +1044,13 @@ function CollapsibleServiceCard({
               </p>
             </div>
           )}
+        </div>
           {expanded && showInvestmentInline && !hotelHasMultipleRooms && (
             <ServiceInvestmentInline service={service} quote={quote} />
           )}
-        </div>
-          {collapsible && expanded && <BookingServiceActionRow service={service} />}
+          {collapsible && expanded && (
+            <BookingServiceActionRow service={service} attached={investmentBandVisible} />
+          )}
         </div>
       </div>
       {/* Per-service payment footer — always visible (open or collapsed) */}
@@ -1053,7 +1081,7 @@ function CollapsibleServiceCard({
       {/* Ação inline de seleção — canto inferior direito do serviço.
           Para serviços avulsos (collapsible=true), a ação fica dentro do corpo
           colapsável e só aparece quando o card está expandido. */}
-      {!collapsible && <BookingServiceActionRow service={service} />}
+      {!collapsible && <BookingServiceActionRow service={service} attached={investmentBandVisible} />}
     </div>
   );
 }
@@ -1062,13 +1090,19 @@ function CollapsibleServiceCard({
  * Faixa discreta com a ação de seleção do serviço. Só existe quando o
  * orçamento tem solicitação de reserva habilitada (o provider decide).
  */
-function BookingServiceActionRow({ service }: { service: QuoteService }) {
+function BookingServiceActionRow({
+  service,
+  attached = false,
+}: { service: QuoteService; attached?: boolean }) {
   const cart = useBookingCart();
   if (!cart.enabled || !cart.stateFor(service.id)) return null;
   return (
     <div
       data-booking-action-row
-      className="flex w-full items-center justify-end gap-2 border-t-2 border-primary/25 bg-primary/[0.07] px-4 py-3.5"
+      data-attached={attached ? "true" : "false"}
+      className={`flex w-full items-center justify-end gap-2 bg-primary/[0.07] px-4 ${
+        attached ? "pb-3.5 pt-1" : "border-t-2 border-primary/25 py-3.5"
+      }`}
     >
       <InlineBookingAction service={service} />
     </div>
