@@ -126,7 +126,7 @@ describe("apresentação dos pagamentos por serviço", () => {
 
   it("título do footer customizado é 'Condições de pagamento' e não 'Parcelamento'", () => {
     const footerStart = src.indexOf("data-service-payment-footer");
-    const footerEnd = src.indexOf("<BookingServiceActionRow service={service} />");
+    const footerEnd = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} />}");
     const footer = src.slice(footerStart, footerEnd);
     expect(footer).toMatch(/Condições de pagamento/);
     expect(footer).not.toMatch(/Parcelamento/);
