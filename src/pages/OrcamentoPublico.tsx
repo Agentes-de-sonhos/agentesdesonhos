@@ -45,6 +45,8 @@ import {
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
+import { usesPerServicePaymentBlocks } from "@/lib/quoteInvestmentDisplay";
+
 import { BookingCartProvider, useBookingCart } from "@/components/quote/booking/BookingCartContext";
 import { BookingCartLauncher } from "@/components/quote/booking/BookingCartLauncher";
 import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog";
