@@ -45,6 +45,8 @@ import {
   hidesIndividualAmounts,
   PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
+import { usesPerServicePaymentBlocks } from "@/lib/quoteInvestmentDisplay";
+
 import { BookingCartProvider, useBookingCart } from "@/components/quote/booking/BookingCartContext";
 import { BookingCartLauncher } from "@/components/quote/booking/BookingCartLauncher";
 import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog";
@@ -1401,6 +1403,13 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const useNewInvestmentLayout =
     (investmentLayout === "grouped" || investmentLayout === "ungrouped") &&
     (quote.services?.length ?? 0) > 0;
+  // Modo de preços detalhados por serviço: parcelas, valor e forma de pagamento
+  // já aparecem dentro do card de cada serviço (faixa azul-clara), então o bloco
+  // geral "Condições de Pagamento" não é renderizado (sem espaço vazio).
+  // Modo investimento total / valor fechado de pacote mantém o bloco geral.
+  const perServicePaymentMode = usesPerServicePaymentBlocks(quote);
+
+
   const startDate = parseLocalDate(quote.start_date);
   const endDate = parseLocalDate(quote.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -1685,7 +1694,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         />
 
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
-        {useNewInvestmentLayout && (
+        {useNewInvestmentLayout && !perServicePaymentMode && (
           <PublicInvestmentSummary
             quote={quote}
             services={quote.services || []}
