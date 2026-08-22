@@ -358,21 +358,24 @@ export function BookingCartDialog() {
                   </p>
                 )}
                 {!isEmpty && (
-                  <Button
-                    type="button"
-                    size="lg"
-                    className="min-h-[48px] w-full gap-2 sm:ml-auto sm:w-auto"
-                    onClick={handleSubmit}
-                    disabled={cart.submitting}
-                  >
-                    {cart.submitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                    ) : (
-                      <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                    )}
-                    {cart.submitting ? "Enviando…" : "Enviar solicitação de reserva"}
-                  </Button>
+                  <div className="flex sm:justify-end">
+                    <Button
+                      type="button"
+                      size="lg"
+                      className="min-h-[48px] w-full gap-2 sm:w-auto"
+                      onClick={handleSubmit}
+                      disabled={cart.submitting}
+                    >
+                      {cart.submitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                      )}
+                      {cart.submitting ? "Enviando…" : "Enviar solicitação de reserva"}
+                    </Button>
+                  </div>
                 )}
+
 
               </>
             )}
