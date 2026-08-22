@@ -1248,6 +1248,26 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
 
+  // Timeline horizontal scroll: show a right arrow only when there are hidden items.
+  const journeyScrollRef = useRef<HTMLDivElement>(null);
+  const [journeyCanScrollRight, setJourneyCanScrollRight] = useState(false);
+  useEffect(() => {
+    const el = journeyScrollRef.current;
+    if (!el) return;
+    const check = () => {
+      const hasOverflow = el.scrollWidth > el.clientWidth + 4;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      setJourneyCanScrollRight(hasOverflow && !atEnd);
+    };
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      el.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, [timelineNodes.length]);
+
   // UX: auto-open single service; keep all closed when multiple services
   useEffect(() => {
     if (!servicesInitialized.current && quote?.services?.length) {
