@@ -136,3 +136,23 @@ describe("apresentação dos pagamentos por serviço", () => {
     expect(src).toMatch(/PACKAGE_INCLUDED_LABEL/);
   });
 });
+
+describe("carrinho em serviços avulsos x agrupados", () => {
+  it("serviços avulsos só exibem ação de carrinho quando o card está expandido", () => {
+    // Ação dos cards colapsáveis é renderizada dentro do corpo, condicionada a expanded.
+    expect(src).toMatch(/\{collapsible && expanded && <BookingServiceActionRow service=\{service\} \/>\}/);
+  });
+
+  it("serviços avulsos recolhidos não reservam espaço para o carrinho", () => {
+    // Não existe mais uma ação incondicional no rodapé do card.
+    const bottomAction = src.indexOf("{!collapsible && <BookingServiceActionRow");
+    expect(bottomAction).toBeGreaterThan(0);
+    // O único <BookingServiceActionRow> fora do corpo colapsável é o dos grupos.
+    const unconditional = /\n\s*<BookingServiceActionRow service=\{service\} \/>/.exec(src);
+    expect(unconditional).toBeNull();
+  });
+
+  it("serviços dentro de blocos mantêm a ação de carrinho sempre visível", () => {
+    expect(src).toMatch(/\{!collapsible && <BookingServiceActionRow service=\{service\} \/>\}/);
+  });
+});
