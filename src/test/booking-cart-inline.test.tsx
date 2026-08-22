@@ -342,7 +342,7 @@ describe("remoção da vitrine duplicada", () => {
     expect(page).not.toContain("QuoteBookingRequestPanel");
     expect(page).not.toContain("Escolha o que deseja reservar");
     expect(page).toContain("<BookingCartCta />");
-    expect(page).toContain("<BookingServiceActionRow service={service} />");
+    expect(page).toContain("<BookingServiceActionRow service={service} attached={investmentBandVisible} />");
   });
 
   it("as regras puras da vitrine continuam disponíveis", () => {

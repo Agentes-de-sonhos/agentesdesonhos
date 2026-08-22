@@ -52,7 +52,7 @@ describe("cards agrupados x individuais no orçamento público", () => {
   it("carrinho inline continua dentro do card, após o footer de pagamento", () => {
     const footer = src.indexOf("data-service-payment-footer");
     // Nos grupos (collapsible=false) a ação fica no rodapé do card, após o footer.
-    const action = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} />}");
+    const action = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} attached={investmentBandVisible} />}");
     expect(footer).toBeGreaterThan(0);
     expect(action).toBeGreaterThan(footer);
   });
@@ -63,6 +63,7 @@ describe("cards agrupados x individuais no orçamento público", () => {
     const row = src.slice(i, i + 400);
     expect(row).toMatch(/bg-primary\/\[0\.07\]/);
     expect(row).toMatch(/border-t-2 border-primary\/25/);
+    expect(row).toMatch(/data-attached=/);
     expect(row).toMatch(/w-full/);
     expect(row).toMatch(/justify-end/);
     expect(row).toMatch(/py-3\.5/);
@@ -107,7 +108,8 @@ describe("cards agrupados x individuais no orçamento público", () => {
 describe("apresentação dos pagamentos por serviço", () => {
   it("ServiceInvestmentInline centraliza, dá respiro e usa tipografia legível", () => {
     const block = src.slice(src.indexOf("function ServiceInvestmentInline"), src.indexOf("function CollapsibleServiceCard"));
-    expect(block).toMatch(/pt-5 mt-3 border-t border-border\/50 space-y-3 text-center/);
+    expect(block).toMatch(/border-t border-primary\/25 bg-primary\/\[0\.07\] px-5 py-4 space-y-3 text-center/);
+    expect(block).not.toMatch(/border-t border-border\/50/);
     expect(block).toMatch(/items-baseline justify-center/);
     // Valor principal destacado; rótulo "À vista" legível.
     expect(block).toMatch(/text-lg sm:text-xl font-bold tracking-tight text-primary tabular-nums/);
@@ -126,7 +128,7 @@ describe("apresentação dos pagamentos por serviço", () => {
 
   it("título do footer customizado é 'Condições de pagamento' e não 'Parcelamento'", () => {
     const footerStart = src.indexOf("data-service-payment-footer");
-    const footerEnd = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} />}");
+    const footerEnd = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} attached={investmentBandVisible} />}");
     const footer = src.slice(footerStart, footerEnd);
     expect(footer).toMatch(/Condições de pagamento/);
     expect(footer).not.toMatch(/Parcelamento/);
@@ -141,7 +143,7 @@ describe("apresentação dos pagamentos por serviço", () => {
 describe("carrinho em serviços avulsos x agrupados", () => {
   it("serviços avulsos só exibem ação de carrinho quando o card está expandido", () => {
     // Ação dos cards colapsáveis é renderizada dentro do corpo, condicionada a expanded.
-    expect(src).toMatch(/\{collapsible && expanded && <BookingServiceActionRow service=\{service\} \/>\}/);
+    expect(src).toMatch(/\{collapsible && expanded && \(\s*<BookingServiceActionRow service=\{service\} attached=\{investmentBandVisible\} \/>/);
   });
 
   it("serviços avulsos recolhidos não reservam espaço para o carrinho", () => {
@@ -149,11 +151,45 @@ describe("carrinho em serviços avulsos x agrupados", () => {
     const bottomAction = src.indexOf("{!collapsible && <BookingServiceActionRow");
     expect(bottomAction).toBeGreaterThan(0);
     // O único <BookingServiceActionRow> fora do corpo colapsável é o dos grupos.
-    const unconditional = /\n\s*<BookingServiceActionRow service=\{service\} \/>/.exec(src);
-    expect(unconditional).toBeNull();
+    // Toda renderização da ação é guardada por collapsible/!collapsible.
+    const occurrences = [...src.matchAll(/<BookingServiceActionRow\b/g)].map((m) =>
+      src.slice(Math.max(0, m.index! - 120), m.index!),
+    );
+    expect(occurrences.length).toBeGreaterThan(0);
+    for (const before of occurrences) {
+      expect(before).toMatch(/collapsible/);
+    }
   });
 
   it("serviços dentro de blocos mantêm a ação de carrinho sempre visível", () => {
-    expect(src).toMatch(/\{!collapsible && <BookingServiceActionRow service=\{service\} \/>\}/);
+    expect(src).toMatch(/\{!collapsible && <BookingServiceActionRow service=\{service\} attached=\{investmentBandVisible\} \/>\}/);
+  });
+});
+
+
+describe("bloco azul unificado de condições de pagamento", () => {
+  it("faixa azul começa no bloco de pagamento (linha azul fina, sem cinza)", () => {
+    const block = src.slice(
+      src.indexOf("function ServiceInvestmentInline"),
+      src.indexOf("function CollapsibleServiceCard"),
+    );
+    expect(block).toMatch(/border-t border-primary\/25 bg-primary\/\[0\.07\]/);
+    expect(block).not.toMatch(/border-border\/50/);
+  });
+
+  it("bloco de pagamento fica fora do padding do corpo, imediatamente antes do carrinho", () => {
+    const investment = src.indexOf("<ServiceInvestmentInline service={service} quote={quote} />");
+    const action = src.indexOf("<BookingServiceActionRow service={service} attached={investmentBandVisible} />");
+    expect(investment).toBeGreaterThan(0);
+    expect(action).toBeGreaterThan(investment);
+  });
+
+  it("carrinho colado no bloco de pagamento perde a divisória azul", () => {
+    expect(src).toMatch(/const investmentBandVisible =/);
+    expect(src).toMatch(/attached \? "pb-3\.5 pt-1" : "border-t-2 border-primary\/25 py-3\.5"/);
+  });
+
+  it("card recolhido não recebe a faixa azul de pagamento", () => {
+    expect(src).toMatch(/expanded && showInvestmentInline && !hotelHasMultipleRooms/);
   });
 });
