@@ -51,7 +51,8 @@ describe("cards agrupados x individuais no orçamento público", () => {
 
   it("carrinho inline continua dentro do card, após o footer de pagamento", () => {
     const footer = src.indexOf("data-service-payment-footer");
-    const action = src.indexOf("<BookingServiceActionRow service={service} />");
+    // Nos grupos (collapsible=false) a ação fica no rodapé do card, após o footer.
+    const action = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} />}");
     expect(footer).toBeGreaterThan(0);
     expect(action).toBeGreaterThan(footer);
   });
@@ -125,7 +126,7 @@ describe("apresentação dos pagamentos por serviço", () => {
 
   it("título do footer customizado é 'Condições de pagamento' e não 'Parcelamento'", () => {
     const footerStart = src.indexOf("data-service-payment-footer");
-    const footerEnd = src.indexOf("<BookingServiceActionRow service={service} />");
+    const footerEnd = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} />}");
     const footer = src.slice(footerStart, footerEnd);
     expect(footer).toMatch(/Condições de pagamento/);
     expect(footer).not.toMatch(/Parcelamento/);
@@ -134,5 +135,25 @@ describe("apresentação dos pagamentos por serviço", () => {
   it("valores ocultos: pacote fechado mostra apenas o rótulo de incluído", () => {
     expect(src).toMatch(/hidesIndividualAmounts\(quote\)/);
     expect(src).toMatch(/PACKAGE_INCLUDED_LABEL/);
+  });
+});
+
+describe("carrinho em serviços avulsos x agrupados", () => {
+  it("serviços avulsos só exibem ação de carrinho quando o card está expandido", () => {
+    // Ação dos cards colapsáveis é renderizada dentro do corpo, condicionada a expanded.
+    expect(src).toMatch(/\{collapsible && expanded && <BookingServiceActionRow service=\{service\} \/>\}/);
+  });
+
+  it("serviços avulsos recolhidos não reservam espaço para o carrinho", () => {
+    // Não existe mais uma ação incondicional no rodapé do card.
+    const bottomAction = src.indexOf("{!collapsible && <BookingServiceActionRow");
+    expect(bottomAction).toBeGreaterThan(0);
+    // O único <BookingServiceActionRow> fora do corpo colapsável é o dos grupos.
+    const unconditional = /\n\s*<BookingServiceActionRow service=\{service\} \/>/.exec(src);
+    expect(unconditional).toBeNull();
+  });
+
+  it("serviços dentro de blocos mantêm a ação de carrinho sempre visível", () => {
+    expect(src).toMatch(/\{!collapsible && <BookingServiceActionRow service=\{service\} \/>\}/);
   });
 });
