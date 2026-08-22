@@ -84,6 +84,8 @@ export interface BookingCartValue {
   showcase: ShowcaseModel;
   model: BookingSelectionModel;
   services: QuoteService[];
+  /** Orçamento completo — necessário para reaproveitar as condições de pagamento. */
+  quote: Quote | null;
   total: number | null;
   totalLabel: string;
   formatAmount: (value: number) => string;
@@ -127,6 +129,7 @@ const DISABLED: BookingCartValue = {
     allServices: [],
   },
   services: [],
+  quote: null,
   total: null,
   totalLabel: "Valor total",
   formatAmount: (v) => String(v),
@@ -398,6 +401,7 @@ export function BookingCartProvider({
             showcase,
             model,
             services,
+            quote,
             total,
             totalLabel,
             formatAmount,
@@ -425,6 +429,7 @@ export function BookingCartProvider({
       openCart,
       showcase,
       services,
+      quote,
       total,
       totalLabel,
       formatAmount,
