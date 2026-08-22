@@ -32,22 +32,14 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
   const body = service && digest && (
     <div className="space-y-4">
       {digest.images.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
-          {digest.images.slice(0, 4).map((img, i) => (
-            <div
-              key={`${img}-${i}`}
-              className="aspect-[4/3] overflow-hidden rounded-xl bg-muted first:col-span-2"
-            >
-              <ResolvedServiceThumb
-                imageRef={img}
-                placeId={resolveServicePlaceId(service)}
-                alt={digest.title}
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        <ServiceImageCarousel
+          images={digest.images}
+          alt={digest.title}
+          placeId={resolveServicePlaceId(service)}
+          hideFallback
+        />
       )}
+
 
       <dl className="space-y-2">
         {rows.map((row) => (
