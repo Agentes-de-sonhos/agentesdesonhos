@@ -299,6 +299,19 @@ export function BookingCartDialog() {
                         placeholder="Preferências, datas alternativas, dúvidas…"
                       />
                     </div>
+                    <div className="sm:col-span-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        data-booking-continue-body
+                        className="min-h-[44px] w-full sm:w-auto"
+                        onClick={() => cart.setCartOpen(false)}
+                        disabled={cart.submitting}
+                      >
+                        Continuar escolhendo
+                      </Button>
+                    </div>
+
                   </div>
                 </div>
               </div>
