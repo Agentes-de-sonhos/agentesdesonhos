@@ -300,7 +300,7 @@ export function BookingCartDialog() {
                         type="button"
                         variant="outline"
                         data-booking-continue-body
-                        className="min-h-[44px] w-full border-border bg-muted font-medium text-foreground hover:bg-muted/80 hover:text-foreground sm:w-auto"
+                        className="min-h-[44px] w-full sm:w-auto border-border bg-muted font-medium text-foreground hover:bg-muted/80 hover:text-foreground"
                         onClick={() => cart.setCartOpen(false)}
                         disabled={cart.submitting}
                       >
