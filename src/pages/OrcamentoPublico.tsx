@@ -7,7 +7,7 @@ import { PublicSectionAccordion } from "@/components/quote/PublicSectionAccordio
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront, Wallet } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -1248,6 +1248,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
 
+
   // UX: auto-open single service; keep all closed when multiple services
   useEffect(() => {
     if (!servicesInitialized.current && quote?.services?.length) {
@@ -1419,6 +1420,26 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   if (svcTypes.has("attraction")) timelineNodes.push({ icon: <Ticket className="h-4 w-4" />, label: "Experiências" });
   if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: "Retorno" });
 
+  // Timeline horizontal scroll: show a right arrow only when there are hidden items.
+  const journeyScrollRef = useRef<HTMLDivElement>(null);
+  const [journeyCanScrollRight, setJourneyCanScrollRight] = useState(false);
+  useEffect(() => {
+    const el = journeyScrollRef.current;
+    if (!el) return;
+    const check = () => {
+      const hasOverflow = el.scrollWidth > el.clientWidth + 4;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      setJourneyCanScrollRight(hasOverflow && !atEnd);
+    };
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      el.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, [timelineNodes.length]);
+
   return (
     <BookingCartProvider
       quote={quote as any}
@@ -1547,7 +1568,22 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <div className="relative">
               {/* Edge fade (mobile only) — sinaliza continuidade horizontal */}
               <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10 sm:hidden" />
+              {/* Right arrow hint: appears only on mobile when more items are hidden. */}
+              {journeyCanScrollRight && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = journeyScrollRef.current;
+                    if (el) el.scrollBy({ left: el.clientWidth * 0.6, behavior: "smooth" });
+                  }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 z-20 sm:hidden h-8 w-8 rounded-full bg-background/90 border border-border shadow-sm flex items-center justify-center text-primary/80 animate-pulse"
+                  aria-label="Ver mais etapas da jornada"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </button>
+              )}
               <div
+                ref={journeyScrollRef}
                 className="flex items-center gap-1 overflow-x-auto sm:overflow-visible snap-x snap-mandatory sm:snap-none sm:justify-center sm:flex-wrap gap-y-3 px-1 -mx-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="list"
                 aria-label="Etapas da sua jornada"
