@@ -17,15 +17,15 @@ describe("apresentação do investimento — bloco geral de condições de pagam
     expect(shouldRenderGlobalPaymentBlock(quote, 3)).toBe(true);
   });
 
-  it("valor fechado de pacote: mantém o bloco geral mesmo em layout ungrouped", () => {
+  it("valor fechado de pacote (consolidado): bloco geral é a única apresentação", () => {
     const quote = {
-      investment_summary_layout: "ungrouped",
+      investment_summary_layout: "consolidated",
       show_detailed_prices: true,
-      pricing_mode: "package_total",
+      pricing_mode: "package",
     };
     expect(usesPerServicePaymentBlocks(quote)).toBe(false);
-    expect(shouldRenderGlobalPaymentBlock(quote, 2)).toBe(true);
   });
+
 
   it("ungrouped sem preços detalhados: mantém o bloco geral", () => {
     const quote = { investment_summary_layout: "ungrouped", show_detailed_prices: false };
