@@ -51,7 +51,8 @@ describe("cards agrupados x individuais no orçamento público", () => {
 
   it("carrinho inline continua dentro do card, após o footer de pagamento", () => {
     const footer = src.indexOf("data-service-payment-footer");
-    const action = src.indexOf("<BookingServiceActionRow service={service} />");
+    // Nos grupos (collapsible=false) a ação fica no rodapé do card, após o footer.
+    const action = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} />}");
     expect(footer).toBeGreaterThan(0);
     expect(action).toBeGreaterThan(footer);
   });
