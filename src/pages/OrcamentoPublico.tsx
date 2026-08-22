@@ -1086,7 +1086,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 /**
  * Floating CTA — mobile only. Aparece quando o usuário rola para baixo
  * (> 200px) e desaparece suavemente ao voltar ao topo. Ocupa ~metade da
- * largura, alinhado à direita, respeitando safe-area do iOS.
+ * largura, alinhado à esquerda, respeitando safe-area do iOS.
  */
 function MobileFloatingCta({ href }: { href: string }) {
   const [visible, setVisible] = useState(false);
@@ -1100,7 +1100,7 @@ function MobileFloatingCta({ href }: { href: string }) {
   }, []);
   return (
     <div
-      className={`fixed right-3 z-40 sm:hidden transition-all duration-300 ease-out ${
+      className={`fixed left-3 z-40 sm:hidden transition-all duration-300 ease-out ${
         visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
       }`}
       data-lifted-by-selection-bar={selectionBar ? "true" : undefined}
