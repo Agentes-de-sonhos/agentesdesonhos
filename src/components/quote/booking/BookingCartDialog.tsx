@@ -299,6 +299,19 @@ export function BookingCartDialog() {
                         placeholder="Preferências, datas alternativas, dúvidas…"
                       />
                     </div>
+                    <div className="sm:col-span-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        data-booking-continue-body
+                        className="min-h-[44px] w-full sm:w-auto"
+                        onClick={() => cart.setCartOpen(false)}
+                        disabled={cart.submitting}
+                      >
+                        Continuar escolhendo
+                      </Button>
+                    </div>
+
                   </div>
                 </div>
               </div>
@@ -345,7 +358,7 @@ export function BookingCartDialog() {
                   </p>
                 )}
                 {!isEmpty && (
-                  <div className="flex flex-col gap-2 sm:flex-row-reverse">
+                  <div className="flex sm:justify-end">
                     <Button
                       type="button"
                       size="lg"
@@ -360,17 +373,10 @@ export function BookingCartDialog() {
                       )}
                       {cart.submitting ? "Enviando…" : "Enviar solicitação de reserva"}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full sm:w-auto"
-                      onClick={() => cart.setCartOpen(false)}
-                      disabled={cart.submitting}
-                    >
-                      Continuar escolhendo
-                    </Button>
                   </div>
                 )}
+
+
               </>
             )}
           </div>
