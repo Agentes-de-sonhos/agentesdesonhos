@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
+import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
 import {
   serviceCompactDigest,
