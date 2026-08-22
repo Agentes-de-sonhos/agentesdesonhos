@@ -1568,7 +1568,22 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <div className="relative">
               {/* Edge fade (mobile only) — sinaliza continuidade horizontal */}
               <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10 sm:hidden" />
+              {/* Right arrow hint: appears only on mobile when more items are hidden. */}
+              {journeyCanScrollRight && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = journeyScrollRef.current;
+                    if (el) el.scrollBy({ left: el.clientWidth * 0.6, behavior: "smooth" });
+                  }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 z-20 sm:hidden h-8 w-8 rounded-full bg-background/90 border border-border shadow-sm flex items-center justify-center text-primary/80 animate-pulse"
+                  aria-label="Ver mais etapas da jornada"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </button>
+              )}
               <div
+                ref={journeyScrollRef}
                 className="flex items-center gap-1 overflow-x-auto sm:overflow-visible snap-x snap-mandatory sm:snap-none sm:justify-center sm:flex-wrap gap-y-3 px-1 -mx-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="list"
                 aria-label="Etapas da sua jornada"
