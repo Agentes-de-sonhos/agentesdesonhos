@@ -1085,12 +1085,10 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 /**
  * Floating CTA — mobile only. Aparece quando o usuário rola para baixo
  * (> 200px) e desaparece suavemente ao voltar ao topo. Ocupa ~metade da
- * largura, alinhado à esquerda, respeitando safe-area do iOS.
+ * largura, fixado no canto inferior esquerdo, respeitando safe-area do iOS.
  */
 function MobileFloatingCta({ href }: { href: string }) {
   const [visible, setVisible] = useState(false);
-  // Sobe acima da barra "Minha Seleção" quando ela está ativa.
-  const selectionBar = useBookingSelectionBar();
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 200);
     onScroll();
@@ -1099,14 +1097,11 @@ function MobileFloatingCta({ href }: { href: string }) {
   }, []);
   return (
     <div
-      className={`fixed left-3 z-40 sm:hidden transition-all duration-300 ease-out ${
+      className={`fixed left-4 z-40 sm:hidden transition-all duration-300 ease-out ${
         visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
       }`}
-      data-lifted-by-selection-bar={selectionBar ? "true" : undefined}
       style={{
-        bottom: selectionBar
-          ? BOOKING_FLOATING_BOTTOM
-          : "calc(env(safe-area-inset-bottom) + 16px)",
+        bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
       }}
       aria-hidden={!visible}
     >
