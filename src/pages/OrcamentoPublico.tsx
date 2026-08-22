@@ -1692,7 +1692,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         />
 
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
-        {useNewInvestmentLayout && (
+        {useNewInvestmentLayout && !perServicePaymentMode && (
           <PublicInvestmentSummary
             quote={quote}
             services={quote.services || []}
