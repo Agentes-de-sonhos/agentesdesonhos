@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { type AgencyDomainInfo } from "@/lib/agencyDomains";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
+import { useNoindex } from "@/hooks/useNoindex";
 import {
   RECOVERY_GUIDANCE, clientAreaAuthBody, isValidClientEmail, prefilledEmailFromSearch,
   readClientAreaToken, validatePasswordInput, writeClientAreaToken,
@@ -42,6 +43,9 @@ interface SessionClient {
  */
 export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
   const hostname = typeof window === "undefined" ? "" : window.location.hostname;
+
+  // Área privada do passageiro: nunca indexada por buscadores.
+  useNoindex(true);
 
   const [email, setEmail] = useState(() =>
     typeof window === "undefined" ? "" : prefilledEmailFromSearch(window.location.search));
