@@ -17,7 +17,6 @@ import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
 import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
 import { LocationSearchInput } from "@/components/whitelabel/LocationSearchInput";
 import { DestinationTagsInput } from "@/components/whitelabel/DestinationTagsInput";
-import { TravelersFields } from "@/components/whitelabel/TravelersFields";
 import {
   EMPTY_CONTACT, REQUEST_SERVICES,
   mergeServiceValues, isMultiRoute, serviceByKey, validateContactStep,
@@ -425,24 +424,6 @@ export function AgencyQuoteJourney({
     [updateOccurrence],
   );
 
-  const setChildren = useCallback((occId: string, raw: string) => {
-    const count = Math.max(0, Math.min(12, Number(raw) || 0));
-    setValue(occId, "criancas", raw);
-    setContext((prev) => ({
-      ...prev,
-      criancas: count,
-      idades_criancas: syncChildAges(prev.idades_criancas, count),
-    }));
-  }, [setValue]);
-
-  const setChildAge = useCallback((index: number, value: string) => {
-    setContext((prev) => {
-      const ages = syncChildAges(prev.idades_criancas, Math.max(prev.criancas, index + 1));
-      ages[index] = value;
-      return { ...prev, idades_criancas: ages };
-    });
-  }, []);
-
   const addOccurrence = () => {
     setGroups((prev) =>
       prev.map((g, gi) => (gi !== groupIndex ? g : { ...g, items: [...g.items, extraOccurrence(groupService, context)] })),
@@ -640,20 +621,8 @@ export function AgencyQuoteJourney({
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          {role === "primary" && (
-            <TravelersFields
-              idPrefix="wlq"
-              adults={String(item.values.adultos ?? "")}
-              children={String(item.values.criancas ?? "0")}
-              ages={context.idades_criancas}
-              onAdultsChange={(v) => setValue(item.id, "adultos", v)}
-              onChildrenChange={(v) => setChildren(item.id, v)}
-              onAgeChange={setChildAge}
-              errors={occErrors}
-              editorial={editorial}
-            />
-          )}
-
+          {/* Viajantes (adultos, crianças e idades) vêm da primeira etapa:
+              ficam herdados no estado e no payload, sem reaparecer aqui. */}
           {plan.fields
             .filter((f) => !isTravelerField(f.name))
             .map((field) => (
