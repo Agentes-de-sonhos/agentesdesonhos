@@ -63,7 +63,7 @@ describe("assistente de solicitação White Label", () => {
     expect(screen.queryByLabelText(/^origem/i)).toBeNull();
     expect(screen.queryByText(/bagagem/i)).toBeNull();
     // Somente os complementos que faltam.
-    expect(screen.getByLabelText(/datas flexíveis/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/flexibilidade de datas/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/classe/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/observações/i)).toBeInTheDocument();
   });
