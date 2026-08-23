@@ -601,7 +601,12 @@ export default function CarteiraPublicaV2({
       <PasswordGate
         onUnlock={handleUnlock}
         loading={loading}
-        error={error}
+        error={
+          error ||
+          (grantExpired
+            ? "Este acesso pela Área do Cliente expirou. Informe a senha da carteira ou abra novamente pela Área do Cliente."
+            : "")
+        }
         branding={branding}
         attemptsLeft={attemptsUsed > 0 ? attemptsLeft : null}
         tripStartDate={tripStartDate}
