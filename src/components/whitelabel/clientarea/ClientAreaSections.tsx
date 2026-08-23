@@ -10,6 +10,11 @@ import { PREPARING_HINT, type ClientAreaView, firstName } from "@/lib/clientArea
 import {
   type ClientAreaTrip, tripPeriodLabel, tripStatusLabel, tripTitle,
 } from "@/lib/clientAreaTrips";
+import {
+  DOCUMENTS_EMPTY, DOCUMENTS_INTRO, type ClientAreaDocument, documentsCountLabel,
+} from "@/lib/clientAreaDocuments";
+import type { ClientAreaProfileData } from "@/hooks/useClientAreaDocuments";
+import { DocumentTripGroups } from "./ClientAreaDocumentList";
 import { ClientAreaSupportCard } from "./ClientAreaSupportCard";
 import { ClientAreaCodeAccess } from "./ClientAreaCodeAccess";
 
@@ -121,19 +126,16 @@ export function ClientAreaHome({
           </Button>
         </div>
 
-        <ul className="mt-5 grid gap-2 border-t border-border/60 pt-5 sm:grid-cols-2">
-          {[
-            { label: "Meus documentos", icon: FileText },
-            { label: "Carteira Digital", icon: Wallet },
-            { label: "Roteiro da viagem", icon: MapPinned },
-          ].map(({ label, icon: Icon }) => (
-            <li key={label} className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="text-foreground/70">{label}</span>
-              <span className="text-xs">· {PREPARING_HINT}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-4 grid gap-3 border-t border-border/60 pt-5 sm:grid-cols-2">
+          <Button variant="outline" className="min-h-12 justify-start" onClick={() => onChangeView("documentos")}>
+            <FileText className="mr-2 h-4 w-4" aria-hidden="true" /> Meus documentos
+          </Button>
+          {highlight ? (
+            <Button variant="outline" className="min-h-12 justify-start" onClick={() => onOpenTrip(highlight.id)}>
+              <Wallet className="mr-2 h-4 w-4" aria-hidden="true" /> Carteira e roteiro da viagem
+            </Button>
+          ) : null}
+        </div>
 
         <ClientAreaCodeAccess className="mt-5" />
       </section>
@@ -143,13 +145,72 @@ export function ClientAreaHome({
   );
 }
 
-export function ClientAreaDocuments() {
+/**
+ * Central "Meus documentos" (Etapa 5). Lista somente o que a agência
+ * disponibilizou; a abertura pede uma autorização nova a cada clique.
+ */
+export function ClientAreaDocuments({
+  info, status, documents, pendingId, error, onOpen, onRetry, onOpenTrip,
+}: {
+  info: AgencyDomainInfo;
+  status: "loading" | "ready" | "error" | "expired";
+  documents: ClientAreaDocument[];
+  pendingId: string | null;
+  error: string | null;
+  onOpen: (doc: ClientAreaDocument) => void;
+  onRetry: () => void;
+  onOpenTrip: (tripId: string) => void;
+}) {
+  if (status === "loading") {
+    return (
+      <SectionCard icon={FileText} title="Meus documentos" description={DOCUMENTS_INTRO}>
+        <div className="mt-5 flex items-center gap-3 text-muted-foreground" role="status" aria-live="polite">
+          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          <span>Carregando seus documentos…</span>
+        </div>
+      </SectionCard>
+    );
+  }
+
+  if (status !== "ready") {
+    return (
+      <SectionCard icon={FileText} title="Meus documentos" description={DOCUMENTS_INTRO}>
+        <p role="alert" className="mt-4 text-sm text-muted-foreground">
+          {status === "expired"
+            ? "Sua sessão expirou. Entre novamente para continuar."
+            : "Não foi possível carregar seus documentos agora."}
+        </p>
+        {status === "error" ? (
+          <Button variant="outline" className="mt-4 min-h-11" onClick={onRetry}>Tentar novamente</Button>
+        ) : null}
+      </SectionCard>
+    );
+  }
+
+  if (documents.length === 0) {
+    return (
+      <div className="space-y-6">
+        <SectionCard icon={FileText} title="Meus documentos" description={DOCUMENTS_INTRO}>
+          <p className="mt-4 text-sm text-muted-foreground">{DOCUMENTS_EMPTY}</p>
+        </SectionCard>
+        <ClientAreaSupportCard info={info} compact />
+      </div>
+    );
+  }
+
   return (
-    <SectionCard
-      icon={FileText}
-      title="Meus documentos"
-      description="Seus contratos e documentos de viagem serão organizados aqui. Estamos preparando esta seção."
-    />
+    <div className="space-y-6">
+      <SectionCard icon={FileText} title="Meus documentos" description={DOCUMENTS_INTRO}>
+        <p className="mt-4 text-sm text-muted-foreground">{documentsCountLabel(documents.length)}</p>
+        {error ? <p role="alert" className="mt-3 text-sm text-destructive">{error}</p> : null}
+      </SectionCard>
+      <DocumentTripGroups
+        documents={documents}
+        actions={{ pendingId, onOpen }}
+        onOpenTrip={onOpenTrip}
+      />
+      <ClientAreaSupportCard info={info} compact />
+    </div>
   );
 }
 
@@ -169,6 +230,10 @@ interface ProfileProps {
   passwordError: string | null;
   busy: boolean;
   onLogout: () => void;
+  /** Etapa 5 — dados de cadastro em modo consulta. */
+  profile?: ClientAreaProfileData | null;
+  /** Pedido de correção: sempre encaminhado à agência (o cliente não edita). */
+  onRequestUpdate?: () => void;
 }
 
 /** Meu perfil — somente dados básicos já disponíveis na sessão. */
@@ -176,7 +241,7 @@ export function ClientAreaProfile({
   info, clientName, clientEmail, showChange, onToggleChange,
   currentPassword, newPassword, confirmPassword,
   onCurrentPassword, onNewPassword, onConfirmPassword, onSubmitPassword,
-  passwordError, busy, onLogout,
+  passwordError, busy, onLogout, profile, onRequestUpdate,
 }: ProfileProps) {
   const name = agencyDisplayName(info);
   return (
@@ -193,16 +258,39 @@ export function ClientAreaProfile({
             <dt className="text-xs uppercase tracking-wide text-muted-foreground">E-mail de login</dt>
             <dd className="mt-1 break-all text-sm text-foreground">{clientEmail}</dd>
           </div>
+          {profile?.phone ? (
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-muted-foreground">Telefone</dt>
+              <dd className="mt-1 text-sm text-foreground">{profile.phone}</dd>
+            </div>
+          ) : null}
+          {profile?.city || profile?.state ? (
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-muted-foreground">Cidade</dt>
+              <dd className="mt-1 text-sm text-foreground">
+                {[profile?.city, profile?.state].filter(Boolean).join(" · ")}
+              </dd>
+            </div>
+          ) : null}
           <div>
             <dt className="text-xs uppercase tracking-wide text-muted-foreground">Agência</dt>
             <dd className="mt-1 text-sm text-foreground"><BrandText>{name}</BrandText></dd>
           </div>
         </dl>
 
+        <p className="mt-5 text-xs text-muted-foreground">
+          Estes dados são mantidos pela agência. Para corrigir algo, peça a atualização por aqui.
+        </p>
+
         <div className="mt-6 flex flex-wrap gap-3 border-t border-border/60 pt-6">
           <Button variant="outline" className="min-h-11" onClick={onToggleChange} aria-expanded={showChange}>
             <KeyRound className="mr-2 h-4 w-4" aria-hidden="true" /> Alterar senha
           </Button>
+          {onRequestUpdate ? (
+            <Button variant="outline" className="min-h-11" onClick={onRequestUpdate}>
+              <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Solicitar atualização
+            </Button>
+          ) : null}
           <Button variant="ghost" className="min-h-11 text-muted-foreground" onClick={onLogout}>
             <LogOut className="mr-2 h-4 w-4" aria-hidden="true" /> Sair
           </Button>
