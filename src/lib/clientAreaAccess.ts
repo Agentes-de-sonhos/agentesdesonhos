@@ -219,7 +219,10 @@ export type ClientAreaAuthAction =
   | "session"
   | "logout"
   | "change_password"
-  | "recovery";
+  | "recovery"
+  /** Etapa 3 — Minhas viagens (lista e detalhe), sempre com sessão válida. */
+  | "trips"
+  | "trip";
 
 /**
  * Corpo padrão de qualquer chamada à `client-area-auth`.

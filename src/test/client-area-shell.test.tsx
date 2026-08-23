@@ -150,23 +150,25 @@ describe('área autenticada', () => {
   it('exibe saudação, agência e conteúdo verdadeiro sobre viagens', async () => {
     await loggedIn()
     expect(screen.getByText(/Bem-vindo à sua área exclusiva/i)).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Suas viagens em um só lugar' })).toBeTruthy()
-    expect(screen.getByText(/Em breve, você poderá acompanhar aqui suas viagens/i)).toBeTruthy()
-    expect(screen.queryByText(/você não possui viagens/i)).toBeNull()
+    // Sem viagens reais, a home é honesta: nada de destino ou data inventados.
+    expect(await screen.findByRole('heading', { name: 'Suas viagens em um só lugar' })).toBeTruthy()
+    expect(screen.queryByText(/pontos/i)).toBeNull()
     expect(screen.queryByText(/pontos|saldo|fidelidade/i)).toBeNull()
   })
 
-  it('navega entre as seções sem consultar dados de viagens ou documentos', async () => {
+  it('navega entre as seções e resolve viagens somente no servidor', async () => {
     await loggedIn()
-    const callsAfterSession = invoke.mock.calls.length
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Minhas viagens' })[0])
-    expect(await screen.findByText(/Suas viagens aparecerão aqui assim que esta área/i)).toBeTruthy()
+    expect(await screen.findByRole('heading', { name: 'Minhas viagens' })).toBeTruthy()
+    // A busca de viagens nunca envia agency_id/client_id escolhidos pelo navegador.
+    const tripCalls = invoke.mock.calls.filter((c: any[]) => c[1]?.body?.action === 'trips')
+    for (const call of tripCalls) {
+      expect(Object.keys(call[1].body).sort()).toEqual(['action', 'hostname', 'token'])
+    }
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Meus documentos' })[0])
     expect(await screen.findByText(/Seus contratos e documentos de viagem serão organizados aqui/i)).toBeTruthy()
-
-    expect(invoke.mock.calls.length).toBe(callsAfterSession)
   })
 
   it('mostra somente dados básicos no perfil', async () => {
