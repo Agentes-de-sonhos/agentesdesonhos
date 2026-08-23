@@ -656,9 +656,11 @@ export function resolveDestination(values: ServiceValues): string {
 }
 
 /** Flat string map sent to the server (details jsonb). */
-export function buildDetailsPayload(service: RequestService, values: ServiceValues): Record<string, string> {
+export function buildDetailsPayload(service: RequestService, raw_values: ServiceValues): Record<string, string> {
   const out: Record<string, string> = {};
+  const values = normalizeServiceQuantities(service, raw_values);
   for (const field of service.fields) {
+
     const raw = values[field.name];
     if (field.type === "checkbox") {
       if (raw === true) out[field.name] = "true";
