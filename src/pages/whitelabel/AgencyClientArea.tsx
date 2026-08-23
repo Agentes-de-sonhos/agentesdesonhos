@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,8 +13,12 @@ import { ClientAreaLogin } from "@/components/whitelabel/clientarea/ClientAreaLo
 import { ClientAreaShell } from "@/components/whitelabel/clientarea/ClientAreaShell";
 import {
   ClientAreaDocuments, ClientAreaHome, ClientAreaProfile, ClientAreaSupportSection,
-  ClientAreaTrips,
 } from "@/components/whitelabel/clientarea/ClientAreaSections";
+import {
+  ClientAreaTripDetail, ClientAreaTripsView,
+} from "@/components/whitelabel/clientarea/ClientAreaTripsView";
+import { useClientAreaTrip, useClientAreaTrips } from "@/hooks/useClientAreaTrips";
+import { groupTrips, highlightTrip, tripIdFromPath, tripPathFor } from "@/lib/clientAreaTrips";
 
 interface SessionClient {
   id: string | null;
@@ -51,6 +55,8 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
   const [recoveryNotice, setRecoveryNotice] = useState<string | null>(null);
   const [view, setView] = useState<ClientAreaView>(() =>
     typeof window === "undefined" ? "inicio" : viewFromSearch(window.location.search));
+  const [tripId, setTripId] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : tripIdFromPath(window.location.pathname));
 
   /** Guarda o token devolvido pelo servidor (login ou rotação de sessão). */
   const storeToken = (token?: string | null) => {
@@ -59,8 +65,10 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
 
   const changeView = (next: ClientAreaView) => {
     setView(next);
+    setTripId(null);
     try {
       const url = new URL(window.location.href);
+      if (tripIdFromPath(url.pathname)) url.pathname = "/area-do-cliente";
       url.searchParams.set("area", next);
       window.history.replaceState(null, "", url.toString());
     } catch {
@@ -193,6 +201,55 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
       setRecoveryNotice((data as any)?.message || RECOVERY_GUIDANCE);
     } finally {
       setBusy(false);
+    }
+  };
+
+  /**
+   * Minhas viagens (Etapa 3): uma única fonte segura alimenta a lista e o
+   * destaque da página inicial. A agência e o cliente são resolvidos no
+   * servidor pela sessão + hostname.
+   */
+  const authenticated = !!client;
+  const trips = useClientAreaTrips({
+    hostname,
+    enabled: authenticated,
+    onToken: storeToken,
+    onExpired: () => {
+      writeClientAreaToken(hostname, null);
+      setClient(null);
+      setFormError("Sua sessão expirou. Entre novamente para continuar.");
+    },
+  });
+  const grouped = useMemo(() => groupTrips(trips.trips), [trips.trips]);
+  const highlight = useMemo(() => highlightTrip(grouped), [grouped]);
+
+  const tripDetail = useClientAreaTrip({
+    hostname,
+    tripId,
+    enabled: authenticated && !!tripId,
+    onExpired: () => {
+      writeClientAreaToken(hostname, null);
+      setClient(null);
+    },
+  });
+
+  const openTrip = (id: string) => {
+    setTripId(id);
+    setView("viagens");
+    try {
+      window.history.pushState(null, "", tripPathFor(id));
+    } catch {
+      /* histórico indisponível: a navegação continua em memória */
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const backToTrips = () => {
+    setTripId(null);
+    try {
+      window.history.pushState(null, "", "/area-do-cliente?area=viagens");
+    } catch {
+      /* histórico indisponível */
     }
   };
 
