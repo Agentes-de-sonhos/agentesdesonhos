@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
     const tokenHash = await sha256(grant)
     const { data: row } = await admin
       .from('client_area_wallet_grants')
-      .select('id, trip_id, expires_at, used_at')
+      .select('id, agency_id, trip_id, expires_at, used_at')
       .eq('token_hash', tokenHash)
       .maybeSingle()
 
@@ -109,21 +109,27 @@ Deno.serve(async (req) => {
 
     const { data: trip } = await admin
       .from('trips')
-      .select('id, public_access_code, access_password, is_locked')
+      .select('id, user_id, public_access_code, access_password, is_locked')
       .eq('id', row.trip_id)
       .maybeSingle()
 
-    if (!trip || trip.public_access_code !== code) return json({ error: GENERIC_ERROR }, 401)
+    // Vínculo canônico: a carteira precisa ser da agência que emitiu a autorização.
+    if (!trip || trip.public_access_code !== code || trip.user_id !== row.agency_id) {
+      return json({ error: GENERIC_ERROR }, 401)
+    }
 
-    // Consome a autorização ANTES de devolver os dados (uso único garantido).
+    // Consome a autorização ANTES de devolver os dados (uso único e expiração
+    // decididos na própria escrita, o que evita corrida entre duas aberturas).
     const { data: consumed } = await admin
       .from('client_area_wallet_grants')
       .update({ used_at: new Date().toISOString() })
       .eq('id', row.id)
       .is('used_at', null)
+      .gt('expires_at', new Date().toISOString())
       .select('id')
       .maybeSingle()
     if (!consumed) return json({ error: GENERIC_ERROR }, 401)
+
 
     const { data: payload, error } = await admin.rpc('verify_trip_by_public_code', {
       p_agency_slug: agencySlug,
