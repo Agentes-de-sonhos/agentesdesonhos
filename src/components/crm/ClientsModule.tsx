@@ -77,6 +77,7 @@ import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
 import { cn } from "@/lib/utils";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { useQueryClient } from "@tanstack/react-query";
+import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
 
 const clientSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
@@ -525,6 +526,15 @@ export function ClientsModule() {
                 </div>
               </form>
             </Form>
+            {editingClient?.id && (
+              <div className="pt-2">
+                <ClientAreaAccessSection
+                  clientId={editingClient.id}
+                  clientName={editingClient.name}
+                  clientEmail={editingClient.email}
+                />
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
