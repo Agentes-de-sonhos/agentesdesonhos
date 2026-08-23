@@ -2346,6 +2346,181 @@ export type Database = {
         }
         Relationships: []
       }
+      client_area_accounts: {
+        Row: {
+          agency_id: string
+          client_id: string
+          created_at: string
+          created_by: string | null
+          email_normalized: string
+          first_login_at: string | null
+          id: string
+          last_login_at: string | null
+          login_count: number
+          must_change_password: boolean
+          password_hash: string
+          password_set_by: string
+          password_updated_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          email_normalized: string
+          first_login_at?: string | null
+          id?: string
+          last_login_at?: string | null
+          login_count?: number
+          must_change_password?: boolean
+          password_hash: string
+          password_set_by?: string
+          password_updated_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          email_normalized?: string
+          first_login_at?: string | null
+          id?: string
+          last_login_at?: string | null
+          login_count?: number
+          must_change_password?: boolean
+          password_hash?: string
+          password_set_by?: string
+          password_updated_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_area_accounts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_area_audit_log: {
+        Row: {
+          account_id: string | null
+          action: string
+          actor: string
+          actor_user_id: string | null
+          agency_id: string
+          client_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          user_agent: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          action: string
+          actor?: string
+          actor_user_id?: string | null
+          agency_id: string
+          client_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          user_agent?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          action?: string
+          actor?: string
+          actor_user_id?: string | null
+          agency_id?: string
+          client_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      client_area_login_attempts: {
+        Row: {
+          agency_id: string
+          attempts: number
+          email_normalized: string
+          first_attempt_at: string
+          id: string
+          locked_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          attempts?: number
+          email_normalized: string
+          first_attempt_at?: string
+          id?: string
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          attempts?: number
+          email_normalized?: string
+          first_attempt_at?: string
+          id?: string
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      client_area_sessions: {
+        Row: {
+          account_id: string
+          agency_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          last_seen_at: string
+          revoked_at: string | null
+          token_hash: string
+          user_agent: string | null
+        }
+        Insert: {
+          account_id: string
+          agency_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          last_seen_at?: string
+          revoked_at?: string | null
+          token_hash: string
+          user_agent?: string | null
+        }
+        Update: {
+          account_id?: string
+          agency_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_seen_at?: string
+          revoked_at?: string | null
+          token_hash?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_area_sessions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "client_area_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_categories: {
         Row: {
           created_at: string
@@ -15231,6 +15406,7 @@ export type Database = {
         }
         Returns: Json
       }
+      agency_has_client_area: { Args: { _agency_id: string }; Returns: boolean }
       agency_has_entitlement: {
         Args: { _agency_id: string; _key: string }
         Returns: boolean
@@ -15354,6 +15530,11 @@ export type Database = {
         }[]
       }
       cleanup_google_oauth_states: { Args: never; Returns: number }
+      client_area_account_status: {
+        Args: { _client_id: string }
+        Returns: Json
+      }
+      client_area_admin_context: { Args: never; Returns: Json }
       clone_itinerary_for_trip: {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
