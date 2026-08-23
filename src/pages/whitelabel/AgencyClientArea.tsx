@@ -310,7 +310,7 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
         />
       )}
       {view === "viagens" && (tripId ? (
-        <ClientAreaTripDetail status={tripDetail.status} trip={tripDetail.trip} onBack={backToTrips} />
+        <ClientAreaTripDetail info={info} status={tripDetail.status} trip={tripDetail.trip} onBack={backToTrips} />
       ) : (
         <ClientAreaTripsView
           info={info}
