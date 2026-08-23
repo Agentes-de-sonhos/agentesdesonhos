@@ -132,18 +132,10 @@ export function validateOccurrence(
     else if (found[end]) errors.periodo = found[end];
   }
 
-  if (options.role === "primary") {
-    const adults = Number(String(values.adultos ?? ""));
-    if (!Number.isInteger(adults) || adults < 1) errors.adultos = "Informe quantos adultos viajam.";
-    const kidsRaw = String(values.criancas ?? "").trim();
-    const kids = Number(kidsRaw);
-    if (kidsRaw === "" || !Number.isInteger(kids) || kids < 0) {
-      errors.criancas = "Informe 0 se não houver crianças.";
-    }
-    if (options.childCount > 0) {
-      Object.assign(errors, validateChildAges(options.childAges, options.childCount));
-    }
-  }
+  // Viajantes (adultos, crianças e idades) já foram informados e validados na
+  // primeira etapa: não são exibidos no modal, logo não são validados de novo.
+
+
 
   return errors;
 }
