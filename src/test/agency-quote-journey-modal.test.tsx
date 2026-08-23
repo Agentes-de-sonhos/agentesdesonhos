@@ -79,7 +79,7 @@ describe("assistente de solicitação White Label", () => {
     expect(screen.getByTestId("wlq-choice-hospedagem")).toHaveAttribute("aria-checked", "true");
     fireEvent.click(screen.getByTestId("wlq-choice-seguro"));
     fireEvent.click(continueBtn());
-    expect(screen.getByText("Etapa 3 de 4")).toBeInTheDocument();
+    expect(screen.getByText("Etapa 3 de 5")).toBeInTheDocument();
   });
 
   it("enviar somente o serviço inicial leva direto ao contato", () => {
