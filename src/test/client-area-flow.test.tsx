@@ -124,15 +124,16 @@ describe('esqueci minha senha', () => {
     const notice = await screen.findByText(RECOVERY_GUIDANCE)
     expect(notice).toBeTruthy()
     expect(RECOVERY_GUIDANCE).not.toMatch(/enviamos|você receberá|verifique (sua|seu) (caixa|e-mail)/i)
-    expect(screen.getByRole('link', { name: /Falar com a agência/i })).toBeTruthy()
+    expect(screen.getAllByRole('link', { name: /Falar com a agência/i }).length).toBeGreaterThan(0)
   })
 })
 
 describe('separação entre login e código de link', () => {
   it('o bloco de código não sugere que o login exige um código', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByLabelText('Código de acesso')).toBeTruthy())
-    expect(screen.getByText(/Recebeu um link com código/i)).toBeTruthy()
+    const toggle = await screen.findByRole('button', { name: /Recebeu um link com código/i })
+    fireEvent.click(toggle)
+    expect(screen.getByLabelText('Código de acesso')).toBeTruthy()
     expect(screen.queryByText(/use o código do link recebido logo abaixo/i)).toBeNull()
   })
 })
