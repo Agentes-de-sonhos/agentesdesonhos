@@ -97,7 +97,7 @@ export function useClientAreaTrip({
   onExpired?: () => void;
 }) {
   const [status, setStatus] = useState<TripsStatus | "notfound">("loading");
-  const [trip, setTrip] = useState<ClientAreaTrip | null>(null);
+  const [trip, setTrip] = useState<ClientAreaTripDetailData | null>(null);
 
   useEffect(() => {
     if (!enabled || !tripId) return;
