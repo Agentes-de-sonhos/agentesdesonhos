@@ -1,14 +1,16 @@
 ---
 name: White-label Quote Journey Flow
-description: Máquina de estados do pop-up de cotação dos sites white label (primary → pick → additional → contact → review) e campos essenciais por serviço
+description: Assistente em modal único da solicitação nos sites white label (primary → pick → additional → contact), com ocorrências múltiplas e sem etapa de revisão
 type: feature
 ---
-Fluxo único no mesmo modal (`AgencyQuoteJourney`), estados em `src/lib/agencyJourneyFlow.ts`:
-`primary` (complemento do serviço da primeira dobra) → `pick` (cards quadrados multi-seleção; clicar só marca) → `additional` (um serviço por vez, "Serviço N de M") → `contact` → `review` (opcional, com Editar por seção e inclusão tardia de serviços).
+Fluxo único no mesmo modal (`AgencyQuoteJourney`), estados: `primary` (complemento do serviço clicado) → `pick` ("Quais outros serviços você deseja incluir?", multi-seleção) → `additional` (um serviço por vez) → `contact`, que já envia.
 
 Regras:
-- Primeira dobra (ServiceInitialFields/TravelersFields/TripDatePicker/LocationSearchInput/DestinationTagsInput) nunca é alterada; seus dados entram preenchidos e não são pedidos de novo.
-- Campos essenciais por serviço em `ESSENTIAL_FIELDS`; Aéreo = adultos, crianças, idades, flexibilidade (obrigatória), classe, observações. Bagagem e voo direto não são pedidos (seguem no schema/payload).
-- Serviços adicionais não repetem viajantes/idades nem dados herdados; só campos obrigatórios ausentes + essenciais.
-- Contato: nome obrigatório + ao menos WhatsApp OU e-mail + consentimento. Canal preferido e melhor horário não aparecem (derivados no payload para compatibilidade).
-- Navegar dentro do modal nunca fecha nem apaga dados.
+- NÃO existe intersticial "Estamos preparando sua solicitação" (`ServiceRequestTransition` removido) nem tela de revisão. Clicar em "Solicitar" abre o assistente direto.
+- Primeira dobra nunca é alterada nem repetida; seus dados entram preenchidos.
+- Campos essenciais por serviço em `ESSENTIAL_FIELDS`; Aéreo = adultos, crianças, idades, flexibilidade, classe, observações.
+- Todo serviço tem ação inline "+ Adicionar outro X" (`agencyJourneyOccurrences.ts`): ocorrências numeradas ("Hospedagem 1/2"), removíveis; extras herdam só os viajantes.
+- Payload: 2ª ocorrência em diante recebe sufixo `_2`, `_3` para não quebrar solicitações antigas.
+- Contato: nome + WhatsApp OU e-mail + consentimento. CTA final "Enviar solicitação".
+- Rascunho em `sessionStorage` por hostname+serviço: voltar, fechar e reabrir não perde dados.
+- UI: superfície branca única, backdrop escurecido, "Etapa X de Y", tokens do tema da agência (sem cor hardcoded), rodapé fixo com safe-area no mobile.

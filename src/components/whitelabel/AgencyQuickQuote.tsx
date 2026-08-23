@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { AgencyQuoteJourney } from "@/components/whitelabel/AgencyQuoteJourney";
 import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
 import { ServiceInitialFields } from "@/components/whitelabel/ServiceInitialFields";
-import { ServiceRequestTransition } from "@/components/whitelabel/ServiceRequestTransition";
 import { isEditorialTheme } from "@/lib/agencySiteTheme";
 import { initialGridClass } from "@/lib/agencyInitialGrid";
 import {
@@ -63,7 +62,6 @@ export function AgencyQuickQuote({
   const railWrapRef = useRef<HTMLDivElement | null>(null);
   const [quickErrors, setQuickErrors] = useState<Record<string, string>>({});
   // Microtransição: só entre a validação da primeira etapa e a 1ª abertura do modal.
-  const [transitioning, setTransitioning] = useState(false);
   const [legsByService, setLegsByService] = useState<Record<string, RouteLeg[]>>({});
   const [agesByService, setAgesByService] = useState<Record<string, string[]>>({});
 
@@ -225,13 +223,9 @@ export function AgencyQuickQuote({
         },
       }));
     }
-    setTransitioning(true);
-  }, [service, values, fields, isAereo, multi, legs, ages, childCount]);
-
-  const finishTransition = useCallback(() => {
-    setTransitioning(false);
+    // Sem intersticial informativo: o assistente funcional abre direto.
     onOpenChange(true);
-  }, [onOpenChange]);
+  }, [onOpenChange, service, values, fields, isAereo, multi, legs, ages, childCount]);
 
   return (
     <>
@@ -363,12 +357,6 @@ export function AgencyQuickQuote({
           Não é uma busca automática: cada pedido é analisado por um consultor da equipe.
         </p>
       </div>
-
-      <ServiceRequestTransition
-        open={transitioning && !open}
-        serviceKey={service.key}
-        onFinished={finishTransition}
-      />
 
       <AgencyQuoteJourney
         hostname={hostname}
