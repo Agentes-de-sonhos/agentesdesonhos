@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { BrandText } from "@/components/ui/brand-text";
 import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
 import { PREPARING_HINT, type ClientAreaView, firstName } from "@/lib/clientAreaNav";
+import {
+  type ClientAreaTrip, tripPeriodLabel, tripStatusLabel, tripTitle,
+} from "@/lib/clientAreaTrips";
 import { ClientAreaSupportCard } from "./ClientAreaSupportCard";
 import { ClientAreaCodeAccess } from "./ClientAreaCodeAccess";
 
@@ -30,13 +33,23 @@ function SectionCard({
   );
 }
 
+/** Destaque da home: rótulo honesto conforme a viagem em andamento ou futura. */
+function highlightHeading(trip: ClientAreaTrip): string {
+  return tripStatusLabel(trip) === "Em viagem" ? "Sua viagem em andamento" : "Sua próxima viagem";
+}
+
 /** Página inicial autenticada: acolhedora, verdadeira e sem dados fictícios. */
 export function ClientAreaHome({
-  info, clientName, onChangeView,
+  info, clientName, onChangeView, tripsStatus, highlight, onOpenTrip,
 }: {
   info: AgencyDomainInfo;
   clientName: string | null;
   onChangeView: (v: ClientAreaView) => void;
+  /** Mesma fonte segura da página “Minhas viagens” — sem consulta duplicada. */
+  tripsStatus: "loading" | "ready" | "error" | "expired";
+  /** Viagem em andamento (prioridade) ou a próxima mais próxima. */
+  highlight: ClientAreaTrip | null;
+  onOpenTrip: (id: string) => void;
 }) {
   const name = agencyDisplayName(info);
   const greeting = firstName(clientName);
@@ -56,13 +69,39 @@ export function ClientAreaHome({
         <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/15 text-primary">
           <Sparkles className="h-6 w-6" aria-hidden="true" />
         </span>
-        <h2 className="mt-4 text-xl font-semibold text-foreground md:text-2xl">
-          Suas viagens em um só lugar
-        </h2>
-        <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted-foreground md:text-base">
-          Em breve, você poderá acompanhar aqui suas viagens, serviços e documentos
-          disponibilizados pela sua agência.
-        </p>
+
+        {tripsStatus === "ready" && highlight ? (
+          <>
+            <h2 className="mt-4 text-sm font-medium uppercase tracking-wide text-primary">
+              {highlightHeading(highlight)}
+            </h2>
+            <p className="mt-2 text-xl font-semibold text-foreground md:text-2xl">
+              {tripTitle(highlight)}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {tripPeriodLabel(highlight)} · {tripStatusLabel(highlight)}
+            </p>
+            <Button className="mt-5 min-h-11" onClick={() => onOpenTrip(highlight.id)}>
+              Ver viagem
+            </Button>
+          </>
+        ) : (
+          <>
+            <h2 className="mt-4 text-xl font-semibold text-foreground md:text-2xl">
+              Suas viagens em um só lugar
+            </h2>
+            <p className="mt-2 max-w-prose text-sm leading-relaxed text-muted-foreground md:text-base">
+              {tripsStatus === "loading"
+                ? "Estamos carregando suas viagens."
+                : tripsStatus === "ready"
+                  ? "Quando a sua agência registrar uma viagem, ela aparecerá aqui."
+                  : "Não foi possível carregar suas viagens agora."}
+            </p>
+            <Button variant="outline" className="mt-5 min-h-11" onClick={() => onChangeView("viagens")}>
+              <MapPinned className="mr-2 h-4 w-4" aria-hidden="true" /> Minhas viagens
+            </Button>
+          </>
+        )}
       </section>
 
       <section aria-labelledby="ca-acoes" className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm md:p-8">
@@ -101,16 +140,6 @@ export function ClientAreaHome({
 
       <ClientAreaSupportCard info={info} compact />
     </div>
-  );
-}
-
-export function ClientAreaTrips() {
-  return (
-    <SectionCard
-      icon={MapPinned}
-      title="Minhas viagens"
-      description="Suas viagens aparecerão aqui assim que esta área for disponibilizada pela agência. Estamos preparando esta seção."
-    />
   );
 }
 
