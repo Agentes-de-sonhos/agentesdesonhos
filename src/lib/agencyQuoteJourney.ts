@@ -353,7 +353,9 @@ function contextValueFor(field: string, context: TripContext): string {
     case "adultos":
       return context.adultos ? String(context.adultos) : "";
     case "criancas":
-      return context.criancas ? String(context.criancas) : "";
+      // Crianças é sempre numérico e visível: 0 nunca vira campo vazio.
+      return String(Math.max(0, context.criancas || 0));
+
     case "passageiros":
     case "viajantes":
       return String(totalTravelers(context));
@@ -375,7 +377,10 @@ export function applyContextToService(
   context: TripContext,
 ): ServiceValues {
   const out: ServiceValues = { ...values };
-  const derived = new Set(["passageiros", "viajantes", "idades_criancas"]);
+  // Viajantes são fonte de verdade GLOBAL: sempre recalculados (o default "0"
+  // de crianças de um item novo não deve bloquear a herança do contexto).
+  const derived = new Set(["adultos", "criancas", "passageiros", "viajantes", "idades_criancas"]);
+
   for (const field of service.fields) {
     const inherited = contextValueFor(field.name, context);
     if (!inherited) continue;

@@ -296,16 +296,64 @@ export function serviceByKey(key: string): RequestService {
   return REQUEST_SERVICES.find((s) => s.key === key) ?? REQUEST_SERVICES[0];
 }
 
+/**
+ * Defaults numéricos de NOVOS formulários/itens (nunca aplicados a dados já
+ * informados). Adultos começa em 2, crianças em 0 (visível, nunca vazio) e todo
+ * campo de UNIDADE obrigatória (quartos, cabines...) começa em 1.
+ * Durações (noites/dias) e campos opcionais continuam vazios.
+ */
+export const QUANTITY_DEFAULTS: Record<string, string> = {
+  adultos: "2",
+  criancas: "0",
+  quartos: "1",
+  cabines: "1",
+};
+
+/** O campo numérico representa uma unidade obrigatória com mínimo 1? */
+export function isUnitQuantityField(field: RequestField): boolean {
+  return field.type === "number" && field.name !== "adultos" && field.name !== "criancas"
+    && QUANTITY_DEFAULTS[field.name] === "1";
+}
+
 export function initialServiceValues(service: RequestService): ServiceValues {
   const out: ServiceValues = {};
   for (const field of service.fields) {
     if (field.type === "checkbox") out[field.name] = false;
     else if (field.type === "select") out[field.name] = field.required ? (field.options?.[0] ?? "") : "";
-    else if (field.type === "number") out[field.name] = field.name === "adultos" ? "2" : "";
+    else if (field.type === "number") out[field.name] = QUANTITY_DEFAULTS[field.name] ?? "";
     else out[field.name] = "";
   }
   return out;
 }
+
+/**
+ * Normaliza os campos numéricos antes de validar/enviar: nunca NaN, string
+ * vazia, null ou undefined em quantidade obrigatória; crianças aceita 0 e,
+ * quando é 0, nenhuma idade residual sobrevive no estado/payload.
+ */
+export function normalizeServiceQuantities(service: RequestService, values: ServiceValues): ServiceValues {
+  const out: ServiceValues = { ...values };
+  for (const field of service.fields) {
+    if (field.type !== "number") continue;
+    const raw = out[field.name];
+    const text = typeof raw === "string" ? raw.trim() : typeof raw === "number" ? String(raw) : "";
+    const parsed = Math.floor(Number(text));
+    const fallback = QUANTITY_DEFAULTS[field.name];
+    if (!text || !Number.isFinite(parsed)) {
+      if (fallback !== undefined) out[field.name] = fallback;
+      continue;
+    }
+    const min = field.name === "criancas" ? 0 : field.min ?? (fallback === "1" ? 1 : undefined);
+    let next = parsed;
+    if (min !== undefined && next < min) next = min;
+    if (field.max !== undefined && next > field.max) next = field.max;
+    out[field.name] = String(next);
+  }
+  const kids = Math.floor(Number(String(out.criancas ?? "")));
+  if (Number.isFinite(kids) && kids <= 0 && "idades_criancas" in out) out.idades_criancas = "";
+  return out;
+}
+
 
 /**
  * Essential fields shown in the compact "Cotação rápida" card of the home.
@@ -608,9 +656,11 @@ export function resolveDestination(values: ServiceValues): string {
 }
 
 /** Flat string map sent to the server (details jsonb). */
-export function buildDetailsPayload(service: RequestService, values: ServiceValues): Record<string, string> {
+export function buildDetailsPayload(service: RequestService, raw_values: ServiceValues): Record<string, string> {
   const out: Record<string, string> = {};
+  const values = normalizeServiceQuantities(service, raw_values);
   for (const field of service.fields) {
+
     const raw = values[field.name];
     if (field.type === "checkbox") {
       if (raw === true) out[field.name] = "true";

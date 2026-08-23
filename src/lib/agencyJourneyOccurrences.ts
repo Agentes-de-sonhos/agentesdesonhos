@@ -144,21 +144,24 @@ export function validateOccurrence(
  * Origem, destino e datas são pedidos de novo porque o trecho pode ser outro.
  */
 export function extraOccurrence(service: RequestService, context: TripContext): Occurrence {
+  // Item NOVO e independente: defaults numéricos coerentes (quartos/cabines = 1,
+  // crianças = 0) e nenhum resíduo de outra ocorrência.
   const base = initialServiceValues(service);
   const values: ServiceValues = { ...base };
   const travelers: Record<string, string> = {
-    adultos: context.adultos ? String(context.adultos) : "",
-    criancas: context.criancas ? String(context.criancas) : "",
+    adultos: String(Math.max(1, context.adultos || 1)),
+    criancas: String(Math.max(0, context.criancas || 0)),
     idades_criancas: formatChildAges(context.idades_criancas),
     passageiros: String(Math.max(1, context.adultos + context.criancas)),
     viajantes: String(Math.max(1, context.adultos + context.criancas)),
   };
   for (const field of service.fields) {
     const inherited = travelers[field.name];
-    if (inherited) values[field.name] = inherited;
+    if (inherited !== undefined) values[field.name] = inherited;
   }
   return { id: newOccurrenceId(service.key), values, legs: [] };
 }
+
 
 /** Primeira ocorrência de um serviço adicional: herda todo o contexto da viagem. */
 export function inheritedOccurrence(service: RequestService, context: TripContext): Occurrence {
