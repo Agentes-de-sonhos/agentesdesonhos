@@ -214,13 +214,14 @@ describe("estados da lista", () => {
 
 describe("detalhe da viagem", () => {
   it("responde de forma genérica quando a viagem não pertence ao cliente", () => {
-    render(<ClientAreaTripDetail status="notfound" trip={null} onBack={() => {}} />);
+    render(<ClientAreaTripDetail info={info} status="notfound" trip={null} onBack={() => {}} />);
     expect(screen.getByText("Viagem não encontrada.")).toBeInTheDocument();
   });
 
   it("exibe identificação, período e status", () => {
     render(
       <ClientAreaTripDetail
+        info={info}
         status="ready"
         trip={trip({ title: "Lisboa", start_date: "2026-05-09", end_date: "2026-05-12", stage: "em_viagem" })}
         onBack={() => {}}
