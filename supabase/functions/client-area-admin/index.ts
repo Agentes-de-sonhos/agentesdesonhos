@@ -34,6 +34,12 @@ const BASE_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Vary': 'Origin',
+  'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+  'Pragma': 'no-cache',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
 }
 
 const corsFor = (origin: string | null): Record<string, string> => {
