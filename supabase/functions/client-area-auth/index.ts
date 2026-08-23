@@ -1,37 +1,56 @@
 /**
- * Autenticação do cliente final na Área do Cliente White Label (Etapa 1).
+ * Autenticação do cliente final na Área do Cliente White Label (Etapa 1.1).
  *
- * A agência é SEMPRE resolvida pelo domínio (agency_public_domains ativo).
- * Nenhum identificador de agência ou de cliente vindo do navegador é aceito
- * como autorização — trocar IDs na URL não dá acesso a outra conta.
- *
- * O mesmo e-mail pode existir em agências diferentes: cada par
- * (agência, e-mail) é uma conta independente, com senha e sessões próprias.
+ * Regras de segurança:
+ * - TODA ação exige `hostname`. A agência é resolvida no servidor pelo RPC
+ *   `client_area_domain_context`, que valida domínio ativo + elegibilidade
+ *   canônica White Label. `agency_id` do navegador nunca é aceito.
+ * - O header `Origin` precisa corresponder ao domínio informado (ou ser um
+ *   ambiente autorizado da plataforma). CORS restrito a essas origens.
+ * - Uma sessão criada no domínio de uma agência é recusada em qualquer outro.
+ * - Limitação combinada: por conta (agência + e-mail), por origem (hash com
+ *   pepper, nunca o endereço em texto aberto) e limite global da função.
+ * - Sessão: token opaco de 32 bytes, guardado apenas como hash, validade
+ *   deslizante de 30 dias, prazo absoluto de 180 dias e rotação a cada 7 dias.
  */
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import bcrypt from 'npm:bcryptjs@2.4.3'
 import {
+  ACCOUNT_ATTEMPT_POLICY,
+  type DomainContext,
   GENERIC_LOGIN_ERROR,
   GENERIC_RECOVERY_MESSAGE,
-  SESSION_TTL_MS,
+  ORIGIN_ATTEMPT_POLICY,
+  assertDomainContext,
+  assertHostnamePresent,
+  assertOriginMatchesHost,
   isLockedOut,
+  isSessionUsable,
   isValidEmail,
   nextAttemptState,
   normalizeEmail,
+  normalizeHost,
+  originHashInput,
+  resolveAllowedOrigin,
   sanitizeAuditDetails,
+  shouldRotateSession,
+  slidingExpiry,
+  SESSION_ABSOLUTE_MS,
+  SESSION_TTL_MS,
   validatePassword,
 } from '../_shared/clientAreaGuards.ts'
+import { checkRateLimit, getClientIP } from '../_shared/rate-limiter.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const BASE_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Vary': 'Origin',
 }
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
+const corsFor = (allowedOrigin: string) => ({
+  ...BASE_HEADERS,
+  'Access-Control-Allow-Origin': allowedOrigin,
+})
 
 async function sha256(input: string): Promise<string> {
   const data = new TextEncoder().encode(input)
@@ -44,17 +63,23 @@ function newToken(): string {
   return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
-function normalizeHost(raw: unknown): string {
-  return String(raw ?? '')
-    .trim()
-    .toLowerCase()
-    .replace(/^[a-z]+:\/\//, '')
-    .replace(/[/?#].*$/, '')
-    .replace(/:\d+$/, '')
-}
-
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  const originHeader = req.headers.get('origin')
+
+  // Preflight: só ecoa origens plausíveis (domínio White Label ou plataforma).
+  // A validação definitiva (origem × domínio × agência) acontece na requisição.
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: corsFor(originHeader && originHeader !== 'null' ? originHeader : '*'),
+    })
+  }
+
+  let headers = corsFor('*')
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    })
 
   const admin = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -86,19 +111,18 @@ Deno.serve(async (req) => {
     const token_hash = await sha256(token)
     const { data: session } = await admin
       .from('client_area_sessions')
-      .select('id, account_id, agency_id, expires_at, revoked_at')
+      .select('id, account_id, agency_id, expires_at, absolute_expires_at, revoked_at, rotated_at')
       .eq('token_hash', token_hash)
       .maybeSingle()
-    if (!session || session.revoked_at) return null
-    if (new Date(session.expires_at).getTime() < Date.now()) return null
+    if (!isSessionUsable(session as any)) return null
 
     const { data: account } = await admin
       .from('client_area_accounts')
       .select('id, agency_id, client_id, status, email_normalized, password_hash, last_login_at, password_set_by')
-      .eq('id', session.account_id)
+      .eq('id', session!.account_id)
       .maybeSingle()
     if (!account || account.status !== 'active') return null
-    if (account.agency_id !== session.agency_id) return null
+    if (account.agency_id !== session!.agency_id) return null
 
     const { data: client } = await admin
       .from('clients')
@@ -106,24 +130,59 @@ Deno.serve(async (req) => {
       .eq('id', account.client_id)
       .maybeSingle()
 
-    return { session, account, client }
+    return { session: session!, account, client }
+  }
+
+  /** Renova a validade deslizante e rotaciona o token quando devido. */
+  const touchSession = async (session: any): Promise<string | null> => {
+    const now = Date.now()
+    const patch: Record<string, unknown> = {
+      last_seen_at: new Date(now).toISOString(),
+      expires_at: slidingExpiry(session, now),
+    }
+    let rotated: string | null = null
+    if (shouldRotateSession(session, now)) {
+      rotated = newToken()
+      patch.token_hash = await sha256(rotated)
+      patch.rotated_at = new Date(now).toISOString()
+    }
+    await admin.from('client_area_sessions').update(patch).eq('id', session.id)
+    return rotated
   }
 
   try {
     const body = await req.json().catch(() => ({})) as Record<string, unknown>
     const action = String(body.action ?? 'login')
 
-    // ── Agência a partir do domínio (nunca do corpo)
+    // ── 1) Hostname obrigatório em TODAS as ações (nunca aceito em silêncio)
+    const hostGuard = assertHostnamePresent(body.hostname)
+    if (hostGuard) return json({ error: hostGuard.error }, hostGuard.status)
     const hostname = normalizeHost(body.hostname)
-    let agencyId: string | null = null
-    if (hostname) {
-      const { data: domain } = await admin
-        .from('agency_public_domains')
-        .select('user_id')
-        .eq('hostname', hostname)
-        .eq('is_active', true)
-        .maybeSingle()
-      agencyId = (domain?.user_id as string | undefined) ?? null
+
+    // ── 2) Origem precisa corresponder ao domínio informado
+    const originGuard = assertOriginMatchesHost(originHeader, hostname)
+    if (originGuard) return json({ error: originGuard.error }, originGuard.status)
+
+    // ── 3) Agência resolvida pelo domínio + elegibilidade canônica White Label
+    const { data: ctxData } = await admin.rpc('client_area_domain_context', { _hostname: hostname })
+    const domain = (ctxData ?? null) as DomainContext | null
+    const domainGuard = assertDomainContext(domain)
+    if (domainGuard) return json({ error: domainGuard.error }, domainGuard.status)
+    const agencyId = domain!.agency_id as string
+
+    // CORS definitivo: origem × domínio da agência
+    const allowedOrigin = resolveAllowedOrigin(originHeader, hostname)
+    if (!allowedOrigin) return json({ error: 'Origem não autorizada.' }, 403)
+    headers = corsFor(allowedOrigin)
+
+    // ── 4) Origem da tentativa (hash com pepper — nunca em texto aberto)
+    const pepper = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? 'client-area'
+    const originHash = await sha256(originHashInput(pepper, agencyId, getClientIP(req)))
+
+    // Limite global da função (protege a infraestrutura)
+    const globalLimit = await checkRateLimit(originHash, 'client-area-auth', 60, 60)
+    if (!globalLimit.allowed) {
+      return json({ error: 'Muitas tentativas. Aguarde alguns segundos e tente novamente.' }, 429)
     }
 
     if (action === 'session' || action === 'logout' || action === 'change_password') {
@@ -131,14 +190,12 @@ Deno.serve(async (req) => {
       if (!resolved) return json({ error: 'Sessão expirada.' }, 401)
 
       // Isolamento: a sessão só vale no domínio da própria agência.
-      if (agencyId && resolved.account.agency_id !== agencyId) {
+      if (resolved.account.agency_id !== agencyId) {
         return json({ error: 'Sessão expirada.' }, 401)
       }
 
       if (action === 'session') {
-        await admin.from('client_area_sessions')
-          .update({ last_seen_at: new Date().toISOString() })
-          .eq('id', resolved.session.id)
+        const rotated = await touchSession(resolved.session)
         return json({
           client: {
             id: resolved.client?.id ?? null,
@@ -146,13 +203,14 @@ Deno.serve(async (req) => {
             email: resolved.account.email_normalized,
           },
           last_login_at: resolved.account.last_login_at,
+          ...(rotated ? { token: rotated } : {}),
         })
       }
 
       if (action === 'logout') {
         await admin.from('client_area_sessions').delete().eq('id', resolved.session.id)
         await audit({
-          agencyId: resolved.account.agency_id,
+          agencyId,
           action: 'logout',
           accountId: resolved.account.id,
           clientId: resolved.account.client_id,
@@ -187,17 +245,24 @@ Deno.serve(async (req) => {
         .eq('account_id', resolved.account.id)
         .neq('id', resolved.session.id)
 
+      // A sessão atual é preservada, mas com token novo (rotação obrigatória).
+      const rotatedToken = newToken()
+      await admin.from('client_area_sessions')
+        .update({
+          token_hash: await sha256(rotatedToken),
+          rotated_at: new Date().toISOString(),
+          expires_at: slidingExpiry(resolved.session as any),
+        })
+        .eq('id', resolved.session.id)
+
       await audit({
-        agencyId: resolved.account.agency_id,
+        agencyId,
         action: 'password_changed_by_client',
         accountId: resolved.account.id,
         clientId: resolved.account.client_id,
       })
-      return json({ ok: true })
+      return json({ ok: true, token: rotatedToken })
     }
-
-    // ── Ações públicas exigem domínio White Label ativo
-    if (!agencyId) return json({ error: GENERIC_LOGIN_ERROR }, 400)
 
     const email = normalizeEmail(body.email)
 
@@ -218,14 +283,32 @@ Deno.serve(async (req) => {
           })
         }
       }
-      // Resposta sempre genérica: nunca revela se o e-mail existe.
-      return json({ ok: true, message: GENERIC_RECOVERY_MESSAGE })
+      // Resposta sempre genérica: nunca revela se o e-mail existe e nunca
+      // promete envio de e-mail (não há disparo automático nesta etapa).
+      return json({
+        ok: true,
+        message: GENERIC_RECOVERY_MESSAGE,
+        whatsapp: domain!.whatsapp ?? null,
+        agency_name: domain!.agency_name ?? null,
+      })
     }
 
     if (action !== 'login') return json({ error: 'Ação inválida.' }, 400)
 
     const password = typeof body.password === 'string' ? body.password : ''
     if (!isValidEmail(email) || !password) return json({ error: GENERIC_LOGIN_ERROR }, 400)
+
+    // ── Limitação por origem (impede pulverização em vários e-mails)
+    const { data: originRow } = await admin
+      .from('client_area_origin_attempts')
+      .select('attempts, first_attempt_at, locked_until')
+      .eq('agency_id', agencyId)
+      .eq('origin_hash', originHash)
+      .maybeSingle()
+
+    if (isLockedOut(originRow as any)) {
+      return json({ error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.' }, 429)
+    }
 
     const { data: attemptRow } = await admin
       .from('client_area_login_attempts')
@@ -234,7 +317,7 @@ Deno.serve(async (req) => {
       .eq('email_normalized', email)
       .maybeSingle()
 
-    if (isLockedOut(attemptRow)) {
+    if (isLockedOut(attemptRow as any)) {
       return json({
         error: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
       }, 429)
@@ -252,47 +335,76 @@ Deno.serve(async (req) => {
       : false
 
     if (!account || !passwordOk || account.status !== 'active') {
-      const next = nextAttemptState(attemptRow)
-      await admin.from('client_area_login_attempts').upsert({
+      // A origem é sempre penalizada.
+      const nextOrigin = nextAttemptState(originRow as any, Date.now(), ORIGIN_ATTEMPT_POLICY)
+      await admin.from('client_area_origin_attempts').upsert({
         agency_id: agencyId,
-        email_normalized: email,
-        ...next,
+        origin_hash: originHash,
+        ...nextOrigin,
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'agency_id,email_normalized' })
+      }, { onConflict: 'agency_id,origin_hash' })
 
-      if (next.locked_until && account) {
+      // A conta só é penalizada enquanto a origem não estiver saturada: assim
+      // uma única origem não consegue manter uma conta legítima bloqueada.
+      if (!nextOrigin.locked_until) {
+        const next = nextAttemptState(attemptRow as any, Date.now(), ACCOUNT_ATTEMPT_POLICY)
+        await admin.from('client_area_login_attempts').upsert({
+          agency_id: agencyId,
+          email_normalized: email,
+          ...next,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'agency_id,email_normalized' })
+
+        if (next.locked_until && account) {
+          await audit({
+            agencyId,
+            action: 'login_throttled',
+            accountId: account.id,
+            clientId: account.client_id,
+            details: { attempts: next.attempts },
+          })
+        }
+      } else if (account) {
         await audit({
           agencyId,
-          action: 'login_throttled',
+          action: 'origin_throttled',
           accountId: account.id,
           clientId: account.client_id,
-          details: { attempts: next.attempts },
+          details: { attempts: nextOrigin.attempts },
         })
       }
+
       return json({ error: GENERIC_LOGIN_ERROR }, 401)
     }
 
     const token = newToken()
     const token_hash = await sha256(token)
-    const expires_at = new Date(Date.now() + SESSION_TTL_MS).toISOString()
+    const now = Date.now()
+    const expires_at = new Date(now + SESSION_TTL_MS).toISOString()
+    const absolute_expires_at = new Date(now + SESSION_ABSOLUTE_MS).toISOString()
 
     await admin.from('client_area_sessions').insert({
       account_id: account.id,
       agency_id: agencyId,
       token_hash,
       expires_at,
+      absolute_expires_at,
+      rotated_at: new Date(now).toISOString(),
       user_agent: userAgent,
     })
 
     const isFirst = !account.first_login_at
     await admin.from('client_area_accounts').update({
-      last_login_at: new Date().toISOString(),
-      first_login_at: account.first_login_at ?? new Date().toISOString(),
+      last_login_at: new Date(now).toISOString(),
+      first_login_at: account.first_login_at ?? new Date(now).toISOString(),
       login_count: (account.login_count ?? 0) + 1,
     }).eq('id', account.id)
 
+    // Login bem-sucedido zera as tentativas da conta e alivia a origem.
     await admin.from('client_area_login_attempts')
       .delete().eq('agency_id', agencyId).eq('email_normalized', email)
+    await admin.from('client_area_origin_attempts')
+      .delete().eq('agency_id', agencyId).eq('origin_hash', originHash)
 
     if (isFirst) {
       await audit({ agencyId, action: 'first_login', accountId: account.id, clientId: account.client_id })

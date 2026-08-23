@@ -15,6 +15,8 @@ import {
   assertClientCanHaveAccess,
   assertSameAgency,
   generateSecurePassword,
+  hostFromOrigin,
+  isPlatformOriginHost,
   isUuid,
   normalizeEmail,
   publicAccountView,
@@ -22,21 +24,43 @@ import {
   validatePassword,
 } from '../_shared/clientAreaGuards.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+
+/**
+ * CORS restrito: a gestão só acontece dentro da aplicação da plataforma
+ * (app oficial, prévias e desenvolvimento). Domínios White Label não gerenciam
+ * acesso — lá roda apenas a Área do Cliente pública.
+ */
+const BASE_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Vary': 'Origin',
 }
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
+const corsFor = (origin: string | null): Record<string, string> => {
+  const host = hostFromOrigin(origin)
+  const allowed = !host ? '*' : isPlatformOriginHost(host) ? String(origin) : ''
+  return { ...BASE_HEADERS, 'Access-Control-Allow-Origin': allowed || 'null' }
+}
 
 const randomBytes = (size: number) => crypto.getRandomValues(new Uint8Array(size))
 
 Deno.serve(async (req) => {
+  const originHeader = req.headers.get('origin')
+  const corsHeaders = corsFor(originHeader)
+
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
+  const originHost = hostFromOrigin(originHeader)
+  if (originHost && !isPlatformOriginHost(originHost)) {
+    return json({ error: 'Origem não autorizada.' }, 403)
+  }
+
 
   try {
     const authHeader = req.headers.get('Authorization') ?? ''

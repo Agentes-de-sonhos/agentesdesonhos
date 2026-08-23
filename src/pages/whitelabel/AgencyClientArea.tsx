@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight, Eye, EyeOff, FileText, KeyRound, Loader2, LogOut, Map, Receipt, Wallet,
+  ArrowRight, Eye, EyeOff, FileText, KeyRound, Loader2, LogOut, Map, MessageCircle,
+  Receipt, Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,8 +15,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
 import {
-  isValidClientEmail, prefilledEmailFromSearch, readClientAreaToken, validatePasswordInput,
-  writeClientAreaToken,
+  RECOVERY_GUIDANCE, agencyWhatsappLink, clientAreaAuthBody, isValidClientEmail,
+  prefilledEmailFromSearch, readClientAreaToken, validatePasswordInput, writeClientAreaToken,
 } from "@/lib/clientAreaAccess";
 
 const KINDS = [
@@ -32,11 +33,13 @@ interface SessionClient {
 }
 
 /**
- * Área do Cliente White Label — Etapa 1.
+ * Área do Cliente White Label — Etapa 1.1.
  *
- * Login por e-mail + senha definida pela agência, isolado por domínio: a agência
- * é sempre resolvida no servidor pelo hostname, nunca pelo que o navegador envia.
- * O acesso por código de link permanece disponível sem login.
+ * Login por e-mail + senha definida pela agência, isolado por domínio: o
+ * hostname atual é enviado em TODAS as chamadas e a agência é sempre resolvida
+ * no servidor, nunca pelo que o navegador afirma. O token de sessão é opaco,
+ * guardado por domínio e substituído quando o servidor devolve um novo (rotação).
+ * O acesso por código de link permanece disponível, sem login, em bloco separado.
  */
 export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
   const navigate = useNavigate();
@@ -57,11 +60,17 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [recoveryNotice, setRecoveryNotice] = useState<string | null>(null);
 
-  const token = useMemo(
-    () => (typeof window === "undefined" ? null : readClientAreaToken(hostname)),
-    [hostname, client],
+  const whatsappLink = useMemo(
+    () => agencyWhatsappLink(info.phone, `Olá! Preciso de ajuda com meu acesso à Área do Cliente da ${name}.`),
+    [info.phone, name],
   );
+
+  /** Guarda o token devolvido pelo servidor (login ou rotação de sessão). */
+  const storeToken = (token?: string | null) => {
+    if (typeof token === "string" && token.length >= 32) writeClientAreaToken(hostname, token);
+  };
 
   // Revalida a sessão salva no navegador — o servidor decide se ainda vale.
   useEffect(() => {
@@ -73,11 +82,16 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     }
     void (async () => {
       const { data } = await supabase.functions.invoke("client-area-auth", {
-        body: { action: "session", token: stored },
+        body: clientAreaAuthBody("session", hostname, { token: stored }),
       });
       if (cancelled) return;
-      if ((data as any)?.client) setClient((data as any).client as SessionClient);
-      else writeClientAreaToken(hostname, null);
+      const result = data as any;
+      if (result?.client) {
+        storeToken(result.token);
+        setClient(result.client as SessionClient);
+      } else {
+        writeClientAreaToken(hostname, null);
+      }
       setChecking(false);
     })();
     return () => { cancelled = true; };
@@ -99,16 +113,20 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     setBusy(true);
     try {
       const { data } = await supabase.functions.invoke("client-area-auth", {
-        body: { action: "login", email: email.trim().toLowerCase(), password },
+        body: clientAreaAuthBody("login", hostname, {
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       });
       const result = data as any;
       if (!result?.token) {
         toast.error(result?.error || "E-mail ou senha incorretos.");
         return;
       }
-      writeClientAreaToken(hostname, result.token);
+      storeToken(result.token);
       setClient(result.client as SessionClient);
       setPassword("");
+      setRecoveryNotice(null);
     } finally {
       setBusy(false);
     }
@@ -121,7 +139,7 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     setShowChange(false);
     if (stored) {
       await supabase.functions.invoke("client-area-auth", {
-        body: { action: "logout", token: stored },
+        body: clientAreaAuthBody("logout", hostname, { token: stored }),
       });
     }
   };
@@ -136,19 +154,20 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     setBusy(true);
     try {
       const { data } = await supabase.functions.invoke("client-area-auth", {
-        body: {
-          action: "change_password",
-          token,
+        body: clientAreaAuthBody("change_password", hostname, {
+          token: readClientAreaToken(hostname),
           current_password: currentPassword,
           new_password: newPassword,
-        },
+        }),
       });
       const result = data as any;
       if (!result?.ok) {
         toast.error(result?.error || "Não foi possível alterar a senha.");
         return;
       }
-      toast.success("Senha alterada com sucesso.");
+      // A sessão atual continua válida com um token novo; as demais são encerradas.
+      storeToken(result.token);
+      toast.success("Senha alterada. Os outros dispositivos precisarão entrar novamente.");
       setShowChange(false);
       setCurrentPassword("");
       setNewPassword("");
@@ -166,12 +185,12 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     setBusy(true);
     try {
       const { data } = await supabase.functions.invoke("client-area-auth", {
-        body: { action: "recovery", email: email.trim().toLowerCase() },
+        body: clientAreaAuthBody("recovery", hostname, {
+          email: email.trim().toLowerCase(),
+        }),
       });
-      toast.success(
-        (data as any)?.message ||
-          `Se este e-mail estiver cadastrado, a ${name} entrará em contato com um novo acesso.`,
-      );
+      // Nunca prometemos envio de e-mail: a orientação é falar com a agência.
+      setRecoveryNotice((data as any)?.message || RECOVERY_GUIDANCE);
     } finally {
       setBusy(false);
     }
@@ -251,9 +270,10 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
           </Card>
 
           <Card className="mt-6 p-6">
-            <p className="text-sm text-muted-foreground">
-              Em breve, suas viagens, serviços, documentos, roteiro e Carteira Digital aparecerão
-              aqui automaticamente. Por enquanto, use o código do link recebido logo abaixo.
+            <h2 className="text-base font-semibold text-foreground">Suas viagens</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Estamos preparando esta área: em breve suas viagens, serviços, documentos, roteiro e
+              Carteira Digital aparecerão aqui automaticamente, sem precisar de nenhum código.
             </p>
           </Card>
         </>
@@ -308,14 +328,31 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
                 </Button>
               </div>
             </form>
+
+            {recoveryNotice && (
+              <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <p className="text-sm text-foreground">{recoveryNotice}</p>
+                {whatsappLink && (
+                  <Button asChild variant="outline" size="sm" className="mt-3">
+                    <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="mr-2 h-4 w-4" /> Falar com a agência
+                    </a>
+                  </Button>
+                )}
+              </div>
+            )}
           </Card>
         </>
       )}
 
       <Card className="mt-6 p-6">
-        <h2 className="text-base font-semibold text-foreground">Acessar por código do link</h2>
+        <h2 className="text-base font-semibold text-foreground">
+          Recebeu um link com código? Acesse aqui
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Se o conteúdo tiver senha própria, ela continua sendo solicitada normalmente.
+          Este acesso é independente do login acima e serve para abrir um conteúdo específico que a
+          agência enviou (carteira, orçamento, roteiro ou fatura). Se o conteúdo tiver senha própria,
+          ela continua sendo solicitada normalmente.
         </p>
         <form onSubmit={submitCode} className="mt-5 space-y-5">
           <div className="space-y-2">
