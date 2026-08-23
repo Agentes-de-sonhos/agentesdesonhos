@@ -525,6 +525,15 @@ export function ClientsModule() {
                 </div>
               </form>
             </Form>
+            {editingClient?.id && (
+              <div className="pt-2">
+                <ClientAreaAccessSection
+                  clientId={editingClient.id}
+                  clientName={editingClient.name}
+                  clientEmail={editingClient.email}
+                />
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
