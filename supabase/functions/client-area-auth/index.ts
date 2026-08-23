@@ -63,6 +63,36 @@ function newToken(): string {
   return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+/**
+ * Campos livres do serviço que NUNCA podem chegar ao passageiro: valores,
+ * custos, comissões, condições de pagamento, fornecedores e anotações internas.
+ * A regra é por lista de bloqueio + apenas valores primitivos e curtos, para
+ * que qualquer chave nova criada no CRM não vaze por acidente.
+ */
+const BLOCKED_DETAIL_KEY =
+  /(valor|price|preco|preço|amount|total|cost|custo|comiss|fee|tax|imposto|markup|margin|lucro|profit|net|payment|pagamento|parcel|installment|entrada|entry|discount|desconto|supplier|fornecedor|operadora|operator|internal|interno|nota|note|obs|cpf|passaporte|passport|document)/i
+
+function safeServiceDetails(raw: unknown): Record<string, unknown> | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const out: Record<string, unknown> = {}
+  let kept = 0
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (kept >= 20) break
+    if (BLOCKED_DETAIL_KEY.test(key)) continue
+    if (typeof value === 'boolean' || typeof value === 'number') {
+      out[key] = value
+      kept += 1
+    } else if (typeof value === 'string') {
+      const text = value.trim()
+      if (!text || text.length > 300) continue
+      out[key] = text
+      kept += 1
+    }
+    // Objetos e listas são descartados: só texto simples é seguro de exibir.
+  }
+  return kept > 0 ? out : null
+}
+
 Deno.serve(async (req) => {
   const originHeader = req.headers.get('origin')
 
