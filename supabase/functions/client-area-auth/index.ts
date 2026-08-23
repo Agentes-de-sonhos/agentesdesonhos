@@ -611,7 +611,12 @@ Deno.serve(async (req) => {
           .createSignedUrl(doc.path, SIGNED_URL_TTL_SECONDS, { download: false })
         if (signError || !signed?.signedUrl) return json({ error: 'Documento indisponível.' }, 404)
 
-        await logAudit(resolved.account.id, 'document_opened', { origin_hash: originHash })
+        await audit({
+          agencyId,
+          action: 'document_opened',
+          accountId: resolved.account.id,
+          clientId: clientId,
+        })
         return json({
           url: signed.signedUrl,
           name: doc.name,
@@ -662,7 +667,12 @@ Deno.serve(async (req) => {
         })
         if (grantError) return json({ error: 'Carteira indisponível.' }, 404)
 
-        await logAudit(resolved.account.id, 'wallet_access_granted', { origin_hash: originHash })
+        await audit({
+          agencyId,
+          action: 'wallet_access_granted',
+          accountId: resolved.account.id,
+          clientId: clientId,
+        })
         const slug = await agencySlug(admin, agencyId)
         return json({
           url: `https://carteiradigital.tur.br/${slug}/${access.wallet.code}?acesso=${grant}`,
@@ -683,7 +693,7 @@ Deno.serve(async (req) => {
         return json({
           profile: {
             name: client?.nome_completo ?? null,
-            email: resolved.account.email ?? client?.email ?? null,
+            email: resolved.account.email_normalized ?? client?.email ?? null,
             phone: client?.telefone ?? null,
             city: client?.cidade ?? null,
             state: client?.estado ?? null,
