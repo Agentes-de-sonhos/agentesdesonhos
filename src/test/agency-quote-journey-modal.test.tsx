@@ -132,7 +132,8 @@ describe("assistente de solicitação White Label", () => {
     expect(payload.service_key).toBe("aereo");
     expect(payload.lead_name).toBe("Maria Souza");
     // Passageiros herdados silenciosamente seguem no payload.
-    expect(payload.adults).toBe(2);
-    expect(payload.children).toBe(0);
+    const details = payload.details as Record<string, string>;
+    expect(details.ctx_adultos).toBe("2");
+    expect(details.adultos).toBe("2");
   });
 });
