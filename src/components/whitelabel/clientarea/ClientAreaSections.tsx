@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandText } from "@/components/ui/brand-text";
 import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
-import { PREPARING_HINT, type ClientAreaView, firstName } from "@/lib/clientAreaNav";
+import { type ClientAreaView, firstName } from "@/lib/clientAreaNav";
 import {
   type ClientAreaTrip, tripPeriodLabel, tripStatusLabel, tripTitle,
 } from "@/lib/clientAreaTrips";
