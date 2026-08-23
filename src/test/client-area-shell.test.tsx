@@ -65,7 +65,8 @@ describe('navegação declarativa', () => {
       'inicio', 'viagens', 'documentos', 'perfil', 'atendimento',
     ])
     const ready = CLIENT_AREA_NAV.filter((i) => i.ready).map((i) => i.view)
-    expect(ready).toEqual(['inicio', 'perfil', 'atendimento'])
+    expect(ready).toEqual(['inicio', 'viagens', 'documentos', 'perfil', 'atendimento'])
+
     expect(CLIENT_AREA_NAV.filter((i) => i.mobileBar)).toHaveLength(4)
   })
 
