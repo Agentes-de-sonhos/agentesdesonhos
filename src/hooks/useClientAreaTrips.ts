@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAreaAuthBody, readClientAreaToken } from "@/lib/clientAreaAccess";
 import type { ClientAreaTrip } from "@/lib/clientAreaTrips";
+import type { ClientAreaTripDetailData } from "@/lib/clientAreaTripDetail";
 
 export type TripsStatus = "loading" | "ready" | "error" | "expired";
 
