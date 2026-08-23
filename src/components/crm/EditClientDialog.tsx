@@ -266,6 +266,15 @@ export function EditClientDialog({ clientId, open, onOpenChange }: Props) {
             </div>
           </form>
         </Form>
+        {clientId && (
+          <div className="pt-2">
+            <ClientAreaAccessSection
+              clientId={clientId}
+              clientName={client?.name}
+              clientEmail={client?.email}
+            />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
