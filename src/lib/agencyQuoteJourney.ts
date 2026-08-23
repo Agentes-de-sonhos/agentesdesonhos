@@ -450,19 +450,28 @@ export function buildJourneyPayload(
   const summaryBlocks: string[] = [];
   const labels: string[] = [];
 
+  // Ocorrências múltiplas do MESMO serviço ganham sufixo numérico só a partir
+  // da segunda: solicitações antigas (uma por serviço) mantêm as chaves atuais.
+  const seen = new Map<string, number>();
+
   list.forEach((entry, index) => {
     const service = serviceByKey(entry.key);
-    labels.push(service.label);
+    const occurrence = (seen.get(entry.key) ?? 0) + 1;
+    seen.set(entry.key, occurrence);
+    const suffix = occurrence > 1 ? `_${occurrence}` : "";
+    const label = occurrence > 1 ? `${service.label} ${occurrence}` : service.label;
+    labels.push(label);
     const flat = buildDetailsPayload(service, entry.values);
     for (const [name, value] of Object.entries(flat)) {
-      const target = index === 0 ? name : `${service.key}_${name}`;
+      const target = index === 0 ? `${name}${suffix}` : `${service.key}${suffix}_${name}`;
       details[target] = value;
     }
     const answers = describeServiceValues(service, entry.values)
       .map((item) => `${item.label}: ${item.value}`)
       .join("; ");
-    summaryBlocks.push(`[${service.label}] ${answers}`);
+    summaryBlocks.push(`[${label}] ${answers}`);
   });
+
 
   details.servicos = labels.join(", ").slice(0, DETAIL_LIMIT);
   details.servicos_keys = list.map((e) => e.key).join(",").slice(0, DETAIL_LIMIT);
