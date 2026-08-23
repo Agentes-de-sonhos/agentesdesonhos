@@ -114,6 +114,8 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
           >
             {!construction && <Route path="/" element={<AgencySiteHome info={info} />} />}
             <Route path="/area-do-cliente" element={<AgencyClientArea info={info} />} />
+            {/* Detalhe da viagem: mesma tela autenticada, resolvida pelo path. */}
+            <Route path="/area-do-cliente/viagens/:id" element={<AgencyClientArea info={info} />} />
             <Route path="/ofertas" element={<Ofertas info={info} />} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
