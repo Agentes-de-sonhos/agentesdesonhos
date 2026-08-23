@@ -267,7 +267,53 @@ Deno.serve(async (req) => {
           cover_url: o.trip_id ? covers.get(o.trip_id) ?? null : null,
         }))
 
-        if (action === 'trip') return json({ trip: trips[0] ?? null })
+        /**
+         * Etapa 4 — detalhe completo. Serviços e viajantes só são resolvidos
+         * DEPOIS de o servidor confirmar a posse (agência do domínio + cliente
+         * da sessão). Nada financeiro, de fornecedor ou anotação interna sai
+         * daqui: `amount`, `supplier` e `notes` nunca são selecionados e os
+         * campos livres passam por uma lista de bloqueio.
+         */
+        if (action === 'trip') {
+          const trip = trips[0]
+          if (!trip) return json({ trip: null })
+
+          const [detailServicesRes, travelersRes] = await Promise.all([
+            admin
+              .from('operation_services')
+              .select('id, service_type, name, destination, start_date, end_date, is_confirmed, is_issued, service_data, position')
+              .eq('user_id', agencyId)
+              .eq('operation_id', trip.id)
+              .order('position', { ascending: true })
+              .limit(200),
+            admin
+              .from('travelers')
+              .select('id, nome_completo, is_responsavel')
+              .eq('user_id', agencyId)
+              .eq('client_id', clientId)
+              .limit(60),
+          ])
+
+          const services = (detailServicesRes.data ?? []).map((s: any) => ({
+            id: s.id,
+            service_type: s.service_type ?? null,
+            name: s.name ?? null,
+            destination: s.destination ?? null,
+            start_date: s.start_date ?? null,
+            end_date: s.end_date ?? null,
+            confirmed: !!(s.is_confirmed || s.is_issued),
+            details: safeServiceDetails(s.service_data),
+          }))
+
+          const travelers = (travelersRes.data ?? []).map((t: any) => ({
+            id: t.id,
+            name: t.nome_completo ?? null,
+            is_responsible: !!t.is_responsavel,
+          }))
+
+          return json({ trip: { ...trip, services, travelers } })
+        }
+
         return json({ trips })
       }
 
