@@ -57,6 +57,24 @@ const clearRememberedPassword = (code: string) => {
   try { localStorage.removeItem(REMEMBER_KEY_PREFIX + code); } catch {}
 };
 
+/**
+ * Lê e remove imediatamente a autorização de uso único (`?acesso=`) da URL.
+ * O valor vive apenas em memória: nunca é salvo, repetido ou exibido.
+ */
+function consumeGrantParam(): string | null {
+  try {
+    const url = new URL(window.location.href);
+    const raw = (url.searchParams.get("acesso") || "").trim();
+    if (raw) {
+      url.searchParams.delete("acesso");
+      window.history.replaceState(null, "", url.toString());
+    }
+    return /^[a-f0-9]{64}$/i.test(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
 async function verifyByPublicCode(agencySlug: string, code: string, password: string) {
   const { data, error } = await supabase.rpc('verify_trip_by_public_code', {
     p_agency_slug: agencySlug,
