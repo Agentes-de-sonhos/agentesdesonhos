@@ -118,3 +118,6 @@ verify_jwt = false
 
 [functions.fx-rate]
 verify_jwt = false
+
+[functions.client-area-auth]
+verify_jwt = false

@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useClients } from "@/hooks/useCRM";
 import { CLIENT_STATUS_LABELS, type Client } from "@/types/crm";
+import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
 
 const clientSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
@@ -266,6 +267,15 @@ export function EditClientDialog({ clientId, open, onOpenChange }: Props) {
             </div>
           </form>
         </Form>
+        {clientId && (
+          <div className="pt-2">
+            <ClientAreaAccessSection
+              clientId={clientId}
+              clientName={client?.name}
+              clientEmail={client?.email}
+            />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
