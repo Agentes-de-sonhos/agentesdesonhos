@@ -7,6 +7,7 @@
  * financeiro, custo, comissão, fornecedor ou anotação interna existe neste
  * modelo — e nada aqui é editável (a área é somente leitura).
  */
+import type { ClientAreaDocument } from "./clientAreaDocuments";
 import { type ClientAreaTrip, parseTripDate } from "./clientAreaTrips";
 
 /** Serviço contratado, como o passageiro pode vê-lo. */
@@ -30,9 +31,18 @@ export interface ClientAreaTraveler {
   is_responsible: boolean;
 }
 
+export interface ClientAreaTripAccess {
+  wallet: { available: boolean; protected?: boolean };
+  itinerary: { available: boolean; url: string | null };
+}
+
 export interface ClientAreaTripDetailData extends ClientAreaTrip {
   services?: ClientAreaTripService[];
   travelers?: ClientAreaTraveler[];
+  /** Etapa 5 — documentos disponibilizados pela agência para esta viagem. */
+  documents?: ClientAreaDocument[];
+  /** Etapa 5 — Carteira Digital e Roteiro vinculados (apenas disponibilidade). */
+  access?: ClientAreaTripAccess;
 }
 
 export const SERVICE_TYPE_LABELS: Record<string, string> = {
@@ -241,6 +251,7 @@ export const DETAIL_TABS = [
   { key: "servicos", label: "Serviços" },
   { key: "programacao", label: "Programação" },
   { key: "viajantes", label: "Viajantes" },
+  { key: "documentos", label: "Documentos e acessos" },
 ] as const;
 
 export type DetailTab = (typeof DETAIL_TABS)[number]["key"];
@@ -249,6 +260,7 @@ export const DETAIL_EMPTY = {
   services: "Os serviços desta viagem ainda estão sendo preparados pela agência.",
   timeline: "A programação será exibida quando os serviços tiverem datas confirmadas.",
   travelers: "Os viajantes desta viagem ainda não foram cadastrados.",
+  documents: "Sua agência ainda não disponibilizou documentos para esta viagem.",
 } as const;
 
 export const DETAIL_READONLY_NOTE =
