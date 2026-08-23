@@ -218,7 +218,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   }
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
-  const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
+  const { contracts, createContract, attachPdf, logAction, setClientVisible } = useSaleContracts(sale?.id);
 
   const { data: saleData, isLoading: loadingSale } = useQuery({
     queryKey: ['sale-contract-source', sale?.id],
