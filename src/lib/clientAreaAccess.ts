@@ -127,10 +127,13 @@ export const AUDIT_LABELS: Record<string, string> = {
   first_login: "Primeiro acesso do cliente",
   login_success: "Login do cliente",
   login_throttled: "Tentativas excessivas bloqueadas",
+  origin_throttled: "Tentativas excessivas de uma mesma origem",
   password_changed_by_client: "Senha alterada pelo cliente",
   logout: "Saída do cliente",
   recovery_requested: "Recuperação de acesso solicitada",
+  session_rotated: "Sessão renovada",
 };
+
 
 // ─────────────────────────────────────────────────────────────
 // Mensagem automática (nunca enviada automaticamente nesta etapa)
@@ -206,3 +209,47 @@ export function prefilledEmailFromSearch(search: string): string {
   const email = raw.trim().toLowerCase();
   return isValidClientEmail(email) ? email : "";
 }
+
+// ─────────────────────────────────────────────────────────────
+// Chamadas à Edge Function (hostname obrigatório em todas)
+// ─────────────────────────────────────────────────────────────
+
+export type ClientAreaAuthAction =
+  | "login"
+  | "session"
+  | "logout"
+  | "change_password"
+  | "recovery";
+
+/**
+ * Corpo padrão de qualquer chamada à `client-area-auth`.
+ * O hostname é obrigatório: o servidor resolve a agência pelo domínio e recusa
+ * a requisição quando ele está ausente, inativo ou sem White Label elegível.
+ */
+export function clientAreaAuthBody(
+  action: ClientAreaAuthAction,
+  hostname: string,
+  payload: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return { action, hostname: (hostname || "").trim().toLowerCase(), ...payload };
+}
+
+/**
+ * Orientação verdadeira da recuperação: nesta etapa não há envio automático de
+ * e-mail. A agência gera a nova senha e entrega pelo canal de atendimento.
+ */
+export const RECOVERY_GUIDANCE =
+  "Nesta etapa a nova senha é gerada pela própria agência. Fale com o atendimento para receber um novo acesso — nenhum e-mail automático é enviado.";
+
+/** Link de WhatsApp da agência (ou `null` quando não há telefone cadastrado). */
+export function agencyWhatsappLink(
+  phone?: string | null,
+  message?: string,
+): string | null {
+  const digits = (phone ?? "").replace(/\D/g, "");
+  if (digits.length < 10) return null;
+  const number = digits.startsWith("55") ? digits : `55${digits}`;
+  const text = message ? `?text=${encodeURIComponent(message)}` : "";
+  return `https://wa.me/${number}${text}`;
+}
+

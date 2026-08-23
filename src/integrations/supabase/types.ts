@@ -2477,8 +2477,42 @@ export type Database = {
         }
         Relationships: []
       }
+      client_area_origin_attempts: {
+        Row: {
+          agency_id: string | null
+          attempts: number
+          distinct_emails: number
+          first_attempt_at: string
+          id: string
+          locked_until: string | null
+          origin_hash: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id?: string | null
+          attempts?: number
+          distinct_emails?: number
+          first_attempt_at?: string
+          id?: string
+          locked_until?: string | null
+          origin_hash: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string | null
+          attempts?: number
+          distinct_emails?: number
+          first_attempt_at?: string
+          id?: string
+          locked_until?: string | null
+          origin_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_area_sessions: {
         Row: {
+          absolute_expires_at: string | null
           account_id: string
           agency_id: string
           created_at: string
@@ -2486,10 +2520,12 @@ export type Database = {
           id: string
           last_seen_at: string
           revoked_at: string | null
+          rotated_at: string
           token_hash: string
           user_agent: string | null
         }
         Insert: {
+          absolute_expires_at?: string | null
           account_id: string
           agency_id: string
           created_at?: string
@@ -2497,10 +2533,12 @@ export type Database = {
           id?: string
           last_seen_at?: string
           revoked_at?: string | null
+          rotated_at?: string
           token_hash: string
           user_agent?: string | null
         }
         Update: {
+          absolute_expires_at?: string | null
           account_id?: string
           agency_id?: string
           created_at?: string
@@ -2508,6 +2546,7 @@ export type Database = {
           id?: string
           last_seen_at?: string
           revoked_at?: string | null
+          rotated_at?: string
           token_hash?: string
           user_agent?: string | null
         }
@@ -15535,6 +15574,7 @@ export type Database = {
         Returns: Json
       }
       client_area_admin_context: { Args: never; Returns: Json }
+      client_area_domain_context: { Args: { _hostname: string }; Returns: Json }
       clone_itinerary_for_trip: {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
