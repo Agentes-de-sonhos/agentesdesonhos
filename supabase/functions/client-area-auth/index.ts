@@ -661,6 +661,8 @@ Deno.serve(async (req) => {
         const { error: grantError } = await admin.from('client_area_wallet_grants').insert({
           agency_id: agencyId,
           account_id: resolved.account.id,
+          client_id: clientId,
+          operation_id: tripId,
           trip_id: access.wallet.trip_id,
           token_hash: grantHash,
           expires_at: new Date(Date.now() + WALLET_GRANT_TTL_MS).toISOString(),
