@@ -21,8 +21,8 @@ export interface ClientAreaNavItem {
 
 export const CLIENT_AREA_NAV: ClientAreaNavItem[] = [
   { view: "inicio", label: "Início", shortLabel: "Início", ready: true, mobileBar: true },
-  { view: "viagens", label: "Minhas viagens", shortLabel: "Viagens", ready: false, mobileBar: true },
-  { view: "documentos", label: "Meus documentos", shortLabel: "Documentos", ready: false, mobileBar: true },
+  { view: "viagens", label: "Minhas viagens", shortLabel: "Viagens", ready: true, mobileBar: true },
+  { view: "documentos", label: "Meus documentos", shortLabel: "Documentos", ready: true, mobileBar: true },
   { view: "perfil", label: "Meu perfil", shortLabel: "Perfil", ready: true, mobileBar: true },
   { view: "atendimento", label: "Falar com a agência", shortLabel: "Atendimento", ready: true, mobileBar: false },
 ];

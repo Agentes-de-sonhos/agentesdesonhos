@@ -465,10 +465,38 @@ export function useOperationAttachments(operationId: string | null) {
       qc.invalidateQueries({ queryKey: ["operation-attachments", operationId] }),
   });
 
+  /**
+   * Área do Cliente: nada é publicado por padrão. A agência decide arquivo por
+   * arquivo se o passageiro pode consultá-lo.
+   */
+  const setClientVisible = useMutation({
+    mutationFn: async ({ id, visible }: { id: string; visible: boolean }) => {
+      const { error } = await supabase
+        .from("operation_attachments" as any)
+        .update({
+          client_visible: visible,
+          client_visible_at: visible ? new Date().toISOString() : null,
+          client_visible_by: visible ? user?.id ?? null : null,
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["operation-attachments", operationId] });
+      toast.success(
+        vars.visible
+          ? "Arquivo disponibilizado na Área do Cliente"
+          : "Arquivo removido da Área do Cliente",
+      );
+    },
+    onError: (e: any) => toast.error(e.message || "Não foi possível alterar a visibilidade"),
+  });
+
   return {
     attachments,
     isLoading,
     uploadFile: uploadFile.mutateAsync,
     removeAttachment: removeAttachment.mutateAsync,
+    setClientVisible: setClientVisible.mutateAsync,
   };
 }

@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,7 +64,8 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   const { updateOperation, deleteOperation } = useOperations();
   const { tasks, seedChecklist, toggleTask, addTask, removeTask } = useOperationTasks(operation?.id ?? null);
   const { events, addNote } = useOperationTimeline(operation?.id ?? null);
-  const { attachments, uploadFile, removeAttachment } = useOperationAttachments(operation?.id ?? null);
+  const { attachments, uploadFile, removeAttachment, setClientVisible } =
+    useOperationAttachments(operation?.id ?? null);
   const { saveTemplate, resetTemplate, isSaving } = useChecklistTemplates();
   const { services: opServices } = useOperationServices({
     operationId: operation?.id ?? null,
@@ -425,11 +427,19 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
             </div>
             <div className="space-y-2">
               {attachments.map((att) => (
-                <div key={att.id} className="flex items-center gap-2 p-2 rounded-md border bg-card">
+                <div key={att.id} className="flex flex-wrap items-center gap-2 p-2 rounded-md border bg-card">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  <a href={att.file_url} target="_blank" rel="noreferrer" className="text-sm flex-1 truncate hover:underline">
+                  <a href={att.file_url} target="_blank" rel="noreferrer" className="text-sm flex-1 min-w-0 truncate hover:underline">
                     {att.file_name}
                   </a>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Switch
+                      checked={!!(att as any).client_visible}
+                      onCheckedChange={(v) => setClientVisible({ id: att.id, visible: v })}
+                      aria-label={`Disponibilizar ${att.file_name} na Área do Cliente`}
+                    />
+                    Área do Cliente
+                  </label>
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeAttachment(att.id)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

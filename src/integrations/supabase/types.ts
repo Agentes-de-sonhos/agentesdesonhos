@@ -2560,6 +2560,53 @@ export type Database = {
           },
         ]
       }
+      client_area_wallet_grants: {
+        Row: {
+          account_id: string
+          agency_id: string
+          client_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          operation_id: string | null
+          token_hash: string
+          trip_id: string
+          used_at: string | null
+        }
+        Insert: {
+          account_id: string
+          agency_id: string
+          client_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          operation_id?: string | null
+          token_hash: string
+          trip_id: string
+          used_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          agency_id?: string
+          client_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          operation_id?: string | null
+          token_hash?: string
+          trip_id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_area_wallet_grants_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "client_area_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_categories: {
         Row: {
           created_at: string
@@ -8715,6 +8762,9 @@ export type Database = {
       operation_attachments: {
         Row: {
           category: string
+          client_visible: boolean
+          client_visible_at: string | null
+          client_visible_by: string | null
           created_at: string
           file_name: string
           file_size: number | null
@@ -8726,6 +8776,9 @@ export type Database = {
         }
         Insert: {
           category?: string
+          client_visible?: boolean
+          client_visible_at?: string | null
+          client_visible_by?: string | null
           created_at?: string
           file_name: string
           file_size?: number | null
@@ -8737,6 +8790,9 @@ export type Database = {
         }
         Update: {
           category?: string
+          client_visible?: boolean
+          client_visible_at?: string | null
+          client_visible_by?: string | null
           created_at?: string
           file_name?: string
           file_size?: number | null
@@ -11793,6 +11849,9 @@ export type Database = {
           agency_snapshot_json: Json
           attachments_json: Json
           client_snapshot_json: Json
+          client_visible: boolean
+          client_visible_at: string | null
+          client_visible_by: string | null
           contract_number: string
           created_at: string
           document_hash: string | null
@@ -11826,6 +11885,9 @@ export type Database = {
           agency_snapshot_json?: Json
           attachments_json?: Json
           client_snapshot_json?: Json
+          client_visible?: boolean
+          client_visible_at?: string | null
+          client_visible_by?: string | null
           contract_number: string
           created_at?: string
           document_hash?: string | null
@@ -11859,6 +11921,9 @@ export type Database = {
           agency_snapshot_json?: Json
           attachments_json?: Json
           client_snapshot_json?: Json
+          client_visible?: boolean
+          client_visible_at?: string | null
+          client_visible_by?: string | null
           contract_number?: string
           created_at?: string
           document_hash?: string | null

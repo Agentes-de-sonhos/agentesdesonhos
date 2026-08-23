@@ -24,6 +24,8 @@ import {
   sortServices,
   travelerName,
 } from "@/lib/clientAreaTripDetail";
+import { CONTRACTS_EMPTY, ITINERARY_EMPTY, WALLET_EMPTY, type ClientAreaDocument } from "@/lib/clientAreaDocuments";
+import { DocumentCategoryList, TripAccessCards } from "./ClientAreaDocumentList";
 import { ClientAreaSupportCard } from "./ClientAreaSupportCard";
 
 function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -117,11 +119,20 @@ export function ClientAreaTripDetail({
   status,
   trip,
   onBack,
+  documentPendingId = null,
+  documentError = null,
+  onOpenDocument,
+  onOpenWallet,
 }: {
   info: AgencyDomainInfo;
   status: "loading" | "ready" | "error" | "expired" | "notfound";
   trip: ClientAreaTripDetailData | null;
   onBack: () => void;
+  /** Etapa 5 — abertura de documentos e da Carteira Digital (uso único). */
+  documentPendingId?: string | null;
+  documentError?: string | null;
+  onOpenDocument?: (doc: ClientAreaDocument) => void;
+  onOpenWallet?: (tripId: string) => void;
 }) {
   const [tab, setTab] = useState<DetailTab>("geral");
 
@@ -363,6 +374,39 @@ export function ClientAreaTripDetail({
           <p className="mt-6 border-t border-border/60 pt-5 text-xs text-muted-foreground">
             Para incluir ou corrigir dados de viajantes, fale com a agência.
           </p>
+        </Panel>
+      )}
+
+      {tab === "documentos" && (
+        <Panel>
+          <h2 className="text-lg font-semibold text-foreground">Documentos e acessos</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{DETAIL_READONLY_NOTE}</p>
+
+          <TripAccessCards
+            className="mt-5"
+            access={trip.access}
+            tripId={trip.id}
+            pendingId={documentPendingId}
+            onOpenWallet={(id) => onOpenWallet?.(id)}
+            walletEmpty={WALLET_EMPTY}
+            itineraryEmpty={ITINERARY_EMPTY}
+          />
+
+          <div className="mt-6 border-t border-border/60 pt-6">
+            <h3 className="text-base font-semibold text-foreground">Arquivos desta viagem</h3>
+            <DocumentCategoryList
+              documents={trip.documents ?? []}
+              emptyText={DETAIL_EMPTY.documents}
+              actions={{ pendingId: documentPendingId, onOpen: (doc) => onOpenDocument?.(doc) }}
+            />
+            {(trip.documents ?? []).some((d) => d.category === "contrato") ? null : (
+              <p className="mt-4 text-xs text-muted-foreground">{CONTRACTS_EMPTY}</p>
+            )}
+          </div>
+
+          {documentError ? (
+            <p role="alert" className="mt-5 text-sm text-destructive">{documentError}</p>
+          ) : null}
         </Panel>
       )}
 

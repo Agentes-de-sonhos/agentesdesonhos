@@ -179,11 +179,38 @@ export function useSaleContracts(saleId?: string) {
     });
   };
 
+  /**
+   * Área do Cliente: o contrato só aparece para o passageiro quando a agência
+   * disponibiliza explicitamente esta versão.
+   */
+  const setClientVisible = useMutation({
+    mutationFn: async (input: { contractId: string; visible: boolean }) => {
+      const { error } = await (supabase.from('sale_contracts') as any)
+        .update({
+          client_visible: input.visible,
+          client_visible_at: input.visible ? new Date().toISOString() : null,
+          client_visible_by: input.visible ? user?.id ?? null : null,
+        })
+        .eq('id', input.contractId);
+      if (error) throw error;
+    },
+    onSuccess: (_d, vars) => {
+      void queryClient.invalidateQueries({ queryKey: ['sale-contracts', saleId] });
+      toast.success(
+        vars.visible
+          ? 'Contrato disponibilizado na Área do Cliente'
+          : 'Contrato removido da Área do Cliente',
+      );
+    },
+    onError: (e: any) => toast.error(e?.message || 'Não foi possível alterar a visibilidade'),
+  });
+
   return {
     contracts: contractsQuery.data ?? [],
     isLoading: contractsQuery.isLoading,
     createContract,
     attachPdf,
     logAction,
+    setClientVisible,
   };
 }

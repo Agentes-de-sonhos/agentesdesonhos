@@ -222,7 +222,13 @@ export type ClientAreaAuthAction =
   | "recovery"
   /** Etapa 3 — Minhas viagens (lista e detalhe), sempre com sessão válida. */
   | "trips"
-  | "trip";
+  | "trip"
+  /** Etapa 5 — documentos, contratos, acessos e perfil em consulta. */
+  | "documents"
+  | "document_url"
+  | "access_links"
+  | "wallet_grant"
+  | "profile";
 
 /**
  * Corpo padrão de qualquer chamada à `client-area-auth`.

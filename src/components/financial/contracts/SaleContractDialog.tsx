@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -217,7 +218,7 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
   }
 
   const { data: templateData, isLoading: loadingTemplate } = useAgencyContractTemplate();
-  const { contracts, createContract, attachPdf, logAction } = useSaleContracts(sale?.id);
+  const { contracts, createContract, attachPdf, logAction, setClientVisible } = useSaleContracts(sale?.id);
 
   const { data: saleData, isLoading: loadingSale } = useQuery({
     queryKey: ['sale-contract-source', sale?.id],
@@ -1216,6 +1217,17 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                             >
                               <Download className="h-3.5 w-3.5" /> PDF
                             </Button>
+                            <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                              <Switch
+                                checked={!!(c as any).client_visible}
+                                disabled={!c.pdf_storage_path}
+                                onCheckedChange={(v) =>
+                                  setClientVisible.mutate({ contractId: c.id, visible: v })
+                                }
+                                aria-label={`Disponibilizar contrato ${c.contract_number} na Área do Cliente`}
+                              />
+                              Área do Cliente
+                            </label>
                           </div>
                         </div>
                         <div className="rounded-md bg-muted/50 px-2.5 py-2 text-[11px] text-muted-foreground space-y-1">

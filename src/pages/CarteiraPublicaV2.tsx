@@ -57,6 +57,24 @@ const clearRememberedPassword = (code: string) => {
   try { localStorage.removeItem(REMEMBER_KEY_PREFIX + code); } catch {}
 };
 
+/**
+ * Lê e remove imediatamente a autorização de uso único (`?acesso=`) da URL.
+ * O valor vive apenas em memória: nunca é salvo, repetido ou exibido.
+ */
+function consumeGrantParam(): string | null {
+  try {
+    const url = new URL(window.location.href);
+    const raw = (url.searchParams.get("acesso") || "").trim();
+    if (raw) {
+      url.searchParams.delete("acesso");
+      window.history.replaceState(null, "", url.toString());
+    }
+    return /^[a-f0-9]{64}$/i.test(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
 async function verifyByPublicCode(agencySlug: string, code: string, password: string) {
   const { data, error } = await supabase.rpc('verify_trip_by_public_code', {
     p_agency_slug: agencySlug,
@@ -309,9 +327,59 @@ export default function CarteiraPublicaV2({
   const LOCKED_MSG = "Acesso bloqueado por segurança. Entre em contato com a agência responsável.";
   const MAX_ATTEMPTS = 5;
   const [tripStartDate, setTripStartDate] = useState<string | null>(null);
+  const [grantExpired, setGrantExpired] = useState(false);
 
   useEffect(() => {
     setOgMeta(GENERIC_PUBLIC_META.wallet);
+    if (!agencySlug || !accessCode) return;
+
+    /**
+     * Autorização de uso único vinda da Área do Cliente autenticada
+     * (`?acesso=`). Abre a carteira sem pedir a senha novamente. A autorização
+     * é consumida no servidor e o parâmetro sai da URL imediatamente — nada é
+     * guardado no navegador e nenhuma senha trafega.
+     */
+    const grant = consumeGrantParam();
+    if (grant) {
+      (async () => {
+        try {
+          const { data, error: fnError } = await supabase.functions.invoke("client-area-wallet-open", {
+            body: { grant, code: accessCode, agency_slug: agencySlug },
+          });
+          const payload = data as any;
+          if (!fnError && payload?.trip) {
+            const result = {
+              trip: {
+                ...payload.trip,
+                services: (payload.services || []).map((sv: any) => ({
+                  ...sv,
+                  service_type: sv.service_type as TripServiceType,
+                  service_data: sv.service_data,
+                })),
+              } as Trip,
+              agentProfile: (payload.agent_profile ?? null) as AgentProfile | null,
+            };
+            setTripData(result);
+            setBranding(result.agentProfile);
+            setNeedsPassword(false);
+            setOfflineCache(accessCode, result);
+            setLoading(false);
+            return;
+          }
+        } catch {
+          /* segue para o fluxo público normal (senha), sem revelar detalhes */
+        }
+        setGrantExpired(true);
+        void loadPublic();
+      })();
+      return;
+    }
+
+    void loadPublic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agencySlug, accessCode]);
+
+  const loadPublic = async () => {
     if (!agencySlug || !accessCode) return;
     // Load agency branding for password gate (no password required)
     supabase
@@ -374,7 +442,7 @@ export default function CarteiraPublicaV2({
       }
       setLoading(false);
     })();
-  }, [agencySlug, accessCode]);
+  };
 
   // Personaliza nome e ícone para "Adicionar à tela inicial" usar o
   // nome e logotipo da agência. Sem manifest, Android/iOS criam um atalho
@@ -533,7 +601,12 @@ export default function CarteiraPublicaV2({
       <PasswordGate
         onUnlock={handleUnlock}
         loading={loading}
-        error={error}
+        error={
+          error ||
+          (grantExpired
+            ? "Este acesso pela Área do Cliente expirou. Informe a senha da carteira ou abra novamente pela Área do Cliente."
+            : "")
+        }
         branding={branding}
         attemptsLeft={attemptsUsed > 0 ? attemptsLeft : null}
         tripStartDate={tripStartDate}
