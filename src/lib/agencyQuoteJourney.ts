@@ -377,7 +377,10 @@ export function applyContextToService(
   context: TripContext,
 ): ServiceValues {
   const out: ServiceValues = { ...values };
-  const derived = new Set(["passageiros", "viajantes", "idades_criancas"]);
+  // Viajantes são fonte de verdade GLOBAL: sempre recalculados (o default "0"
+  // de crianças de um item novo não deve bloquear a herança do contexto).
+  const derived = new Set(["adultos", "criancas", "passageiros", "viajantes", "idades_criancas"]);
+
   for (const field of service.fields) {
     const inherited = contextValueFor(field.name, context);
     if (!inherited) continue;
