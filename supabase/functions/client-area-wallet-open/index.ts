@@ -54,10 +54,34 @@ async function allowedOrigin(admin: any, origin: string | null): Promise<string 
 
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
+  const originHeader = req.headers.get('origin')
+
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    { auth: { persistSession: false } },
+  )
+
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
+      headers: corsFor(originHeader && originHeader !== 'null' ? originHeader : '*'),
+    })
+  }
+
+  let headers = corsFor('null')
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...headers, 'Content-Type': 'application/json' },
+    })
+
   if (req.method !== 'POST') return json({ error: GENERIC_ERROR }, 405)
 
   try {
+    const origin = await allowedOrigin(admin, originHeader)
+    if (!origin) return json({ error: GENERIC_ERROR }, 403)
+    headers = corsFor(origin)
+
     const body = await req.json().catch(() => ({})) as Record<string, unknown>
     const grant = typeof body.grant === 'string' ? body.grant.trim() : ''
     const code = typeof body.code === 'string' ? body.code.trim() : ''
@@ -70,11 +94,7 @@ Deno.serve(async (req) => {
     const limit = await checkRateLimit(await sha256(getClientIP(req)), 'client-area-wallet-open', 20, 60)
     if (!limit.allowed) return json({ error: 'Muitas tentativas. Aguarde alguns segundos.' }, 429)
 
-    const admin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-      { auth: { persistSession: false } },
-    )
+
 
     const tokenHash = await sha256(grant)
     const { data: row } = await admin
