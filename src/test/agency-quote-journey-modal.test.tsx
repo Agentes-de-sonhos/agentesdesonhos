@@ -55,15 +55,24 @@ describe("assistente de solicitação White Label", () => {
   it("abre no complemento do serviço inicial, sem repetir a primeira dobra", () => {
     open({ criancas: "1" });
     expect(screen.getByText("Etapa 1 de 3")).toBeInTheDocument();
-    expect(screen.getByLabelText(/adultos/i)).toHaveValue(2);
-    expect(screen.getByLabelText(/idade da criança 1/i)).toBeInTheDocument();
+    // Viajantes vieram da primeira etapa: não reaparecem em nenhuma forma.
+    expect(screen.queryByLabelText(/adultos/i)).toBeNull();
+    expect(screen.queryByLabelText(/^crianças$/i)).toBeNull();
+    expect(screen.queryByLabelText(/idade da criança 1/i)).toBeNull();
+    expect(screen.queryByText(/idade das crianças/i)).toBeNull();
     expect(screen.queryByLabelText(/^origem/i)).toBeNull();
     expect(screen.queryByText(/bagagem/i)).toBeNull();
+    // Somente os complementos que faltam.
+    expect(screen.getByLabelText(/datas flexíveis/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/classe/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/observações/i)).toBeInTheDocument();
   });
 
-  it("permite ocorrências múltiplas do mesmo serviço", () => {
-    open();
+  it("permite ocorrências múltiplas do mesmo serviço sem pedir passageiros de novo", () => {
+    open({ criancas: "1" });
     fireEvent.click(screen.getByTestId("wlq-add-occurrence"));
+    expect(screen.queryByLabelText(/adultos/i)).toBeNull();
+    expect(screen.queryByLabelText(/idade da criança 1/i)).toBeNull();
     expect(screen.getByText("Aéreo 1")).toBeInTheDocument();
     expect(screen.getByText("Aéreo 2")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /remover aéreo 2/i }));
@@ -122,5 +131,8 @@ describe("assistente de solicitação White Label", () => {
     const payload = (submitMock.mock.calls[0] as unknown[])[0] as Record<string, unknown>;
     expect(payload.service_key).toBe("aereo");
     expect(payload.lead_name).toBe("Maria Souza");
+    // Passageiros herdados silenciosamente seguem no payload.
+    expect(payload.adults).toBe(2);
+    expect(payload.children).toBe(0);
   });
 });

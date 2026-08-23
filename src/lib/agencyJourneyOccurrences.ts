@@ -21,7 +21,6 @@ import { isTravelerField, stepFields } from "@/lib/agencyJourneyFlow";
 import {
   applyContextToService,
   formatChildAges,
-  validateChildAges,
   validateRouteLegs,
   type RouteLeg,
   type TripContext,
