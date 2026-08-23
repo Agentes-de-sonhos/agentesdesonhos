@@ -300,9 +300,26 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
       onLogout={logout}
     >
       {view === "inicio" && (
-        <ClientAreaHome info={info} clientName={client.name} onChangeView={changeView} />
+        <ClientAreaHome
+          info={info}
+          clientName={client.name}
+          onChangeView={changeView}
+          tripsStatus={trips.status}
+          highlight={highlight}
+          onOpenTrip={openTrip}
+        />
       )}
-      {view === "viagens" && <ClientAreaTrips />}
+      {view === "viagens" && (tripId ? (
+        <ClientAreaTripDetail status={tripDetail.status} trip={tripDetail.trip} onBack={backToTrips} />
+      ) : (
+        <ClientAreaTripsView
+          info={info}
+          status={trips.status}
+          grouped={grouped}
+          onRetry={trips.refetch}
+          onOpenTrip={openTrip}
+        />
+      ))}
       {view === "documentos" && <ClientAreaDocuments />}
       {view === "perfil" && (
         <ClientAreaProfile
