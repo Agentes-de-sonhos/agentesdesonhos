@@ -21,7 +21,7 @@ import { useClientAreaTrip, useClientAreaTrips } from "@/hooks/useClientAreaTrip
 import {
   useClientAreaDocuments, useClientAreaOpener, useClientAreaProfile,
 } from "@/hooks/useClientAreaDocuments";
-import { agencySupportWhatsappUrl } from "@/lib/agencyDomains";
+import { agencyWhatsappNumber } from "@/lib/agencyDomains";
 import { groupTrips, highlightTrip, tripIdFromPath, tripPathFor } from "@/lib/clientAreaTrips";
 
 interface SessionClient {
@@ -275,10 +275,12 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
    */
   /** Pedido de atualização de cadastro: o cliente nunca edita — só solicita. */
   const requestProfileUpdate = () => {
-    const url = agencySupportWhatsappUrl(
-      info,
-      "Olá! Gostaria de atualizar meus dados de cadastro na Área do Cliente.",
-    );
+    const phone = agencyWhatsappNumber(info);
+    const url = phone
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(
+          "Olá! Gostaria de atualizar meus dados de cadastro na Área do Cliente.",
+        )}`
+      : null;
     if (url) {
       window.open(url, "_blank", "noopener,noreferrer");
       return;
