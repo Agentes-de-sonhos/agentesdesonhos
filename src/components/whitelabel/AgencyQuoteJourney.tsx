@@ -370,7 +370,6 @@ export function AgencyQuoteJourney({
   );
   const isPrimaryStep = stage === "primary";
 
-  const chosenKeys = groups.map((g) => g.key);
   const complements = useMemo(
     () => REQUEST_SERVICES.filter((s) => s.key !== (groups[0]?.key ?? primaryService)),
     [groups, primaryService],
