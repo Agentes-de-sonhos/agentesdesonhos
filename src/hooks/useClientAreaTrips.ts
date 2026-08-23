@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { clientAreaAuthBody, readClientAreaToken } from "@/lib/clientAreaAccess";
 import type { ClientAreaTrip } from "@/lib/clientAreaTrips";
+import type { ClientAreaTripDetailData } from "@/lib/clientAreaTripDetail";
 
 export type TripsStatus = "loading" | "ready" | "error" | "expired";
 
@@ -97,7 +98,7 @@ export function useClientAreaTrip({
   onExpired?: () => void;
 }) {
   const [status, setStatus] = useState<TripsStatus | "notfound">("loading");
-  const [trip, setTrip] = useState<ClientAreaTrip | null>(null);
+  const [trip, setTrip] = useState<ClientAreaTripDetailData | null>(null);
 
   useEffect(() => {
     if (!enabled || !tripId) return;
@@ -117,7 +118,7 @@ export function useClientAreaTrip({
       if (cancelled) return;
       if (payload && "trip" in payload) {
         if (payload.trip) {
-          setTrip(payload.trip as ClientAreaTrip);
+          setTrip(payload.trip as ClientAreaTripDetailData);
           setStatus("ready");
         } else {
           // Inexistente ou de outra pessoa: mesma resposta genérica.
