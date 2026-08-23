@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { checkRateLimit, getClientIP } from '../_shared/rate-limiter.ts'
+import { hostFromOrigin, isPlatformOriginHost } from '../_shared/clientAreaGuards.ts'
 
 /**
  * Abre a Carteira Digital pública a partir de uma autorização de uso único
@@ -11,21 +12,24 @@ import { checkRateLimit, getClientIP } from '../_shared/rate-limiter.ts'
  *   o payload é montado pelo mesmo RPC usado no fluxo público.
  * - Link, código e slug precisam bater com a viagem da autorização.
  * - Erros são genéricos: nunca revelam se o código ou a viagem existem.
+ * - CORS restrito: apenas a plataforma ou um domínio White Label ativo.
  */
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const BASE_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Vary': 'Origin',
+  'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+  'Pragma': 'no-cache',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
 }
 
-const GENERIC_ERROR = 'Este acesso expirou. Volte à Área do Cliente e abra a carteira novamente.'
+const corsFor = (allowed: string) => ({ ...BASE_HEADERS, 'Access-Control-Allow-Origin': allowed })
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
+const GENERIC_ERROR = 'Este acesso expirou. Volte à Área do Cliente e abra a carteira novamente.'
 
 async function sha256(input: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input))
@@ -33,6 +37,21 @@ async function sha256(input: string): Promise<string> {
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 }
+
+/** Origem aceita: plataforma/prévia ou domínio White Label ativo cadastrado. */
+async function allowedOrigin(admin: any, origin: string | null): Promise<string | null> {
+  const host = hostFromOrigin(origin)
+  if (!host) return '*'
+  if (isPlatformOriginHost(host)) return String(origin)
+  const { data } = await admin
+    .from('agency_public_domains')
+    .select('hostname')
+    .eq('hostname', host)
+    .eq('is_active', true)
+    .maybeSingle()
+  return data ? String(origin) : null
+}
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
