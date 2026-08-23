@@ -118,7 +118,7 @@ export function useClientAreaTrip({
       if (cancelled) return;
       if (payload && "trip" in payload) {
         if (payload.trip) {
-          setTrip(payload.trip as ClientAreaTrip);
+          setTrip(payload.trip as ClientAreaTripDetailData);
           setStatus("ready");
         } else {
           // Inexistente ou de outra pessoa: mesma resposta genérica.
