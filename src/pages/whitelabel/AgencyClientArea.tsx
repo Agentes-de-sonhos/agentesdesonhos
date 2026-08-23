@@ -316,7 +316,7 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
           info={info}
           status={trips.status}
           grouped={grouped}
-          onRetry={trips.refetch}
+          onRetry={trips.reload}
           onOpenTrip={openTrip}
         />
       ))}
