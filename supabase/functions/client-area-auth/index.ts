@@ -549,12 +549,149 @@ Deno.serve(async (req) => {
             is_responsible: !!t.is_responsavel,
           }))
 
-          return json({ trip: { ...trip, services, travelers } })
+          /**
+           * Etapa 5 — documentos da viagem e acessos (carteira/roteiro).
+           * Só disponibilidade: a autorização da carteira é criada apenas no
+           * clique, em `wallet_grant`.
+           */
+          const [docs, access] = await Promise.all([
+            collectClientDocuments(admin, agencyId, clientId, trip.id),
+            resolveTripAccess(admin, agencyId, clientId, trip.id),
+          ])
+          const itineraryUrl = access.itinerary
+            ? `https://seuroteiro.tur.br/${await agencySlug(admin, agencyId)}/${access.itinerary.code}`
+            : null
+
+          return json({
+            trip: {
+              ...trip,
+              services,
+              travelers,
+              documents: docs.map(publicDoc),
+              access: {
+                wallet: { available: !!access.wallet, protected: !!access.wallet?.locked },
+                itinerary: { available: !!access.itinerary, url: itineraryUrl },
+              },
+            },
+          })
         }
 
         return json({ trips })
       }
 
+
+
+      /** Central "Meus documentos" — somente metadados seguros. */
+      if (action === 'documents') {
+        const clientId = resolved.account.client_id
+        if (!clientId) return json({ documents: [] })
+        const docs = await collectClientDocuments(admin, agencyId, clientId)
+        return json({ documents: docs.map(publicDoc) })
+      }
+
+      /**
+       * Autorização de leitura de UM documento. O navegador manda apenas o id;
+       * o servidor reconfere a posse listando novamente os documentos
+       * autorizados e só então assina uma URL de curta duração (120s).
+       */
+      if (action === 'document_url') {
+        const clientId = resolved.account.client_id
+        const docId = typeof body.document_id === 'string' ? body.document_id.trim() : ''
+        if (!clientId || !isUuid(docId)) return json({ error: 'Documento indisponível.' }, 404)
+
+        const throttle = await checkRateLimit(originHash, 'client-area-document', 30, 60)
+        if (!throttle.allowed) return json({ error: 'Muitas solicitações. Aguarde um instante.' }, 429)
+
+        const docs = await collectClientDocuments(admin, agencyId, clientId)
+        const doc = docs.find((d) => d.id === docId && (!body.source || d.source === body.source))
+        if (!doc) return json({ error: 'Documento indisponível.' }, 404)
+
+        const { data: signed, error: signError } = await admin.storage
+          .from(doc.bucket)
+          .createSignedUrl(doc.path, SIGNED_URL_TTL_SECONDS, { download: false })
+        if (signError || !signed?.signedUrl) return json({ error: 'Documento indisponível.' }, 404)
+
+        await logAudit(resolved.account.id, 'document_opened', { origin_hash: originHash })
+        return json({
+          url: signed.signedUrl,
+          name: doc.name,
+          file_type: doc.file_type,
+          expires_in: SIGNED_URL_TTL_SECONDS,
+        })
+      }
+
+      /** Disponibilidade de Carteira Digital e Roteiro de uma viagem. */
+      if (action === 'access_links') {
+        const clientId = resolved.account.client_id
+        const tripId = typeof body.trip_id === 'string' ? body.trip_id.trim() : ''
+        if (!clientId || !isUuid(tripId)) return json({ wallet: { available: false }, itinerary: { available: false } })
+        const access = await resolveTripAccess(admin, agencyId, clientId, tripId)
+        const itineraryUrl = access.itinerary
+          ? `https://seuroteiro.tur.br/${await agencySlug(admin, agencyId)}/${access.itinerary.code}`
+          : null
+        return json({
+          wallet: { available: !!access.wallet, protected: !!access.wallet?.locked },
+          itinerary: { available: !!access.itinerary, url: itineraryUrl },
+        })
+      }
+
+      /**
+       * Abrir a Carteira Digital sem pedir a senha da carteira de novo.
+       * Gera uma autorização de uso único, válida por 120s, ligada à conta e à
+       * viagem. A senha da carteira NUNCA é lida, transportada ou exibida.
+       */
+      if (action === 'wallet_grant') {
+        const clientId = resolved.account.client_id
+        const tripId = typeof body.trip_id === 'string' ? body.trip_id.trim() : ''
+        if (!clientId || !isUuid(tripId)) return json({ error: 'Carteira indisponível.' }, 404)
+
+        const throttle = await checkRateLimit(originHash, 'client-area-wallet-grant', 20, 60)
+        if (!throttle.allowed) return json({ error: 'Muitas solicitações. Aguarde um instante.' }, 429)
+
+        const access = await resolveTripAccess(admin, agencyId, clientId, tripId)
+        if (!access.wallet) return json({ error: 'Carteira indisponível.' }, 404)
+
+        const grant = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+        const grantHash = await sha256(grant)
+        const { error: grantError } = await admin.from('client_area_wallet_grants').insert({
+          agency_id: agencyId,
+          account_id: resolved.account.id,
+          trip_id: access.wallet.trip_id,
+          token_hash: grantHash,
+          expires_at: new Date(Date.now() + WALLET_GRANT_TTL_MS).toISOString(),
+        })
+        if (grantError) return json({ error: 'Carteira indisponível.' }, 404)
+
+        await logAudit(resolved.account.id, 'wallet_access_granted', { origin_hash: originHash })
+        const slug = await agencySlug(admin, agencyId)
+        return json({
+          url: `https://carteiradigital.tur.br/${slug}/${access.wallet.code}?acesso=${grant}`,
+          expires_in: Math.round(WALLET_GRANT_TTL_MS / 1000),
+        })
+      }
+
+      /** Perfil em modo consulta — a atualização é sempre pedida à agência. */
+      if (action === 'profile') {
+        const clientId = resolved.account.client_id
+        if (!clientId) return json({ profile: null })
+        const { data: client } = await admin
+          .from('clients')
+          .select('nome_completo, email, telefone, cidade, estado, pais, data_nascimento')
+          .eq('user_id', agencyId)
+          .eq('id', clientId)
+          .maybeSingle()
+        return json({
+          profile: {
+            name: client?.nome_completo ?? null,
+            email: resolved.account.email ?? client?.email ?? null,
+            phone: client?.telefone ?? null,
+            city: client?.cidade ?? null,
+            state: client?.estado ?? null,
+            country: client?.pais ?? null,
+            birth_date: client?.data_nascimento ?? null,
+          },
+        })
+      }
 
       if (action === 'session') {
         const rotated = await touchSession(resolved.session)
