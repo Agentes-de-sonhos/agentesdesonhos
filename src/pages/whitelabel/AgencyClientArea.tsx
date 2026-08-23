@@ -18,6 +18,10 @@ import {
   ClientAreaTripDetail, ClientAreaTripsView,
 } from "@/components/whitelabel/clientarea/ClientAreaTripsView";
 import { useClientAreaTrip, useClientAreaTrips } from "@/hooks/useClientAreaTrips";
+import {
+  useClientAreaDocuments, useClientAreaOpener, useClientAreaProfile,
+} from "@/hooks/useClientAreaDocuments";
+import { agencySupportWhatsappUrl } from "@/lib/agencyDomains";
 import { groupTrips, highlightTrip, tripIdFromPath, tripPathFor } from "@/lib/clientAreaTrips";
 
 interface SessionClient {
@@ -233,6 +237,18 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     },
   });
 
+  /** Etapa 5 — documentos, perfil em consulta e acessos (carteira/roteiro). */
+  const documents = useClientAreaDocuments({
+    hostname,
+    enabled: authenticated,
+    onExpired: () => {
+      writeClientAreaToken(hostname, null);
+      setClient(null);
+    },
+  });
+  const profile = useClientAreaProfile({ hostname, enabled: authenticated });
+  const opener = useClientAreaOpener(hostname);
+
   const openTrip = (id: string) => {
     setTripId(id);
     setView("viagens");
@@ -257,6 +273,19 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
    * Identidade White Label: a cor primária da agência dirige os tokens shadcn
    * (--primary/--ring e o contraste do texto) apenas dentro da Área do Cliente.
    */
+  /** Pedido de atualização de cadastro: o cliente nunca edita — só solicita. */
+  const requestProfileUpdate = () => {
+    const url = agencySupportWhatsappUrl(
+      info,
+      "Olá! Gostaria de atualizar meus dados de cadastro na Área do Cliente.",
+    );
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    changeView("atendimento");
+  };
+
   const brandStyle = getWalletBrandStyle(info.primary_color);
 
   if (checking) {
@@ -310,7 +339,16 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
         />
       )}
       {view === "viagens" && (tripId ? (
-        <ClientAreaTripDetail info={info} status={tripDetail.status} trip={tripDetail.trip} onBack={backToTrips} />
+        <ClientAreaTripDetail
+          info={info}
+          status={tripDetail.status}
+          trip={tripDetail.trip}
+          onBack={backToTrips}
+          documentPendingId={opener.pendingId}
+          documentError={opener.error}
+          onOpenDocument={opener.openDocument}
+          onOpenWallet={opener.openWallet}
+        />
       ) : (
         <ClientAreaTripsView
           info={info}
@@ -320,7 +358,18 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
           onOpenTrip={openTrip}
         />
       ))}
-      {view === "documentos" && <ClientAreaDocuments />}
+      {view === "documentos" && (
+        <ClientAreaDocuments
+          info={info}
+          status={documents.status}
+          documents={documents.documents}
+          pendingId={opener.pendingId}
+          error={opener.error}
+          onOpen={opener.openDocument}
+          onRetry={documents.reload}
+          onOpenTrip={openTrip}
+        />
+      )}
       {view === "perfil" && (
         <ClientAreaProfile
           info={info}
@@ -338,6 +387,8 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
           passwordError={passwordError}
           busy={busy}
           onLogout={logout}
+          profile={profile}
+          onRequestUpdate={requestProfileUpdate}
         />
       )}
       {view === "atendimento" && <ClientAreaSupportSection info={info} />}
