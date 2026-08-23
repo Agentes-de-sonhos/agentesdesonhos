@@ -185,7 +185,8 @@ Deno.serve(async (req) => {
       return json({ error: 'Muitas tentativas. Aguarde alguns segundos e tente novamente.' }, 429)
     }
 
-    if (action === 'session' || action === 'logout' || action === 'change_password') {
+    const SESSION_ACTIONS = ['session', 'logout', 'change_password', 'trips', 'trip']
+    if (SESSION_ACTIONS.includes(action)) {
       const resolved = await resolveSession(body.token)
       if (!resolved) return json({ error: 'Sessão expirada.' }, 401)
 
@@ -193,6 +194,83 @@ Deno.serve(async (req) => {
       if (resolved.account.agency_id !== agencyId) {
         return json({ error: 'Sessão expirada.' }, 401)
       }
+
+      /**
+       * Minhas viagens (Etapa 3) — fonte canônica: `operations` (viagem
+       * efetivamente contratada). O escopo é SEMPRE duplo e vem do servidor:
+       * `user_id = agência do domínio` e `client_id = cliente da sessão`.
+       * O navegador não informa agency_id nem client_id. Nenhum campo
+       * financeiro, de fornecedor ou anotação interna é selecionado.
+       */
+      if (action === 'trips' || action === 'trip') {
+        const clientId = resolved.account.client_id
+        if (!clientId) return json({ trips: [] })
+
+        let requestedId: string | null = null
+        if (action === 'trip') {
+          const raw = typeof body.trip_id === 'string' ? body.trip_id.trim() : ''
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)
+          // ID ausente/malformado: resposta genérica, sem confirmar existência.
+          if (!isUuid) return json({ trip: null })
+          requestedId = raw
+        }
+
+        let query = admin
+          .from('operations')
+          .select('id, title, destination, travel_start_date, travel_end_date, stage, passengers_count, trip_id')
+          .eq('user_id', agencyId)
+          .eq('client_id', clientId)
+        if (requestedId) query = query.eq('id', requestedId)
+
+        const { data: rows, error: opsError } = await query.limit(200)
+        if (opsError) return json({ error: 'Não foi possível carregar suas viagens.' }, 500)
+
+        const operations = rows ?? []
+        if (action === 'trip' && operations.length === 0) return json({ trip: null })
+
+        const ids = operations.map((o) => o.id)
+        const tripIds = operations.map((o) => o.trip_id).filter(Boolean) as string[]
+
+        const [servicesRes, coversRes, stagesRes] = await Promise.all([
+          ids.length
+            ? admin.from('operation_services').select('operation_id').in('operation_id', ids)
+            : Promise.resolve({ data: [] as { operation_id: string }[] }),
+          tripIds.length
+            ? admin.from('trips').select('id, wallet_cover_url').eq('user_id', agencyId).in('id', tripIds)
+            : Promise.resolve({ data: [] as { id: string; wallet_cover_url: string | null }[] }),
+          admin.from('operation_pipeline_stages').select('key, name').eq('user_id', agencyId),
+        ])
+
+        const serviceCount = new Map<string, number>()
+        for (const s of (servicesRes.data ?? []) as { operation_id: string }[]) {
+          serviceCount.set(s.operation_id, (serviceCount.get(s.operation_id) ?? 0) + 1)
+        }
+        const covers = new Map<string, string | null>()
+        for (const t of (coversRes.data ?? []) as { id: string; wallet_cover_url: string | null }[]) {
+          covers.set(t.id, t.wallet_cover_url ?? null)
+        }
+        const stageNames = new Map<string, string>()
+        for (const s of (stagesRes.data ?? []) as { key: string; name: string }[]) {
+          stageNames.set(s.key, s.name)
+        }
+
+        const trips = operations.map((o) => ({
+          id: o.id,
+          title: o.title ?? null,
+          destination: o.destination ?? null,
+          start_date: o.travel_start_date ?? null,
+          end_date: o.travel_end_date ?? null,
+          stage: o.stage ?? null,
+          stage_label: o.stage ? stageNames.get(o.stage) ?? null : null,
+          travelers_count: typeof o.passengers_count === 'number' ? o.passengers_count : null,
+          services_count: serviceCount.get(o.id) ?? 0,
+          cover_url: o.trip_id ? covers.get(o.trip_id) ?? null : null,
+        }))
+
+        if (action === 'trip') return json({ trip: trips[0] ?? null })
+        return json({ trips })
+      }
+
 
       if (action === 'session') {
         const rotated = await touchSession(resolved.session)
