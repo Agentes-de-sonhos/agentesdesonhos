@@ -12,7 +12,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { EDITORIAL_ROOT_CLASS, isEditorialTheme } from "@/lib/agencySiteTheme";
+import { isEditorialTheme } from "@/lib/agencySiteTheme";
+import { portalThemeClass } from "@/lib/agencySitePortalTheme";
 import { RouteLegsEditor } from "@/components/whitelabel/RouteLegsEditor";
 import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
 import { LocationSearchInput } from "@/components/whitelabel/LocationSearchInput";
@@ -151,7 +152,7 @@ function FieldControl({
       <Label htmlFor={id} className="text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
         {field.label}
         {field.required ? (
-          <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>
+          <span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>
         ) : (
           <span className="ml-1 font-normal normal-case tracking-normal text-muted-foreground/80">(opcional)</span>
         )}
@@ -688,7 +689,7 @@ export function AgencyQuoteJourney({
         type="button"
         onClick={addOccurrence}
         data-testid="wlq-add-occurrence"
-        className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="wl-add-action mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <Plus className="h-4 w-4" aria-hidden="true" /> Adicionar outro {groupService.label.toLowerCase()}
       </button>
@@ -727,7 +728,7 @@ export function AgencyQuoteJourney({
       <div className="grid gap-4 md:grid-cols-2">
         <div className="min-w-0 md:col-span-2">
           <Label htmlFor="wlq_lead_name" className="text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-            Nome <span aria-hidden="true" className="text-destructive">*</span>
+            Nome <span aria-hidden="true" className="wl-required text-destructive">*</span>
           </Label>
           <Input
             id="wlq_lead_name"
@@ -866,10 +867,10 @@ export function AgencyQuoteJourney({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`flex max-h-[92vh] w-[calc(100vw-1rem)] max-w-xl flex-col gap-0 overflow-hidden rounded-3xl border-0 bg-card p-0 shadow-2xl sm:w-[calc(100vw-3rem)] ${editorial ? EDITORIAL_ROOT_CLASS : ""}`}
+        className={`flex max-h-[92vh] w-[calc(100vw-1rem)] max-w-xl flex-col gap-0 overflow-hidden rounded-3xl border-0 bg-card p-0 shadow-2xl sm:w-[calc(100vw-3rem)] ${editorial ? portalThemeClass(hostname) : ""}`}
       >
         <div className="flex items-start gap-3 px-5 pb-3 pt-6 md:px-8">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+          <span className="wl-icon-badge grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
             <HeaderIcon className="h-5 w-5" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1 pr-8">
@@ -888,7 +889,7 @@ export function AgencyQuoteJourney({
         <div ref={bodyRef} className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-6 pt-2 md:px-8">
           {state === "success" ? (
             <div className="mx-auto max-w-md py-6 text-center" role="status">
-              <span className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+              <span className="wl-icon-badge mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
                 <CheckCircle2 className="h-6 w-6" />
               </span>
               <h3 className="text-lg font-semibold text-foreground">Solicitação enviada</h3>
@@ -933,7 +934,7 @@ export function AgencyQuoteJourney({
 
             <Button
               size="lg"
-              className="min-w-[9rem] rounded-xl"
+              className="wl-journey-cta min-w-[9rem] rounded-xl"
               disabled={state === "submitting"}
               onClick={
                 stage === "primary"

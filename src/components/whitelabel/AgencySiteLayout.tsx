@@ -14,6 +14,7 @@ import {
   siteContainer,
   siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
+import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 
 export const NAV_LINKS = [
@@ -479,6 +480,9 @@ export function AgencySiteLayout({
   info: AgencyDomainInfo;
   children: React.ReactNode;
 }) {
+  // Propaga o tema do tenant para o `body`, para que Dialog/Popover/Select/
+  // Calendar renderizados em portal herdem os tokens da agência.
+  useAgencySiteThemeOnBody(info.hostname);
   return (
     <div className={`min-h-screen bg-background ${siteThemeRootClass(info.hostname)}`}>
       <AgencyBrandBar info={info} />
