@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { useOperations } from "@/hooks/useOperations";
 import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
-import { useKanbanFullscreen } from "@/hooks/useKanbanFullscreen";
+import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
+import { KanbanScrollArea } from "@/components/crm/kanban/KanbanScrollArea";
 import { toast } from "sonner";
 import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import { getStageTokens } from "@/types/crm";
@@ -32,7 +33,7 @@ export function OperationsModule() {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageKey: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteStageTarget, setDeleteStageTarget] = useState<{ id: string; name: string } | null>(null);
-  const { isFullscreen, toggle: toggleFullscreen } = useKanbanFullscreen();
+  const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
 
   const filtered = useMemo(
     () =>
@@ -139,7 +140,7 @@ export function OperationsModule() {
     <div
       className={cn(
         "space-y-4",
-        isFullscreen && "fixed inset-0 z-40 bg-background overflow-y-auto p-4"
+        isMaximized && "flex min-h-0 flex-1 flex-col"
       )}
     >
       <div className="flex flex-wrap items-center gap-3">
@@ -157,13 +158,13 @@ export function OperationsModule() {
             <Plus className="mr-2 h-4 w-4" /> Nova Operação
           </Button>
         )}
-        <Button variant="outline" size="sm" className="gap-2 ml-auto" onClick={toggleFullscreen}>
-          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          {isFullscreen ? "Sair da tela cheia" : "Maximizar"}
+        <Button variant="outline" size="sm" className="gap-2 ml-auto" onClick={toggleMaximize}>
+          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          {isMaximized ? "Minimizar" : "Maximizar"}
         </Button>
       </div>
 
-      <div>
+      <div className={cn(isMaximized && "flex min-h-0 flex-1 flex-col")}>
           {isLoading ? (
             <div className="text-sm text-muted-foreground p-6 text-center">Carregando operações...</div>
           ) : filtered.length === 0 ? (
@@ -172,7 +173,7 @@ export function OperationsModule() {
               <p className="text-sm mt-1">Feche uma oportunidade ou clique em "Nova Operação" para começar.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto pb-4 touch-pan-x">
+            <KanbanScrollArea>
               <div className="flex gap-4" style={{ minWidth: "max-content" }}>
                 {stages.map((stage) => {
                   const ops = byStage.get(stage.key) || [];
@@ -242,7 +243,7 @@ export function OperationsModule() {
                   <span className="text-sm font-medium">Adicionar coluna</span>
                 </button>
               </div>
-            </div>
+            </KanbanScrollArea>
           )}
       </div>
 
