@@ -295,9 +295,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   return (
                     <article
                       key={h.title}
-                      className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
+                      className="group wl-curation-card relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
-                      <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
+                      <Icon className="h-8 w-8 text-primary wl-accent-icon" aria-hidden="true" strokeWidth={1.6} />
                       <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
                       <p className="mt-3 flex-1 text-[15px] leading-relaxed text-muted-foreground">{h.text}</p>
                       <button
@@ -305,8 +305,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         onClick={() => openRequest(h.service)}
                         className="mt-7 inline-flex w-fit items-center border-b border-foreground/25 pb-1 text-[15px] font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                       >
-                        {h.cta} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                        {h.cta} <ArrowRight className="ml-2 h-4 w-4 wl-accent-icon" aria-hidden="true" />
                       </button>
+
                     </article>
                   );
                 })}
