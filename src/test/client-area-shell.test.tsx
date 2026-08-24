@@ -93,10 +93,11 @@ describe('tela de login', () => {
     expect(screen.getByRole('button', { name: /Esqueci minha senha/i })).toBeTruthy()
   })
 
-  it('mostra o logotipo da agência quando existe', async () => {
+  it('oculta o logotipo interno do login mantendo o espaço reservado', async () => {
     renderPage({ ...baseInfo, agency_name: 'Outra Agência', logo_url: 'https://cdn.exemplo/logo.png' })
-    const logo = await screen.findByAltText('Logotipo da Outra Agência')
-    expect(logo.getAttribute('src')).toBe('https://cdn.exemplo/logo.png')
+    await waitFor(() => expect(screen.getByLabelText('E-mail')).toBeTruthy())
+    expect(screen.queryByAltText('Logotipo da Outra Agência')).toBeNull()
+    expect(screen.getByTestId('client-area-internal-logo-placeholder')).toBeTruthy()
   })
 
   it('mantém o acesso por código como opção secundária recolhida', async () => {
