@@ -70,6 +70,7 @@ function SortableColumn({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: stage.id,
   });
+  const { isMaximized } = useKanbanMaximize();
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -79,7 +80,11 @@ function SortableColumn({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="w-[290px] flex-shrink-0">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn("w-[290px] flex-shrink-0", isMaximized && "h-full")}
+    >
       {children({
         dragHandleProps: { ...attributes, ...listeners } as React.HTMLAttributes<HTMLButtonElement>,
         isDragging,
@@ -285,8 +290,7 @@ export function KanbanBoard() {
     <TooltipProvider>
       <div
         className={cn(
-          "space-y-4",
-          isMaximized && "flex min-h-0 flex-1 flex-col"
+          isMaximized ? "flex min-h-0 flex-1 flex-col gap-3" : "space-y-4"
         )}
       >
         <div className="flex flex-wrap items-center gap-3">
@@ -357,7 +361,10 @@ export function KanbanBoard() {
                 items={stages.map((s) => s.id)}
                 strategy={horizontalListSortingStrategy}
               >
-                <div className="flex gap-4" style={{ minWidth: "max-content" }}>
+                <div
+                  className={cn("flex gap-4", isMaximized && "h-full items-stretch")}
+                  style={{ minWidth: "max-content" }}
+                >
                   {stages
                     .filter(s => canStage('opportunities', s.id, 'view'))
                     .map((stage, index) => {
@@ -379,10 +386,12 @@ export function KanbanBoard() {
                           <div
                             onDragOver={handleDragOver}
                             onDrop={(e) => handleColumnDrop(e, stage)}
+                            className={cn(isMaximized && "h-full")}
                           >
                             <div
                               className={cn(
-                                "rounded-xl border p-3 min-h-[400px] transition-shadow",
+                                "rounded-xl border p-3 transition-shadow",
+                                isMaximized ? "h-full" : "min-h-[400px]",
                                 tokens.bg,
                                 tokens.border,
                                 isDragging && "shadow-xl ring-2 ring-primary/30"

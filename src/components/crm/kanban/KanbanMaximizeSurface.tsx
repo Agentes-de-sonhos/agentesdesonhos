@@ -18,7 +18,7 @@ export function KanbanMaximizeSurface({
       data-testid="kanban-maximize-surface"
       data-maximized={isMaximized ? "true" : "false"}
       className={cn(
-        isMaximized && "fixed inset-0 z-40 flex flex-col overflow-hidden bg-background p-4",
+        isMaximized && "fixed inset-0 z-40 flex flex-col overflow-hidden bg-background px-3 py-3",
         className
       )}
     >

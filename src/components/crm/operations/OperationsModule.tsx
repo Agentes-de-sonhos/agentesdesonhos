@@ -139,8 +139,7 @@ export function OperationsModule() {
   return (
     <div
       className={cn(
-        "space-y-4",
-        isMaximized && "flex min-h-0 flex-1 flex-col"
+        isMaximized ? "flex min-h-0 flex-1 flex-col gap-3" : "space-y-4"
       )}
     >
       <div className="flex flex-wrap items-center gap-3">
@@ -174,7 +173,10 @@ export function OperationsModule() {
             </div>
           ) : (
             <KanbanScrollArea>
-              <div className="flex gap-4" style={{ minWidth: "max-content" }}>
+              <div
+                className={cn("flex gap-4", isMaximized && "h-full items-stretch")}
+                style={{ minWidth: "max-content" }}
+              >
                 {stages.map((stage) => {
                   const ops = byStage.get(stage.key) || [];
                   const tokens = getStageTokens(stage.color);
@@ -185,7 +187,8 @@ export function OperationsModule() {
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleColumnDrop(e, stage.key)}
                       className={cn(
-                        "w-[290px] flex-shrink-0 rounded-xl border p-3 min-h-[400px]",
+                        "w-[290px] flex-shrink-0 rounded-xl border p-3",
+                        isMaximized ? "h-full" : "min-h-[400px]",
                         tokens.bg,
                         tokens.border
                       )}
@@ -237,7 +240,10 @@ export function OperationsModule() {
                     const name = prompt("Nome da nova coluna");
                     if (name && name.trim()) createStage({ name: name.trim() });
                   }}
-                  className="w-[290px] flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3 min-h-[400px]"
+                  className={cn(
+                    "w-[290px] flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3",
+                    isMaximized ? "h-full" : "min-h-[400px]"
+                  )}
                 >
                   <Plus className="h-5 w-5 mb-1" />
                   <span className="text-sm font-medium">Adicionar coluna</span>
