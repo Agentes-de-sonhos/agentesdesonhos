@@ -37,7 +37,7 @@ export function RouteLegsEditor({
         }
       >
         Destinos da viagem
-        <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>
+        <span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>
       </legend>
 
       <div className="mt-2 space-y-3">

@@ -41,7 +41,7 @@ export function TravelersFields({
     <>
       <div className={cn("min-w-0", className)}>
         <Label htmlFor={`${idPrefix}-adultos`} className={labelCls}>
-          Adultos<span aria-hidden="true" className="ml-0.5 text-destructive">*</span>
+          Adultos<span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>
         </Label>
         <Input
           id={`${idPrefix}-adultos`}
@@ -80,7 +80,7 @@ export function TravelersFields({
       {showAges && count > 0 && (
         <fieldset className="min-w-0 md:col-span-full">
           <legend className={labelCls}>
-            Idade das crianças<span aria-hidden="true" className="ml-0.5 text-destructive">*</span>
+            Idade das crianças<span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>
           </legend>
           <div className="mt-2 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             {Array.from({ length: count }, (_, index) => {

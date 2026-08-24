@@ -165,7 +165,7 @@ export function ServiceInitialFields({
           <div key={field.name} className={cn("relative min-w-0", spanCls)}>
             <Label htmlFor={id} className={labelCls}>
               {fieldLabel}
-              {field.required && <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>}
+              {field.required && <span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>}
             </Label>
             {field.type === "select" ? (
               <Select value={value} onValueChange={(next) => onValue(field.name, next)}>
