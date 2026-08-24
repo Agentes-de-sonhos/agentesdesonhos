@@ -8,7 +8,8 @@ import {
   agencyWhatsappNumber,
   formatCnpj,
 } from "@/lib/agencyDomains";
-import { configuredCnpj } from "@/lib/agencySiteStatus";
+import { configuredCnpj, resolveConstructionVariant } from "@/lib/agencySiteStatus";
+import DestinosComAJuComingSoon from "@/pages/whitelabel/DestinosComAJuComingSoon";
 
 /** Só aceita cores simples e seguras vindas do cadastro (hex). */
 function safeAccent(color?: string | null): string | null {
