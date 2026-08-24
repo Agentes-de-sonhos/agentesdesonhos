@@ -7,6 +7,13 @@ import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
 import { agencyWhatsappLink } from "@/lib/clientAreaAccess";
 import { ClientAreaCodeAccess } from "./ClientAreaCodeAccess";
 
+/**
+ * Flag focal: exibição do logotipo interno (acima do título "Área do Cliente")
+ * na página de login da Área do Cliente. Desligado temporariamente para todos
+ * os white labels; cabeçalho e rodapé não são afetados.
+ */
+const SHOW_INTERNAL_LOGO = false;
+
 interface LoginProps {
   info: AgencyDomainInfo;
   email: string;
@@ -42,16 +49,31 @@ export function ClientAreaLogin({
       <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         {/* Apresentação da marca da agência */}
         <div className="order-1 text-center lg:text-left">
-          {info.logo_url ? (
-            <img
-              src={info.logo_url}
-              alt={`Logotipo da ${name}`}
-              className="mx-auto h-14 w-auto max-w-[220px] object-contain lg:mx-0 lg:h-16"
-            />
+          {/*
+           * Logotipo interno da Área do Cliente temporariamente oculto a pedido
+           * (todos os white labels). Cabeçalho e rodapé seguem exibindo o logo.
+           * Para reativar: trocar SHOW_INTERNAL_LOGO para true — nada mais muda.
+           * Enquanto oculto, mantemos um placeholder invisível com as MESMAS
+           * dimensões para preservar espaçamentos e layout.
+           */}
+          {SHOW_INTERNAL_LOGO ? (
+            info.logo_url ? (
+              <img
+                src={info.logo_url}
+                alt={`Logotipo da ${name}`}
+                className="mx-auto h-14 w-auto max-w-[220px] object-contain lg:mx-0 lg:h-16"
+              />
+            ) : (
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-xl font-semibold text-primary-foreground lg:mx-0">
+                {name.slice(0, 1).toUpperCase()}
+              </span>
+            )
           ) : (
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-xl font-semibold text-primary-foreground lg:mx-0">
-              {name.slice(0, 1).toUpperCase()}
-            </span>
+            <span
+              data-testid="client-area-internal-logo-placeholder"
+              aria-hidden="true"
+              className="mx-auto block h-14 w-14 lg:mx-0 lg:h-16"
+            />
           )}
 
           <h1 className="mt-6 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
