@@ -337,7 +337,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="assinatura" className="bg-background">
             <div className={`${container} py-16 md:py-24`}>
               <div className="mx-auto max-w-3xl text-center">
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--wl-red))]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--wl-red))] wl-kicker">
                   {s.kicker}
                 </p>
                 <h2 className="mt-6 text-3xl leading-tight text-foreground md:text-[2.9rem]">
@@ -360,7 +360,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="credenciais" className="bg-background">
             <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-16 md:py-24`}>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                   {c.kicker}
                 </p>
                 <h2 className="mt-4 text-3xl leading-tight text-foreground md:text-[2.6rem]">
@@ -379,7 +379,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       className="flex gap-5 border-t border-foreground/10 pt-6"
                     >
                       <Icon
-                        className="mt-1 h-7 w-7 shrink-0 text-[hsl(var(--wl-red))]"
+                        className="mt-1 h-7 w-7 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon"
                         aria-hidden="true"
                         strokeWidth={1.5}
                       />
@@ -604,7 +604,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <section key={key} id="sobre" className="bg-background">
               <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
                   </p>
                   {aboutCopy?.title ? (
@@ -761,7 +761,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <section key={key} id="atendimento" className="bg-background">
               <div className={`${container} grid items-stretch gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                     {copy.kicker ?? "Gente cuidando de gente"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
@@ -896,7 +896,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <section key={key} id="faq" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                     {copy.kicker ?? "Antes de solicitar"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
