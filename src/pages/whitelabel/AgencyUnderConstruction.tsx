@@ -22,6 +22,11 @@ function safeAccent(color?: string | null): string | null {
  * Usa exclusivamente a identidade da agência — nunca a marca da plataforma.
  */
 export default function AgencyUnderConstruction({ info }: { info: AgencyDomainInfo }) {
+  // Variantes exclusivas por domínio: página própria, sem afetar os demais.
+  if (resolveConstructionVariant(info.hostname) === "destinosComAJu") {
+    return <DestinosComAJuComingSoon />;
+  }
+
   const name = agencyDisplayName(info);
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" / ");
