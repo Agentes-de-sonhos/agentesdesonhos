@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useMemo } from "react";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Filter, ChevronLeft, ChevronRight, Info, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Search, Filter, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   DndContext,
   closestCenter,
@@ -45,7 +45,8 @@ import { QuickAddClientDialog } from "./QuickAddClientDialog";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
 import { usePermissions } from "@/hooks/usePermissions";
-import { useKanbanFullscreen } from "@/hooks/useKanbanFullscreen";
+import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
+import { KanbanScrollArea } from "@/components/crm/kanban/KanbanScrollArea";
 import { toast } from "sonner";
 import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import {
@@ -109,13 +110,7 @@ export function KanbanBoard() {
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const { isFullscreen, toggle: toggleFullscreen } = useKanbanFullscreen();
-
-  // Drag-to-scroll state
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const isDraggingScroll = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
+  const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -150,13 +145,6 @@ export function KanbanBoard() {
       scrollRef.current.style.cursor = "grab";
       scrollRef.current.style.userSelect = "";
     }
-  }, []);
-
-  const scrollBy = useCallback((direction: "left" | "right") => {
-    scrollRef.current?.scrollBy({
-      left: direction === "left" ? -300 : 300,
-      behavior: "smooth",
-    });
   }, []);
 
   const filteredOpportunities = opportunities.filter((opp) => {
@@ -327,7 +315,7 @@ export function KanbanBoard() {
       <div
         className={cn(
           "space-y-4",
-          isFullscreen && "fixed inset-0 z-40 bg-background overflow-y-auto p-4"
+          isMaximized && "flex min-h-0 flex-1 flex-col"
         )}
       >
         <div className="flex flex-wrap items-center gap-3">
@@ -379,57 +367,16 @@ export function KanbanBoard() {
             variant="outline"
             size="sm"
             className="gap-2 ml-auto"
-            onClick={toggleFullscreen}
+            onClick={toggleMaximize}
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            {isFullscreen ? "Sair da tela cheia" : "Maximizar"}
+            {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isMaximized ? "Minimizar" : "Maximizar"}
           </Button>
         </div>
 
-        {/* Scroll navigation arrows */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 flex-shrink-0"
-            onClick={() => scrollBy("left")}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 flex-shrink-0"
-            onClick={() => scrollBy("right")}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Arraste as colunas para reordenar • use as setas ou role para navegar</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-
-        {/* Kanban container with drag-to-scroll and edge fades */}
-        <div className="relative">
-          {/* Left fade */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-          {/* Right fade */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-
-          <div
-            ref={scrollRef}
-            className="overflow-x-auto overscroll-x-contain cursor-grab pb-4 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent touch-pan-x"
-            style={{ scrollbarWidth: "thin" }}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
+        {/* Kanban container: arraste com o mouse + barra horizontal única no final */}
+        <div className={cn("relative", isMaximized && "flex min-h-0 flex-1 flex-col")}>
+          <KanbanScrollArea>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
@@ -538,7 +485,7 @@ export function KanbanBoard() {
                 </div>
               </SortableContext>
             </DndContext>
-          </div>
+          </KanbanScrollArea>
         </div>
 
         <DeleteStageDialog
