@@ -2,12 +2,13 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
-import { shouldRenderUnderConstruction } from "@/lib/agencySiteStatus";
+import { shouldRenderUnderConstruction, resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { AGENCY_PUBLIC_TOOL_ROUTES } from "@/lib/agencyPublicToolRoutes";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
+const DestinosComAJuComingSoon = lazy(() => import("@/pages/whitelabel/DestinosComAJuComingSoon"));
 const AgencyPreviewGate = lazy(() => import("@/pages/whitelabel/AgencyPreviewGate"));
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
@@ -87,7 +88,18 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
       <Suspense fallback={<Fallback />}>
         <Routes>
           {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
-          {construction && <Route path="/" element={<AgencyUnderConstruction info={info} />} />}
+          {construction && (
+            <Route
+              path="/"
+              element={
+                resolveConstructionVariant(info.hostname) === "destinosComAJu" ? (
+                  <DestinosComAJuComingSoon />
+                ) : (
+                  <AgencyUnderConstruction info={info} />
+                )
+              }
+            />
+          )}
 
           {/* Preview protegido por senha: tela isolada, sem o chrome do site. */}
           <Route path="/preview" element={<AgencyPreviewGate info={info} />} />
