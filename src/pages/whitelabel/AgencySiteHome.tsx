@@ -719,7 +719,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     return (
                       <li key={d.title} className="flex gap-5 border-t border-foreground/10 pt-6">
                         <Icon
-                          className="mt-1 h-7 w-7 shrink-0 text-primary"
+                          className="mt-1 h-7 w-7 shrink-0 text-primary wl-accent-icon"
                           aria-hidden="true"
                           strokeWidth={1.6}
                         />
@@ -775,10 +775,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <div className="mt-9 flex flex-wrap gap-3">
                      <Button
                        size="lg"
-                       className="bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
+                       className="wl-cta-primary bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
                        onClick={() => openRequest("pacotes")}
                      >
-                       Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
+                       {copy.cta ?? "Solicitar atendimento"} <ArrowRight className="ml-2 h-4 w-4" />
                      </Button>
                     {waHref && (
                       <Button
@@ -973,7 +973,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
                       <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
-                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
+                        <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
                         {copy.title ?? "Receba novidades e oportunidades"}
@@ -986,7 +986,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     <div className="md:justify-self-end">
                       <Button
                         size="lg"
-                        className="h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
+                        className="wl-cta-invert h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
                         onClick={() => openRequest("pacotes")}
                       >
                         {copy.cta ?? "Quero receber novidades"}{" "}
