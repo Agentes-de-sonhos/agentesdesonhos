@@ -277,40 +277,117 @@ img {
    apenas tokens, tipografia e acabamento. Paleta: azul-marinho profundo, verde
    sálvia, marfim quente e champanhe discreto. Nenhum componente muda. */
 .wl-editorial.wl-luxury {
-  --background: 40 30% 97%;
-  --foreground: 218 30% 14%;
+  /* Claro complementar #FAF8F5 */
+  --background: 30 33% 97%;
+  /* Azul-marinho profundo #111B2D */
+  --foreground: 218 46% 12%;
 
   --card: 0 0% 100%;
-  --card-foreground: 218 30% 14%;
+  --card-foreground: 218 46% 12%;
   --popover: 0 0% 100%;
-  --popover-foreground: 218 30% 14%;
+  --popover-foreground: 218 46% 12%;
 
-  /* Azul-marinho profundo como cor primária (CTAs e foco). */
-  --primary: 217 44% 20%;
+  /* Azul do logotipo #2D3053 — CTAs, foco e elementos interativos. */
+  --primary: 236 29% 25%;
   --primary-foreground: 40 32% 97%;
 
   --secondary: 40 24% 93%;
-  --secondary-foreground: 218 30% 14%;
+  --secondary-foreground: 218 46% 12%;
   --muted: 40 24% 94%;
-  --muted-foreground: 218 12% 36%;
+  --muted-foreground: 218 16% 34%;
   --accent: 40 24% 93%;
-  --accent-foreground: 218 30% 14%;
+  --accent-foreground: 218 46% 12%;
 
   --border: 38 20% 88%;
   --input: 38 20% 84%;
-  --ring: 217 44% 20%;
+  --ring: 236 29% 25%;
   /* Cantos discretos, quase retos. */
   --radius: 0.25rem;
 
-  /* Verde sálvia substitui o vermelho de marca nos detalhes/kickers/ícones. */
-  --wl-red: 148 20% 30%;
-  --wl-navy: 217 44% 15%;
-  --wl-ink: 217 46% 12%;
-  /* Marfim quente/champanhe muito discreto nas faixas alternadas. */
-  --wl-sand: 40 28% 94%;
+  /* Detalhes/kickers e ícones em azul-marinho; o verde é a assinatura. */
+  --wl-red: 236 29% 25%;
+  --wl-navy: 218 46% 12%;
+  --wl-ink: 218 46% 12%;
+  /* Marfim #F4F1EB nas faixas alternadas. */
+  --wl-sand: 40 26% 94%;
+  /* Verde Paraíso #A8CC44 — usado só como assinatura (ícones, linhas, setas). */
+  --wl-green: 74 58% 53%;
 
   font-family: 'Manrope', 'Inter', system-ui, sans-serif;
 }
+
+/* --- Assinatura verde: traço acima dos títulos (eyebrow) ------------------- */
+.wl-editorial.wl-luxury .wl-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.wl-editorial.wl-luxury .wl-kicker::before {
+  content: "";
+  display: inline-block;
+  width: 1.75rem;
+  height: 2px;
+  flex: none;
+  background: hsl(var(--wl-green));
+}
+
+/* Ícones de apoio (curadoria, cuidados, credenciais) em verde Paraíso. */
+.wl-editorial.wl-luxury .wl-accent-icon {
+  color: hsl(var(--wl-green));
+}
+
+/* Setas/ícones dentro do CTA principal azul-marinho. */
+.wl-editorial.wl-luxury .wl-cta-primary svg {
+  color: hsl(var(--wl-green));
+}
+
+/* CTA da newsletter sobre o fundo azul: verde com texto azul-marinho. */
+.wl-editorial.wl-luxury .wl-cta-invert {
+  background-color: hsl(var(--wl-green));
+  color: hsl(var(--wl-ink));
+}
+.wl-editorial.wl-luxury .wl-cta-invert:hover {
+  background-color: hsl(var(--wl-green) / 0.9);
+}
+.wl-editorial.wl-luxury .wl-cta-invert svg {
+  color: hsl(var(--wl-ink));
+}
+
+/* Cards de inspiração: degradê um pouco mais firme + hover discreto. */
+.wl-editorial.wl-luxury #destinos button {
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+.wl-editorial.wl-luxury #destinos button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to top, hsl(218 46% 8% / 0.55), transparent 58%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wl-editorial.wl-luxury #destinos button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px -22px hsl(218 46% 12% / 0.55);
+  }
+}
+
+/* Espaçamentos institucionais ~15% mais contidos (história, rede, consultor). */
+.wl-editorial.wl-luxury #sobre > div,
+.wl-editorial.wl-luxury #credenciais > div,
+.wl-editorial.wl-luxury #atendimento > div {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+@media (min-width: 768px) {
+  .wl-editorial.wl-luxury #sobre > div,
+  .wl-editorial.wl-luxury #credenciais > div,
+  .wl-editorial.wl-luxury #atendimento > div {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+
 
 .wl-editorial.wl-luxury h1,
 .wl-editorial.wl-luxury h2,
