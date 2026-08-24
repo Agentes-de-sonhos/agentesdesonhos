@@ -165,6 +165,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
     text:
       "À frente da Paraíso, Mariana e Daniela unem repertório, escuta e cuidado para desenhar viagens personalizadas.",
     image: "villa",
+    badge: { value: "Desde 1997", label: "Experiência e cuidado em cada etapa." },
   },
   credentials: {
     kicker: "CREDENCIAIS E CONEXÕES",
@@ -224,6 +225,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       title: "Um consultor dedicado à sua viagem",
       subtitle:
         "Conversamos, entendemos o seu momento e desenhamos as opções. Você decide com todas as informações à mão.",
+      cta: "Planeje sua viagem",
     },
     newsletter: {
       kicker: "INSPIRAÇÕES",
