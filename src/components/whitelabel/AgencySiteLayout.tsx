@@ -323,22 +323,12 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             {logoUrl ? (
-              <span
-                className={
-                  luxury
-                    ? "inline-flex rounded-md bg-[hsl(var(--wl-sand))] px-6 py-5"
-                    : "inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]"
-                }
-              >
+              <span className="inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]">
                 <img
                   src={logoUrl}
                   alt={`Logo ${name}`}
                   loading="lazy"
-                  className={
-                    luxury
-                      ? "h-16 w-auto max-w-[260px] object-contain md:h-[72px] md:max-w-[300px]"
-                      : "h-12 w-auto max-w-[200px] object-contain"
-                  }
+                  className="h-12 w-auto max-w-[200px] object-contain"
                 />
               </span>
 
