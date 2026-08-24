@@ -155,13 +155,13 @@ function KanbanTabsSurface({
         </div>
         <TabsContent
           value="funil"
-          className={cn("mt-6", isMaximized && isFunnelTab && "flex min-h-0 flex-1 flex-col")}
+          className={cn(isMaximized && isFunnelTab ? "mt-3 flex min-h-0 flex-1 flex-col" : "mt-6")}
         >
           <PermissionGate permission="opportunities.view"><KanbanBoard /></PermissionGate>
         </TabsContent>
         <TabsContent
           value="operacoes"
-          className={cn("mt-6", isMaximized && isFunnelTab && "flex min-h-0 flex-1 flex-col")}
+          className={cn(isMaximized && isFunnelTab ? "mt-3 flex min-h-0 flex-1 flex-col" : "mt-6")}
         >
           <PermissionGate permission="operations.view"><OperationsModule /></PermissionGate>
         </TabsContent>

@@ -64,7 +64,7 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       data-testid="kanban-scroll-area"
       className={cn(
         "overflow-auto overscroll-x-contain cursor-grab touch-pan-x scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent",
-        isMaximized ? "flex-1 min-h-0" : "min-h-[420px] max-h-[calc(100vh-16rem)]",
+        isMaximized ? "h-full min-h-0 flex-1" : "min-h-[420px] max-h-[calc(100vh-16rem)]",
         className
       )}
       style={{ scrollbarWidth: "thin" }}
