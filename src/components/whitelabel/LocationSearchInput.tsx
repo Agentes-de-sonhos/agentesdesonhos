@@ -107,7 +107,7 @@ export function LocationSearchInput({
         }
       >
         {label}
-        {required && <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>}
+        {required && <span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>}
       </label>
 
       <div className="relative">

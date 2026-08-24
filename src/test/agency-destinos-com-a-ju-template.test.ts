@@ -36,7 +36,8 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
   it("aplica o logotipo oficial apenas nos hosts da agência", () => {
     for (const host of JU_HOSTS) expect(resolveAgencyLogoOverride(host)).toContain("logo-destinos-com-a-ju");
     expect(resolveAgencyLogoOverride(LIMITES)).toBeNull();
-    expect(resolveAgencyLogoOverride("paraisoviagens.com")).toBeNull();
+    // Paraíso tem o próprio logotipo oficial — nunca o da Ju.
+    expect(resolveAgencyLogoOverride("paraisoviagens.com")).not.toContain("logo-destinos-com-a-ju");
   });
 
   it("não altera os demais tenants", () => {

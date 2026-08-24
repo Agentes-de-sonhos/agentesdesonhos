@@ -62,7 +62,7 @@ function FieldControl({
     <div className={field.span === 2 ? "sm:col-span-2" : ""}>
       <Label htmlFor={id} className="text-xs font-medium text-muted-foreground">
         {field.label}
-        {field.required && <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>}
+        {field.required && <span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>}
       </Label>
 
       {field.type === "select" ? (
@@ -346,7 +346,7 @@ export function AgencyRequestCenter({
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <Label htmlFor="lead_name" className="text-xs font-medium text-muted-foreground">
-                      Nome completo <span aria-hidden="true" className="text-destructive">*</span>
+                      Nome completo <span aria-hidden="true" className="wl-required text-destructive">*</span>
                     </Label>
                     <Input
                       id="lead_name"

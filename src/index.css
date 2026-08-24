@@ -751,3 +751,108 @@ body[data-booking-selection-bar] {
     padding-bottom: 0;
   }
 }
+
+/* ===== Paraíso Viagens — modais, popovers e calendários (tema wl-luxury) =====
+   Escopo: somente descendentes de `.wl-editorial.wl-luxury`. A classe é aplicada
+   também no `document.body` enquanto o site white label está montado
+   (src/lib/agencySitePortalTheme.ts), então TODO conteúdo em portal (Dialog,
+   Popover, Select, Calendar) herda estes tokens sem overrides por componente. */
+.wl-editorial.wl-luxury {
+  /* Verde bem claro para range/hover/seleções (#F0F6DE). */
+  --wl-green-soft: 74 60% 92%;
+  /* Verde escuro acessível para texto pequeno sobre fundo claro. */
+  --wl-green-ink: 74 62% 26%;
+  /* Foco discreto em verde. */
+  --ring: 74 55% 40%;
+}
+
+/* Asteriscos de campo obrigatório: verde escuro acessível (nunca vermelho). */
+.wl-editorial.wl-luxury .wl-required {
+  color: hsl(var(--wl-green-ink));
+}
+
+/* Selo circular de ícone no cabeçalho dos modais. */
+.wl-editorial.wl-luxury .wl-icon-badge {
+  background-color: hsl(var(--wl-green-soft));
+  color: hsl(var(--wl-green-ink));
+}
+
+/* Ações inline "Adicionar outro …": texto azul-marinho + ícone verde. */
+.wl-editorial.wl-luxury .wl-add-action {
+  color: hsl(var(--wl-ink));
+}
+.wl-editorial.wl-luxury .wl-add-action svg {
+  color: hsl(var(--wl-green));
+}
+
+/* CTA principal do assistente: verde Paraíso com texto e seta azul-marinho. */
+.wl-editorial.wl-luxury .wl-journey-cta {
+  background-color: hsl(var(--wl-green));
+  color: hsl(var(--wl-ink));
+}
+.wl-editorial.wl-luxury .wl-journey-cta:hover {
+  background-color: hsl(var(--wl-green) / 0.88);
+  color: hsl(var(--wl-ink));
+}
+.wl-editorial.wl-luxury .wl-journey-cta svg {
+  color: hsl(var(--wl-ink));
+}
+
+/* --- Calendário / seleção de datas ---------------------------------------- */
+/* Intervalo entre as datas (célula e dia intermediário) em verde bem claro. */
+.wl-editorial.wl-luxury .rdp td:has([aria-selected]) {
+  background-color: hsl(var(--wl-green-soft));
+}
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"] {
+  background-color: hsl(var(--wl-green-soft));
+  color: hsl(var(--wl-ink));
+}
+/* Dia intermediário do intervalo: verde bem claro (sobrepõe o verde cheio). */
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].day-range-middle,
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].day-range-middle:hover {
+  background-color: hsl(var(--wl-green-soft));
+  color: hsl(var(--wl-ink));
+}
+/* Dias inicial e final selecionados: verde Paraíso + texto azul-marinho. */
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:not(.day-range-middle),
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:not(.day-range-middle):hover,
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:not(.day-range-middle):focus {
+  background-color: hsl(var(--wl-green));
+  color: hsl(var(--wl-ink));
+}
+/* Hover de dias livres em verde muito claro. */
+.wl-editorial.wl-luxury .rdp button:not([aria-selected="true"]):not([disabled]):hover {
+  background-color: hsl(var(--wl-green-soft) / 0.6);
+  color: hsl(var(--wl-ink));
+}
+/* Dia atual: indicador verde discreto. */
+.wl-editorial.wl-luxury .rdp button:not([aria-selected="true"]).bg-accent {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px hsl(var(--wl-green));
+  color: hsl(var(--wl-ink));
+}
+/* Foco de teclado: anel verde visível. */
+.wl-editorial.wl-luxury .rdp button:focus-visible {
+  outline: 2px solid hsl(var(--wl-green-ink));
+  outline-offset: 1px;
+}
+/* Setas de navegação: azul-marinho com hover verde-claro. */
+.wl-editorial.wl-luxury .rdp .rdp-nav_button,
+.wl-editorial.wl-luxury .rdp nav button {
+  color: hsl(var(--wl-ink));
+}
+.wl-editorial.wl-luxury .rdp nav button:hover {
+  background-color: hsl(var(--wl-green-soft));
+  color: hsl(var(--wl-ink));
+}
+
+/* --- Selects, dropdowns e itens de menu em portal -------------------------- */
+.wl-editorial.wl-luxury [role="option"][data-highlighted],
+.wl-editorial.wl-luxury [role="option"][data-state="checked"],
+.wl-editorial.wl-luxury [role="menuitem"][data-highlighted] {
+  background-color: hsl(var(--wl-green-soft));
+  color: hsl(var(--wl-ink));
+}
+.wl-editorial.wl-luxury [role="option"][data-state="checked"] svg {
+  color: hsl(var(--wl-green-ink));
+}

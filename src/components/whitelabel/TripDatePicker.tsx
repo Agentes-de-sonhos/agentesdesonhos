@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { EDITORIAL_ROOT_CLASS } from "@/lib/agencySiteTheme";
+import { portalThemeClass } from "@/lib/agencySitePortalTheme";
 
 /** "YYYY-MM-DD" -> Date local (nunca UTC, para não deslocar um dia). */
 export function parseYMD(value?: string | null): Date | undefined {
@@ -87,7 +87,7 @@ export function TripDatePicker({
         }
       >
         {label}
-        {required && <span aria-hidden="true" className="ml-0.5 text-destructive">*</span>}
+        {required && <span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>}
       </label>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -116,7 +116,7 @@ export function TripDatePicker({
           align="start"
           className={cn(
             "w-auto max-w-[calc(100vw-2rem)] overflow-x-auto p-0",
-            editorial && EDITORIAL_ROOT_CLASS,
+            editorial && portalThemeClass(),
           )}
         >
           {mode === "range" ? (
