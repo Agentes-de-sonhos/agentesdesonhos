@@ -74,7 +74,7 @@ describe("ordem e conteúdo da home Paraíso", () => {
 
   it("história é factual e não atribui a fundação a Mariana e Daniela", () => {
     const text = `${profile.about?.title} ${profile.about?.text}`;
-    expect(text).toContain("1997");
+    expect(text).toContain("2011");
     expect(text).toMatch(/Mariana e Daniela/);
     expect(text).not.toMatch(/fundaram|Grupo Paraíso|Paraíso Seguros/i);
   });

@@ -161,11 +161,11 @@ const LUXURY_CURATED: AgencySiteProfile = {
   ],
   about: {
     kicker: "QUEM DESENHA A SUA VIAGEM",
-    title: "Uma trajetória construída desde 1997.",
+    title: "Uma trajetória construída desde 2011.",
     text:
       "À frente da Paraíso, Mariana e Daniela unem repertório, escuta e cuidado para desenhar viagens personalizadas.",
     image: "villa",
-    badge: { value: "Desde 1997", label: "Experiência e cuidado em cada etapa." },
+    badge: { value: "Desde 2011", label: "Experiência e cuidado em cada etapa." },
   },
   credentials: {
     kicker: "CREDENCIAIS E CONEXÕES",
