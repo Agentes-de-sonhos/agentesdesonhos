@@ -10,6 +10,7 @@ import {
 } from "@/lib/agencyDomains";
 import {
   isEditorialTheme,
+  isLuxuryTheme,
   siteContainer,
   siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
@@ -29,6 +30,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
   const editorial = isEditorialTheme(info.hostname);
+  const luxury = isLuxuryTheme(info.hostname);
   const wa = agencyWhatsappNumber(info);
   const logoUrl = resolveAgencyLogoUrl(info);
 
@@ -36,23 +38,35 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
     const mainLinks = NAV_LINKS.filter((l) => l.to !== "/area-do-cliente");
     return (
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
-        <div className={`${siteContainer(true)} flex h-20 items-center justify-between gap-6`}>
+        <div
+          className={`${siteContainer(true)} flex items-center justify-between gap-6 ${
+            luxury ? "h-[88px]" : "h-20"
+          }`}
+        >
           <Link to="/" className="flex min-w-0 items-center gap-3">
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={`Logo ${name}`}
-                className="h-12 w-auto max-w-[200px] object-contain"
+                className={
+                  luxury
+                    ? "h-14 w-auto max-w-[240px] object-contain md:h-16 md:max-w-[280px]"
+                    : "h-12 w-auto max-w-[200px] object-contain"
+                }
               />
             ) : (
               <span className="grid h-12 w-12 place-items-center rounded-lg bg-foreground text-lg font-bold text-background">
                 {name.slice(0, 1).toUpperCase()}
               </span>
             )}
-            <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
-              <BrandText>{name}</BrandText>
-            </span>
+            {/* O logotipo do luxo já é um wordmark: evita marca duplicada. */}
+            {!(luxury && logoUrl) && (
+              <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
+                <BrandText>{name}</BrandText>
+              </span>
+            )}
           </Link>
+
 
           <nav className="hidden items-center gap-8 lg:flex">
             {mainLinks.map((l) => (
