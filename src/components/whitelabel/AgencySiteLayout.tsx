@@ -10,6 +10,7 @@ import {
 } from "@/lib/agencyDomains";
 import {
   isEditorialTheme,
+  isLuxuryTheme,
   siteContainer,
   siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
@@ -29,6 +30,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
   const editorial = isEditorialTheme(info.hostname);
+  const luxury = isLuxuryTheme(info.hostname);
   const wa = agencyWhatsappNumber(info);
   const logoUrl = resolveAgencyLogoUrl(info);
 
@@ -36,23 +38,35 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
     const mainLinks = NAV_LINKS.filter((l) => l.to !== "/area-do-cliente");
     return (
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
-        <div className={`${siteContainer(true)} flex h-20 items-center justify-between gap-6`}>
+        <div
+          className={`${siteContainer(true)} flex items-center justify-between gap-6 ${
+            luxury ? "h-[88px]" : "h-20"
+          }`}
+        >
           <Link to="/" className="flex min-w-0 items-center gap-3">
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={`Logo ${name}`}
-                className="h-12 w-auto max-w-[200px] object-contain"
+                className={
+                  luxury
+                    ? "h-14 w-auto max-w-[240px] object-contain md:h-16 md:max-w-[280px]"
+                    : "h-12 w-auto max-w-[200px] object-contain"
+                }
               />
             ) : (
               <span className="grid h-12 w-12 place-items-center rounded-lg bg-foreground text-lg font-bold text-background">
                 {name.slice(0, 1).toUpperCase()}
               </span>
             )}
-            <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
-              <BrandText>{name}</BrandText>
-            </span>
+            {/* O logotipo do luxo já é um wordmark: evita marca duplicada. */}
+            {!(luxury && logoUrl) && (
+              <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
+                <BrandText>{name}</BrandText>
+              </span>
+            )}
           </Link>
+
 
           <nav className="hidden items-center gap-8 lg:flex">
             {mainLinks.map((l) => (
@@ -191,6 +205,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
   const editorial = isEditorialTheme(info.hostname);
+  const luxury = isLuxuryTheme(info.hostname);
   const logoUrl = resolveAgencyLogoUrl(info);
 
   if (editorial) {
@@ -204,14 +219,25 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             {logoUrl ? (
-              <span className="inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]">
+              <span
+                className={
+                  luxury
+                    ? "inline-flex rounded-md bg-[hsl(var(--wl-sand))] px-6 py-5"
+                    : "inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]"
+                }
+              >
                 <img
                   src={logoUrl}
                   alt={`Logo ${name}`}
                   loading="lazy"
-                  className="h-12 w-auto max-w-[200px] object-contain"
+                  className={
+                    luxury
+                      ? "h-16 w-auto max-w-[260px] object-contain md:h-[72px] md:max-w-[300px]"
+                      : "h-12 w-auto max-w-[200px] object-contain"
+                  }
                 />
               </span>
+
             ) : (
               <p className="text-lg font-bold tracking-tight text-white">
                 <BrandText>{name}</BrandText>
@@ -222,13 +248,13 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
             </p>
             {location && (
               <p className="mt-6 flex items-center gap-2 text-sm text-white/70">
-                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> {location}
+                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> {location}
               </p>
             )}
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">Navegação</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-accent-icon">Navegação</p>
             <ul className="mt-5 space-y-3">
               {navLinks.map((l) => (
                 <li key={l.to}>
@@ -244,7 +270,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">Atendimento</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-accent-icon">Atendimento</p>
             <ul className="mt-5 space-y-3">
               {wa ? (
                 <li>
@@ -254,13 +280,13 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
-                    <MessageCircle className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> Falar no WhatsApp
+                    <MessageCircle className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> Falar no WhatsApp
                   </a>
                 </li>
               ) : null}
               {info.phone ? (
                 <li className="flex items-center gap-2 text-[15px] text-white/75">
-                  <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> {info.phone}
+                  <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> {info.phone}
                 </li>
               ) : null}
               <li>
@@ -268,14 +294,14 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                   href="/area-do-cliente"
                   className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                 >
-                  <UserRound className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))]" aria-hidden="true" /> Área do Cliente
+                  <UserRound className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> Área do Cliente
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">Legal</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-accent-icon">Legal</p>
             <ul className="mt-5 space-y-3">
               {legalLinks.map((l) => (
                 <li key={l.to}>

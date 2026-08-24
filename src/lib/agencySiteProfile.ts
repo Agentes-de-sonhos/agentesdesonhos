@@ -64,7 +64,14 @@ export interface AgencySiteProfile {
   /** Títulos/subtítulos por seção (fallback: textos padrão da engine). */
   copy?: Partial<Record<AgencySectionKey, AgencySectionCopy>>;
   /** Conteúdo institucional da seção "about" quando o perfil define a redação. */
-  about?: { kicker?: string; title?: string; text?: string; image?: string };
+  about?: {
+    kicker?: string;
+    title?: string;
+    text?: string;
+    image?: string;
+    /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
+    badge?: { value: string; label?: string };
+  };
 }
 
 /* ------------------------------ PERFIS ------------------------------ */
@@ -120,7 +127,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
   ],
   signature: {
     kicker: "CURADORIA PARAÍSO",
-    title: "O luxo está na forma de viver cada destino.",
+    title: "O verdadeiro luxo está em cada detalhe da viagem.",
     text:
       "Mais do que escolher lugares, criamos conexões entre o seu momento, o seu estilo e experiências que realmente fazem sentido.",
   },
@@ -158,6 +165,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
     text:
       "À frente da Paraíso, Mariana e Daniela unem repertório, escuta e cuidado para desenhar viagens personalizadas.",
     image: "villa",
+    badge: { value: "Desde 1997", label: "Experiência e cuidado em cada etapa." },
   },
   credentials: {
     kicker: "CREDENCIAIS E CONEXÕES",
@@ -217,6 +225,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       title: "Um consultor dedicado à sua viagem",
       subtitle:
         "Conversamos, entendemos o seu momento e desenhamos as opções. Você decide com todas as informações à mão.",
+      cta: "Planeje sua viagem",
     },
     newsletter: {
       kicker: "INSPIRAÇÕES",

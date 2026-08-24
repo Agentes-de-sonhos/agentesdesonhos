@@ -295,9 +295,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   return (
                     <article
                       key={h.title}
-                      className="group flex h-full flex-col rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
+                      className="group wl-curation-card relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
-                      <Icon className="h-8 w-8 text-primary" aria-hidden="true" strokeWidth={1.6} />
+                      <Icon className="h-8 w-8 text-primary wl-accent-icon" aria-hidden="true" strokeWidth={1.6} />
                       <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
                       <p className="mt-3 flex-1 text-[15px] leading-relaxed text-muted-foreground">{h.text}</p>
                       <button
@@ -305,8 +305,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         onClick={() => openRequest(h.service)}
                         className="mt-7 inline-flex w-fit items-center border-b border-foreground/25 pb-1 text-[15px] font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                       >
-                        {h.cta} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                        {h.cta} <ArrowRight className="ml-2 h-4 w-4 wl-accent-icon" aria-hidden="true" />
                       </button>
+
                     </article>
                   );
                 })}
@@ -337,7 +338,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="assinatura" className="bg-background">
             <div className={`${container} py-16 md:py-24`}>
               <div className="mx-auto max-w-3xl text-center">
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--wl-red))]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--wl-red))] wl-kicker">
                   {s.kicker}
                 </p>
                 <h2 className="mt-6 text-3xl leading-tight text-foreground md:text-[2.9rem]">
@@ -360,7 +361,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <section key={key} id="credenciais" className="bg-background">
             <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-16 md:py-24`}>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                   {c.kicker}
                 </p>
                 <h2 className="mt-4 text-3xl leading-tight text-foreground md:text-[2.6rem]">
@@ -379,7 +380,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       className="flex gap-5 border-t border-foreground/10 pt-6"
                     >
                       <Icon
-                        className="mt-1 h-7 w-7 shrink-0 text-[hsl(var(--wl-red))]"
+                        className="mt-1 h-7 w-7 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon"
                         aria-hidden="true"
                         strokeWidth={1.5}
                       />
@@ -604,7 +605,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <section key={key} id="sobre" className="bg-background">
               <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
                   </p>
                   {aboutCopy?.title ? (
@@ -625,6 +626,18 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         anos de estrada
                       </span>
                     </p>
+                  )}
+                  {aboutCopy?.badge && (
+                    <div className="mt-8 inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6">
+                      <span className="text-4xl font-extrabold uppercase leading-none tracking-tight text-[hsl(var(--wl-ink))] md:text-5xl">
+                        {aboutCopy.badge.value}
+                      </span>
+                      {aboutCopy.badge.label && (
+                        <span className="max-w-[14rem] text-sm font-semibold uppercase leading-snug tracking-[0.1em] text-muted-foreground">
+                          {aboutCopy.badge.label}
+                        </span>
+                      )}
+                    </div>
                   )}
                   <p className="mt-8 whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base">
                     {bio}
@@ -718,7 +731,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     return (
                       <li key={d.title} className="flex gap-5 border-t border-foreground/10 pt-6">
                         <Icon
-                          className="mt-1 h-7 w-7 shrink-0 text-primary"
+                          className="mt-1 h-7 w-7 shrink-0 text-primary wl-accent-icon"
                           aria-hidden="true"
                           strokeWidth={1.6}
                         />
@@ -761,7 +774,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <section key={key} id="atendimento" className="bg-background">
               <div className={`${container} grid items-stretch gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-24`}>
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                     {copy.kicker ?? "Gente cuidando de gente"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
@@ -774,10 +787,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <div className="mt-9 flex flex-wrap gap-3">
                      <Button
                        size="lg"
-                       className="bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
+                       className="wl-cta-primary bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
                        onClick={() => openRequest("pacotes")}
                      >
-                       Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
+                       {copy.cta ?? "Solicitar atendimento"} <ArrowRight className="ml-2 h-4 w-4" />
                      </Button>
                     {waHref && (
                       <Button
@@ -896,7 +909,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             <section key={key} id="faq" className="bg-[hsl(var(--wl-sand))]">
               <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-kicker">
                     {copy.kicker ?? "Antes de solicitar"}
                   </p>
                   <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
@@ -972,7 +985,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
                       <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
-                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
+                        <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
                         {copy.title ?? "Receba novidades e oportunidades"}
@@ -985,7 +998,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     <div className="md:justify-self-end">
                       <Button
                         size="lg"
-                        className="h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
+                        className="wl-cta-invert h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
                         onClick={() => openRequest("pacotes")}
                       >
                         {copy.cta ?? "Quero receber novidades"}{" "}
