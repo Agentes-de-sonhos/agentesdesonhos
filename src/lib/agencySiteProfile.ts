@@ -19,7 +19,11 @@ import {
   type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
 
-export type AgencySiteProfileKey = "classic" | "editorialDmc" | "luxuryCurated";
+export type AgencySiteProfileKey =
+  | "classic"
+  | "editorialDmc"
+  | "luxuryCurated"
+  | "editorialRose";
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
 export interface AgencySignatureContent {
@@ -227,17 +231,27 @@ const LUXURY_CURATED: AgencySiteProfile = {
   },
 };
 
+/**
+ * Destinos com a Ju — MESMA estrutura editorial aprovada (nenhum override de
+ * seção): apenas o tema muda. Conteúdo exclusivo (DMC) nunca é herdado, pois é
+ * resolvido por hostname em `resolveDmc`.
+ */
+const EDITORIAL_ROSE: AgencySiteProfile = { key: "editorialRose" };
+
 const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "100limites.tur.br": "editorialDmc",
   "www.100limites.tur.br": "editorialDmc",
   "paraisoviagens.com": "luxuryCurated",
   "www.paraisoviagens.com": "luxuryCurated",
+  "destinoscomaju.com.br": "editorialRose",
+  "www.destinoscomaju.com.br": "editorialRose",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   classic: CLASSIC,
   editorialDmc: EDITORIAL_DMC,
   luxuryCurated: LUXURY_CURATED,
+  editorialRose: EDITORIAL_ROSE,
 };
 
 function normalizeHost(hostname?: string | null): string {

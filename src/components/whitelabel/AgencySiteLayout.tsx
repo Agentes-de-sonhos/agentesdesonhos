@@ -13,6 +13,7 @@ import {
   siteContainer,
   siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
+import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
@@ -29,6 +30,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const name = agencyDisplayName(info);
   const editorial = isEditorialTheme(info.hostname);
   const wa = agencyWhatsappNumber(info);
+  const logoUrl = resolveAgencyLogoUrl(info);
 
   if (editorial) {
     const mainLinks = NAV_LINKS.filter((l) => l.to !== "/area-do-cliente");
@@ -36,9 +38,9 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
         <div className={`${siteContainer(true)} flex h-20 items-center justify-between gap-6`}>
           <Link to="/" className="flex min-w-0 items-center gap-3">
-            {info.logo_url ? (
+            {logoUrl ? (
               <img
-                src={info.logo_url}
+                src={logoUrl}
                 alt={`Logo ${name}`}
                 className="h-12 w-auto max-w-[200px] object-contain"
               />
@@ -130,8 +132,8 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <Link to="/" className="flex items-center gap-3 min-w-0">
-          {info.logo_url ? (
-            <img src={info.logo_url} alt={`Logo ${name}`} className="h-10 w-auto max-w-[160px] object-contain" />
+          {logoUrl ? (
+            <img src={logoUrl} alt={`Logo ${name}`} className="h-10 w-auto max-w-[160px] object-contain" />
           ) : (
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground font-semibold">
               {name.slice(0, 1).toUpperCase()}
@@ -189,6 +191,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
   const editorial = isEditorialTheme(info.hostname);
+  const logoUrl = resolveAgencyLogoUrl(info);
 
   if (editorial) {
     const navLinks = NAV_LINKS.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
@@ -200,10 +203,10 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
       <footer id="rodape" className="bg-[hsl(var(--wl-ink))] text-white">
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
-            {info.logo_url ? (
+            {logoUrl ? (
               <span className="inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]">
                 <img
-                  src={info.logo_url}
+                  src={logoUrl}
                   alt={`Logo ${name}`}
                   loading="lazy"
                   className="h-12 w-auto max-w-[200px] object-contain"
@@ -300,8 +303,8 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
     <footer id="rodape" className="border-t border-border/60 bg-muted/30">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-3">
         <div className="space-y-3">
-          {info.logo_url ? (
-            <img src={info.logo_url} alt={`Logo ${name}`} className="h-10 w-auto max-w-[160px] object-contain" />
+          {logoUrl ? (
+            <img src={logoUrl} alt={`Logo ${name}`} className="h-10 w-auto max-w-[160px] object-contain" />
           ) : null}
           <p className="text-sm font-semibold text-foreground">
             <BrandText>{name}</BrandText>
