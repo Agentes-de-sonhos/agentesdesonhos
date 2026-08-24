@@ -10,10 +10,19 @@
  */
 export type AgencySiteStatus = "live" | "under_construction";
 
+/**
+ * Variante visual da página temporária. `default` é a página institucional
+ * genérica (usada por todos os tenants atuais); variantes nomeadas são
+ * acabamentos exclusivos de um domínio, fáceis de remover quando o site
+ * completo entrar no ar.
+ */
+export type AgencyConstructionVariant = "default" | "destinosComAJu";
+
 export interface AgencySiteStatusConfig {
   status: AgencySiteStatus;
   /** CNPJ opcional para quando o cadastro da agência ainda não tiver o dado. */
   cnpj?: string;
+  variant?: AgencyConstructionVariant;
 }
 
 const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
@@ -21,7 +30,14 @@ const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
   "www.100limites.tur.br": { status: "under_construction" },
   "paraisoviagens.com": { status: "under_construction" },
   "www.paraisoviagens.com": { status: "under_construction" },
+  "destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
+  "www.destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
 };
+
+/** Variante da página temporária configurada para o hostname. */
+export function resolveConstructionVariant(hostname?: string | null): AgencyConstructionVariant {
+  return resolveSiteStatusConfig(hostname).variant ?? "default";
+}
 
 export function normalizeStatusHost(hostname?: string | null): string {
   return (hostname || "").trim().toLowerCase().replace(/:\d+$/, "");
