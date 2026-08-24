@@ -117,35 +117,6 @@ export function KanbanBoard() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    // Only initiate drag-scroll if clicking on the background, not on a card
-    const target = e.target as HTMLElement;
-    if (target.closest('[draggable="true"]')) return;
-    if (target.closest('button, input, [role="menu"], [role="dialog"]')) return;
-    isDraggingScroll.current = true;
-    startX.current = e.pageX - el.offsetLeft;
-    scrollLeft.current = el.scrollLeft;
-    el.style.cursor = "grabbing";
-    el.style.userSelect = "none";
-  }, []);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDraggingScroll.current || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1.5;
-    scrollRef.current.scrollLeft = scrollLeft.current - walk;
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    isDraggingScroll.current = false;
-    if (scrollRef.current) {
-      scrollRef.current.style.cursor = "grab";
-      scrollRef.current.style.userSelect = "";
-    }
-  }, []);
 
   const filteredOpportunities = opportunities.filter((opp) => {
     const matchesSearch =
