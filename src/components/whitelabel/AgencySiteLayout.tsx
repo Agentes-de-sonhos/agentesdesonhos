@@ -230,11 +230,11 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                 <BrandText>{name}</BrandText>
               </p>
             )}
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)/0.85)]">
+            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
               Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
             </p>
             {location && (
-              <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)/0.85)]">
+              <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)_/_0.85)]">
                 <MapPin className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {location}
               </p>
             )}
