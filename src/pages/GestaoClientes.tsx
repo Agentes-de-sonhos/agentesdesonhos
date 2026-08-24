@@ -12,6 +12,9 @@ import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { PermissionGate } from "@/components/permissions/PermissionGate";
 import { useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { KanbanMaximizeProvider, useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
+import { KanbanMaximizeSurface } from "@/components/crm/kanban/KanbanMaximizeSurface";
 
 export default function GestaoClientes() {
   return (
