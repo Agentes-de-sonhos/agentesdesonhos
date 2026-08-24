@@ -86,59 +86,96 @@ function GestaoClientesContent() {
           icon={Users}
         />
 
-        <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
-          <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
-            <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-5xl md:grid-cols-5">
-              {can('opportunities.view') && (
-                <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-3">
-                  <Kanban className="h-4 w-4 shrink-0" />
-                  Oportunidades
-                </TabsTrigger>
-              )}
-              {can('operations.view') && (
-                <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-3">
-                  <Briefcase className="h-4 w-4 shrink-0" />
-                  Operações
-                </TabsTrigger>
-              )}
-              {can('clients.view') && (
-                <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-3">
-                  <Users className="h-4 w-4 shrink-0" />
-                  Clientes
-                </TabsTrigger>
-              )}
-              {can('dashboard.view') && (
-                <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
-                  <LayoutDashboard className="h-4 w-4 shrink-0" />
-                  Visão Geral
-                </TabsTrigger>
-              )}
-              {can('goals.view') && (
-                <TabsTrigger value="metas" className="gap-1.5 whitespace-nowrap px-3">
-                  <Target className="h-4 w-4 shrink-0" />
-                  <span className="md:hidden">Metas</span>
-                  <span className="hidden md:inline">Meta de Vendas</span>
-                </TabsTrigger>
-              )}
-            </TabsList>
-          </div>
-          <TabsContent value="funil" className="mt-6">
-            <PermissionGate permission="opportunities.view"><KanbanBoard /></PermissionGate>
-          </TabsContent>
-          <TabsContent value="operacoes" className="mt-6">
-            <PermissionGate permission="operations.view"><OperationsModule /></PermissionGate>
-          </TabsContent>
-          <TabsContent value="clientes" className="mt-6">
-            <PermissionGate permission="clients.view"><ClientsModule /></PermissionGate>
-          </TabsContent>
-          <TabsContent value="dashboard" className="mt-6">
-            <PermissionGate permission="dashboard.view"><DashboardModule /></PermissionGate>
-          </TabsContent>
-          <TabsContent value="metas" className="mt-6">
-            <PermissionGate permission="goals.view"><SalesGoalsModule /></PermissionGate>
-          </TabsContent>
-        </Tabs>
+        <KanbanMaximizeProvider>
+          <KanbanTabsSurface currentTab={currentTab} onTabChange={handleTabChange} can={can} />
+        </KanbanMaximizeProvider>
+
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function KanbanTabsSurface({
+  currentTab,
+  onTabChange,
+  can,
+}: {
+  currentTab: string;
+  onTabChange: (v: string) => void;
+  can: (p: string) => boolean;
+}) {
+  const { isMaximized } = useKanbanMaximize();
+  const isFunnelTab = currentTab === 'funil' || currentTab === 'operacoes';
+
+  return (
+    <KanbanMaximizeSurface>
+      <Tabs
+        value={currentTab}
+        onValueChange={onTabChange}
+        className={cn("w-full", isMaximized && "flex min-h-0 flex-1 flex-col")}
+      >
+        {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
+        <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
+          <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-5xl md:grid-cols-5">
+            {can('opportunities.view') && (
+              <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-3">
+                <Kanban className="h-4 w-4 shrink-0" />
+                Oportunidades
+              </TabsTrigger>
+            )}
+            {can('operations.view') && (
+              <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-3">
+                <Briefcase className="h-4 w-4 shrink-0" />
+                Operações
+              </TabsTrigger>
+            )}
+            {can('clients.view') && (
+              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-3">
+                <Users className="h-4 w-4 shrink-0" />
+                Clientes
+              </TabsTrigger>
+            )}
+            {can('dashboard.view') && (
+              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                Visão Geral
+              </TabsTrigger>
+            )}
+            {can('goals.view') && (
+              <TabsTrigger value="metas" className="gap-1.5 whitespace-nowrap px-3">
+                <Target className="h-4 w-4 shrink-0" />
+                <span className="md:hidden">Metas</span>
+                <span className="hidden md:inline">Meta de Vendas</span>
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
+        <TabsContent
+          value="funil"
+          className={cn("mt-6", isMaximized && isFunnelTab && "flex min-h-0 flex-1 flex-col")}
+        >
+          <PermissionGate permission="opportunities.view"><KanbanBoard /></PermissionGate>
+        </TabsContent>
+        <TabsContent
+          value="operacoes"
+          className={cn("mt-6", isMaximized && isFunnelTab && "flex min-h-0 flex-1 flex-col")}
+        >
+          <PermissionGate permission="operations.view"><OperationsModule /></PermissionGate>
+        </TabsContent>
+        <TabsContent value="clientes" className="mt-6">
+          <PermissionGate permission="clients.view"><ClientsModule /></PermissionGate>
+        </TabsContent>
+        <TabsContent value="dashboard" className="mt-6">
+          <PermissionGate permission="dashboard.view"><DashboardModule /></PermissionGate>
+        </TabsContent>
+        <TabsContent value="metas" className="mt-6">
+          <PermissionGate permission="goals.view"><SalesGoalsModule /></PermissionGate>
+        </TabsContent>
+      </Tabs>
+    </KanbanMaximizeSurface>
+  );
+}
+
 
       </div>
     </DashboardLayout>
