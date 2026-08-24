@@ -175,9 +175,3 @@ function KanbanTabsSurface({
     </KanbanMaximizeSurface>
   );
 }
-
-
-      </div>
-    </DashboardLayout>
-  );
-}
