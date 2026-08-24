@@ -807,10 +807,16 @@ body[data-booking-selection-bar] {
   background-color: hsl(var(--wl-green-soft));
   color: hsl(var(--wl-ink));
 }
+/* Dia intermediário do intervalo: verde bem claro (sobrepõe o verde cheio). */
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].day-range-middle,
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].day-range-middle:hover {
+  background-color: hsl(var(--wl-green-soft));
+  color: hsl(var(--wl-ink));
+}
 /* Dias inicial e final selecionados: verde Paraíso + texto azul-marinho. */
-.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary,
-.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:hover,
-.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:focus {
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:not(.day-range-middle),
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:not(.day-range-middle):hover,
+.wl-editorial.wl-luxury .rdp button[aria-selected="true"].bg-primary:not(.day-range-middle):focus {
   background-color: hsl(var(--wl-green));
   color: hsl(var(--wl-ink));
 }
