@@ -388,6 +388,27 @@ img {
   }
 }
 
+/* "A curadoria Paraíso": filete verde no topo do card + hover discreto. */
+.wl-editorial.wl-luxury .wl-curation-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: hsl(var(--wl-green));
+  opacity: 0.85;
+}
+.wl-editorial.wl-luxury .wl-curation-card:hover {
+  border-color: hsl(var(--wl-green) / 0.6);
+}
+
+/* Buscador: indicador da aba ativa em verde Paraíso. */
+.wl-editorial.wl-luxury [role="tab"][data-state="active"],
+.wl-editorial.wl-luxury [aria-selected="true"][role="tab"] {
+  box-shadow: inset 0 -2px 0 0 hsl(var(--wl-green));
+}
+
+
+
 
 .wl-editorial.wl-luxury h1,
 .wl-editorial.wl-luxury h2,
