@@ -78,10 +78,10 @@ describe("formatCnpj", () => {
 });
 
 describe("variante da página temporária", () => {
-  it("aplica a variante exclusiva apenas nos hosts da Destinos com a Ju", () => {
-    expect(resolveConstructionVariant("destinoscomaju.com.br")).toBe("destinosComAJu");
-    expect(resolveConstructionVariant(" WWW.DestinosComAJu.com.br ")).toBe("destinosComAJu");
-    expect(isUnderConstruction("destinoscomaju.com.br")).toBe(true);
+  it("Destinos com a Ju deixou de usar a página temporária (home completa)", () => {
+    expect(isUnderConstruction("destinoscomaju.com.br")).toBe(false);
+    expect(isUnderConstruction(" WWW.DestinosComAJu.com.br ")).toBe(false);
+    expect(resolveConstructionVariant("destinoscomaju.com.br")).toBe("default");
   });
 
   it("mantém a variante default nos demais domínios", () => {
@@ -90,3 +90,4 @@ describe("variante da página temporária", () => {
     }
   });
 });
+
