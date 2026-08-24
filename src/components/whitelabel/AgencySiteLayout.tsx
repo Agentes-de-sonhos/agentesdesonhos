@@ -208,6 +208,110 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   const luxury = isLuxuryTheme(info.hostname);
   const logoUrl = resolveAgencyLogoUrl(info);
 
+  if (luxury) {
+    const navLinks = NAV_LINKS.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
+    const legalLinks = [
+      { label: "Política de Privacidade", to: "/politicasdeprivacidade" },
+      { label: "Termos de Uso", to: "/termosdeuso" },
+    ];
+    return (
+      <footer id="rodape" className="wl-luxury-footer">
+        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
+          <div>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={`Logo ${name}`}
+                loading="lazy"
+                className="h-16 w-auto max-w-[260px] object-contain md:h-[72px] md:max-w-[300px]"
+              />
+            ) : (
+              <p className="text-lg font-bold tracking-tight text-[hsl(var(--wl-ink))]">
+                <BrandText>{name}</BrandText>
+              </p>
+            )}
+            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)/0.85)]">
+              Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
+            </p>
+            {location && (
+              <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)/0.85)]">
+                <MapPin className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {location}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Navegação</p>
+            <ul className="mt-5 space-y-3">
+              {navLinks.map((l) => (
+                <li key={l.to}>
+                  <a
+                    href={l.to}
+                    className="inline-block py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Atendimento</p>
+            <ul className="mt-5 space-y-3">
+              {wa ? (
+                <li>
+                  <a
+                    href={`https://wa.me/${wa}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                  >
+                    <MessageCircle className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> Falar no WhatsApp
+                  </a>
+                </li>
+              ) : null}
+              {info.phone ? (
+                <li className="flex items-center gap-2 text-[15px]">
+                  <Phone className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {info.phone}
+                </li>
+              ) : null}
+              <li>
+                <a
+                  href="/area-do-cliente"
+                  className="inline-flex items-center gap-2 py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                >
+                  <UserRound className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> Área do Cliente
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Legal</p>
+            <ul className="mt-5 space-y-3">
+              {legalLinks.map((l) => (
+                <li key={l.to}>
+                  <a
+                    href={l.to}
+                    className="inline-block py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="wl-footer-divider border-t">
+          <div className={`${siteContainer(true)} py-6 text-xs wl-footer-copyright`}>
+            © {new Date().getFullYear()} <BrandText>{name}</BrandText>. Todos os direitos reservados.
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   if (editorial) {
     const navLinks = NAV_LINKS.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
     const legalLinks = [
@@ -324,6 +428,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
       </footer>
     );
   }
+
 
   return (
     <footer id="rodape" className="border-t border-border/60 bg-muted/30">
