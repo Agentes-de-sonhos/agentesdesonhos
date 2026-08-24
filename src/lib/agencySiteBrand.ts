@@ -8,10 +8,14 @@
  */
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-atualizado.png.asset.json";
+import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuLogo.url,
   "www.destinoscomaju.com.br": destinosComAJuLogo.url,
+  /** Versão horizontal recortada e transparente do logotipo oficial. */
+  "paraisoviagens.com": paraisoLogo.url,
+  "www.paraisoviagens.com": paraisoLogo.url,
 };
 
 export function normalizeBrandHost(hostname?: string | null): string {
