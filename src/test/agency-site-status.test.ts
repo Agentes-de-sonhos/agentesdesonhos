@@ -5,6 +5,7 @@ import {
   isUnderConstruction,
   resolveHomeSurface,
   isRouteGatedByStatus,
+  resolveConstructionVariant,
 } from "@/lib/agencySiteStatus";
 import { formatCnpj } from "@/lib/agencyDomains";
 
@@ -73,5 +74,19 @@ describe("formatCnpj", () => {
     expect(formatCnpj("")).toBeNull();
     expect(formatCnpj("123456")).toBeNull();
     expect(formatCnpj("123456780001950")).toBeNull();
+  });
+});
+
+describe("variante da página temporária", () => {
+  it("aplica a variante exclusiva apenas nos hosts da Destinos com a Ju", () => {
+    expect(resolveConstructionVariant("destinoscomaju.com.br")).toBe("destinosComAJu");
+    expect(resolveConstructionVariant(" WWW.DestinosComAJu.com.br ")).toBe("destinosComAJu");
+    expect(isUnderConstruction("destinoscomaju.com.br")).toBe(true);
+  });
+
+  it("mantém a variante default nos demais domínios", () => {
+    for (const host of [...CONSTRUCTION_HOSTS, "outraagencia.com.br", "", null]) {
+      expect(resolveConstructionVariant(host as string | null), String(host)).toBe("default");
+    }
   });
 });
