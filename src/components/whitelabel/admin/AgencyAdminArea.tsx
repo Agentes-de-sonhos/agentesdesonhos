@@ -3,7 +3,8 @@ import { Navigate, useRoutes } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
-import { AppErrorFallback, ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { AgencyAdminShell } from "./AgencyAdminShell";
 import AgencyAdminLogin from "@/pages/whitelabel/admin/AgencyAdminLogin";
 
@@ -26,7 +27,15 @@ const Suporte = lazy(() => import("@/pages/Suporte"));
 
 function e(Page: ComponentType) {
   return (
-    <ErrorBoundary fallback={<AppErrorFallback />}>
+    <ErrorBoundary
+      fallback={
+        <CriticalErrorState
+          description="Esta área não carregou corretamente. Você pode tentar novamente sem perder o restante do painel."
+          retryLabel="Atualizar área"
+          onRetry={() => window.location.reload()}
+        />
+      }
+    >
       <Page />
     </ErrorBoundary>
   );
