@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Outlet, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
+import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 import { shouldRenderUnderConstruction, resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { AGENCY_PUBLIC_TOOL_ROUTES } from "@/lib/agencyPublicToolRoutes";
@@ -11,6 +12,7 @@ const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnde
 const DestinosComAJuComingSoon = lazy(() => import("@/pages/whitelabel/DestinosComAJuComingSoon"));
 const AgencyPreviewGate = lazy(() => import("@/pages/whitelabel/AgencyPreviewGate"));
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
+const AgencyAdminArea = lazy(() => import("@/components/whitelabel/admin/AgencyAdminArea"));
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
 const RoteiroPublicoV2 = lazy(() => import("@/pages/RoteiroPublicoV2"));
@@ -70,6 +72,16 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
 }
 
 export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<Fallback />}>
+        <AgencyDomainRoutesInner info={info} />
+      </Suspense>
+    </BrowserRouter>
+  );
+}
+
+function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
   /**
    * O status governa a home. O bypass explícito de revisão (`?__agency_preview=1`)
    * só vale no hostname técnico de preview do Lovable — nunca no domínio real da
@@ -83,9 +95,18 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
           window.location.hostname,
           window.location.search,
         );
+
+  /**
+   * Painel administrativo white label: qualquer caminho de /gestao (e os
+   * aliases absolutos reutilizados pelas páginas) entra na área própria —
+   * antes do site público e mesmo com a home em construção.
+   */
+  const location = useLocation();
+  if (isAgencyAdminPath(location.pathname)) {
+    return <AgencyAdminArea hostname={info.hostname} />;
+  }
+
   return (
-    <BrowserRouter>
-      <Suspense fallback={<Fallback />}>
         <Routes>
           {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
           {construction && (
@@ -134,7 +155,5 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
             <Route path="*" element={<LinkUnavailable />} />
           </Route>
         </Routes>
-      </Suspense>
-    </BrowserRouter>
   );
 }

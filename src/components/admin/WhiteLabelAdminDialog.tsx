@@ -44,6 +44,7 @@ interface DomainRow {
   agency_slug: string;
   is_primary: boolean;
   is_active: boolean;
+  admin_portal_enabled: boolean;
 }
 
 interface WhiteLabelStatus {
@@ -150,6 +151,17 @@ export function WhiteLabelAdminDialog({ open, onOpenChange, userId, userName }: 
       toast.success("Situação do domínio atualizada.");
     },
     onError: (e: any) => toast.error(e?.message || "Não foi possível atualizar o domínio."),
+  });
+
+  const setAdminPortal = useMutation({
+    mutationFn: (p: { id: string; enabled: boolean }) =>
+      call("admin_whitelabel_set_admin_portal", { _domain_id: p.id, _enabled: p.enabled }),
+    onSuccess: (data) => {
+      refresh(data);
+      toast.success("Painel administrativo atualizado.");
+    },
+    onError: (e: any) =>
+      toast.error(e?.message || "Não foi possível atualizar o painel administrativo."),
   });
 
   const reasons: string[] = [];
@@ -342,6 +354,20 @@ export function WhiteLabelAdminDialog({ open, onOpenChange, userId, userName }: 
                           {d.is_active ? "Desativar" : "Ativar"}
                         </Button>
                       </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium">Painel administrativo (/gestao)</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          A equipe acessa a gestão pelo próprio domínio da agência.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={!!d.admin_portal_enabled}
+                        onCheckedChange={(v) => setAdminPortal.mutate({ id: d.id, enabled: v })}
+                        disabled={setAdminPortal.isPending}
+                        aria-label={`Painel administrativo de ${d.hostname}`}
+                      />
                     </div>
                   </div>
                 ))}

@@ -25,7 +25,7 @@ interface DashboardLayoutProps {
  * mounted (e.g. from a router layout-route). Nested instances then render
  * their children as-is, avoiding a full sidebar/chrome remount on navigation.
  */
-const DashboardLayoutContext = createContext(false);
+export const DashboardLayoutContext = createContext(false);
 
 export function DashboardLayout({ children, flushHorizontal = false }: DashboardLayoutProps) {
   const alreadyMounted = useContext(DashboardLayoutContext);
