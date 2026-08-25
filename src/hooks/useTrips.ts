@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { cloneItineraryForTrip } from "@/lib/roteiro-domain";
 import type { Trip, TripService, TripFormData, TripServiceType, TripServiceData } from "@/types/trip";
 
 function generatePassword(): string {
@@ -156,6 +157,149 @@ export function useTrips() {
     },
   });
 
+  const duplicateTripMutation = useMutation({
+    mutationFn: async (sourceId: string) => {
+      if (!user) throw new Error("User not authenticated");
+
+      const { data: source, error: srcErr } = await supabase
+        .from("trips").select("*").eq("id", sourceId).single();
+      if (srcErr || !source) throw srcErr || new Error("Carteira não encontrada");
+
+      const array = new Uint8Array(16);
+      crypto.getRandomValues(array);
+      const shareToken = Array.from(array).map(b => b.toString(16).padStart(2, "0")).join("");
+
+      const src = source as any;
+      const { data: newTrip, error: newErr } = await supabase
+        .from("trips")
+        .insert({
+          user_id: user.id,
+          client_name: `${src.client_name} (cópia)`,
+          client_id: src.client_id ?? null,
+          destination: src.destination,
+          start_date: src.start_date,
+          end_date: src.end_date,
+          status: src.status ?? "active",
+          trip_title: src.trip_title ? `${src.trip_title} (cópia)` : null,
+          wallet_cover_url: src.wallet_cover_url ?? null,
+          signature_snapshot: src.signature_snapshot ?? null,
+          share_token: shareToken,
+          access_password: generatePassword(),
+          // A cópia não herda vínculos operacionais nem códigos públicos —
+          // slug/short_code/public_access_code são gerados pelos triggers.
+          opportunity_id: null,
+          itinerary_id: null,
+          itinerary_mode: "none",
+        } as any)
+        .select()
+        .single();
+      if (newErr || !newTrip) throw newErr || new Error("Falha ao criar a cópia da carteira");
+
+      // Serviços: vouchers/anexos ficam de fora (são arquivos da reserva
+      // original e sua substituição removeria o arquivo da carteira de origem).
+      const { data: services } = await supabase
+        .from("trip_services").select("*").eq("trip_id", sourceId)
+        .order("order_index", { ascending: true });
+      const serviceIdMap = new Map<string, string>();
+      if (services && services.length > 0) {
+        const { data: inserted } = await supabase
+          .from("trip_services")
+          .insert(services.map((s: any) => ({
+            trip_id: newTrip.id,
+            service_type: s.service_type,
+            service_data: s.service_data,
+            order_index: s.order_index,
+            image_url: s.image_url ?? null,
+            image_urls: Array.isArray(s.image_urls) ? [...s.image_urls] : [],
+            place_id: s.place_id ?? null,
+            attachments: [],
+            voucher_url: null,
+            voucher_name: null,
+          })) as any)
+          .select("id, order_index");
+        (services as any[]).forEach((s) => {
+          const created = (inserted ?? []).find((n: any) => n.order_index === s.order_index);
+          if (created) serviceIdMap.set(s.id, created.id);
+        });
+      }
+
+      // Roteiro V2 vinculado: clona o itinerário (cópia independente) e já
+      // vincula à nova carteira via RPC atômica.
+      if (src.itinerary_mode === "v2" && src.itinerary_id) {
+        try {
+          await cloneItineraryForTrip(src.itinerary_id, newTrip.id);
+        } catch (e) {
+          console.warn("[duplicateTrip] falha ao clonar roteiro V2:", e);
+        }
+      }
+
+      // Roteiro legado (atividades por período salvas na própria carteira).
+      const { data: legacyActs } = await supabase
+        .from("trip_itinerary_activities").select("*").eq("trip_id", sourceId)
+        .order("day_date", { ascending: true }).order("order_index", { ascending: true });
+      if (legacyActs && legacyActs.length > 0) {
+        await supabase.from("trip_itinerary_activities").insert(
+          legacyActs.map((a: any) => ({
+            trip_id: newTrip.id,
+            day_date: a.day_date,
+            period: a.period,
+            title: a.title,
+            description: a.description ?? null,
+            location: a.location ?? null,
+            maps_url: a.maps_url ?? null,
+            notes: a.notes ?? null,
+            start_time: a.start_time ?? null,
+            order_index: a.order_index ?? 0,
+            origin: a.origin ?? "manual",
+            photo_urls: Array.isArray(a.photo_urls) ? [...a.photo_urls] : null,
+            document_urls: Array.isArray(a.document_urls) ? [...a.document_urls] : null,
+            linked_service_id: a.linked_service_id ? serviceIdMap.get(a.linked_service_id) ?? null : null,
+          })) as any
+        );
+      }
+
+      const { data: periodImgs } = await supabase
+        .from("trip_itinerary_period_images").select("*").eq("trip_id", sourceId);
+      if (periodImgs && periodImgs.length > 0) {
+        await supabase.from("trip_itinerary_period_images").insert(
+          periodImgs.map((p: any) => ({
+            trip_id: newTrip.id,
+            day_date: p.day_date,
+            period: p.period,
+            image_url: p.image_url,
+          })) as any
+        );
+      }
+
+      const { data: reminders } = await supabase
+        .from("trip_reminders").select("*").eq("trip_id", sourceId);
+      if (reminders && reminders.length > 0) {
+        await supabase.from("trip_reminders").insert(
+          reminders.map((r: any) => ({
+            trip_id: newTrip.id,
+            user_id: user.id,
+            days_before: r.days_before,
+            reminder_date: r.reminder_date,
+            follow_up_note: r.follow_up_note ?? null,
+            is_completed: false,
+          })) as any
+        );
+      }
+
+      return newTrip as Trip;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
+      toast({
+        title: "Carteira duplicada",
+        description: "Cópia criada com nova senha de acesso. Vouchers e anexos não foram copiados.",
+      });
+    },
+    onError: (error) => {
+      toast({ title: "Erro ao duplicar", description: error.message, variant: "destructive" });
+    },
+  });
+
   const updatePasswordMutation = useMutation({
     mutationFn: async ({ id, password }: { id: string; password: string }) => {
       const { error } = await supabase.from("trips").update({ access_password: password, failed_password_attempts: 0, is_locked: false } as any).eq("id", id);
@@ -215,11 +359,13 @@ export function useTrips() {
     createTrip: createTripMutation.mutateAsync,
     updateTrip: updateTripMutation.mutateAsync,
     deleteTrip: deleteTripMutation.mutateAsync,
+    duplicateTrip: duplicateTripMutation.mutateAsync,
     updatePassword: updatePasswordMutation.mutateAsync,
     regeneratePassword: regeneratePasswordMutation.mutateAsync,
     unlockTrip: unlockTripMutation.mutateAsync,
     isCreating: createTripMutation.isPending,
     isUpdating: updateTripMutation.isPending,
+    isDuplicating: duplicateTripMutation.isPending,
   };
 }
 

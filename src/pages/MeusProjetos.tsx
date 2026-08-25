@@ -64,7 +64,6 @@ import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialo
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -265,8 +264,8 @@ export default function MeusProjetos() {
   const [templateTarget, setTemplateTarget] = useState<Itinerary | null>(null);
 
   const { quotes, isLoading: quotesLoading, deleteQuote, duplicateQuote } = useQuotes();
-  const { trips, isLoading: tripsLoading, deleteTrip } = useTrips();
-  const { itineraries, isLoading: itinerariesLoading, deleteItinerary } = useItineraries();
+  const { trips, isLoading: tripsLoading, deleteTrip, duplicateTrip } = useTrips();
+  const { itineraries, isLoading: itinerariesLoading, deleteItinerary, duplicateItinerary } = useItineraries();
   const { templates } = useItineraryTemplates();
   const { notes } = useNotes();
   const { canUseBookingRequests } = useBookingRequestCapability();
@@ -313,10 +312,16 @@ export default function MeusProjetos() {
   };
 
   const handleDuplicate = (item: ProjectItem) => {
-    if (item.type === "quote") {
-      duplicateQuote(item.id);
-    } else {
-      toast.info("Funcionalidade de duplicar disponível em breve para este tipo.");
+    switch (item.type) {
+      case "quote":
+        duplicateQuote(item.id);
+        break;
+      case "trip":
+        duplicateTrip(item.id);
+        break;
+      case "itinerary":
+        duplicateItinerary.mutate(item.id);
+        break;
     }
   };
 
@@ -409,6 +414,9 @@ export default function MeusProjetos() {
                 <IconAction label="Editar" onClick={() => handleEdit(item)}>
                   <Pencil className="h-4 w-4" />
                 </IconAction>
+                <IconAction label="Duplicar" onClick={() => handleDuplicate(item)}>
+                  <Copy className="h-4 w-4" />
+                </IconAction>
                 <IconAction
                   label="Salvar como modelo"
                   onClick={() => setTemplateTarget(found as Itinerary)}
@@ -482,11 +490,10 @@ export default function MeusProjetos() {
           <IconAction label="Editar" onClick={() => handleEdit(item)}>
             <Pencil className="h-4 w-4" />
           </IconAction>
-          {item.type !== "itinerary" ? (
-            <IconAction label="Duplicar" onClick={() => handleDuplicate(item)}>
-              <Copy className="h-4 w-4" />
-            </IconAction>
-          ) : (
+          <IconAction label="Duplicar" onClick={() => handleDuplicate(item)}>
+            <Copy className="h-4 w-4" />
+          </IconAction>
+          {item.type === "itinerary" && (
             <IconAction
               label="Salvar como modelo"
               onClick={() => {
