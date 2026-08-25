@@ -790,6 +790,7 @@ export type Database = {
       }
       agency_public_domains: {
         Row: {
+          admin_portal_enabled: boolean
           agency_slug: string
           created_at: string
           hostname: string
@@ -800,6 +801,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_portal_enabled?: boolean
           agency_slug: string
           created_at?: string
           hostname: string
@@ -810,6 +812,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_portal_enabled?: boolean
           agency_slug?: string
           created_at?: string
           hostname?: string
@@ -15454,6 +15457,10 @@ export type Database = {
           wallets_count: number
         }[]
       }
+      admin_whitelabel_set_admin_portal: {
+        Args: { _domain_id: string; _enabled: boolean }
+        Returns: Json
+      }
       admin_whitelabel_set_domain_active: {
         Args: { _domain_id: string; _is_active: boolean }
         Returns: Json
@@ -15484,6 +15491,7 @@ export type Database = {
         }
         Returns: Json
       }
+      agency_admin_access_check: { Args: { p_hostname: string }; Returns: Json }
       agency_can_use_booking_requests: {
         Args: { _agency_id: string }
         Returns: boolean
@@ -15807,6 +15815,7 @@ export type Database = {
         Returns: string
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
+      get_agency_admin_portal: { Args: { p_hostname: string }; Returns: Json }
       get_agency_domain: { Args: { p_hostname: string }; Returns: Json }
       get_agency_signature_base: {
         Args: { _agency_id: string }
