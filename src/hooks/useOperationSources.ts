@@ -69,25 +69,21 @@ export function useOperationSearch(term: string) {
       const [opps, trips, quotes, operations] = await Promise.all([
         supabase.from("opportunities")
           .select("id, client_id, destination, start_date, end_date, estimated_value, updated_at, client:clients(name)")
-          .eq("user_id", uid)
           .or(`destination.ilike.${pattern}`)
           .order("updated_at", { ascending: false })
           .limit(25),
         supabase.from("trips")
           .select("id, client_id, client_name, trip_title, destination, start_date, end_date, opportunity_id, updated_at")
-          .eq("user_id", uid)
           .or(`client_name.ilike.${pattern},destination.ilike.${pattern},trip_title.ilike.${pattern}`)
           .order("updated_at", { ascending: false })
           .limit(25),
         supabase.from("quotes")
           .select("id, client_id, client_name, trip_title, destination, start_date, end_date, total_amount, opportunity_id, updated_at")
-          .eq("user_id", uid)
           .or(`client_name.ilike.${pattern},destination.ilike.${pattern},trip_title.ilike.${pattern}`)
           .order("updated_at", { ascending: false })
           .limit(25),
         supabase.from("operations")
           .select("id, client_id, opportunity_id, quote_id, trip_id, title, destination, travel_start_date, travel_end_date, sale_amount, updated_at, client:clients(name)")
-          .eq("user_id", uid)
           .or(`title.ilike.${pattern},destination.ilike.${pattern}`)
           .order("updated_at", { ascending: false })
           .limit(25),
@@ -200,11 +196,11 @@ export function useOperationBundle(candidate: OperationCandidate | null) {
       const c = candidate!;
 
       const tripQuery = c.opportunityId
-        ? supabase.from("trips").select("*").eq("user_id", uid).eq("opportunity_id", c.opportunityId)
-        : supabase.from("trips").select("*").eq("user_id", uid).in("id", c.tripIds.length ? c.tripIds : ["00000000-0000-0000-0000-000000000000"]);
+        ? supabase.from("trips").select("*").eq("opportunity_id", c.opportunityId)
+        : supabase.from("trips").select("*").in("id", c.tripIds.length ? c.tripIds : ["00000000-0000-0000-0000-000000000000"]);
       const quoteQuery = c.opportunityId
-        ? supabase.from("quotes").select("*").eq("user_id", uid).eq("opportunity_id", c.opportunityId)
-        : supabase.from("quotes").select("*").eq("user_id", uid).in("id", c.quoteIds.length ? c.quoteIds : ["00000000-0000-0000-0000-000000000000"]);
+        ? supabase.from("quotes").select("*").eq("opportunity_id", c.opportunityId)
+        : supabase.from("quotes").select("*").in("id", c.quoteIds.length ? c.quoteIds : ["00000000-0000-0000-0000-000000000000"]);
 
       const [tripRes, quoteRes, oppRes, saleRes] = await Promise.all([
         tripQuery,

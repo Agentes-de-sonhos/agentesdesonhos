@@ -36,7 +36,6 @@ export function ImportQuoteIntoWalletDialog({
       const { data, error } = await supabase
         .from("quotes")
         .select("id, client_name, destination, start_date, end_date, created_at, quote_services(id)")
-        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;

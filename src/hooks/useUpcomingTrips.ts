@@ -56,7 +56,6 @@ export function useUpcomingTrips() {
       const { data: trips, error } = await supabase
         .from("trips")
         .select("id, client_name, trip_title, destination, start_date, end_date, status")
-        .eq("user_id", user.id)
         .gte("end_date", today)
         .order("start_date", { ascending: true })
         .limit(500);
@@ -71,7 +70,6 @@ export function useUpcomingTrips() {
       const { data: reminders } = await supabase
         .from("trip_reminders")
         .select("id, trip_id, follow_up_note, reminder_date")
-        .eq("user_id", user.id)
         .in("trip_id", rows.map((t: any) => t.id))
         .order("reminder_date", { ascending: true });
 

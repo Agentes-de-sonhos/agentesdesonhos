@@ -176,7 +176,6 @@ export function useAgenda(year?: number) {
       const { data, error } = await supabase
         .from("trips")
         .select("id, client_name, destination, start_date, end_date")
-        .eq("user_id", user.id)
         .gte("start_date", startDate)
         .lte("start_date", endDate)
         .order("start_date", { ascending: true });

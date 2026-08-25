@@ -17,10 +17,11 @@ export function useTrips() {
     queryKey: ["trips", user?.id],
     queryFn: async () => {
       if (!user) return [];
+      // O filtro fica no RLS: masters recebem toda a agência; colaboradores
+      // continuam restritos pelas políticas de equipe.
       const { data, error } = await supabase
         .from("trips")
         .select("id, user_id, client_name, client_id, destination, start_date, end_date, status, share_token, access_password, slug, short_code, created_at, updated_at, is_locked, failed_password_attempts")
-        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
