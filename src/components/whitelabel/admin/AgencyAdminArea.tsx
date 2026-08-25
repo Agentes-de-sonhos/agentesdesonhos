@@ -16,12 +16,12 @@ const MeusProjetos = lazy(() => import("@/pages/MeusProjetos"));
 const Agenda = lazy(() => import("@/pages/Agenda"));
 const GestaoClientes = lazy(() => import("@/pages/GestaoClientes"));
 const Financeiro = lazy(() => import("@/pages/Financeiro"));
-const Quotes = lazy(() => import("@/pages/Quotes"));
+const GerarOrcamento = lazy(() => import("@/pages/GerarOrcamento"));
 const TripWallet = lazy(() => import("@/pages/TripWallet"));
-const Itinerary = lazy(() => import("@/pages/Itinerary"));
-const ItineraryTemplates = lazy(() => import("@/pages/ItineraryTemplates"));
+const CriarRoteiro = lazy(() => import("@/pages/CriarRoteiro"));
+const ModelosRoteiros = lazy(() => import("@/pages/ModelosRoteiros"));
 const Perfil = lazy(() => import("@/pages/Perfil"));
-const Configuracoes = lazy(() => import("@/pages/Configuracoes"));
+const MinhaConta = lazy(() => import("@/pages/MinhaConta"));
 const Suporte = lazy(() => import("@/pages/Suporte"));
 
 function e(Page: ComponentType) {
@@ -51,12 +51,15 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
     ["crm/documentos", GestaoClientes],
     ["reservas", GestaoClientes],
     ["financeiro", Financeiro],
-    ["criar/orcamento", Quotes],
+    ["criar/orcamento", GerarOrcamento],
+    ["criar/orcamento/:id", GerarOrcamento],
     ["criar/carteira", TripWallet],
-    ["criar/roteiro", Itinerary],
-    ["criar/modelos-roteiros", ItineraryTemplates],
+    ["criar/carteira/:id", TripWallet],
+    ["criar/roteiro", CriarRoteiro],
+    ["criar/roteiro/:id", CriarRoteiro],
+    ["criar/modelos-roteiros", ModelosRoteiros],
     ["perfil", Perfil],
-    ["minha-conta", Configuracoes],
+    ["minha-conta", MinhaConta],
     ["suporte", Suporte],
   ];
 
@@ -67,12 +70,15 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
     ["/gestao-clientes", GestaoClientes],
     ["/financeiro", Financeiro],
     ["/perfil", Perfil],
-    ["/minha-conta", Configuracoes],
+    ["/minha-conta", MinhaConta],
     ["/suporte", Suporte],
-    ["/ferramentas-ia/gerar-orcamento", Quotes],
+    ["/ferramentas-ia/gerar-orcamento", GerarOrcamento],
+    ["/ferramentas-ia/gerar-orcamento/:id", GerarOrcamento],
     ["/ferramentas-ia/trip-wallet", TripWallet],
-    ["/ferramentas-ia/criar-roteiro", Itinerary],
-    ["/ferramentas-ia/modelos-roteiros", ItineraryTemplates],
+    ["/ferramentas-ia/trip-wallet/:id", TripWallet],
+    ["/ferramentas-ia/criar-roteiro", CriarRoteiro],
+    ["/ferramentas-ia/criar-roteiro/:id", CriarRoteiro],
+    ["/ferramentas-ia/modelos-roteiros", ModelosRoteiros],
   ];
 
   const routes = useRoutes([
