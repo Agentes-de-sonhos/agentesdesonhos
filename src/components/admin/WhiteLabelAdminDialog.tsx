@@ -355,6 +355,20 @@ export function WhiteLabelAdminDialog({ open, onOpenChange, userId, userName }: 
                         </Button>
                       </div>
                     </div>
+                    <div className="flex items-center justify-between gap-3 rounded-md bg-muted/40 px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium">Painel administrativo (/gestao)</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          A equipe acessa a gestão pelo próprio domínio da agência.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={!!d.admin_portal_enabled}
+                        onCheckedChange={(v) => setAdminPortal.mutate({ id: d.id, enabled: v })}
+                        disabled={setAdminPortal.isPending}
+                        aria-label={`Painel administrativo de ${d.hostname}`}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
