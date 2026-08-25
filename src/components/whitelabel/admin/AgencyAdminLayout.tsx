@@ -388,7 +388,3 @@ function MenuContent({
     </div>
   );
 }
-
-// User icon importado para possíveis extensões do rodapé; mantido para uso futuro.
-void User;
-void PlusCircle;
