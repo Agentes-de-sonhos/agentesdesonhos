@@ -736,6 +736,120 @@ export function useItineraries() {
     },
   });
 
+  const duplicateItinerary = useMutation({
+    mutationFn: async (sourceId: string) => {
+      if (!user) throw new Error("User not authenticated");
+
+      const { data: source, error: srcErr } = await supabase
+        .from("itineraries").select("*").eq("id", sourceId).single();
+      if (srcErr || !source) throw srcErr || new Error("Roteiro não encontrado");
+
+      const src = source as any;
+      const { data: newItinerary, error: newErr } = await supabase
+        .from("itineraries")
+        .insert({
+          user_id: user.id,
+          destination: src.destination,
+          start_date: src.start_date,
+          end_date: src.end_date,
+          travelers_count: src.travelers_count ?? 1,
+          trip_type: src.trip_type,
+          budget_level: src.budget_level,
+          // Cópia nasce como rascunho e sem token público: o link de
+          // compartilhamento é gerado só quando o usuário publicar.
+          status: "draft",
+          share_token: null,
+          client_id: src.client_id ?? null,
+          passengers: src.passengers ?? [],
+          cover_image_url: src.cover_image_url ?? null,
+          headline: src.headline ? `${src.headline} (cópia)` : null,
+          destination_intro_text: src.destination_intro_text ?? null,
+          destination_intro_images: Array.isArray(src.destination_intro_images)
+            ? [...src.destination_intro_images] : [],
+          show_destination_intro: src.show_destination_intro ?? true,
+          show_pricing_section: src.show_pricing_section ?? false,
+          pricing_content: src.pricing_content ?? null,
+          signature_snapshot: src.signature_snapshot ?? null,
+          source_itinerary_id: src.id,
+        } as any)
+        .select()
+        .single();
+      if (newErr || !newItinerary) throw newErr || new Error("Falha ao criar a cópia do roteiro");
+
+      // Dias (mapeando id antigo -> novo pelo day_number, único por roteiro).
+      const { data: days } = await supabase
+        .from("itinerary_days").select("*").eq("itinerary_id", sourceId)
+        .order("day_number", { ascending: true });
+      const dayIdMap = new Map<string, string>();
+      if (days && days.length > 0) {
+        const { data: newDays, error: daysErr } = await supabase
+          .from("itinerary_days")
+          .insert(days.map((d: any) => ({
+            itinerary_id: newItinerary.id,
+            day_number: d.day_number,
+            date: d.date,
+          })) as any)
+          .select("id, day_number");
+        if (daysErr) throw daysErr;
+        (days as any[]).forEach((d) => {
+          const created = (newDays ?? []).find((n: any) => n.day_number === d.day_number);
+          if (created) dayIdMap.set(d.id, created.id);
+        });
+
+        // Atividades de cada dia.
+        const { data: activities } = await supabase
+          .from("itinerary_activities").select("*")
+          .in("day_id", days.map((d: any) => d.id));
+        if (activities && activities.length > 0) {
+          const { error: actErr } = await supabase.from("itinerary_activities").insert(
+            activities
+              .filter((a: any) => dayIdMap.has(a.day_id))
+              .map((a: any) => ({
+                day_id: dayIdMap.get(a.day_id)!,
+                title: a.title,
+                description: a.description ?? null,
+                location: a.location ?? null,
+                maps_url: a.maps_url ?? null,
+                period: a.period,
+                order_index: a.order_index ?? 0,
+                estimated_cost: a.estimated_cost ?? null,
+                estimated_duration: a.estimated_duration ?? null,
+                photo_url: a.photo_url ?? null,
+                document_urls: Array.isArray(a.document_urls) ? [...a.document_urls] : [],
+                is_approved: a.is_approved ?? false,
+                // Vínculo com serviço de uma carteira não se aplica à cópia.
+                linked_trip_service_id: null,
+              })) as any
+          );
+          if (actErr) throw actErr;
+        }
+      }
+
+      // Imagens por período.
+      const { data: periodImgs } = await supabase
+        .from("itinerary_period_images").select("*").eq("itinerary_id", sourceId);
+      if (periodImgs && periodImgs.length > 0) {
+        await supabase.from("itinerary_period_images").insert(
+          periodImgs.map((p: any) => ({
+            itinerary_id: newItinerary.id,
+            day_date: p.day_date,
+            period: p.period,
+            image_url: p.image_url,
+          })) as any
+        );
+      }
+
+      return newItinerary;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["itineraries"] });
+      toast.success("Roteiro duplicado — a cópia foi criada como rascunho.");
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao duplicar roteiro", { description: error.message });
+    },
+  });
+
   const reorderDays = useMutation({
     mutationFn: async ({
       itineraryId,
@@ -795,5 +909,6 @@ export function useItineraries() {
     reorderDays,
     mutateItineraryDays,
     deleteItinerary,
+    duplicateItinerary,
   };
 }
