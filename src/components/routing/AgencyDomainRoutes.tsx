@@ -71,6 +71,16 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
 }
 
 export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<Fallback />}>
+        <AgencyDomainRoutesInner info={info} />
+      </Suspense>
+    </BrowserRouter>
+  );
+}
+
+function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
   /**
    * O status governa a home. O bypass explícito de revisão (`?__agency_preview=1`)
    * só vale no hostname técnico de preview do Lovable — nunca no domínio real da
@@ -84,9 +94,18 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
           window.location.hostname,
           window.location.search,
         );
+
+  /**
+   * Painel administrativo white label: qualquer caminho de /gestao (e os
+   * aliases absolutos reutilizados pelas páginas) entra na área própria —
+   * antes do site público e mesmo com a home em construção.
+   */
+  const location = useLocation();
+  if (isAgencyAdminPath(location.pathname)) {
+    return <AgencyAdminArea hostname={info.hostname} />;
+  }
+
   return (
-    <BrowserRouter>
-      <Suspense fallback={<Fallback />}>
         <Routes>
           {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
           {construction && (
