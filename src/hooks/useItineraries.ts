@@ -52,10 +52,11 @@ export function useItineraries() {
   const itinerariesQuery = useQuery({
     queryKey: ["itineraries", user?.id],
     queryFn: async () => {
+      // O filtro fica no RLS: masters recebem toda a agência; colaboradores
+      // continuam restritos pelas políticas de equipe.
       const { data, error } = await supabase
         .from("itineraries")
         .select("*")
-        .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

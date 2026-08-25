@@ -24,10 +24,11 @@ export function useQuotes() {
     queryKey: ["quotes", user?.id],
     queryFn: async () => {
       if (!user) return [];
+      // O filtro fica no RLS: masters recebem toda a agência; colaboradores
+      // continuam restritos pelas políticas de equipe.
       const { data, error } = await supabase
         .from("quotes")
         .select("*")
-        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
