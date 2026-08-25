@@ -44,6 +44,7 @@ interface DomainRow {
   agency_slug: string;
   is_primary: boolean;
   is_active: boolean;
+  admin_portal_enabled: boolean;
 }
 
 interface WhiteLabelStatus {
@@ -150,6 +151,17 @@ export function WhiteLabelAdminDialog({ open, onOpenChange, userId, userName }: 
       toast.success("Situação do domínio atualizada.");
     },
     onError: (e: any) => toast.error(e?.message || "Não foi possível atualizar o domínio."),
+  });
+
+  const setAdminPortal = useMutation({
+    mutationFn: (p: { id: string; enabled: boolean }) =>
+      call("admin_whitelabel_set_admin_portal", { _domain_id: p.id, _enabled: p.enabled }),
+    onSuccess: (data) => {
+      refresh(data);
+      toast.success("Painel administrativo atualizado.");
+    },
+    onError: (e: any) =>
+      toast.error(e?.message || "Não foi possível atualizar o painel administrativo."),
   });
 
   const reasons: string[] = [];
