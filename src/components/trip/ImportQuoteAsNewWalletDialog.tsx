@@ -72,7 +72,6 @@ export function ImportQuoteAsNewWalletDialog({
       const { data, error } = await supabase
         .from("quotes")
         .select("id, client_id, client_name, trip_title, destination, start_date, end_date, created_at, status, total_amount, currency, quote_services(id)")
-        .eq("user_id", agencyOwnerId)
         .order("created_at", { ascending: false })
         .limit(300);
       if (error) {

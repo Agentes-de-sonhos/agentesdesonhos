@@ -36,7 +36,6 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
       const { data, error } = await supabase
         .from("itineraries")
         .select("id, destination, start_date, end_date, status, cover_image_url")
-        .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(200);
       if (error) throw error;
