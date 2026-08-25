@@ -11,6 +11,7 @@ const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnde
 const DestinosComAJuComingSoon = lazy(() => import("@/pages/whitelabel/DestinosComAJuComingSoon"));
 const AgencyPreviewGate = lazy(() => import("@/pages/whitelabel/AgencyPreviewGate"));
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
+const AgencyAdminArea = lazy(() => import("@/components/whitelabel/admin/AgencyAdminArea"));
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
 const RoteiroPublicoV2 = lazy(() => import("@/pages/RoteiroPublicoV2"));
