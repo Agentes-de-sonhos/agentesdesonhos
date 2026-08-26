@@ -90,12 +90,14 @@ export function OperationsModule() {
       if (idx >= 0) targetList.splice(idx, 1);
     }
 
-    let insertIdx = targetList.length;
-    if (targetCardId) {
+    // Mudança de etapa: o card sempre entra na primeira posição da nova coluna.
+    // Reordenação dentro da mesma etapa: mantém o posicionamento livre por drag and drop.
+    let insertIdx = stageChanged ? 0 : targetList.length;
+    if (!stageChanged && targetCardId) {
       const ti = targetList.indexOf(targetCardId);
       if (ti >= 0) insertIdx = dropBefore ? ti : ti + 1;
     }
-    targetList.splice(insertIdx, 0, draggedId);
+
 
     await reorderOperations({
       movedId: draggedId,
