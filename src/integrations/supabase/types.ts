@@ -14110,6 +14110,50 @@ export type Database = {
         }
         Relationships: []
       }
+      travel_file_notes: {
+        Row: {
+          agency_id: string
+          author_name: string | null
+          author_team_member_id: string | null
+          author_user_id: string | null
+          body: string
+          created_at: string
+          file_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          author_name?: string | null
+          author_team_member_id?: string | null
+          author_user_id?: string | null
+          body: string
+          created_at?: string
+          file_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          author_name?: string | null
+          author_team_member_id?: string | null
+          author_user_id?: string | null
+          body?: string
+          created_at?: string
+          file_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_file_notes_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "travel_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       travel_file_services: {
         Row: {
           agency_id: string
