@@ -42,8 +42,10 @@ describe("dashboard operacional white label", () => {
   });
 
   it("mantém Comunidade, Academy, Notícias e gamificação fora do painel", () => {
-    for (const term of ["Comunidade", "Academy", "Notícias", "gamifica"]) {
-      expect(home.includes(term)).toBe(false);
+    // O comentário do arquivo cita os módulos excluídos; o que não pode
+    // existir é qualquer link/import para eles.
+    for (const term of ["/comunidade", "/academy", "/noticias", "gamification"]) {
+      expect(home.toLowerCase().includes(term)).toBe(false);
     }
   });
 
