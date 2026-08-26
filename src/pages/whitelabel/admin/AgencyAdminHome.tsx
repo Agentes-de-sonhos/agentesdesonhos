@@ -87,8 +87,8 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
           </div>
         }
       >
-        {/* Solicitações de leads aguardando atendimento (respeita permissão de CRM). */}
-        {can("crm.access") && <LeadsAwaitingCard />}
+        {/* Leads aguardando atendimento — respeita a permissão de oportunidades. */}
+        {can("opportunities.view") && <LeadsAwaitingCard />}
 
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="min-w-0">
