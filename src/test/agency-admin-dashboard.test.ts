@@ -21,6 +21,11 @@ describe("catálogo de permissões", () => {
     expect(permissions).toContain("reservations.manage");
     expect(permissions).toContain("reservations.assign");
   });
+
+  it("trata a alteração de valores da reserva como permissão sensível", () => {
+    expect(permissions).toContain("reservations.financial.manage");
+    expect(permissions).toMatch(/reservations\.financial\.manage[^\]]*true/);
+  });
 });
 
 describe("dashboard operacional white label", () => {
@@ -39,6 +44,17 @@ describe("dashboard operacional white label", () => {
     expect(home).toContain("can?.reservations");
     expect(home).toContain("can?.agenda");
     expect(home).toContain("can.quotes_create");
+    expect(home).toContain("can?.operations_create");
+  });
+
+  it("abre os fluxos reais de criação sem sair do painel", () => {
+    expect(home).toContain("QuickAddClientDialog");
+    expect(home).toContain("CreateOperationDialog");
+  });
+
+  it("oferece nova tentativa quando o resumo falha", () => {
+    expect(home).toContain("isError");
+    expect(home).toContain("Tentar novamente");
   });
 
   it("mantém Comunidade, Academy, Notícias e gamificação fora do painel", () => {
@@ -69,7 +85,25 @@ describe("Central de Reservas", () => {
   });
 
   it("aplica debounce na busca do servidor", () => {
-    expect(reservas).toContain("setDebouncedSearch");
+    expect(reservas).toMatch(/setTimeout\(\(\) => patch\(\{ q:/);
+    expect(reservas).toContain("300");
+  });
+
+  it("guarda busca, filtros, ordenação e página na URL", () => {
+    expect(reservas).toContain("useSearchParams");
+    for (const key of ['params.get("q")', 'params.get("status")', 'params.get("sort")', 'params.get("page")', 'params.get("unread")']) {
+      expect(reservas).toContain(key);
+    }
+  });
+
+  it("permite ordenar e filtrar somente não lidas", () => {
+    expect(reservas).toContain("TRAVEL_FILES_SORTS");
+    expect(reservas).toContain("unreadOnly");
+  });
+
+  it("oferece nova tentativa quando a lista falha", () => {
+    expect(reservas).toContain("Não foi possível carregar as reservas");
+    expect(reservas).toContain("refetch()");
   });
 });
 
