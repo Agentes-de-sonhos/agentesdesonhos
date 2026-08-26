@@ -51,19 +51,19 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const brand = brandAccent(info.primary_color);
   // Mesma fonte de nome usada pelo shell (profiles.name), com fallback vazio.
   const { data: profileName } = useQuery({
-    queryKey: ["agency-admin-home-name", user?.id],
+    queryKey: ["agency-admin-profile", user?.id],
     enabled: !!user?.id,
     staleTime: 10 * 60 * 1000,
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("name")
-        .eq("id", user!.id)
+        .select("name, avatar_url")
+        .eq("user_id", user!.id)
         .maybeSingle();
-      return (data?.name as string | null) ?? null;
+      return (data as { name: string | null; avatar_url: string | null } | null);
     },
   });
-  const firstName = (profileName || "").trim().split(" ")[0] || "";
+  const firstName = (profileName?.name || "").trim().split(" ")[0] || "";
 
   return (
     <div className="space-y-6 animate-fade-in">
