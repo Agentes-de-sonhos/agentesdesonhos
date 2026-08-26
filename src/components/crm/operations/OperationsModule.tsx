@@ -97,7 +97,7 @@ export function OperationsModule() {
       const ti = targetList.indexOf(targetCardId);
       if (ti >= 0) insertIdx = dropBefore ? ti : ti + 1;
     }
-
+    targetList.splice(insertIdx, 0, draggedId);
 
     await reorderOperations({
       movedId: draggedId,
