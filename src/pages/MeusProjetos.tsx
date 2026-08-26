@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { Ticket } from "lucide-react";
 import { ReservasTab } from "@/components/reservas/ReservasTab";
-import { useTravelFiles, useQuoteFileNumbers } from "@/hooks/useTravelFiles";
+import { useTravelFilesSummary, useQuoteFileNumbers } from "@/hooks/useTravelFiles";
 import { useBookingRequestCapability } from "@/hooks/useBookingRequestCapability";
 import { ClientAvatar, getPersonInitials } from "@/components/shared/ClientAvatar";
 import {
@@ -301,7 +301,8 @@ export default function MeusProjetos() {
     next.set("tab", tab);
     setSearchParams(next);
   };
-  const { files: travelFiles, unreadCount: filesUnread } = useTravelFiles(canUseBookingRequests);
+  const { counts: travelFileCounts, unreadCount: filesUnread } =
+    useTravelFilesSummary(canUseBookingRequests);
   const { quoteFiles } = useQuoteFileNumbers(canUseBookingRequests);
 
   const normalized = useMemo(
@@ -384,7 +385,7 @@ export default function MeusProjetos() {
       case "modelos":
         return templates.length;
       case "reservas":
-        return travelFiles.length;
+        return travelFileCounts.all;
       case "bloco-notas":
         return notes.length;
       default:
