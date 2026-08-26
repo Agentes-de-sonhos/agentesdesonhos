@@ -126,4 +126,9 @@ describe("Processo de reserva", () => {
     expect(processo).toContain('can("financial.view_revenue")');
     expect(processo).toContain('can("financial.commissions.view")');
   });
+
+  it("ver valores não autoriza alterar valores", () => {
+    expect(processo).toContain('can("reservations.financial.manage")');
+    expect(processo).toContain("readOnly={!canFinancialManage}");
+  });
 });
