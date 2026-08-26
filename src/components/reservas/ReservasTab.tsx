@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import {
   Calendar,
   Loader2,
   MapPin,
+  RefreshCw,
   Search,
   SlidersHorizontal,
   Ticket,
@@ -25,10 +26,16 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAgencyTeamDirectory, useTravelFilesPage } from "@/hooks/useTravelFiles";
+import {
+  TRAVEL_FILES_SORTS,
+  useAgencyTeamDirectory,
+  useTravelFilesPage,
+  type TravelFilesSort,
+} from "@/hooks/useTravelFiles";
 import {
   FILE_STATUS_LABELS,
   RESERVAS_FILTERS,
+  reservasFilterCount,
   type ReservasFilterId,
 } from "@/lib/travelFiles";
 import { isFileOverdue } from "@/lib/travelFileWorkflow";
@@ -81,49 +88,103 @@ function StatusPill({ status }: { status: TravelFileListItem["status"] }) {
 }
 
 const PAGE_SIZE = 20;
+const FILTER_IDS = RESERVAS_FILTERS.map((f) => f.id) as string[];
+const SORT_IDS = TRAVEL_FILES_SORTS.map((s) => s.value) as string[];
+
+/** Chaves usadas na URL — o restante da query string é sempre preservado. */
+type ParamKey = "q" | "status" | "from" | "to" | "resp" | "unread" | "sort" | "page";
 
 export function ReservasTab() {
   const navigate = useNavigate();
   const nav = useAdminNav();
   const { members } = useAgencyTeamDirectory();
-  const [filter, setFilter] = useState<ReservasFilterId>("all");
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [responsible, setResponsible] = useState("all");
-  const [page, setPage] = useState(1);
+  const [params, setParams] = useSearchParams();
 
-  // Busca no servidor: aguarda o usuário parar de digitar.
+  // A URL é a fonte da verdade: busca, filtros, ordenação e página podem ser
+  // compartilhados e sobrevivem ao recarregamento da página.
+  const statusParam = params.get("status") || "all";
+  const filter: ReservasFilterId = (FILTER_IDS.includes(statusParam) ? statusParam : "all") as ReservasFilterId;
+  const urlSearch = params.get("q") || "";
+  const from = params.get("from") || "";
+  const to = params.get("to") || "";
+  const responsible = params.get("resp") || "all";
+  const unreadOnly = params.get("unread") === "1";
+  const sortParam = params.get("sort") || "recent";
+  const sort: TravelFilesSort = (SORT_IDS.includes(sortParam) ? sortParam : "recent") as TravelFilesSort;
+  const page = Math.max(1, parseInt(params.get("page") || "1", 10) || 1);
+
+  const [search, setSearch] = useState(urlSearch);
+  const [showAdvanced, setShowAdvanced] = useState(!!(from || to || responsible !== "all" || unreadOnly));
+
+  /** Valores padrão nunca poluem a URL (o parâmetro é removido). */
+  const DEFAULTS: Record<ParamKey, string> = {
+    q: "",
+    status: "all",
+    from: "",
+    to: "",
+    resp: "all",
+    unread: "0",
+    sort: "recent",
+    page: "1",
+  };
+
+  const patch = useCallback(
+    (changes: Partial<Record<ParamKey, string | null>>, resetPage = true) => {
+      const next = new URLSearchParams(params);
+      const entries = { ...changes } as Partial<Record<ParamKey, string | null>>;
+      if (resetPage && !("page" in changes)) entries.page = null;
+      for (const [key, value] of Object.entries(entries) as [ParamKey, string | null][]) {
+        if (!value || value === DEFAULTS[key]) next.delete(key);
+        else next.set(key, value);
+      }
+      setParams(next, { replace: true });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [params, setParams],
+  );
+
+  // Busca no servidor: aguarda o usuário parar de digitar e reflete na URL.
   useEffect(() => {
-    const t = setTimeout(() => {
-      setDebouncedSearch(search.trim());
-      setPage(1);
-    }, 300);
+    if (search === urlSearch) return;
+    const t = setTimeout(() => patch({ q: search.trim() || null }), 300);
     return () => clearTimeout(t);
-  }, [search]);
+  }, [search, urlSearch, patch]);
+
+  // Mantém o campo sincronizado quando a URL muda por fora (voltar/avançar).
+  useEffect(() => {
+    setSearch((current) => (current.trim() === urlSearch ? current : urlSearch));
+  }, [urlSearch]);
 
   const statuses = useMemo(() => {
     const found = RESERVAS_FILTERS.find((f) => f.id === filter);
     return found && found.statuses.length > 0 ? found.statuses : null;
   }, [filter]);
 
-  const { items, total, counts, can, isLoading, isFetching } = useTravelFilesPage({
-    search: debouncedSearch,
-    statuses,
-    from: from || null,
-    to: to || null,
-    responsibleTeamMemberId: responsible === "all" ? null : responsible,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  const { items, total, pages, counts, can, isLoading, isFetching, isError, error, refetch } =
+    useTravelFilesPage({
+      search: urlSearch,
+      statuses,
+      from: from || null,
+      to: to || null,
+      responsibleTeamMemberId: responsible === "all" ? null : responsible,
+      unreadOnly,
+      page,
+      pageSize: PAGE_SIZE,
+      sort,
+    });
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  // O servidor ajusta a página quando ela passa do total: refletir na URL.
+  useEffect(() => {
+    if (!isLoading && page > pages) patch({ page: pages > 1 ? String(pages) : null }, false);
+  }, [isLoading, page, pages, patch]);
 
   const kpis = [
     { label: "Novas solicitações", value: counts.new, tone: "text-primary" },
-    { label: "Aguardando reconfirmação", value: counts.awaiting_reconfirmation, tone: "text-amber-600" },
+    {
+      label: "Aguardando reconfirmação",
+      value: counts.awaiting_reconfirmation + counts.partially_available,
+      tone: "text-amber-600",
+    },
     { label: "Aguardando cliente", value: counts.awaiting_client, tone: "text-amber-600" },
     { label: "Confirmadas", value: counts.confirmed, tone: "text-emerald-600" },
     { label: "Em operação", value: counts.in_operation, tone: "text-foreground" },
@@ -145,13 +206,13 @@ export function ReservasTab() {
     return { requested, confirmed, currency };
   }, [items]);
 
+  const hasFilters = !!(urlSearch || filter !== "all" || from || to || responsible !== "all" || unreadOnly);
+
   const resetFilters = () => {
-    setFilter("all");
     setSearch("");
-    setFrom("");
-    setTo("");
-    setResponsible("all");
-    setPage(1);
+    const next = new URLSearchParams(params);
+    for (const key of ["q", "status", "from", "to", "resp", "unread", "page", "sort"]) next.delete(key);
+    setParams(next, { replace: true });
   };
 
   return (
@@ -198,10 +259,33 @@ export function ReservasTab() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nº do file, cliente, destino ou serviço..."
+            placeholder="Buscar por nº do file, cliente, destino, serviço ou fornecedor..."
             className="h-10 rounded-lg bg-background pl-9"
           />
         </div>
+        <Select value={sort} onValueChange={(v) => patch({ sort: v })}>
+          <SelectTrigger className="h-10 w-full bg-background sm:w-[220px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TRAVEL_FILES_SORTS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          type="button"
+          variant={unreadOnly ? "default" : "outline"}
+          size="sm"
+          className="h-10 gap-2"
+          aria-pressed={unreadOnly}
+          onClick={() => patch({ unread: unreadOnly ? null : "1" })}
+        >
+          Não lidas
+          <span className="tabular-nums opacity-80">{counts.unread}</span>
+        </Button>
         <Button
           type="button"
           variant="outline"
@@ -224,10 +308,7 @@ export function ReservasTab() {
             <Input
               type="date"
               value={from}
-              onChange={(e) => {
-                setFrom(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => patch({ from: e.target.value || null })}
               className="mt-1 h-9 bg-background"
             />
           </div>
@@ -238,10 +319,7 @@ export function ReservasTab() {
             <Input
               type="date"
               value={to}
-              onChange={(e) => {
-                setTo(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => patch({ to: e.target.value || null })}
               className="mt-1 h-9 bg-background"
             />
           </div>
@@ -249,13 +327,7 @@ export function ReservasTab() {
             <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               Responsável
             </label>
-            <Select
-              value={responsible}
-              onValueChange={(v) => {
-                setResponsible(v);
-                setPage(1);
-              }}
-            >
+            <Select value={responsible} onValueChange={(v) => patch({ resp: v === "all" ? null : v })}>
               <SelectTrigger className="mt-1 h-9 bg-background">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
@@ -270,7 +342,7 @@ export function ReservasTab() {
             </Select>
           </div>
           <div className="sm:col-span-3">
-            <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
+            <Button type="button" variant="ghost" size="sm" onClick={resetFilters} disabled={!hasFilters}>
               Limpar filtros
             </Button>
           </div>
@@ -282,10 +354,7 @@ export function ReservasTab() {
           <button
             key={f.id}
             type="button"
-            onClick={() => {
-              setFilter(f.id);
-              setPage(1);
-            }}
+            onClick={() => patch({ status: f.id === "all" ? null : f.id })}
             aria-pressed={filter === f.id}
             className={cn(
               "inline-flex h-auto items-center gap-1.5 whitespace-normal rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
@@ -295,13 +364,29 @@ export function ReservasTab() {
             )}
           >
             {f.label}
-            <span className="tabular-nums opacity-70">{counts[f.id] ?? 0}</span>
+            <span className="tabular-nums opacity-70">{reservasFilterCount(counts, f.id)}</span>
           </button>
         ))}
       </div>
 
       <Card className="overflow-hidden rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        {isLoading ? (
+        {isError ? (
+          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-50">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              Não foi possível carregar as reservas
+            </p>
+            <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+              {error?.message || "Tente novamente em alguns instantes."}
+            </p>
+            <Button size="sm" variant="outline" className="mt-4 gap-2" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4" />
+              Tentar novamente
+            </Button>
+          </div>
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
@@ -311,15 +396,18 @@ export function ReservasTab() {
               <Ticket className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">
-              {search || filter !== "all"
-                ? "Nenhum processo encontrado"
-                : "Nenhuma solicitação de reserva ainda"}
+              {hasFilters ? "Nenhum processo encontrado" : "Nenhuma solicitação de reserva ainda"}
             </p>
             <p className="mt-1 max-w-sm text-xs text-muted-foreground">
-              {search || filter !== "all"
+              {hasFilters
                 ? "Ajuste a busca ou os filtros para encontrar o processo desejado."
                 : "Quando um cliente escolher os serviços no orçamento web, o processo de reserva aparece aqui."}
             </p>
+            {hasFilters && (
+              <Button size="sm" variant="outline" className="mt-4" onClick={resetFilters}>
+                Limpar filtros
+              </Button>
+            )}
           </div>
         ) : (
           <div className="divide-y divide-border/50">
@@ -397,10 +485,10 @@ export function ReservasTab() {
         )}
       </Card>
 
-      {total > 0 && (
+      {total > 0 && !isError && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground">
-            {total} processo{total === 1 ? "" : "s"} · página {page} de {totalPages}
+            {total} processo{total === 1 ? "" : "s"} · página {page} de {pages}
             {isFetching ? " · atualizando..." : ""}
           </p>
           <div className="flex items-center gap-2">
@@ -408,15 +496,15 @@ export function ReservasTab() {
               variant="outline"
               size="sm"
               disabled={page <= 1 || isFetching}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => patch({ page: page - 1 <= 1 ? null : String(page - 1) }, false)}
             >
               Anterior
             </Button>
             <Button
               variant="outline"
               size="sm"
-              disabled={page >= totalPages || isFetching}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= pages || isFetching}
+              onClick={() => patch({ page: String(Math.min(pages, page + 1)) }, false)}
             >
               Próxima
             </Button>

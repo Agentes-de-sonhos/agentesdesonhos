@@ -72,6 +72,21 @@ export const RESERVAS_FILTERS: { id: ReservasFilterId; label: string; statuses: 
   { id: "cancelled", label: "Canceladas", statuses: ["cancelled"] },
 ];
 
+/**
+ * Contagem exibida em cada filtro. O servidor devolve um contador por etapa;
+ * o filtro "Aguardando reconfirmação" soma também "Parcialmente disponível"
+ * porque ele cobre as duas etapas.
+ */
+export function reservasFilterCount(
+  counts: Partial<Record<string, number>>,
+  id: ReservasFilterId,
+): number {
+  if (id === "awaiting_reconfirmation") {
+    return (counts.awaiting_reconfirmation ?? 0) + (counts.partially_available ?? 0);
+  }
+  return counts[id] ?? 0;
+}
+
 const norm = (v: string): string =>
   v
     .normalize("NFD")

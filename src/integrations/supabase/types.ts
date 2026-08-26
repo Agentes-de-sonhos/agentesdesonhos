@@ -16713,6 +16713,7 @@ export type Database = {
           _sort?: string
           _statuses?: string[]
           _to?: string
+          _unread?: boolean
         }
         Returns: Json
       }

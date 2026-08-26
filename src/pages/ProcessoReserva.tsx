@@ -134,12 +134,16 @@ export default function ProcessoReserva() {
   const { setStatus, setResponsibles, saveService } = useTravelFileMutations(id);
   const { can } = usePermissions();
   // Interface segue as permissões; a autoridade final é o servidor.
+  // Ver valores NUNCA autoriza alterar valores: a edição de valor vendido e
+  // custo exige reservations.financial.manage e a comissão exige a permissão
+  // específica de comissões.
   const canManage = can("reservations.manage");
   const canAssign = can("reservations.assign");
   const canRevenue = can("financial.view_revenue");
   const canMargin = can("financial.view_margin");
   const canCommission = can("financial.commissions.view");
   const canCommissionManage = can("financial.commissions.manage");
+  const canFinancialManage = can("reservations.financial.manage");
 
   const file = data?.file;
   const { notes, addNote, deleteNote } = useTravelFileNotes(id, file?.agency_id);
@@ -604,12 +608,14 @@ export default function ProcessoReserva() {
                         label="Reconfirmado"
                         value={service.reconfirmed_amount}
                         currency={service.currency}
+                        readOnly={!canManage}
                         onCommit={(v) => patchServiceAmounts(service, { reconfirmed_amount: v })}
                       />
                       <AmountField
                         label="Vendido"
                         value={service.sold_amount}
                         currency={service.currency}
+                        readOnly={!canFinancialManage}
                         onCommit={(v) => patchServiceAmounts(service, { sold_amount: v })}
                       />
                     </>
@@ -619,6 +625,7 @@ export default function ProcessoReserva() {
                       label="Custo"
                       value={service.cost_amount}
                       currency={service.currency}
+                      readOnly={!canFinancialManage}
                       onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
                     />
                   )}
