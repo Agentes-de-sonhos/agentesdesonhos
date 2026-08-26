@@ -76,12 +76,15 @@ function AmountField({
   value,
   currency,
   onCommit,
+  readOnly = false,
 }: {
   label: string;
   value: number | null | undefined;
   currency: string;
   onCommit: (next: number | null) => void;
+  readOnly?: boolean;
 }) {
+
   const [draft, setDraft] = useState(value == null ? "" : String(value));
 
   useEffect(() => {
