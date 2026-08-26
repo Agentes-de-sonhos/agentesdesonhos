@@ -27,7 +27,6 @@ export const SCOPED_MODULES: { key: string; label: string }[] = [
   { key: 'clients', label: 'Clientes' },
   { key: 'opportunities', label: 'Oportunidades' },
   { key: 'operations', label: 'Operações' },
-  { key: 'reservations', label: 'Central de Reservas' },
   { key: 'quotes', label: 'Orçamentos' },
   { key: 'itineraries', label: 'Roteiros' },
   { key: 'wallet', label: 'Carteira Digital' },
