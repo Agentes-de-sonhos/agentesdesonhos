@@ -16018,6 +16018,10 @@ export type Database = {
         Args: { p_landing_id: string }
         Returns: Json
       }
+      get_public_itinerary_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: Json
+      }
       get_public_lead_form: { Args: { p_token: string }; Returns: Json }
       get_public_product_landing: {
         Args: { p_product_key: string; p_slug: string }
