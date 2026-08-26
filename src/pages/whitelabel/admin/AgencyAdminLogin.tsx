@@ -71,6 +71,8 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [forgotSent, setForgotSent] = useState(false);
+  const [forgotTeam, setForgotTeam] = useState(false);
+
 
   if (authLoading || portal.isLoading) return <AgencyAdminLoading />;
   if (!info || !enabled) return <AgencyAdminUnavailable />;
