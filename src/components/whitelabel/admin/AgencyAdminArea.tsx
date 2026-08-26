@@ -1,5 +1,5 @@
 import { ComponentType, lazy } from "react";
-import { Navigate, useRoutes } from "react-router-dom";
+import { Navigate, useOutletContext, useRoutes } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
@@ -7,12 +7,13 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { AgencyAdminShell } from "./AgencyAdminShell";
 import AgencyAdminLogin from "@/pages/whitelabel/admin/AgencyAdminLogin";
+import type { AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 
 /**
  * Páginas administrativas reutilizadas da plataforma. Comunidade, Academy,
  * Notícias e Gamificação ficam de fora por definição do escopo (Etapa 1).
  */
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const AgencyAdminHome = lazy(() => import("@/pages/whitelabel/admin/AgencyAdminHome"));
 const MeusProjetos = lazy(() => import("@/pages/MeusProjetos"));
 const Agenda = lazy(() => import("@/pages/Agenda"));
 const GestaoClientes = lazy(() => import("@/pages/GestaoClientes"));
@@ -24,6 +25,15 @@ const ModelosRoteiros = lazy(() => import("@/pages/ModelosRoteiros"));
 const Perfil = lazy(() => import("@/pages/Perfil"));
 const MinhaConta = lazy(() => import("@/pages/MinhaConta"));
 const Suporte = lazy(() => import("@/pages/Suporte"));
+
+/**
+ * Home exclusiva do painel: recebe a agência resolvida pelo shell via
+ * contexto do Outlet, sem refazer a consulta de domínio.
+ */
+function AdminHomeRoute() {
+  const { info } = useOutletContext<{ info: AgencyAdminPortalInfo }>();
+  return <AgencyAdminHome info={info} />;
+}
 
 function e(Page: ComponentType) {
   return (
@@ -50,7 +60,7 @@ function e(Page: ComponentType) {
  */
 function AgencyAdminRouter({ hostname }: { hostname: string }) {
   const pagePairs: Array<[string, ComponentType]> = [
-    ["", Dashboard],
+    ["", AdminHomeRoute],
     ["meus-projetos", MeusProjetos],
     ["agenda", Agenda],
     ["crm/funil", GestaoClientes],
@@ -73,7 +83,7 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
   ];
 
   const aliasPairs: Array<[string, ComponentType]> = [
-    ["/dashboard", Dashboard],
+    ["/dashboard", AdminHomeRoute],
     ["/meus-projetos", MeusProjetos],
     ["/agenda", Agenda],
     ["/gestao-clientes", GestaoClientes],
