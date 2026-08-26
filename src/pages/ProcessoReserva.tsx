@@ -32,7 +32,7 @@ import {
   useTravelFile,
   useTravelFileMutations,
   useTravelFileNotes,
-  useTravelFilesSummary,
+  useTravelFilesPage,
 } from "@/hooks/useTravelFiles";
 import { usePermissions } from "@/hooks/usePermissions";
 import { FILE_STATUS_LABELS, SERVICE_STATUS_LABELS } from "@/lib/travelFiles";
@@ -110,6 +110,7 @@ function AmountField({
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
+        readOnly={readOnly}
         placeholder={money(0, currency)}
         className="mt-1 h-9 bg-background tabular-nums"
       />
@@ -139,7 +140,8 @@ export default function ProcessoReserva() {
 
   const file = data?.file;
   const { notes, addNote, deleteNote } = useTravelFileNotes(id, file?.agency_id);
-  const { markViewed } = useTravelFilesMarkViewed();
+  // Somente para registrar leitura do processo (lista não é buscada aqui).
+  const { markViewed } = useTravelFilesPage({ pageSize: 1 }, false);
   const [noteDraft, setNoteDraft] = useState("");
   const [cancelReason, setCancelReason] = useState("");
 
@@ -425,19 +427,25 @@ export default function ProcessoReserva() {
                 label: "Passageiros",
                 value: `${file.passengers_count} (${file.adults_count} adulto(s), ${file.children_count} criança(s))`,
               },
-              { label: "Valor solicitado", value: money(file.requested_amount, file.currency) },
-              {
-                label: "Valor reconfirmado",
-                value: file.reconfirmed_amount != null
-                  ? money(file.reconfirmed_amount, file.currency)
-                  : "Aguardando reconfirmação",
-              },
-              {
-                label: "Venda final",
-                value: file.final_sale_amount != null
-                  ? money(file.final_sale_amount, file.currency)
-                  : "—",
-              },
+              ...(canRevenue
+                ? [
+                    { label: "Valor solicitado", value: money(file.requested_amount, file.currency) },
+                    {
+                      label: "Valor reconfirmado",
+                      value:
+                        file.reconfirmed_amount != null
+                          ? money(file.reconfirmed_amount, file.currency)
+                          : "Aguardando reconfirmação",
+                    },
+                    {
+                      label: "Venda final",
+                      value:
+                        file.final_sale_amount != null
+                          ? money(file.final_sale_amount, file.currency)
+                          : "—",
+                    },
+                  ]
+                : []),
               { label: "Aberto em", value: format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) },
               { label: "Protocolo original", value: file.protocol_snapshot || "—" },
               {
@@ -508,18 +516,22 @@ export default function ProcessoReserva() {
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">Serviços solicitados</h2>
-            <span className="text-xs text-muted-foreground">
-              Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
-              {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
-            </span>
+            {canRevenue && (
+              <span className="text-xs text-muted-foreground">
+                Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
+                {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
+              </span>
+            )}
           </div>
 
           <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              { label: "Custo", value: totals.cost },
-              { label: "Comissão", value: totals.commission },
-              { label: "Margem", value: totals.margin },
-              { label: "Variação vs. solicitado", value: totals.variation },
+              ...(canMargin ? [{ label: "Custo", value: totals.cost }] : []),
+              ...(canCommission ? [{ label: "Comissão", value: totals.commission }] : []),
+              ...(canMargin ? [{ label: "Margem", value: totals.margin }] : []),
+              ...(canRevenue
+                ? [{ label: "Variação vs. solicitado", value: totals.variation }]
+                : []),
             ].map((item) => (
               <div key={item.label} className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
