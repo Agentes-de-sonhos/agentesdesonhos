@@ -94,11 +94,23 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
     setError(null);
     setSubmitting(true);
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+      const typed = email.trim().toLowerCase();
+      // Colaboradores digitam o login visível; o identificador técnico é
+      // resolvido no servidor SOMENTE dentro da agência dona do hostname.
+      const resolved = await resolveAgencyAdminLogin(hostname, typed);
+
+      let attempt = await supabase.auth.signInWithPassword({
+        email: resolved.email ?? typed,
         password,
       });
-      if (signInError || !data.user) {
+
+      // Um login de equipe pode coincidir com o e-mail real de uma conta
+      // master; nesse caso tenta novamente com o valor digitado.
+      if (attempt.error && resolved.email && resolved.email !== typed) {
+        attempt = await supabase.auth.signInWithPassword({ email: typed, password });
+      }
+
+      if (attempt.error || !attempt.data.user) {
         setError(GENERIC_ERROR);
         return;
       }
@@ -109,7 +121,7 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
         return;
       }
       // Sucesso: semeia o cache para a navegação acontecer sem nova espera.
-      queryClient.setQueryData(["agency-admin-access", hostname, data.user.id], true);
+      queryClient.setQueryData(["agency-admin-access", hostname, attempt.data.user.id], true);
     } catch {
       setError(GENERIC_ERROR);
     } finally {
@@ -122,8 +134,16 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
     if (submitting) return;
     setSubmitting(true);
     try {
-      // Fluxo seguro já existente da plataforma (página /reset-password).
-      await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      const typed = email.trim().toLowerCase();
+      const resolved = await resolveAgencyAdminLogin(hostname, typed);
+      if (resolved.team) {
+        // Colaborador: o identificador técnico não é uma caixa de e-mail real.
+        // A redefinição é feita pela gestão de equipe da própria agência.
+        setForgotTeam(true);
+        return;
+      }
+      // Conta master: fluxo seguro já existente da plataforma (/reset-password).
+      await supabase.auth.resetPasswordForEmail(typed, {
         redirectTo: `${PLATFORM_APP_ORIGIN}/reset-password`,
       });
     } catch {
@@ -133,6 +153,7 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
       setForgotSent(true);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-muted/40 flex items-center justify-center p-4">
