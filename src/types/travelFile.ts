@@ -79,10 +79,25 @@ export interface TravelFileService {
   requested_amount: number;
   reconfirmed_amount: number | null;
   sold_amount: number | null;
+  cost_amount: number | null;
+  commission_amount: number | null;
+  responsible_team_member_id: string | null;
   is_required: boolean;
   status: TravelFileServiceStatus;
   snapshot: Record<string, unknown>;
   created_at: string;
+}
+
+/** Nota interna do processo: nunca é exibida ao cliente. */
+export interface TravelFileNote {
+  id: string;
+  file_id: string;
+  agency_id: string;
+  author_user_id: string | null;
+  author_name: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
 }
 
 /** Item da lista da aba Reservas, já com dados derivados de leitura. */
@@ -91,4 +106,6 @@ export interface TravelFileListItem extends TravelFile {
   servicesCount: number;
   serviceNames: string[];
   unread: boolean;
+  responsibleName?: string | null;
 }
+

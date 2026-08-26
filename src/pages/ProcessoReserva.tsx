@@ -1,9 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -11,18 +13,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, ExternalLink, FileText, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ExternalLink,
+  FileText,
+  Loader2,
+  Lock,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { useTravelFile, useTravelFiles } from "@/hooks/useTravelFiles";
+import { useAuth } from "@/hooks/useAuth";
 import {
-  FILE_STATUS_LABELS,
-  SERVICE_STATUS_LABELS,
-} from "@/lib/travelFiles";
-import type { TravelFileServiceStatus, TravelFileStatus } from "@/types/travelFile";
+  useAgencyTeamDirectory,
+  useTravelFile,
+  useTravelFileMutations,
+  useTravelFileNotes,
+  useTravelFiles,
+} from "@/hooks/useTravelFiles";
+import { FILE_STATUS_LABELS, SERVICE_STATUS_LABELS } from "@/lib/travelFiles";
+import {
+  describeFileEvent,
+  fileStatusStep,
+  nextFileStatus,
+  summarizeServiceFinancials,
+  suggestFileStatusFromServices,
+} from "@/lib/travelFileWorkflow";
+import type {
+  TravelFileService,
+  TravelFileServiceStatus,
+  TravelFileStatus,
+} from "@/types/travelFile";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const money = (value: number | null | undefined, currency: string) =>
@@ -43,73 +67,134 @@ const dateLabel = (value?: string | null) => {
   return d ? format(d, "dd/MM/yyyy", { locale: ptBR }) : "—";
 };
 
-const EVENT_LABELS: Record<string, string> = {
-  request_received: "Solicitação recebida do cliente",
-  request_superseded: "Solicitação anterior substituída por nova revisão",
-  crm_opportunity_linked: "Oportunidade vinculada no CRM",
-  file_status_changed: "Status do processo alterado",
-  service_status_changed: "Status de um serviço alterado",
-};
+const NO_MEMBER = "none";
+
+/** Campo monetário do serviço: só grava quando o valor realmente muda. */
+function AmountField({
+  label,
+  value,
+  currency,
+  onCommit,
+}: {
+  label: string;
+  value: number | null | undefined;
+  currency: string;
+  onCommit: (next: number | null) => void;
+}) {
+  const [draft, setDraft] = useState(value == null ? "" : String(value));
+
+  useEffect(() => {
+    setDraft(value == null ? "" : String(value));
+  }, [value]);
+
+  const commit = () => {
+    const trimmed = draft.trim().replace(",", ".");
+    const next = trimmed === "" ? null : Number(trimmed);
+    if (next != null && (!Number.isFinite(next) || next < 0)) {
+      setDraft(value == null ? "" : String(value));
+      toast.error("Informe um valor válido.");
+      return;
+    }
+    if ((next ?? null) === (value ?? null)) return;
+    onCommit(next);
+  };
+
+  return (
+    <div className="min-w-0">
+      <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </label>
+      <Input
+        inputMode="decimal"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        placeholder={money(0, currency)}
+        className="mt-1 h-9 bg-background tabular-nums"
+      />
+    </div>
+  );
+}
 
 export default function ProcessoReserva() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const nav = useAdminNav();
+  const { user } = useAuth();
   // Volta para a lista de Reservas do contexto atual (painel da agência ou
   // aba de Reservas em Meus Projetos na plataforma tradicional).
   const backToList = nav.isAgencyAdmin ? nav.reservas() : "/meus-projetos?tab=reservas";
-  const queryClient = useQueryClient();
   const { data, isLoading } = useTravelFile(id);
   const { markViewed } = useTravelFiles();
+  const { members, memberNames } = useAgencyTeamDirectory();
+  const { updateFile, updateService } = useTravelFileMutations(id);
 
   const file = data?.file;
+  const { notes, addNote, deleteNote } = useTravelFileNotes(id, file?.agency_id);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [cancelReason, setCancelReason] = useState("");
 
   useEffect(() => {
     if (file?.id) markViewed({ id: file.id, agency_id: file.agency_id }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file?.id]);
 
-  const totals = useMemo(() => {
-    const services = data?.services ?? [];
-    return {
-      requested: services.reduce((sum, s) => sum + (Number(s.requested_amount) || 0), 0),
-      reconfirmed: services.reduce(
-        (sum, s) => sum + (Number(s.reconfirmed_amount ?? s.requested_amount) || 0),
-        0,
-      ),
-    };
-  }, [data?.services]);
+  const services = data?.services ?? [];
+  const totals = useMemo(() => summarizeServiceFinancials(services), [services]);
+  const suggested = useMemo(() => suggestFileStatusFromServices(services), [services]);
+
+  const patchFile = async (patch: Record<string, unknown>, successMessage: string) => {
+    try {
+      await updateFile.mutateAsync(patch as any);
+      toast.success(successMessage);
+    } catch {
+      toast.error("Não foi possível salvar a alteração.");
+    }
+  };
 
   const updateFileStatus = async (status: TravelFileStatus) => {
     if (!file) return;
-    const { error } = await (supabase as any)
-      .from("travel_files")
-      .update({
+    const now = new Date().toISOString();
+    await patchFile(
+      {
         status,
-        confirmed_at: status === "sale_confirmed" ? new Date().toISOString() : file.confirmed_at,
-        cancelled_at: status === "cancelled" ? new Date().toISOString() : file.cancelled_at,
-        completed_at: status === "trip_completed" ? new Date().toISOString() : file.completed_at,
-      })
-      .eq("id", file.id);
-    if (error) {
-      toast.error("Não foi possível atualizar o status do processo.");
-      return;
-    }
-    toast.success(`Processo atualizado: ${FILE_STATUS_LABELS[status]}`);
-    queryClient.invalidateQueries({ queryKey: ["travel-file", file.id] });
-    queryClient.invalidateQueries({ queryKey: ["travel-files"] });
+        confirmed_at: status === "sale_confirmed" ? now : file.confirmed_at,
+        cancelled_at: status === "cancelled" ? now : file.cancelled_at,
+        completed_at: status === "trip_completed" ? now : file.completed_at,
+        cancellation_reason:
+          status === "cancelled" ? cancelReason.trim() || file.cancellation_reason : file.cancellation_reason,
+        final_sale_amount:
+          status === "sale_confirmed" ? totals.sold : file.final_sale_amount,
+        reconfirmed_amount:
+          status === "sale_confirmed" || status === "awaiting_client"
+            ? totals.reconfirmed
+            : file.reconfirmed_amount,
+      },
+      `Processo atualizado: ${FILE_STATUS_LABELS[status]}`,
+    );
   };
 
-  const updateServiceStatus = async (serviceId: string, status: TravelFileServiceStatus) => {
-    const { error } = await (supabase as any)
-      .from("travel_file_services")
-      .update({ status })
-      .eq("id", serviceId);
-    if (error) {
+  const patchService = async (serviceId: string, patch: Partial<TravelFileService>) => {
+    try {
+      await updateService.mutateAsync({ id: serviceId, patch });
+    } catch {
       toast.error("Não foi possível atualizar o serviço.");
-      return;
     }
-    queryClient.invalidateQueries({ queryKey: ["travel-file", id] });
+  };
+
+  const submitNote = async () => {
+    const body = noteDraft.trim();
+    if (!body) return;
+    try {
+      await addNote.mutateAsync({
+        body,
+        authorName: (user?.user_metadata as any)?.full_name || user?.email || null,
+      });
+      setNoteDraft("");
+      toast.success("Nota interna registrada.");
+    } catch {
+      toast.error("Não foi possível salvar a nota.");
+    }
   };
 
   if (isLoading) {
@@ -138,6 +223,8 @@ export default function ProcessoReserva() {
     );
   }
 
+  const next = nextFileStatus(file.status);
+
   return (
     <DashboardLayout>
       <div className="w-full min-w-0 space-y-6">
@@ -156,16 +243,21 @@ export default function ProcessoReserva() {
           </h1>
           <Badge variant="secondary">{FILE_STATUS_LABELS[file.status]}</Badge>
           {file.revision > 1 && <Badge variant="outline">Revisão {file.revision}</Badge>}
+          <span className="text-xs text-muted-foreground">
+            Etapa {fileStatusStep(file.status) || "—"} de 7
+          </span>
         </div>
 
-        {/* Visão geral */}
+        {/* Etapa e responsáveis */}
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-foreground">Visão geral</h2>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Status do processo</span>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Andamento do processo</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="min-w-0">
+              <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Etapa atual
+              </label>
               <Select value={file.status} onValueChange={(v) => updateFileStatus(v as TravelFileStatus)}>
-                <SelectTrigger className="h-9 w-[220px]">
+                <SelectTrigger className="mt-1 h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,10 +269,104 @@ export default function ProcessoReserva() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="min-w-0">
+              <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Responsável comercial
+              </label>
+              <Select
+                value={file.responsible_team_member_id ?? NO_MEMBER}
+                onValueChange={(v) =>
+                  patchFile(
+                    { responsible_team_member_id: v === NO_MEMBER ? null : v },
+                    "Responsável comercial atualizado.",
+                  )
+                }
+              >
+                <SelectTrigger className="mt-1 h-9">
+                  <SelectValue placeholder="Não definido" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_MEMBER}>Não definido</SelectItem>
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="min-w-0">
+              <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Responsável pela operação
+              </label>
+              <Select
+                value={file.operations_responsible_team_member_id ?? NO_MEMBER}
+                onValueChange={(v) =>
+                  patchFile(
+                    { operations_responsible_team_member_id: v === NO_MEMBER ? null : v },
+                    "Responsável pela operação atualizado.",
+                  )
+                }
+              >
+                <SelectTrigger className="mt-1 h-9">
+                  <SelectValue placeholder="Não definido" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_MEMBER}>Não definido</SelectItem>
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {next && (
+              <Button size="sm" className="gap-2" onClick={() => updateFileStatus(next)}>
+                Avançar para {FILE_STATUS_LABELS[next]}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            )}
+            {suggested && suggested !== file.status && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateFileStatus(suggested)}
+              >
+                Sugestão pelos serviços: {FILE_STATUS_LABELS[suggested]}
+              </Button>
+            )}
+            {file.status !== "cancelled" && (
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                <Input
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Motivo do cancelamento (opcional)"
+                  className="h-9 min-w-[220px] flex-1 bg-background"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-rose-600 hover:text-rose-700"
+                  onClick={() => updateFileStatus("cancelled")}
+                >
+                  Cancelar processo
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Visão geral */}
+        <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Visão geral</h2>
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { label: "Cliente", value: data?.client?.name || file.protocol_snapshot || "—" },
+              { label: "Contato", value: data?.client?.phone || data?.client?.email || "—" },
               { label: "Destino", value: file.primary_destination || "—" },
               { label: "Período", value: `${dateLabel(file.start_date)} — ${dateLabel(file.end_date)}` },
               {
@@ -194,8 +380,20 @@ export default function ProcessoReserva() {
                   ? money(file.reconfirmed_amount, file.currency)
                   : "Aguardando reconfirmação",
               },
+              {
+                label: "Venda final",
+                value: file.final_sale_amount != null
+                  ? money(file.final_sale_amount, file.currency)
+                  : "—",
+              },
               { label: "Aberto em", value: format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) },
               { label: "Protocolo original", value: file.protocol_snapshot || "—" },
+              {
+                label: "Responsável comercial",
+                value: file.responsible_team_member_id
+                  ? memberNames[file.responsible_team_member_id] || "—"
+                  : "Não definido",
+              },
               {
                 label: "Confirmado em",
                 value: file.confirmed_at
@@ -223,6 +421,23 @@ export default function ProcessoReserva() {
                 Orçamento de origem
               </Button>
             )}
+            {file.client_id && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() =>
+                  navigate(
+                    nav.isAgencyAdmin
+                      ? `${nav.crm("clientes")}?client=${file.client_id}`
+                      : `/gestao-clientes?client=${file.client_id}`,
+                  )
+                }
+              >
+                <Users className="h-4 w-4" />
+                Ficha do cliente
+              </Button>
+            )}
             {file.opportunity_id && (
               <Button
                 variant="outline"
@@ -243,11 +458,30 @@ export default function ProcessoReserva() {
             <h2 className="text-sm font-semibold text-foreground">Serviços solicitados</h2>
             <span className="text-xs text-muted-foreground">
               Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
-              {money(totals.reconfirmed, file.currency)}
+              {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
             </span>
           </div>
+
+          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { label: "Custo", value: totals.cost },
+              { label: "Comissão", value: totals.commission },
+              { label: "Margem", value: totals.margin },
+              { label: "Variação vs. solicitado", value: totals.variation },
+            ].map((item) => (
+              <div key={item.label} className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {item.label}
+                </p>
+                <p className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">
+                  {money(item.value, file.currency)}
+                </p>
+              </div>
+            ))}
+          </div>
+
           <div className="space-y-2">
-            {(data?.services ?? []).map((service) => (
+            {services.map((service) => (
               <div
                 key={service.id}
                 className="min-w-0 rounded-xl border border-border/50 p-3 sm:p-4"
@@ -268,33 +502,116 @@ export default function ProcessoReserva() {
                   )}
                   <span>Qtd. {service.quantity}</span>
                   {service.supplier_name && <span>Fornecedor: {service.supplier_name}</span>}
+                  <span>Solicitado {money(service.requested_amount, service.currency)}</span>
                 </div>
-                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-semibold tabular-nums text-foreground">
-                    {money(service.requested_amount, service.currency)}
-                  </span>
-                  <Select
-                    value={service.status}
-                    onValueChange={(v) => updateServiceStatus(service.id, v as TravelFileServiceStatus)}
-                  >
-                    <SelectTrigger className="h-9 w-[200px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(SERVICE_STATUS_LABELS).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="min-w-0">
+                    <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Status do serviço
+                    </label>
+                    <Select
+                      value={service.status}
+                      onValueChange={(v) =>
+                        patchService(service.id, { status: v as TravelFileServiceStatus })
+                      }
+                    >
+                      <SelectTrigger className="mt-1 h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(SERVICE_STATUS_LABELS).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <AmountField
+                    label="Reconfirmado"
+                    value={service.reconfirmed_amount}
+                    currency={service.currency}
+                    onCommit={(v) => patchService(service.id, { reconfirmed_amount: v })}
+                  />
+                  <AmountField
+                    label="Vendido"
+                    value={service.sold_amount}
+                    currency={service.currency}
+                    onCommit={(v) => patchService(service.id, { sold_amount: v })}
+                  />
+                  <AmountField
+                    label="Custo"
+                    value={service.cost_amount}
+                    currency={service.currency}
+                    onCommit={(v) => patchService(service.id, { cost_amount: v })}
+                  />
+                  <AmountField
+                    label="Comissão"
+                    value={service.commission_amount}
+                    currency={service.currency}
+                    onCommit={(v) => patchService(service.id, { commission_amount: v })}
+                  />
                 </div>
               </div>
             ))}
-            {(data?.services ?? []).length === 0 && (
+            {services.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 Nenhum serviço registrado neste processo.
               </p>
+            )}
+          </div>
+        </Card>
+
+        {/* Notas internas */}
+        <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
+          <div className="mb-2 flex items-center gap-2">
+            <Lock className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">Notas internas</h2>
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Visíveis apenas para a sua equipe. O cliente nunca tem acesso a estas anotações.
+          </p>
+          <Textarea
+            value={noteDraft}
+            onChange={(e) => setNoteDraft(e.target.value)}
+            placeholder="Registre tratativas com fornecedores, prazos e combinados internos..."
+            rows={3}
+            className="bg-background"
+          />
+          <div className="mt-2 flex justify-end">
+            <Button size="sm" onClick={submitNote} disabled={!noteDraft.trim() || addNote.isPending}>
+              Salvar nota
+            </Button>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            {notes.map((note) => (
+              <div key={note.id} className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3">
+                <p className="text-sm text-foreground [overflow-wrap:anywhere] whitespace-pre-wrap">
+                  {note.body}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {note.author_name || "Equipe"} ·{" "}
+                    {format(new Date(note.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  </p>
+                  {note.author_user_id === user?.id && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1 text-xs text-muted-foreground"
+                      onClick={() => deleteNote.mutateAsync(note.id).catch(() => {})}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Excluir
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {notes.length === 0 && (
+              <p className="text-sm text-muted-foreground">Nenhuma nota interna registrada.</p>
             )}
           </div>
         </Card>
@@ -306,7 +623,7 @@ export default function ProcessoReserva() {
             {(data?.events ?? []).map((event) => (
               <li key={event.id} className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3">
                 <p className="text-sm text-foreground [overflow-wrap:anywhere]">
-                  {EVENT_LABELS[event.event_type] || event.event_type}
+                  {describeFileEvent(event, memberNames)}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {format(new Date(event.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} ·{" "}
