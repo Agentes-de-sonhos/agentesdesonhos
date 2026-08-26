@@ -429,7 +429,7 @@ export default function ProcessoReserva() {
                 onClick={() =>
                   navigate(
                     nav.isAgencyAdmin
-                      ? `${nav.clientes()}?client=${file.client_id}`
+                      ? `${nav.crm("clientes")}?client=${file.client_id}`
                       : `/gestao-clientes?client=${file.client_id}`,
                   )
                 }
