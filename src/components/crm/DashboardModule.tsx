@@ -29,6 +29,7 @@ import { usePipelineStages } from "@/hooks/usePipelineStages";
 import { useOperations } from "@/hooks/useOperations";
 import { OPERATION_STAGES, getStageMeta } from "@/types/operations";
 import { getStageTokens, CLIENT_STATUS_LABELS } from "@/types/crm";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const formatCurrency = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v || 0);
@@ -45,6 +46,7 @@ function daysUntil(dateStr: string | null | undefined) {
 
 export function DashboardModule() {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
@@ -145,14 +147,14 @@ export function DashboardModule() {
   }
 
   const kpiCards = [
-    { label: "Total de Clientes", value: kpis.total, icon: Users, color: "text-blue-600", bg: "bg-blue-100", onClick: () => navigate("/gestao-clientes/clientes") },
-    { label: "Clientes Ativos", value: kpis.ativos, icon: UserCheck, color: "text-green-600", bg: "bg-green-100", onClick: () => navigate("/gestao-clientes/clientes") },
-    { label: "Leads", value: kpis.leads, icon: UserPlus, color: "text-amber-600", bg: "bg-amber-100", onClick: () => navigate("/gestao-clientes/clientes") },
-    { label: "Fidelizados", value: kpis.fidelizados, icon: Heart, color: "text-purple-600", bg: "bg-purple-100", onClick: () => navigate("/gestao-clientes/clientes") },
-    { label: "Oportunidades", value: kpis.oppsAtivas, icon: Kanban, color: "text-violet-600", bg: "bg-violet-100", onClick: () => navigate("/gestao-clientes/funil") },
-    { label: "Operações em Andamento", value: kpis.opsAtivas, icon: Briefcase, color: "text-sky-600", bg: "bg-sky-100", onClick: () => navigate("/gestao-clientes/operacoes") },
-    { label: "Vendas do Mês", value: formatCurrency(totalSold), icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-100", onClick: () => navigate("/gestao-clientes/metas") },
-    { label: "Meta do Mês", value: `${goalPct.toFixed(0)}%`, icon: Target, color: "text-rose-600", bg: "bg-rose-100", subtitle: target ? formatCurrency(target) : "Sem meta", onClick: () => navigate("/gestao-clientes/metas") },
+    { label: "Total de Clientes", value: kpis.total, icon: Users, color: "text-blue-600", bg: "bg-blue-100", onClick: () => navigate(nav.crm("clientes")) },
+    { label: "Clientes Ativos", value: kpis.ativos, icon: UserCheck, color: "text-green-600", bg: "bg-green-100", onClick: () => navigate(nav.crm("clientes")) },
+    { label: "Leads", value: kpis.leads, icon: UserPlus, color: "text-amber-600", bg: "bg-amber-100", onClick: () => navigate(nav.crm("clientes")) },
+    { label: "Fidelizados", value: kpis.fidelizados, icon: Heart, color: "text-purple-600", bg: "bg-purple-100", onClick: () => navigate(nav.crm("clientes")) },
+    { label: "Oportunidades", value: kpis.oppsAtivas, icon: Kanban, color: "text-violet-600", bg: "bg-violet-100", onClick: () => navigate(nav.crm("funil")) },
+    { label: "Operações em Andamento", value: kpis.opsAtivas, icon: Briefcase, color: "text-sky-600", bg: "bg-sky-100", onClick: () => navigate(nav.crm("operacoes")) },
+    { label: "Vendas do Mês", value: formatCurrency(totalSold), icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-100", onClick: () => navigate(nav.crm("metas")) },
+    { label: "Meta do Mês", value: `${goalPct.toFixed(0)}%`, icon: Target, color: "text-rose-600", bg: "bg-rose-100", subtitle: target ? formatCurrency(target) : "Sem meta", onClick: () => navigate(nav.crm("metas")) },
   ];
 
   return (
@@ -166,13 +168,13 @@ export function DashboardModule() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" onClick={() => navigate("/gestao-clientes/clientes")}>
+          <Button size="sm" variant="outline" onClick={() => navigate(nav.crm("clientes"))}>
             <Plus className="h-4 w-4 mr-1" /> Novo Cliente
           </Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/gestao-clientes/funil")}>
+          <Button size="sm" variant="outline" onClick={() => navigate(nav.crm("funil"))}>
             <Plus className="h-4 w-4 mr-1" /> Nova Oportunidade
           </Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/gestao-clientes/operacoes")}>
+          <Button size="sm" variant="outline" onClick={() => navigate(nav.crm("operacoes"))}>
             <Plus className="h-4 w-4 mr-1" /> Nova Operação
           </Button>
         </div>
@@ -211,7 +213,7 @@ export function DashboardModule() {
             <CardTitle className="text-lg flex items-center gap-2">
               <Target className="h-5 w-5 text-rose-600" /> Meta de Vendas
             </CardTitle>
-            <Button size="sm" variant="ghost" onClick={() => navigate("/gestao-clientes/metas")}>
+            <Button size="sm" variant="ghost" onClick={() => navigate(nav.crm("metas"))}>
               Detalhes <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           </div>
@@ -351,7 +353,7 @@ export function DashboardModule() {
         <Card>
           <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
             <CardTitle className="text-lg">Clientes recentes</CardTitle>
-            <Button size="sm" variant="ghost" onClick={() => navigate("/gestao-clientes/clientes")}>
+            <Button size="sm" variant="ghost" onClick={() => navigate(nav.crm("clientes"))}>
               Ver todos <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           </CardHeader>
@@ -382,7 +384,7 @@ export function DashboardModule() {
         <Card>
           <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
             <CardTitle className="text-lg">Oportunidades recentes</CardTitle>
-            <Button size="sm" variant="ghost" onClick={() => navigate("/gestao-clientes/funil")}>
+            <Button size="sm" variant="ghost" onClick={() => navigate(nav.crm("funil"))}>
               Ver funil <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           </CardHeader>

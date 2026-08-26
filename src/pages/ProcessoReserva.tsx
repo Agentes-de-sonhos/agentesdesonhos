@@ -23,6 +23,7 @@ import {
   SERVICE_STATUS_LABELS,
 } from "@/lib/travelFiles";
 import type { TravelFileServiceStatus, TravelFileStatus } from "@/types/travelFile";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const money = (value: number | null | undefined, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
@@ -53,6 +54,10 @@ const EVENT_LABELS: Record<string, string> = {
 export default function ProcessoReserva() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const nav = useAdminNav();
+  // Volta para a lista de Reservas do contexto atual (painel da agência ou
+  // aba de Reservas em Meus Projetos na plataforma tradicional).
+  const backToList = nav.isAgencyAdmin ? nav.reservas() : "/meus-projetos?tab=reservas";
   const queryClient = useQueryClient();
   const { data, isLoading } = useTravelFile(id);
   const { markViewed } = useTravelFiles();
@@ -125,7 +130,7 @@ export default function ProcessoReserva() {
           <p className="mt-1 text-sm text-muted-foreground">
             Este processo de reserva não existe ou não pertence à sua agência.
           </p>
-          <Button className="mt-4" onClick={() => navigate("/meus-projetos?tab=reservas")}>
+          <Button className="mt-4" onClick={() => navigate(backToList)}>
             Voltar para Reservas
           </Button>
         </div>
@@ -141,7 +146,7 @@ export default function ProcessoReserva() {
             variant="ghost"
             size="sm"
             className="gap-2"
-            onClick={() => navigate("/meus-projetos?tab=reservas")}
+            onClick={() => navigate(backToList)}
           >
             <ArrowLeft className="h-4 w-4" />
             Reservas
@@ -212,7 +217,7 @@ export default function ProcessoReserva() {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => navigate(`/ferramentas-ia/gerar-orcamento/${file.quote_id}`)}
+                onClick={() => navigate(nav.quote(file.quote_id))}
               >
                 <FileText className="h-4 w-4" />
                 Orçamento de origem
@@ -223,7 +228,7 @@ export default function ProcessoReserva() {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={() => navigate(`/crm?opportunity=${file.opportunity_id}`)}
+                onClick={() => navigate(nav.isAgencyAdmin ? `${nav.crm("funil")}?opportunity=${file.opportunity_id}` : `/crm?opportunity=${file.opportunity_id}`)}
               >
                 <ExternalLink className="h-4 w-4" />
                 Oportunidade no CRM

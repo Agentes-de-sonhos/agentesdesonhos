@@ -61,6 +61,7 @@ function parseLocalDate(dateStr: string): Date {
 }
 import { ptBR } from "date-fns/locale";
 import type { TripServiceType, TripFormData, TripService } from "@/types/trip";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -414,6 +415,7 @@ export default function TripWallet() {
 
 function TripWalletContent() {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -522,7 +524,7 @@ function TripWalletContent() {
         } as any);
       } catch { /* non-fatal */ }
     }
-    navigate(`/ferramentas-ia/trip-wallet/${newTrip.id}`, { replace: true });
+    navigate(nav.wallet(newTrip.id), { replace: true });
   };
 
   const handleUpdateTrip = async (data: { client_name: string; destination: string; start_date: string; end_date: string; status: string }) => {
@@ -799,7 +801,7 @@ function TripWalletContent() {
   const handleDeleteTrip = async () => {
     if (!id) return;
     await deleteTrip(id);
-    navigate("/ferramentas-ia/trip-wallet");
+    navigate(nav.wallet());
   };
 
   const handleArchiveTrip = async () => {
@@ -929,7 +931,7 @@ function TripWalletContent() {
       <DashboardLayout>
         <div className="space-y-6 animate-fade-in">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia/trip-wallet")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(nav.wallet())}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -994,7 +996,7 @@ function TripWalletContent() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/ferramentas-ia/trip-wallet")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(nav.wallet())}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>

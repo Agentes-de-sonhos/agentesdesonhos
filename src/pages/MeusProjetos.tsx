@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -75,6 +75,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Itinerary } from "@/types/itinerary";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 type StatusFilter = "all" | "draft" | "published";
 type SortOrder = "recent" | "az";
@@ -248,15 +249,12 @@ export default function MeusProjetos() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { plan, isPromotor } = useSubscription();
   const isStartPlan = !isPromotor && plan === "start";
-  const [activeTab, setActiveTabState] = useState(
-    searchParams.get("tab") || (isStartPlan ? "roteiros" : "orcamentos"),
-  );
-  const setActiveTab = (tab: string) => {
-    setActiveTabState(tab);
-    const next = new URLSearchParams(searchParams);
-    next.set("tab", tab);
-    setSearchParams(next, { replace: true });
-  };
+  const nav = useAdminNav();
+  /**
+   * No painel white label a página mostra apenas Orçamentos, Roteiros,
+   * Carteiras e Modelos. Na plataforma tradicional nada muda.
+   */
+  const isAgencyAdmin = nav.isAgencyAdmin;
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
@@ -269,6 +267,40 @@ export default function MeusProjetos() {
   const { templates } = useItineraryTemplates();
   const { notes } = useNotes();
   const { canUseBookingRequests } = useBookingRequestCapability();
+
+  /**
+   * A URL é a fonte de verdade da aba ativa: acesso direto, F5, voltar e
+   * avançar do navegador refletem sempre o parâmetro `?tab=`. Parâmetros
+   * inválidos (ou bloqueados por plano/permissão) caem na primeira aba
+   * permitida.
+   */
+  const allowedTabs = useMemo(() => {
+    const tabs: string[] = [];
+    if (!isStartPlan) tabs.push("orcamentos");
+    if (!isStartPlan) tabs.push("carteiras");
+    tabs.push("roteiros", "modelos");
+    if (!isAgencyAdmin && canUseBookingRequests) tabs.push("reservas");
+    if (!isAgencyAdmin && !isStartPlan) tabs.push("bloco-notas");
+    return tabs;
+  }, [isStartPlan, isAgencyAdmin, canUseBookingRequests]);
+
+  const defaultTab = isStartPlan ? "roteiros" : "orcamentos";
+  const requestedTab = searchParams.get("tab");
+  const activeTab = requestedTab && allowedTabs.includes(requestedTab) ? requestedTab : defaultTab;
+
+  useEffect(() => {
+    if (requestedTab === activeTab) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", activeTab);
+    setSearchParams(next, { replace: true });
+  }, [requestedTab, activeTab, searchParams, setSearchParams]);
+
+  const setActiveTab = (tab: string) => {
+    if (tab === activeTab) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", tab);
+    setSearchParams(next);
+  };
   const { files: travelFiles, unreadCount: filesUnread } = useTravelFiles(canUseBookingRequests);
   const { quoteFiles } = useQuoteFileNumbers(canUseBookingRequests);
 
@@ -300,13 +332,13 @@ export default function MeusProjetos() {
   const handleEdit = (item: ProjectItem) => {
     switch (item.type) {
       case "quote":
-        navigate(`/ferramentas-ia/gerar-orcamento/${item.id}`);
+        navigate(nav.quote(item.id));
         break;
       case "trip":
-        navigate(`/ferramentas-ia/trip-wallet/${item.id}`);
+        navigate(nav.wallet(item.id));
         break;
       case "itinerary":
-        navigate(`/ferramentas-ia/criar-roteiro/${item.id}`);
+        navigate(nav.itinerary(item.id));
         break;
     }
   };
@@ -379,19 +411,19 @@ export default function MeusProjetos() {
         return {
           title: "Nenhum orçamento ainda",
           description: "Crie seu primeiro orçamento profissional para compartilhar com seus clientes.",
-          cta: { label: "Novo Orçamento", path: "/ferramentas-ia/gerar-orcamento" },
+          cta: { label: "Novo Orçamento", path: nav.quote() },
         };
       case "carteiras":
         return {
           title: "Nenhuma carteira digital ainda",
           description: "Crie sua primeira carteira digital para organizar a viagem do seu cliente.",
-          cta: { label: "Nova Carteira", path: "/ferramentas-ia/trip-wallet" },
+          cta: { label: "Nova Carteira", path: nav.wallet() },
         };
       case "roteiros":
         return {
           title: "Nenhum roteiro ainda",
           description: "Crie seu primeiro roteiro com a ajuda da IA ou manualmente.",
-          cta: { label: "Novo Roteiro", path: "/ferramentas-ia/criar-roteiro" },
+          cta: { label: "Novo Roteiro", path: nav.itinerary() },
         };
       default:
         return { title: "Nenhum item encontrado", description: "" };
@@ -458,7 +490,7 @@ export default function MeusProjetos() {
               {item.type === "quote" && quoteFiles[item.id] && (
                 <button
                   type="button"
-                  onClick={() => navigate(`/reservas/${quoteFiles[item.id].id}`)}
+                  onClick={() => navigate(nav.reservas(quoteFiles[item.id].id))}
                   className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary transition-colors hover:bg-primary/15"
                 >
                   <Ticket className="h-3 w-3" />
@@ -697,7 +729,7 @@ export default function MeusProjetos() {
                     {getTabCount("modelos")}
                   </Badge>
                 </TabsTrigger>
-                {canUseBookingRequests && (
+                {!isAgencyAdmin && canUseBookingRequests && (
                   <TabsTrigger
                     value="reservas"
                     className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
@@ -712,7 +744,7 @@ export default function MeusProjetos() {
                     </Badge>
                   </TabsTrigger>
                 )}
-                {!isStartPlan && (
+                {!isAgencyAdmin && !isStartPlan && (
                   <TabsTrigger
                     value="bloco-notas"
                     className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
@@ -830,12 +862,12 @@ export default function MeusProjetos() {
             <TabsContent value="modelos" className="mt-5">
               <TemplatesGrid />
             </TabsContent>
-            {canUseBookingRequests && (
+            {!isAgencyAdmin && canUseBookingRequests && (
               <TabsContent value="reservas" className="mt-5">
                 <ReservasTab />
               </TabsContent>
             )}
-            {!isStartPlan && (
+            {!isAgencyAdmin && !isStartPlan && (
               <TabsContent value="bloco-notas" className="mt-5">
                 <BlocoNotasContent />
               </TabsContent>

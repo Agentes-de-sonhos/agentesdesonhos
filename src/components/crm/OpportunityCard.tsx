@@ -89,6 +89,7 @@ import {
 import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, CLIENT_STATUS_LABELS, type Opportunity, type OpportunityStage } from "@/types/crm";
 import { cn } from "@/lib/utils";
 import { parseLocalDate } from "@/lib/dateParsing";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -122,6 +123,7 @@ type ClientFormData = z.infer<typeof clientSchema>;
 
 export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColor }: OpportunityCardProps) {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { deleteOpportunity } = useOpportunities();
   const { updateClient } = useClients();
   const { user } = useAuth();
@@ -226,12 +228,12 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
 
   const proceedCreateQuote = async () => {
     await logTimelineEvent("Orçamento criado", `Novo orçamento iniciado a partir da oportunidade.`);
-    navigate(`/ferramentas-ia/gerar-orcamento`, { state: buildOpportunityState() });
+    navigate(nav.quote(), { state: buildOpportunityState() });
   };
 
   const proceedCreateTripWallet = async () => {
     await logTimelineEvent("Carteira digital criada", `Nova carteira digital iniciada a partir da oportunidade.`);
-    navigate(`/ferramentas-ia/trip-wallet/nova`, { state: buildOpportunityState() });
+    navigate(nav.wallet("nova"), { state: buildOpportunityState() });
   };
 
   const handleCreateQuote = async () => {
@@ -277,9 +279,9 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
   const openExistingLinked = () => {
     if (!linkedDialog) return;
     if (linkedDialog.kind === "quote") {
-      navigate(`/ferramentas-ia/gerar-orcamento/${linkedDialog.existingId}`);
+      navigate(nav.quote(linkedDialog.existingId));
     } else {
-      navigate(`/ferramentas-ia/trip-wallet/${linkedDialog.existingId}`);
+      navigate(nav.wallet(linkedDialog.existingId));
     }
     setLinkedDialog(null);
   };

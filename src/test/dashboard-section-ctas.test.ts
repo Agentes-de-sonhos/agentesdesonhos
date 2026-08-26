@@ -124,12 +124,14 @@ describe("Próximas Viagens — uma viagem = um item", () => {
     expect(src).not.toContain("is_completed");
   });
 
-  it("excludes cancelled/archived trips and scopes by user_id (RLS)", () => {
+  it("excludes cancelled/archived trips and delegates scope to RLS", () => {
     const src = read("src/hooks/useUpcomingTrips.ts");
     expect(src).toContain("EXCLUDED_STATUSES");
     expect(src).toContain('"archived"');
     expect(src).toContain('"cancelado"');
-    expect(src).toContain('.eq("user_id", user.id)');
+    // Visibilidade (criador vs. master da agência) é resolvida por RLS —
+    // o hook não filtra mais por user_id no cliente.
+    expect(src).not.toContain('.eq("user_id", user.id)');
   });
 
   it("filters by period and real trip situation", () => {

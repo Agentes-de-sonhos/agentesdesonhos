@@ -88,6 +88,7 @@ import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalle
 import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { parsePaymentMethods, serializePaymentMethods, formatPaymentMethodsInline } from "@/lib/paymentMethods";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
@@ -401,6 +402,7 @@ export default function GerarOrcamento() {
   const [editingDestination, setEditingDestination] = useState(false);
   const [destinationDraft, setDestinationDraft] = useState("");
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const location = useLocation();
@@ -835,7 +837,7 @@ export default function GerarOrcamento() {
     });
     incrementUsage();
     setDraftBanner(null);
-    navigate(`/ferramentas-ia/gerar-orcamento/${newQuote.id}`);
+    navigate(nav.quote(newQuote.id));
   };
 
   /**
@@ -1040,7 +1042,7 @@ export default function GerarOrcamento() {
 
   const handleDuplicate = async (qId: string) => {
     const dup = await duplicateQuote(qId);
-    navigate(`/ferramentas-ia/gerar-orcamento/${dup.id}`);
+    navigate(nav.quote(dup.id));
   };
 
   /* ─── Trip date range for constraining service calendars ─── */
@@ -1099,7 +1101,7 @@ export default function GerarOrcamento() {
                   size="sm"
                   onClick={() => {
                     setDraftBanner(null);
-                    navigate(`/ferramentas-ia/gerar-orcamento/${draftBanner.quoteId}`);
+                    navigate(nav.quote(draftBanner.quoteId));
                   }}
                 >
                   Continuar editando
@@ -1178,8 +1180,8 @@ export default function GerarOrcamento() {
               <QuotesListSection
                 quotes={quotes}
                 isLoading={quotesLoading}
-                onView={(q) => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
-                onEdit={(q) => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
+                onView={(q) => navigate(nav.quote(q.id))}
+                onEdit={(q) => navigate(nav.quote(q.id))}
                 onDuplicate={(q) => handleDuplicate(q.id)}
                 onDelete={(q) => setDeleteConfirmId(q.id)}
                 onCreate={() => setActiveTab("create")}
@@ -1237,7 +1239,7 @@ export default function GerarOrcamento() {
         <div className="flex w-full min-w-0 flex-col gap-3">
           <div className="flex w-full min-w-0 flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
-            <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
+            <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" onClick={() => navigate(nav.quote())}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="min-w-0">

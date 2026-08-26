@@ -32,6 +32,7 @@ import { InvoicesManager } from "@/components/financial/invoices/InvoicesManager
 import { SuppliersManager } from "@/components/financial/SuppliersManager";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const MONTH_NAMES = [
   "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -91,12 +92,13 @@ export default function Financeiro() {
   const isTeam = useIsTeamMember();
   const { can } = usePermissions();
   const navigate = useNavigate();
+  const nav = useAdminNav();
 
   // Bloqueio total para team member sem financial.access
   const hasFinancialAccess = can('financial.access');
   useEffect(() => {
     if (isTeam && !hasFinancialAccess) {
-      navigate('/gestao-clientes/clientes', { replace: true });
+      navigate(nav.crm('clientes'), { replace: true });
     }
   }, [isTeam, hasFinancialAccess, navigate]);
 
