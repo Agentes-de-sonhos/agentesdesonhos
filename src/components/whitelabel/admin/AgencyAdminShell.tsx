@@ -67,7 +67,8 @@ export function AgencyAdminShell({ hostname }: { hostname: string }) {
 
   return (
     <AgencyAdminLayout info={info}>
-      <Outlet />
+      {/* O contexto expõe a agência resolvida às páginas exclusivas do painel. */}
+      <Outlet context={{ info }} />
     </AgencyAdminLayout>
   );
 }
