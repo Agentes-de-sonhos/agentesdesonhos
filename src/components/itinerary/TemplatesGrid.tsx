@@ -27,6 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const STYLE_LABELS: Record<string, string> = {
   economico: "Econômico",
@@ -42,6 +43,7 @@ interface Props {
 export function TemplatesGrid({ emptyTitle, emptyDescription }: Props) {
   const { templates, isLoading, deleteTemplate } = useItineraryTemplates();
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const [instantiate, setInstantiate] = useState<ItineraryTemplate | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ItineraryTemplate | null>(null);
 
@@ -66,7 +68,7 @@ export function TemplatesGrid({ emptyTitle, emptyDescription }: Props) {
           {emptyDescription ??
             "Crie um roteiro e use a ação ‘Salvar como modelo’ para reaproveitar a estrutura em futuras viagens."}
         </p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate("/ferramentas-ia/modelos-roteiros")}>
+        <Button variant="outline" className="mt-4" onClick={() => navigate(nav.itineraryTemplates)}>
           Abrir biblioteca de modelos
         </Button>
       </Card>

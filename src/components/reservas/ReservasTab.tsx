@@ -16,6 +16,7 @@ import {
   type ReservasFilterId,
 } from "@/lib/travelFiles";
 import type { TravelFileListItem } from "@/types/travelFile";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const money = (value: number, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
@@ -64,6 +65,7 @@ function StatusPill({ status }: { status: TravelFileListItem["status"] }) {
 
 export function ReservasTab() {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { files, isLoading } = useTravelFiles();
   const [filter, setFilter] = useState<ReservasFilterId>("all");
   const [search, setSearch] = useState("");
@@ -140,7 +142,7 @@ export function ReservasTab() {
               <button
                 key={file.id}
                 type="button"
-                onClick={() => navigate(`/reservas/${file.id}`)}
+                onClick={() => navigate(nav.reservas(file.id))}
                 className="flex w-full min-w-0 flex-col gap-2 px-4 py-4 text-left transition-colors hover:bg-muted/40 md:px-5"
               >
                 <div className="flex min-w-0 flex-wrap items-center gap-2">

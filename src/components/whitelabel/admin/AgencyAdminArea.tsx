@@ -1,5 +1,5 @@
 import { ComponentType, lazy } from "react";
-import { Navigate, useOutletContext, useRoutes } from "react-router-dom";
+import { Navigate, useOutletContext, useParams, useRoutes } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
@@ -8,6 +8,7 @@ import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { AgencyAdminShell } from "./AgencyAdminShell";
 import AgencyAdminLogin from "@/pages/whitelabel/admin/AgencyAdminLogin";
 import type { AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
+import { AgencyAdminNavProvider } from "@/lib/agencyAdminNav";
 
 /**
  * Páginas administrativas reutilizadas da plataforma. Comunidade, Academy,
@@ -25,6 +26,15 @@ const ModelosRoteiros = lazy(() => import("@/pages/ModelosRoteiros"));
 const Perfil = lazy(() => import("@/pages/Perfil"));
 const MinhaConta = lazy(() => import("@/pages/MinhaConta"));
 const Suporte = lazy(() => import("@/pages/Suporte"));
+const AgencyReservas = lazy(() => import("@/pages/whitelabel/admin/AgencyReservas"));
+const ProcessoReserva = lazy(() => import("@/pages/ProcessoReserva"));
+const AgencyAdminNotFound = lazy(() => import("@/pages/whitelabel/admin/AgencyAdminNotFound"));
+
+/** Alias legado /reservas/:id → rota administrativa equivalente. */
+function LegacyReservaRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={id ? `/gestao/reservas/${id}` : "/gestao/reservas"} replace />;
+}
 
 /**
  * Home exclusiva do painel: recebe a agência resolvida pelo shell via
@@ -68,7 +78,8 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
     ["crm/clientes", GestaoClientes],
     ["crm/agenda", GestaoClientes],
     ["crm/documentos", GestaoClientes],
-    ["reservas", GestaoClientes],
+    ["reservas", AgencyReservas],
+    ["reservas/:id", ProcessoReserva],
     ["financeiro", Financeiro],
     ["criar/orcamento", GerarOrcamento],
     ["criar/orcamento/:id", GerarOrcamento],
@@ -98,6 +109,7 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
     ["/ferramentas-ia/criar-roteiro", CriarRoteiro],
     ["/ferramentas-ia/criar-roteiro/:id", CriarRoteiro],
     ["/ferramentas-ia/modelos-roteiros", ModelosRoteiros],
+    ["/reservas", AgencyReservas],
   ];
 
   const routes = useRoutes([
@@ -110,7 +122,11 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
           element: e(Page),
         })),
         ...aliasPairs.map(([path, Page]) => ({ path, element: e(Page) })),
-        { path: "*", element: <Navigate to="/gestao" replace /> },
+        // Alias legado com id: direciona para a rota administrativa segura.
+        { path: "/reservas/:id", element: <LegacyReservaRedirect /> },
+        // Rotas administrativas desconhecidas: 404 white label (sem redirect
+        // silencioso), ainda dentro do shell e do guard de domínio/usuário.
+        { path: "*", element: e(AgencyAdminNotFound) },
       ],
     },
   ]);
@@ -129,7 +145,10 @@ export default function AgencyAdminArea({ hostname }: { hostname: string }) {
     <AuthProvider>
       <TeamSessionProvider>
         <SubscriptionProvider>
-          <AgencyAdminRouter hostname={hostname} />
+          {/* Navegação contextual: páginas reutilizadas geram caminhos /gestao/*. */}
+          <AgencyAdminNavProvider>
+            <AgencyAdminRouter hostname={hostname} />
+          </AgencyAdminNavProvider>
         </SubscriptionProvider>
       </TeamSessionProvider>
     </AuthProvider>

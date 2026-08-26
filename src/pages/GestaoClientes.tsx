@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { KanbanMaximizeProvider, useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
 import { KanbanMaximizeSurface } from "@/components/crm/kanban/KanbanMaximizeSurface";
+import { useAdminNav, type CrmTab } from "@/lib/agencyAdminNav";
 
 export default function GestaoClientes() {
   return (
@@ -28,6 +29,10 @@ function GestaoClientesContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const { can, isTeamMember } = usePermissions();
+  // Rotas das abas seguem o contexto: /gestao/crm/* no painel white label,
+  // /gestao-clientes/* na plataforma tradicional.
+  const nav = useAdminNav();
+  const tabRoute = (tab: string) => nav.crm(tab as CrmTab);
 
   const tabPermission: Record<string, string> = {
     dashboard: 'dashboard.view',
@@ -47,14 +52,7 @@ function GestaoClientesContent() {
   };
 
   const handleTabChange = (value: string) => {
-    const routes: Record<string, string> = {
-      dashboard: '/gestao-clientes/dashboard',
-      clientes: '/gestao-clientes/clientes',
-      funil: '/gestao-clientes/funil',
-      metas: '/gestao-clientes/metas',
-      operacoes: '/gestao-clientes/operacoes',
-    };
-    navigate(routes[value] || '/gestao-clientes/dashboard');
+    navigate(tabRoute(value || 'dashboard'));
   };
 
   const visibleTabs = (['funil','operacoes','clientes','dashboard','metas'] as const).filter(t => can(tabPermission[t]));
@@ -64,18 +62,11 @@ function GestaoClientesContent() {
   useEffect(() => {
     if (!isTeamMember) return;
     if (visibleTabs.length === 0) {
-      navigate('/financeiro', { replace: true });
+      navigate(nav.financeiro, { replace: true });
       return;
     }
     if (!visibleTabs.includes(currentTab as any)) {
-      const routes: Record<string, string> = {
-        dashboard: '/gestao-clientes/dashboard',
-        clientes: '/gestao-clientes/clientes',
-        funil: '/gestao-clientes/funil',
-        operacoes: '/gestao-clientes/operacoes',
-        metas: '/gestao-clientes/metas',
-      };
-      navigate(routes[visibleTabs[0]], { replace: true });
+      navigate(tabRoute(visibleTabs[0]), { replace: true });
     }
   }, [isTeamMember, currentTab, visibleTabs.join(','), navigate]);
 

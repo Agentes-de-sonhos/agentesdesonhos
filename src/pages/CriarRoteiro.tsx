@@ -63,9 +63,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 export default function CriarRoteiro() {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const fromTripId = searchParams.get("fromTrip");
@@ -470,7 +472,7 @@ export default function CriarRoteiro() {
     setCurrentItinerary(null);
     setFormData(null);
     setGeneratedLinkUrl(null);
-    navigate("/ferramentas-ia/criar-roteiro");
+    navigate(nav.itinerary());
   };
 
   const areAllActivitiesApproved = (itinerary: Itinerary & { days: ItineraryDay[] }) => {
@@ -823,7 +825,7 @@ export default function CriarRoteiro() {
                 variant="outline"
                 onClick={() => {
                   if (fromTripId) {
-                    navigate(`/ferramentas-ia/trip-wallet/${fromTripId}`);
+                    navigate(nav.wallet(fromTripId));
                   } else {
                     handleBack();
                   }

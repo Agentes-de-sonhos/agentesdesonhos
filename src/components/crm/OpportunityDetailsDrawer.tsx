@@ -35,6 +35,7 @@ import {
 import { useOpportunityFollowups } from "@/hooks/useOpportunityFollowups";
 import { STAGE_LABELS, STAGE_COLORS, type Opportunity } from "@/types/crm";
 import { cn } from "@/lib/utils";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 interface OpportunityDetailsDrawerProps {
   opportunity: Opportunity | null;
@@ -115,6 +116,7 @@ export function OpportunityDetailsDrawer({
   onEdit,
 }: OpportunityDetailsDrawerProps) {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { byOpportunity, unassignLabel } = useOpportunityLabelAssignments();
   const { followups } = useOpportunityFollowups(opportunity?.id);
   const appliedLabels = opportunity ? byOpportunity[opportunity.id] || [] : [];
@@ -131,7 +133,7 @@ export function OpportunityDetailsDrawer({
   const handleOpenClient = () => {
     if (!client?.id) return;
     onOpenChange(false);
-    navigate(`/gestao-clientes/clientes?client=${client.id}`);
+    navigate(`${nav.crm("clientes")}?client=${client.id}`);
   };
 
   const handleEdit = () => {

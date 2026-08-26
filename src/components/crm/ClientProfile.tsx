@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 interface ClientProfileProps {
   client: Client;
@@ -61,6 +62,7 @@ const TRIP_STATUS_COLORS: Record<string, string> = {
 
 export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { sales, opportunities, clientQuotes, clientItineraries, clientTrips, isLoading, createTrip, updateTrip, deleteTrip, isCreatingTrip } =
     useClientDetails(client.id);
 
@@ -289,7 +291,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Orçamentos</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => navigate("/ferramentas-ia/gerar-orcamento")}>
+              <Button size="sm" variant="outline" onClick={() => navigate(nav.quote())}>
                 <FileText className="mr-2 h-4 w-4" /> Novo Orçamento
               </Button>
             </CardHeader>
@@ -302,7 +304,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
                     <div
                       key={q.id}
                       className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/40 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/ferramentas-ia/gerar-orcamento/${q.id}`)}
+                      onClick={() => navigate(nav.quote(q.id))}
                     >
                       <div className="flex items-center gap-4">
                         <div className="p-2 rounded-lg bg-primary/10">
@@ -334,7 +336,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Roteiros</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => navigate("/ferramentas-ia/criar-roteiro")}>
+              <Button size="sm" variant="outline" onClick={() => navigate(nav.itinerary())}>
                 <Wand2 className="mr-2 h-4 w-4" /> Novo Roteiro
               </Button>
             </CardHeader>
@@ -347,7 +349,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
                     <div
                       key={it.id}
                       className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/40 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/ferramentas-ia/criar-roteiro/${it.id}`)}
+                      onClick={() => navigate(nav.itinerary(it.id))}
                     >
                       <div className="flex items-center gap-4">
                         <div className="p-2 rounded-lg bg-primary/10">

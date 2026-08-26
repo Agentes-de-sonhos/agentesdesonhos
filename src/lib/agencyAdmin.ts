@@ -59,6 +59,7 @@ const ADMIN_ALIAS_PREFIXES = [
   "/agenda",
   "/gestao-clientes",
   "/financeiro",
+  "/reservas",
   "/perfil",
   "/minha-conta",
   "/suporte",
