@@ -107,7 +107,9 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const { user } = useAuth();
   const nav = useAdminNav();
   const brand = brandAccent(info.primary_color);
-  const { data, isLoading } = useAgencyAdminDashboard();
+  const { data, isLoading, isError, error, refetch } = useAgencyAdminDashboard();
+  const [newClientOpen, setNewClientOpen] = useState(false);
+  const [newOperationOpen, setNewOperationOpen] = useState(false);
 
   const { data: profileName } = useQuery({
     queryKey: ["agency-admin-profile", user?.id],
@@ -126,14 +128,31 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
 
   const can = data?.can;
 
+  /**
+   * Atalhos reais: os de criação abrem o fluxo completo (cliente e operação
+   * abrem o próprio formulário aqui mesmo, sem sair do painel da agência).
+   */
   const shortcuts = useMemo(() => {
-    const list: { label: string; to: string; icon: typeof FileText }[] = [];
+    const list: {
+      label: string;
+      icon: typeof FileText;
+      to?: string;
+      onClick?: () => void;
+    }[] = [];
+    if (!can || can.clients_create)
+      list.push({ label: "Novo cliente", icon: UserPlus, onClick: () => setNewClientOpen(true) });
     if (!can || can.quotes_create) list.push({ label: "Novo orçamento", to: nav.quote(), icon: FileText });
     if (!can || can.wallet_create) list.push({ label: "Nova carteira digital", to: nav.wallet(), icon: Wallet });
     if (!can || can.itineraries_create) list.push({ label: "Novo roteiro", to: nav.itinerary(), icon: Map });
-    if (!can || can.clients) list.push({ label: "Clientes", to: nav.crm("clientes"), icon: Users });
+    if (can?.operations_create)
+      list.push({
+        label: "Abrir operação",
+        icon: Briefcase,
+        onClick: () => setNewOperationOpen(true),
+      });
     if (can?.reservations) list.push({ label: "Central de Reservas", to: nav.reservas(), icon: Ticket });
-    return list.slice(0, 4);
+    if (!can || can.clients) list.push({ label: "Clientes", to: nav.crm("clientes"), icon: Users });
+    return list.slice(0, 6);
   }, [can, nav]);
 
   const counters = useMemo(() => {
