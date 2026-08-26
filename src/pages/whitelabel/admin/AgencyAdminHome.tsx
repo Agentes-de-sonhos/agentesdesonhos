@@ -214,28 +214,57 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
 
       {/* Atalhos de criação */}
       {shortcuts.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {shortcuts.map(({ label, to, icon: Icon }) => (
-            <Link
-              key={label}
-              to={to}
-              className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/60"
-            >
-              <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: brand.tint, color: brand.accent }}
-              >
-                <Icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                {label}
-              </span>
-            </Link>
-          ))}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          {shortcuts.map(({ label, to, onClick, icon: Icon }) => {
+            const body = (
+              <>
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                  style={{ backgroundColor: brand.tint, color: brand.accent }}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
+                  {label}
+                </span>
+              </>
+            );
+            const shell =
+              "flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/60";
+            return to ? (
+              <Link key={label} to={to} className={shell}>
+                {body}
+              </Link>
+            ) : (
+              <button key={label} type="button" onClick={onClick} className={shell}>
+                {body}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {isLoading ? (
+      {/* Formulários abertos direto do painel da agência */}
+      <QuickAddClientDialog open={newClientOpen} onOpenChange={setNewClientOpen} />
+      <CreateOperationDialog open={newOperationOpen} onOpenChange={setNewOperationOpen} />
+
+      {isError ? (
+        <Card className="min-w-0 rounded-2xl border-border/60 p-6 text-center">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-amber-50">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+          </div>
+          <p className="text-sm font-medium text-foreground">
+            Não foi possível carregar o resumo operacional
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground">
+            {error?.message || "Tente novamente em alguns instantes."}
+          </p>
+          <Button size="sm" variant="outline" className="mt-4 gap-2" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4" />
+            Tentar novamente
+          </Button>
+        </Card>
+      ) : isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
