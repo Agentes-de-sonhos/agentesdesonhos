@@ -5,6 +5,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { agencyDisplayName } from "@/lib/agencyDomains";
+import { resolveAgencyAdminLogin } from "@/lib/agencyAdminLogin";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import {
   AGENCY_ADMIN_HOME,
@@ -71,6 +72,8 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [forgotSent, setForgotSent] = useState(false);
+  const [forgotTeam, setForgotTeam] = useState(false);
+
 
   if (authLoading || portal.isLoading) return <AgencyAdminLoading />;
   if (!info || !enabled) return <AgencyAdminUnavailable />;
@@ -94,11 +97,23 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
     setError(null);
     setSubmitting(true);
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+      const typed = email.trim().toLowerCase();
+      // Colaboradores digitam o login visível; o identificador técnico é
+      // resolvido no servidor SOMENTE dentro da agência dona do hostname.
+      const resolved = await resolveAgencyAdminLogin(hostname, typed);
+
+      let attempt = await supabase.auth.signInWithPassword({
+        email: resolved.email ?? typed,
         password,
       });
-      if (signInError || !data.user) {
+
+      // Um login de equipe pode coincidir com o e-mail real de uma conta
+      // master; nesse caso tenta novamente com o valor digitado.
+      if (attempt.error && resolved.email && resolved.email !== typed) {
+        attempt = await supabase.auth.signInWithPassword({ email: typed, password });
+      }
+
+      if (attempt.error || !attempt.data.user) {
         setError(GENERIC_ERROR);
         return;
       }
@@ -109,7 +124,7 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
         return;
       }
       // Sucesso: semeia o cache para a navegação acontecer sem nova espera.
-      queryClient.setQueryData(["agency-admin-access", hostname, data.user.id], true);
+      queryClient.setQueryData(["agency-admin-access", hostname, attempt.data.user.id], true);
     } catch {
       setError(GENERIC_ERROR);
     } finally {
@@ -122,8 +137,16 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
     if (submitting) return;
     setSubmitting(true);
     try {
-      // Fluxo seguro já existente da plataforma (página /reset-password).
-      await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      const typed = email.trim().toLowerCase();
+      const resolved = await resolveAgencyAdminLogin(hostname, typed);
+      if (resolved.team) {
+        // Colaborador: o identificador técnico não é uma caixa de e-mail real.
+        // A redefinição é feita pela gestão de equipe da própria agência.
+        setForgotTeam(true);
+        return;
+      }
+      // Conta master: fluxo seguro já existente da plataforma (/reset-password).
+      await supabase.auth.resetPasswordForEmail(typed, {
         redirectTo: `${PLATFORM_APP_ORIGIN}/reset-password`,
       });
     } catch {
@@ -133,6 +156,7 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
       setForgotSent(true);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-muted/40 flex items-center justify-center p-4">
@@ -225,6 +249,7 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
                   setMode("forgot");
                   setError(null);
                   setForgotSent(false);
+                  setForgotTeam(false);
                 }}
                 className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
@@ -235,9 +260,11 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
             <form onSubmit={handleForgot} className="space-y-4">
               {forgotSent ? (
                 <p className="text-sm text-muted-foreground text-center">
-                  Se este e-mail estiver cadastrado, você receberá as instruções de recuperação em
-                  instantes.
+                  {forgotTeam
+                    ? "Sua senha de acesso é definida pelo administrador da sua agência. Entre em contato com ele para redefini-la."
+                    : "Se este e-mail estiver cadastrado, você receberá as instruções de recuperação em instantes."}
                 </p>
+
               ) : (
                 <>
                   <p className="text-sm text-muted-foreground">
