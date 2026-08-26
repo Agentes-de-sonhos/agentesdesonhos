@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowRight,
+  Briefcase,
   CalendarDays,
   Clock,
   FileText,
@@ -10,7 +11,9 @@ import {
   Map,
   MapPin,
   Plane,
+  RefreshCw,
   Ticket,
+  UserPlus,
   UserRound,
   Users,
   Wallet,
@@ -24,6 +27,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { QuickAddClientDialog } from "@/components/crm/QuickAddClientDialog";
+import { CreateOperationDialog } from "@/components/crm/operations/CreateOperationDialog";
 import {
   useAgencyAdminDashboard,
   type AdminAttentionItem,
@@ -102,7 +107,9 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const { user } = useAuth();
   const nav = useAdminNav();
   const brand = brandAccent(info.primary_color);
-  const { data, isLoading } = useAgencyAdminDashboard();
+  const { data, isLoading, isError, error, refetch } = useAgencyAdminDashboard();
+  const [newClientOpen, setNewClientOpen] = useState(false);
+  const [newOperationOpen, setNewOperationOpen] = useState(false);
 
   const { data: profileName } = useQuery({
     queryKey: ["agency-admin-profile", user?.id],
@@ -121,14 +128,31 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
 
   const can = data?.can;
 
+  /**
+   * Atalhos reais: os de criação abrem o fluxo completo (cliente e operação
+   * abrem o próprio formulário aqui mesmo, sem sair do painel da agência).
+   */
   const shortcuts = useMemo(() => {
-    const list: { label: string; to: string; icon: typeof FileText }[] = [];
+    const list: {
+      label: string;
+      icon: typeof FileText;
+      to?: string;
+      onClick?: () => void;
+    }[] = [];
+    if (!can || can.clients_create)
+      list.push({ label: "Novo cliente", icon: UserPlus, onClick: () => setNewClientOpen(true) });
     if (!can || can.quotes_create) list.push({ label: "Novo orçamento", to: nav.quote(), icon: FileText });
     if (!can || can.wallet_create) list.push({ label: "Nova carteira digital", to: nav.wallet(), icon: Wallet });
     if (!can || can.itineraries_create) list.push({ label: "Novo roteiro", to: nav.itinerary(), icon: Map });
-    if (!can || can.clients) list.push({ label: "Clientes", to: nav.crm("clientes"), icon: Users });
+    if (can?.operations_create)
+      list.push({
+        label: "Abrir operação",
+        icon: Briefcase,
+        onClick: () => setNewOperationOpen(true),
+      });
     if (can?.reservations) list.push({ label: "Central de Reservas", to: nav.reservas(), icon: Ticket });
-    return list.slice(0, 4);
+    if (!can || can.clients) list.push({ label: "Clientes", to: nav.crm("clientes"), icon: Users });
+    return list.slice(0, 6);
   }, [can, nav]);
 
   const counters = useMemo(() => {
@@ -190,28 +214,57 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
 
       {/* Atalhos de criação */}
       {shortcuts.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {shortcuts.map(({ label, to, icon: Icon }) => (
-            <Link
-              key={label}
-              to={to}
-              className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/60"
-            >
-              <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: brand.tint, color: brand.accent }}
-              >
-                <Icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                {label}
-              </span>
-            </Link>
-          ))}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+          {shortcuts.map(({ label, to, onClick, icon: Icon }) => {
+            const body = (
+              <>
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                  style={{ backgroundColor: brand.tint, color: brand.accent }}
+                >
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
+                  {label}
+                </span>
+              </>
+            );
+            const shell =
+              "flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/60";
+            return to ? (
+              <Link key={label} to={to} className={shell}>
+                {body}
+              </Link>
+            ) : (
+              <button key={label} type="button" onClick={onClick} className={shell}>
+                {body}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {isLoading ? (
+      {/* Formulários abertos direto do painel da agência */}
+      <QuickAddClientDialog open={newClientOpen} onOpenChange={setNewClientOpen} />
+      <CreateOperationDialog open={newOperationOpen} onOpenChange={setNewOperationOpen} />
+
+      {isError ? (
+        <Card className="min-w-0 rounded-2xl border-border/60 p-6 text-center">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-amber-50">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+          </div>
+          <p className="text-sm font-medium text-foreground">
+            Não foi possível carregar o resumo operacional
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground">
+            {error?.message || "Tente novamente em alguns instantes."}
+          </p>
+          <Button size="sm" variant="outline" className="mt-4 gap-2" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4" />
+            Tentar novamente
+          </Button>
+        </Card>
+      ) : isLoading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>

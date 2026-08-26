@@ -89,6 +89,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ['reservations.view', 'Visualizar a Central de Reservas'],
     ['reservations.manage', 'Alterar etapas, dados operacionais e notas'],
     ['reservations.assign', 'Definir responsáveis comercial e de operação'],
+    ['reservations.financial.manage', 'Alterar valores financeiros da reserva', true],
   ]),
   g('sales', 'Vendas', 'Registro de vendas fechadas.', [
     ['sales.view', 'Visualizar vendas'],

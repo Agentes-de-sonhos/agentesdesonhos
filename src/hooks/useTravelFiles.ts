@@ -49,21 +49,35 @@ export function useAgencyTeamDirectory(enabled = true) {
   return { members: query.data ?? [], memberNames: byId, isLoading: query.isLoading };
 }
 
+/** Ordenações aceitas pelo servidor (travel_files_page). */
+export type TravelFilesSort = "recent" | "oldest" | "travel" | "updated" | "number";
+
+export const TRAVEL_FILES_SORTS: { value: TravelFilesSort; label: string }[] = [
+  { value: "recent", label: "Solicitação mais recente" },
+  { value: "oldest", label: "Solicitação mais antiga" },
+  { value: "updated", label: "Última atualização" },
+  { value: "travel", label: "Data da viagem" },
+  { value: "number", label: "Nº do file" },
+];
+
 export interface TravelFilesQueryParams {
   search?: string;
   statuses?: string[] | null;
   from?: string | null;
   to?: string | null;
   responsibleTeamMemberId?: string | null;
+  /** Somente processos ainda não abertos pelo usuário. */
+  unreadOnly?: boolean;
   page?: number;
   pageSize?: number;
-  sort?: "recent" | "oldest" | "travel";
+  sort?: TravelFilesSort;
 }
 
 export interface TravelFilesCounts {
   all: number;
   new: number;
   awaiting_reconfirmation: number;
+  partially_available: number;
   awaiting_client: number;
   confirmed: number;
   in_operation: number;
@@ -80,12 +94,16 @@ export interface TravelFilesCapabilities {
   margin: boolean;
   commission: boolean;
   commission_manage: boolean;
+  /** Alterar valor vendido e custo do serviço (reservations.financial.manage). */
+  financial_manage: boolean;
 }
 
 export interface TravelFilesPageResult {
   total: number;
   page: number;
+  pages: number;
   pageSize: number;
+  sort: TravelFilesSort;
   items: TravelFileListItem[];
   counts: TravelFilesCounts;
   can: TravelFilesCapabilities;
@@ -95,6 +113,7 @@ const EMPTY_COUNTS: TravelFilesCounts = {
   all: 0,
   new: 0,
   awaiting_reconfirmation: 0,
+  partially_available: 0,
   awaiting_client: 0,
   confirmed: 0,
   in_operation: 0,
@@ -111,6 +130,7 @@ const EMPTY_CAN: TravelFilesCapabilities = {
   margin: false,
   commission: false,
   commission_manage: false,
+  financial_manage: false,
 };
 
 const toNumber = (value: unknown): number => {
@@ -153,6 +173,7 @@ export function useTravelFilesPage(params: TravelFilesQueryParams, enabled = tru
       params.from ?? "",
       params.to ?? "",
       params.responsibleTeamMemberId ?? "",
+      params.unreadOnly ? "unread" : "",
       page,
       pageSize,
       params.sort ?? "recent",
@@ -160,6 +181,7 @@ export function useTravelFilesPage(params: TravelFilesQueryParams, enabled = tru
     enabled: !!user?.id && enabled,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
+    retry: 1,
     queryFn: async (): Promise<TravelFilesPageResult> => {
       const { data, error } = await sb.rpc("travel_files_page", {
         _search: params.search?.trim() || null,
@@ -167,6 +189,7 @@ export function useTravelFilesPage(params: TravelFilesQueryParams, enabled = tru
         _from: params.from || null,
         _to: params.to || null,
         _responsible: params.responsibleTeamMemberId || null,
+        _unread: !!params.unreadOnly,
         _page: page,
         _page_size: pageSize,
         _sort: params.sort ?? "recent",
@@ -176,7 +199,9 @@ export function useTravelFilesPage(params: TravelFilesQueryParams, enabled = tru
       return {
         total: toNumber(payload.total),
         page: toNumber(payload.page) || page,
+        pages: Math.max(1, toNumber(payload.pages) || 1),
         pageSize: toNumber(payload.page_size) || pageSize,
+        sort: (payload.sort as TravelFilesSort) || params.sort || "recent",
         items: ((payload.items || []) as any[]).map(mapTravelFileRow),
         counts: { ...EMPTY_COUNTS, ...(payload.counts || {}) },
         can: { ...EMPTY_CAN, ...(payload.can || {}) },
@@ -206,6 +231,10 @@ export function useTravelFilesPage(params: TravelFilesQueryParams, enabled = tru
   return {
     items: query.data?.items ?? [],
     total: query.data?.total ?? 0,
+    /** Total de páginas calculado pelo servidor. */
+    pages: query.data?.pages ?? 1,
+    /** Página efetivamente devolvida (o servidor ajusta quando excede o total). */
+    serverPage: query.data?.page ?? page,
     counts: query.data?.counts ?? EMPTY_COUNTS,
     can: query.data?.can ?? EMPTY_CAN,
     isLoading: query.isLoading,
