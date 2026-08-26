@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,14 +25,13 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useAgencyTeamDirectory, useTravelFiles } from "@/hooks/useTravelFiles";
+import { useAgencyTeamDirectory, useTravelFilesPage } from "@/hooks/useTravelFiles";
 import {
   FILE_STATUS_LABELS,
   RESERVAS_FILTERS,
-  filterTravelFiles,
   type ReservasFilterId,
 } from "@/lib/travelFiles";
-import { isFileOverdue, summarizeReservas } from "@/lib/travelFileWorkflow";
+import { isFileOverdue } from "@/lib/travelFileWorkflow";
 import type { TravelFileListItem } from "@/types/travelFile";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 
@@ -86,47 +85,65 @@ const PAGE_SIZE = 20;
 export function ReservasTab() {
   const navigate = useNavigate();
   const nav = useAdminNav();
-  const { files, isLoading } = useTravelFiles();
   const { members } = useAgencyTeamDirectory();
   const [filter, setFilter] = useState<ReservasFilterId>("all");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [responsible, setResponsible] = useState("all");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [page, setPage] = useState(1);
 
-  const indicators = useMemo(() => summarizeReservas(files), [files]);
+  // Busca no servidor: aguarda o usuário parar de digitar.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
-  const filtered = useMemo(
-    () =>
-      filterTravelFiles(files, {
-        filter,
-        search,
-        from: from || null,
-        to: to || null,
-        responsibleTeamMemberId: responsible === "all" ? null : responsible,
-      }),
-    [files, filter, search, from, to, responsible],
-  );
+  const statuses = useMemo(() => {
+    const found = RESERVAS_FILTERS.find((f) => f.id === filter);
+    return found && found.statuses.length > 0 ? found.statuses : null;
+  }, [filter]);
 
-  const visible = filtered.slice(0, visibleCount);
+  const { items, total, counts, can, isLoading, isFetching } = useTravelFilesPage({
+    search: debouncedSearch,
+    statuses,
+    from: from || null,
+    to: to || null,
+    responsibleTeamMemberId: responsible === "all" ? null : responsible,
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
-  const counts = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const f of RESERVAS_FILTERS) {
-      map[f.id] = filterTravelFiles(files, { filter: f.id }).length;
-    }
-    return map;
-  }, [files]);
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const kpis = [
-    { label: "Novas solicitações", value: indicators.newRequests, tone: "text-primary" },
-    { label: "Aguardando reconfirmação", value: indicators.awaitingReconfirmation, tone: "text-amber-600" },
-    { label: "Aguardando cliente", value: indicators.awaitingClient, tone: "text-amber-600" },
-    { label: "Confirmadas", value: indicators.confirmed, tone: "text-emerald-600" },
-    { label: "Em operação", value: indicators.inOperation, tone: "text-foreground" },
+    { label: "Novas solicitações", value: counts.new, tone: "text-primary" },
+    { label: "Aguardando reconfirmação", value: counts.awaiting_reconfirmation, tone: "text-amber-600" },
+    { label: "Aguardando cliente", value: counts.awaiting_client, tone: "text-amber-600" },
+    { label: "Confirmadas", value: counts.confirmed, tone: "text-emerald-600" },
+    { label: "Em operação", value: counts.in_operation, tone: "text-foreground" },
   ];
+
+  /** Somatórios da página atual — só aparecem com permissão financeira. */
+  const pageAmounts = useMemo(() => {
+    let requested = 0;
+    let confirmed = 0;
+    let currency = "BRL";
+    for (const f of items) {
+      currency = f.currency || currency;
+      if (f.status === "cancelled") continue;
+      requested += Number(f.requested_amount) || 0;
+      if (f.status === "sale_confirmed" || f.status === "in_operation" || f.status === "trip_completed") {
+        confirmed += Number(f.final_sale_amount ?? f.reconfirmed_amount ?? f.requested_amount) || 0;
+      }
+    }
+    return { requested, confirmed, currency };
+  }, [items]);
 
   const resetFilters = () => {
     setFilter("all");
@@ -134,6 +151,7 @@ export function ReservasTab() {
     setFrom("");
     setTo("");
     setResponsible("all");
+    setPage(1);
   };
 
   return (
@@ -153,35 +171,34 @@ export function ReservasTab() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Valor solicitado em aberto
-          </p>
-          <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">
-            {money(indicators.requestedAmount, indicators.currency)}
-          </p>
+      {can.revenue && (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Valor solicitado (página atual)
+            </p>
+            <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">
+              {money(pageAmounts.requested, pageAmounts.currency)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Vendas confirmadas (página atual)
+            </p>
+            <p className="mt-0.5 text-base font-semibold tabular-nums text-emerald-600">
+              {money(pageAmounts.confirmed, pageAmounts.currency)}
+            </p>
+          </div>
         </div>
-        <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-            Valor de vendas confirmadas
-          </p>
-          <p className="mt-0.5 text-base font-semibold tabular-nums text-emerald-600">
-            {money(indicators.confirmedAmount, indicators.currency)}
-          </p>
-        </div>
-      </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1 sm:max-w-[420px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setVisibleCount(PAGE_SIZE);
-            }}
-            placeholder="Buscar por nº do file, cliente, destino ou status..."
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nº do file, cliente, destino ou serviço..."
             className="h-10 rounded-lg bg-background pl-9"
           />
         </div>
@@ -207,7 +224,10 @@ export function ReservasTab() {
             <Input
               type="date"
               value={from}
-              onChange={(e) => setFrom(e.target.value)}
+              onChange={(e) => {
+                setFrom(e.target.value);
+                setPage(1);
+              }}
               className="mt-1 h-9 bg-background"
             />
           </div>
@@ -218,7 +238,10 @@ export function ReservasTab() {
             <Input
               type="date"
               value={to}
-              onChange={(e) => setTo(e.target.value)}
+              onChange={(e) => {
+                setTo(e.target.value);
+                setPage(1);
+              }}
               className="mt-1 h-9 bg-background"
             />
           </div>
@@ -226,7 +249,13 @@ export function ReservasTab() {
             <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               Responsável
             </label>
-            <Select value={responsible} onValueChange={setResponsible}>
+            <Select
+              value={responsible}
+              onValueChange={(v) => {
+                setResponsible(v);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="mt-1 h-9 bg-background">
                 <SelectValue placeholder="Todos" />
               </SelectTrigger>
@@ -255,7 +284,7 @@ export function ReservasTab() {
             type="button"
             onClick={() => {
               setFilter(f.id);
-              setVisibleCount(PAGE_SIZE);
+              setPage(1);
             }}
             aria-pressed={filter === f.id}
             className={cn(
@@ -276,7 +305,7 @@ export function ReservasTab() {
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
-        ) : visible.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
               <Ticket className="h-5 w-5 text-muted-foreground" />
@@ -294,7 +323,7 @@ export function ReservasTab() {
           </div>
         ) : (
           <div className="divide-y divide-border/50">
-            {visible.map((file) => (
+            {items.map((file) => (
               <button
                 key={file.id}
                 type="button"
@@ -350,12 +379,14 @@ export function ReservasTab() {
                 </div>
 
                 <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-semibold tabular-nums text-foreground">
-                    {money(
-                      file.final_sale_amount ?? file.reconfirmed_amount ?? file.requested_amount,
-                      file.currency,
-                    )}
-                  </span>
+                  {can.revenue && (
+                    <span className="text-sm font-semibold tabular-nums text-foreground">
+                      {money(
+                        file.final_sale_amount ?? file.reconfirmed_amount ?? file.requested_amount,
+                        file.currency,
+                      )}
+                    </span>
+                  )}
                   <span className="text-[11px] text-muted-foreground">
                     Solicitado em {format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                   </span>
@@ -366,11 +397,30 @@ export function ReservasTab() {
         )}
       </Card>
 
-      {filtered.length > visible.length && (
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}>
-            Carregar mais ({filtered.length - visible.length} restantes)
-          </Button>
+      {total > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            {total} processo{total === 1 ? "" : "s"} · página {page} de {totalPages}
+            {isFetching ? " · atualizando..." : ""}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1 || isFetching}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages || isFetching}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Próxima
+            </Button>
+          </div>
         </div>
       )}
     </div>

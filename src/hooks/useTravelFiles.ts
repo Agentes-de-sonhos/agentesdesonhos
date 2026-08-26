@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type {
   TravelFile,
+  TravelFileServiceStatus,
+  TravelFileStatus,
   TravelFileListItem,
   TravelFileNote,
   TravelFileService,
@@ -47,98 +49,192 @@ export function useAgencyTeamDirectory(enabled = true) {
   return { members: query.data ?? [], memberNames: byId, isLoading: query.isLoading };
 }
 
+export interface TravelFilesQueryParams {
+  search?: string;
+  statuses?: string[] | null;
+  from?: string | null;
+  to?: string | null;
+  responsibleTeamMemberId?: string | null;
+  page?: number;
+  pageSize?: number;
+  sort?: "recent" | "oldest" | "travel";
+}
+
+export interface TravelFilesCounts {
+  all: number;
+  new: number;
+  awaiting_reconfirmation: number;
+  awaiting_client: number;
+  confirmed: number;
+  in_operation: number;
+  completed: number;
+  cancelled: number;
+  overdue: number;
+  unread: number;
+}
+
+export interface TravelFilesCapabilities {
+  manage: boolean;
+  assign: boolean;
+  revenue: boolean;
+  margin: boolean;
+  commission: boolean;
+  commission_manage: boolean;
+}
+
+export interface TravelFilesPageResult {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: TravelFileListItem[];
+  counts: TravelFilesCounts;
+  can: TravelFilesCapabilities;
+}
+
+const EMPTY_COUNTS: TravelFilesCounts = {
+  all: 0,
+  new: 0,
+  awaiting_reconfirmation: 0,
+  awaiting_client: 0,
+  confirmed: 0,
+  in_operation: 0,
+  completed: 0,
+  cancelled: 0,
+  overdue: 0,
+  unread: 0,
+};
+
+const EMPTY_CAN: TravelFilesCapabilities = {
+  manage: false,
+  assign: false,
+  revenue: false,
+  margin: false,
+  commission: false,
+  commission_manage: false,
+};
+
+const toNumber = (value: unknown): number => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
+/** Normaliza a linha devolvida pelo servidor no formato usado pela interface. */
+export function mapTravelFileRow(row: any): TravelFileListItem {
+  return {
+    ...(row as TravelFile),
+    requested_amount: toNumber(row.requested_amount),
+    reconfirmed_amount: row.reconfirmed_amount == null ? null : toNumber(row.reconfirmed_amount),
+    final_sale_amount: row.final_sale_amount == null ? null : toNumber(row.final_sale_amount),
+    clientName: row.client_name ?? null,
+    servicesCount: toNumber(row.services_count),
+    serviceNames: (row.service_names || []) as string[],
+    unread: !!row.unread,
+    responsibleName: row.responsible_name ?? null,
+  } as TravelFileListItem;
+}
+
 /**
- * Lista os processos de reserva (files) visíveis para o usuário.
- * A RLS já isola por agência: nenhuma agência lê files de outra.
+ * Central de Reservas: busca, filtros e paginação executados NO SERVIDOR
+ * (RPC travel_files_page). A função resolve a agência pelo usuário autenticado,
+ * exige reservations.view e remove valores financeiros sem permissão.
  */
-export function useTravelFiles(enabled = true) {
+export function useTravelFilesPage(params: TravelFilesQueryParams, enabled = true) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { memberNames } = useAgencyTeamDirectory(enabled);
+  const pageSize = params.pageSize ?? 20;
+  const page = params.page ?? 1;
 
   const query = useQuery({
-    queryKey: ["travel-files", user?.id],
+    queryKey: [
+      "travel-files-page",
+      user?.id,
+      params.search ?? "",
+      (params.statuses ?? []).join(","),
+      params.from ?? "",
+      params.to ?? "",
+      params.responsibleTeamMemberId ?? "",
+      page,
+      pageSize,
+      params.sort ?? "recent",
+    ],
     enabled: !!user?.id && enabled,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
-    queryFn: async (): Promise<TravelFileListItem[]> => {
-      const { data: files, error } = await sb
-        .from("travel_files")
-        .select("*")
-        .order("created_at", { ascending: false });
+    queryFn: async (): Promise<TravelFilesPageResult> => {
+      const { data, error } = await sb.rpc("travel_files_page", {
+        _search: params.search?.trim() || null,
+        _statuses: params.statuses && params.statuses.length ? params.statuses : null,
+        _from: params.from || null,
+        _to: params.to || null,
+        _responsible: params.responsibleTeamMemberId || null,
+        _page: page,
+        _page_size: pageSize,
+        _sort: params.sort ?? "recent",
+      });
       if (error) throw error;
-
-      const rows = (files || []) as TravelFile[];
-      if (rows.length === 0) return [];
-
-      const fileIds = rows.map((f) => f.id);
-      const clientIds = Array.from(
-        new Set(rows.map((f) => f.client_id).filter((v): v is string => !!v)),
-      );
-
-      const [servicesRes, clientsRes, viewsRes] = await Promise.all([
-        sb
-          .from("travel_file_services")
-          .select("id, file_id, product_name, service_type")
-          .in("file_id", fileIds),
-        clientIds.length
-          ? supabase.from("clients").select("id, name").in("id", clientIds)
-          : Promise.resolve({ data: [], error: null } as any),
-        sb.from("travel_file_views").select("file_id").in("file_id", fileIds),
-      ]);
-
-      const byFile = new Map<string, { count: number; names: string[] }>();
-      for (const svc of (servicesRes.data || []) as any[]) {
-        const entry = byFile.get(svc.file_id) || { count: 0, names: [] };
-        entry.count += 1;
-        if (entry.names.length < 6) entry.names.push(String(svc.product_name || ""));
-        byFile.set(svc.file_id, entry);
-      }
-      const clientName = new Map<string, string>();
-      for (const c of (clientsRes.data || []) as any[]) clientName.set(c.id, c.name);
-      const viewed = new Set<string>(((viewsRes.data || []) as any[]).map((v) => v.file_id));
-
-      return rows.map((f) => ({
-        ...f,
-        clientName: f.client_id ? clientName.get(f.client_id) ?? null : null,
-        servicesCount: byFile.get(f.id)?.count ?? 0,
-        serviceNames: byFile.get(f.id)?.names ?? [],
-        unread: !viewed.has(f.id),
-      }));
+      const payload = (data || {}) as any;
+      return {
+        total: toNumber(payload.total),
+        page: toNumber(payload.page) || page,
+        pageSize: toNumber(payload.page_size) || pageSize,
+        items: ((payload.items || []) as any[]).map(mapTravelFileRow),
+        counts: { ...EMPTY_COUNTS, ...(payload.counts || {}) },
+        can: { ...EMPTY_CAN, ...(payload.can || {}) },
+      };
     },
   });
 
   const markViewed = useMutation({
     mutationFn: async (file: { id: string; agency_id: string }) => {
       if (!user?.id) return;
-      await sb
-        .from("travel_file_views")
-        .upsert(
-          { file_id: file.id, agency_id: file.agency_id, user_id: user.id, viewed_at: new Date().toISOString() },
-          { onConflict: "file_id,user_id" },
-        );
+      await sb.from("travel_file_views").upsert(
+        {
+          file_id: file.id,
+          agency_id: file.agency_id,
+          user_id: user.id,
+          viewed_at: new Date().toISOString(),
+        },
+        { onConflict: "file_id,user_id" },
+      );
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-files"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["travel-files-page"] });
+      queryClient.invalidateQueries({ queryKey: ["travel-files-summary"] });
+    },
   });
 
-  const files = useMemo(
-    () =>
-      (query.data ?? []).map((f) => ({
-        ...f,
-        responsibleName: f.responsible_team_member_id
-          ? memberNames[f.responsible_team_member_id] ?? null
-          : null,
-      })),
-    [query.data, memberNames],
-  );
-  const unreadCount = useMemo(() => files.filter((f) => f.unread).length, [files]);
-
   return {
-    files,
-    unreadCount,
+    items: query.data?.items ?? [],
+    total: query.data?.total ?? 0,
+    counts: query.data?.counts ?? EMPTY_COUNTS,
+    can: query.data?.can ?? EMPTY_CAN,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error as Error | null,
     refetch: query.refetch,
     markViewed: markViewed.mutateAsync,
+  };
+}
+
+/** Contadores da Central de Reservas sem carregar a lista (etiquetas e badges). */
+export function useTravelFilesSummary(enabled = true) {
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: ["travel-files-summary", user?.id],
+    enabled: !!user?.id && enabled,
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async (): Promise<TravelFilesCounts> => {
+      const { data, error } = await sb.rpc("travel_files_page", { _page: 1, _page_size: 1 });
+      if (error) throw error;
+      return { ...EMPTY_COUNTS, ...(((data || {}) as any).counts || {}) };
+    },
+  });
+  return {
+    counts: query.data ?? EMPTY_COUNTS,
+    unreadCount: query.data?.unread ?? 0,
+    isLoading: query.isLoading,
   };
 }
 
@@ -197,38 +293,85 @@ export function useTravelFile(fileId?: string) {
   });
 }
 
-/** Atualizações operacionais do file e dos serviços (RLS isola por agência). */
+/**
+ * Atualizações do file e dos serviços SEMPRE por funções seguras no servidor.
+ * O servidor resolve a agência pelo usuário autenticado, valida a permissão e
+ * confirma que o registro pertence à agência antes de gravar.
+ */
 export function useTravelFileMutations(fileId?: string) {
   const queryClient = useQueryClient();
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["travel-file", fileId] });
-    queryClient.invalidateQueries({ queryKey: ["travel-files"] });
+    queryClient.invalidateQueries({ queryKey: ["travel-files-page"] });
+    queryClient.invalidateQueries({ queryKey: ["travel-files-summary"] });
+    queryClient.invalidateQueries({ queryKey: ["agency-admin-dashboard"] });
   };
 
-  const updateFile = useMutation({
-    mutationFn: async (patch: Partial<TravelFile>) => {
-      const { error } = await sb
-        .from("travel_files")
-        .update({ ...patch, updated_at: new Date().toISOString() })
-        .eq("id", fileId);
+  const setStatus = useMutation({
+    mutationFn: async ({ status, reason }: { status: TravelFileStatus; reason?: string | null }) => {
+      const { error } = await sb.rpc("travel_file_set_status", {
+        _file_id: fileId,
+        _status: status,
+        _reason: reason?.trim() || null,
+      });
       if (error) throw error;
     },
     onSuccess: invalidate,
   });
 
-  const updateService = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<TravelFileService> }) => {
-      const { error } = await sb
-        .from("travel_file_services")
-        .update({ ...patch, updated_at: new Date().toISOString() })
-        .eq("id", id);
+  const setResponsibles = useMutation({
+    mutationFn: async ({
+      commercial,
+      operations,
+    }: {
+      commercial: string | null;
+      operations: string | null;
+    }) => {
+      const { error } = await sb.rpc("travel_file_set_responsibles", {
+        _file_id: fileId,
+        _commercial: commercial,
+        _operations: operations,
+      });
       if (error) throw error;
     },
     onSuccess: invalidate,
   });
 
-  return { updateFile, updateService };
+  const saveService = useMutation({
+    mutationFn: async ({
+      id,
+      status,
+      financials,
+      responsibleTeamMemberId,
+    }: {
+      id: string;
+      status?: TravelFileServiceStatus;
+      financials?: {
+        reconfirmed_amount?: number | null;
+        sold_amount?: number | null;
+        cost_amount?: number | null;
+        commission_amount?: number | null;
+      };
+      responsibleTeamMemberId?: string | null;
+    }) => {
+      const { error } = await sb.rpc("travel_file_service_save", {
+        _service_id: id,
+        _status: status ?? null,
+        _reconfirmed_amount: financials?.reconfirmed_amount ?? null,
+        _sold_amount: financials?.sold_amount ?? null,
+        _cost_amount: financials?.cost_amount ?? null,
+        _commission_amount: financials?.commission_amount ?? null,
+        _responsible: responsibleTeamMemberId ?? null,
+        _touch_financials: !!financials,
+        _touch_responsible: responsibleTeamMemberId !== undefined,
+      });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+
+  return { setStatus, setResponsibles, saveService };
 }
 
 /** Notas internas do processo — visíveis apenas para a agência. */
@@ -254,13 +397,11 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
 
   const addNote = useMutation({
     mutationFn: async ({ body, authorName }: { body: string; authorName?: string | null }) => {
-      if (!fileId || !agencyId || !user?.id) throw new Error("Processo não identificado.");
-      const { error } = await sb.from("travel_file_notes").insert({
-        file_id: fileId,
-        agency_id: agencyId,
-        author_user_id: user.id,
-        author_name: authorName || null,
-        body: body.trim().slice(0, 4000),
+      if (!fileId || !user?.id) throw new Error("Processo não identificado.");
+      const { error } = await sb.rpc("travel_file_note_add", {
+        _file_id: fileId,
+        _body: body,
+        _author_name: authorName || null,
       });
       if (error) throw error;
     },
@@ -269,7 +410,7 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
 
   const deleteNote = useMutation({
     mutationFn: async (noteId: string) => {
-      const { error } = await sb.from("travel_file_notes").delete().eq("id", noteId);
+      const { error } = await sb.rpc("travel_file_note_delete", { _note_id: noteId });
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes", fileId] }),

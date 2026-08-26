@@ -4,7 +4,7 @@
 
 export type ModuleKey =
   | 'dashboard' | 'clients' | 'opportunities' | 'operations' | 'sales'
-  | 'quotes' | 'itineraries' | 'wallet' | 'agenda' | 'tasks'
+  | 'reservations' | 'quotes' | 'itineraries' | 'wallet' | 'agenda' | 'tasks'
   | 'financial' | 'marketing' | 'education' | 'community' | 'tools'
   | 'settings'
 
@@ -84,6 +84,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ['operations.edit', 'Editar operações'],
     ['operations.delete', 'Excluir operações', true],
     ['operations.assign', 'Definir responsável'],
+  ]),
+  g('reservations', 'Central de Reservas', 'Processos de reserva (files) entre solicitação, reconfirmação, venda e operação.', [
+    ['reservations.view', 'Visualizar a Central de Reservas'],
+    ['reservations.manage', 'Alterar etapas, dados operacionais e notas'],
+    ['reservations.assign', 'Definir responsáveis comercial e de operação'],
   ]),
   g('sales', 'Vendas', 'Registro de vendas fechadas.', [
     ['sales.view', 'Visualizar vendas'],

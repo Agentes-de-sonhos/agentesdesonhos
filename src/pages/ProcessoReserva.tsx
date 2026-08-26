@@ -32,8 +32,9 @@ import {
   useTravelFile,
   useTravelFileMutations,
   useTravelFileNotes,
-  useTravelFiles,
+  useTravelFilesPage,
 } from "@/hooks/useTravelFiles";
+import { usePermissions } from "@/hooks/usePermissions";
 import { FILE_STATUS_LABELS, SERVICE_STATUS_LABELS } from "@/lib/travelFiles";
 import {
   describeFileEvent,
@@ -75,12 +76,15 @@ function AmountField({
   value,
   currency,
   onCommit,
+  readOnly = false,
 }: {
   label: string;
   value: number | null | undefined;
   currency: string;
   onCommit: (next: number | null) => void;
+  readOnly?: boolean;
 }) {
+
   const [draft, setDraft] = useState(value == null ? "" : String(value));
 
   useEffect(() => {
@@ -109,6 +113,7 @@ function AmountField({
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
+        readOnly={readOnly}
         placeholder={money(0, currency)}
         className="mt-1 h-9 bg-background tabular-nums"
       />
@@ -125,12 +130,21 @@ export default function ProcessoReserva() {
   // aba de Reservas em Meus Projetos na plataforma tradicional).
   const backToList = nav.isAgencyAdmin ? nav.reservas() : "/meus-projetos?tab=reservas";
   const { data, isLoading } = useTravelFile(id);
-  const { markViewed } = useTravelFiles();
   const { members, memberNames } = useAgencyTeamDirectory();
-  const { updateFile, updateService } = useTravelFileMutations(id);
+  const { setStatus, setResponsibles, saveService } = useTravelFileMutations(id);
+  const { can } = usePermissions();
+  // Interface segue as permissões; a autoridade final é o servidor.
+  const canManage = can("reservations.manage");
+  const canAssign = can("reservations.assign");
+  const canRevenue = can("financial.view_revenue");
+  const canMargin = can("financial.view_margin");
+  const canCommission = can("financial.commissions.view");
+  const canCommissionManage = can("financial.commissions.manage");
 
   const file = data?.file;
   const { notes, addNote, deleteNote } = useTravelFileNotes(id, file?.agency_id);
+  // Somente para registrar leitura do processo (lista não é buscada aqui).
+  const { markViewed } = useTravelFilesPage({ pageSize: 1 }, false);
   const [noteDraft, setNoteDraft] = useState("");
   const [cancelReason, setCancelReason] = useState("");
 
@@ -143,42 +157,72 @@ export default function ProcessoReserva() {
   const totals = useMemo(() => summarizeServiceFinancials(services), [services]);
   const suggested = useMemo(() => suggestFileStatusFromServices(services), [services]);
 
-  const patchFile = async (patch: Record<string, unknown>, successMessage: string) => {
+  const updateFileStatus = async (status: TravelFileStatus, reason?: string) => {
+    if (!file) return;
+    if (!canManage) {
+      toast.error("Você não possui permissão para alterar o processo.");
+      return;
+    }
+    if (status === "cancelled" && !(reason || "").trim()) {
+      toast.error("Informe o motivo do cancelamento.");
+      return;
+    }
     try {
-      await updateFile.mutateAsync(patch as any);
-      toast.success(successMessage);
-    } catch {
-      toast.error("Não foi possível salvar a alteração.");
+      await setStatus.mutateAsync({ status, reason: reason ?? null });
+      toast.success(`Processo atualizado: ${FILE_STATUS_LABELS[status]}`);
+    } catch (error: any) {
+      toast.error(error?.message || "Não foi possível salvar a alteração.");
     }
   };
 
-  const updateFileStatus = async (status: TravelFileStatus) => {
-    if (!file) return;
-    const now = new Date().toISOString();
-    await patchFile(
-      {
-        status,
-        confirmed_at: status === "sale_confirmed" ? now : file.confirmed_at,
-        cancelled_at: status === "cancelled" ? now : file.cancelled_at,
-        completed_at: status === "trip_completed" ? now : file.completed_at,
-        cancellation_reason:
-          status === "cancelled" ? cancelReason.trim() || file.cancellation_reason : file.cancellation_reason,
-        final_sale_amount:
-          status === "sale_confirmed" ? totals.sold : file.final_sale_amount,
-        reconfirmed_amount:
-          status === "sale_confirmed" || status === "awaiting_client"
-            ? totals.reconfirmed
-            : file.reconfirmed_amount,
-      },
-      `Processo atualizado: ${FILE_STATUS_LABELS[status]}`,
-    );
+  const updateResponsibles = async (
+    commercial: string | null,
+    operations: string | null,
+    successMessage: string,
+  ) => {
+    if (!canAssign) {
+      toast.error("Você não possui permissão para definir responsáveis.");
+      return;
+    }
+    try {
+      await setResponsibles.mutateAsync({ commercial, operations });
+      toast.success(successMessage);
+    } catch (error: any) {
+      toast.error(error?.message || "Não foi possível salvar a alteração.");
+    }
   };
 
-  const patchService = async (serviceId: string, patch: Partial<TravelFileService>) => {
+  const patchServiceStatus = async (serviceId: string, status: TravelFileServiceStatus) => {
     try {
-      await updateService.mutateAsync({ id: serviceId, patch });
-    } catch {
-      toast.error("Não foi possível atualizar o serviço.");
+      await saveService.mutateAsync({ id: serviceId, status });
+    } catch (error: any) {
+      toast.error(error?.message || "Não foi possível atualizar o serviço.");
+    }
+  };
+
+  /** Valores operacionais gravados juntos: o servidor valida cada permissão. */
+  const patchServiceAmounts = async (
+    service: TravelFileService,
+    patch: Partial<
+      Pick<
+        TravelFileService,
+        "reconfirmed_amount" | "sold_amount" | "cost_amount" | "commission_amount"
+      >
+    >,
+  ) => {
+    try {
+      await saveService.mutateAsync({
+        id: service.id,
+        financials: {
+          reconfirmed_amount: service.reconfirmed_amount,
+          sold_amount: service.sold_amount,
+          cost_amount: service.cost_amount,
+          commission_amount: service.commission_amount,
+          ...patch,
+        },
+      });
+    } catch (error: any) {
+      toast.error(error?.message || "Não foi possível atualizar o serviço.");
     }
   };
 
@@ -256,7 +300,15 @@ export default function ProcessoReserva() {
               <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 Etapa atual
               </label>
-              <Select value={file.status} onValueChange={(v) => updateFileStatus(v as TravelFileStatus)}>
+              <Select
+                value={file.status}
+                disabled={!canManage}
+                onValueChange={(v) =>
+                  v === "cancelled"
+                    ? updateFileStatus("cancelled", cancelReason)
+                    : updateFileStatus(v as TravelFileStatus)
+                }
+              >
                 <SelectTrigger className="mt-1 h-9">
                   <SelectValue />
                 </SelectTrigger>
@@ -275,9 +327,11 @@ export default function ProcessoReserva() {
               </label>
               <Select
                 value={file.responsible_team_member_id ?? NO_MEMBER}
+                disabled={!canAssign}
                 onValueChange={(v) =>
-                  patchFile(
-                    { responsible_team_member_id: v === NO_MEMBER ? null : v },
+                  updateResponsibles(
+                    v === NO_MEMBER ? null : v,
+                    file.operations_responsible_team_member_id,
                     "Responsável comercial atualizado.",
                   )
                 }
@@ -301,9 +355,11 @@ export default function ProcessoReserva() {
               </label>
               <Select
                 value={file.operations_responsible_team_member_id ?? NO_MEMBER}
+                disabled={!canAssign}
                 onValueChange={(v) =>
-                  patchFile(
-                    { operations_responsible_team_member_id: v === NO_MEMBER ? null : v },
+                  updateResponsibles(
+                    file.responsible_team_member_id,
+                    v === NO_MEMBER ? null : v,
                     "Responsável pela operação atualizado.",
                   )
                 }
@@ -324,13 +380,13 @@ export default function ProcessoReserva() {
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {next && (
+            {next && canManage && (
               <Button size="sm" className="gap-2" onClick={() => updateFileStatus(next)}>
                 Avançar para {FILE_STATUS_LABELS[next]}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
-            {suggested && suggested !== file.status && (
+            {suggested && suggested !== file.status && canManage && (
               <Button
                 size="sm"
                 variant="outline"
@@ -339,19 +395,20 @@ export default function ProcessoReserva() {
                 Sugestão pelos serviços: {FILE_STATUS_LABELS[suggested]}
               </Button>
             )}
-            {file.status !== "cancelled" && (
+            {file.status !== "cancelled" && canManage && (
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
                 <Input
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
-                  placeholder="Motivo do cancelamento (opcional)"
+                  placeholder="Motivo do cancelamento (obrigatório)"
                   className="h-9 min-w-[220px] flex-1 bg-background"
                 />
                 <Button
                   size="sm"
                   variant="outline"
                   className="text-rose-600 hover:text-rose-700"
-                  onClick={() => updateFileStatus("cancelled")}
+                  disabled={!cancelReason.trim()}
+                  onClick={() => updateFileStatus("cancelled", cancelReason)}
                 >
                   Cancelar processo
                 </Button>
@@ -373,19 +430,25 @@ export default function ProcessoReserva() {
                 label: "Passageiros",
                 value: `${file.passengers_count} (${file.adults_count} adulto(s), ${file.children_count} criança(s))`,
               },
-              { label: "Valor solicitado", value: money(file.requested_amount, file.currency) },
-              {
-                label: "Valor reconfirmado",
-                value: file.reconfirmed_amount != null
-                  ? money(file.reconfirmed_amount, file.currency)
-                  : "Aguardando reconfirmação",
-              },
-              {
-                label: "Venda final",
-                value: file.final_sale_amount != null
-                  ? money(file.final_sale_amount, file.currency)
-                  : "—",
-              },
+              ...(canRevenue
+                ? [
+                    { label: "Valor solicitado", value: money(file.requested_amount, file.currency) },
+                    {
+                      label: "Valor reconfirmado",
+                      value:
+                        file.reconfirmed_amount != null
+                          ? money(file.reconfirmed_amount, file.currency)
+                          : "Aguardando reconfirmação",
+                    },
+                    {
+                      label: "Venda final",
+                      value:
+                        file.final_sale_amount != null
+                          ? money(file.final_sale_amount, file.currency)
+                          : "—",
+                    },
+                  ]
+                : []),
               { label: "Aberto em", value: format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) },
               { label: "Protocolo original", value: file.protocol_snapshot || "—" },
               {
@@ -456,18 +519,22 @@ export default function ProcessoReserva() {
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">Serviços solicitados</h2>
-            <span className="text-xs text-muted-foreground">
-              Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
-              {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
-            </span>
+            {canRevenue && (
+              <span className="text-xs text-muted-foreground">
+                Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
+                {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
+              </span>
+            )}
           </div>
 
           <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              { label: "Custo", value: totals.cost },
-              { label: "Comissão", value: totals.commission },
-              { label: "Margem", value: totals.margin },
-              { label: "Variação vs. solicitado", value: totals.variation },
+              ...(canMargin ? [{ label: "Custo", value: totals.cost }] : []),
+              ...(canCommission ? [{ label: "Comissão", value: totals.commission }] : []),
+              ...(canMargin ? [{ label: "Margem", value: totals.margin }] : []),
+              ...(canRevenue
+                ? [{ label: "Variação vs. solicitado", value: totals.variation }]
+                : []),
             ].map((item) => (
               <div key={item.label} className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -502,7 +569,9 @@ export default function ProcessoReserva() {
                   )}
                   <span>Qtd. {service.quantity}</span>
                   {service.supplier_name && <span>Fornecedor: {service.supplier_name}</span>}
-                  <span>Solicitado {money(service.requested_amount, service.currency)}</span>
+                  {canRevenue && (
+                    <span>Solicitado {money(service.requested_amount, service.currency)}</span>
+                  )}
                 </div>
 
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -512,8 +581,9 @@ export default function ProcessoReserva() {
                     </label>
                     <Select
                       value={service.status}
+                      disabled={!canManage}
                       onValueChange={(v) =>
-                        patchService(service.id, { status: v as TravelFileServiceStatus })
+                        patchServiceStatus(service.id, v as TravelFileServiceStatus)
                       }
                     >
                       <SelectTrigger className="mt-1 h-9">
@@ -528,30 +598,39 @@ export default function ProcessoReserva() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <AmountField
-                    label="Reconfirmado"
-                    value={service.reconfirmed_amount}
-                    currency={service.currency}
-                    onCommit={(v) => patchService(service.id, { reconfirmed_amount: v })}
-                  />
-                  <AmountField
-                    label="Vendido"
-                    value={service.sold_amount}
-                    currency={service.currency}
-                    onCommit={(v) => patchService(service.id, { sold_amount: v })}
-                  />
-                  <AmountField
-                    label="Custo"
-                    value={service.cost_amount}
-                    currency={service.currency}
-                    onCommit={(v) => patchService(service.id, { cost_amount: v })}
-                  />
-                  <AmountField
-                    label="Comissão"
-                    value={service.commission_amount}
-                    currency={service.currency}
-                    onCommit={(v) => patchService(service.id, { commission_amount: v })}
-                  />
+                  {canRevenue && (
+                    <>
+                      <AmountField
+                        label="Reconfirmado"
+                        value={service.reconfirmed_amount}
+                        currency={service.currency}
+                        onCommit={(v) => patchServiceAmounts(service, { reconfirmed_amount: v })}
+                      />
+                      <AmountField
+                        label="Vendido"
+                        value={service.sold_amount}
+                        currency={service.currency}
+                        onCommit={(v) => patchServiceAmounts(service, { sold_amount: v })}
+                      />
+                    </>
+                  )}
+                  {canMargin && (
+                    <AmountField
+                      label="Custo"
+                      value={service.cost_amount}
+                      currency={service.currency}
+                      onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
+                    />
+                  )}
+                  {canCommission && (
+                    <AmountField
+                      label="Comissão"
+                      value={service.commission_amount}
+                      currency={service.currency}
+                      readOnly={!canCommissionManage}
+                      onCommit={(v) => patchServiceAmounts(service, { commission_amount: v })}
+                    />
+                  )}
                 </div>
               </div>
             ))}
