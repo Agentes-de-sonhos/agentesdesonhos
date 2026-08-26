@@ -1682,7 +1682,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         />
 
         {/* ─── Investment Highlight — premium, inverted hierarchy ─── */}
-        {useNewInvestmentLayout && !perServicePaymentMode && (
+        {useNewInvestmentLayout && (!perServicePaymentMode || (quote as any).hide_investment_total !== true) && (
           <PublicInvestmentSummary
             quote={quote}
             services={quote.services || []}
@@ -1700,10 +1700,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             useServicePayment={useServicePayment}
             paymentTerms={paymentTerms}
             hideServiceList={
-              investmentLayout === "ungrouped" && showDetailedPrices
+              perServicePaymentMode ||
+              (investmentLayout === "ungrouped" && showDetailedPrices)
             }
           />
         )}
+
 
         {!useNewInvestmentLayout && (quote as any).show_investment_section !== false && (() => {
           const mode = (quote as any).payment_display_mode || "full_payment";
