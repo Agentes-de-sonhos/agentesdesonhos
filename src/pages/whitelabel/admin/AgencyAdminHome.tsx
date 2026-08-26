@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowRight,
+  Briefcase,
   CalendarDays,
   Clock,
   FileText,
@@ -10,7 +11,9 @@ import {
   Map,
   MapPin,
   Plane,
+  RefreshCw,
   Ticket,
+  UserPlus,
   UserRound,
   Users,
   Wallet,
@@ -24,6 +27,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { QuickAddClientDialog } from "@/components/crm/QuickAddClientDialog";
+import { CreateOperationDialog } from "@/components/crm/operations/CreateOperationDialog";
 import {
   useAgencyAdminDashboard,
   type AdminAttentionItem,
