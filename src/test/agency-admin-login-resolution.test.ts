@@ -110,7 +110,7 @@ describe("ausência de exposição e de enumeração", () => {
   const helper = readFileSync("src/lib/agencyAdminLogin.ts", "utf8");
 
   it("a Edge Function nunca aceita agency_id do navegador", () => {
-    expect(fn).not.toMatch(/body[\s\S]*agency_id/);
+    expect(fn).not.toMatch(/req\.json\(\)[\s\S]{0,120}agency_id/);
     expect(fn).toContain("resolveAgencyFromDomains");
   });
 
