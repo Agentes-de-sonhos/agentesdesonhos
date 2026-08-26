@@ -15859,6 +15859,10 @@ export type Database = {
         Returns: string
       }
       get_active_presentation: { Args: { _user_id: string }; Returns: string }
+      get_agency_admin_dashboard: {
+        Args: { _time_zone?: string }
+        Returns: Json
+      }
       get_agency_admin_portal: { Args: { p_hostname: string }; Returns: Json }
       get_agency_domain: { Args: { p_hostname: string }; Returns: Json }
       get_agency_signature_base: {
@@ -16668,6 +16672,49 @@ export type Database = {
       track_sales_landing_view: {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined
+      }
+      travel_file_note_add: {
+        Args: { _author_name?: string; _body: string; _file_id: string }
+        Returns: string
+      }
+      travel_file_note_delete: {
+        Args: { _note_id: string }
+        Returns: undefined
+      }
+      travel_file_service_save: {
+        Args: {
+          _commission_amount?: number
+          _cost_amount?: number
+          _reconfirmed_amount?: number
+          _responsible?: string
+          _service_id: string
+          _sold_amount?: number
+          _status?: string
+          _touch_financials?: boolean
+          _touch_responsible?: boolean
+        }
+        Returns: undefined
+      }
+      travel_file_set_responsibles: {
+        Args: { _commercial?: string; _file_id: string; _operations?: string }
+        Returns: undefined
+      }
+      travel_file_set_status: {
+        Args: { _file_id: string; _reason?: string; _status: string }
+        Returns: undefined
+      }
+      travel_files_page: {
+        Args: {
+          _from?: string
+          _page?: number
+          _page_size?: number
+          _responsible?: string
+          _search?: string
+          _sort?: string
+          _statuses?: string[]
+          _to?: string
+        }
+        Returns: Json
       }
       trigger_google_calendar_cron: { Args: never; Returns: number }
       trigger_google_calendar_purge: { Args: never; Returns: number }
