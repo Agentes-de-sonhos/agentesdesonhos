@@ -77,15 +77,13 @@ export const RESERVAS_FILTERS: { id: ReservasFilterId; label: string; statuses: 
  * o filtro "Aguardando reconfirmação" soma também "Parcialmente disponível"
  * porque ele cobre as duas etapas.
  */
-export function reservasFilterCount(
-  counts: Record<string, number> | Partial<Record<string, number>>,
-  id: ReservasFilterId,
-): number {
-  const map = counts as Partial<Record<string, number>>;
+export type ReservasFilterCounts = Partial<Record<ReservasFilterId | "partially_available", number>>;
+
+export function reservasFilterCount(counts: ReservasFilterCounts, id: ReservasFilterId): number {
   if (id === "awaiting_reconfirmation") {
-    return (map.awaiting_reconfirmation ?? 0) + (map.partially_available ?? 0);
+    return (counts.awaiting_reconfirmation ?? 0) + (counts.partially_available ?? 0);
   }
-  return map[id] ?? 0;
+  return counts[id] ?? 0;
 }
 
 const norm = (v: string): string =>
