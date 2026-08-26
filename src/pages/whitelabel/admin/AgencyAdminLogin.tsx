@@ -258,9 +258,11 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
             <form onSubmit={handleForgot} className="space-y-4">
               {forgotSent ? (
                 <p className="text-sm text-muted-foreground text-center">
-                  Se este e-mail estiver cadastrado, você receberá as instruções de recuperação em
-                  instantes.
+                  {forgotTeam
+                    ? "Sua senha de acesso é definida pelo administrador da sua agência. Entre em contato com ele para redefini-la."
+                    : "Se este e-mail estiver cadastrado, você receberá as instruções de recuperação em instantes."}
                 </p>
+
               ) : (
                 <>
                   <p className="text-sm text-muted-foreground">
