@@ -1,7 +1,9 @@
 import { Suspense, lazy } from "react";
 import { Link } from "react-router-dom";
 import { FileText, Loader2, Map, Users, Wallet } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
 import { brandAccent, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 
@@ -47,7 +49,21 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const { user } = useAuth();
   const { can } = usePermissions();
   const brand = brandAccent(info.primary_color);
-  const firstName = (user?.user_metadata?.name as string | undefined)?.split(" ")[0] || "";
+  // Mesma fonte de nome usada pelo shell (profiles.name), com fallback vazio.
+  const { data: profileName } = useQuery({
+    queryKey: ["agency-admin-home-name", user?.id],
+    enabled: !!user?.id,
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("name")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return (data?.name as string | null) ?? null;
+    },
+  });
+  const firstName = (profileName || "").trim().split(" ")[0] || "";
 
   return (
     <div className="space-y-6 animate-fade-in">
