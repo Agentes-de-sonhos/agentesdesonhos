@@ -87,32 +87,21 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
   const loadItinerary = async (shareToken: string) => {
     try {
-      const { data: itineraryData, error: itineraryError } = await supabase
-        .from("itineraries")
-        .select("*")
-        .eq("share_token", shareToken)
-        .eq("status", "published")
-        .single();
+      const { data, error: itineraryError } = await supabase.rpc(
+        "get_public_itinerary_by_share_token" as any,
+        { p_share_token: shareToken },
+      );
+      const result = data as any;
+      const itineraryData = result?.itinerary;
 
-      if (itineraryError || !itineraryData) {
+      if (itineraryError || result?.error || !itineraryData) {
         setError("Roteiro não encontrado ou não está público");
         setIsLoading(false);
         return;
       }
 
-      const { data: days, error: daysError } = await supabase
-        .from("itinerary_days")
-        .select("*")
-        .eq("itinerary_id", itineraryData.id)
-        .order("day_number", { ascending: true });
-
-      if (daysError) throw daysError;
-
-      // Load period images for the itinerary
-      const { data: periodImgs } = await supabase
-        .from("trip_itinerary_period_images")
-        .select("*")
-        .eq("trip_id", itineraryData.id);
+      const days = Array.isArray(result.days) ? result.days : [];
+      const periodImgs = Array.isArray(result.period_images) ? result.period_images : [];
 
       const imgMap: Record<string, string> = {};
       (periodImgs || []).forEach((img: any) => {
@@ -122,11 +111,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
       const daysWithActivities = await Promise.all(
         (days || []).map(async (day) => {
-          const { data: activities } = await supabase
-            .from("itinerary_activities")
-            .select("*")
-            .eq("day_id", day.id)
-            .order("order_index", { ascending: true });
+          const activities = Array.isArray(day.activities) ? day.activities : [];
 
           // Legacy trip_itinerary_activities fallback removed — this page
           // renders itinerary_activities directly; documents/maps come from
