@@ -78,13 +78,14 @@ export const RESERVAS_FILTERS: { id: ReservasFilterId; label: string; statuses: 
  * porque ele cobre as duas etapas.
  */
 export function reservasFilterCount(
-  counts: Partial<Record<string, number>>,
+  counts: Record<string, number> | Partial<Record<string, number>>,
   id: ReservasFilterId,
 ): number {
+  const map = counts as Partial<Record<string, number>>;
   if (id === "awaiting_reconfirmation") {
-    return (counts.awaiting_reconfirmation ?? 0) + (counts.partially_available ?? 0);
+    return (map.awaiting_reconfirmation ?? 0) + (map.partially_available ?? 0);
   }
-  return counts[id] ?? 0;
+  return map[id] ?? 0;
 }
 
 const norm = (v: string): string =>
