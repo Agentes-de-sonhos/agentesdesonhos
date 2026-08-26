@@ -5,6 +5,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { agencyDisplayName } from "@/lib/agencyDomains";
+import { resolveAgencyAdminLogin } from "@/lib/agencyAdminLogin";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import {
   AGENCY_ADMIN_HOME,
@@ -248,6 +249,7 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
                   setMode("forgot");
                   setError(null);
                   setForgotSent(false);
+                  setForgotTeam(false);
                 }}
                 className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
