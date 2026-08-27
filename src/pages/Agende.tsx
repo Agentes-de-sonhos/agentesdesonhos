@@ -228,7 +228,7 @@ export default function Agende() {
           agencyName: values.agencyName,
           state: values.state,
           city: values.city,
-          session: `${formatSessionDate(selectedSession)} ${formatSessionTime(selectedSession)}`.trim(),
+          session: `${formatSessionDate(selectedSession.starts_at)} ${formatSessionTime(selectedSession.starts_at)}`.trim(),
         },
         tracking,
       );
