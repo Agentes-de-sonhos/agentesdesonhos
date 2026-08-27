@@ -79,7 +79,7 @@ function SectionCard({
   className,
 }: {
   title: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   action?: { label: string; to: string };
   children: React.ReactNode;
   className?: string;
