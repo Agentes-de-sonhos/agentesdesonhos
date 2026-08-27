@@ -1,13 +1,13 @@
-import { useEffect } from "react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { ReactNode, useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import {
   AGENCY_ADMIN_LOGIN,
   checkAgencyAdminAccess,
   fetchAgencyAdminPortal,
+  type AgencyAdminPortalInfo,
 } from "@/lib/agencyAdmin";
-import { AgencyAdminLayout } from "./AgencyAdminLayout";
 import { AgencyAdminLoading, AgencyAdminUnavailable } from "./AgencyAdminStatus";
 
 /**
@@ -18,8 +18,17 @@ import { AgencyAdminLoading, AgencyAdminUnavailable } from "./AgencyAdminStatus"
  * servidor que o usuário autenticado pertence à agência dona do domínio.
  * Qualquer falha encerra a sessão e devolve para /gestao/login do MESMO
  * domínio. URLs digitadas manualmente passam pelo mesmo guard.
+ *
+ * O guard não renderiza layout: entrega a agência resolvida via render prop
+ * para que a área interna monte o shell com abas (workspace).
  */
-export function AgencyAdminShell({ hostname }: { hostname: string }) {
+export function AgencyAdminShell({
+  hostname,
+  children,
+}: {
+  hostname: string;
+  children: (info: AgencyAdminPortalInfo) => ReactNode;
+}) {
   const { user, loading: authLoading, signOut } = useAuth();
   const location = useLocation();
 
@@ -65,10 +74,5 @@ export function AgencyAdminShell({ hostname }: { hostname: string }) {
     return <AgencyAdminLoading />;
   }
 
-  return (
-    <AgencyAdminLayout info={info}>
-      {/* O contexto expõe a agência resolvida às páginas exclusivas do painel. */}
-      <Outlet context={{ info }} />
-    </AgencyAdminLayout>
-  );
+  return <>{children(info)}</>;
 }

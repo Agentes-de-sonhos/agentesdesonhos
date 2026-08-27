@@ -46,6 +46,22 @@ const ROUTE_TITLES: Record<string, string> = {
   "/suporte": "Suporte",
   "/gamificacao": "Gamificação",
   "/calculadora": "Calculadora",
+  // Painel white label (/gestao) — mesmos títulos curtos do menu da agência.
+  "/gestao": "Inicial",
+  "/gestao/meus-projetos": "Meus Projetos",
+  "/gestao/agenda": "Minha Agenda",
+  "/gestao/crm/funil": "Oportunidades",
+  "/gestao/crm/operacoes": "Operações",
+  "/gestao/crm/clientes": "Clientes",
+  "/gestao/reservas": "Reservas",
+  "/gestao/financeiro": "Gestão Financeira",
+  "/gestao/criar/orcamento": "Novo Orçamento",
+  "/gestao/criar/carteira": "Carteira Digital",
+  "/gestao/criar/roteiro": "Roteiros",
+  "/gestao/criar/modelos-roteiros": "Modelos de Roteiros",
+  "/gestao/perfil": "Meu Perfil",
+  "/gestao/minha-conta": "Minha Conta",
+  "/gestao/suporte": "Suporte",
   "/perguntas-respostas": "Perguntas e Respostas",
 };
 

@@ -8,6 +8,10 @@ const MULTI_INSTANCE_PATHS = [
   "/ferramentas-ia/gerar-orcamento",
   "/ferramentas-ia/trip-wallet",
   "/ferramentas-ia/criar-roteiro",
+  // Equivalentes do painel white label (/gestao).
+  "/gestao/criar/orcamento",
+  "/gestao/criar/carteira",
+  "/gestao/criar/roteiro",
 ];
 
 /** Normaliza removendo query, hash e barra final. */
