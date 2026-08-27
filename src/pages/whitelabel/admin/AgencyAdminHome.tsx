@@ -5,8 +5,10 @@ import {
   ArrowRight,
   Briefcase,
   CalendarDays,
+  ChevronRight,
   Clock,
   FileText,
+  KanbanSquare,
   Loader2,
   Map,
   MapPin,
@@ -34,7 +36,7 @@ import {
   type AdminAttentionItem,
   type AdminRecentItem,
 } from "@/hooks/useAgencyAdminDashboard";
-import { brandAccent, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
+import { brandAccent, brandCssVars, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 
 /**
  * Home operacional do painel administrativo white label.
@@ -42,7 +44,8 @@ import { brandAccent, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
  * Exclusiva do painel da agência: Comunidade, Academy, Notícias e gamificação
  * ficam fora do escopo. Todos os dados vêm de uma única função segura no
  * servidor, que já aplica as permissões da equipe e não devolve valores
- * financeiros.
+ * financeiros. Esta camada é puramente visual — nenhuma consulta, critério
+ * ou destino de link foi alterado.
  */
 
 function greeting(): string {
@@ -67,27 +70,47 @@ const dateLabel = (value?: string | null) => {
 
 const timeLabel = (value?: string | null) => (value ? value.slice(0, 5) : null);
 
+/** Cartão padrão das seções: título com ícone, linha da marca e ação opcional. */
 function SectionCard({
   title,
   icon: Icon,
   action,
   children,
+  className,
 }: {
   title: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   action?: { label: string; to: string };
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          {title}
-        </h2>
+    <Card
+      className={cn(
+        "min-w-0 rounded-2xl border-border/60 bg-card p-4 shadow-sm sm:p-5",
+        className,
+      )}
+    >
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+            <Icon className="h-4 w-4" style={{ color: "var(--wl-accent)" }} />
+            {title}
+          </h2>
+          <span
+            aria-hidden
+            className="mt-1.5 block h-[2px] w-8 rounded-full"
+            style={{ backgroundColor: "var(--wl-accent)" }}
+          />
+        </div>
         {action && (
-          <Button asChild variant="ghost" size="sm" className="h-7 gap-1 text-xs">
-            <Link to={action.to}>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="-mr-1 h-7 gap-1 px-2 text-xs hover:bg-transparent"
+          >
+            <Link to={action.to} style={{ color: "var(--wl-accent)" }}>
               {action.label}
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -100,8 +123,14 @@ function SectionCard({
 }
 
 function EmptyLine({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-muted-foreground">{children}</p>;
+  return (
+    <div className="rounded-xl border border-dashed border-border/70 bg-muted/30 px-3 py-6 text-center">
+      <p className="text-xs text-muted-foreground">{children}</p>
+    </div>
+  );
 }
+
+const ATTENTION_VISIBLE = 6;
 
 export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo }) {
   const { user } = useAuth();
@@ -110,6 +139,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const { data, isLoading, isError, error, refetch } = useAgencyAdminDashboard();
   const [newClientOpen, setNewClientOpen] = useState(false);
   const [newOperationOpen, setNewOperationOpen] = useState(false);
+  const [showAllAttention, setShowAllAttention] = useState(false);
 
   const { data: profileName } = useQuery({
     queryKey: ["agency-admin-profile", user?.id],
@@ -159,10 +189,15 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
     const c = data?.counters;
     if (!c) return [];
     return [
-      { label: "Reservas em andamento", value: c.reservations_pending, to: nav.reservas() },
-      { label: "Oportunidades abertas", value: c.opportunities_open, to: nav.crm("funil") },
-      { label: "Operações ativas", value: c.operations_active, to: nav.crm("operacoes") },
-      { label: "Viagens em 30 dias", value: c.trips_next_30_days, to: nav.projects("carteiras") },
+      { label: "Reservas em andamento", value: c.reservations_pending, to: nav.reservas(), icon: Ticket },
+      { label: "Oportunidades abertas", value: c.opportunities_open, to: nav.crm("funil"), icon: KanbanSquare },
+      { label: "Operações ativas", value: c.operations_active, to: nav.crm("operacoes"), icon: Briefcase },
+      {
+        label: "Viagens em 30 dias",
+        value: c.trips_next_30_days,
+        to: nav.projects("carteiras"),
+        icon: Plane,
+      },
     ].filter((item) => item.value != null);
   }, [data?.counters, nav]);
 
@@ -198,45 +233,63 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
     operation: "Operação",
   };
 
+  const attention = data?.attention ?? [];
+  const visibleAttention = showAllAttention ? attention : attention.slice(0, ATTENTION_VISIBLE);
+
   return (
-    <div className="w-full min-w-0 space-y-6 animate-fade-in">
+    <div
+      className="w-full min-w-0 space-y-4 animate-fade-in sm:space-y-5"
+      style={brandCssVars(brand) as React.CSSProperties}
+    >
       <header className="min-w-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           {greeting()}
           {firstName ? `, ${firstName}` : ""}!
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-0.5 text-sm text-muted-foreground">
           {data?.attentionTotal
             ? `${data.attentionTotal} ${data.attentionTotal === 1 ? "item precisa" : "itens precisam"} da sua atenção hoje.`
             : "Aqui está o resumo operacional da sua agência."}
         </p>
       </header>
 
-      {/* Atalhos de criação */}
+      {/* Atalhos rápidos */}
       {shortcuts.length > 0 && (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {shortcuts.map(({ label, to, onClick, icon: Icon }) => {
             const body = (
               <>
                 <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-                  style={{ backgroundColor: brand.tint, color: brand.accent }}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors"
+                  style={{ backgroundColor: "var(--wl-tint)", color: "var(--wl-accent)" }}
                 >
                   <Icon className="h-4 w-4" />
                 </span>
-                <span className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
+                <span className="min-w-0 text-[13px] font-medium leading-tight text-foreground [overflow-wrap:anywhere]">
                   {label}
                 </span>
               </>
             );
             const shell =
-              "flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/60";
+              "group flex min-w-0 items-center gap-2.5 rounded-xl border border-border/70 bg-card px-3 py-2.5 text-left shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md";
+            const hoverBorder = { ["--tw-ring-color" as string]: "var(--wl-accent)" };
             return to ? (
-              <Link key={label} to={to} className={shell}>
+              <Link
+                key={label}
+                to={to}
+                className={cn(shell, "hover:ring-1")}
+                style={hoverBorder as React.CSSProperties}
+              >
                 {body}
               </Link>
             ) : (
-              <button key={label} type="button" onClick={onClick} className={shell}>
+              <button
+                key={label}
+                type="button"
+                onClick={onClick}
+                className={cn(shell, "hover:ring-1")}
+                style={hoverBorder as React.CSSProperties}
+              >
                 {body}
               </button>
             );
@@ -249,7 +302,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
       <CreateOperationDialog open={newOperationOpen} onOpenChange={setNewOperationOpen} />
 
       {isError ? (
-        <Card className="min-w-0 rounded-2xl border-border/60 p-6 text-center">
+        <Card className="min-w-0 rounded-2xl border-border/60 p-6 text-center shadow-sm">
           <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-amber-50">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
           </div>
@@ -270,70 +323,107 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
         </div>
       ) : (
         <>
-          {/* Panorama operacional (somente contagens) */}
+          {/* Indicadores (somente contagens) */}
           {counters.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-              {counters.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.to}
-                  className="min-w-0 rounded-xl border border-border/60 bg-card px-3 py-2.5 transition-colors hover:bg-muted/50"
-                >
-                  <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    {item.label}
-                  </p>
-                  <p className="mt-0.5 text-xl font-semibold tabular-nums text-foreground">
-                    {item.value}
-                  </p>
-                </Link>
-              ))}
+            <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+              {counters.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    className="group relative min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card px-3 py-3 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-0 left-0 w-[3px]"
+                      style={{ backgroundColor: "var(--wl-accent)" }}
+                    />
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-3.5 w-3.5" style={{ color: "var(--wl-accent)" }} />
+                      <p className="min-w-0 truncate text-[11px] font-medium text-muted-foreground">
+                        {item.label}
+                      </p>
+                    </div>
+                    <p className="mt-1 text-2xl font-semibold leading-none tabular-nums text-foreground">
+                      {item.value}
+                    </p>
+                  </Link>
+                );
+              })}
             </div>
           )}
 
-          {/* Precisa de atenção */}
+          {/* Precisa da sua atenção */}
           <SectionCard
             title="Precisa da sua atenção"
             icon={AlertTriangle}
             action={can?.reservations ? { label: "Reservas", to: nav.reservas() } : undefined}
           >
-            {(data?.attention ?? []).length === 0 ? (
+            {attention.length === 0 ? (
               <EmptyLine>Nada pendente por aqui. Tudo em dia.</EmptyLine>
             ) : (
-              <ul className="divide-y divide-border/50">
-                {(data?.attention ?? []).map((item) => (
-                  <li key={`${item.kind}-${item.id}`}>
-                    <Link
-                      to={attentionLink(item)}
-                      className="-mx-2 flex min-w-0 flex-col gap-1 rounded-lg px-2 py-3 transition-colors hover:bg-muted/50"
-                    >
-                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <>
+                <ul className="divide-y divide-border/50">
+                  {visibleAttention.map((item) => (
+                    <li key={`${item.kind}-${item.id}`}>
+                      <Link
+                        to={attentionLink(item)}
+                        className="-mx-2 flex min-w-0 items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/50"
+                      >
                         <span
+                          aria-hidden
                           className={cn(
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset",
-                            item.priority === 1
-                              ? "bg-rose-50 text-rose-700 ring-rose-200/70"
-                              : "bg-amber-50 text-amber-700 ring-amber-200/70",
+                            "h-8 w-[3px] shrink-0 rounded-full",
+                            item.priority === 1 ? "bg-rose-500" : "bg-amber-400",
                           )}
-                        >
-                          {item.reason}
-                        </span>
-                        {item.subtitle && (
-                          <span className="text-[11px] text-muted-foreground">{item.subtitle}</span>
-                        )}
-                      </div>
-                      <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                        {item.title}
-                      </p>
-                      {item.responsible_name && (
-                        <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <UserRound className="h-3.5 w-3.5" />
-                          {item.responsible_name}
-                        </p>
-                      )}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="min-w-0 text-sm font-medium leading-tight text-foreground [overflow-wrap:anywhere]">
+                            {item.title}
+                          </p>
+                          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                            <span
+                              className={cn(
+                                "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset",
+                                item.priority === 1
+                                  ? "bg-rose-50 text-rose-700 ring-rose-200/70"
+                                  : "bg-amber-50 text-amber-700 ring-amber-200/70",
+                              )}
+                            >
+                              {item.reason}
+                            </span>
+                            {item.subtitle && (
+                              <span className="text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
+                                {item.subtitle}
+                              </span>
+                            )}
+                            {item.responsible_name && (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                                <UserRound className="h-3 w-3" />
+                                {item.responsible_name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                {attention.length > ATTENTION_VISIBLE && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllAttention((v) => !v)}
+                    className="mt-2 text-xs font-medium transition-opacity hover:opacity-80"
+                    style={{ color: "var(--wl-accent)" }}
+                  >
+                    {showAllAttention
+                      ? "Ver menos"
+                      : `Ver tudo (${attention.length})`}
+                  </button>
+                )}
+              </>
             )}
           </SectionCard>
 
@@ -344,19 +434,19 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
               icon={CalendarDays}
               action={can?.agenda ? { label: "Agenda", to: nav.agenda } : undefined}
             >
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {(data?.agenda ?? []).length === 0 && (data?.followups ?? []).length === 0 ? (
                   <EmptyLine>Nenhum compromisso ou follow-up para hoje.</EmptyLine>
                 ) : (
                   <>
                     {(data?.agenda ?? []).map((event) => (
-                      <div key={event.id} className="flex min-w-0 items-start gap-2">
+                      <div key={event.id} className="flex min-w-0 items-start gap-2.5 py-0.5">
                         <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                         <div className="min-w-0">
-                          <p className="min-w-0 text-sm text-foreground [overflow-wrap:anywhere]">
+                          <p className="min-w-0 text-sm leading-tight text-foreground [overflow-wrap:anywhere]">
                             {event.title}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">
                             {event.all_day
                               ? "Dia inteiro"
                               : timeLabel(event.event_time) || "Horário a definir"}
@@ -368,14 +458,19 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                       <Link
                         key={fu.id}
                         to={`${nav.crm("funil")}?opportunity=${fu.opportunity_id}`}
-                        className="-mx-2 flex min-w-0 items-start gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
+                        className="-mx-2 flex min-w-0 items-start gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
                       >
                         <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                         <div className="min-w-0">
-                          <p className="min-w-0 text-sm text-foreground [overflow-wrap:anywhere]">
+                          <p className="min-w-0 text-sm leading-tight text-foreground [overflow-wrap:anywhere]">
                             {fu.client_name || "Oportunidade"}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p
+                            className={cn(
+                              "mt-0.5 text-[11px]",
+                              fu.overdue ? "text-rose-600" : "text-muted-foreground",
+                            )}
+                          >
                             {fu.overdue ? "Follow-up vencido" : "Follow-up hoje"} ·{" "}
                             {dateLabel(fu.follow_up_date)}
                           </p>
@@ -398,23 +493,29 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
               {(data?.trips ?? []).length === 0 ? (
                 <EmptyLine>Nenhuma viagem próxima registrada.</EmptyLine>
               ) : (
-                <ul className="space-y-3">
+                <ul className="space-y-1">
                   {(data?.trips ?? []).map((trip) => (
                     <li key={trip.id}>
                       <Link
                         to={nav.wallet(trip.id)}
-                        className="-mx-2 flex min-w-0 items-start justify-between gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted/50"
+                        className="-mx-2 flex min-w-0 items-center justify-between gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
                       >
                         <div className="min-w-0">
-                          <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
+                          <p className="min-w-0 text-sm font-medium leading-tight text-foreground [overflow-wrap:anywhere]">
                             {trip.client_name || trip.trip_title || "Viagem"}
                           </p>
-                          <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="h-3.5 w-3.5" />
+                          <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
                             {trip.destination || "Destino a definir"} · {dateLabel(trip.start_date)}
                           </p>
                         </div>
-                        <span className="shrink-0 whitespace-nowrap text-xs font-medium text-muted-foreground">
+                        <span
+                          className="shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium"
+                          style={{
+                            backgroundColor: "var(--wl-tint)",
+                            color: "var(--wl-accent)",
+                          }}
+                        >
                           {trip.days_remaining < 0
                             ? "Em viagem"
                             : trip.days_remaining === 0
@@ -443,18 +544,24 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                   <Link
                     key={`${item.kind}-${item.id}`}
                     to={recentLink(item)}
-                    className="min-w-0 rounded-xl border border-border/50 p-3 transition-colors hover:bg-muted/50"
+                    className="flex min-w-0 items-center gap-3 rounded-xl border border-border/60 px-3 py-2.5 transition-colors hover:bg-muted/50"
                   >
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      {RECENT_LABELS[item.kind] || item.kind}
-                    </p>
-                    <p className="mt-0.5 min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
-                      {item.subtitle || "—"} ·{" "}
-                      {format(new Date(item.updated_at), "dd/MM/yyyy", { locale: ptBR })}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <span
+                        className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                        style={{ backgroundColor: "var(--wl-tint)", color: "var(--wl-accent)" }}
+                      >
+                        {RECENT_LABELS[item.kind] || item.kind}
+                      </span>
+                      <p className="mt-1 min-w-0 text-sm font-medium leading-tight text-foreground [overflow-wrap:anywhere]">
+                        {item.title}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground [overflow-wrap:anywhere]">
+                        {item.subtitle || "—"} ·{" "}
+                        {format(new Date(item.updated_at), "dd/MM/yyyy", { locale: ptBR })}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
                   </Link>
                 ))}
               </div>
