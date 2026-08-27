@@ -3,7 +3,7 @@ import { Loader2, Receipt, FileText, CalendarClock, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { useCommissionsReceivable } from "@/hooks/useCommissionsReceivable";
 import { CommissionsReceivable } from "@/components/financial/CommissionsReceivable";
-import { EnhancedSummary } from "./EnhancedSummary";
+
 import { InvoicesCenter } from "./InvoicesCenter";
 import { FutureCashflow } from "./FutureCashflow";
 import { SuppliersRanking } from "./SuppliersRanking";
