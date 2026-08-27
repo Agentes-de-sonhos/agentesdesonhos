@@ -241,7 +241,7 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
 
   return (
     <div className="space-y-6">
-      <SummaryCards commissions={commissions} />
+      <MonthlySummary commissions={commissions} month={month} year={year} />
 
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Comissões" onExport={handleExportCommissions} />
       <div className="flex items-center justify-between">
