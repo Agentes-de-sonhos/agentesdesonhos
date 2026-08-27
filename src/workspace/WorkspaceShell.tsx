@@ -11,6 +11,11 @@ import { isMultiInstanceRoute } from "./multiInstanceRoutes";
 interface Props {
   /** Same JSX subtree used when Workspace is off (typically the app's <Routes/>). */
   children: ReactNode;
+  /**
+   * `false` quando a barra de abas é renderizada por outro layout (painel
+   * white label, que a posiciona no cabeçalho da área de conteúdo).
+   */
+  showTabBar?: boolean;
 }
 
 /**
@@ -39,7 +44,7 @@ export function scrollWorkspaceToTop(root: HTMLElement | null) {
  * inside a `<nav>` / `<aside>` (i.e. sidebar or drawer) into an openTab() call.
  * This avoids touching AppSidebar/MobileDrawerMenu source.
  */
-export function WorkspaceShell({ children }: Props) {
+export function WorkspaceShell({ children, showTabBar = true }: Props) {
   const ws = useWorkspace();
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -108,7 +113,7 @@ export function WorkspaceShell({ children }: Props) {
       const hasExisting =
         !isMultiInstanceRoute(href) && (tabsRef.current ?? []).some((t) => t.path === href);
       if (!hasExisting && !canOpenRef.current) {
-        toast.error(`Limite de ${MAX_TABS} abas atingido. Feche uma aba para abrir outra.`);
+        toast.error(`Você pode manter até ${MAX_TABS} páginas abertas. Feche uma aba para continuar.`);
         return;
       }
 
@@ -132,7 +137,7 @@ export function WorkspaceShell({ children }: Props) {
 
   return (
     <div ref={rootRef} className="flex flex-col min-h-screen bg-background">
-      <TabBar />
+      {showTabBar && <TabBar />}
       <div className="flex-1 min-h-0 relative">
         {ws.tabs.map((tab) => {
           const active = tab.id === ws.activeId;
@@ -152,7 +157,7 @@ export function WorkspaceShell({ children }: Props) {
                     const hasExisting =
                       !isMultiInstanceRoute(path) && (tabsRef.current ?? []).some((t) => t.path === path);
                     if (!hasExisting && !canOpenRef.current) {
-                      toast.error(`Limite de ${MAX_TABS} abas atingido. Feche uma aba para abrir outra.`);
+                      toast.error(`Você pode manter até ${MAX_TABS} páginas abertas. Feche uma aba para continuar.`);
                       return;
                     }
                     openTabRef.current?.(path, title, state);
