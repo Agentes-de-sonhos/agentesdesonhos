@@ -1,14 +1,18 @@
 import { ComponentType, lazy } from "react";
-import { Navigate, useOutletContext, useParams, useRoutes } from "react-router-dom";
+import { Navigate, useParams, useRoutes } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { AgencyAdminShell } from "./AgencyAdminShell";
+import { AgencyAdminLayout } from "./AgencyAdminLayout";
 import AgencyAdminLogin from "@/pages/whitelabel/admin/AgencyAdminLogin";
-import type { AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
+import { AGENCY_ADMIN_HOME, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 import { AgencyAdminNavProvider } from "@/lib/agencyAdminNav";
+import { WorkspaceProvider } from "@/workspace/WorkspaceProvider";
+import { WorkspaceShell } from "@/workspace/WorkspaceShell";
+import { titleForPath } from "@/workspace/routeTitle";
 
 /**
  * Páginas administrativas reutilizadas da plataforma. Comunidade, Academy,
@@ -36,15 +40,6 @@ function LegacyReservaRedirect() {
   return <Navigate to={id ? `/gestao/reservas/${id}` : "/gestao/reservas"} replace />;
 }
 
-/**
- * Home exclusiva do painel: recebe a agência resolvida pelo shell via
- * contexto do Outlet, sem refazer a consulta de domínio.
- */
-function AdminHomeRoute() {
-  const { info } = useOutletContext<{ info: AgencyAdminPortalInfo }>();
-  return <AgencyAdminHome info={info} />;
-}
-
 function e(Page: ComponentType) {
   return (
     <ErrorBoundary
@@ -62,15 +57,17 @@ function e(Page: ComponentType) {
 }
 
 /**
- * Rotas do painel white label. Cada caminho /gestao/* tem um alias absoluto
+ * Rotas internas do painel. Cada caminho /gestao/* tem um alias absoluto
  * equivalente para que links internos das páginas existentes (que apontam
  * para caminhos como /meus-projetos ou /perfil) continuem funcionando no
  * MESMO domínio e dentro do mesmo guard — nunca indo parar no app da
  * plataforma.
+ *
+ * Cada aba do workspace monta esta árvore no seu próprio router de memória,
+ * exatamente como a plataforma principal faz com o DashboardLayout.
  */
-function AgencyAdminRouter({ hostname }: { hostname: string }) {
+function AgencyAdminPages({ info }: { info: AgencyAdminPortalInfo }) {
   const pagePairs: Array<[string, ComponentType]> = [
-    ["", AdminHomeRoute],
     ["meus-projetos", MeusProjetos],
     ["agenda", Agenda],
     ["crm/funil", GestaoClientes],
@@ -94,7 +91,6 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
   ];
 
   const aliasPairs: Array<[string, ComponentType]> = [
-    ["/dashboard", AdminHomeRoute],
     ["/meus-projetos", MeusProjetos],
     ["/agenda", Agenda],
     ["/gestao-clientes", GestaoClientes],
@@ -112,26 +108,65 @@ function AgencyAdminRouter({ hostname }: { hostname: string }) {
     ["/reservas", AgencyReservas],
   ];
 
+  const home = <AgencyAdminHome info={info} />;
+
   const routes = useRoutes([
-    { path: "/gestao/login", element: <AgencyAdminLogin hostname={hostname} /> },
-    {
-      element: <AgencyAdminShell hostname={hostname} />,
-      children: [
-        ...pagePairs.map(([sub, Page]) => ({
-          path: `/gestao${sub ? `/${sub}` : ""}`,
-          element: e(Page),
-        })),
-        ...aliasPairs.map(([path, Page]) => ({ path, element: e(Page) })),
-        // Alias legado com id: direciona para a rota administrativa segura.
-        { path: "/reservas/:id", element: <LegacyReservaRedirect /> },
-        // Rotas administrativas desconhecidas: 404 white label (sem redirect
-        // silencioso), ainda dentro do shell e do guard de domínio/usuário.
-        { path: "*", element: e(AgencyAdminNotFound) },
-      ],
-    },
+    { path: AGENCY_ADMIN_HOME, element: home },
+    { path: "/dashboard", element: home },
+    ...pagePairs.map(([sub, Page]) => ({ path: `/gestao/${sub}`, element: e(Page) })),
+    ...aliasPairs.map(([path, Page]) => ({ path, element: e(Page) })),
+    // Alias legado com id: direciona para a rota administrativa segura.
+    { path: "/reservas/:id", element: <LegacyReservaRedirect /> },
+    // Rotas administrativas desconhecidas: 404 white label (sem redirect
+    // silencioso), ainda dentro do shell e do guard de domínio/usuário.
+    { path: "*", element: e(AgencyAdminNotFound) },
   ]);
 
-  return routes;
+  return <AgencyAdminLayout info={info}>{routes}</AgencyAdminLayout>;
+}
+
+/** Caminho inicial da primeira janela, a partir da URL real do navegador. */
+function initialWorkspacePath(): string {
+  const path = `${window.location.pathname}${window.location.search}`;
+  const clean = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (clean === AGENCY_ADMIN_HOME || clean === "/" || clean === "/dashboard") {
+    return AGENCY_ADMIN_HOME;
+  }
+  return path;
+}
+
+/**
+ * Ambiente autenticado do painel: reutiliza integralmente o workspace de abas
+ * internas da plataforma principal (WorkspaceProvider + WorkspaceShell), com
+ * a barra de abas renderizada pelo layout da agência.
+ */
+function AgencyAdminWorkspace({ info }: { info: AgencyAdminPortalInfo }) {
+  const initialPath = initialWorkspacePath();
+  return (
+    <WorkspaceProvider
+      initialPath={initialPath}
+      initialTitle={titleForPath(initialPath)}
+      homePath={AGENCY_ADMIN_HOME}
+    >
+      <WorkspaceShell showTabBar={false}>
+        <AgencyAdminPages info={info} />
+      </WorkspaceShell>
+    </WorkspaceProvider>
+  );
+}
+
+function AgencyAdminRouter({ hostname }: { hostname: string }) {
+  return useRoutes([
+    { path: "/gestao/login", element: <AgencyAdminLogin hostname={hostname} /> },
+    {
+      path: "*",
+      element: (
+        <AgencyAdminShell hostname={hostname}>
+          {(info) => <AgencyAdminWorkspace info={info} />}
+        </AgencyAdminShell>
+      ),
+    },
+  ]);
 }
 
 /**
