@@ -71,41 +71,53 @@ function isDueIn7Days(c: CommissionReceivable) {
   return c.status !== "recebido" && c.status !== "cancelado" && c.expected_date && c.expected_date >= t && c.expected_date <= d7;
 }
 
-function SummaryCards({ commissions }: { commissions: CommissionReceivable[] }) {
-  const active = commissions.filter(c => c.status !== "cancelado");
-  const totalPrevisto = active.filter(c => c.status !== "recebido").reduce((s, c) => s + c.commission_amount, 0);
-  const totalAguardandoNF = active.filter(c => c.status === "aguardando_emissao_nota" || c.status === "aguardando_envio_nota").reduce((s, c) => s + c.commission_amount, 0);
-  const totalAguardandoPgto = active.filter(c => c.status === "aguardando_pagamento").reduce((s, c) => s + c.commission_amount, 0);
-  const totalAtrasado = active.filter(c => isOverdue(c)).reduce((s, c) => s + c.commission_amount, 0);
+const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-  const now = new Date();
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-  const totalRecebidoMes = active.filter(c => c.status === "recebido" && c.received_date && c.received_date >= monthStart).reduce((s, c) => s + c.commission_amount, 0);
+function MonthlySummary({ commissions, month, year }: { commissions: CommissionReceivable[]; month: number; year: number }) {
+  const { previsto, recebido, aReceber, atrasado } = useMemo(() => {
+    const active = commissions.filter(c => c.status !== "cancelado");
+    const expectedInMonth = active.filter(c => isInMonth(c.expected_date, month, year));
+    const previsto = expectedInMonth.reduce((s, c) => s + (Number(c.commission_amount) || 0), 0);
+    const recebido = active
+      .filter(c => isInMonth(c.received_date, month, year))
+      .reduce((s, c) => s + (Number(c.received_amount) || 0), 0);
+    const remaining = (c: CommissionReceivable) =>
+      Math.max((Number(c.commission_amount) || 0) - (Number(c.received_amount) || 0), 0);
+    const aReceber = expectedInMonth.reduce((s, c) => s + remaining(c), 0);
+    const t = today();
+    const atrasado = expectedInMonth
+      .filter(c => c.status !== "recebido" && !!c.expected_date && c.expected_date < t && remaining(c) > 0)
+      .reduce((s, c) => s + remaining(c), 0);
+    return { previsto, recebido, aReceber, atrasado };
+  }, [commissions, month, year]);
 
   const cards = [
-    { label: "A Receber", value: totalPrevisto, color: "text-violet-600 dark:text-violet-400", icon: DollarSign },
-    { label: "Aguardando NF", value: totalAguardandoNF, color: "text-amber-600 dark:text-amber-400", icon: FileText },
-    { label: "Aguardando Pagamento", value: totalAguardandoPgto, color: "text-blue-600 dark:text-blue-400", icon: Clock },
-    { label: "Atrasado", value: totalAtrasado, color: "text-red-600 dark:text-red-400", icon: AlertTriangle },
-    { label: "Recebido (mês)", value: totalRecebidoMes, color: "text-emerald-600 dark:text-emerald-400", icon: CheckCircle },
+    { label: "Previsto no mês", value: previsto, color: "text-violet-600 dark:text-violet-400", icon: DollarSign },
+    { label: "Recebido no mês", value: recebido, color: "text-emerald-600 dark:text-emerald-400", icon: CheckCircle },
+    { label: "A receber no mês", value: aReceber, color: "text-blue-600 dark:text-blue-400", icon: Clock },
+    { label: "Em atraso no mês", value: atrasado, color: "text-red-600 dark:text-red-400", icon: AlertTriangle },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-      {cards.map((c) => (
-        <Card key={c.label}>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <c.icon className={`h-4 w-4 ${c.color}`} />
-              <span className="text-xs text-muted-foreground">{c.label}</span>
-            </div>
-            <p className={`text-lg font-bold ${c.color}`}>R$ {fmt(c.value)}</p>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="space-y-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {cards.map((c) => (
+          <Card key={c.label}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-1">
+                <c.icon className={`h-4 w-4 ${c.color}`} />
+                <span className="text-xs text-muted-foreground">{c.label}</span>
+              </div>
+              <p className={`text-lg font-bold ${c.color}`}>R$ {fmt(c.value)}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">Referente a: {MONTH_NAMES[month - 1]} de {year}</p>
     </div>
   );
 }
+
 
 function NoteDialog({ commission, open, onOpenChange }: { commission: CommissionReceivable; open: boolean; onOpenChange: (v: boolean) => void }) {
   const qc = useQueryClient();
@@ -141,14 +153,16 @@ function NoteDialog({ commission, open, onOpenChange }: { commission: Commission
 
 export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
   const { data: allCommissions = [], isLoading } = useCommissionsReceivable();
+  const now = new Date();
+  const month = viewMonth || now.getMonth() + 1;
+  const year = viewYear || now.getFullYear();
   const commissions = useMemo(() => {
-    if (!viewMonth || !viewYear) return allCommissions;
     return allCommissions.filter(c =>
-      isInMonth(c.expected_date, viewMonth, viewYear) ||
-      isInMonth(c.received_date, viewMonth, viewYear) ||
-      isInMonth((c as any).sale_date, viewMonth, viewYear)
+      isInMonth(c.expected_date, month, year) ||
+      isInMonth(c.received_date, month, year)
     );
-  }, [allCommissions, viewMonth, viewYear]);
+  }, [allCommissions, month, year]);
+
   const { showExport, setShowExport, agencyName } = useFinancialExport("Comissões");
   const handleExportCommissions = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
     const { columns, rows, totals } = prepareCommissionsExport(filtered, period);
@@ -227,7 +241,7 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
 
   return (
     <div className="space-y-6">
-      <SummaryCards commissions={commissions} />
+      <MonthlySummary commissions={commissions} month={month} year={year} />
 
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Comissões" onExport={handleExportCommissions} />
       <div className="flex items-center justify-between">
@@ -324,7 +338,7 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                   <th className="text-right p-3 font-medium text-muted-foreground">Comissão</th>
                   <th className="text-center p-3 font-medium text-muted-foreground">NF</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Regra Pgto</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Previsão</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">Datas</th>
                   <th className="text-center p-3 font-medium text-muted-foreground">Status</th>
                   <th className="text-center p-3 font-medium text-muted-foreground">Ações</th>
                 </tr>
@@ -335,13 +349,13 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                     <td colSpan={10} className="p-10 text-center">
                       <div className="space-y-1">
                         <DollarSign className="h-6 w-6 mx-auto text-muted-foreground/60" />
-                        <p className="text-sm font-medium">Nenhuma comissão encontrada.</p>
-                        <p className="text-xs text-muted-foreground">
-                          Cadastre produtos nas suas vendas para ver as comissões aparecerem aqui.
+                        <p className="text-sm font-medium">
+                          Nenhuma comissão com previsão ou recebimento em {MONTH_NAMES[month - 1]} de {year}.
                         </p>
                       </div>
                     </td>
                   </tr>
+
                 ) : filtered.map((c) => {
                   const overdue = isOverdue(c);
                   const taxes = Number(c.non_commissionable_taxes) || 0;
@@ -391,11 +405,12 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                       <td className="p-3">
                         {c.expected_date ? (
                           <p className={`text-xs font-medium ${overdue ? "text-red-600" : "text-foreground"}`}>
-                            {format(new Date(c.expected_date + "T00:00:00"), "dd/MM/yyyy")}
+                            Prev.: {format(new Date(c.expected_date + "T00:00:00"), "dd/MM/yyyy")}
                           </p>
                         ) : <span className="text-xs text-muted-foreground">—</span>}
-                        {c.received_date && <p className="text-[10px] text-emerald-600">Receb: {format(new Date(c.received_date + "T00:00:00"), "dd/MM/yyyy")}</p>}
+                        {c.received_date && <p className="text-[10px] text-emerald-600">Receb.: {format(new Date(c.received_date + "T00:00:00"), "dd/MM/yyyy")}</p>}
                       </td>
+
                       <td className="p-3 text-center">
                         <Badge className={`${statusInfo.color} border-0 text-[10px]`}>
                           {statusInfo.icon} {statusInfo.label}

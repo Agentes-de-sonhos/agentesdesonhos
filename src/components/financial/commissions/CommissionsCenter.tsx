@@ -3,7 +3,7 @@ import { Loader2, Receipt, FileText, CalendarClock, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { useCommissionsReceivable } from "@/hooks/useCommissionsReceivable";
 import { CommissionsReceivable } from "@/components/financial/CommissionsReceivable";
-import { EnhancedSummary } from "./EnhancedSummary";
+
 import { InvoicesCenter } from "./InvoicesCenter";
 import { FutureCashflow } from "./FutureCashflow";
 import { SuppliersRanking } from "./SuppliersRanking";
@@ -27,9 +27,8 @@ export function CommissionsCenter({ viewMonth, viewYear }: { viewMonth?: number;
 
   return (
     <div className="space-y-5">
-      <EnhancedSummary commissions={allCommissions} />
-
       <div className="flex items-center gap-1 flex-wrap border-b pb-1">
+
         {SUBTABS.map(t => {
           const Icon = t.icon;
           const isActive = sub === t.key;
