@@ -153,14 +153,16 @@ function NoteDialog({ commission, open, onOpenChange }: { commission: Commission
 
 export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
   const { data: allCommissions = [], isLoading } = useCommissionsReceivable();
+  const now = new Date();
+  const month = viewMonth || now.getMonth() + 1;
+  const year = viewYear || now.getFullYear();
   const commissions = useMemo(() => {
-    if (!viewMonth || !viewYear) return allCommissions;
     return allCommissions.filter(c =>
-      isInMonth(c.expected_date, viewMonth, viewYear) ||
-      isInMonth(c.received_date, viewMonth, viewYear) ||
-      isInMonth((c as any).sale_date, viewMonth, viewYear)
+      isInMonth(c.expected_date, month, year) ||
+      isInMonth(c.received_date, month, year)
     );
-  }, [allCommissions, viewMonth, viewYear]);
+  }, [allCommissions, month, year]);
+
   const { showExport, setShowExport, agencyName } = useFinancialExport("Comissões");
   const handleExportCommissions = async (period: { start: Date; end: Date }, fmt: ExportFormat) => {
     const { columns, rows, totals } = prepareCommissionsExport(filtered, period);
