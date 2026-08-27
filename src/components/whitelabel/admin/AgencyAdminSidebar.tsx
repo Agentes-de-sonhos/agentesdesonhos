@@ -11,7 +11,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   FileText,
   FolderOpen,
@@ -454,6 +453,3 @@ export function AgencyAdminSidebar({
     </TooltipProvider>
   );
 }
-
-/** Ícone auxiliar reexportado para o topbar mobile. */
-export { ChevronLeft };
