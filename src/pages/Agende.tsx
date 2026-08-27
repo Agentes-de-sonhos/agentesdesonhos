@@ -216,6 +216,20 @@ export default function Agende() {
         },
         tracking,
       );
+      void sendAgendeLeadToSheet(
+        {
+          email: values.email,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          whatsapp: values.whatsapp,
+          whatsappOptIn: values.whatsappOptIn,
+          agencyName: values.agencyName,
+          state: values.state,
+          city: values.city,
+          session: `${formatSessionDate(selectedSession)} ${formatSessionTime(selectedSession)}`.trim(),
+        },
+        tracking,
+      );
       saveAgendePrefill({
         email: values.email,
         firstName: values.firstName,
@@ -225,6 +239,7 @@ export default function Agende() {
         state: values.state,
         city: values.city,
       });
+
       setAlreadyRegistered(result.alreadyRegistered);
       setStep("success");
       trackAgende("agende_success", {
