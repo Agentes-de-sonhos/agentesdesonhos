@@ -338,7 +338,7 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                   <th className="text-right p-3 font-medium text-muted-foreground">Comissão</th>
                   <th className="text-center p-3 font-medium text-muted-foreground">NF</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Regra Pgto</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Previsão</th>
+                  <th className="text-left p-3 font-medium text-muted-foreground">Datas</th>
                   <th className="text-center p-3 font-medium text-muted-foreground">Status</th>
                   <th className="text-center p-3 font-medium text-muted-foreground">Ações</th>
                 </tr>
@@ -349,13 +349,13 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                     <td colSpan={10} className="p-10 text-center">
                       <div className="space-y-1">
                         <DollarSign className="h-6 w-6 mx-auto text-muted-foreground/60" />
-                        <p className="text-sm font-medium">Nenhuma comissão encontrada.</p>
-                        <p className="text-xs text-muted-foreground">
-                          Cadastre produtos nas suas vendas para ver as comissões aparecerem aqui.
+                        <p className="text-sm font-medium">
+                          Nenhuma comissão com previsão ou recebimento em {MONTH_NAMES[month - 1]} de {year}.
                         </p>
                       </div>
                     </td>
                   </tr>
+
                 ) : filtered.map((c) => {
                   const overdue = isOverdue(c);
                   const taxes = Number(c.non_commissionable_taxes) || 0;
