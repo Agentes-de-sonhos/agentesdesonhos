@@ -27,9 +27,8 @@ export function CommissionsCenter({ viewMonth, viewYear }: { viewMonth?: number;
 
   return (
     <div className="space-y-5">
-      <EnhancedSummary commissions={allCommissions} />
-
       <div className="flex items-center gap-1 flex-wrap border-b pb-1">
+
         {SUBTABS.map(t => {
           const Icon = t.icon;
           const isActive = sub === t.key;
