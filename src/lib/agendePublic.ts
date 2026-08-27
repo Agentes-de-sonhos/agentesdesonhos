@@ -374,3 +374,70 @@ export const BR_STATES = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR",
   "PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
 ] as const;
+
+/* ------------------------------------------------------------------ */
+/*  Google Sheets mirror (leads spreadsheet) — additive, never blocks  */
+/* ------------------------------------------------------------------ */
+
+export interface AgendeSheetLead {
+  email: string;
+  firstName: string;
+  lastName: string;
+  whatsapp: string;
+  whatsappOptIn: boolean;
+  agencyName: string;
+  state: string;
+  city: string;
+  /** Human-readable session date/time chosen by the lead. */
+  session: string;
+}
+
+const SHEET_SENT_KEY = "agende:sheet-sent";
+
+function sheetAlreadySent(key: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.sessionStorage.getItem(SHEET_SENT_KEY);
+    const list = raw ? (JSON.parse(raw) as string[]) : [];
+    if (list.includes(key)) return true;
+    window.sessionStorage.setItem(SHEET_SENT_KEY, JSON.stringify([...list.slice(-20), key]));
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Mirrors a successful registration into the leads spreadsheet through our own
+ * Edge Function (the Google credentials stay server-side). Fire-and-forget:
+ * any failure here must never affect the registration already completed.
+ */
+export async function sendAgendeLeadToSheet(
+  lead: AgendeSheetLead,
+  tracking: AgendeAdTracking = {},
+): Promise<void> {
+  const dedupeKey = `${lead.email.trim().toLowerCase()}|${lead.session}`;
+  if (sheetAlreadySent(dedupeKey)) return;
+  try {
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/agende-lead-to-sheet`;
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        ...lead,
+        email: lead.email.trim().toLowerCase(),
+        utm_source: tracking.utm_source ?? "",
+        utm_medium: tracking.utm_medium ?? "",
+        utm_campaign: tracking.utm_campaign ?? "",
+        utm_content: tracking.utm_content ?? "",
+        utm_term: tracking.utm_term ?? "",
+      }),
+    });
+  } catch {
+    /* spreadsheet mirror is best-effort only */
+  }
+}

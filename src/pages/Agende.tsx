@@ -30,6 +30,8 @@ import {
   registerAgende,
   resolveTracking,
   saveAgendePrefill,
+  sendAgendeLeadToSheet,
+
   seatsLabel,
   sortSessions,
   trackAgende,
@@ -216,6 +218,20 @@ export default function Agende() {
         },
         tracking,
       );
+      void sendAgendeLeadToSheet(
+        {
+          email: values.email,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          whatsapp: values.whatsapp,
+          whatsappOptIn: values.whatsappOptIn,
+          agencyName: values.agencyName,
+          state: values.state,
+          city: values.city,
+          session: `${formatSessionDate(selectedSession.starts_at)} ${formatSessionTime(selectedSession.starts_at)}`.trim(),
+        },
+        tracking,
+      );
       saveAgendePrefill({
         email: values.email,
         firstName: values.firstName,
@@ -225,6 +241,7 @@ export default function Agende() {
         state: values.state,
         city: values.city,
       });
+
       setAlreadyRegistered(result.alreadyRegistered);
       setStep("success");
       trackAgende("agende_success", {
