@@ -120,6 +120,14 @@ export interface BrandAccent {
   onAccent: string;
   /** `accent` com alfa ~8% para fundos de estado ativo. */
   tint: string;
+  /** `accent` com alfa ~14% para hover/seleção mais evidente. */
+  tintStrong: string;
+  /** `accent` com alfa ~5% para fundos muito suaves. */
+  tintSoft: string;
+  /** `accent` com alfa ~25% para bordas discretas. */
+  border: string;
+  /** Variação mais escura, útil em hover de botões. */
+  accentDark: string;
 }
 
 /**
@@ -135,10 +143,40 @@ export function brandAccent(primary: string | null | undefined): BrandAccent {
     rgb = [rgb[0] * 0.82, rgb[1] * 0.82, rgb[2] * 0.82];
     guard += 1;
   }
+  // Cores extremamente escuras ganham um leve clareamento para que os
+  // fundos suaves derivados continuem perceptíveis.
+  if (luminance(rgb) < 0.02) {
+    rgb = [rgb[0] + 28, rgb[1] + 28, rgb[2] + 28];
+  }
   const accent = toHex(rgb);
   const onAccent = luminance(rgb) > 0.42 ? "#1e293b" : "#ffffff";
-  return { accent, onAccent, tint: `${accent}14` };
+  return {
+    accent,
+    onAccent,
+    tint: `${accent}14`,
+    tintStrong: `${accent}24`,
+    tintSoft: `${accent}0d`,
+    border: `${accent}40`,
+    accentDark: toHex([rgb[0] * 0.85, rgb[1] * 0.85, rgb[2] * 0.85]),
+  };
 }
+
+/**
+ * Tokens CSS da marca da agência. Aplicados uma única vez no shell para que
+ * os componentes usem `var(--wl-accent)` em vez de estilos inline duplicados.
+ */
+export function brandCssVars(brand: BrandAccent): Record<string, string> {
+  return {
+    "--wl-accent": brand.accent,
+    "--wl-accent-dark": brand.accentDark,
+    "--wl-on-accent": brand.onAccent,
+    "--wl-tint": brand.tint,
+    "--wl-tint-strong": brand.tintStrong,
+    "--wl-tint-soft": brand.tintSoft,
+    "--wl-border": brand.border,
+  };
+}
+
 
 // ─────────────────────────────────────────────────────────────
 // <head> do painel: título, robots e favicon da agência
