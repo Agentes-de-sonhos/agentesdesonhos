@@ -161,12 +161,60 @@ export function brandAccent(primary: string | null | undefined): BrandAccent {
   };
 }
 
+/** Mistura a cor com branco (`amount` = fração de branco). */
+function mixWithWhite(rgb: RGB, amount: number): RGB {
+  return [
+    rgb[0] + (255 - rgb[0]) * amount,
+    rgb[1] + (255 - rgb[1]) * amount,
+    rgb[2] + (255 - rgb[2]) * amount,
+  ];
+}
+
+/** Converte para o formato "H S% L%" exigido pelos tokens do design system. */
+function hslTriplet(hex: string): string {
+  const rgb = parseHex(hex) ?? [51, 65, 85];
+  const [r, g, b] = rgb.map((v) => v / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+    else if (max === g) h = ((b - r) / d + 2) * 60;
+    else h = ((r - g) / d + 4) * 60;
+  }
+  return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
+
 /**
- * Tokens CSS da marca da agência. Aplicados uma única vez no shell para que
- * os componentes usem `var(--wl-accent)` em vez de estilos inline duplicados.
+ * Fonte ÚNICA da identidade visual do white label.
+ *
+ * Além dos tokens próprios (`--wl-*` / `--agency-*`), sobrescreve os tokens do
+ * design system (`--primary`, `--ring`, `--accent`, `--sidebar-*`) apenas
+ * dentro do container do painel da agência. Assim todos os componentes
+ * compartilhados (botões, campos, calendários, selects, dropdowns, abas)
+ * passam a usar automaticamente a cor cadastrada pela agência, sem hardcode
+ * por página e sem afetar a plataforma principal.
+ *
+ * Cores semânticas (`--destructive`, `--success`, `--warning`) NÃO são
+ * alteradas: continuam comunicando erro, sucesso e pendência.
  */
 export function brandCssVars(brand: BrandAccent): Record<string, string> {
+  const rgb = parseHex(brand.accent) ?? [51, 65, 85];
+  const soft = toHex(mixWithWhite(rgb, 0.9));
+  const softHover = toHex(mixWithWhite(rgb, 0.84));
+  const selection = toHex(mixWithWhite(rgb, 0.78));
+  const borderSolid = toHex(mixWithWhite(rgb, 0.55));
+  const accentHsl = hslTriplet(brand.accent);
+  const onAccentHsl = hslTriplet(brand.onAccent);
+  const softHsl = hslTriplet(soft);
+  const neutralFg = "222 47% 11%";
+
   return {
+    // Tokens próprios do painel (uso direto em estilos inline existentes).
     "--wl-accent": brand.accent,
     "--wl-accent-dark": brand.accentDark,
     "--wl-on-accent": brand.onAccent,
@@ -174,8 +222,33 @@ export function brandCssVars(brand: BrandAccent): Record<string, string> {
     "--wl-tint-strong": brand.tintStrong,
     "--wl-tint-soft": brand.tintSoft,
     "--wl-border": brand.border,
+
+    // Tokens semânticos da agência (nomeados conforme a especificação).
+    "--agency-primary": brand.accent,
+    "--agency-primary-hover": brand.accentDark,
+    "--agency-primary-active": brand.accentDark,
+    "--agency-primary-soft": soft,
+    "--agency-primary-soft-hover": softHover,
+    "--agency-primary-border": borderSolid,
+    "--agency-primary-foreground": brand.onAccent,
+    "--agency-focus-ring": brand.accent,
+    "--agency-selection": selection,
+
+    // Sobrescrita local do design system → tudo acompanha a cor da agência.
+    "--primary": accentHsl,
+    "--primary-foreground": onAccentHsl,
+    "--ring": accentHsl,
+    "--accent": softHsl,
+    "--accent-foreground": neutralFg,
+    "--sidebar-primary": accentHsl,
+    "--sidebar-primary-foreground": onAccentHsl,
+    "--sidebar-ring": accentHsl,
+    "--sidebar-accent": softHsl,
+    "--sidebar-accent-foreground": neutralFg,
+    "--gradient-primary": `linear-gradient(135deg, ${brand.accent} 0%, ${brand.accentDark} 100%)`,
   };
 }
+
 
 
 // ─────────────────────────────────────────────────────────────
