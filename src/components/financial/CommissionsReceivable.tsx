@@ -405,11 +405,12 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                       <td className="p-3">
                         {c.expected_date ? (
                           <p className={`text-xs font-medium ${overdue ? "text-red-600" : "text-foreground"}`}>
-                            {format(new Date(c.expected_date + "T00:00:00"), "dd/MM/yyyy")}
+                            Prev.: {format(new Date(c.expected_date + "T00:00:00"), "dd/MM/yyyy")}
                           </p>
                         ) : <span className="text-xs text-muted-foreground">—</span>}
-                        {c.received_date && <p className="text-[10px] text-emerald-600">Receb: {format(new Date(c.received_date + "T00:00:00"), "dd/MM/yyyy")}</p>}
+                        {c.received_date && <p className="text-[10px] text-emerald-600">Receb.: {format(new Date(c.received_date + "T00:00:00"), "dd/MM/yyyy")}</p>}
                       </td>
+
                       <td className="p-3 text-center">
                         <Badge className={`${statusInfo.color} border-0 text-[10px]`}>
                           {statusInfo.icon} {statusInfo.label}
