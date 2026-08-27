@@ -30,6 +30,8 @@ import {
   registerAgende,
   resolveTracking,
   saveAgendePrefill,
+  sendAgendeLeadToSheet,
+
   seatsLabel,
   sortSessions,
   trackAgende,
