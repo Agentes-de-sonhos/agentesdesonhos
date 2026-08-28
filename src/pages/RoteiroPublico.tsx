@@ -22,8 +22,8 @@ import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
-import {
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import {
   isPricingContentEmpty,
   sanitizePricingContent,
   PRICING_SECTION_TITLE,
