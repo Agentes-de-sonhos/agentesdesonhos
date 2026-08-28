@@ -15,11 +15,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { normalizeHex, rgbToHex } from "@/lib/agencyColor";
+import { Switch } from "@/components/ui/switch";
+import { useQueryClient } from "@tanstack/react-query";
+import { deriveSecondaryColor } from "@/lib/brandTheme";
 
 interface Props {
   initialColor: string | null;
+  /** Tom claro salvo (quando a agência optou por definir manualmente). */
+  initialSecondaryColor?: string | null;
+  /** Gerar o tom claro automaticamente a partir da cor principal. */
+  initialSecondaryAuto?: boolean | null;
   agencyLogoUrl: string | null;
-  onSaved?: (color: string | null) => void;
+  onSaved?: (color: string | null, secondary?: string | null, auto?: boolean) => void;
 }
 
 const PRESETS = [
@@ -28,11 +35,24 @@ const PRESETS = [
   "#0D9488", "#0F172A", "#475569", "#A21CAF",
 ];
 
-export function AgencyBrandColorCard({ initialColor, agencyLogoUrl, onSaved }: Props) {
+export function AgencyBrandColorCard({
+  initialColor,
+  initialSecondaryColor = null,
+  initialSecondaryAuto = true,
+  agencyLogoUrl,
+  onSaved,
+}: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [color, setColor] = useState<string>(normalizeHex(initialColor) || "#0284C7");
   const [savedColor, setSavedColor] = useState<string | null>(normalizeHex(initialColor));
+  const [auto, setAuto] = useState<boolean>(initialSecondaryAuto !== false);
+  const [secondary, setSecondary] = useState<string>(
+    normalizeHex(initialSecondaryColor) || deriveSecondaryColor(initialColor),
+  );
+  const [savedSecondary, setSavedSecondary] = useState<string | null>(normalizeHex(initialSecondaryColor));
+  const [savedAuto, setSavedAuto] = useState<boolean>(initialSecondaryAuto !== false);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -41,7 +61,24 @@ export function AgencyBrandColorCard({ initialColor, agencyLogoUrl, onSaved }: P
     setSavedColor(normalizeHex(initialColor));
   }, [initialColor]);
 
-  const dirty = (savedColor || "") !== (normalizeHex(color) || "");
+  useEffect(() => {
+    setSecondary(normalizeHex(initialSecondaryColor) || deriveSecondaryColor(initialColor));
+    setSavedSecondary(normalizeHex(initialSecondaryColor));
+    setAuto(initialSecondaryAuto !== false);
+    setSavedAuto(initialSecondaryAuto !== false);
+  }, [initialSecondaryColor, initialSecondaryAuto, initialColor]);
+
+  // No modo automático a secundária acompanha a principal (10–15% da cor
+  // principal misturada com branco).
+  useEffect(() => {
+    if (auto) setSecondary(deriveSecondaryColor(color));
+  }, [auto, color]);
+
+  const effectiveSecondary = auto ? deriveSecondaryColor(color) : normalizeHex(secondary) || deriveSecondaryColor(color);
+  const dirty =
+    (savedColor || "") !== (normalizeHex(color) || "") ||
+    savedAuto !== auto ||
+    (!auto && (savedSecondary || "") !== (normalizeHex(secondary) || ""));
 
   const handleSave = async () => {
     if (!user) return;
@@ -54,12 +91,22 @@ export function AgencyBrandColorCard({ initialColor, agencyLogoUrl, onSaved }: P
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ agency_primary_color: hex } as any)
+        .update({
+          agency_primary_color: hex,
+          agency_secondary_color: auto ? null : effectiveSecondary,
+          agency_secondary_auto: auto,
+        } as any)
         .eq("user_id", user.id);
       if (error) throw error;
       setSavedColor(hex);
-      onSaved?.(hex);
-      toast({ title: "Cor principal salva!", description: "Será aplicada nos links públicos da agência." });
+      setSavedSecondary(auto ? null : effectiveSecondary);
+      setSavedAuto(auto);
+      onSaved?.(hex, auto ? null : effectiveSecondary, auto);
+      // Reflete a mudança imediatamente em todas as telas e links públicos.
+      queryClient.invalidateQueries({ queryKey: ["agency-admin-portal"] });
+      queryClient.invalidateQueries({ queryKey: ["agency-domain"] });
+      queryClient.invalidateQueries({ queryKey: ["agency-admin-profile"] });
+      toast({ title: "Identidade visual salva!", description: "Aplicada no painel, no site e em todos os links públicos." });
     } catch (err: any) {
       toast({ title: "Erro ao salvar cor", description: err.message, variant: "destructive" });
     } finally {
@@ -159,10 +206,56 @@ export function AgencyBrandColorCard({ initialColor, agencyLogoUrl, onSaved }: P
           </div>
         </div>
 
+        {/* Cor secundária (tom claro) */}
+        <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <Label className="text-sm font-medium">Gerar tom claro automaticamente</Label>
+              <p className="text-xs text-muted-foreground">
+                A cor secundária é usada em fundos claros, hovers, itens selecionados e no
+                intervalo de datas do calendário.
+              </p>
+            </div>
+            <Switch checked={auto} onCheckedChange={setAuto} aria-label="Gerar tom claro automaticamente" />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-end">
+            <div className="space-y-2">
+              <Label className="text-xs">Secundária</Label>
+              <input
+                type="color"
+                value={effectiveSecondary}
+                disabled={auto}
+                onChange={(e) => setSecondary(e.target.value.toUpperCase())}
+                className="h-10 w-16 cursor-pointer rounded-md border border-input bg-background p-1 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Escolher cor secundária"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">HEX secundário</Label>
+              <Input
+                value={effectiveSecondary}
+                disabled={auto}
+                onChange={(e) => setSecondary(e.target.value.toUpperCase())}
+                onBlur={() => {
+                  const n = normalizeHex(secondary);
+                  if (n) setSecondary(n);
+                }}
+                className="font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="h-8 flex-1 rounded-md border" style={{ backgroundColor: color }} />
+            <span className="h-8 flex-1 rounded-md border" style={{ backgroundColor: effectiveSecondary }} />
+          </div>
+        </div>
+
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={!dirty || saving}>
             {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Salvar cor
+            Salvar identidade visual
           </Button>
         </div>
       </CardContent>
