@@ -421,31 +421,39 @@ export function AgencyAdminSidebar({
                   aria-label="Criar novo"
                   aria-haspopup="menu"
                   aria-expanded={openMenu === "create"}
-                  className="mt-1 flex h-10 w-10 items-center justify-center rounded-[10px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]"
+                  className={cn(
+                    "mt-0.5 flex w-10 items-center justify-center rounded-[10px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]",
+                    d.createBtn,
+                  )}
                   style={{
                     backgroundColor: "var(--agency-primary)",
                     color: "var(--agency-primary-foreground)",
                   }}
                 >
-                  <Plus className="h-[18px] w-[18px]" />
+                  <Plus className={d.icon} />
                 </button>
               ) : (
                 <button
                   type="button"
                   aria-haspopup="menu"
                   aria-expanded={openMenu === "create"}
-                  className="mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-[10px] text-sm font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]"
+                  className={cn(
+                    "mt-0.5 flex w-full items-center justify-center gap-2 rounded-[10px] font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    d.createBtn,
+                    d.rowText,
+                  )}
                   style={{
                     backgroundColor:
                       openMenu === "create" ? "var(--agency-primary-hover)" : "var(--agency-primary)",
                     color: "var(--agency-primary-foreground)",
                   }}
                 >
-                  <Plus className="h-[18px] w-[18px]" />
+                  <Plus className={d.icon} />
                   <span>Criar novo</span>
                   {openMenu === "create" && <ChevronUp className="ml-auto h-4 w-4" />}
                 </button>
               )}
+
             </PopoverTrigger>
             <PopoverContent
               align="start"
