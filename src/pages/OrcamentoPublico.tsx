@@ -54,6 +54,7 @@ import { BookingCartLauncher } from "@/components/quote/booking/BookingCartLaunc
 import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog";
 import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
+import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -1440,6 +1441,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     };
   }, [timelineNodes.length]);
 
+  useAgencyBrandTheme({
+    primary: agentProfile?.agency_primary_color ?? null,
+    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
+    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
+  });
+
   return (
     <BookingCartProvider
       quote={quote as any}
@@ -1449,7 +1456,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     >
     <div
       className="min-h-screen bg-[hsl(var(--background))]"
-      style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
+      style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
     >
       {/* ─── Slim Premium Header ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">

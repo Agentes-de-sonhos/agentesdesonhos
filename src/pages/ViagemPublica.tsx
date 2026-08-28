@@ -56,6 +56,7 @@ import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
+import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the
@@ -2153,11 +2154,17 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     endDate,
   );
 
+  useAgencyBrandTheme({
+    primary: agentProfile?.agency_primary_color ?? null,
+    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
+    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
+  });
+
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>
     <div
       className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100"
-      style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
+      style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
     >
       {/* ─── Premium Agency Header with large logo (mesmo padrão do Orçamento) ─── */}
       <header className="border-b border-border/30 bg-white/90 backdrop-blur-md sticky top-0 z-10 shadow-sm">
@@ -2433,7 +2440,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               onOpenChange={setItineraryOpen}
               title="Roteiro dia a dia"
               icon={CalendarDays}
-              style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
+              style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
             >
               <div ref={itineraryRef}>
               {v2Days && v2Days.length > 0 ? (
@@ -2650,7 +2657,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         service={activeService}
         open={activeService !== null}
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
-        style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
+        style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
       >
         {activeService && <PublicServiceCard service={activeService} />}
       </ServiceDetailOverlay>
@@ -2660,7 +2667,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
         title={activeGroupType ? SERVICE_LABELS[activeGroupType] : undefined}
         icon={activeGroupType ? SERVICE_ICONS[activeGroupType] : undefined}
-        style={getWalletBrandStyle(agentProfile?.agency_primary_color)}
+        style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
       >
         {activeGroupType && (
           <CategoryServiceView
