@@ -516,7 +516,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
             <p className="mt-0.5 text-sm text-muted-foreground">{summarySentence}</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2.5 xl:gap-3">
             {actions.map((a) => (
               <IconAction
                 key={a.label}
@@ -534,7 +534,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                       <button
                         type="button"
                         aria-label="Gestão financeira"
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent"
+                        className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent focus-visible:outline-none xl:h-[68px] xl:w-[68px]"
                         style={{ color: "var(--wl-accent)" }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = "var(--wl-accent)";
@@ -545,7 +545,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                           e.currentTarget.style.color = "var(--wl-accent)";
                         }}
                       >
-                        <DollarSign className="h-[18px] w-[18px]" />
+                        <DollarSign className="h-[26px] w-[26px] xl:h-[30px] xl:w-[30px]" />
                       </button>
                     </DropdownMenuTrigger>
                   </TooltipTrigger>
@@ -580,7 +580,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
               Não foi possível carregar o resumo operacional
             </p>
             <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground">
-              {error?.message || "Tente novamente em alguns instantes."}
+              Tente novamente em alguns instantes.
             </p>
             <Button size="sm" variant="outline" className="mt-4 gap-2" onClick={() => refetch()}>
               <RefreshCw className="h-4 w-4" />
