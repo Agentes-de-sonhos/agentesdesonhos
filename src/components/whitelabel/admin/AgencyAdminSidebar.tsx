@@ -561,9 +561,23 @@ export function AgencyAdminSidebar({
           {sectionLabel("Gestão")}
           {managementItems.map((item) => renderItem(item))}
         </nav>
+        {/* Fade neutro: só quando ainda há itens fora da área visível. */}
+        {hasMoreBelow && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-card to-transparent"
+          />
+        )}
+        </div>
 
-        {/* ── Rodapé: bloco compacto do usuário ─────────────────────────── */}
-        <div className={cn("shrink-0 border-t border-border/70", collapsed ? "px-2 py-3" : "px-3 py-3")}>
+        {/* ── Rodapé fixo: bloco compacto do usuário ────────────────────── */}
+        <div
+          className={cn(
+            "shrink-0 border-t border-border/70",
+            d.footer,
+            collapsed ? "px-2" : "px-3",
+          )}
+        >
           <Popover open={openMenu === "user"} onOpenChange={(o) => setOpenMenu(o ? "user" : null)}>
             <PopoverTrigger asChild>
               <button
@@ -571,12 +585,13 @@ export function AgencyAdminSidebar({
                 aria-label="Abrir menu do usuário"
                 aria-haspopup="menu"
                 aria-expanded={openMenu === "user"}
+                title={fullName}
                 className={cn(
                   "flex items-center rounded-[10px] outline-none transition-colors duration-150 hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
-                  collapsed ? "h-10 w-10 justify-center" : "w-full gap-3 px-2 py-2",
+                  collapsed ? "h-10 w-10 justify-center" : "w-full gap-2.5 px-2 py-1.5",
                 )}
               >
-                <Avatar className="h-9 w-9 shrink-0">
+                <Avatar className={cn("shrink-0", d.avatar)}>
                   <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />
                   <AvatarFallback
                     className="text-xs font-semibold"
@@ -591,11 +606,27 @@ export function AgencyAdminSidebar({
                 {!collapsed && (
                   <>
                     <span className="min-w-0 flex-1 text-left">
-                      <span className="block truncate text-sm font-medium leading-tight text-slate-900">
+                      <span
+                        className={cn(
+                          "block truncate font-medium leading-tight text-slate-900",
+                          d.rowText,
+                        )}
+                      >
                         {firstName}
                       </span>
-                      <span className="block truncate text-xs leading-tight text-slate-500">{roleLabel}</span>
+                      {d.showRole && (
+                        <span className="block truncate text-xs leading-tight text-slate-500">{roleLabel}</span>
+                      )}
                     </span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-slate-500 transition-transform duration-150",
+                        openMenu === "user" && "rotate-180",
+                      )}
+                    />
+                  </>
+                )}
+
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 shrink-0 text-slate-500 transition-transform duration-150",
