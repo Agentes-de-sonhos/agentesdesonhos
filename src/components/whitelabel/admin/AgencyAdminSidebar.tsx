@@ -23,7 +23,7 @@ import {
   Folder,
   FolderOpen,
   Headphones,
-  Home,
+  
   KanbanSquare,
   Layers,
   LogOut,
