@@ -49,7 +49,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getPersonInitials } from "@/components/shared/ClientAvatar";
+import { densityForHeight, sidebarDensity, useViewport } from "@/lib/agencyAdminDensity";
 import { cn } from "@/lib/utils";
+
 
 const SIDEBAR_PREF_KEY = "wl-admin-sidebar-collapsed";
 
