@@ -10,7 +10,7 @@
  * Toda a identidade visual vem dos tokens `--agency-*` / `--wl-*` definidos
  * pelo shell a partir da cor cadastrada pela agência: nada de cor fixa aqui.
  */
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -35,6 +35,7 @@ import {
   UsersRound,
   Wallet,
   WalletCards,
+  type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -73,7 +74,7 @@ export function useSidebarCollapsed() {
 interface MenuItemDef {
   label: string;
   to: string;
-  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   /** Caminhos (além de `to`) que marcam o item como ativo. */
   match?: (pathname: string, search: string) => boolean;
 }
