@@ -67,9 +67,13 @@ describe("workspace window scroll + active tab cursor", () => {
     const src = read("src/workspace/TabBar.tsx");
     expect(src).toContain('active ? "cursor-default" : "cursor-pointer"');
     expect(src).toContain("{!pinned && (");
-    // tab bar keeps only horizontal auto-scroll to reveal the active tab
-    expect(src).toContain('inline: "nearest"');
+    // a barra de abas é de linha única, sem rolagem horizontal
+    expect(src).not.toContain("overflow-x-auto");
+    expect(src).toContain("overflow-hidden");
+    // a aba ativa sempre permanece visível; o excedente vai para o seletor "+N"
+    expect(src).toContain("vis[vis.length - 1] = active");
   });
+
 });
 
 const trip = (over: Partial<any> = {}) => ({

@@ -38,7 +38,6 @@ import {
 } from "@/hooks/useAgencyAdminDashboard";
 import { brandAccent, brandCssVars, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 import { agencyDisplayName } from "@/lib/agencyDomains";
-import { AgencyUserBadge } from "@/components/whitelabel/admin/AgencyUserBadge";
 
 /**
  * Home operacional do painel administrativo white label.
@@ -243,21 +242,18 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
       className="w-full min-w-0 space-y-4 animate-fade-in sm:space-y-5"
       style={brandCssVars(brand) as React.CSSProperties}
     >
-      <header className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            {greeting()}
-            {firstName ? `, ${firstName}` : ""}!
-          </h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {data?.attentionTotal
-              ? `${data.attentionTotal} ${data.attentionTotal === 1 ? "item precisa" : "itens precisam"} da sua atenção hoje.`
-              : "Aqui está o resumo operacional da sua agência."}
-          </p>
-        </div>
-        {/* Identificação do usuário: exclusiva da página inicial. */}
-        <AgencyUserBadge agencyName={agencyDisplayName(info)} />
+      <header className="min-w-0">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          {greeting()}
+          {firstName ? `, ${firstName}` : ""}!
+        </h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          {data?.attentionTotal
+            ? `${data.attentionTotal} ${data.attentionTotal === 1 ? "item precisa" : "itens precisam"} da sua atenção hoje.`
+            : "Aqui está o resumo operacional da sua agência."}
+        </p>
       </header>
+
 
       {/* Atalhos rápidos */}
       {shortcuts.length > 0 && (

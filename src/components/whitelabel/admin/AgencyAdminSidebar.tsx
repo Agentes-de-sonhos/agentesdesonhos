@@ -10,8 +10,9 @@
  * Toda a identidade visual vem dos tokens `--agency-*` / `--wl-*` definidos
  * pelo shell a partir da cor cadastrada pela agência: nada de cor fixa aqui.
  */
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
@@ -48,28 +49,46 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getPersonInitials } from "@/components/shared/ClientAvatar";
+import { densityForHeight, sidebarDensity, useViewport } from "@/lib/agencyAdminDensity";
 import { cn } from "@/lib/utils";
+
 
 const SIDEBAR_PREF_KEY = "wl-admin-sidebar-collapsed";
 
-/** Preferência do usuário (desktop) para menu recolhido. */
+/**
+ * Preferência do usuário (desktop) para menu recolhido. Em larguras muito
+ * reduzidas o painel inicia recolhido sem apagar a preferência manual salva
+ * para resoluções maiores.
+ */
 export function useSidebarCollapsed() {
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(SIDEBAR_PREF_KEY) === "1";
+      const pref = localStorage.getItem(SIDEBAR_PREF_KEY);
+      if (pref === "1") return true;
+      if (pref === "0") return false;
+      return typeof window !== "undefined" && window.innerWidth < 1280;
     } catch {
       return false;
     }
   });
+  const [touched, setTouched] = useState(false);
   useEffect(() => {
+    if (!touched) return;
     try {
       localStorage.setItem(SIDEBAR_PREF_KEY, collapsed ? "1" : "0");
     } catch {
       /* preferência é opcional */
     }
-  }, [collapsed]);
-  return { collapsed, toggle: () => setCollapsed((v) => !v) };
+  }, [collapsed, touched]);
+  return {
+    collapsed,
+    toggle: () => {
+      setTouched(true);
+      setCollapsed((v) => !v);
+    },
+  };
 }
+
 
 interface MenuItemDef {
   label: string;
@@ -123,6 +142,19 @@ export function AgencyAdminSidebar({
   const agencyName = agencyDisplayName(info);
   const logoUrl = resolveAgencyLogoUrl(info);
 
+  /**
+   * Densidade responsiva por ALTURA da viewport: as dimensões reais dos
+   * componentes (cabeçalho, botão, linhas, fontes, ícones, rodapé) diminuem
+   * para que todo o menu caiba sem rolagem em telas mais baixas.
+   */
+  const { height } = useViewport();
+  const d = sidebarDensity(densityForHeight(height));
+
+  /** Fallback: fade neutro só quando ainda houver conteúdo fora da área visível. */
+  const navRef = useRef<HTMLElement | null>(null);
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+
   /** Apenas um popover aberto por vez. */
   const [openMenu, setOpenMenu] = useState<null | "create" | "user">(null);
 
@@ -148,7 +180,24 @@ export function AgencyAdminSidebar({
 
   const isProjectsArea =
     location.pathname === "/gestao/meus-projetos" || location.pathname === "/meus-projetos";
+  // Grupos recolhíveis permanecem fechados quando não contêm a página ativa.
   const [projectsOpen, setProjectsOpen] = useState(isProjectsArea);
+
+  // Detecta se a navegação ainda transborda (mesmo no modo mais compacto).
+  useLayoutEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    const check = () => setHasMoreBelow(el.scrollHeight - el.clientHeight - el.scrollTop > 4);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    el.addEventListener("scroll", check, { passive: true });
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("scroll", check);
+    };
+  }, [collapsed, d.mode, projectsOpen]);
+
 
   const handleSignOut = async () => {
     setOpenMenu(null);
@@ -237,7 +286,7 @@ export function AgencyAdminSidebar({
       node
     );
 
-  /** Linha de navegação padrão (40px, cantos 10px, estado ativo suave). */
+  /** Linha de navegação (altura/fonte/ícone vêm da densidade atual). */
   const renderItem = (item: MenuItemDef, opts: { sub?: boolean } = {}) => {
     const Icon = item.icon;
     const active = isActive(item);
@@ -249,10 +298,13 @@ export function AgencyAdminSidebar({
         aria-label={collapsed ? item.label : undefined}
         aria-current={active ? "page" : undefined}
         data-workspace-title={item.label}
+        title={collapsed ? undefined : item.label}
         className={cn(
-          "group relative flex items-center rounded-[10px] text-sm outline-none transition-colors duration-150",
+          "group relative flex items-center rounded-[10px] outline-none transition-colors duration-150",
           "focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]",
-          collapsed ? "h-10 w-10 justify-center" : "h-10 gap-3 px-3",
+          d.row,
+          d.rowText,
+          collapsed ? "w-10 justify-center" : "gap-2.5 px-3",
           active
             ? "font-medium"
             : cn(
@@ -265,12 +317,12 @@ export function AgencyAdminSidebar({
         {active && !collapsed && (
           <span
             aria-hidden
-            className="absolute -left-2 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-full"
+            className="absolute -left-2 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full"
             style={{ backgroundColor: "var(--agency-primary)" }}
           />
         )}
-        <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-        {!collapsed && <span className="truncate">{item.label}</span>}
+        <Icon className={cn("shrink-0", d.icon)} strokeWidth={1.8} />
+        {!collapsed && <span className="min-w-0 truncate">{item.label}</span>}
       </Link>
     );
     return withTip(item.label, node);
@@ -282,48 +334,62 @@ export function AgencyAdminSidebar({
 
   const sectionLabel = (label: string) =>
     collapsed ? (
-      <div key={label} className="mx-auto my-2 h-px w-6 bg-border" />
+      <div key={label} className="mx-auto my-1.5 h-px w-6 bg-border" />
     ) : (
       <p
         key={label}
-        className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-400"
+        className={cn(
+          "font-semibold uppercase tracking-[0.09em] text-slate-400",
+          d.sectionLabel,
+        )}
       >
         {label}
       </p>
     );
 
+
   return (
     <TooltipProvider>
-      <div className="flex h-full min-h-0 flex-col bg-card">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden bg-card">
         {/* ── Cabeçalho: logotipo + nome da agência + recolher ───────────── */}
         <div
           className={cn(
             "flex shrink-0 items-center border-b border-border/70",
-            collapsed ? "flex-col gap-2 px-2 py-3" : "gap-2 px-3 py-3",
+            d.header,
+            collapsed ? "justify-center px-2" : "gap-2 px-3",
           )}
         >
           <Link
             to={AGENCY_ADMIN_HOME}
             onClick={onNavigate}
             data-workspace-title="Inicial"
-            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[10px] p-1 outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]"
+            title={agencyName}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-[10px] p-1 outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]"
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={agencyName}
-                className={cn("shrink-0 object-contain", collapsed ? "h-8 w-8" : "h-9 max-w-[104px]")}
+                className={cn("shrink-0 object-contain", collapsed ? d.logoCollapsed : d.logo)}
               />
             ) : (
               <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold"
+                className={cn(
+                  "flex shrink-0 items-center justify-center rounded-[10px] text-sm font-bold",
+                  d.logoCollapsed,
+                )}
                 style={{ backgroundColor: "var(--agency-primary)", color: "var(--agency-primary-foreground)" }}
               >
                 {agencyName.charAt(0).toUpperCase()}
               </span>
             )}
             {!collapsed && (
-              <span className="min-w-0 truncate text-[15px] font-medium leading-tight text-slate-900">
+              <span
+                className={cn(
+                  "min-w-0 truncate pr-1 font-medium leading-tight text-slate-900",
+                  d.agencyText,
+                )}
+              >
                 {agencyName}
               </span>
             )}
@@ -340,13 +406,18 @@ export function AgencyAdminSidebar({
           )}
         </div>
 
-        {/* ── Navegação (área rolável) ───────────────────────────────────── */}
+        {/* ── Navegação: densidade primeiro; rolagem invisível só como fallback ── */}
+        <div className="relative min-h-0 flex-1">
         <nav
+          ref={navRef}
           className={cn(
-            "min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden py-3",
+            "no-scrollbar h-full overflow-y-auto overflow-x-hidden",
+            d.gap,
+            d.navPadding,
             collapsed ? "flex flex-col items-center px-2" : "px-4",
           )}
         >
+
           {renderItem({
             label: "Início",
             to: AGENCY_ADMIN_HOME,
@@ -366,31 +437,39 @@ export function AgencyAdminSidebar({
                   aria-label="Criar novo"
                   aria-haspopup="menu"
                   aria-expanded={openMenu === "create"}
-                  className="mt-1 flex h-10 w-10 items-center justify-center rounded-[10px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]"
+                  className={cn(
+                    "mt-0.5 flex w-10 items-center justify-center rounded-[10px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]",
+                    d.createBtn,
+                  )}
                   style={{
                     backgroundColor: "var(--agency-primary)",
                     color: "var(--agency-primary-foreground)",
                   }}
                 >
-                  <Plus className="h-[18px] w-[18px]" />
+                  <Plus className={d.icon} />
                 </button>
               ) : (
                 <button
                   type="button"
                   aria-haspopup="menu"
                   aria-expanded={openMenu === "create"}
-                  className="mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-[10px] text-sm font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]"
+                  className={cn(
+                    "mt-0.5 flex w-full items-center justify-center gap-2 rounded-[10px] font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    d.createBtn,
+                    d.rowText,
+                  )}
                   style={{
                     backgroundColor:
                       openMenu === "create" ? "var(--agency-primary-hover)" : "var(--agency-primary)",
                     color: "var(--agency-primary-foreground)",
                   }}
                 >
-                  <Plus className="h-[18px] w-[18px]" />
+                  <Plus className={d.icon} />
                   <span>Criar novo</span>
                   {openMenu === "create" && <ChevronUp className="ml-auto h-4 w-4" />}
                 </button>
               )}
+
             </PopoverTrigger>
             <PopoverContent
               align="start"
@@ -436,7 +515,9 @@ export function AgencyAdminSidebar({
                   aria-label="Meus projetos"
                   data-workspace-title="Meus Projetos"
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-[10px] text-sm outline-none transition-colors",
+                    "flex w-10 items-center justify-center rounded-[10px] outline-none transition-colors",
+                    d.row,
+                    d.rowText,
                     isProjectsArea ? "font-medium" : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900",
                   )}
                   style={
@@ -445,7 +526,7 @@ export function AgencyAdminSidebar({
                       : undefined
                   }
                 >
-                  <Folder className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  <Folder className={d.icon} strokeWidth={1.8} />
                 </Link>,
               )
             : (
@@ -455,17 +536,20 @@ export function AgencyAdminSidebar({
                   onClick={() => setProjectsOpen((v) => !v)}
                   aria-expanded={projectsOpen}
                   className={cn(
-                    "flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    "flex w-full items-center gap-2.5 rounded-[10px] px-3 font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    d.row,
+                    d.rowText,
                     isProjectsArea ? "" : "text-slate-700 hover:bg-slate-100/80 hover:text-slate-900",
                   )}
                   style={isProjectsArea ? { color: "var(--agency-primary)" } : undefined}
                 >
-                  <Folder className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-                  <span className="flex-1 truncate text-left">Meus projetos</span>
+                  <Folder className={cn("shrink-0", d.icon)} strokeWidth={1.8} />
+                  <span className="min-w-0 flex-1 truncate text-left">Meus projetos</span>
                   <ChevronDown
                     className={cn("h-4 w-4 shrink-0 transition-transform duration-150", projectsOpen && "rotate-180")}
                   />
                 </button>
+
                 {projectsOpen && (
                   <div className="relative ml-4 space-y-0.5 pl-4">
                     <span aria-hidden className="absolute left-0 top-1 bottom-1 w-px bg-border" />
@@ -493,9 +577,23 @@ export function AgencyAdminSidebar({
           {sectionLabel("Gestão")}
           {managementItems.map((item) => renderItem(item))}
         </nav>
+        {/* Fade neutro: só quando ainda há itens fora da área visível. */}
+        {hasMoreBelow && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-card to-transparent"
+          />
+        )}
+        </div>
 
-        {/* ── Rodapé: bloco compacto do usuário ─────────────────────────── */}
-        <div className={cn("shrink-0 border-t border-border/70", collapsed ? "px-2 py-3" : "px-3 py-3")}>
+        {/* ── Rodapé fixo: bloco compacto do usuário ────────────────────── */}
+        <div
+          className={cn(
+            "shrink-0 border-t border-border/70",
+            d.footer,
+            collapsed ? "px-2" : "px-3",
+          )}
+        >
           <Popover open={openMenu === "user"} onOpenChange={(o) => setOpenMenu(o ? "user" : null)}>
             <PopoverTrigger asChild>
               <button
@@ -503,12 +601,13 @@ export function AgencyAdminSidebar({
                 aria-label="Abrir menu do usuário"
                 aria-haspopup="menu"
                 aria-expanded={openMenu === "user"}
+                title={fullName}
                 className={cn(
                   "flex items-center rounded-[10px] outline-none transition-colors duration-150 hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
-                  collapsed ? "h-10 w-10 justify-center" : "w-full gap-3 px-2 py-2",
+                  collapsed ? "h-10 w-10 justify-center" : "w-full gap-2.5 px-2 py-1.5",
                 )}
               >
-                <Avatar className="h-9 w-9 shrink-0">
+                <Avatar className={cn("shrink-0", d.avatar)}>
                   <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />
                   <AvatarFallback
                     className="text-xs font-semibold"
@@ -523,10 +622,17 @@ export function AgencyAdminSidebar({
                 {!collapsed && (
                   <>
                     <span className="min-w-0 flex-1 text-left">
-                      <span className="block truncate text-sm font-medium leading-tight text-slate-900">
+                      <span
+                        className={cn(
+                          "block truncate font-medium leading-tight text-slate-900",
+                          d.rowText,
+                        )}
+                      >
                         {firstName}
                       </span>
-                      <span className="block truncate text-xs leading-tight text-slate-500">{roleLabel}</span>
+                      {d.showRole && (
+                        <span className="block truncate text-xs leading-tight text-slate-500">{roleLabel}</span>
+                      )}
                     </span>
                     <ChevronDown
                       className={cn(
