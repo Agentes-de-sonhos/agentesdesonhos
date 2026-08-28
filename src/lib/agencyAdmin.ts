@@ -11,6 +11,8 @@ import { normalizeHostname, type AgencyDomainInfo } from "@/lib/agencyDomains";
 
 export const AGENCY_ADMIN_HOME = "/gestao";
 export const AGENCY_ADMIN_LOGIN = "/gestao/login";
+/** Destino pretendido guardado antes de mandar o usuário para o login. */
+export const AGENCY_ADMIN_FROM_KEY = "wl-admin-from";
 
 /** Origem da plataforma usada apenas no fluxo de recuperação de senha. */
 export const PLATFORM_APP_ORIGIN = "https://app.agentesdesonhos.com.br";

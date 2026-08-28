@@ -1,8 +1,8 @@
 import { ReactNode, useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  AGENCY_ADMIN_FROM_KEY,
   AGENCY_ADMIN_LOGIN,
   checkAgencyAdminAccess,
   fetchAgencyAdminPortal,
@@ -30,7 +30,6 @@ export function AgencyAdminShell({
   children: (info: AgencyAdminPortalInfo) => ReactNode;
 }) {
   const { user, loading: authLoading, signOut } = useAuth();
-  const location = useLocation();
 
   const portal = useQuery({
     queryKey: ["agency-admin-portal", hostname],
@@ -61,13 +60,19 @@ export function AgencyAdminShell({
   if (!info || !enabled) return <AgencyAdminUnavailable />;
 
   if (!user) {
-    return (
-      <Navigate
-        to={AGENCY_ADMIN_LOGIN}
-        replace
-        state={{ from: `${location.pathname}${location.search}` }}
-      />
-    );
+    // Sem router externo aqui (o workspace usa routers de memória): a volta
+    // para o login é uma navegação real do MESMO domínio, guardando o destino
+    // pretendido para o pós-login.
+    try {
+      sessionStorage.setItem(
+        AGENCY_ADMIN_FROM_KEY,
+        `${window.location.pathname}${window.location.search}`,
+      );
+    } catch {
+      /* storage indisponível: apenas segue para o login */
+    }
+    window.location.replace(AGENCY_ADMIN_LOGIN);
+    return <AgencyAdminLoading />;
   }
 
   if (access.isLoading || access.data === undefined || accessDenied) {

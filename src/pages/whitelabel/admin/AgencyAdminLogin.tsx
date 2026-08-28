@@ -1,5 +1,4 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +14,7 @@ import {
   fetchAgencyAdminPortal,
   isAgencyAdminPath,
   useAgencyAdminHead,
+  AGENCY_ADMIN_FROM_KEY,
 } from "@/lib/agencyAdmin";
 import {
   AgencyAdminLoading,
@@ -38,7 +38,6 @@ const GENERIC_ERROR = "Não foi possível entrar. Verifique seu e-mail e senha e
 export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
-  const location = useLocation();
 
   const portal = useQuery({
     queryKey: ["agency-admin-portal", hostname],
@@ -83,9 +82,7 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
       return <AgencyAdminLoading />;
     }
     if (access.data === true) {
-      const from = (location.state as { from?: string } | null)?.from;
-      const target = typeof from === "string" && isAgencyAdminPath(from) ? from : AGENCY_ADMIN_HOME;
-      return <Navigate to={target} replace />;
+      return <AgencyAdminRedirect />;
     }
   }
 
@@ -309,4 +306,23 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Pós-login: navegação real (o painel autenticado monta o workspace de abas,
+ * que substitui o router desta página). Respeita o destino guardado.
+ */
+function AgencyAdminRedirect() {
+  useEffect(() => {
+    let target = AGENCY_ADMIN_HOME;
+    try {
+      const from = sessionStorage.getItem(AGENCY_ADMIN_FROM_KEY);
+      if (from && isAgencyAdminPath(from)) target = from;
+      sessionStorage.removeItem(AGENCY_ADMIN_FROM_KEY);
+    } catch {
+      /* storage indisponível: usa a home do painel */
+    }
+    window.location.replace(target);
+  }, []);
+  return <AgencyAdminLoading />;
 }

@@ -72,6 +72,19 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
 }
 
 export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
+  /**
+   * Painel administrativo white label: decidido ANTES do BrowserRouter, pois a
+   * área /gestao usa o workspace de abas internas (cada aba tem o seu próprio
+   * router) — dois routers aninhados não são permitidos.
+   */
+  if (typeof window !== "undefined" && isAgencyAdminPath(window.location.pathname)) {
+    return (
+      <Suspense fallback={<Fallback />}>
+        <AgencyAdminArea hostname={info.hostname} />
+      </Suspense>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Suspense fallback={<Fallback />}>
@@ -95,16 +108,6 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           window.location.hostname,
           window.location.search,
         );
-
-  /**
-   * Painel administrativo white label: qualquer caminho de /gestao (e os
-   * aliases absolutos reutilizados pelas páginas) entra na área própria —
-   * antes do site público e mesmo com a home em construção.
-   */
-  const location = useLocation();
-  if (isAgencyAdminPath(location.pathname)) {
-    return <AgencyAdminArea hostname={info.hostname} />;
-  }
 
   return (
         <Routes>
