@@ -1,5 +1,5 @@
 import { ComponentType, lazy } from "react";
-import { Navigate, useParams, useRoutes } from "react-router-dom";
+import { BrowserRouter, Navigate, useParams, useRoutes } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
@@ -8,7 +8,7 @@ import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { AgencyAdminShell } from "./AgencyAdminShell";
 import { AgencyAdminLayout } from "./AgencyAdminLayout";
 import AgencyAdminLogin from "@/pages/whitelabel/admin/AgencyAdminLogin";
-import { AGENCY_ADMIN_HOME, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
+import { AGENCY_ADMIN_HOME, AGENCY_ADMIN_LOGIN, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 import { AgencyAdminNavProvider } from "@/lib/agencyAdminNav";
 import { WorkspaceProvider } from "@/workspace/WorkspaceProvider";
 import { WorkspaceShell } from "@/workspace/WorkspaceShell";
@@ -155,18 +155,26 @@ function AgencyAdminWorkspace({ info }: { info: AgencyAdminPortalInfo }) {
   );
 }
 
-function AgencyAdminRouter({ hostname }: { hostname: string }) {
-  return useRoutes([
-    { path: "/gestao/login", element: <AgencyAdminLogin hostname={hostname} /> },
-    {
-      path: "*",
-      element: (
-        <AgencyAdminShell hostname={hostname}>
-          {(info) => <AgencyAdminWorkspace info={info} />}
-        </AgencyAdminShell>
-      ),
-    },
-  ]);
+/**
+ * Entrada do painel decidida pela URL real, SEM router externo: a área
+ * autenticada usa o workspace de abas (cada aba tem o seu próprio router de
+ * memória) e o React Router não permite routers aninhados. O login, que é uma
+ * página isolada, monta o seu próprio BrowserRouter.
+ */
+function AgencyAdminEntry({ hostname }: { hostname: string }) {
+  const clean = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (clean === AGENCY_ADMIN_LOGIN) {
+    return (
+      <BrowserRouter>
+        <AgencyAdminLogin hostname={hostname} />
+      </BrowserRouter>
+    );
+  }
+  return (
+    <AgencyAdminShell hostname={hostname}>
+      {(info) => <AgencyAdminWorkspace info={info} />}
+    </AgencyAdminShell>
+  );
 }
 
 /**
@@ -182,7 +190,7 @@ export default function AgencyAdminArea({ hostname }: { hostname: string }) {
         <SubscriptionProvider>
           {/* Navegação contextual: páginas reutilizadas geram caminhos /gestao/*. */}
           <AgencyAdminNavProvider>
-            <AgencyAdminRouter hostname={hostname} />
+            <AgencyAdminEntry hostname={hostname} />
           </AgencyAdminNavProvider>
         </SubscriptionProvider>
       </TeamSessionProvider>
