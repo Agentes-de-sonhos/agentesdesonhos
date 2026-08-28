@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useClientAreaDocuments";
 import { agencyWhatsappNumber } from "@/lib/agencyDomains";
 import { groupTrips, highlightTrip, tripIdFromPath, tripPathFor } from "@/lib/clientAreaTrips";
+import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 
 interface SessionClient {
   id: string | null;
@@ -292,7 +293,12 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     changeView("atendimento");
   };
 
-  const brandStyle = getWalletBrandStyle(info.primary_color);
+  const brandStyle = getWalletBrandStyle(info.primary_color, info.secondary_color ?? null);
+  useAgencyBrandTheme({
+    primary: info.primary_color,
+    secondary: info.secondary_color ?? null,
+    secondaryAuto: info.secondary_auto !== false,
+  });
 
   if (checking) {
     return (

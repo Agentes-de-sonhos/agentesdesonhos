@@ -18,6 +18,10 @@ export interface AgencyDomainInfo {
   logo_url: string | null;
   cover_image_url: string | null;
   primary_color: string | null;
+  /** Tom claro da marca (gerado automaticamente quando não informado). */
+  secondary_color?: string | null;
+  /** Quando true, a secundária é derivada da principal. */
+  secondary_auto?: boolean | null;
   phone: string | null;
   city: string | null;
   state: string | null;

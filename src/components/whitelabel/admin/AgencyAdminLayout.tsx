@@ -15,6 +15,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TabBar } from "@/workspace/TabBar";
 import { cn } from "@/lib/utils";
 import { AgencyAdminSidebar, useSidebarCollapsed } from "./AgencyAdminSidebar";
+import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 
 /**
  * Shell administrativo white label. Reutiliza as páginas existentes da
@@ -40,8 +41,16 @@ export function AgencyAdminLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
   const { collapsed, toggle } = useSidebarCollapsed();
   const brand = brandAccent(info.primary_color);
+  const secondary = info.secondary_auto === false ? info.secondary_color ?? null : null;
   const agencyName = agencyDisplayName(info);
   const logoUrl = resolveAgencyLogoUrl(info);
+
+  // Tema global do painel: também cobre dialogs/popovers em Portal.
+  useAgencyBrandTheme({
+    primary: info.primary_color,
+    secondary,
+    secondaryAuto: info.secondary_auto !== false,
+  });
 
   useAgencyAdminHead(`${agencyName} | Gestão`, logoUrl);
 
@@ -49,7 +58,7 @@ export function AgencyAdminLayout({
     <DashboardLayoutContext.Provider value={true}>
       <div
         className="flex min-h-screen w-full max-w-full overflow-x-hidden bg-muted/40"
-        style={brandCssVars(brand) as React.CSSProperties}
+        style={brandCssVars(brand, secondary) as React.CSSProperties}
       >
         {/* Sidebar desktop — largura controlada dentro do shell flex */}
         <aside
@@ -81,7 +90,7 @@ export function AgencyAdminLayout({
             </Link>
           </div>
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetContent side="left" className="w-72 p-0" style={brandCssVars(brand) as React.CSSProperties}>
+            <SheetContent side="left" className="w-72 p-0" style={brandCssVars(brand, secondary) as React.CSSProperties}>
               <AgencyAdminSidebar info={info} onNavigate={() => setMobileOpen(false)} />
             </SheetContent>
           </Sheet>

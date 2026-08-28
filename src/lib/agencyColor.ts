@@ -20,6 +20,8 @@
  * without any component-level changes.
  */
 
+import { brandThemeStyle } from "@/lib/brandTheme";
+
 export function normalizeHex(input: string | null | undefined): string | null {
   if (!input) return null;
   let v = input.trim();
@@ -131,22 +133,16 @@ function readableForegroundHsl(hex: string): string {
  */
 export function getWalletBrandStyle(
   hex: string | null | undefined,
+  secondaryHex?: string | null,
 ): React.CSSProperties {
   const normalized = normalizeHex(hex || undefined);
   if (!normalized) return {};
-  const brand = hexToHslTriplet(normalized);
-  const soft = hexToSoftHslTriplet(normalized);
-  if (!brand || !soft) return {};
-  const fg = readableForegroundHsl(normalized);
-  return {
-    ["--wallet-brand" as any]: brand,
-    ["--wallet-brand-soft" as any]: soft,
-    // Drive shadcn tokens so every Button / Input focus / Calendar / etc.
-    // inside the wallet auto-themes with the agency color.
-    ["--primary" as any]: brand,
-    ["--primary-foreground" as any]: fg,
-    ["--ring" as any]: brand,
-    ["--sidebar-primary" as any]: brand,
-    ["--sidebar-primary-foreground" as any]: fg,
-  } as React.CSSProperties;
+  // Fonte única: o tema global da agência (brandTheme). Assim carteira,
+  // orçamentos, roteiros e área do cliente recebem exatamente o mesmo
+  // conjunto de tokens usados no painel de gestão.
+  return brandThemeStyle({
+    primary: normalized,
+    secondary: secondaryHex ?? null,
+    secondaryAuto: !secondaryHex,
+  });
 }

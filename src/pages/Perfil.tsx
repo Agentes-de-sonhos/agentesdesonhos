@@ -59,6 +59,8 @@ interface ProfileData {
   zip_code: string | null;
   has_password: boolean;
   agency_primary_color: string | null;
+  agency_secondary_color: string | null;
+  agency_secondary_auto: boolean | null;
 }
 
 export default function Perfil() {
@@ -109,6 +111,8 @@ export default function Perfil() {
           zip_code: (data as any).zip_code || null,
           has_password: (data as any).has_password || false,
           agency_primary_color: (data as any).agency_primary_color || null,
+          agency_secondary_color: (data as any).agency_secondary_color || null,
+          agency_secondary_auto: (data as any).agency_secondary_auto ?? true,
         };
         setProfile(profileData);
         setFormData(profileData);
@@ -607,10 +611,17 @@ export default function Perfil() {
 
           <AgencyBrandColorCard
             initialColor={profile?.agency_primary_color ?? null}
+            initialSecondaryColor={profile?.agency_secondary_color ?? null}
+            initialSecondaryAuto={profile?.agency_secondary_auto ?? true}
             agencyLogoUrl={profile?.agency_logo_url ?? null}
-            onSaved={(color) => {
-              setProfile((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
-              setFormData((prev) => (prev ? { ...prev, agency_primary_color: color } : prev));
+            onSaved={(color, secondary, auto) => {
+              const patch = {
+                agency_primary_color: color,
+                agency_secondary_color: secondary ?? null,
+                agency_secondary_auto: auto ?? true,
+              };
+              setProfile((prev) => (prev ? { ...prev, ...patch } : prev));
+              setFormData((prev) => (prev ? { ...prev, ...patch } : prev));
             }}
           />
         </div>
