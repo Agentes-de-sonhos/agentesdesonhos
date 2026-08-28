@@ -467,7 +467,7 @@ export function AgencyAdminSidebar({
                   aria-haspopup="menu"
                   aria-expanded={openMenu === "create"}
                   className={cn(
-                    "mt-0.5 flex w-full items-center justify-center gap-2 rounded-[10px] font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    "mt-0.5 flex w-full items-center gap-2 rounded-[10px] px-3.5 font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]",
                     d.createBtn,
                     d.rowText,
                   )}
@@ -477,11 +477,17 @@ export function AgencyAdminSidebar({
                     color: "var(--agency-primary-foreground)",
                   }}
                 >
-                  <Plus className={d.icon} />
-                  <span>Criar novo</span>
-                  {openMenu === "create" && <ChevronUp className="ml-auto h-4 w-4" />}
+                  <Plus className={cn("shrink-0", d.icon)} />
+                  <span className="min-w-0 flex-1 truncate text-center">Criar novo</span>
+                  <ChevronUp
+                    className={cn(
+                      "h-4 w-4 shrink-0 transition-transform duration-150",
+                      openMenu === "create" ? "rotate-0" : "rotate-180",
+                    )}
+                  />
                 </button>
               )}
+
 
             </PopoverTrigger>
             <PopoverContent
