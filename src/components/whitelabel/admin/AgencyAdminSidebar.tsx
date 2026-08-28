@@ -126,6 +126,19 @@ export function AgencyAdminSidebar({
   const agencyName = agencyDisplayName(info);
   const logoUrl = resolveAgencyLogoUrl(info);
 
+  /**
+   * Densidade responsiva por ALTURA da viewport: as dimensões reais dos
+   * componentes (cabeçalho, botão, linhas, fontes, ícones, rodapé) diminuem
+   * para que todo o menu caiba sem rolagem em telas mais baixas.
+   */
+  const { height } = useViewport();
+  const d = sidebarDensity(densityForHeight(height));
+
+  /** Fallback: fade neutro só quando ainda houver conteúdo fora da área visível. */
+  const navRef = useRef<HTMLElement | null>(null);
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+
   /** Apenas um popover aberto por vez. */
   const [openMenu, setOpenMenu] = useState<null | "create" | "user">(null);
 
