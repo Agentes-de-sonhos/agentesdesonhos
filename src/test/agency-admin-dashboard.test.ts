@@ -34,14 +34,40 @@ describe("dashboard operacional white label", () => {
     expect(hook).toContain("_time_zone");
   });
 
-  it("não exibe valores financeiros na home", () => {
-    expect(home).not.toMatch(/style:\s*"currency"/);
-    expect(home).not.toContain("requested_amount");
-    expect(home).not.toContain("final_sale_amount");
+  it("exibe somente os três indicadores operacionais pedidos", () => {
+    expect(home).toContain("Novas oportunidades");
+    expect(home).toContain("Oportunidades abertas");
+    expect(home).toContain("Operações ativas");
+    expect(home).not.toContain("Viagens em 30 dias");
+    expect(home).not.toContain("Precisa da sua atenção");
+  });
+
+  it("mantém a ordem final das seções", () => {
+    const order = [
+      "Meu dia",
+      "Próximos dias",
+      "Próximas viagens",
+      "Resumo financeiro do mês",
+      "Continue de onde parou",
+    ].map((t) => home.indexOf(t));
+    expect(order.every((i) => i > 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
+
+  it("reutiliza as regras do financeiro para o resumo do mês", () => {
+    expect(home).toContain("computeMonthIncomeSummary");
+    expect(home).toContain("Em atraso");
+    expect(read("src/components/financial/SmartDashboard.tsx")).toContain(
+      "computeMonthIncomeSummary",
+    );
+  });
+
+  it("pagina os blocos internamente em vez de rolar", () => {
+    expect(home).toContain("Pager");
+    expect(home).toContain("tripsPerPage");
   });
 
   it("respeita as permissões devolvidas pelo servidor", () => {
-    expect(home).toContain("can?.reservations");
     expect(home).toContain("can?.agenda");
     expect(home).toContain("can.quotes_create");
     expect(home).toContain("can?.operations_create");
@@ -58,8 +84,6 @@ describe("dashboard operacional white label", () => {
   });
 
   it("mantém Comunidade, Academy, Notícias e gamificação fora do painel", () => {
-    // O comentário do arquivo cita os módulos excluídos; o que não pode
-    // existir é qualquer link/import para eles.
     for (const term of ["/comunidade", "/academy", "/noticias", "gamification"]) {
       expect(home.toLowerCase().includes(term)).toBe(false);
     }
@@ -69,7 +93,12 @@ describe("dashboard operacional white label", () => {
     expect(home).toContain("useAdminNav");
     expect(home).not.toMatch(/to="\/gestao\//);
   });
+
+  it("abre ou ativa abas internas do workspace", () => {
+    expect(home).toContain("openOrActivateTab");
+  });
 });
+
 
 describe("Central de Reservas", () => {
   it("consulta busca, filtros, período, responsável, página e ordenação no servidor", () => {
