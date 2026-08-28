@@ -7,6 +7,7 @@
  */
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { brandThemeVars } from "@/lib/brandTheme";
 import { normalizeHostname, type AgencyDomainInfo } from "@/lib/agencyDomains";
 
 export const AGENCY_ADMIN_HOME = "/gestao";
@@ -204,54 +205,16 @@ function hslTriplet(hex: string): string {
  * Cores semânticas (`--destructive`, `--success`, `--warning`) NÃO são
  * alteradas: continuam comunicando erro, sucesso e pendência.
  */
-export function brandCssVars(brand: BrandAccent): Record<string, string> {
-  const rgb = parseHex(brand.accent) ?? [51, 65, 85];
-  const soft = toHex(mixWithWhite(rgb, 0.9));
-  const softHover = toHex(mixWithWhite(rgb, 0.84));
-  const selection = toHex(mixWithWhite(rgb, 0.78));
-  const borderSolid = toHex(mixWithWhite(rgb, 0.55));
-  const accentHsl = hslTriplet(brand.accent);
-  const onAccentHsl = hslTriplet(brand.onAccent);
-  const softHsl = hslTriplet(soft);
-  const neutralFg = "222 47% 11%";
-
-  return {
-    // Tokens próprios do painel (uso direto em estilos inline existentes).
-    "--wl-accent": brand.accent,
-    "--wl-accent-dark": brand.accentDark,
-    "--wl-on-accent": brand.onAccent,
-    "--wl-tint": brand.tint,
-    "--wl-tint-strong": brand.tintStrong,
-    "--wl-tint-soft": brand.tintSoft,
-    "--wl-border": brand.border,
-
-    // Tokens semânticos da agência (nomeados conforme a especificação).
-    "--agency-primary": brand.accent,
-    "--agency-primary-hover": brand.accentDark,
-    "--agency-primary-active": brand.accentDark,
-    "--agency-primary-soft": soft,
-    "--agency-primary-soft-hover": softHover,
-    "--agency-primary-border": borderSolid,
-    "--agency-primary-foreground": brand.onAccent,
-    "--agency-focus-ring": brand.accent,
-    "--agency-selection": selection,
-
-    // Sobrescrita local do design system → tudo acompanha a cor da agência.
-    "--primary": accentHsl,
-    "--primary-foreground": onAccentHsl,
-    "--ring": accentHsl,
-    "--accent": softHsl,
-    "--accent-foreground": neutralFg,
-    "--sidebar-primary": accentHsl,
-    "--sidebar-primary-foreground": onAccentHsl,
-    "--sidebar-ring": accentHsl,
-    "--sidebar-accent": softHsl,
-    "--sidebar-accent-foreground": neutralFg,
-    "--gradient-primary": `linear-gradient(135deg, ${brand.accent} 0%, ${brand.accentDark} 100%)`,
-  };
+export function brandCssVars(
+  brand: BrandAccent,
+  secondary?: string | null,
+): Record<string, string> {
+  return brandThemeVars({
+    primary: brand.accent,
+    secondary: secondary ?? null,
+    secondaryAuto: !secondary,
+  });
 }
-
-
 
 // ─────────────────────────────────────────────────────────────
 // <head> do painel: título, robots e favicon da agência
