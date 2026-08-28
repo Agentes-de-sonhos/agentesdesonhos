@@ -12,8 +12,10 @@ describe("identidade visual global das agências", () => {
     const vars = brandThemeVars({ primary: "#0284C7" });
     expect(vars["--brand-primary"]).toBeTruthy();
     expect(vars["--brand-secondary"]).toBeTruthy();
-    expect(vars["--primary"]).toBe(vars["--brand-primary"]);
-    expect(vars["--ring"]).toBe(vars["--brand-primary"]);
+    // tokens shadcn são sobrescritos em HSL ("H S% L%")
+    expect(vars["--primary"]).toMatch(/^\d+ \d+% \d+%$/);
+    expect(vars["--ring"]).toBe(vars["--primary"]);
+    expect(vars["--accent"]).toBeTruthy();
   });
 
   it("escolhe texto legível sobre a cor principal", () => {
@@ -22,7 +24,7 @@ describe("identidade visual global das agências", () => {
     expect(dark).not.toBe(light);
   });
 
-  it("sem cor configurada, não injeta variáveis (mantém o padrão da plataforma)", () => {
-    expect(brandThemeVars({ primary: null })).toEqual({});
+  it("sem cor configurada, usa a cor padrão da plataforma", () => {
+    expect(brandThemeVars({ primary: null })["--brand-primary"]).toBe("#0284C7");
   });
 });
