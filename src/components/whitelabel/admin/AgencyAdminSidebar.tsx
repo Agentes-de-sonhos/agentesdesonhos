@@ -10,8 +10,9 @@
  * Toda a identidade visual vem dos tokens `--agency-*` / `--wl-*` definidos
  * pelo shell a partir da cor cadastrada pela agência: nada de cor fixa aqui.
  */
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import { useQuery } from "@tanstack/react-query";
 import {
   CalendarDays,
