@@ -107,25 +107,26 @@ export function CollapsibleDayCard({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between cursor-pointer text-left"
+        className="w-full px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 cursor-pointer text-left"
       >
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 w-full">
           <div className="flex h-11 w-11 flex-col items-center justify-center rounded-xl bg-primary/8 border border-primary/15 shrink-0">
             <Calendar className="h-4 w-4 text-primary" strokeWidth={2.2} />
           </div>
-          <div className="flex flex-col items-start gap-0.5 min-w-0">
+          <div className="flex flex-col items-start gap-0.5 min-w-0 flex-1">
             <span className="text-[13px] font-bold tracking-tight text-primary uppercase">
               Dia {day.dayNumber}
             </span>
-            <span className="text-xs text-muted-foreground font-medium truncate">
+            <span className="text-xs text-muted-foreground font-medium truncate w-full">
               {dateFormatted}
               {!isOpen && totalActivities > 0 && (
                 <span className="text-muted-foreground/60"> · {totalActivities} {totalActivities === 1 ? "atividade" : "atividades"}</span>
               )}
             </span>
           </div>
+          <ChevronDown className={`sm:hidden h-4 w-4 text-muted-foreground/60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
           {/* Previsão do dia — reutiliza os dados do Calendário da Viagem
               (nenhuma consulta extra por card). Fica sempre visível, com o
               card recolhido ou expandido, e usa a cor principal da agência.
@@ -140,7 +141,7 @@ export function CollapsibleDayCard({
               <span>{weather.tmin}° / {weather.tmax}°C</span>
             </div>
           )}
-          <ChevronDown className={`h-4 w-4 text-muted-foreground/60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown className={`hidden sm:block h-4 w-4 text-muted-foreground/60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
         </div>
       </button>
 
