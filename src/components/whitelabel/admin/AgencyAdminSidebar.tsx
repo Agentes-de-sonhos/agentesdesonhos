@@ -334,36 +334,46 @@ export function AgencyAdminSidebar({
 
   return (
     <TooltipProvider>
-      <div className="flex h-full min-h-0 flex-col bg-card">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden bg-card">
         {/* ── Cabeçalho: logotipo + nome da agência + recolher ───────────── */}
         <div
           className={cn(
             "flex shrink-0 items-center border-b border-border/70",
-            collapsed ? "flex-col gap-2 px-2 py-3" : "gap-2 px-3 py-3",
+            d.header,
+            collapsed ? "justify-center px-2" : "gap-2 px-3",
           )}
         >
           <Link
             to={AGENCY_ADMIN_HOME}
             onClick={onNavigate}
             data-workspace-title="Inicial"
-            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[10px] p-1 outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]"
+            title={agencyName}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-[10px] p-1 outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]"
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={agencyName}
-                className={cn("shrink-0 object-contain", collapsed ? "h-8 w-8" : "h-9 max-w-[104px]")}
+                className={cn("shrink-0 object-contain", collapsed ? d.logoCollapsed : d.logo)}
               />
             ) : (
               <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold"
+                className={cn(
+                  "flex shrink-0 items-center justify-center rounded-[10px] text-sm font-bold",
+                  d.logoCollapsed,
+                )}
                 style={{ backgroundColor: "var(--agency-primary)", color: "var(--agency-primary-foreground)" }}
               >
                 {agencyName.charAt(0).toUpperCase()}
               </span>
             )}
             {!collapsed && (
-              <span className="min-w-0 truncate text-[15px] font-medium leading-tight text-slate-900">
+              <span
+                className={cn(
+                  "min-w-0 truncate pr-1 font-medium leading-tight text-slate-900",
+                  d.agencyText,
+                )}
+              >
                 {agencyName}
               </span>
             )}
@@ -380,13 +390,18 @@ export function AgencyAdminSidebar({
           )}
         </div>
 
-        {/* ── Navegação (área rolável) ───────────────────────────────────── */}
+        {/* ── Navegação: densidade primeiro; rolagem invisível só como fallback ── */}
+        <div className="relative min-h-0 flex-1">
         <nav
+          ref={navRef}
           className={cn(
-            "min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden py-3",
+            "no-scrollbar h-full overflow-y-auto overflow-x-hidden",
+            d.gap,
+            d.navPadding,
             collapsed ? "flex flex-col items-center px-2" : "px-4",
           )}
         >
+
           {renderItem({
             label: "Início",
             to: AGENCY_ADMIN_HOME,
