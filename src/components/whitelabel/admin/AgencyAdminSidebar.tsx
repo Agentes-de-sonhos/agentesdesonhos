@@ -698,7 +698,7 @@ export function AgencyAdminSidebar({
                           d.rowText,
                         )}
                       >
-                        {firstName}
+                        {fullName}
                       </span>
                       {d.showRole && (
                         <span className="block truncate text-xs leading-tight text-slate-500">{roleLabel}</span>
