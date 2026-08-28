@@ -356,21 +356,27 @@ export function AgencyAdminSidebar({
           className={cn(
             "flex shrink-0 items-center border-b border-border/70",
             d.header,
-            collapsed ? "justify-center px-2" : "gap-2 px-3",
+            collapsed ? "justify-between px-0.5" : "gap-2 px-3",
           )}
         >
           <Link
             to={AGENCY_ADMIN_HOME}
-            onClick={onNavigate}
+            onClick={() => {
+              setOpenMenu(null);
+              onNavigate?.();
+            }}
             data-workspace-title="Inicial"
             title={agencyName}
-            className="flex min-w-0 flex-1 items-center gap-2 rounded-[10px] p-1 outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]"
+            className={cn(
+              "flex min-w-0 flex-1 items-center rounded-[10px] outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+              collapsed ? "justify-center p-0.5" : "gap-2 p-1",
+            )}
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={agencyName}
-                className={cn("shrink-0 object-contain", collapsed ? d.logoCollapsed : d.logo)}
+                className={cn("shrink-0 object-contain", collapsed ? collapsedLogo : d.logo)}
               />
             ) : (
               <span
@@ -399,7 +405,10 @@ export function AgencyAdminSidebar({
               type="button"
               onClick={onToggle}
               aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-slate-500 outline-none transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)] lg:flex"
+              className={cn(
+                "hidden shrink-0 items-center justify-center rounded-[10px] text-slate-500 outline-none transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)] lg:flex",
+                collapsed ? "mr-0 h-6 w-6" : "h-8 w-8",
+              )}
             >
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
@@ -418,18 +427,12 @@ export function AgencyAdminSidebar({
           )}
         >
 
-          {renderItem({
-            label: "Início",
-            to: AGENCY_ADMIN_HOME,
-            icon: Home,
-            match: (p) => p === AGENCY_ADMIN_HOME || p === "/dashboard",
-          })}
-
           {/* Criar novo */}
           <Popover
             open={openMenu === "create"}
             onOpenChange={(o) => setOpenMenu(o ? "create" : null)}
           >
+
             <PopoverTrigger asChild>
               {collapsed ? (
                 <button
