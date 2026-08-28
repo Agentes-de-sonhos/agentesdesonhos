@@ -1,42 +1,53 @@
 /**
  * Menu lateral do painel administrativo white label.
  *
- * Apenas apresentação: as rotas, permissões e itens exibidos são exatamente
- * os mesmos de antes. O componente suporta os estados expandido e recolhido
- * (com tooltips) e recebe a cor da agência via tokens CSS do shell.
+ * Somente apresentação/navegação: rotas, permissões e handlers são os mesmos
+ * já existentes. Links são âncoras reais dentro de <aside>/<nav> ou de um
+ * container marcado com `data-workspace-menu`, portanto o interceptador do
+ * workspace (WorkspaceShell) os transforma em abas internas — sem duplicar a
+ * lógica de abas e respeitando o limite de 10 páginas.
+ *
+ * Toda a identidade visual vem dos tokens `--agency-*` / `--wl-*` definidos
+ * pelo shell a partir da cor cadastrada pela agência: nada de cor fixa aqui.
  */
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Calendar,
+  CalendarDays,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   FileText,
+  Folder,
   FolderOpen,
+  Headphones,
   Home,
   KanbanSquare,
   Layers,
-  LifeBuoy,
   LogOut,
   Map,
   PanelLeftClose,
-  Settings,
+  Plus,
   Ticket,
-  UserCircle,
-  Users,
+  UserCog,
+  UserRound,
+  UsersRound,
   Wallet,
+  WalletCards,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useTeamSession } from "@/contexts/TeamSessionContext";
 import { agencyDisplayName } from "@/lib/agencyDomains";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import { AGENCY_ADMIN_HOME, AGENCY_ADMIN_LOGIN, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getPersonInitials } from "@/components/shared/ClientAvatar";
 import { cn } from "@/lib/utils";
-import { userInitials } from "./AgencyUserBadge";
 
 const SIDEBAR_PREF_KEY = "wl-admin-sidebar-collapsed";
 
@@ -86,31 +97,10 @@ const PROJECTS_ITEMS: MenuItemDef[] = [
   {
     label: "Carteiras digitais",
     to: "/gestao/meus-projetos?tab=carteiras",
-    icon: Wallet,
+    icon: WalletCards,
     match: tabMatcher("carteiras"),
   },
   { label: "Modelos", to: "/gestao/meus-projetos?tab=modelos", icon: Layers, match: tabMatcher("modelos") },
-];
-
-const CREATE_ITEMS: MenuItemDef[] = [
-  {
-    label: "Novo orçamento",
-    to: "/gestao/criar/orcamento",
-    icon: FileText,
-    match: (p) => p.startsWith("/gestao/criar/orcamento") || p.startsWith("/ferramentas-ia/gerar-orcamento"),
-  },
-  {
-    label: "Novo roteiro",
-    to: "/gestao/criar/roteiro",
-    icon: Map,
-    match: (p) => p.startsWith("/gestao/criar/roteiro") || p.startsWith("/ferramentas-ia/criar-roteiro"),
-  },
-  {
-    label: "Nova carteira digital",
-    to: "/gestao/criar/carteira",
-    icon: Wallet,
-    match: (p) => p.startsWith("/gestao/criar/carteira") || p.startsWith("/ferramentas-ia/trip-wallet"),
-  },
 ];
 
 export function AgencyAdminSidebar({
@@ -126,10 +116,14 @@ export function AgencyAdminSidebar({
 }) {
   const { user, signOut } = useAuth();
   const { can } = usePermissions();
+  const { member, accessProfile } = useTeamSession();
   const navigate = useNavigate();
   const location = useLocation();
   const agencyName = agencyDisplayName(info);
   const logoUrl = resolveAgencyLogoUrl(info);
+
+  /** Apenas um popover aberto por vez. */
+  const [openMenu, setOpenMenu] = useState<null | "create" | "user">(null);
 
   const { data: profile } = useQuery({
     queryKey: ["agency-admin-profile", user?.id],
@@ -144,44 +138,73 @@ export function AgencyAdminSidebar({
       return data as { name: string | null; avatar_url: string | null } | null;
     },
   });
-  const userName = profile?.name?.trim() || user?.email || "Usuário";
-  const initials = userInitials(userName);
+
+  const fullName = member?.full_name?.trim() || profile?.name?.trim() || user?.email || "Usuário";
+  const firstName = fullName.split(/\s+/)[0];
+  const initials = getPersonInitials(fullName);
+  const avatarUrl = member?.avatar_url || profile?.avatar_url || undefined;
+  const roleLabel = member?.role_title?.trim() || accessProfile?.name?.trim() || "Administrador";
 
   const isProjectsArea =
     location.pathname === "/gestao/meus-projetos" || location.pathname === "/meus-projetos";
   const [projectsOpen, setProjectsOpen] = useState(isProjectsArea);
 
   const handleSignOut = async () => {
+    setOpenMenu(null);
     await signOut();
     navigate(AGENCY_ADMIN_LOGIN, { replace: true });
   };
 
+  // ── Itens (mesmas rotas e permissões de antes) ───────────────────────────
+  const createItems: MenuItemDef[] = [
+    { label: "Novo orçamento", to: "/gestao/criar/orcamento", icon: FileText },
+    { label: "Novo roteiro", to: "/gestao/criar/roteiro", icon: Map },
+    { label: "Nova carteira digital", to: "/gestao/criar/carteira", icon: WalletCards },
+    ...(can("opportunities.view")
+      ? [{ label: "Nova oportunidade", to: "/gestao/crm/funil", icon: KanbanSquare } as MenuItemDef]
+      : []),
+    ...(can("operations.view")
+      ? [{ label: "Nova operação", to: "/gestao/crm/operacoes", icon: FolderOpen } as MenuItemDef]
+      : []),
+  ];
+
   const managementItems: MenuItemDef[] = [
-    {
-      label: "Oportunidades",
-      to: "/gestao/crm/funil",
-      icon: KanbanSquare,
-      match: (p) => p.includes("/funil"),
-    },
-    {
-      label: "Operações",
-      to: "/gestao/crm/operacoes",
-      icon: FolderOpen,
-      match: (p) => p.includes("/operacoes"),
-    },
-    {
-      label: "Clientes",
-      to: "/gestao/crm/clientes",
-      icon: Users,
-      match: (p) => p.includes("/clientes"),
-    },
+    ...(can("opportunities.view")
+      ? [
+          {
+            label: "Oportunidades",
+            to: "/gestao/crm/funil",
+            icon: KanbanSquare,
+            match: (p: string) => p.includes("/funil"),
+          } as MenuItemDef,
+        ]
+      : []),
+    ...(can("operations.view")
+      ? [
+          {
+            label: "Operações",
+            to: "/gestao/crm/operacoes",
+            icon: FolderOpen,
+            match: (p: string) => p.includes("/operacoes"),
+          } as MenuItemDef,
+        ]
+      : []),
+    ...(can("clients.view")
+      ? [
+          {
+            label: "Clientes",
+            to: "/gestao/crm/clientes",
+            icon: UsersRound,
+            match: (p: string) => p.includes("/clientes"),
+          } as MenuItemDef,
+        ]
+      : []),
     {
       label: "Reservas",
       to: "/gestao/reservas",
       icon: Ticket,
       match: (p) => p.startsWith("/gestao/reservas"),
     },
-    // Financeiro respeita integralmente a permissão existente.
     ...(can("financial.access")
       ? [
           {
@@ -194,28 +217,16 @@ export function AgencyAdminSidebar({
       : []),
   ];
 
-  const footerItems: MenuItemDef[] = [
-    {
-      label: "Meu perfil",
-      to: "/gestao/perfil",
-      icon: UserCircle,
-      match: (p) => p === "/gestao/perfil" || p === "/perfil",
-    },
-    {
-      label: "Minha conta",
-      to: "/gestao/minha-conta",
-      icon: Settings,
-      match: (p) => p === "/gestao/minha-conta" || p === "/minha-conta",
-    },
-    {
-      label: "Suporte",
-      to: "/gestao/suporte",
-      icon: LifeBuoy,
-      match: (p) => p === "/gestao/suporte" || p === "/suporte",
-    },
+  const userItems: MenuItemDef[] = [
+    { label: "Meu perfil", to: "/gestao/perfil", icon: UserRound },
+    { label: "Minha conta", to: "/gestao/minha-conta", icon: UserCog },
+    { label: "Suporte", to: "/gestao/suporte", icon: Headphones },
   ];
 
-  const withTip = (label: string, node: React.ReactNode) =>
+  const isActive = (item: MenuItemDef) =>
+    item.match ? item.match(location.pathname, location.search) : location.pathname === item.to;
+
+  const withTip = (label: string, node: ReactNode) =>
     collapsed ? (
       <Tooltip key={label} delayDuration={80}>
         <TooltipTrigger asChild>{node}</TooltipTrigger>
@@ -225,53 +236,56 @@ export function AgencyAdminSidebar({
       node
     );
 
-  const renderItem = (item: MenuItemDef, indented = false) => {
+  /** Linha de navegação padrão (40px, cantos 10px, estado ativo suave). */
+  const renderItem = (item: MenuItemDef, opts: { sub?: boolean } = {}) => {
     const Icon = item.icon;
-    const active = item.match
-      ? item.match(location.pathname, location.search)
-      : location.pathname === item.to;
+    const active = isActive(item);
     const node = (
       <Link
         key={item.label}
         to={item.to}
         onClick={onNavigate}
         aria-label={collapsed ? item.label : undefined}
+        aria-current={active ? "page" : undefined}
         data-workspace-title={item.label}
         className={cn(
-          "group relative flex items-center rounded-lg text-sm transition-all duration-150",
-          collapsed ? "h-10 w-10 justify-center" : "gap-2.5 px-2.5 py-2",
-          !collapsed && indented && "ml-3",
+          "group relative flex items-center rounded-[10px] text-sm outline-none transition-colors duration-150",
+          "focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]",
+          collapsed ? "h-10 w-10 justify-center" : "h-10 gap-3 px-3",
           active
             ? "font-medium"
-            : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+            : cn(
+                "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900",
+                opts.sub && "font-normal",
+              ),
         )}
-        style={
-          active
-            ? { backgroundColor: "var(--wl-tint)", color: "var(--wl-accent)" }
-            : undefined
-        }
+        style={active ? { backgroundColor: "var(--agency-primary-soft)", color: "var(--agency-primary)" } : undefined}
       >
         {active && !collapsed && (
           <span
             aria-hidden
-            className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full"
-            style={{ backgroundColor: "var(--wl-accent)" }}
+            className="absolute -left-2 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-full"
+            style={{ backgroundColor: "var(--agency-primary)" }}
           />
         )}
-        <Icon className="h-[18px] w-[18px] shrink-0" />
+        <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
         {!collapsed && <span className="truncate">{item.label}</span>}
       </Link>
     );
     return withTip(item.label, node);
   };
 
-  const groupLabel = (label: string) =>
+  /** Opção dentro dos popovers (hover/focus com a cor da agência). */
+  const popoverItemClass =
+    "flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm text-slate-700 outline-none transition-colors duration-150 hover:bg-[var(--agency-primary-soft)] hover:text-[var(--agency-primary)] focus-visible:bg-[var(--agency-primary-soft)] focus-visible:text-[var(--agency-primary)]";
+
+  const sectionLabel = (label: string) =>
     collapsed ? (
-      <div key={label} className="my-2 mx-auto h-px w-6 bg-border" />
+      <div key={label} className="mx-auto my-2 h-px w-6 bg-border" />
     ) : (
       <p
         key={label}
-        className="px-2.5 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/70"
+        className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-400"
       >
         {label}
       </p>
@@ -279,35 +293,36 @@ export function AgencyAdminSidebar({
 
   return (
     <TooltipProvider>
-      <div className="flex h-full flex-col bg-card">
-        {/* Cabeçalho: marca da agência */}
+      <div className="flex h-full min-h-0 flex-col bg-card">
+        {/* ── Cabeçalho: logotipo + nome da agência + recolher ───────────── */}
         <div
           className={cn(
-            "flex items-center border-b border-border/70",
+            "flex shrink-0 items-center border-b border-border/70",
             collapsed ? "flex-col gap-2 px-2 py-3" : "gap-2 px-3 py-3",
           )}
         >
           <Link
             to={AGENCY_ADMIN_HOME}
             onClick={onNavigate}
-            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg p-1 transition-colors hover:bg-muted/60"
+            data-workspace-title="Inicial"
+            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[10px] p-1 outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]"
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={agencyName}
-                className={cn("object-contain", collapsed ? "h-8 w-8" : "h-9 max-w-[140px]")}
+                className={cn("shrink-0 object-contain", collapsed ? "h-8 w-8" : "h-9 max-w-[104px]")}
               />
             ) : (
               <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold"
-                style={{ backgroundColor: "var(--wl-accent)", color: "var(--wl-on-accent)" }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold"
+                style={{ backgroundColor: "var(--agency-primary)", color: "var(--agency-primary-foreground)" }}
               >
                 {agencyName.charAt(0).toUpperCase()}
               </span>
             )}
             {!collapsed && (
-              <span className="min-w-0 truncate text-sm font-semibold leading-tight text-foreground">
+              <span className="min-w-0 truncate text-[15px] font-medium leading-tight text-slate-900">
                 {agencyName}
               </span>
             )}
@@ -317,22 +332,18 @@ export function AgencyAdminSidebar({
               type="button"
               onClick={onToggle}
               aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:flex"
+              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-slate-500 outline-none transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)] lg:flex"
             >
-              {collapsed ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <PanelLeftClose className="h-4 w-4" />
-              )}
+              {collapsed ? <ChevronRight className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
           )}
         </div>
 
-        {/* Navegação principal */}
+        {/* ── Navegação (área rolável) ───────────────────────────────────── */}
         <nav
           className={cn(
-            "flex-1 space-y-0.5 overflow-y-auto py-3",
-            collapsed ? "px-2 flex flex-col items-center" : "px-3",
+            "min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden py-3",
+            collapsed ? "flex flex-col items-center px-2" : "px-4",
           )}
         >
           {renderItem({
@@ -342,7 +353,78 @@ export function AgencyAdminSidebar({
             match: (p) => p === AGENCY_ADMIN_HOME || p === "/dashboard",
           })}
 
-          {/* Meus projetos (expansível) */}
+          {/* Criar novo */}
+          <Popover
+            open={openMenu === "create"}
+            onOpenChange={(o) => setOpenMenu(o ? "create" : null)}
+          >
+            <PopoverTrigger asChild>
+              {collapsed ? (
+                <button
+                  type="button"
+                  aria-label="Criar novo"
+                  aria-haspopup="menu"
+                  aria-expanded={openMenu === "create"}
+                  className="mt-1 flex h-10 w-10 items-center justify-center rounded-[10px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]"
+                  style={{
+                    backgroundColor: "var(--agency-primary)",
+                    color: "var(--agency-primary-foreground)",
+                  }}
+                >
+                  <Plus className="h-[18px] w-[18px]" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={openMenu === "create"}
+                  className="mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-[10px] text-sm font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]"
+                  style={{
+                    backgroundColor:
+                      openMenu === "create" ? "var(--agency-primary-hover)" : "var(--agency-primary)",
+                    color: "var(--agency-primary-foreground)",
+                  }}
+                >
+                  <Plus className="h-[18px] w-[18px]" />
+                  <span>Criar novo</span>
+                  {openMenu === "create" && <ChevronUp className="ml-auto h-4 w-4" />}
+                </button>
+              )}
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              side={collapsed ? "right" : "bottom"}
+              sideOffset={6}
+              data-workspace-menu
+              className="w-[var(--radix-popover-trigger-width)] min-w-[216px] rounded-xl border-border/70 p-1.5 shadow-md"
+            >
+              <div role="menu" className="space-y-0.5">
+                {createItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.label}
+                      role="menuitem"
+                      to={item.to}
+                      data-workspace-title={item.label}
+                      onClick={() => {
+                        setOpenMenu(null);
+                        onNavigate?.();
+                      }}
+                      className={popoverItemClass}
+                    >
+                      <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {sectionLabel("Meu trabalho")}
+
+          {/* Meus projetos — grupo expansível */}
           {collapsed
             ? withTip(
                 "Meus projetos",
@@ -353,18 +435,16 @@ export function AgencyAdminSidebar({
                   aria-label="Meus projetos"
                   data-workspace-title="Meus Projetos"
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-lg text-sm transition-colors",
-                    isProjectsArea
-                      ? "font-medium"
-                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                    "flex h-10 w-10 items-center justify-center rounded-[10px] text-sm outline-none transition-colors",
+                    isProjectsArea ? "font-medium" : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900",
                   )}
                   style={
                     isProjectsArea
-                      ? { backgroundColor: "var(--wl-tint)", color: "var(--wl-accent)" }
+                      ? { backgroundColor: "var(--agency-primary-soft)", color: "var(--agency-primary)" }
                       : undefined
                   }
                 >
-                  <FolderOpen className="h-[18px] w-[18px]" />
+                  <Folder className="h-[18px] w-[18px]" strokeWidth={1.8} />
                 </Link>,
               )
             : (
@@ -372,23 +452,31 @@ export function AgencyAdminSidebar({
                 <button
                   type="button"
                   onClick={() => setProjectsOpen((v) => !v)}
+                  aria-expanded={projectsOpen}
                   className={cn(
-                    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
-                    isProjectsArea
-                      ? "font-medium"
-                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                    "flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    isProjectsArea ? "" : "text-slate-700 hover:bg-slate-100/80 hover:text-slate-900",
                   )}
-                  style={isProjectsArea ? { color: "var(--wl-accent)" } : undefined}
+                  style={isProjectsArea ? { color: "var(--agency-primary)" } : undefined}
                 >
-                  <FolderOpen className="h-[18px] w-[18px] shrink-0" />
+                  <Folder className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                   <span className="flex-1 truncate text-left">Meus projetos</span>
                   <ChevronDown
-                    className={cn("h-4 w-4 transition-transform", projectsOpen && "rotate-180")}
+                    className={cn("h-4 w-4 shrink-0 transition-transform duration-150", projectsOpen && "rotate-180")}
                   />
                 </button>
                 {projectsOpen && (
-                  <div className="space-y-0.5 border-l border-border/60 pl-1">
-                    {PROJECTS_ITEMS.map((i) => renderItem(i, true))}
+                  <div className="relative ml-4 space-y-0.5 pl-4">
+                    <span aria-hidden className="absolute left-0 top-1 bottom-1 w-px bg-border" />
+                    {PROJECTS_ITEMS.map((item) => (
+                      <div key={item.label} className="relative">
+                        <span
+                          aria-hidden
+                          className="absolute -left-4 top-1/2 h-1.5 w-1.5 -translate-x-[2px] -translate-y-1/2 rounded-full bg-border"
+                        />
+                        {renderItem(item, { sub: true })}
+                      </div>
+                    ))}
                   </div>
                 )}
               </>
@@ -397,54 +485,98 @@ export function AgencyAdminSidebar({
           {renderItem({
             label: "Agenda",
             to: "/gestao/agenda",
-            icon: Calendar,
+            icon: CalendarDays,
             match: (p) => p === "/gestao/agenda" || p === "/agenda",
           })}
 
-          {groupLabel("Criar")}
-          {CREATE_ITEMS.map((i) => renderItem(i))}
-
-          {groupLabel("Gestão")}
-          {managementItems.map((i) => renderItem(i))}
+          {sectionLabel("Gestão")}
+          {managementItems.map((item) => renderItem(item))}
         </nav>
 
-        {/* Rodapé do menu */}
-        <div
-          className={cn(
-            "space-y-0.5 border-t border-border/70 py-3",
-            collapsed ? "px-2 flex flex-col items-center" : "px-3",
-          )}
-        >
-          {!collapsed && (
-            <Link
-              to="/gestao/perfil"
-              onClick={onNavigate}
-              className="mb-1 flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-muted/60"
+        {/* ── Rodapé: bloco compacto do usuário ─────────────────────────── */}
+        <div className={cn("shrink-0 border-t border-border/70", collapsed ? "px-2 py-3" : "px-3 py-3")}>
+          <Popover open={openMenu === "user"} onOpenChange={(o) => setOpenMenu(o ? "user" : null)}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label="Abrir menu do usuário"
+                aria-haspopup="menu"
+                aria-expanded={openMenu === "user"}
+                className={cn(
+                  "flex items-center rounded-[10px] outline-none transition-colors duration-150 hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                  collapsed ? "h-10 w-10 justify-center" : "w-full gap-3 px-2 py-2",
+                )}
+              >
+                <Avatar className="h-9 w-9 shrink-0">
+                  <AvatarImage src={avatarUrl} alt={fullName} className="object-cover" />
+                  <AvatarFallback
+                    className="text-xs font-semibold"
+                    style={{
+                      backgroundColor: "var(--agency-primary)",
+                      color: "var(--agency-primary-foreground)",
+                    }}
+                  >
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                {!collapsed && (
+                  <>
+                    <span className="min-w-0 flex-1 text-left">
+                      <span className="block truncate text-sm font-medium leading-tight text-slate-900">
+                        {firstName}
+                      </span>
+                      <span className="block truncate text-xs leading-tight text-slate-500">{roleLabel}</span>
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-slate-500 transition-transform duration-150",
+                        openMenu === "user" && "rotate-180",
+                      )}
+                    />
+                  </>
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              side="top"
+              sideOffset={8}
+              data-workspace-menu
+              className="w-[var(--radix-popover-trigger-width)] min-w-[216px] rounded-xl border-border/70 p-1.5 shadow-md"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={profile?.avatar_url || undefined} alt={userName} />
-                <AvatarFallback className="text-xs">{initials || "?"}</AvatarFallback>
-              </Avatar>
-              <span className="min-w-0 truncate text-sm text-foreground">{userName}</span>
-            </Link>
-          )}
-          {footerItems.map((i) => renderItem(i))}
-          {withTip(
-            "Sair",
-            <button
-              key="sair"
-              type="button"
-              onClick={handleSignOut}
-              aria-label="Sair"
-              className={cn(
-                "flex items-center rounded-lg text-sm text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground",
-                collapsed ? "h-10 w-10 justify-center" : "w-full gap-2.5 px-2.5 py-2",
-              )}
-            >
-              <LogOut className="h-[18px] w-[18px] shrink-0" />
-              {!collapsed && <span>Sair</span>}
-            </button>,
-          )}
+              <div role="menu" className="space-y-0.5">
+                {userItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.label}
+                      role="menuitem"
+                      to={item.to}
+                      data-workspace-title={item.label}
+                      onClick={() => {
+                        setOpenMenu(null);
+                        onNavigate?.();
+                      }}
+                      className={popoverItemClass}
+                    >
+                      <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
+                <div className="my-1 h-px bg-border/70" />
+                <button
+                  role="menuitem"
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm text-destructive outline-none transition-colors duration-150 hover:bg-destructive/10 focus-visible:bg-destructive/10"
+                >
+                  <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
+                  <span>Sair</span>
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </TooltipProvider>
