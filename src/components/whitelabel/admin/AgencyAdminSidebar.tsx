@@ -205,7 +205,9 @@ export function AgencyAdminSidebar({
   const { data: profile } = useQuery({
     queryKey: ["agency-admin-profile", user?.id],
     enabled: !!user?.id,
-    staleTime: 10 * 60 * 1000,
+    /* Nome/foto do rodapé precisam refletir a edição do perfil imediatamente. */
+    staleTime: 0,
+    refetchOnMount: "always",
     queryFn: async () => {
       const { data } = await supabase
         .from("profiles")
@@ -216,10 +218,13 @@ export function AgencyAdminSidebar({
     },
   });
 
-  const fullName = member?.full_name?.trim() || profile?.name?.trim() || user?.email || "Usuário";
-  const firstName = fullName.split(/\s+/)[0];
+  /** Nome oficial: perfil salvo → sessão de equipe → fallback pelo e-mail. */
+  const emailFallback = (user?.email ?? "").split("@")[0].replace(/[._-]+/g, " ").trim();
+  const fullName =
+    profile?.name?.trim() || member?.full_name?.trim() || emailFallback || "Usuário";
   const initials = getPersonInitials(fullName);
-  const avatarUrl = member?.avatar_url || profile?.avatar_url || undefined;
+  const avatarUrl = profile?.avatar_url || member?.avatar_url || undefined;
+
   const roleLabel = member?.role_title?.trim() || accessProfile?.name?.trim() || "Administrador";
 
   const isProjectsArea =
@@ -327,7 +332,10 @@ export function AgencyAdminSidebar({
     collapsed ? (
       <Tooltip key={label} delayDuration={80}>
         <TooltipTrigger asChild>{node}</TooltipTrigger>
-        <TooltipContent side="right">{label}</TooltipContent>
+        <TooltipContent side="right" align="center" sideOffset={8} className="z-[9999]">
+          {label}
+        </TooltipContent>
+
       </Tooltip>
     ) : (
       node
@@ -693,7 +701,7 @@ export function AgencyAdminSidebar({
                           d.rowText,
                         )}
                       >
-                        {firstName}
+                        {fullName}
                       </span>
                       {d.showRole && (
                         <span className="block truncate text-xs leading-tight text-slate-500">{roleLabel}</span>

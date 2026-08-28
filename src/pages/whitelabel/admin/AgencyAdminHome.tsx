@@ -234,7 +234,7 @@ function IconAction({
           type="button"
           aria-label={label}
           onClick={onClick}
-          className="group relative flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent focus-visible:border-transparent focus-visible:outline-none xl:h-[68px] xl:w-[68px]"
+          className="group relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent focus-visible:border-transparent focus-visible:outline-none xl:h-14 xl:w-14"
           style={{ color: "var(--wl-accent)" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "var(--wl-accent)";
@@ -253,15 +253,15 @@ function IconAction({
             e.currentTarget.style.color = "var(--wl-accent)";
           }}
         >
-          <Icon className="h-[26px] w-[26px] xl:h-[30px] xl:w-[30px]" />
+          <Icon className="h-6 w-6 xl:h-[26px] xl:w-[26px]" />
           {create && (
             <span
               aria-hidden
-              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border/70 xl:h-[22px] xl:w-[22px]"
+              className="absolute -right-1 -top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border/70 xl:h-5 xl:w-5"
               /* O "+" nunca herda o branco do ícone principal. */
               style={{ color: "var(--wl-accent)" }}
             >
-              <Plus className="h-3.5 w-3.5 xl:h-4 xl:w-4" strokeWidth={2.5} />
+              <Plus className="h-3 w-3 xl:h-3.5 xl:w-3.5" strokeWidth={2.5} />
             </span>
           )}
         </button>
@@ -539,7 +539,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                       <button
                         type="button"
                         aria-label="Gestão financeira"
-                        className="flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent focus-visible:outline-none xl:h-[68px] xl:w-[68px]"
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent focus-visible:outline-none xl:h-14 xl:w-14"
                         style={{ color: "var(--wl-accent)" }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = "var(--wl-accent)";
@@ -550,7 +550,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                           e.currentTarget.style.color = "var(--wl-accent)";
                         }}
                       >
-                        <DollarSign className="h-[26px] w-[26px] xl:h-[30px] xl:w-[30px]" />
+                        <DollarSign className="h-6 w-6 xl:h-[26px] xl:w-[26px]" />
                       </button>
                     </DropdownMenuTrigger>
                   </TooltipTrigger>
