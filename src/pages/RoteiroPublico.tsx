@@ -61,10 +61,34 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     try { window.localStorage.setItem("roteiro:fontScale", fontScale); } catch {}
   }, [fontScale]);
 
+  /**
+   * Single, non-competing reposition when a day is expanded.
+   * Runs only after the expand transition settles, so the final height is
+   * already applied and there is no "scroll down then back up" jitter.
+   */
+  const [pendingScrollDay, setPendingScrollDay] = useState<number | null>(null);
+  const scheduleDayScroll = (dayNumber: number) => setPendingScrollDay(dayNumber);
+
+  useEffect(() => {
+    if (pendingScrollDay === null) return;
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById(`day-${pendingScrollDay}`);
+      if (el) {
+        const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        const isMobile = window.matchMedia("(max-width: 639px)").matches;
+        window.scrollTo({ top: Math.max(0, top), behavior: isMobile ? "auto" : "smooth" });
+      }
+      setPendingScrollDay(null);
+    }, 330);
+    return () => window.clearTimeout(timer);
+  }, [pendingScrollDay]);
+
   useEffect(() => {
     setOgMeta(GENERIC_PUBLIC_META.itinerary);
     if (token) loadItinerary(token);
   }, [token]);
+
 
   const { data: agentProfile } = useQuery({
     queryKey: ["agent-profile-itinerary", itinerary?.userId],
@@ -204,6 +228,11 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   }
 
   const sig = resolveSignatureContact((itinerary as any).signature_snapshot, agentProfile as any);
+  /**
+   * Logotipos sempre atuais: a foto do consultor e o logotipo da agência vêm
+   * do cadastro vivo (get_public_profile), nunca da cópia salva no roteiro.
+   */
+  const consultantPhoto = agentProfile?.avatar_url || sig.photo_url || null;
   const whatsappUrl = buildWhatsAppUrl(
     sig.whatsapp || sig.phone,
     `Olá! Vi o roteiro para ${itinerary.destination} e gostaria de mais informações.`,
@@ -219,23 +248,9 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const introText = itinerary.destinationIntroText || null;
   const introImages = itinerary.destinationIntroImages || [];
 
-  const scrollToDayStart = (dayNumber: number) => {
-    const el = document.getElementById(`day-${dayNumber}`);
-    if (!el) return;
-
-    const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
-    const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-
-    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  };
-
-  const scheduleDayScroll = (dayNumber: number) => {
-    requestAnimationFrame(() => scrollToDayStart(dayNumber));
-    window.setTimeout(() => scrollToDayStart(dayNumber), 360);
-  };
 
   return (
-    <div className={`min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0 rt-scale-${fontScale}`}>
+    <div className={`min-h-screen bg-[hsl(var(--background))] pb-12 sm:pb-8 rt-scale-${fontScale}`}>
       {/* ─── Slim Premium Header (mirrors Orçamento) ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
@@ -539,8 +554,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         {(agentProfile || (itinerary as any).signature_snapshot) && (
           <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="flex items-center gap-3 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-4">
-              {sig.photo_url ? (
-                <img src={sig.photo_url} alt={sig.name}
+              {consultantPhoto ? (
+                <img src={consultantPhoto} alt={sig.name}
                   className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover ring-2 ring-primary/10 shrink-0" />
               ) : (
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-base font-bold ring-2 ring-white shrink-0">
@@ -557,11 +572,13 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               </div>
               {whatsappUrl && (
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                  className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-4 py-2.5 font-bold text-[13px] shadow-md hover:shadow-lg transition-all duration-200 shrink-0">
-                  <WhatsAppIcon className="h-4 w-4" />
-                  Falar no WhatsApp
+                  aria-label="Falar no WhatsApp"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white h-11 w-11 sm:h-auto sm:w-auto sm:px-4 sm:py-2.5 font-bold text-[13px] shadow-md hover:shadow-lg transition-all duration-200 shrink-0">
+                  <WhatsAppIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Falar no WhatsApp</span>
                 </a>
               )}
+
               <button
                 type="button"
                 onClick={() => setAgentOpen((v) => !v)}
@@ -599,15 +616,9 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
       </main>
 
-      {/* ─── Mobile floating WhatsApp ─── */}
-      {whatsappUrl && (
-        <div className="fixed bottom-6 right-6 sm:hidden z-20">
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 transition-transform">
-            <WhatsAppIcon className="h-7 w-7" />
-          </a>
-        </div>
-      )}
+      {/* WhatsApp flutuante removido do roteiro público: o contato fica apenas
+          no card "Precisa de ajuda?". */}
     </div>
+
   );
 }
