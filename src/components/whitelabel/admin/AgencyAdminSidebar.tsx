@@ -164,7 +164,24 @@ export function AgencyAdminSidebar({
 
   const isProjectsArea =
     location.pathname === "/gestao/meus-projetos" || location.pathname === "/meus-projetos";
+  // Grupos recolhíveis permanecem fechados quando não contêm a página ativa.
   const [projectsOpen, setProjectsOpen] = useState(isProjectsArea);
+
+  // Detecta se a navegação ainda transborda (mesmo no modo mais compacto).
+  useLayoutEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    const check = () => setHasMoreBelow(el.scrollHeight - el.clientHeight - el.scrollTop > 4);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    el.addEventListener("scroll", check, { passive: true });
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("scroll", check);
+    };
+  }, [collapsed, d.mode, projectsOpen]);
+
 
   const handleSignOut = async () => {
     setOpenMenu(null);
