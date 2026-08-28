@@ -61,10 +61,34 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     try { window.localStorage.setItem("roteiro:fontScale", fontScale); } catch {}
   }, [fontScale]);
 
+  /**
+   * Single, non-competing reposition when a day is expanded.
+   * Runs only after the expand transition settles, so the final height is
+   * already applied and there is no "scroll down then back up" jitter.
+   */
+  const [pendingScrollDay, setPendingScrollDay] = useState<number | null>(null);
+  const scheduleDayScroll = (dayNumber: number) => setPendingScrollDay(dayNumber);
+
+  useEffect(() => {
+    if (pendingScrollDay === null) return;
+    const timer = window.setTimeout(() => {
+      const el = document.getElementById(`day-${pendingScrollDay}`);
+      if (el) {
+        const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        const isMobile = window.matchMedia("(max-width: 639px)").matches;
+        window.scrollTo({ top: Math.max(0, top), behavior: isMobile ? "auto" : "smooth" });
+      }
+      setPendingScrollDay(null);
+    }, 330);
+    return () => window.clearTimeout(timer);
+  }, [pendingScrollDay]);
+
   useEffect(() => {
     setOgMeta(GENERIC_PUBLIC_META.itinerary);
     if (token) loadItinerary(token);
   }, [token]);
+
 
   const { data: agentProfile } = useQuery({
     queryKey: ["agent-profile-itinerary", itinerary?.userId],
