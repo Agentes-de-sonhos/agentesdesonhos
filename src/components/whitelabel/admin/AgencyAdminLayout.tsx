@@ -55,7 +55,7 @@ export function AgencyAdminLayout({
         <aside
           className={cn(
             "fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-border/70 bg-card transition-[width] duration-200 lg:flex",
-            collapsed ? "w-[68px]" : "w-64",
+            collapsed ? "w-16" : "w-[250px]",
           )}
         >
           <AgencyAdminSidebar info={info} collapsed={collapsed} onToggle={toggle} />
@@ -88,7 +88,7 @@ export function AgencyAdminLayout({
         <main
           className={cn(
             "min-w-0 transition-[padding] duration-200",
-            collapsed ? "lg:pl-[68px]" : "lg:pl-64",
+            collapsed ? "lg:pl-16" : "lg:pl-[250px]",
           )}
         >
           {/* Barra de abas internas (mesmo componente da plataforma principal),
