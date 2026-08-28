@@ -36,6 +36,7 @@ import { AGENCY_ADMIN_HOME, AGENCY_ADMIN_LOGIN, type AgencyAdminPortalInfo } fro
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { userInitials } from "./AgencyUserBadge";
 
 const SIDEBAR_PREF_KEY = "wl-admin-sidebar-collapsed";
 
@@ -144,13 +145,7 @@ export function AgencyAdminSidebar({
     },
   });
   const userName = profile?.name?.trim() || user?.email || "Usuário";
-  const initials = userName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase();
+  const initials = userInitials(userName);
 
   const isProjectsArea =
     location.pathname === "/gestao/meus-projetos" || location.pathname === "/meus-projetos";
@@ -241,6 +236,7 @@ export function AgencyAdminSidebar({
         to={item.to}
         onClick={onNavigate}
         aria-label={collapsed ? item.label : undefined}
+        data-workspace-title={item.label}
         className={cn(
           "group relative flex items-center rounded-lg text-sm transition-all duration-150",
           collapsed ? "h-10 w-10 justify-center" : "gap-2.5 px-2.5 py-2",
@@ -355,6 +351,7 @@ export function AgencyAdminSidebar({
                   to="/gestao/meus-projetos"
                   onClick={onNavigate}
                   aria-label="Meus projetos"
+                  data-workspace-title="Meus Projetos"
                   className={cn(
                     "flex h-10 w-10 items-center justify-center rounded-lg text-sm transition-colors",
                     isProjectsArea
