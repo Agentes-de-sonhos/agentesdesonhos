@@ -138,9 +138,12 @@ export function resolveBrandPalette(input: AgencyBrandInput): BrandPalette {
   }
   if (luminance(readable) < 0.02) readable = [readable[0] + 28, readable[1] + 28, readable[2] + 28];
 
+  // Automático (padrão) → tom claro derivado. Manual → cor informada, com
+  // fallback seguro para o tom derivado quando o HEX for inválido/ausente.
   const auto = input.secondaryAuto !== false;
-  const manualSecondary = auto ? null : normalizeBrandHex(input.secondary);
-  const secondary = manualSecondary ?? normalizeBrandHex(auto ? null : input.secondary) ?? deriveSecondaryColor(primaryHex);
+  const secondary = auto
+    ? deriveSecondaryColor(primaryHex)
+    : normalizeBrandHex(input.secondary) ?? deriveSecondaryColor(primaryHex);
 
   const secondaryRgb = parseHex(secondary)!;
   rgb = readable;
