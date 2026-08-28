@@ -23,7 +23,7 @@ import {
   Folder,
   FolderOpen,
   Headphones,
-  Home,
+  
   KanbanSquare,
   Layers,
   LogOut,
@@ -157,6 +157,16 @@ export function AgencyAdminSidebar({
 
   /** Apenas um popover aberto por vez. */
   const [openMenu, setOpenMenu] = useState<null | "create" | "user">(null);
+
+  /** Logotipo do menu recolhido: maior, proporcional e sem overflow (aside = 64px). */
+  const collapsedLogo =
+    d.mode === "dense" ? "h-7 w-auto max-w-[32px]" : d.mode === "medium" ? "h-8 w-auto max-w-[34px]" : "h-9 w-auto max-w-[34px]";
+
+  /** Fecha os popovers em qualquer mudança de contexto (rota/aba, colapso, etc.). */
+  useEffect(() => {
+    setOpenMenu(null);
+  }, [location.pathname, location.search, collapsed]);
+
 
   const { data: profile } = useQuery({
     queryKey: ["agency-admin-profile", user?.id],
@@ -356,21 +366,27 @@ export function AgencyAdminSidebar({
           className={cn(
             "flex shrink-0 items-center border-b border-border/70",
             d.header,
-            collapsed ? "justify-center px-2" : "gap-2 px-3",
+            collapsed ? "justify-between px-0.5" : "gap-2 px-3",
           )}
         >
           <Link
             to={AGENCY_ADMIN_HOME}
-            onClick={onNavigate}
+            onClick={() => {
+              setOpenMenu(null);
+              onNavigate?.();
+            }}
             data-workspace-title="Inicial"
             title={agencyName}
-            className="flex min-w-0 flex-1 items-center gap-2 rounded-[10px] p-1 outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]"
+            className={cn(
+              "flex min-w-0 flex-1 items-center rounded-[10px] outline-none transition-colors hover:bg-slate-100/70 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+              collapsed ? "justify-center p-0.5" : "gap-2 p-1",
+            )}
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={agencyName}
-                className={cn("shrink-0 object-contain", collapsed ? d.logoCollapsed : d.logo)}
+                className={cn("shrink-0 object-contain", collapsed ? collapsedLogo : d.logo)}
               />
             ) : (
               <span
@@ -399,7 +415,10 @@ export function AgencyAdminSidebar({
               type="button"
               onClick={onToggle}
               aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-              className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-slate-500 outline-none transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)] lg:flex"
+              className={cn(
+                "hidden shrink-0 items-center justify-center rounded-[10px] text-slate-500 outline-none transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)] lg:flex",
+                collapsed ? "mr-0 h-6 w-6" : "h-8 w-8",
+              )}
             >
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
@@ -418,18 +437,12 @@ export function AgencyAdminSidebar({
           )}
         >
 
-          {renderItem({
-            label: "Início",
-            to: AGENCY_ADMIN_HOME,
-            icon: Home,
-            match: (p) => p === AGENCY_ADMIN_HOME || p === "/dashboard",
-          })}
-
           {/* Criar novo */}
           <Popover
             open={openMenu === "create"}
             onOpenChange={(o) => setOpenMenu(o ? "create" : null)}
           >
+
             <PopoverTrigger asChild>
               {collapsed ? (
                 <button
@@ -454,7 +467,7 @@ export function AgencyAdminSidebar({
                   aria-haspopup="menu"
                   aria-expanded={openMenu === "create"}
                   className={cn(
-                    "mt-0.5 flex w-full items-center justify-center gap-2 rounded-[10px] font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    "mt-0.5 flex w-full items-center gap-2 rounded-[10px] px-3.5 font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]",
                     d.createBtn,
                     d.rowText,
                   )}
@@ -464,11 +477,17 @@ export function AgencyAdminSidebar({
                     color: "var(--agency-primary-foreground)",
                   }}
                 >
-                  <Plus className={d.icon} />
-                  <span>Criar novo</span>
-                  {openMenu === "create" && <ChevronUp className="ml-auto h-4 w-4" />}
+                  <Plus className={cn("shrink-0", d.icon)} />
+                  <span className="min-w-0 flex-1 truncate text-center">Criar novo</span>
+                  <ChevronUp
+                    className={cn(
+                      "h-4 w-4 shrink-0 transition-transform duration-150",
+                      openMenu === "create" ? "rotate-0" : "rotate-180",
+                    )}
+                  />
                 </button>
               )}
+
 
             </PopoverTrigger>
             <PopoverContent
