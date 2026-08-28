@@ -332,7 +332,10 @@ export function AgencyAdminSidebar({
     collapsed ? (
       <Tooltip key={label} delayDuration={80}>
         <TooltipTrigger asChild>{node}</TooltipTrigger>
-        <TooltipContent side="right">{label}</TooltipContent>
+        <TooltipContent side="right" align="center" sideOffset={8} className="z-[9999]">
+          {label}
+        </TooltipContent>
+
       </Tooltip>
     ) : (
       node
