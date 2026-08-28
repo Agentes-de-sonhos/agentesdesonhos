@@ -234,13 +234,8 @@ function IconAction({
           type="button"
           aria-label={label}
           onClick={onClick}
-          className="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent"
-          style={
-            {
-              color: "var(--wl-accent)",
-              ["--hover-bg" as string]: "var(--wl-accent)",
-            } as React.CSSProperties
-          }
+          className="group relative flex h-[58px] w-[58px] shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent focus-visible:border-transparent focus-visible:outline-none xl:h-[68px] xl:w-[68px]"
+          style={{ color: "var(--wl-accent)" }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "var(--wl-accent)";
             e.currentTarget.style.color = "#fff";
@@ -249,14 +244,24 @@ function IconAction({
             e.currentTarget.style.backgroundColor = "";
             e.currentTarget.style.color = "var(--wl-accent)";
           }}
+          onFocus={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--wl-accent)";
+            e.currentTarget.style.color = "#fff";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.backgroundColor = "";
+            e.currentTarget.style.color = "var(--wl-accent)";
+          }}
         >
-          <Icon className="h-[18px] w-[18px]" />
+          <Icon className="h-[26px] w-[26px] xl:h-[30px] xl:w-[30px]" />
           {create && (
             <span
               aria-hidden
-              className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-card text-current shadow-sm ring-1 ring-border/70"
+              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border/70 xl:h-[22px] xl:w-[22px]"
+              /* O "+" nunca herda o branco do ícone principal. */
+              style={{ color: "var(--wl-accent)" }}
             >
-              <Plus className="h-3 w-3" />
+              <Plus className="h-3.5 w-3.5 xl:h-4 xl:w-4" strokeWidth={2.5} />
             </span>
           )}
         </button>
@@ -265,6 +270,7 @@ function IconAction({
     </Tooltip>
   );
 }
+
 
 const RECENT_LABELS: Record<string, string> = {
   quote: "Orçamento",
