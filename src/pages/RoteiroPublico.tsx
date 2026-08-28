@@ -554,8 +554,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         {(agentProfile || (itinerary as any).signature_snapshot) && (
           <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
             <div className="flex items-center gap-3 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-4">
-              {sig.photo_url ? (
-                <img src={sig.photo_url} alt={sig.name}
+              {consultantPhoto ? (
+                <img src={consultantPhoto} alt={sig.name}
                   className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover ring-2 ring-primary/10 shrink-0" />
               ) : (
                 <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-base font-bold ring-2 ring-white shrink-0">
@@ -572,11 +572,13 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               </div>
               {whatsappUrl && (
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                  className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-4 py-2.5 font-bold text-[13px] shadow-md hover:shadow-lg transition-all duration-200 shrink-0">
-                  <WhatsAppIcon className="h-4 w-4" />
-                  Falar no WhatsApp
+                  aria-label="Falar no WhatsApp"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white h-11 w-11 sm:h-auto sm:w-auto sm:px-4 sm:py-2.5 font-bold text-[13px] shadow-md hover:shadow-lg transition-all duration-200 shrink-0">
+                  <WhatsAppIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Falar no WhatsApp</span>
                 </a>
               )}
+
               <button
                 type="button"
                 onClick={() => setAgentOpen((v) => !v)}
