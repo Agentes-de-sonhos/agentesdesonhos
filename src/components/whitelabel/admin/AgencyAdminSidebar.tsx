@@ -499,7 +499,9 @@ export function AgencyAdminSidebar({
                   aria-label="Meus projetos"
                   data-workspace-title="Meus Projetos"
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-[10px] text-sm outline-none transition-colors",
+                    "flex w-10 items-center justify-center rounded-[10px] outline-none transition-colors",
+                    d.row,
+                    d.rowText,
                     isProjectsArea ? "font-medium" : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900",
                   )}
                   style={
@@ -508,7 +510,7 @@ export function AgencyAdminSidebar({
                       : undefined
                   }
                 >
-                  <Folder className="h-[18px] w-[18px]" strokeWidth={1.8} />
+                  <Folder className={d.icon} strokeWidth={1.8} />
                 </Link>,
               )
             : (
@@ -518,17 +520,20 @@ export function AgencyAdminSidebar({
                   onClick={() => setProjectsOpen((v) => !v)}
                   aria-expanded={projectsOpen}
                   className={cn(
-                    "flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    "flex w-full items-center gap-2.5 rounded-[10px] px-3 font-medium outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
+                    d.row,
+                    d.rowText,
                     isProjectsArea ? "" : "text-slate-700 hover:bg-slate-100/80 hover:text-slate-900",
                   )}
                   style={isProjectsArea ? { color: "var(--agency-primary)" } : undefined}
                 >
-                  <Folder className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-                  <span className="flex-1 truncate text-left">Meus projetos</span>
+                  <Folder className={cn("shrink-0", d.icon)} strokeWidth={1.8} />
+                  <span className="min-w-0 flex-1 truncate text-left">Meus projetos</span>
                   <ChevronDown
                     className={cn("h-4 w-4 shrink-0 transition-transform duration-150", projectsOpen && "rotate-180")}
                   />
                 </button>
+
                 {projectsOpen && (
                   <div className="relative ml-4 space-y-0.5 pl-4">
                     <span aria-hidden className="absolute left-0 top-1 bottom-1 w-px bg-border" />
