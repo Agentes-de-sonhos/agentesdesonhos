@@ -73,7 +73,7 @@ export function useSidebarCollapsed() {
 interface MenuItemDef {
   label: string;
   to: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   /** Caminhos (além de `to`) que marcam o item como ativo. */
   match?: (pathname: string, search: string) => boolean;
 }
