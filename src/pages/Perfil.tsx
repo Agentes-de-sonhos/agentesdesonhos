@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -73,6 +74,7 @@ export default function Perfil() {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -173,6 +175,7 @@ export default function Perfil() {
 
       setProfile((prev) => prev ? { ...prev, [updateField]: newUrl } : null);
       setFormData((prev) => prev ? { ...prev, [updateField]: newUrl } : null);
+      void queryClient.invalidateQueries({ queryKey: ["agency-admin-profile"] });
 
       toast({
         title: type === "avatar" ? "Foto atualizada!" : "Logo atualizada!",
@@ -226,6 +229,8 @@ export default function Perfil() {
 
       setProfile(formData);
       setEditing(false);
+      /* Rodapé do menu lateral e cabeçalhos leem esta consulta. */
+      void queryClient.invalidateQueries({ queryKey: ["agency-admin-profile"] });
 
       toast({
         title: "Perfil atualizado!",
