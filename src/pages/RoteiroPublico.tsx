@@ -570,14 +570,6 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                   Fale com seu consultor de viagens.
                 </p>
               </div>
-              {whatsappUrl && (
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                  aria-label="Falar no WhatsApp"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white h-11 w-11 sm:h-auto sm:w-auto sm:px-4 sm:py-2.5 font-bold text-[13px] shadow-md hover:shadow-lg transition-all duration-200 shrink-0">
-                  <WhatsAppIcon className="h-5 w-5 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Falar no WhatsApp</span>
-                </a>
-              )}
 
               <button
                 type="button"
@@ -602,7 +594,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 </div>
                 {whatsappUrl && (
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    className="sm:hidden inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
+                    aria-label="Falar no WhatsApp"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
                     <WhatsAppIcon className="h-4 w-4" />
                     Falar no WhatsApp
                   </a>
