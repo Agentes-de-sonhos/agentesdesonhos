@@ -87,10 +87,11 @@ export function AgencyAdminLayout({
           </Sheet>
 
           {/* Barra de abas internas: linha única, sem rolagem horizontal. */}
-          <div className="sticky top-0 z-30 min-w-0 max-w-full shrink-0 overflow-hidden bg-card/95 backdrop-blur">
+          <div className="sticky top-14 z-30 min-w-0 max-w-full shrink-0 overflow-hidden bg-card/95 backdrop-blur lg:top-0">
             <TabBar embedded />
           </div>
-          <div className="min-w-0 max-w-full px-4 py-4 sm:px-6 sm:py-6 xl:px-8">{children}</div>
+          <main className="min-w-0 max-w-full px-4 py-4 sm:px-6 sm:py-6 xl:px-8">{children}</main>
+
         </div>
       </div>
     </DashboardLayoutContext.Provider>
