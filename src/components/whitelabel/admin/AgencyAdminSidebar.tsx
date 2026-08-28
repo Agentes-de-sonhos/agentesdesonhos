@@ -270,7 +270,7 @@ export function AgencyAdminSidebar({
       node
     );
 
-  /** Linha de navegação padrão (40px, cantos 10px, estado ativo suave). */
+  /** Linha de navegação (altura/fonte/ícone vêm da densidade atual). */
   const renderItem = (item: MenuItemDef, opts: { sub?: boolean } = {}) => {
     const Icon = item.icon;
     const active = isActive(item);
@@ -282,10 +282,13 @@ export function AgencyAdminSidebar({
         aria-label={collapsed ? item.label : undefined}
         aria-current={active ? "page" : undefined}
         data-workspace-title={item.label}
+        title={collapsed ? undefined : item.label}
         className={cn(
-          "group relative flex items-center rounded-[10px] text-sm outline-none transition-colors duration-150",
+          "group relative flex items-center rounded-[10px] outline-none transition-colors duration-150",
           "focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]",
-          collapsed ? "h-10 w-10 justify-center" : "h-10 gap-3 px-3",
+          d.row,
+          d.rowText,
+          collapsed ? "w-10 justify-center" : "gap-2.5 px-3",
           active
             ? "font-medium"
             : cn(
@@ -298,12 +301,12 @@ export function AgencyAdminSidebar({
         {active && !collapsed && (
           <span
             aria-hidden
-            className="absolute -left-2 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-full"
+            className="absolute -left-2 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full"
             style={{ backgroundColor: "var(--agency-primary)" }}
           />
         )}
-        <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
-        {!collapsed && <span className="truncate">{item.label}</span>}
+        <Icon className={cn("shrink-0", d.icon)} strokeWidth={1.8} />
+        {!collapsed && <span className="min-w-0 truncate">{item.label}</span>}
       </Link>
     );
     return withTip(item.label, node);
@@ -315,15 +318,19 @@ export function AgencyAdminSidebar({
 
   const sectionLabel = (label: string) =>
     collapsed ? (
-      <div key={label} className="mx-auto my-2 h-px w-6 bg-border" />
+      <div key={label} className="mx-auto my-1.5 h-px w-6 bg-border" />
     ) : (
       <p
         key={label}
-        className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-[0.09em] text-slate-400"
+        className={cn(
+          "font-semibold uppercase tracking-[0.09em] text-slate-400",
+          d.sectionLabel,
+        )}
       >
         {label}
       </p>
     );
+
 
   return (
     <TooltipProvider>
