@@ -228,6 +228,11 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   }
 
   const sig = resolveSignatureContact((itinerary as any).signature_snapshot, agentProfile as any);
+  /**
+   * Logotipos sempre atuais: a foto do consultor e o logotipo da agência vêm
+   * do cadastro vivo (get_public_profile), nunca da cópia salva no roteiro.
+   */
+  const consultantPhoto = agentProfile?.avatar_url || sig.photo_url || null;
   const whatsappUrl = buildWhatsAppUrl(
     sig.whatsapp || sig.phone,
     `Olá! Vi o roteiro para ${itinerary.destination} e gostaria de mais informações.`,
@@ -243,20 +248,6 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const introText = itinerary.destinationIntroText || null;
   const introImages = itinerary.destinationIntroImages || [];
 
-  const scrollToDayStart = (dayNumber: number) => {
-    const el = document.getElementById(`day-${dayNumber}`);
-    if (!el) return;
-
-    const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 0;
-    const top = el.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-
-    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  };
-
-  const scheduleDayScroll = (dayNumber: number) => {
-    requestAnimationFrame(() => scrollToDayStart(dayNumber));
-    window.setTimeout(() => scrollToDayStart(dayNumber), 360);
-  };
 
   return (
     <div className={`min-h-screen bg-[hsl(var(--background))] pb-28 sm:pb-0 rt-scale-${fontScale}`}>
