@@ -594,7 +594,8 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 </div>
                 {whatsappUrl && (
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    className="sm:hidden inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
+                    aria-label="Falar no WhatsApp"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
                     <WhatsAppIcon className="h-4 w-4" />
                     Falar no WhatsApp
                   </a>
