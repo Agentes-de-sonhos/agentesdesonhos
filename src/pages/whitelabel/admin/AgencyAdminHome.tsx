@@ -38,7 +38,6 @@ import {
 } from "@/hooks/useAgencyAdminDashboard";
 import { brandAccent, brandCssVars, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 import { agencyDisplayName } from "@/lib/agencyDomains";
-import { AgencyUserBadge } from "@/components/whitelabel/admin/AgencyUserBadge";
 
 /**
  * Home operacional do painel administrativo white label.
