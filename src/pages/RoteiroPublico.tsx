@@ -616,15 +616,9 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
 
       </main>
 
-      {/* ─── Mobile floating WhatsApp ─── */}
-      {whatsappUrl && (
-        <div className="fixed bottom-6 right-6 sm:hidden z-20">
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl hover:scale-110 transition-transform">
-            <WhatsAppIcon className="h-7 w-7" />
-          </a>
-        </div>
-      )}
+      {/* WhatsApp flutuante removido do roteiro público: o contato fica apenas
+          no card "Precisa de ajuda?". */}
     </div>
+
   );
 }
