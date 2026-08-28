@@ -126,9 +126,17 @@ export function CollapsibleDayCard({
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {/* Previsão do dia — reutiliza os dados do Calendário da Viagem
+              (nenhuma consulta extra por card). Fica sempre visível, com o
+              card recolhido ou expandido, e usa a cor principal da agência.
+              Quando não há previsão para a data, o bloco simplesmente não é
+              renderizado. */}
           {weather && WxIcon && (
-            <div className="hidden xs:flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-foreground/80">
-              <WxIcon className="h-3.5 w-3.5 text-primary/70" strokeWidth={2.4} />
+            <div
+              className="flex items-center gap-1 whitespace-nowrap rounded-full border border-primary/15 bg-primary/5 px-2 py-1 text-[10.5px] font-semibold leading-none tabular-nums text-foreground/80 sm:gap-1.5 sm:px-2.5 sm:text-[11px]"
+              title={`Mínima ${weather.tmin}°C · Máxima ${weather.tmax}°C`}
+            >
+              <WxIcon className="h-3.5 w-3.5 shrink-0 text-primary" strokeWidth={2.4} />
               <span>{weather.tmin}° / {weather.tmax}°C</span>
             </div>
           )}
