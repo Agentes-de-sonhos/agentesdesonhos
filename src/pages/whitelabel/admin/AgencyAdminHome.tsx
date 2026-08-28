@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
@@ -488,6 +488,11 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   };
 
   /* ----------------------- Frase de resumo do dia -------------------------- */
+  /** Diagnóstico: a mensagem técnica do banco fica só no console. */
+  useEffect(() => {
+    if (isError && error) console.error("[agency-admin-dashboard]", error);
+  }, [isError, error]);
+
   const summarySentence = useMemo(() => {
     const acts = todayItems.length;
     const news = data?.counters?.opportunities_new ?? 0;
