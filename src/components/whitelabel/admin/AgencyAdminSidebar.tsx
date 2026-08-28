@@ -10,7 +10,8 @@
  * Toda a identidade visual vem dos tokens `--agency-*` / `--wl-*` definidos
  * pelo shell a partir da cor cadastrada pela agência: nada de cor fixa aqui.
  */
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
@@ -46,11 +47,17 @@ import { agencyDisplayName } from "@/lib/agencyDomains";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import { AGENCY_ADMIN_HOME, AGENCY_ADMIN_LOGIN, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getPersonInitials } from "@/components/shared/ClientAvatar";
 import { densityForHeight, sidebarDensity, useViewport } from "@/lib/agencyAdminDensity";
 import { cn } from "@/lib/utils";
+import { useWorkspace } from "@/workspace/WorkspaceProvider";
 
 
 const SIDEBAR_PREF_KEY = "wl-admin-sidebar-collapsed";
@@ -137,6 +144,7 @@ export function AgencyAdminSidebar({
   const { user, signOut } = useAuth();
   const { can } = usePermissions();
   const { member, accessProfile } = useTeamSession();
+  const workspace = useWorkspace();
   const navigate = useNavigate();
   const location = useLocation();
   const agencyName = agencyDisplayName(info);
@@ -155,8 +163,34 @@ export function AgencyAdminSidebar({
   const [hasMoreBelow, setHasMoreBelow] = useState(false);
 
 
-  /** Apenas um popover aberto por vez. */
-  const [openMenu, setOpenMenu] = useState<null | "create" | "user">(null);
+  /** Estados únicos dos menus, compartilhados pelas variantes expandida/recolhida. */
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const closeSidebarMenus = useCallback(() => {
+    setCreateMenuOpen(false);
+    setUserMenuOpen(false);
+  }, []);
+
+  /** Garante o commit do fechamento antes de abrir/ativar outra aba. */
+  const closeThenNavigate = useCallback(
+    (action: () => void) => {
+      flushSync(closeSidebarMenus);
+      requestAnimationFrame(action);
+    },
+    [closeSidebarMenus],
+  );
+
+  const openOrActivate = useCallback(
+    (item: MenuItemDef) => {
+      closeThenNavigate(() => {
+        if (workspace) workspace.openOrActivateTab(item.to, item.label);
+        else navigate(item.to);
+        onNavigate?.();
+      });
+    },
+    [closeThenNavigate, navigate, onNavigate, workspace],
+  );
 
   /** Logotipo do menu recolhido: maior, proporcional e sem overflow (aside = 64px). */
   const collapsedLogo =
@@ -164,8 +198,8 @@ export function AgencyAdminSidebar({
 
   /** Fecha os popovers em qualquer mudança de contexto (rota/aba, colapso, etc.). */
   useEffect(() => {
-    setOpenMenu(null);
-  }, [location.pathname, location.search, collapsed]);
+    closeSidebarMenus();
+  }, [location.pathname, location.search, collapsed, workspace?.activeId, closeSidebarMenus]);
 
 
   const { data: profile } = useQuery({
@@ -209,10 +243,13 @@ export function AgencyAdminSidebar({
   }, [collapsed, d.mode, projectsOpen]);
 
 
-  const handleSignOut = async () => {
-    setOpenMenu(null);
-    await signOut();
-    navigate(AGENCY_ADMIN_LOGIN, { replace: true });
+  const handleSignOut = () => {
+    closeThenNavigate(() => {
+      void (async () => {
+        await signOut();
+        navigate(AGENCY_ADMIN_LOGIN, { replace: true });
+      })();
+    });
   };
 
   // ── Itens (mesmas rotas e permissões de antes) ───────────────────────────
@@ -372,7 +409,7 @@ export function AgencyAdminSidebar({
           <Link
             to={AGENCY_ADMIN_HOME}
             onClick={() => {
-              setOpenMenu(null);
+              closeSidebarMenus();
               onNavigate?.();
             }}
             data-workspace-title="Inicial"
@@ -413,7 +450,10 @@ export function AgencyAdminSidebar({
           {onToggle && (
             <button
               type="button"
-              onClick={onToggle}
+              onClick={() => {
+                closeSidebarMenus();
+                onToggle();
+              }}
               aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
               className={cn(
                 "hidden shrink-0 items-center justify-center rounded-[10px] text-slate-500 outline-none transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)] lg:flex",
@@ -438,18 +478,21 @@ export function AgencyAdminSidebar({
         >
 
           {/* Criar novo */}
-          <Popover
-            open={openMenu === "create"}
-            onOpenChange={(o) => setOpenMenu(o ? "create" : null)}
+          <DropdownMenu
+            open={createMenuOpen}
+            onOpenChange={(open) => {
+              setCreateMenuOpen(open);
+              if (open) setUserMenuOpen(false);
+            }}
           >
 
-            <PopoverTrigger asChild>
+            <DropdownMenuTrigger asChild>
               {collapsed ? (
                 <button
                   type="button"
                   aria-label="Criar novo"
                   aria-haspopup="menu"
-                  aria-expanded={openMenu === "create"}
+                  aria-expanded={createMenuOpen}
                   className={cn(
                     "mt-0.5 flex w-10 items-center justify-center rounded-[10px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--agency-focus-ring)]",
                     d.createBtn,
@@ -465,7 +508,7 @@ export function AgencyAdminSidebar({
                 <button
                   type="button"
                   aria-haspopup="menu"
-                  aria-expanded={openMenu === "create"}
+                  aria-expanded={createMenuOpen}
                   className={cn(
                     "mt-0.5 flex w-full items-center gap-2 rounded-[10px] px-3.5 font-semibold outline-none transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--agency-focus-ring)]",
                     d.createBtn,
@@ -473,7 +516,7 @@ export function AgencyAdminSidebar({
                   )}
                   style={{
                     backgroundColor:
-                      openMenu === "create" ? "var(--agency-primary-hover)" : "var(--agency-primary)",
+                      createMenuOpen ? "var(--agency-primary-hover)" : "var(--agency-primary)",
                     color: "var(--agency-primary-foreground)",
                   }}
                 >
@@ -482,15 +525,15 @@ export function AgencyAdminSidebar({
                   <ChevronUp
                     className={cn(
                       "h-4 w-4 shrink-0 transition-transform duration-150",
-                      openMenu === "create" ? "rotate-0" : "rotate-180",
+                      createMenuOpen ? "rotate-0" : "rotate-180",
                     )}
                   />
                 </button>
               )}
 
 
-            </PopoverTrigger>
-            <PopoverContent
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
               align="start"
               side={collapsed ? "right" : "bottom"}
               sideOffset={6}
@@ -501,25 +544,22 @@ export function AgencyAdminSidebar({
                 {createItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Link
+                    <DropdownMenuItem
                       key={item.label}
-                      role="menuitem"
-                      to={item.to}
-                      data-workspace-title={item.label}
-                      onClick={() => {
-                        setOpenMenu(null);
-                        onNavigate?.();
+                      onSelect={() => openOrActivate(item)}
+                      onClick={(event) => {
+                        event.stopPropagation();
                       }}
                       className={popoverItemClass}
                     >
                       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                       <span className="truncate">{item.label}</span>
-                    </Link>
+                    </DropdownMenuItem>
                   );
                 })}
               </div>
-            </PopoverContent>
-          </Popover>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {sectionLabel("Meu trabalho")}
 
@@ -613,13 +653,19 @@ export function AgencyAdminSidebar({
             collapsed ? "px-2" : "px-3",
           )}
         >
-          <Popover open={openMenu === "user"} onOpenChange={(o) => setOpenMenu(o ? "user" : null)}>
-            <PopoverTrigger asChild>
+          <DropdownMenu
+            open={userMenuOpen}
+            onOpenChange={(open) => {
+              setUserMenuOpen(open);
+              if (open) setCreateMenuOpen(false);
+            }}
+          >
+            <DropdownMenuTrigger asChild>
               <button
                 type="button"
                 aria-label="Abrir menu do usuário"
                 aria-haspopup="menu"
-                aria-expanded={openMenu === "user"}
+                aria-expanded={userMenuOpen}
                 title={fullName}
                 className={cn(
                   "flex items-center rounded-[10px] outline-none transition-colors duration-150 hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[var(--agency-focus-ring)]",
@@ -656,14 +702,14 @@ export function AgencyAdminSidebar({
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 shrink-0 text-slate-500 transition-transform duration-150",
-                        openMenu === "user" && "rotate-180",
+                        userMenuOpen && "rotate-180",
                       )}
                     />
                   </>
                 )}
               </button>
-            </PopoverTrigger>
-            <PopoverContent
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
               align="start"
               side="top"
               sideOffset={8}
@@ -674,35 +720,33 @@ export function AgencyAdminSidebar({
                 {userItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Link
+                    <DropdownMenuItem
                       key={item.label}
-                      role="menuitem"
-                      to={item.to}
-                      data-workspace-title={item.label}
-                      onClick={() => {
-                        setOpenMenu(null);
-                        onNavigate?.();
+                      onSelect={() => openOrActivate(item)}
+                      onClick={(event) => {
+                        event.stopPropagation();
                       }}
                       className={popoverItemClass}
                     >
                       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                       <span className="truncate">{item.label}</span>
-                    </Link>
+                    </DropdownMenuItem>
                   );
                 })}
                 <div className="my-1 h-px bg-border/70" />
-                <button
-                  role="menuitem"
-                  type="button"
-                  onClick={handleSignOut}
+                <DropdownMenuItem
+                  onSelect={handleSignOut}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
                   className="flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm text-destructive outline-none transition-colors duration-150 hover:bg-destructive/10 focus-visible:bg-destructive/10"
                 >
                   <LogOut className="h-[18px] w-[18px] shrink-0" strokeWidth={1.8} />
                   <span>Sair</span>
-                </button>
+                </DropdownMenuItem>
               </div>
-            </PopoverContent>
-          </Popover>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </TooltipProvider>
