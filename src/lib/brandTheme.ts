@@ -125,12 +125,11 @@ export interface AgencyBrandInput {
  */
 export function resolveBrandPalette(input: AgencyBrandInput): BrandPalette {
   const primaryHex = normalizeBrandHex(input.primary) ?? BRAND_FALLBACK_PRIMARY;
-  let rgb = parseHex(primaryHex)!;
 
   // Cores muito claras são escurecidas para permanecerem legíveis como cor de
   // texto/ícone sobre fundo branco; a cor "pura" continua disponível em
   // --brand-primary-raw para superfícies preenchidas.
-  let readable = rgb;
+  let readable = parseHex(primaryHex)!;
   let guard = 0;
   while (luminance(readable) > 0.6 && guard < 6) {
     readable = [readable[0] * 0.82, readable[1] * 0.82, readable[2] * 0.82];
@@ -146,7 +145,6 @@ export function resolveBrandPalette(input: AgencyBrandInput): BrandPalette {
     : normalizeBrandHex(input.secondary) ?? deriveSecondaryColor(primaryHex);
 
   const secondaryRgb = parseHex(secondary)!;
-  rgb = readable;
 
   return {
     primary: toHex(readable),
