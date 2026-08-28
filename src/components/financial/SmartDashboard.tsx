@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
+import { computeMonthIncomeSummary, getIncomeStatus } from "@/lib/financialMonthSummary";
 
 const MONTH_NAMES = [
   "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -31,19 +32,8 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   const [, setSearchParams] = useSearchParams();
   const { sales, saleProducts, expenseEntries, incomeEntries } = useFinancial();
 
-  const getIncomeStatus = (entry: any) => {
-    const rawStatus = String(entry?.status || "received").toLowerCase();
+  // Regras de status compartilhadas com o painel white label (fonte única).
 
-    if (["received", "recebido"].includes(rawStatus)) {
-      return "received";
-    }
-
-    if (["pending", "a_receber", "prevista", "previsao_criada"].includes(rawStatus)) {
-      return "pending";
-    }
-
-    return rawStatus;
-  };
 
   const now = new Date();
   const { showExport, setShowExport, agencyName } = useFinancialExport("Dashboard");
@@ -84,26 +74,24 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
     const endInclusive = `${viewYear}-${String(viewMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
     return projectExpensesInRange(expenseEntries, periodStart, endInclusive);
   }, [expenseEntries, periodStart, viewMonth, viewYear]);
-  const periodIncome = useMemo(() => incomeEntries.filter(e => e.entry_date >= periodStart && e.entry_date < periodEnd), [incomeEntries, periodStart, periodEnd]);
 
   // KPIs
   const totalSold = periodSales.reduce((s, sale) => s + Number(sale.sale_amount), 0);
   const totalCommission = periodProducts.reduce((s, p) => s + calcProductCommission(p), 0);
   const totalExpenses = periodExpenses.reduce((s, e) => s + Number(e.amount), 0);
 
-  // Income statuses
-  const incomeReceived = periodIncome
-    .filter(e => getIncomeStatus(e) === "received")
-    .reduce((s, e) => s + Number(e.amount), 0);
-  const incomePending = periodIncome
-    .filter(e => getIncomeStatus(e) === "pending")
-    .reduce((s, e) => s + Number(e.amount), 0);
-
-  // Overdue: any pending income across ALL time where expected_date < today
+  // Income statuses (mesmas regras do resumo financeiro do painel white label)
+  const monthIncome = useMemo(
+    () => computeMonthIncomeSummary(incomeEntries as any[], viewMonth, viewYear, today),
+    [incomeEntries, viewMonth, viewYear, today],
+  );
+  const incomeReceived = monthIncome.received;
+  const incomePending = monthIncome.pending;
   const overdueEntries = incomeEntries.filter(
     e => getIncomeStatus(e) === "pending" && (e as any).expected_date && (e as any).expected_date < today
   );
-  const overdueTotal = overdueEntries.reduce((s, e) => s + Number(e.amount), 0);
+  const overdueTotal = monthIncome.overdue;
+
 
   // Profit
   const currentProfit = totalCommission - totalExpenses;

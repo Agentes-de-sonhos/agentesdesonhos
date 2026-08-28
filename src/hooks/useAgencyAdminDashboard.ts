@@ -10,35 +10,18 @@ import { useAuth } from "@/hooks/useAuth";
  * equipe e nunca devolve valores financeiros.
  */
 
-export type AdminAttentionKind = "reservation" | "followup" | "operation";
-
-export interface AdminAttentionItem {
-  kind: AdminAttentionKind | string;
+export interface AdminActivityItem {
+  /** "event" (agenda) ou "followup" (oportunidade). */
+  kind: "event" | "followup" | string;
   id: string;
+  /** Id de destino: evento na agenda ou oportunidade no funil. */
+  link_id: string;
   title: string;
   subtitle: string | null;
-  reason: string;
-  priority: number;
-  due_at: string | null;
-  responsible_name: string | null;
-}
-
-export interface AdminAgendaItem {
-  id: string;
-  title: string;
-  event_type: string | null;
-  event_date: string;
-  event_time: string | null;
+  type_label: string | null;
+  activity_date: string;
+  activity_time: string | null;
   all_day: boolean | null;
-}
-
-export interface AdminFollowupItem {
-  id: string;
-  opportunity_id: string;
-  follow_up_date: string;
-  client_name: string | null;
-  destination: string | null;
-  responsible_name: string | null;
   overdue: boolean;
 }
 
@@ -50,6 +33,9 @@ export interface AdminTripItem {
   start_date: string;
   end_date: string | null;
   days_remaining: number;
+  operation_id: string | null;
+  operation_status: string | null;
+  has_wallet: boolean;
 }
 
 export interface AdminRecentItem {
@@ -63,10 +49,9 @@ export interface AdminRecentItem {
 }
 
 export interface AdminDashboardCounters {
-  reservations_pending: number | null;
+  opportunities_new: number | null;
   opportunities_open: number | null;
   operations_active: number | null;
-  trips_next_30_days: number | null;
 }
 
 export interface AdminDashboardCapabilities {
@@ -78,6 +63,7 @@ export interface AdminDashboardCapabilities {
   wallet: boolean;
   agenda: boolean;
   trips: boolean;
+  financial: boolean;
   clients: boolean;
   clients_create: boolean;
   quotes_create: boolean;
@@ -89,12 +75,12 @@ export interface AdminDashboardCapabilities {
 export interface AdminDashboardData {
   today: string;
   timeZone: string;
-  attention: AdminAttentionItem[];
-  attentionTotal: number;
-  agenda: AdminAgendaItem[];
-  followups: AdminFollowupItem[];
+  todayItems: AdminActivityItem[];
+  upcomingItems: AdminActivityItem[];
   trips: AdminTripItem[];
-  recent: AdminRecentItem[];
+  recentProjects: AdminRecentItem[];
+  recentOpportunities: AdminRecentItem[];
+  recentOperations: AdminRecentItem[];
   counters: AdminDashboardCounters;
   can: AdminDashboardCapabilities;
 }
@@ -108,6 +94,7 @@ const EMPTY_CAN: AdminDashboardCapabilities = {
   wallet: false,
   agenda: false,
   trips: false,
+  financial: false,
   clients: false,
   clients_create: false,
   quotes_create: false,
@@ -117,10 +104,9 @@ const EMPTY_CAN: AdminDashboardCapabilities = {
 };
 
 const EMPTY_COUNTERS: AdminDashboardCounters = {
-  reservations_pending: null,
+  opportunities_new: null,
   opportunities_open: null,
   operations_active: null,
-  trips_next_30_days: null,
 };
 
 const sb = supabase as any;
@@ -144,12 +130,12 @@ export function useAgencyAdminDashboard(enabled = true) {
       return {
         today: payload.today ?? new Date().toISOString().slice(0, 10),
         timeZone: payload.time_zone ?? timeZone,
-        attention: (payload.attention || []) as AdminAttentionItem[],
-        attentionTotal: Number(payload.attention_total) || 0,
-        agenda: (payload.agenda || []) as AdminAgendaItem[],
-        followups: (payload.followups || []) as AdminFollowupItem[],
+        todayItems: (payload.today_items || []) as AdminActivityItem[],
+        upcomingItems: (payload.upcoming_items || []) as AdminActivityItem[],
         trips: (payload.trips || []) as AdminTripItem[],
-        recent: (payload.recent || []) as AdminRecentItem[],
+        recentProjects: (payload.recent_projects || []) as AdminRecentItem[],
+        recentOpportunities: (payload.recent_opportunities || []) as AdminRecentItem[],
+        recentOperations: (payload.recent_operations || []) as AdminRecentItem[],
         counters: { ...EMPTY_COUNTERS, ...(payload.counters || {}) },
         can: { ...EMPTY_CAN, ...(payload.can || {}) },
       };
