@@ -8,15 +8,17 @@ export function getClientInitials(name: string): string {
 
 /**
  * First-letter of the first name + first-letter of the last name.
- * "Fernando Nobre" → "FN". Single-word names fall back to two letters.
+ * "Fernando Nobre" → "FN". Parênteses, sinais e espaços excedentes são
+ * ignorados; nomes de uma palavra caem para duas letras.
  */
 export function getPersonInitials(name: string): string {
   if (!name) return "?";
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const parts = (name.match(/[\p{L}\p{N}][\p{L}\p{N}'-]*/gu) ?? []).filter(Boolean);
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
+
 
 interface ClientAvatarProps {
   name: string;
