@@ -158,6 +158,16 @@ export function AgencyAdminSidebar({
   /** Apenas um popover aberto por vez. */
   const [openMenu, setOpenMenu] = useState<null | "create" | "user">(null);
 
+  /** Logotipo do menu recolhido: maior, proporcional e sem overflow (aside = 64px). */
+  const collapsedLogo =
+    d.mode === "dense" ? "h-7 w-auto max-w-[32px]" : d.mode === "medium" ? "h-8 w-auto max-w-[34px]" : "h-9 w-auto max-w-[34px]";
+
+  /** Fecha os popovers em qualquer mudança de contexto (rota/aba, colapso, etc.). */
+  useEffect(() => {
+    setOpenMenu(null);
+  }, [location.pathname, location.search, collapsed]);
+
+
   const { data: profile } = useQuery({
     queryKey: ["agency-admin-profile", user?.id],
     enabled: !!user?.id,
