@@ -30,6 +30,8 @@ const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
   "www.100limites.tur.br": { status: "under_construction" },
   "paraisoviagens.com": { status: "under_construction" },
   "www.paraisoviagens.com": { status: "under_construction" },
+  "destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
+  "www.destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
 };
 
 /** Variante da página temporária configurada para o hostname. */
