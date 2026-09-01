@@ -16,7 +16,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
-import { computeMonthIncomeSummary, getIncomeStatus } from "@/lib/financialMonthSummary";
+import {
+  computeMonthIncomeSummary,
+  getIncomeDueDate,
+  getIncomeRemainingAmount,
+  isIncomeOverdue,
+} from "@/lib/financialMonthSummary";
+
 
 const MONTH_NAMES = [
   "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -87,10 +93,9 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
   );
   const incomeReceived = monthIncome.received;
   const incomePending = monthIncome.pending;
-  const overdueEntries = incomeEntries.filter(
-    e => getIncomeStatus(e) === "pending" && (e as any).expected_date && (e as any).expected_date < today
-  );
+  const overdueEntries = incomeEntries.filter(e => isIncomeOverdue(e, today));
   const overdueTotal = monthIncome.overdue;
+
 
 
   // Profit
