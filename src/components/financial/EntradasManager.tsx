@@ -33,6 +33,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { isInMonth } from "@/utils/monthFilter";
+import {
+  getIncomeStatus,
+  getIncomeReceivedAmount,
+  getIncomeRemainingAmount,
+  getIncomeReceivedDate,
+  isIncomeOverdue,
+  isAutoIncomeEntry,
+} from "@/lib/financialMonthSummary";
+
 
 export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
   const { incomeEntries: allIncomeEntries, sales, createIncome, updateIncome, deleteIncome, isCreating, isUpdating } = useFinancial();
@@ -70,17 +79,25 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
   monthStart.setDate(1);
   const monthStartStr = monthStart.toISOString().split("T")[0];
 
-  const received = incomeEntries.filter(e => (e as any).status === "received" || !(e as any).status);
-  const pending = incomeEntries.filter(e => (e as any).status === "pending");
-  const overdue = incomeEntries.filter(e => {
-    const s = (e as any).status;
-    const exp = (e as any).expected_date;
-    return s === "pending" && exp && exp < today;
+  const received = incomeEntries.filter(e => {
+    const s = getIncomeStatus(e);
+    return s === "received" || s === "partial";
   });
+  const pending = incomeEntries.filter(e => {
+    const s = getIncomeStatus(e);
+    return (s === "pending" || s === "partial") && getIncomeRemainingAmount(e) > 0;
+  });
+  const overdue = incomeEntries.filter(e => isIncomeOverdue(e, today));
 
-  const totalReceived = received.filter(e => e.entry_date >= monthStartStr).reduce((sum, e) => sum + Number(e.amount), 0);
-  const totalPending = pending.reduce((sum, e) => sum + Number(e.amount), 0);
-  const totalOverdue = overdue.reduce((sum, e) => sum + Number(e.amount), 0);
+  const totalReceived = incomeEntries
+    .filter(e => {
+      const d = getIncomeReceivedDate(e);
+      return !!d && d >= monthStartStr;
+    })
+    .reduce((sum, e) => sum + getIncomeReceivedAmount(e), 0);
+  const totalPending = pending.reduce((sum, e) => sum + getIncomeRemainingAmount(e), 0);
+  const totalOverdue = overdue.reduce((sum, e) => sum + getIncomeRemainingAmount(e), 0);
+
 
   const resetForm = () => {
     setFormData({ sale_id: null, amount: 0, entry_date: new Date().toISOString().split("T")[0], payment_method: "pix", notes: "", status: "received", expected_date: "" });
