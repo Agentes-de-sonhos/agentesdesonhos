@@ -575,6 +575,7 @@ export function useOpportunities() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       if (res?.stageChanged) {
+        queryClient.invalidateQueries({ queryKey: ["operations"] });
         queryClient.invalidateQueries({ queryKey: ["sales-stats"] });
         logTeamAction({
           action: 'opportunity.stage_move',
