@@ -290,45 +290,11 @@ export function useFinancial() {
     return Number(formData.commission_value) || 0;
   };
 
-  // Auto-generate income entry for a product
-  const syncIncomeEntry = async (productId: string, saleId: string, formData: SaleProductFormData) => {
-    if (!user) return;
-    const commissionAmount = calcCommissionAmount(formData);
-    if (commissionAmount <= 0) return;
+  // A entrada automática vinculada ao produto (income_entries.source = 'auto')
+  // é criada/atualizada/removida pelo banco (trigger sale_products_sync_auto_income),
+  // que é a camada central compartilhada pela plataforma e por todos os white labels.
+  // Nenhuma sincronização paralela no cliente — evita sobrescrever recebimentos.
 
-    // Check if income entry already exists for this product
-    const { data: existing } = await supabase
-      .from("income_entries")
-      .select("id")
-      .eq("sale_product_id", productId)
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    const entryData = {
-      sale_id: saleId,
-      sale_product_id: productId,
-      amount: commissionAmount,
-      entry_date: formData.expected_date || new Date().toISOString().split("T")[0],
-      expected_date: formData.expected_date || null,
-      payment_method: "pix",
-      status: "pending",
-      source: "auto",
-      notes: `Comissão: ${formData.supplier_name || PRODUCT_TYPES[formData.product_type] || formData.product_type}`,
-      user_id: user.id,
-    };
-
-    if (existing) {
-      await supabase.from("income_entries").update(entryData).eq("id", existing.id);
-    } else {
-      await supabase.from("income_entries").insert(entryData);
-    }
-  };
-
-  // Remove auto-generated income entry for a product
-  const removeIncomeEntry = async (productId: string) => {
-    if (!user) return;
-    await supabase.from("income_entries").delete().eq("sale_product_id", productId).eq("user_id", user.id);
-  };
 
   // Create sale product mutation
   const createSaleProductMutation = useMutation({
