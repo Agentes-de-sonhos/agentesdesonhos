@@ -484,6 +484,7 @@ export function useOpportunities() {
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      queryClient.invalidateQueries({ queryKey: ["operations"] });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients-search"] });
       queryClient.invalidateQueries({ queryKey: ["clients-paged"] });
