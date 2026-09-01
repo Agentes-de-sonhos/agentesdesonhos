@@ -107,10 +107,12 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
 
   // Alerts
   const salesWithoutProducts = sales.filter(s => !saleProducts.some(p => p.sale_id === s.id));
-  const upcomingIncome = incomeEntries.filter(
-    e => (e as any).status === "pending" && (e as any).expected_date && (e as any).expected_date >= today &&
-      (e as any).expected_date <= new Date(now.getTime() + 7 * 86400000).toISOString().split("T")[0]
-  );
+  const in7days = new Date(now.getTime() + 7 * 86400000).toISOString().split("T")[0];
+  const upcomingIncome = incomeEntries.filter(e => {
+    const due = getIncomeDueDate(e);
+    return getIncomeRemainingAmount(e) > 0 && !!due && due >= today && due <= in7days;
+  });
+
 
   const goToTab = (tab: string) => setSearchParams({ tab }, { replace: true });
 
