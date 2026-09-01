@@ -55,10 +55,16 @@ export function getIncomeDueDate(entry: any): string | null {
   return entry?.expected_date || entry?.entry_date || null;
 }
 
+/**
+ * Só é atraso quando há saldo pendente E uma data prevista/vencimento explícita
+ * anterior a hoje. `entry_date` nunca é usado como fallback aqui — ele serve
+ * apenas para a competência mensal do saldo pendente.
+ */
 export function isIncomeOverdue(entry: any, today: string): boolean {
-  const due = getIncomeDueDate(entry);
+  const due = entry?.expected_date || null;
   return getIncomeRemainingAmount(entry) > 0 && !!due && due < today;
 }
+
 
 /** Entrada automática mantida pela tela de Comissões. */
 export function isAutoIncomeEntry(entry: any): boolean {
