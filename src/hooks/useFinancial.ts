@@ -513,8 +513,8 @@ export function useFinancial() {
         .select()
         .single();
       if (error) throw error;
-      // Sync income entry with updated data
-      await syncIncomeEntry(id, data.sale_id, sanitized);
+      // Entrada automática sincronizada pelo trigger central no banco.
+
       // Auto-sync sale_amount from products
       await syncSaleAmount(data.sale_id);
       return data;
