@@ -82,15 +82,24 @@ describe("sincronização Comissões -> Entradas (regras compartilhadas)", () =>
     expect(computeMonthIncomeSummary([e], 8, 2026, TODAY).pending).toBe(0);
   });
 
-  it("entrada manual permanece intacta e pendente", () => {
+  it("entrada manual pendente sem expected_date permanece intacta, pendente e nunca atrasada", () => {
     const manual = { source: "manual", sale_product_id: null, amount: 1000, received_amount: 0, received_date: null, status: "pending", entry_date: "2026-08-27", expected_date: null };
     expect(isAutoIncomeEntry(manual)).toBe(false);
     const s = computeMonthIncomeSummary([manual], 8, 2026, TODAY);
     expect(s.pending).toBe(1000);
     expect(s.received).toBe(0);
     // Sem expected_date, cai como pendente do mês da entrada e não como atraso do mês seguinte
-    expect(isIncomeOverdue(manual, TODAY)).toBe(true);
+    expect(isIncomeOverdue(manual, TODAY)).toBe(false);
+    expect(s.overdue).toBe(0);
+    expect(s.overdueCount).toBe(0);
   });
+
+  it("entrada manual só fica atrasada com expected_date explícita vencida", () => {
+    const comData = { source: "manual", amount: 1000, received_amount: 0, status: "pending", entry_date: "2026-08-27", expected_date: "2026-08-28" };
+    expect(isIncomeOverdue(comData, TODAY)).toBe(true);
+    expect(computeMonthIncomeSummary([comData], 8, 2026, TODAY).overdue).toBe(1000);
+  });
+
 
   it("registro legado recebido sem received_date usa entry_date", () => {
     const legacy = { source: "manual", amount: 300, status: "received", entry_date: "2026-08-10" };
