@@ -196,8 +196,10 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["commissions-receivable"] });
       qc.invalidateQueries({ queryKey: ["sale_products"] });
+      qc.invalidateQueries({ queryKey: ["income_entries"] });
       toast.success("Comissão atualizada com sucesso");
     },
+
     onError: () => toast.error("Não foi possível atualizar a comissão. Tente novamente."),
   });
 
@@ -486,7 +488,10 @@ function ReceivePaymentDialog({ commission, open, onOpenChange }: { commission: 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["commissions-receivable"] });
       qc.invalidateQueries({ queryKey: ["sale_products"] });
+      qc.invalidateQueries({ queryKey: ["income_entries"] });
+      qc.invalidateQueries({ queryKey: ["sales"] });
       toast.success("Recebimento registrado");
+
       onOpenChange(false);
     },
     onError: () => toast.error("Erro ao registrar recebimento"),

@@ -33,6 +33,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { isInMonth } from "@/utils/monthFilter";
+import {
+  getIncomeStatus,
+  getIncomeReceivedAmount,
+  getIncomeRemainingAmount,
+  getIncomeReceivedDate,
+  isIncomeOverdue,
+  isAutoIncomeEntry,
+} from "@/lib/financialMonthSummary";
+
 
 export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
   const { incomeEntries: allIncomeEntries, sales, createIncome, updateIncome, deleteIncome, isCreating, isUpdating } = useFinancial();
@@ -70,17 +79,25 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
   monthStart.setDate(1);
   const monthStartStr = monthStart.toISOString().split("T")[0];
 
-  const received = incomeEntries.filter(e => (e as any).status === "received" || !(e as any).status);
-  const pending = incomeEntries.filter(e => (e as any).status === "pending");
-  const overdue = incomeEntries.filter(e => {
-    const s = (e as any).status;
-    const exp = (e as any).expected_date;
-    return s === "pending" && exp && exp < today;
+  const received = incomeEntries.filter(e => {
+    const s = getIncomeStatus(e);
+    return s === "received" || s === "partial";
   });
+  const pending = incomeEntries.filter(e => {
+    const s = getIncomeStatus(e);
+    return (s === "pending" || s === "partial") && getIncomeRemainingAmount(e) > 0;
+  });
+  const overdue = incomeEntries.filter(e => isIncomeOverdue(e, today));
 
-  const totalReceived = received.filter(e => e.entry_date >= monthStartStr).reduce((sum, e) => sum + Number(e.amount), 0);
-  const totalPending = pending.reduce((sum, e) => sum + Number(e.amount), 0);
-  const totalOverdue = overdue.reduce((sum, e) => sum + Number(e.amount), 0);
+  const totalReceived = incomeEntries
+    .filter(e => {
+      const d = getIncomeReceivedDate(e);
+      return !!d && d >= monthStartStr;
+    })
+    .reduce((sum, e) => sum + getIncomeReceivedAmount(e), 0);
+  const totalPending = pending.reduce((sum, e) => sum + getIncomeRemainingAmount(e), 0);
+  const totalOverdue = overdue.reduce((sum, e) => sum + getIncomeRemainingAmount(e), 0);
+
 
   const resetForm = () => {
     setFormData({ sale_id: null, amount: 0, entry_date: new Date().toISOString().split("T")[0], payment_method: "pix", notes: "", status: "received", expected_date: "" });
@@ -88,6 +105,13 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
   };
 
   const openEdit = (entry: typeof incomeEntries[0]) => {
+    if (isAutoIncomeEntry(entry)) {
+      toast({
+        title: "Entrada automática",
+        description: "Esta entrada é controlada pela aba Comissões. Registre ou ajuste o recebimento por lá.",
+      });
+      return;
+    }
     setEditingId(entry.id);
     setFormData({
       sale_id: entry.sale_id || null,
@@ -95,7 +119,7 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
       entry_date: entry.entry_date,
       payment_method: entry.payment_method,
       notes: entry.notes || "",
-      status: (entry as any).status || "received",
+      status: getIncomeStatus(entry) === "pending" ? "pending" : "received",
       expected_date: (entry as any).expected_date || "",
     });
     setIsDialogOpen(true);
@@ -118,30 +142,61 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
     resetForm();
   };
 
-  const markAsReceived = async (id: string) => {
-    const { error } = await supabase
-      .from("income_entries")
-      .update({ status: "received", entry_date: today } as any)
-      .eq("id", id);
+  const invalidateFinancial = () => {
+    queryClient.invalidateQueries({ queryKey: ["income_entries"] });
+    queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
+    queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+  };
+
+  // Entradas automáticas: a comissão é a fonte de verdade; atualizamos sale_products
+  // e o banco sincroniza a entrada. Entradas manuais seguem atualizadas direto.
+  const markAsReceived = async (entry: any) => {
+    const auto = isAutoIncomeEntry(entry);
+    const { error } = auto
+      ? await supabase
+          .from("sale_products")
+          .update({ received_amount: Number(entry.amount), received_date: today } as any)
+          .eq("id", entry.sale_product_id)
+      : await supabase
+          .from("income_entries")
+          .update({ status: "received", entry_date: today, received_amount: Number(entry.amount), received_date: today } as any)
+          .eq("id", entry.id);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
-      queryClient.invalidateQueries({ queryKey: ["income_entries"] });
-      queryClient.invalidateQueries({ queryKey: ["commissions-receivable"] });
-      queryClient.invalidateQueries({ queryKey: ["sale_products"] });
+      invalidateFinancial();
       toast({ title: "✅ Entrada recebida!", description: "Valor marcado como recebido." });
     }
+  };
+
+  const requestDelete = (entry: any) => {
+    if (isAutoIncomeEntry(entry)) {
+      toast({
+        title: "Entrada automática",
+        description: "Para remover, exclua ou cancele a comissão correspondente na aba Comissões.",
+      });
+      return;
+    }
+    setDeleteId(entry.id);
   };
 
   const handleDelete = async () => { if (deleteId) { await deleteIncome(deleteId); setDeleteId(null); } };
   const isSaving = isCreating || isUpdating;
 
   const getStatusBadge = (entry: any) => {
-    const status = entry.status || "received";
-    const expectedDate = entry.expected_date;
-    const isOverdue = status === "pending" && expectedDate && expectedDate < today;
-    if (isOverdue) return <Badge className="bg-destructive/10 text-destructive border-destructive/20 gap-1"><AlertTriangle className="h-3 w-3" />Atrasada</Badge>;
-    if (status === "pending") return <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock className="h-3 w-3" />A receber</Badge>;
+    const status = getIncomeStatus(entry);
+    if (status === "cancelled") {
+      return <Badge className="bg-muted text-muted-foreground border-border gap-1">Cancelada</Badge>;
+    }
+    if (isIncomeOverdue(entry, today)) {
+      return <Badge className="bg-destructive/10 text-destructive border-destructive/20 gap-1"><AlertTriangle className="h-3 w-3" />Atrasada</Badge>;
+    }
+    if (status === "partial") {
+      return <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 gap-1"><Clock className="h-3 w-3" />Parcial</Badge>;
+    }
+    if (status === "pending") {
+      return <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 gap-1"><Clock className="h-3 w-3" />A receber</Badge>;
+    }
     return <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 gap-1"><CheckCircle2 className="h-3 w-3" />Recebida</Badge>;
   };
 
@@ -150,20 +205,28 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
       {entries.length === 0 ? (
         <div className="border rounded-lg p-8 text-center text-muted-foreground">Nenhuma entrada encontrada</div>
       ) : (
-        entries.map((entry) => (
+        entries.map((entry) => {
+          const status = getIncomeStatus(entry);
+          const remaining = getIncomeRemainingAmount(entry);
+          const receivedAmount = getIncomeReceivedAmount(entry);
+          const auto = isAutoIncomeEntry(entry);
+          return (
           <div key={entry.id} className="border rounded-lg p-4 flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium">{entry.sale?.client_name || entry.notes || "Entrada manual"}</span>
                 {getStatusBadge(entry)}
-                {(entry as any).source === "auto" && (
+                {auto && (
                   <Badge variant="outline" className="text-xs gap-1 border-primary/30 text-primary">⚡ Automática</Badge>
                 )}
               </div>
               <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                 <span>{format(parseLocalDate(entry.entry_date), "dd/MM/yyyy", { locale: ptBR })}</span>
-                {(entry as any).expected_date && (entry as any).status === "pending" && (
+                {(entry as any).expected_date && remaining > 0 && (
                   <><span>•</span><span>Previsto: {format(new Date((entry as any).expected_date + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}</span></>
+                )}
+                {status === "partial" && (
+                  <><span>•</span><span>Recebido: {formatCurrency(receivedAmount)} • Saldo: {formatCurrency(remaining)}</span></>
                 )}
                 <span>•</span>
                 <span>{PAYMENT_METHODS[entry.payment_method] || entry.payment_method}</span>
@@ -172,23 +235,29 @@ export function EntradasManager({ viewMonth, viewYear }: { viewMonth?: number; v
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(Number(entry.amount))}</span>
-              {showMarkButton && (entry as any).status === "pending" && (
-                <Button variant="outline" size="sm" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => markAsReceived(entry.id)}>
+              {showMarkButton && remaining > 0 && status !== "cancelled" && (
+                <Button variant="outline" size="sm" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => markAsReceived(entry)}>
                   <CheckCircle2 className="h-4 w-4 mr-1" /> Recebido
                 </Button>
               )}
-              <Button variant="ghost" size="icon" onClick={() => openEdit(entry)}>
-                <Pencil className="h-4 w-4 text-muted-foreground" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => setDeleteId(entry.id)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+              {!auto && (
+                <>
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(entry)}>
+                    <Pencil className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => requestDelete(entry)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
-        ))
+          );
+        })
       )}
     </div>
   );
+
 
   return (
     <div className="space-y-4">

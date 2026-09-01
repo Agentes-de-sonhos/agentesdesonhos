@@ -9,9 +9,10 @@ const JU_HOSTS = ["destinoscomaju.com.br", "www.destinoscomaju.com.br"];
 const LIMITES = "100limites.tur.br";
 
 describe("Destinos com a Ju — template estrutural da 100 Limites com identidade rosé", () => {
-  it("renderiza a home completa (sem página temporária)", () => {
-    for (const host of JU_HOSTS) expect(isUnderConstruction(host)).toBe(false);
+  it("está em modo página em construção (decisão vigente), mantendo o template configurado", () => {
+    for (const host of JU_HOSTS) expect(isUnderConstruction(host)).toBe(true);
   });
+
 
   it("usa a família de layout editorial com tokens rosé exclusivos", () => {
     for (const host of JU_HOSTS) {

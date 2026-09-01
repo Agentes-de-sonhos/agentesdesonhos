@@ -6048,6 +6048,8 @@ export type Database = {
           id: string
           notes: string | null
           payment_method: string
+          received_amount: number
+          received_date: string | null
           sale_id: string | null
           sale_product_id: string | null
           source: string | null
@@ -6063,6 +6065,8 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_method?: string
+          received_amount?: number
+          received_date?: string | null
           sale_id?: string | null
           sale_product_id?: string | null
           source?: string | null
@@ -6078,6 +6082,8 @@ export type Database = {
           id?: string
           notes?: string | null
           payment_method?: string
+          received_amount?: number
+          received_date?: string | null
           sale_id?: string | null
           sale_product_id?: string | null
           source?: string | null
@@ -16510,6 +16516,10 @@ export type Database = {
       sync_agency_booking_requests: {
         Args: { _agency_id: string }
         Returns: number
+      }
+      sync_auto_income_entry_for_product: {
+        Args: { p_product_id: string }
+        Returns: undefined
       }
       sync_booking_request_opportunity: {
         Args: { p_request_id: string }
