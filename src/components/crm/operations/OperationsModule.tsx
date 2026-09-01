@@ -166,93 +166,88 @@ export function OperationsModule() {
       </div>
 
       <div className={cn(isMaximized && "flex min-h-0 flex-1 flex-col")}>
-          {isLoading ? (
-            <div className="text-sm text-muted-foreground p-6 text-center">Carregando operações...</div>
-          ) : filtered.length === 0 ? (
-            <div className="border-2 border-dashed rounded-xl p-12 text-center text-muted-foreground">
-              <p className="font-medium">Nenhuma operação ainda</p>
-              <p className="text-sm mt-1">Feche uma oportunidade ou clique em "Nova Operação" para começar.</p>
-            </div>
-          ) : (
-            <KanbanScrollArea>
-              <div
-                className={cn("flex gap-4", isMaximized && "h-full items-stretch")}
-                style={{ minWidth: "max-content" }}
-              >
-                {stages.map((stage) => {
-                  const ops = byStage.get(stage.key) || [];
-                  const tokens = getStageTokens(stage.color);
-                  const stageCanEdit = canStage('operations', stage.id, 'edit');
-                  return (
-                    <div
-                      key={stage.id}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleColumnDrop(e, stage.key)}
-                      className={cn(
-                        "w-[290px] flex-shrink-0 rounded-xl border p-3",
-                        isMaximized ? "h-full" : "min-h-[400px]",
-                        tokens.bg,
-                        tokens.border
-                      )}
-                    >
-                      <OperationStageColumnHeader
-                        stage={stage}
-                        count={ops.length}
-                        onRename={(name) => updateStage({ id: stage.id, name })}
-                        onChangeColor={(color) => updateStage({ id: stage.id, color })}
-                        onDuplicate={() => duplicateStage(stage.id)}
-                        onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
-                        canEdit={stageCanEdit}
-                      />
-                      <div className="space-y-2.5">
-                        {ops.map((op) => {
-                          const isIndicator = dragOver?.stageKey === stage.key && dragOver?.targetId === op.id;
-                          return (
-                            <div
-                              key={op.id}
-                              onDragOver={(e) => handleCardDragOver(e, stage.key, op.id)}
-                              onDrop={(e) => handleCardDrop(e, stage.key, op.id)}
-                              className={cn(
-                                isIndicator && dragOver?.before && "border-t-2 border-primary rounded-t-sm pt-0.5",
-                                isIndicator && !dragOver?.before && "border-b-2 border-primary rounded-b-sm pb-0.5",
-                                draggedId === op.id && "opacity-40"
-                              )}
-                            >
-                              <OperationCard
-                                operation={op}
-                                onClick={() => { setSelectedTab("overview"); setSelected(op); }}
-                                onOpenTab={(t) => { setSelectedTab(t); setSelected(op); }}
-                                onDragStart={handleDragStart}
-                              />
-                            </div>
-                          );
-                        })}
-                        {ops.length === 0 && (
-                          <div className="text-center py-8 text-xs text-muted-foreground/70 border-2 border-dashed rounded-lg border-muted-foreground/15">
-                            Nenhuma operação
+        {isLoading ? (
+          <div className="text-sm text-muted-foreground p-6 text-center">Carregando operações...</div>
+        ) : (
+          <KanbanScrollArea>
+            <div
+              className={cn("flex gap-4", isMaximized && "h-full items-stretch")}
+              style={{ minWidth: "max-content" }}
+            >
+              {stages.map((stage) => {
+                const ops = byStage.get(stage.key) || [];
+                const tokens = getStageTokens(stage.color);
+                const stageCanEdit = canStage('operations', stage.id, 'edit');
+                return (
+                  <div
+                    key={stage.id}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleColumnDrop(e, stage.key)}
+                    className={cn(
+                      "w-[290px] flex-shrink-0 rounded-xl border p-3",
+                      isMaximized ? "h-full" : "min-h-[400px]",
+                      tokens.bg,
+                      tokens.border
+                    )}
+                  >
+                    <OperationStageColumnHeader
+                      stage={stage}
+                      count={ops.length}
+                      onRename={(name) => updateStage({ id: stage.id, name })}
+                      onChangeColor={(color) => updateStage({ id: stage.id, color })}
+                      onDuplicate={() => duplicateStage(stage.id)}
+                      onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
+                      canEdit={stageCanEdit}
+                    />
+                    <div className="space-y-2.5">
+                      {ops.map((op) => {
+                        const isIndicator = dragOver?.stageKey === stage.key && dragOver?.targetId === op.id;
+                        return (
+                          <div
+                            key={op.id}
+                            onDragOver={(e) => handleCardDragOver(e, stage.key, op.id)}
+                            onDrop={(e) => handleCardDrop(e, stage.key, op.id)}
+                            className={cn(
+                              isIndicator && dragOver?.before && "border-t-2 border-primary rounded-t-sm pt-0.5",
+                              isIndicator && !dragOver?.before && "border-b-2 border-primary rounded-b-sm pb-0.5",
+                              draggedId === op.id && "opacity-40"
+                            )}
+                          >
+                            <OperationCard
+                              operation={op}
+                              onClick={() => { setSelectedTab("overview"); setSelected(op); }}
+                              onOpenTab={(t) => { setSelectedTab(t); setSelected(op); }}
+                              onDragStart={handleDragStart}
+                            />
                           </div>
-                        )}
-                      </div>
+                        );
+                      })}
+                      {ops.length === 0 && (
+                        <div className="text-center py-8 text-xs text-muted-foreground/70 border-2 border-dashed rounded-lg border-muted-foreground/15">
+                          Nenhuma operação
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={() => {
-                    const name = prompt("Nome da nova coluna");
-                    if (name && name.trim()) createStage({ name: name.trim() });
-                  }}
-                  className={cn(
-                    "w-[290px] flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3",
-                    isMaximized ? "h-full" : "min-h-[400px]"
-                  )}
-                >
-                  <Plus className="h-5 w-5 mb-1" />
-                  <span className="text-sm font-medium">Adicionar coluna</span>
-                </button>
-              </div>
-            </KanbanScrollArea>
-          )}
+                  </div>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => {
+                  const name = prompt("Nome da nova coluna");
+                  if (name && name.trim()) createStage({ name: name.trim() });
+                }}
+                className={cn(
+                  "w-[290px] flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3",
+                  isMaximized ? "h-full" : "min-h-[400px]"
+                )}
+              >
+                <Plus className="h-5 w-5 mb-1" />
+                <span className="text-sm font-medium">Adicionar coluna</span>
+              </button>
+            </div>
+          </KanbanScrollArea>
+        )}
       </div>
 
       <CreateOperationDialog open={createOpen} onOpenChange={setCreateOpen} />
