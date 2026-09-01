@@ -316,8 +316,8 @@ export function useFinancial() {
         .select()
         .single();
       if (error) throw error;
-      // Auto-generate income entry
-      await syncIncomeEntry(data.id, saleId, sanitized);
+      // Entrada automática criada pelo trigger central no banco.
+
       // Auto-sync sale_amount from products
       await syncSaleAmount(saleId);
       return data;
@@ -339,8 +339,8 @@ export function useFinancial() {
     mutationFn: async (id: string) => {
       // Get sale_id before deleting
       const { data: product } = await supabase.from("sale_products").select("sale_id").eq("id", id).single();
-      // Remove auto-generated income entry first
-      await removeIncomeEntry(id);
+      // A entrada automática é removida por cascade (FK sale_product_id).
+
       const { error } = await supabase.from("sale_products").delete().eq("id", id);
       if (error) throw error;
       // Auto-sync sale_amount after product removal
