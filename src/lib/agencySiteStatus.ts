@@ -32,6 +32,8 @@ const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
   "www.paraisoviagens.com": { status: "under_construction" },
   "destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
   "www.destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
+  "faeviagens.com.br": { status: "under_construction" },
+  "www.faeviagens.com.br": { status: "under_construction" },
 };
 
 /** Variante da página temporária configurada para o hostname. */
