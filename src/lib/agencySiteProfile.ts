@@ -23,7 +23,8 @@ export type AgencySiteProfileKey =
   | "classic"
   | "editorialDmc"
   | "luxuryCurated"
-  | "editorialRose";
+  | "editorialRose"
+  | "faeCurated";
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
 export interface AgencySignatureContent {
