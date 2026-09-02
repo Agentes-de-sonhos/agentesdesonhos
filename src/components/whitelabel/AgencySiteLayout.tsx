@@ -15,7 +15,7 @@ import {
   siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
 import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
-import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
+import { logoIncludesWordmark, resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
