@@ -141,11 +141,8 @@ export function OperationsModule() {
   };
 
   return (
-    <div
-      className={cn(
-        isMaximized ? "flex min-h-0 flex-1 flex-col gap-3" : "space-y-4"
-      )}
-    >
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+
       <KanbanToolbarSlot>
         <div className="relative w-[150px] shrink-0 lg:w-[190px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
