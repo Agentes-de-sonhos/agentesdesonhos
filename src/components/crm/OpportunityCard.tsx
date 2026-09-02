@@ -80,6 +80,7 @@ import { OpportunityForm } from "./OpportunityForm";
 import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
 import { QuickLabelPicker } from "./QuickLabelPicker";
+import { QuickOpportunityNoteDialog } from "./QuickOpportunityNoteDialog";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
 import { useHasBookingRequest } from "@/hooks/useHasBookingRequest";
@@ -162,6 +163,7 @@ export function OpportunityCard({
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showQuickNote, setShowQuickNote] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [showEditClient, setShowEditClient] = useState(false);
 
@@ -449,17 +451,6 @@ export function OpportunityCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowLabels(true)}>
-                  <Tag className="mr-2 h-4 w-4" /> Etiquetas
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowDetails(true)}>
-                  <MessageSquare className="mr-2 h-4 w-4" /> Anotações
-                </DropdownMenuItem>
-                {canEditOpp && (
-                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                    <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
-                  </DropdownMenuItem>
-                )}
                 {canEditOpp && onMoveToStage && moveTargets && moveTargets.length > 0 && (
                   <MoveToStageMenu
                     targets={moveTargets}
@@ -467,6 +458,20 @@ export function OpportunityCard({
                     onMoveToStage={onMoveToStage}
                   />
                 )}
+                {canEditOpp && (
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => setShowQuickNote(true)}>
+                  <MessageSquare className="mr-2 h-4 w-4" /> Anotações
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowLabels(true)}>
+                  <Tag className="mr-2 h-4 w-4" /> Etiquetas
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowHistory(true)}>
+                  <History className="mr-2 h-4 w-4" /> Histórico
+                </DropdownMenuItem>
                 {hasBookingRequest && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -477,23 +482,6 @@ export function OpportunityCard({
                     <ClipboardList className="mr-2 h-4 w-4" /> Visualizar serviços solicitados
                   </DropdownMenuItem>
                 )}
-                {canEditClient && (
-                  <DropdownMenuItem onClick={handleEditClientClick}>
-                    <User className="mr-2 h-4 w-4" /> Editar cliente
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={() => setShowHistory(true)}>
-                  <History className="mr-2 h-4 w-4" /> Histórico
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {canGenerateQuote && (
-                  <DropdownMenuItem onClick={handleCreateQuote}>
-                    <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={handleCreateTripWallet}>
-                  <Wallet className="mr-2 h-4 w-4" /> Gerar Carteira Digital
-                </DropdownMenuItem>
                 {canDeleteOpp && (
                   <>
                     <DropdownMenuSeparator />
@@ -506,6 +494,7 @@ export function OpportunityCard({
                   </>
                 )}
               </DropdownMenuContent>
+
             </DropdownMenu>
           </div>
 
@@ -806,6 +795,13 @@ export function OpportunityCard({
         opportunityId={opportunity.id}
         open={showHistory}
         onOpenChange={setShowHistory}
+      />
+
+      <QuickOpportunityNoteDialog
+        opportunityId={opportunity.id}
+        contextLabel={opportunity.client?.name || opportunity.destination}
+        open={showQuickNote}
+        onOpenChange={setShowQuickNote}
       />
 
       <OpportunityDetailsDrawer
