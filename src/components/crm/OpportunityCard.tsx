@@ -96,7 +96,11 @@ interface OpportunityCardProps {
   onDragStart: (e: React.DragEvent, id: string) => void;
   isOverdue?: boolean;
   stageColor?: OpportunityStage;
+  moveTargets?: MoveStageTarget[];
+  currentStageId?: string | null;
+  onMoveToStage?: (stageId: string) => void | Promise<void>;
 }
+
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
