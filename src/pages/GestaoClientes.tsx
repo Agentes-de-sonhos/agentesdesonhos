@@ -98,7 +98,7 @@ function KanbanTabsSurface({
   onTabChange: (v: string) => void;
   can: (p: string) => boolean;
 }) {
-  const { isMaximized } = useKanbanMaximize();
+  const { isMaximized, setToolbarEl } = useKanbanMaximize();
   const isFunnelTab = currentTab === 'funil' || currentTab === 'operacoes';
 
   return (
@@ -108,42 +108,44 @@ function KanbanTabsSurface({
         onValueChange={onTabChange}
         className={cn("w-full", isMaximized && "flex min-h-0 flex-1 flex-col")}
       >
-        {/* Mobile: horizontal scroll; Desktop: grid 5 cols */}
-        <div className="-mx-1 overflow-x-auto md:mx-0 md:overflow-visible scrollbar-thin">
-          <TabsList className="inline-flex w-max gap-1 md:grid md:w-full md:max-w-5xl md:grid-cols-5">
+        {/* Linha única: abas + controles da aba ativa (portal), sem quebra */}
+        <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 md:mx-0 scrollbar-thin">
+          <TabsList className="inline-flex w-max shrink-0 gap-0.5">
             {can('opportunities.view') && (
-              <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-3">
+              <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Kanban className="h-4 w-4 shrink-0" />
                 Oportunidades
               </TabsTrigger>
             )}
             {can('operations.view') && (
-              <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-3">
+              <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Briefcase className="h-4 w-4 shrink-0" />
                 Operações
               </TabsTrigger>
             )}
             {can('clients.view') && (
-              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-3">
+              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Users className="h-4 w-4 shrink-0" />
                 Clientes
               </TabsTrigger>
             )}
             {can('dashboard.view') && (
-              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-3">
+              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
                 Visão Geral
               </TabsTrigger>
             )}
             {can('goals.view') && (
-              <TabsTrigger value="metas" className="gap-1.5 whitespace-nowrap px-3">
+              <TabsTrigger value="metas" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Target className="h-4 w-4 shrink-0" />
                 <span className="md:hidden">Metas</span>
                 <span className="hidden md:inline">Meta de Vendas</span>
               </TabsTrigger>
             )}
           </TabsList>
+          <div ref={setToolbarEl} className="flex min-w-0 flex-1 items-center justify-end gap-1.5" />
         </div>
+
         <TabsContent
           value="funil"
           className={cn(isMaximized && isFunnelTab ? "mt-3 flex min-h-0 flex-1 flex-col" : "mt-6")}
