@@ -3,30 +3,27 @@ import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus,
   Search,
-  Edit2,
+  Pencil,
   Trash2,
-  User,
   Phone,
   Mail,
   MapPin,
   Eye,
-  DollarSign,
-  Plane,
   Clock,
   Cake,
   Upload,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -59,6 +56,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useClients } from "@/hooks/useCRM";
 import {
   useClientsPaged,
@@ -72,12 +75,65 @@ import { ServerPagination } from "@/components/shared/ServerPagination";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { ClientProfile } from "./ClientProfile";
+import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import type { Client, ClientStatus } from "@/types/crm";
 import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
 import { cn } from "@/lib/utils";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
+
+function ClientStatusBadge({ status }: { status: ClientStatus }) {
+  const label = CLIENT_STATUS_LABELS[status] || "Lead";
+  const colorClass = CLIENT_STATUS_COLORS[status] || "bg-blue-500";
+  // Map tailwind bg class to a softer ring/pill style while preserving the dot color.
+  const tone = colorClass.replace("bg-", "").split("-")[0];
+  const toneMap: Record<string, { bg: string; text: string; ring: string; dot: string }> = {
+    blue: { bg: "bg-blue-50", text: "text-blue-700", ring: "ring-blue-200/70", dot: "bg-blue-500" },
+    yellow: { bg: "bg-amber-50", text: "text-amber-700", ring: "ring-amber-200/70", dot: "bg-amber-500" },
+    green: { bg: "bg-emerald-50", text: "text-emerald-700", ring: "ring-emerald-200/70", dot: "bg-emerald-500" },
+    purple: { bg: "bg-purple-50", text: "text-purple-700", ring: "ring-purple-200/70", dot: "bg-purple-500" },
+  };
+  const t = toneMap[tone] || toneMap.blue;
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset", t.bg, t.text, t.ring)}>
+      <span className={cn("h-1.5 w-1.5 rounded-full", t.dot)} />
+      {label}
+    </span>
+  );
+}
+
+function IconAction({
+  label,
+  onClick,
+  children,
+  destructive,
+}: {
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+  destructive?: boolean;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={label}
+          className={cn(
+            "inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-muted-foreground/80 transition-colors",
+            "hover:bg-muted/70 hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground",
+            destructive && "hover:bg-rose-50 hover:text-rose-600"
+          )}
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 const clientSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
@@ -286,8 +342,9 @@ export function ClientsModule() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
+    <TooltipProvider delayDuration={200}>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -540,128 +597,128 @@ export function ClientsModule() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">Carregando...</div>
+        <Card className="rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        </Card>
       ) : clients.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          {isEmptyAgency ? (
-            <>
-              <p className="font-medium text-foreground">Nenhum cliente cadastrado ainda</p>
-              <p className="text-sm mt-1">
-                Cadastre seu primeiro cliente ou importe seus contatos para começar.
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="font-medium text-foreground">Nenhum resultado encontrado</p>
-              <p className="text-sm mt-1">Ajuste a busca ou os filtros para ver outros clientes.</p>
-            </>
-          )}
-        </div>
+        <Card className="rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+          <div className="flex flex-col items-center justify-center text-center py-16 px-6">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <Search className="h-5 w-5 text-muted-foreground" />
+            </div>
+            {isEmptyAgency ? (
+              <>
+                <p className="text-sm font-medium text-foreground">Nenhum cliente cadastrado ainda</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                  Cadastre seu primeiro cliente ou importe seus contatos para começar.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-foreground">Nenhum resultado encontrado</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                  Ajuste a busca ou os filtros para ver outros clientes.
+                </p>
+              </>
+            )}
+          </div>
+        </Card>
       ) : (
         <>
-        <div className="rounded-md border overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Nome</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden sm:table-cell">Contato</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden md:table-cell">Cidade</th>
-                 <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden xl:table-cell">Última interação</th>
-                <th className="text-right py-3 px-4 font-medium text-muted-foreground">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Card className="rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+            <div className="hidden md:grid grid-cols-[1fr_140px_180px] gap-6 items-center px-5 py-2.5 border-b border-border/60 bg-muted/20 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <div>Cliente</div>
+              <div>Status</div>
+              <div className="justify-self-end pr-1">Ações</div>
+            </div>
+            <div className="divide-y divide-border/50">
               {clients.map((client) => (
-                <tr
+                <div
                   key={client.id}
-                  className="border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
+                  className="group grid grid-cols-1 md:grid-cols-[1fr_140px_180px] gap-3 md:gap-6 items-start md:items-center px-4 md:px-5 py-3.5 transition-colors hover:bg-muted/40 cursor-pointer"
                   onClick={() => setSelectedClient(client)}
                 >
-                  <td className="py-3 px-4 font-medium">{client.name}</td>
-                  <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">
-                    <div className="flex flex-col gap-0.5">
-                      {client.email && (
-                        <span className="flex items-center gap-1.5 truncate max-w-[200px]">
-                          <Mail className="h-3 w-3 flex-shrink-0" />
-                          {client.email}
-                        </span>
-                      )}
-                      {client.phone && (
-                        <span className="flex items-center gap-1.5">
-                          <Phone className="h-3 w-3 flex-shrink-0" />
-                          {client.phone}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground hidden md:table-cell">{client.city || "—"}</td>
-                  <td className="py-3 px-4">
-                    <Badge
-                      variant="secondary"
-                      className={cn(
-                        "text-white text-xs",
-                        CLIENT_STATUS_COLORS[client.status as ClientStatus] || "bg-gray-500"
-                      )}
-                    >
-                      {CLIENT_STATUS_LABELS[client.status as ClientStatus] || "Lead"}
-                    </Badge>
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs hidden xl:table-cell">
-                    {formatDistanceToNow(new Date(client.last_interaction_at), {
-                      addSuffix: true,
-                      locale: ptBR,
-                    })}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => setSelectedClient(client)}
+                  <div className="flex items-start gap-3 min-w-0">
+                    <ClientAvatar name={client.name} className="h-10 w-10" />
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="font-medium text-foreground truncate text-[14px] leading-5 hover:text-primary transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedClient(client);
+                        }}
                       >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      {canEdit && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleOpenDialog(client)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {canDelete && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          onClick={() => setDeleteId(client.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                        {client.name}
+                      </p>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                        {client.email && (
+                          <span className="inline-flex items-center gap-1 min-w-0">
+                            <Mail className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate max-w-[180px] sm:max-w-[240px]">{client.email}</span>
+                          </span>
+                        )}
+                        {client.phone && (
+                          <span className="inline-flex items-center gap-1">
+                            <Phone className="h-3.5 w-3.5 shrink-0" />
+                            {client.phone}
+                          </span>
+                        )}
+                        {client.city && (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate max-w-[140px]">{client.city}</span>
+                          </span>
+                        )}
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5 shrink-0" />
+                          {formatDistanceToNow(new Date(client.last_interaction_at), {
+                            addSuffix: true,
+                            locale: ptBR,
+                          })}
+                        </span>
+                      </div>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+
+                  <div className="md:justify-self-start">
+                    <ClientStatusBadge status={client.status as ClientStatus} />
+                  </div>
+
+                  <div
+                    className="flex items-center gap-0.5 md:justify-self-end opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <IconAction label="Visualizar" onClick={() => setSelectedClient(client)}>
+                      <Eye className="h-4 w-4" />
+                    </IconAction>
+                    {canEdit && (
+                      <IconAction label="Editar" onClick={() => handleOpenDialog(client)}>
+                        <Pencil className="h-4 w-4" />
+                      </IconAction>
+                    )}
+                    {canDelete && (
+                      <IconAction label="Excluir" destructive onClick={() => setDeleteId(client.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </IconAction>
+                    )}
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-        <ServerPagination
-          page={page}
-          totalPages={totalPages}
-          total={total}
-          pageSize={pageSize}
-          pageSizeOptions={CLIENTS_PAGE_SIZE_OPTIONS}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          itemLabel="clientes"
-          isFetching={isFetching}
-        />
+            </div>
+          </Card>
+          <ServerPagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={pageSize}
+            pageSizeOptions={CLIENTS_PAGE_SIZE_OPTIONS}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            itemLabel="clientes"
+            isFetching={isFetching}
+          />
         </>
       )}
 
@@ -697,5 +754,6 @@ export function ClientsModule() {
         }}
       />
     </div>
+    </TooltipProvider>
   );
 }
