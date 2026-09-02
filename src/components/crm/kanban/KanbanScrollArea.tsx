@@ -63,10 +63,11 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       ref={setRefs}
       data-testid="kanban-scroll-area"
       className={cn(
-        "overflow-x-auto overscroll-x-contain cursor-grab touch-pan-x scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent",
+        // Única área de rolagem do funil: horizontal (colunas) e vertical (cards).
+        "overflow-x-auto overflow-y-auto overscroll-x-contain cursor-grab touch-pan-x scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent",
         isMaximized
-          ? "h-full min-h-0 flex-1 overflow-y-hidden"
-          : "overflow-y-auto min-h-[420px] max-h-[calc(100vh-16rem)]",
+          ? "h-full min-h-0 flex-1"
+          : "min-h-[calc(100dvh-15rem)] max-h-[calc(100dvh-15rem)]",
         className
       )}
 
@@ -76,6 +77,7 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       onMouseUp={stopDrag}
       onMouseLeave={stopDrag}
     >
+
       {children}
     </div>
   );

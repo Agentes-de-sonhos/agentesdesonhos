@@ -99,15 +99,15 @@ function KanbanTabsSurface({
   can: (p: string) => boolean;
 }) {
   const { isMaximized, setToolbarEl } = useKanbanMaximize();
-  const isFunnelTab = currentTab === 'funil' || currentTab === 'operacoes';
 
   return (
-    <KanbanMaximizeSurface>
+    <KanbanMaximizeSurface className={cn(!isMaximized && "flex w-full flex-col")}>
       <Tabs
         value={currentTab}
         onValueChange={onTabChange}
-        className={cn("w-full", isMaximized && "flex min-h-0 flex-1 flex-col")}
+        className={cn("flex w-full min-h-0 flex-1 flex-col")}
       >
+
         {/* Linha única: abas + controles da aba ativa (portal), sem quebra */}
         <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 md:mx-0 scrollbar-thin">
           <TabsList className="inline-flex w-max shrink-0 gap-0.5">
@@ -148,16 +148,17 @@ function KanbanTabsSurface({
 
         <TabsContent
           value="funil"
-          className={cn(isMaximized && isFunnelTab ? "mt-3 flex min-h-0 flex-1 flex-col" : "mt-6")}
+          className="mt-3 flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
         >
           <PermissionGate permission="opportunities.view"><KanbanBoard /></PermissionGate>
         </TabsContent>
         <TabsContent
           value="operacoes"
-          className={cn(isMaximized && isFunnelTab ? "mt-3 flex min-h-0 flex-1 flex-col" : "mt-6")}
+          className="mt-3 flex min-h-0 flex-1 flex-col data-[state=inactive]:hidden"
         >
           <PermissionGate permission="operations.view"><OperationsModule /></PermissionGate>
         </TabsContent>
+
         <TabsContent value="clientes" className="mt-6">
           <PermissionGate permission="clients.view"><ClientsModule /></PermissionGate>
         </TabsContent>
