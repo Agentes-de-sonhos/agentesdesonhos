@@ -529,6 +529,52 @@ img {
   --wl-sand: 340 46% 95%;
 }
 
+/* ===== Acabamento "faeEditorial" (Faé Viagens) ================================
+   Camada FINA sobre `.wl-editorial`: mesmo layout e comportamento, identidade
+   derivada do logotipo (roxo profundo, dourado quente nos detalhes, superfícies
+   marfim e texto grafite suave). Nenhum outro tenant é afetado. */
+.wl-editorial.wl-fae {
+  --background: 40 33% 98%;
+  --foreground: 265 18% 18%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 265 18% 18%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 265 18% 18%;
+
+  /* Roxo do logotipo; branco sobre este tom passa com folga em contraste. */
+  --primary: 272 47% 33%;
+  --primary-foreground: 40 33% 98%;
+
+  --secondary: 268 24% 95%;
+  --secondary-foreground: 265 18% 18%;
+  --muted: 40 26% 96%;
+  --muted-foreground: 265 10% 40%;
+  --accent: 42 45% 93%;
+  --accent-foreground: 265 18% 18%;
+
+  --border: 268 16% 89%;
+  --input: 268 16% 85%;
+  --ring: 272 47% 33%;
+  --radius: 0.75rem;
+
+  /* Dourado quente nos detalhes/kickers/ícones e roxo nas faixas escuras. */
+  --wl-red: 42 62% 42%;
+  --wl-navy: 271 34% 20%;
+  --wl-ink: 271 38% 17%;
+  /* Marfim quente nas seções alternadas. */
+  --wl-sand: 41 40% 95%;
+}
+
+.wl-editorial.wl-fae h1,
+.wl-editorial.wl-fae h2,
+.wl-editorial.wl-fae h3 {
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.14;
+}
+
 /* Wizard – Cadastro assistido por etapas (Carteira Digital)
    Neutral inputs with the category color reserved for the focus state.
    The category color is provided via the --wizard-accent CSS variable
