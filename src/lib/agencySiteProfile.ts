@@ -247,6 +247,154 @@ const LUXURY_CURATED: AgencySiteProfile = {
  */
 const EDITORIAL_ROSE: AgencySiteProfile = { key: "editorialRose" };
 
+/**
+ * Faé Viagens — viagens sob medida com curadoria humana. Sem DMC, depoimentos,
+ * equipe ou credenciais (nada é inventado): apenas conteúdo factual da marca.
+ */
+const FAE_CURATED: AgencySiteProfile = {
+  key: "faeCurated",
+  sections: {
+    dmc: { enabled: false },
+    testimonials: { enabled: false },
+    team: { enabled: false },
+    credentials: { enabled: false },
+    signature: { enabled: true, order: 1 },
+    destinations: { order: 2 },
+    modules: { order: 3 },
+    highlights: { order: 4 },
+    differentials: { order: 5 },
+    about: { order: 6 },
+    concierge: { order: 7 },
+    faq: { order: 8 },
+    newsletter: { order: 9 },
+    offers: { order: 10 },
+  },
+  heroImage: "fae",
+  hero: [
+    {
+      title: "Viagens sob medida, planejadas com cuidado",
+      subtitle:
+        "Roteiros autênticos, experiências escolhidas a dedo e atendimento próximo do primeiro contato ao retorno.",
+      order: 1,
+      enabled: true,
+    },
+    {
+      title: "Curadoria humana, do início ao fim",
+      subtitle:
+        "Conversamos, entendemos o seu momento e desenhamos a viagem que combina com você — sem pacote pronto.",
+      order: 2,
+      enabled: true,
+    },
+    {
+      title: "Experiência e confiança desde 2003",
+      subtitle:
+        "Uma trajetória construída viagem por viagem, com planejamento atento e acompanhamento em cada etapa.",
+      order: 3,
+      enabled: true,
+    },
+  ],
+  signature: {
+    kicker: "CURADORIA FAÉ",
+    title: "Cada viagem começa por uma boa conversa.",
+    text:
+      "Entender quem viaja é o que permite escolher os destinos, as hospedagens e o ritmo certos. É esse cuidado que transforma um roteiro em uma experiência.",
+  },
+  destinations: [
+    { key: "europa-cultural", image: "europa", label: "Cultura", title: "Europa com tempo para viver", text: "Cidades históricas, museus, vilas e estradas cênicas combinadas no seu ritmo, com deslocamentos bem pensados.", service: "pacotes", enabled: true, order: 1 },
+    { key: "norte-africa", image: "norteafrica", label: "Culturas", title: "Norte da África e culturas milenares", text: "Medinas, deserto e tradições vivas em roteiros conduzidos por parceiros locais experientes.", service: "pacotes", enabled: true, order: 2 },
+    { key: "escandinavia", image: "escandinavia", label: "Natureza", title: "Escandinávia e paisagens do Norte", text: "Fiordes, auroras e cidades tranquilas para quem busca natureza com conforto e boa logística.", service: "pacotes", enabled: true, order: 3 },
+    { key: "gastronomia-vinhos", image: "gastronomia", label: "Gastronomia", title: "Gastronomia e vinhos", text: "Mesas, mercados e vinícolas escolhidos como parte do roteiro — não como passeio avulso.", service: "pacotes", enabled: true, order: 4 },
+    { key: "brasil-autentico", image: "brasil", label: "Brasil", title: "Brasil autêntico", text: "Praias, serras e vilas brasileiras planejadas com o mesmo critério de uma viagem internacional.", service: "pacotes", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "roteiros-sob-medida", title: "Roteiros sob medida", text: "Do primeiro rascunho ao roteiro final: cada escolha é explicada e ajustada com você.", service: "pacotes", image: "europa", enabled: true, order: 1 },
+    { key: "grupos-acompanhados", title: "Grupos e viagens acompanhadas", text: "Saídas em grupo com organização cuidadosa, ritmo equilibrado e apoio durante toda a viagem.", service: "pacotes", image: "grupos", enabled: true, order: 2 },
+    { key: "cultura-historia", title: "Viagens culturais e históricas", text: "Museus, cidades históricas e experiências locais conduzidas por quem conhece o destino.", service: "pacotes", image: "norteafrica", enabled: true, order: 3 },
+    { key: "natureza-paisagens", title: "Natureza e grandes paisagens", text: "Trilhas, fiordes e cenários marcantes com logística bem resolvida.", service: "pacotes", image: "escandinavia", enabled: true, order: 4 },
+    { key: "gastronomia", title: "Gastronomia e vinhos", text: "Mesas e vinícolas integradas ao roteiro, com reservas feitas antecipadamente.", service: "pacotes", image: "gastronomia", enabled: true, order: 5 },
+    { key: "hospedagem-selecionada", title: "Hospedagens selecionadas", text: "Endereços escolhidos por localização, serviço e atmosfera — com o porquê de cada indicação.", service: "hospedagem", image: "villa", enabled: true, order: 6 },
+    { key: "aereo-seguro", title: "Aéreo e seguro viagem", text: "Rotas, conexões e coberturas explicadas com transparência antes de decidir.", service: "aereo", image: "litoral", enabled: true, order: 7 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Itinerários, cabines e categorias comparados de forma clara.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 8 },
+  ],
+  highlights: [
+    { title: "Roteiros desenhados para cada viajante", text: "A viagem nasce da conversa: seu tempo, seu ritmo e o que você quer viver.", service: "pacotes", cta: "Começar a planejar" },
+    { title: "Seleção criteriosa de hospedagens", text: "Indicamos endereços com critério e explicamos cada escolha antes de você decidir.", service: "hospedagem", cta: "Falar sobre hospedagem" },
+    { title: "Parceiros especializados", text: "Operadoras, receptivos e guias escolhidos pela especialidade em cada destino.", service: "pacotes", cta: "Solicitar proposta" },
+  ],
+  differentials: [
+    { title: "Curadoria humana em cada etapa", text: "Nada de roteiro automático: o planejamento é conduzido por pessoas que ouvem você.", icon: "consultivo" },
+    { title: "Planejamento conferido nos detalhes", text: "Horários, conexões, traslados e reservas revisados antes da confirmação.", icon: "conferido" },
+    { title: "Parceiros locais de confiança", text: "Fornecedores escolhidos pela especialidade no destino, não por volume.", icon: "fornecedores" },
+    { title: "Acompanhamento antes, durante e depois", text: "Você tem com quem falar em qualquer momento da viagem.", icon: "acompanhamento" },
+  ],
+  about: {
+    kicker: "QUEM PLANEJA A SUA VIAGEM",
+    title: "Uma trajetória construída desde 2003.",
+    text:
+      "A Faé Viagens é especialista em viagens sob medida: curadoria humana de experiências, roteiros autênticos e atendimento personalizado, com o cuidado de quem acompanha cada etapa da jornada.",
+    image: "europa",
+    badge: { value: "Desde 2003", label: "Experiência e cuidado em cada viagem." },
+  },
+  faq: [
+    {
+      q: "O que é uma viagem sob medida?",
+      a: "É uma viagem desenhada a partir do seu contexto: quem viaja, quanto tempo tem, o que quer viver e o que prefere evitar. A partir disso montamos roteiro, hospedagens e experiências, explicando cada escolha.",
+    },
+    {
+      q: "A Faé organiza viagens em grupo?",
+      a: "Sim. Além dos roteiros individuais e em família, organizamos grupos e viagens acompanhadas, com ritmo equilibrado e apoio durante todo o percurso.",
+    },
+    {
+      q: "É possível solicitar apenas um serviço, como aéreo ou hospedagem?",
+      a: "Sim. Você pode solicitar um serviço isolado — aéreo, hospedagem, transfer, seguro, ingressos — ou o planejamento completo da viagem.",
+    },
+    {
+      q: "Como funciona o atendimento?",
+      a: "Você envia a sua solicitação pela Central, conversamos para entender os detalhes e apresentamos uma proposta clara. Confirmada a viagem, seguimos acompanhando antes, durante e depois.",
+    },
+    {
+      q: "Como começo a planejar?",
+      a: "Basta enviar uma solicitação pela Central ou falar pelo WhatsApp contando o que você já imagina. A partir daí conduzimos o planejamento com você.",
+    },
+  ],
+  copy: {
+    destinations: {
+      title: "Inspirações para a sua próxima viagem",
+      subtitle:
+        "Referências que guiam a nossa curadoria. Escolha uma e conversamos sobre como ela pode virar a sua viagem.",
+    },
+    modules: {
+      title: "Como podemos planejar com você",
+      subtitle: "Temas que acompanhamos de perto. Escolha um e conte o que você imagina.",
+    },
+    highlights: {
+      title: "A curadoria Faé",
+      subtitle: "Três princípios que orientam cada viagem que desenhamos.",
+    },
+    differentials: {
+      title: "Como cuidamos de cada viagem",
+      subtitle: "O que sustenta a experiência, do primeiro contato ao retorno.",
+    },
+    concierge: {
+      kicker: "ATENDIMENTO PERSONALIZADO",
+      title: "Um consultor dedicado à sua viagem",
+      subtitle:
+        "Conversamos, entendemos o seu momento e desenhamos as opções. Você decide com todas as informações à mão.",
+      cta: "Planeje sua viagem",
+    },
+    newsletter: {
+      kicker: "INSPIRAÇÕES",
+      title: "Receba inspirações de viagem",
+      subtitle:
+        "Deixe o seu contato e o canal preferido: enviamos ideias de destinos e experiências alinhadas ao seu jeito de viajar.",
+      cta: "Quero receber inspirações",
+    },
+    faq: {
+      title: "Perguntas frequentes",
+    },
+  },
+};
+
 const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "100limites.tur.br": "editorialDmc",
   "www.100limites.tur.br": "editorialDmc",
@@ -254,6 +402,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "www.paraisoviagens.com": "luxuryCurated",
   "destinoscomaju.com.br": "editorialRose",
   "www.destinoscomaju.com.br": "editorialRose",
+  "faeviagens.com.br": "faeCurated",
+  "www.faeviagens.com.br": "faeCurated",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
@@ -261,6 +411,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   editorialDmc: EDITORIAL_DMC,
   luxuryCurated: LUXURY_CURATED,
   editorialRose: EDITORIAL_ROSE,
+  faeCurated: FAE_CURATED,
 };
 
 function normalizeHost(hostname?: string | null): string {
