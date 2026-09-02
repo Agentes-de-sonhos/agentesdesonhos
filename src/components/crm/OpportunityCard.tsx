@@ -54,6 +54,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MoveToStageMenu, type MoveStageTarget } from "@/components/crm/kanban/MoveToStageMenu";
 import {
   Dialog,
   DialogContent,
@@ -125,7 +126,15 @@ const clientSchema = z.object({
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
-export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColor }: OpportunityCardProps) {
+export function OpportunityCard({
+  opportunity,
+  onDragStart,
+  isOverdue,
+  stageColor,
+  moveTargets,
+  currentStageId,
+  onMoveToStage,
+}: OpportunityCardProps) {
   const navigate = useNavigate();
   const nav = useAdminNav();
   const { deleteOpportunity } = useOpportunities();
@@ -450,6 +459,13 @@ export function OpportunityCard({ opportunity, onDragStart, isOverdue, stageColo
                   <DropdownMenuItem onClick={() => setIsEditing(true)}>
                     <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
                   </DropdownMenuItem>
+                )}
+                {canEditOpp && onMoveToStage && moveTargets && moveTargets.length > 0 && (
+                  <MoveToStageMenu
+                    targets={moveTargets}
+                    currentStageId={currentStageId ?? currentStage?.id ?? null}
+                    onMoveToStage={onMoveToStage}
+                  />
                 )}
                 {hasBookingRequest && (
                   <DropdownMenuItem

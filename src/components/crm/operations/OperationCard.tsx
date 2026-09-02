@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MoveToStageMenu, type MoveStageTarget } from "@/components/crm/kanban/MoveToStageMenu";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -29,6 +30,10 @@ interface Props {
   onClick?: () => void;
   onOpenTab?: (tab: OperationCardTab) => void;
   onDragStart?: (e: React.DragEvent, id: string) => void;
+  canEdit?: boolean;
+  moveTargets?: MoveStageTarget[];
+  currentStageId?: string | null;
+  onMoveToStage?: (stageId: string) => void | Promise<void>;
 }
 
 function textColorFor(hex: string) {
@@ -40,7 +45,16 @@ function textColorFor(hex: string) {
   return lum > 0.6 ? "#1a1a1a" : "#ffffff";
 }
 
-export function OperationCard({ operation, onClick, onOpenTab, onDragStart }: Props) {
+export function OperationCard({
+  operation,
+  onClick,
+  onOpenTab,
+  onDragStart,
+  canEdit = true,
+  moveTargets,
+  currentStageId,
+  onMoveToStage,
+}: Props) {
   const { byOperation } = useOperationLabelAssignments();
   const { deleteOperation } = useOperations();
   const [showLabels, setShowLabels] = useState(false);
@@ -106,6 +120,13 @@ export function OperationCard({ operation, onClick, onOpenTab, onDragStart }: Pr
                 <DropdownMenuItem onClick={() => setShowEditClient(true)}>
                   <User className="mr-2 h-4 w-4" /> Editar cliente
                 </DropdownMenuItem>
+              )}
+              {canEdit && onMoveToStage && moveTargets && moveTargets.length > 0 && (
+                <MoveToStageMenu
+                  targets={moveTargets}
+                  currentStageId={currentStageId ?? null}
+                  onMoveToStage={onMoveToStage}
+                />
               )}
               <DropdownMenuItem onClick={() => setShowHistory(true)}>
                 <History className="mr-2 h-4 w-4" /> Histórico
