@@ -390,17 +390,18 @@ export function KanbanBoard() {
                           <div
                             onDragOver={handleDragOver}
                             onDrop={(e) => handleColumnDrop(e, stage)}
-                            className={cn(isMaximized && "h-full")}
+                            className={cn(isMaximized && "flex h-full min-h-0 flex-col")}
                           >
                             <div
                               className={cn(
                                 "rounded-xl border p-3 transition-shadow",
-                                isMaximized ? "h-full" : "min-h-[400px]",
+                                isMaximized ? "flex h-full min-h-0 flex-col" : "min-h-[400px]",
                                 tokens.bg,
                                 tokens.border,
                                 isDragging && "shadow-xl ring-2 ring-primary/30"
                               )}
                             >
+
                               <StageColumnHeader
                                 stage={stage}
                                 count={stageOpps.length}
