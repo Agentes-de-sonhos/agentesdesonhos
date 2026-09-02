@@ -80,6 +80,7 @@ import { OpportunityForm } from "./OpportunityForm";
 import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
 import { QuickLabelPicker } from "./QuickLabelPicker";
+import { QuickOpportunityNoteDialog } from "./QuickOpportunityNoteDialog";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
 import { useHasBookingRequest } from "@/hooks/useHasBookingRequest";
@@ -162,6 +163,7 @@ export function OpportunityCard({
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showQuickNote, setShowQuickNote] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [showEditClient, setShowEditClient] = useState(false);
 
@@ -793,6 +795,13 @@ export function OpportunityCard({
         opportunityId={opportunity.id}
         open={showHistory}
         onOpenChange={setShowHistory}
+      />
+
+      <QuickOpportunityNoteDialog
+        opportunityId={opportunity.id}
+        contextLabel={opportunity.client?.name || opportunity.destination}
+        open={showQuickNote}
+        onOpenChange={setShowQuickNote}
       />
 
       <OpportunityDetailsDrawer
