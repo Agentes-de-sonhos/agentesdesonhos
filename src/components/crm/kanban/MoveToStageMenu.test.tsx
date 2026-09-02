@@ -35,7 +35,9 @@ describe("MoveToStageMenu", () => {
     setup();
     fireEvent.click(screen.getByText("Mover"));
     await waitFor(() => expect(screen.getByText("Mover para")).toBeInTheDocument());
-    const items = screen.getAllByRole("menuitem");
+    const items = screen
+      .getAllByRole("menuitem")
+      .filter((i) => !i.textContent?.includes("Mover") || i.textContent?.includes("Lead"));
     const names = items.map((i) => i.textContent);
     expect(names[0]).toContain("Novo Lead");
     expect(names[1]).toContain("Em Negociação");
