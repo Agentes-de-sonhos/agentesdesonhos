@@ -32,6 +32,7 @@ import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
 import heroLuxo from "@/assets/whitelabel/hero-luxo.jpg";
+import heroFae from "@/assets/whitelabel/hero-fae.jpg";
 import destinoLitoral from "@/assets/whitelabel/destino-litoral.jpg";
 import destinoResort from "@/assets/whitelabel/destino-resort.jpg";
 import destinoCruzeiro from "@/assets/whitelabel/destino-cruzeiro.jpg";
@@ -43,6 +44,9 @@ import destinoVilla from "@/assets/whitelabel/destino-villa.jpg";
 import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
 import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
 import destinoLuaDeMel from "@/assets/whitelabel/destino-luademel.jpg";
+import destinoNorteAfrica from "@/assets/whitelabel/destino-norte-africa.jpg";
+import destinoEscandinavia from "@/assets/whitelabel/destino-escandinavia.jpg";
+import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
@@ -58,12 +62,16 @@ const DESTINATION_IMAGES: Record<string, string> = {
   gastronomia: destinoGastronomia,
   brasil: destinoBrasil,
   luademel: destinoLuaDeMel,
+  norteafrica: destinoNorteAfrica,
+  escandinavia: destinoEscandinavia,
+  grupos: destinoGrupos,
 };
 
 /** Slots de imagem de hero (fallback quando a agência não tem capa própria). */
 const HERO_IMAGES: Record<string, string> = {
   praia: heroPraia,
   luxo: heroLuxo,
+  fae: heroFae,
 };
 
 /** Kept exported: other white-label surfaces import this service list. */
