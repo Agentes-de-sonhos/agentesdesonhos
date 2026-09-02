@@ -170,8 +170,13 @@ export function KanbanBoard() {
     e.dataTransfer.dropEffect = "move";
   };
 
-  const performDrop = async (toStage: PipelineStage, targetCardId: string | null, dropBefore: boolean) => {
-    if (!draggedId) return;
+  const performMove = async (
+    movedId: string,
+    toStage: PipelineStage,
+    targetCardId: string | null,
+    dropBefore: boolean
+  ) => {
+    const draggedId = movedId;
     const opportunity = opportunities.find((o) => o.id === draggedId);
     if (!opportunity) return;
 
@@ -223,6 +228,32 @@ export function KanbanBoard() {
       orderedTargetIds: targetList,
       orderedSourceIds: sourceList,
     });
+  };
+
+  // Reuso direto da lógica do drag and drop (mesma reordenação, permissões e cache).
+  const performDrop = async (toStage: PipelineStage, targetCardId: string | null, dropBefore: boolean) => {
+    if (!draggedId) return;
+    await performMove(draggedId, toStage, targetCardId, dropBefore);
+  };
+
+  const moveTargets = useMemo(
+    () =>
+      stages.map((s) => ({
+        id: s.id,
+        name: s.name,
+        disabled: isTeamMember ? !canStage('opportunities', s.id, 'move') : false,
+      })),
+    [stages, isTeamMember, canStage]
+  );
+
+  const handleMoveToStage = async (opportunity: Opportunity, toStageId: string) => {
+    const toStage = stages.find((s) => s.id === toStageId);
+    if (!toStage) return;
+    try {
+      await performMove(opportunity.id, toStage, null, false);
+    } catch {
+      toast.error("Não foi possível mover o card. Tente novamente.");
+    }
   };
 
   const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
@@ -438,6 +469,11 @@ export function KanbanBoard() {
                                         opportunity={opportunity}
                                         onDragStart={handleDragStart}
                                         isOverdue={hasOverdueFollowUp(opportunity)}
+                                        moveTargets={moveTargets}
+                                        currentStageId={stage.id}
+                                        onMoveToStage={(toStageId) =>
+                                          handleMoveToStage(opportunity, toStageId)
+                                        }
                                       />
                                     </div>
                                   );
