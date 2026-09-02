@@ -60,8 +60,8 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
                 {name.slice(0, 1).toUpperCase()}
               </span>
             )}
-            {/* O logotipo do luxo já é um wordmark: evita marca duplicada. */}
-            {!(luxury && logoUrl) && (
+            {/* Logotipos que já contêm o nome da marca não repetem o wordmark. */}
+            {!(logoUrl && logoIncludesWordmark(info.hostname)) && (
               <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
                 <BrandText>{name}</BrandText>
               </span>
