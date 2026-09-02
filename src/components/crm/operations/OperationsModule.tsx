@@ -76,8 +76,13 @@ export function OperationsModule() {
     e.dataTransfer.dropEffect = "move";
   };
 
-  const performDrop = async (toStageKey: string, targetCardId: string | null, dropBefore: boolean) => {
-    if (!draggedId) return;
+  const performMove = async (
+    movedId: string,
+    toStageKey: string,
+    targetCardId: string | null,
+    dropBefore: boolean
+  ) => {
+    const draggedId = movedId;
     const op = operations.find((o) => o.id === draggedId);
     if (!op) return;
     const fromStageKey = op.stage as string;
@@ -108,6 +113,34 @@ export function OperationsModule() {
       orderedTargetIds: targetList,
       orderedSourceIds: sourceList,
     });
+  };
+
+  // Reuso direto da lógica do drag and drop (mesma reordenação e mutação).
+  const performDrop = async (toStageKey: string, targetCardId: string | null, dropBefore: boolean) => {
+    if (!draggedId) return;
+    await performMove(draggedId, toStageKey, targetCardId, dropBefore);
+  };
+
+  const moveTargets = useMemo(
+    () =>
+      stages.map((s) => ({
+        id: s.key,
+        name: s.name,
+        disabled: isTeamMember ? !canStage('operations', s.id, 'edit') : false,
+      })),
+    [stages, isTeamMember, canStage]
+  );
+
+  const handleMoveToStage = async (op: Operation, toStageKey: string) => {
+    if (isTeamMember && !canEdit) {
+      toast.error(DENY_MESSAGE);
+      return;
+    }
+    try {
+      await performMove(op.id, toStageKey, null, false);
+    } catch {
+      toast.error("Não foi possível mover o card. Tente novamente.");
+    }
   };
 
   const handleColumnDrop = async (e: React.DragEvent, stageKey: string) => {
@@ -224,6 +257,10 @@ export function OperationsModule() {
                               onClick={() => { setSelectedTab("overview"); setSelected(op); }}
                               onOpenTab={(t) => { setSelectedTab(t); setSelected(op); }}
                               onDragStart={handleDragStart}
+                              canEdit={canEdit}
+                              moveTargets={moveTargets}
+                              currentStageId={stage.key}
+                              onMoveToStage={(toStageKey) => handleMoveToStage(op, toStageKey)}
                             />
                           </div>
                         );
