@@ -243,10 +243,8 @@ export function OperationsModule() {
                   const name = prompt("Nome da nova coluna");
                   if (name && name.trim()) createStage({ name: name.trim() });
                 }}
-                className={cn(
-                  "w-[290px] flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3",
-                  isMaximized ? "h-full" : "min-h-[400px]"
-                )}
+                className="w-[290px] min-h-full flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3"
+
               >
                 <Plus className="h-5 w-5 mb-1" />
                 <span className="text-sm font-medium">Adicionar coluna</span>
