@@ -191,7 +191,7 @@ export function OperationsModule() {
                     onDrop={(e) => handleColumnDrop(e, stage.key)}
                     className={cn(
                       "w-[290px] flex-shrink-0 rounded-xl border p-3",
-                      isMaximized ? "h-full" : "min-h-[400px]",
+                      isMaximized ? "flex h-full min-h-0 flex-col" : "min-h-[400px]",
                       tokens.bg,
                       tokens.border
                     )}
@@ -205,7 +205,13 @@ export function OperationsModule() {
                       onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
                       canEdit={stageCanEdit}
                     />
-                    <div className="space-y-2.5">
+                    <div
+                      className={cn(
+                        "space-y-2.5",
+                        isMaximized && "min-h-0 flex-1 overflow-y-auto pr-0.5 scrollbar-thin"
+                      )}
+                    >
+
                       {ops.map((op) => {
                         const isIndicator = dragOver?.stageKey === stage.key && dragOver?.targetId === op.id;
                         return (
