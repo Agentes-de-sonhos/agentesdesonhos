@@ -8,6 +8,8 @@ import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
 import { KanbanScrollArea } from "@/components/crm/kanban/KanbanScrollArea";
+import { KanbanToolbarSlot } from "@/components/crm/kanban/KanbanToolbarSlot";
+
 import { toast } from "sonner";
 import { DENY_MESSAGE } from "@/hooks/usePermissions";
 import { getStageTokens } from "@/types/crm";
