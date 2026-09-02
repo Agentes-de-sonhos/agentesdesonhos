@@ -170,13 +170,13 @@ export function OperationsModule() {
       </KanbanToolbarSlot>
 
 
-      <div className={cn(isMaximized && "flex min-h-0 flex-1 flex-col")}>
+      <div className="flex min-h-0 flex-1 flex-col">
         {isLoading ? (
           <div className="text-sm text-muted-foreground p-6 text-center">Carregando operações...</div>
         ) : (
           <KanbanScrollArea>
             <div
-              className={cn("flex gap-4", isMaximized && "h-full items-stretch")}
+              className="flex min-h-full items-stretch gap-4"
               style={{ minWidth: "max-content" }}
             >
               {stages.map((stage) => {
@@ -189,8 +189,7 @@ export function OperationsModule() {
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleColumnDrop(e, stage.key)}
                     className={cn(
-                      "w-[290px] flex-shrink-0 rounded-xl border p-3",
-                      isMaximized ? "flex h-full min-h-0 flex-col" : "min-h-[400px]",
+                      "flex w-[290px] min-h-full flex-shrink-0 flex-col rounded-xl border p-3",
                       tokens.bg,
                       tokens.border
                     )}
@@ -204,12 +203,8 @@ export function OperationsModule() {
                       onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
                       canEdit={stageCanEdit}
                     />
-                    <div
-                      className={cn(
-                        "space-y-2.5",
-                        isMaximized && "min-h-0 flex-1 overflow-y-auto pr-0.5 scrollbar-thin"
-                      )}
-                    >
+                    <div className="flex-1 space-y-2.5">
+
 
                       {ops.map((op) => {
                         const isIndicator = dragOver?.stageKey === stage.key && dragOver?.targetId === op.id;
