@@ -352,8 +352,8 @@ export function KanbanBoard() {
         </KanbanToolbarSlot>
 
 
-        {/* Kanban container: arraste com o mouse + barra horizontal única no final */}
-        <div className={cn("relative", isMaximized && "flex min-h-0 flex-1 flex-col")}>
+        {/* Kanban container: arraste com o mouse + rolagem única (horizontal e vertical) */}
+        <div className="relative flex min-h-0 flex-1 flex-col">
           <KanbanScrollArea>
             <DndContext
               sensors={sensors}
@@ -365,7 +365,7 @@ export function KanbanBoard() {
                 strategy={horizontalListSortingStrategy}
               >
                 <div
-                  className={cn("flex gap-4", isMaximized && "h-full items-stretch")}
+                  className="flex min-h-full items-stretch gap-4"
                   style={{ minWidth: "max-content" }}
                 >
                   {stages
@@ -389,12 +389,11 @@ export function KanbanBoard() {
                           <div
                             onDragOver={handleDragOver}
                             onDrop={(e) => handleColumnDrop(e, stage)}
-                            className={cn(isMaximized && "flex h-full min-h-0 flex-col")}
+                            className="flex min-h-full flex-col"
                           >
                             <div
                               className={cn(
-                                "rounded-xl border p-3 transition-shadow",
-                                isMaximized ? "flex h-full min-h-0 flex-col" : "min-h-[400px]",
+                                "flex min-h-full flex-1 flex-col rounded-xl border p-3 transition-shadow",
                                 tokens.bg,
                                 tokens.border,
                                 isDragging && "shadow-xl ring-2 ring-primary/30"
@@ -418,13 +417,8 @@ export function KanbanBoard() {
                                 canEdit={stageCanEdit}
                               />
 
-                              <div
-                                className={cn(
-                                  "space-y-2.5 min-h-[100px]",
-                                  isMaximized &&
-                                    "min-h-0 flex-1 overflow-y-auto pr-0.5 scrollbar-thin"
-                                )}
-                              >
+                              <div className="flex-1 space-y-2.5">
+
 
                                 {stageOpps.map((opportunity) => {
                                   const isIndicator = dragOver?.stageId === stage.id && dragOver?.targetId === opportunity.id;
