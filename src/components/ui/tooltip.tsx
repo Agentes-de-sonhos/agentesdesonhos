@@ -4,6 +4,11 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import { usePortalContainer } from "@/components/ui/portal-container-context";
 
+const ScopedTooltipPortal = ({ children }: { children?: React.ReactNode }) => {
+  const portalContainer = usePortalContainer();
+  return <TooltipPrimitive.Portal container={portalContainer}>{children}</TooltipPrimitive.Portal>;
+};
+
 const TooltipProvider = TooltipPrimitive.Provider;
 
 const Tooltip = TooltipPrimitive.Root;
@@ -15,7 +20,7 @@ const TooltipContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
 >(({ className, sideOffset = 4, ...props }, ref) => (
   /* Portal no document.body: nenhum overflow/transform de card recorta o tooltip. */
-  <TooltipPrimitive.Portal container={portalContainer}>
+  <ScopedTooltipPortal>
     <TooltipPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
@@ -25,7 +30,7 @@ const TooltipContent = React.forwardRef<
       )}
       {...props}
     />
-  </TooltipPrimitive.Portal>
+  </ScopedTooltipPortal>
 ));
 
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;

@@ -3,6 +3,11 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
 import { cn } from "@/lib/utils";
 import { usePortalContainer } from "@/components/ui/portal-container-context";
+
+const ScopedAlertDialogPortal = ({ children }: { children?: React.ReactNode }) => {
+  const portalContainer = usePortalContainer();
+  return <AlertDialogPrimitive.Portal container={portalContainer}>{children}</AlertDialogPrimitive.Portal>;
+};
 import { buttonVariants } from "@/components/ui/button";
 
 const AlertDialog = AlertDialogPrimitive.Root;
@@ -30,7 +35,7 @@ const AlertDialogContent = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>
 >(({ className, ...props }, ref) => (
-  <AlertDialogPortal container={portalContainer}>
+  <ScopedAlertDialogPortal>
     <AlertDialogOverlay />
     <AlertDialogPrimitive.Content
       ref={ref}
@@ -40,7 +45,7 @@ const AlertDialogContent = React.forwardRef<
       )}
       {...props}
     />
-  </AlertDialogPortal>
+  </ScopedAlertDialogPortal>
 ));
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
 

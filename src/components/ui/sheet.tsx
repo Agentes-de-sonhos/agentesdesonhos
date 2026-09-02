@@ -6,6 +6,11 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { usePortalContainer } from "@/components/ui/portal-container-context";
 
+const ScopedSheetPortal = ({ children }: { children?: React.ReactNode }) => {
+  const portalContainer = usePortalContainer();
+  return <SheetPrimitive.Portal container={portalContainer}>{children}</SheetPrimitive.Portal>;
+};
+
 const Sheet = SheetPrimitive.Root;
 
 const SheetTrigger = SheetPrimitive.Trigger;
@@ -56,7 +61,7 @@ interface SheetContentProps
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
   ({ side = "right", className, children, hideCloseButton, ...props }, ref) => (
-    <SheetPortal container={portalContainer}>
+    <ScopedSheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content ref={ref} className={cn(sheetVariants({ side }), className)} {...props}>
         {children}
@@ -67,7 +72,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>
-    </SheetPortal>
+    </ScopedSheetPortal>
   ),
 );
 SheetContent.displayName = SheetPrimitive.Content.displayName;

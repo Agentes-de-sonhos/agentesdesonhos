@@ -5,6 +5,11 @@ import { Check, ChevronRight, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePortalContainer } from "@/components/ui/portal-container-context";
 
+const ScopedDropdownPortal = ({ children }: { children?: React.ReactNode }) => {
+  const portalContainer = usePortalContainer();
+  return <DropdownMenuPrimitive.Portal container={portalContainer}>{children}</DropdownMenuPrimitive.Portal>;
+};
+
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
@@ -57,7 +62,7 @@ const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
 >(({ className, sideOffset = 4, ...props }, ref) => (
-  <DropdownMenuPrimitive.Portal container={portalContainer}>
+  <ScopedDropdownPortal>
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
@@ -67,7 +72,7 @@ const DropdownMenuContent = React.forwardRef<
       )}
       {...props}
     />
-  </DropdownMenuPrimitive.Portal>
+  </ScopedDropdownPortal>
 ));
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName;
 

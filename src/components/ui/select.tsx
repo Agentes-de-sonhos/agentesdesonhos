@@ -5,6 +5,11 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { usePortalContainer } from "@/components/ui/portal-container-context";
 
+const ScopedSelectPortal = ({ children }: { children?: React.ReactNode }) => {
+  const portalContainer = usePortalContainer();
+  return <SelectPrimitive.Portal container={portalContainer}>{children}</SelectPrimitive.Portal>;
+};
+
 const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
@@ -63,7 +68,7 @@ const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Portal container={portalContainer}>
+  <ScopedSelectPortal>
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
@@ -87,7 +92,7 @@ const SelectContent = React.forwardRef<
       </SelectPrimitive.Viewport>
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
+  </ScopedSelectPortal>
 ));
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
