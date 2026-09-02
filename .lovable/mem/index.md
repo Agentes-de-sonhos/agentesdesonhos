@@ -6,3 +6,4 @@
 - [White-label Admin Dashboard](mem://features/whitelabel/admin-dashboard-and-reservations) — Dashboard operacional /gestao via RPC única, Central de Reservas paginada no servidor, permissões reservations.*
 - [Agende → Google Sheets](mem://features/leads/agende-google-sheets) — Espelhamento dos leads de /agende na planilha EducaTravel via connector gateway
 - [White-label Brand Identity](mem://features/whitelabel/global-brand-identity) — Cor principal/secundária centralizadas em brandTheme, aplicadas em todas as superfícies da agência
+- [Faé Viagens](mem://features/whitelabel/fae-viagens-tenant) — Tenant white label faeviagens.com.br, perfil faeCurated, tema roxo/dourado, hosts em construção
