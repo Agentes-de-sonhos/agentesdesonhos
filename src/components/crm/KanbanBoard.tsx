@@ -419,7 +419,14 @@ export function KanbanBoard() {
                                 canEdit={stageCanEdit}
                               />
 
-                              <div className="space-y-2.5 min-h-[100px]">
+                              <div
+                                className={cn(
+                                  "space-y-2.5 min-h-[100px]",
+                                  isMaximized &&
+                                    "min-h-0 flex-1 overflow-y-auto pr-0.5 scrollbar-thin"
+                                )}
+                              >
+
                                 {stageOpps.map((opportunity) => {
                                   const isIndicator = dragOver?.stageId === stage.id && dragOver?.targetId === opportunity.id;
                                   return (
