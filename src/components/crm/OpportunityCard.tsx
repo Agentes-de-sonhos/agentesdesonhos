@@ -449,17 +449,6 @@ export function OpportunityCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowLabels(true)}>
-                  <Tag className="mr-2 h-4 w-4" /> Etiquetas
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowDetails(true)}>
-                  <MessageSquare className="mr-2 h-4 w-4" /> Anotações
-                </DropdownMenuItem>
-                {canEditOpp && (
-                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                    <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
-                  </DropdownMenuItem>
-                )}
                 {canEditOpp && onMoveToStage && moveTargets && moveTargets.length > 0 && (
                   <MoveToStageMenu
                     targets={moveTargets}
@@ -467,6 +456,20 @@ export function OpportunityCard({
                     onMoveToStage={onMoveToStage}
                   />
                 )}
+                {canEditOpp && (
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <Edit2 className="mr-2 h-4 w-4" /> Editar oportunidade
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => setShowQuickNote(true)}>
+                  <MessageSquare className="mr-2 h-4 w-4" /> Anotações
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowLabels(true)}>
+                  <Tag className="mr-2 h-4 w-4" /> Etiquetas
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowHistory(true)}>
+                  <History className="mr-2 h-4 w-4" /> Histórico
+                </DropdownMenuItem>
                 {hasBookingRequest && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -477,23 +480,6 @@ export function OpportunityCard({
                     <ClipboardList className="mr-2 h-4 w-4" /> Visualizar serviços solicitados
                   </DropdownMenuItem>
                 )}
-                {canEditClient && (
-                  <DropdownMenuItem onClick={handleEditClientClick}>
-                    <User className="mr-2 h-4 w-4" /> Editar cliente
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={() => setShowHistory(true)}>
-                  <History className="mr-2 h-4 w-4" /> Histórico
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {canGenerateQuote && (
-                  <DropdownMenuItem onClick={handleCreateQuote}>
-                    <FileText className="mr-2 h-4 w-4" /> Gerar Orçamento
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={handleCreateTripWallet}>
-                  <Wallet className="mr-2 h-4 w-4" /> Gerar Carteira Digital
-                </DropdownMenuItem>
                 {canDeleteOpp && (
                   <>
                     <DropdownMenuSeparator />
@@ -506,6 +492,7 @@ export function OpportunityCard({
                   </>
                 )}
               </DropdownMenuContent>
+
             </DropdownMenu>
           </div>
 
