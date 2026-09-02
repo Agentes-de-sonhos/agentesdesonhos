@@ -98,7 +98,7 @@ function KanbanTabsSurface({
   onTabChange: (v: string) => void;
   can: (p: string) => boolean;
 }) {
-  const { isMaximized } = useKanbanMaximize();
+  const { isMaximized, setToolbarEl } = useKanbanMaximize();
   const isFunnelTab = currentTab === 'funil' || currentTab === 'operacoes';
 
   return (
