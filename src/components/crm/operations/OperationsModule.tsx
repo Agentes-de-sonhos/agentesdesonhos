@@ -144,26 +144,32 @@ export function OperationsModule() {
         isMaximized ? "flex min-h-0 flex-1 flex-col gap-3" : "space-y-4"
       )}
     >
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <KanbanToolbarSlot>
+        <div className="relative w-[150px] shrink-0 lg:w-[190px]">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Buscar operações..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="h-8 pl-8 text-xs"
           />
         </div>
         {canCreate && (
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Nova Operação
+          <Button size="sm" className="h-8 shrink-0 gap-1 px-2.5 text-xs" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-3.5 w-3.5" /> Nova
           </Button>
         )}
-        <Button variant="outline" size="sm" className="gap-2 ml-auto" onClick={toggleMaximize}>
-          {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 shrink-0 gap-1.5 px-2.5 text-xs"
+          onClick={toggleMaximize}
+        >
+          {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
           {isMaximized ? "Minimizar" : "Maximizar"}
         </Button>
-      </div>
+      </KanbanToolbarSlot>
+
 
       <div className={cn(isMaximized && "flex min-h-0 flex-1 flex-col")}>
         {isLoading ? (
