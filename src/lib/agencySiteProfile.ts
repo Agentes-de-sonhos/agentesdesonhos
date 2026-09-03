@@ -249,28 +249,36 @@ const LUXURY_CURATED: AgencySiteProfile = {
 const EDITORIAL_ROSE: AgencySiteProfile = { key: "editorialRose" };
 
 /**
+ * Preset ESTRUTURAL compartilhado da família "curadoria sob medida": mesma
+ * ordem de seções, densidade e tipos de módulos, sem conteúdo de marca.
+ * Reutilizado por tenants editoriais (Faé) e pelo laboratório (SiteLab Base).
+ */
+const CURATED_SECTIONS: NonNullable<AgencySiteProfile["sections"]> = {
+  dmc: { enabled: false },
+  testimonials: { enabled: false },
+  team: { enabled: false },
+  credentials: { enabled: false },
+  signature: { enabled: true, order: 1 },
+  destinations: { order: 2 },
+  modules: { order: 3 },
+  highlights: { order: 4 },
+  differentials: { order: 5 },
+  about: { order: 6 },
+  concierge: { order: 7 },
+  faq: { order: 8 },
+  newsletter: { order: 9 },
+  offers: { order: 10 },
+};
+
+/**
  * Faé Viagens — viagens sob medida com curadoria humana. Sem DMC, depoimentos,
  * equipe ou credenciais (nada é inventado): apenas conteúdo factual da marca.
  */
 const FAE_CURATED: AgencySiteProfile = {
   key: "faeCurated",
-  sections: {
-    dmc: { enabled: false },
-    testimonials: { enabled: false },
-    team: { enabled: false },
-    credentials: { enabled: false },
-    signature: { enabled: true, order: 1 },
-    destinations: { order: 2 },
-    modules: { order: 3 },
-    highlights: { order: 4 },
-    differentials: { order: 5 },
-    about: { order: 6 },
-    concierge: { order: 7 },
-    faq: { order: 8 },
-    newsletter: { order: 9 },
-    offers: { order: 10 },
-  },
+  sections: { ...CURATED_SECTIONS },
   heroImage: "fae",
+
   hero: [
     {
       title: "Viagens sob medida, planejadas com cuidado",
