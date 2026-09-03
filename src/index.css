@@ -531,9 +531,12 @@ img {
 
 /* ===== Acabamento "siteBaseEditorial" (SiteLab Base) =========================
    Camada FINA e NEUTRA sobre `.wl-editorial`: mesma estrutura e comportamento,
-   superfícies neutras e acentos derivados dos tokens de marca do laboratório
-   (--brand-primary / --brand-secondary / --brand-tertiary). Nenhum tenant real
-   é afetado e `.wl-fae` permanece intacta. */
+   com TODA a cor vinda dos tokens dinâmicos da paleta de 3 cores
+   (`brandThemeVars`): --brand-primary-hsl / --brand-secondary-hsl /
+   --brand-tertiary-hsl e os respectivos foregrounds calculados.
+   Nenhuma cor de marca é fixada aqui; os fallbacks são neutros (nunca a paleta
+   provisória do laboratório). Nenhum tenant real é afetado e `.wl-fae`
+   permanece intacta. */
 .wl-editorial.wl-site-base {
   --background: 0 0% 100%;
   --foreground: 240 10% 16%;
@@ -543,26 +546,32 @@ img {
   --popover: 0 0% 100%;
   --popover-foreground: 240 10% 16%;
 
-  --primary: 270 44% 30%;
-  --primary-foreground: 0 0% 100%;
+  /* Ações principais → primária configurada; contraste calculado. */
+  --primary: var(--brand-primary-hsl, 222 47% 11%);
+  --primary-foreground: var(--brand-on-primary-hsl, 0 0% 100%);
 
-  --secondary: 268 20% 96%;
-  --secondary-foreground: 240 10% 16%;
+  /* Superfícies suaves e cards selecionados → terciária. */
+  --secondary: var(--brand-tertiary-hsl, 240 12% 97%);
+  --secondary-foreground: var(--brand-on-tertiary-hsl, 240 10% 16%);
   --muted: 240 12% 97%;
   --muted-foreground: 240 6% 42%;
-  --accent: 268 24% 95%;
-  --accent-foreground: 240 10% 16%;
+  --accent: var(--brand-tertiary-hsl, 240 12% 97%);
+  --accent-foreground: var(--brand-on-tertiary-hsl, 240 10% 16%);
 
   --border: 240 10% 90%;
   --input: 240 10% 86%;
-  --ring: 270 44% 30%;
+  /* Foco/borda ativa → secundária. */
+  --ring: var(--brand-secondary-hsl, 222 47% 11%);
   --radius: 0.75rem;
 
-  --wl-red: 270 44% 30%;
-  --wl-navy: 270 30% 20%;
-  --wl-ink: 270 32% 16%;
-  --wl-sand: 270 22% 97%;
+  /* Detalhes/kickers/ícones → secundária; faixas escuras → primária;
+     superfícies alternadas → terciária. */
+  --wl-red: var(--brand-secondary-hsl, 222 47% 11%);
+  --wl-navy: var(--brand-primary-hsl, 222 47% 11%);
+  --wl-ink: var(--brand-primary-hsl, 222 47% 11%);
+  --wl-sand: var(--brand-tertiary-hsl, 240 12% 97%);
 }
+
 
 .wl-editorial.wl-site-base h1,
 .wl-editorial.wl-site-base h2,
