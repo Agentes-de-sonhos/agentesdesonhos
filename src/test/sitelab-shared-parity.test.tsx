@@ -105,7 +105,7 @@ describe("Site Lab — identidade e segurança", () => {
   });
 
   it("não exibe o modal global de nova versão nas áreas do laboratório", () => {
-    const hook = read("src/hooks/useAppUpdateModal.ts");
+    const hook = read("src/hooks/useAppVersion.ts");
     expect(hook).toContain("/sitelab-base");
   });
 });
