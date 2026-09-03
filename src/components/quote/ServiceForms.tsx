@@ -1,4 +1,6 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { analyzeFlight, computeFlightStatus, formatMissingFlightFields } from "./flight-wizard/flightStatus";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -396,10 +398,35 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const isUnitPrice = true;
   const adultPrice = form.watch("adult_price");
   const childPrice = form.watch("child_price");
+  const watchedAirline = form.watch("airline");
+  const watchedOrigin = form.watch("origin_city");
+  const watchedDestination = form.watch("destination_city");
+  const watchedDeparture = form.watch("departure_date");
+  const watchedReturn = form.watch("return_date");
 
   const totalAdults = adultPrice * adultsCount;
   const totalChildren = childPrice * childrenCount;
   const totalAmount = totalAdults + totalChildren;
+
+  const isEditing = !!initialData;
+  const flightAnalysis = useMemo(() => analyzeFlight({
+    airline: watchedAirline,
+    origin_city: watchedOrigin,
+    destination_city: watchedDestination,
+    departure_date: watchedDeparture ? "set" : "",
+    return_date: watchedReturn ? "set" : "",
+    is_one_way: isOneWay,
+    outbound_legs: outboundLegs,
+    return_legs: returnLegs,
+    adult_price: adultPrice,
+    child_price: childPrice,
+  }, totalAmount || initialData?.amount), [watchedAirline, watchedOrigin, watchedDestination, watchedDeparture, watchedReturn, isOneWay, outboundLegs, returnLegs, adultPrice, childPrice, totalAmount, initialData?.amount]);
+  const missingPrice = flightAnalysis.missing.includes("valor do serviço");
+
+  useEffect(() => {
+    if (isEditing && missingPrice) setShowPricing(true);
+  }, [isEditing, missingPrice]);
+
 
   const hasNonEmptyLegs = (legs: z.infer<typeof flightLegSchema>[]) =>
     legs.some(l => Object.entries(l).some(([key, v]) => key !== "segment_type" && v && String(v).length > 0));
@@ -473,16 +500,26 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       data.return_detail = preparedLegs.return_[0];
     }
 
-    onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
+    const savedTotal = computedTotalAdults + computedTotalChildren;
+    // Recompute status from the data being saved (never keep a stale one).
+    data.flight_status = computeFlightStatus(data, false, savedTotal || initialData?.amount);
+
+    onSubmit(data, savedTotal, values.option_label || undefined, values.service_description || undefined);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {isEditing && flightAnalysis.status === "incomplete" && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+            <span className="font-medium">Passagem incompleta</span> — {formatMissingFlightFields(flightAnalysis.missing)}
+          </div>
+        )}
         {/* BLOCO 1 — Informações Principais */}
         <FormField control={form.control} name="airline" render={({ field }) => (
           <FormItem><FormLabel>Companhia Aérea</FormLabel><FormControl><Input placeholder="LATAM, GOL, Air France..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="origin_city" render={({ field }) => (
             <FormItem><FormLabel>Cidade de Origem</FormLabel><FormControl><Input placeholder="São Paulo" {...field} /></FormControl><FormMessage /></FormItem>
@@ -632,7 +669,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
         {/* BLOCO 5 — Apresentação do Serviço */}
         {/* BLOCO 5 — Financeiro (prioritário) */}
-        <div className="border border-border/60 rounded-lg">
+        <div className={cn("border rounded-lg", isEditing && missingPrice ? "border-amber-500/50 ring-1 ring-amber-500/30" : "border-border/60")}>
+
           <button
             type="button"
             onClick={() => setShowPricing(!showPricing)}
