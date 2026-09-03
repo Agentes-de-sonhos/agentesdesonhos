@@ -105,6 +105,7 @@ export default function Perfil() {
           agency_name: (data as any).agency_name || null,
           agency_logo_url: (data as any).agency_logo_url || null,
           cnpj: (data as any).cnpj || null,
+          agency_whatsapp_group_url: (data as any).agency_whatsapp_group_url || null,
           street: (data as any).street || null,
           address_number: (data as any).address_number || null,
           neighborhood: (data as any).neighborhood || null,
@@ -222,6 +223,7 @@ export default function Perfil() {
           phone: formData.phone,
           agency_name: formData.agency_name,
           cnpj: formData.cnpj,
+          agency_whatsapp_group_url: formData.agency_whatsapp_group_url?.trim() || null,
           street: formData.street,
           address_number: formData.address_number,
           neighborhood: formData.neighborhood,
@@ -521,6 +523,20 @@ export default function Perfil() {
                       onChange={(e) => updateField("cnpj", formatCNPJ(e.target.value))}
                       placeholder="00.000.000/0000-00"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Link do grupo de WhatsApp — Inspirações</Label>
+                    <Input
+                      value={formData.agency_whatsapp_group_url || ""}
+                      onChange={(e) => updateField("agency_whatsapp_group_url", e.target.value)}
+                      placeholder="https://chat.whatsapp.com/..."
+                      inputMode="url"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Opcional. Com o link preenchido, quem se cadastrar na seção "Receba
+                      inspirações" do seu site é direcionado ao grupo após o registro. Sem link,
+                      o lead é apenas registrado na sua gestão.
+                    </p>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
