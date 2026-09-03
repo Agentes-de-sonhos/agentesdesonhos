@@ -1243,6 +1243,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           </div>
         );
       })}
+
+      {/* Captação "Receba inspirações": tenant resolvido no servidor pelo hostname. */}
+      <AgencyInspirationDialog
+        open={inspirationOpen}
+        onOpenChange={setInspirationOpen}
+        hostname={hostname}
+        agencyName={name}
+        groupUrl={info.whatsapp_group_url}
+      />
     </>
   );
 }
