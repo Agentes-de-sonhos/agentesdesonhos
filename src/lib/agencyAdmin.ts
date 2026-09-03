@@ -15,6 +15,32 @@ export const AGENCY_ADMIN_LOGIN = "/gestao/login";
 /** Destino pretendido guardado antes de mandar o usuário para o login. */
 export const AGENCY_ADMIN_FROM_KEY = "wl-admin-from";
 
+/**
+ * Montagem do painel sob um prefixo de URL.
+ *
+ * Nos domínios das agências o prefixo é vazio (comportamento atual). O Site Lab
+ * — que é apenas um CONSUMIDOR do mesmo painel, nunca uma cópia — monta a mesma
+ * árvore sob `/sitelab-base`, e por isso login/home/rotas internas precisam
+ * respeitar esse prefixo em vez de escapar para o `/gestao` de outro contexto.
+ */
+export function agencyAdminMount(basePath?: string | null) {
+  const base = (basePath || "").replace(/\/+$/, "");
+  return {
+    base,
+    home: `${base}${AGENCY_ADMIN_HOME}`,
+    login: `${base}${AGENCY_ADMIN_LOGIN}`,
+    /** URL real do navegador → caminho interno das rotas do painel. */
+    toInternal(path: string): string {
+      if (!base) return path;
+      return path.startsWith(base) ? path.slice(base.length) || AGENCY_ADMIN_HOME : AGENCY_ADMIN_HOME;
+    },
+    /** Caminho interno → URL real do navegador. */
+    toExternal(path: string): string {
+      return base ? `${base}${path}` : path;
+    },
+  };
+}
+
 /** Origem da plataforma usada apenas no fluxo de recuperação de senha. */
 export const PLATFORM_APP_ORIGIN = "https://app.agentesdesonhos.com.br";
 
@@ -208,11 +234,16 @@ function hslTriplet(hex: string): string {
 export function brandCssVars(
   brand: BrandAccent,
   secondary?: string | null,
+  /** Paleta completa do tenant (inclui terciária); quando ausente, o
+   * comportamento é exatamente o atual — apenas primária/secundária. */
+  palette?: { tertiary?: string | null; tertiaryAuto?: boolean | null } | null,
 ): Record<string, string> {
   return brandThemeVars({
     primary: brand.accent,
     secondary: secondary ?? null,
     secondaryAuto: !secondary,
+    tertiary: palette?.tertiary ?? null,
+    tertiaryAuto: palette?.tertiaryAuto ?? true,
   });
 }
 

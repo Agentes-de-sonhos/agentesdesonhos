@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { agencyDisplayName } from "@/lib/agencyDomains";
+import { agencyBrandInput, agencyDisplayName } from "@/lib/agencyDomains";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import {
   AGENCY_ADMIN_HOME,
