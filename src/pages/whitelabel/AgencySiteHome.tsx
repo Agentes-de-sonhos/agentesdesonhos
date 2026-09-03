@@ -1016,10 +1016,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     <div className="md:justify-self-end">
                       <Button
                         size="lg"
-                        className="wl-cta-invert h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
-                        onClick={() => openRequest("pacotes")}
+                        className="h-12 w-full rounded-xl border border-[var(--brand-secondary)] bg-[var(--brand-secondary)] px-7 text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)] [&_svg]:text-[var(--brand-on-secondary)] md:w-auto"
+                        onClick={() => setInspirationOpen(true)}
                       >
-                        {copy.cta ?? "Quero receber novidades"}{" "}
+                        {copy.cta ?? "Quero receber inspirações"}{" "}
                         <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
