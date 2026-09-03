@@ -1,94 +1,126 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, FileText, MapPin, Users, Wallet } from "lucide-react";
+/**
+ * Área do Cliente do Site Lab.
+ *
+ * Reutiliza EXATAMENTE a casca e as seções compartilhadas dos sites das
+ * agências (`ClientAreaShell`, `ClientAreaSections`, `ClientAreaTripsView`) e a
+ * navegação central (`CLIENT_AREA_NAV`). A única diferença é a origem dos
+ * dados: fixtures sintéticas de uma viagem a Portugal. Nada aqui consulta,
+ * grava ou dispara qualquer ação real.
+ */
+import { useMemo, useState } from "react";
+import type { AgencyDomainInfo } from "@/lib/agencyDomains";
+import { ClientAreaShell } from "@/components/whitelabel/clientarea/ClientAreaShell";
+import {
+  ClientAreaDocuments,
+  ClientAreaHome,
+  ClientAreaProfile,
+  ClientAreaSupportSection,
+} from "@/components/whitelabel/clientarea/ClientAreaSections";
+import {
+  ClientAreaTripDetail,
+  ClientAreaTripsView,
+} from "@/components/whitelabel/clientarea/ClientAreaTripsView";
+import { groupTrips, highlightTrip } from "@/lib/clientAreaTrips";
+import type { ClientAreaView } from "@/lib/clientAreaNav";
 import {
   DEMO_CLIENT,
-  DEMO_DOCUMENTS,
-  DEMO_TRIPS,
-  formatDemoDate,
+  DEMO_CLIENT_AREA_DOCUMENTS,
+  DEMO_CLIENT_AREA_PROFILE,
+  DEMO_CLIENT_AREA_TRIP,
+  DEMO_CLIENT_AREA_TRIPS,
 } from "@/pages/sitelab/sitelabFixtures";
 
-/** Área do cliente demonstrativa — 100% fixtures, sem login real adicional. */
-export default function SiteLabClientAreaDemo() {
+const noop = () => {};
+
+export default function SiteLabClientAreaDemo({ info }: { info: AgencyDomainInfo }) {
+  const [view, setView] = useState<ClientAreaView>("inicio");
+  const [tripId, setTripId] = useState<string | null>(null);
+
+  const grouped = useMemo(() => groupTrips(DEMO_CLIENT_AREA_TRIPS), []);
+  const highlight = useMemo(() => highlightTrip(grouped), [grouped]);
+
+  const changeView = (next: ClientAreaView) => {
+    setTripId(null);
+    setView(next);
+  };
+  const openTrip = (id: string) => {
+    setTripId(id);
+    setView("viagens");
+  };
+
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8">
-      <header className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-wide text-[var(--brand-primary)]">
-          Área do cliente
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight">Olá, {DEMO_CLIENT.name}</h1>
-        <p className="text-sm text-muted-foreground">
-          Acompanhe suas viagens, documentos e a carteira digital em um só lugar.
-        </p>
-      </header>
-
-      <section className="grid gap-4 sm:grid-cols-3">
-        {[
-          { icon: MapPin, label: "Viagens ativas", value: "2" },
-          { icon: FileText, label: "Documentos", value: String(DEMO_DOCUMENTS.length) },
-          { icon: Wallet, label: "Carteira digital", value: "Disponível" },
-        ].map(({ icon: Icon, label, value }) => (
-          <Card key={label} className="border-[var(--brand-border)] bg-[var(--brand-tertiary)]">
-            <CardContent className="flex items-center gap-3 p-4">
-              <span className="rounded-full bg-white/70 p-2 text-[var(--brand-primary)]">
-                <Icon className="h-4 w-4" />
-              </span>
-              <span>
-                <span className="block text-xs text-muted-foreground">{label}</span>
-                <span className="block text-base font-semibold">{value}</span>
-              </span>
-            </CardContent>
-          </Card>
-        ))}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Minhas viagens</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          {DEMO_TRIPS.map((trip) => (
-            <Card key={trip.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-3">
-                  <CardTitle className="text-base">{trip.title}</CardTitle>
-                  <Badge variant="secondary">{trip.status}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm text-muted-foreground">
-                <p className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" /> {trip.destination}
-                </p>
-                <p className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" /> {formatDemoDate(trip.start)} — {formatDemoDate(trip.end)}
-                </p>
-                <p className="flex items-center gap-2">
-                  <Users className="h-4 w-4" /> {trip.travelers} viajantes
-                </p>
-                <Button size="sm" variant="outline" className="mt-2">
-                  Ver detalhes
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Documentos</h2>
-        <Card>
-          <CardContent className="divide-y p-0">
-            {DEMO_DOCUMENTS.map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between gap-3 p-4">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{doc.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">{doc.trip}</p>
-                </div>
-                <Badge variant="outline">{doc.kind}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </section>
-    </div>
+    <ClientAreaShell
+      info={info}
+      view={view}
+      onChangeView={changeView}
+      clientName={DEMO_CLIENT.name}
+      clientEmail={DEMO_CLIENT.email}
+      onLogout={noop}
+    >
+      {view === "inicio" && (
+        <ClientAreaHome
+          info={info}
+          clientName={DEMO_CLIENT.name}
+          onChangeView={changeView}
+          tripsStatus="ready"
+          highlight={highlight}
+          onOpenTrip={openTrip}
+        />
+      )}
+      {view === "viagens" && (tripId ? (
+        <ClientAreaTripDetail
+          info={info}
+          status="ready"
+          trip={DEMO_CLIENT_AREA_TRIP}
+          onBack={() => setTripId(null)}
+          documentPendingId={null}
+          documentError={null}
+          onOpenDocument={noop}
+          onOpenWallet={noop}
+        />
+      ) : (
+        <ClientAreaTripsView
+          info={info}
+          status="ready"
+          grouped={grouped}
+          onRetry={noop}
+          onOpenTrip={openTrip}
+        />
+      ))}
+      {view === "documentos" && (
+        <ClientAreaDocuments
+          info={info}
+          status="ready"
+          documents={DEMO_CLIENT_AREA_DOCUMENTS}
+          pendingId={null}
+          error={null}
+          onOpen={noop}
+          onRetry={noop}
+          onOpenTrip={openTrip}
+        />
+      )}
+      {view === "perfil" && (
+        <ClientAreaProfile
+          info={info}
+          clientName={DEMO_CLIENT.name}
+          clientEmail={DEMO_CLIENT.email}
+          showChange={false}
+          onToggleChange={noop}
+          currentPassword=""
+          newPassword=""
+          confirmPassword=""
+          onCurrentPassword={noop}
+          onNewPassword={noop}
+          onConfirmPassword={noop}
+          onSubmitPassword={noop}
+          passwordError={null}
+          busy={false}
+          onLogout={noop}
+          profile={DEMO_CLIENT_AREA_PROFILE}
+          onRequestUpdate={noop}
+        />
+      )}
+      {view === "atendimento" && <ClientAreaSupportSection info={info} />}
+    </ClientAreaShell>
   );
 }

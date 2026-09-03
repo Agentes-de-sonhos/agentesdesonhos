@@ -259,9 +259,9 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
             <AgencySiteHome info={info} />
           </AgencySiteLayout>
         ) : view === "clientArea" ? (
-          <SiteLabClientAreaDemo />
+          <SiteLabClientAreaDemo info={info} />
         ) : (
-          <SiteLabAdminDemo />
+          <SiteLabAdminDemo info={info} />
         )}
       </Suspense>
     </div>

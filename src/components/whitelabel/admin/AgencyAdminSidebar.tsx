@@ -58,6 +58,14 @@ import { getPersonInitials } from "@/components/shared/ClientAvatar";
 import { densityForHeight, sidebarDensity, useViewport } from "@/lib/agencyAdminDensity";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/workspace/WorkspaceProvider";
+import {
+  CREATE_ITEMS,
+  MANAGEMENT_ITEMS,
+  PROJECTS_ITEMS,
+  USER_ITEMS,
+  filterMenuByPermission,
+  type MenuItemDef,
+} from "@/lib/agencyAdminMenu";
 
 
 const SIDEBAR_PREF_KEY = "wl-admin-sidebar-collapsed";
@@ -97,38 +105,7 @@ export function useSidebarCollapsed() {
 }
 
 
-interface MenuItemDef {
-  label: string;
-  to: string;
-  icon: LucideIcon;
-  /** Caminhos (além de `to`) que marcam o item como ativo. */
-  match?: (pathname: string, search: string) => boolean;
-}
 
-function tabMatcher(tab: string) {
-  return (pathname: string, search: string) =>
-    (pathname === "/gestao/meus-projetos" || pathname === "/meus-projetos") &&
-    new URLSearchParams(search).get("tab") === tab;
-}
-
-const PROJECTS_ITEMS: MenuItemDef[] = [
-  {
-    label: "Orçamentos",
-    to: "/gestao/meus-projetos?tab=orcamentos",
-    icon: FileText,
-    match: (p, s) =>
-      (p === "/gestao/meus-projetos" || p === "/meus-projetos") &&
-      (new URLSearchParams(s).get("tab") ?? "orcamentos") === "orcamentos",
-  },
-  { label: "Roteiros", to: "/gestao/meus-projetos?tab=roteiros", icon: Map, match: tabMatcher("roteiros") },
-  {
-    label: "Carteiras digitais",
-    to: "/gestao/meus-projetos?tab=carteiras",
-    icon: WalletCards,
-    match: tabMatcher("carteiras"),
-  },
-  { label: "Modelos", to: "/gestao/meus-projetos?tab=modelos", icon: Layers, match: tabMatcher("modelos") },
-];
 
 export function AgencyAdminSidebar({
   info,
@@ -257,73 +234,11 @@ export function AgencyAdminSidebar({
     });
   };
 
-  // ── Itens (mesmas rotas e permissões de antes) ───────────────────────────
-  const createItems: MenuItemDef[] = [
-    { label: "Novo orçamento", to: "/gestao/criar/orcamento", icon: FileText },
-    { label: "Novo roteiro", to: "/gestao/criar/roteiro", icon: Map },
-    { label: "Nova carteira digital", to: "/gestao/criar/carteira", icon: WalletCards },
-    ...(can("opportunities.view")
-      ? [{ label: "Nova oportunidade", to: "/gestao/crm/funil", icon: KanbanSquare } as MenuItemDef]
-      : []),
-    ...(can("operations.view")
-      ? [{ label: "Nova operação", to: "/gestao/crm/operacoes", icon: FolderOpen } as MenuItemDef]
-      : []),
-  ];
+  // ── Itens: fonte única compartilhada com o Site Lab (mesma ordem) ───────
+  const createItems = filterMenuByPermission(CREATE_ITEMS, can);
+  const managementItems = filterMenuByPermission(MANAGEMENT_ITEMS, can);
+  const userItems = USER_ITEMS;
 
-  const managementItems: MenuItemDef[] = [
-    ...(can("opportunities.view")
-      ? [
-          {
-            label: "Oportunidades",
-            to: "/gestao/crm/funil",
-            icon: KanbanSquare,
-            match: (p: string) => p.includes("/funil"),
-          } as MenuItemDef,
-        ]
-      : []),
-    ...(can("operations.view")
-      ? [
-          {
-            label: "Operações",
-            to: "/gestao/crm/operacoes",
-            icon: FolderOpen,
-            match: (p: string) => p.includes("/operacoes"),
-          } as MenuItemDef,
-        ]
-      : []),
-    ...(can("clients.view")
-      ? [
-          {
-            label: "Clientes",
-            to: "/gestao/crm/clientes",
-            icon: UsersRound,
-            match: (p: string) => p.includes("/clientes"),
-          } as MenuItemDef,
-        ]
-      : []),
-    {
-      label: "Reservas",
-      to: "/gestao/reservas",
-      icon: Ticket,
-      match: (p) => p.startsWith("/gestao/reservas"),
-    },
-    ...(can("financial.access")
-      ? [
-          {
-            label: "Financeiro",
-            to: "/gestao/financeiro",
-            icon: Wallet,
-            match: (p: string) => p === "/gestao/financeiro" || p === "/financeiro",
-          } as MenuItemDef,
-        ]
-      : []),
-  ];
-
-  const userItems: MenuItemDef[] = [
-    { label: "Meu perfil", to: "/gestao/perfil", icon: UserRound },
-    { label: "Minha conta", to: "/gestao/minha-conta", icon: UserCog },
-    { label: "Suporte", to: "/gestao/suporte", icon: Headphones },
-  ];
 
   const isActive = (item: MenuItemDef) =>
     item.match ? item.match(location.pathname, location.search) : location.pathname === item.to;
