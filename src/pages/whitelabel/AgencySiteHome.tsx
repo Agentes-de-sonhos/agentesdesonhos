@@ -21,6 +21,7 @@ import {
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
+import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
