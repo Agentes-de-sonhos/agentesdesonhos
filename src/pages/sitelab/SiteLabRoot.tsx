@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
-import type { AgencyDomainInfo } from "@/lib/agencyDomains";
+import { fetchAgencyDomain, type AgencyDomainInfo } from "@/lib/agencyDomains";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import {
   SITELAB_BASE,
+  SITELAB_BASE_PATH,
   SITELAB_DEMO_HOSTNAME,
   SITELAB_DEMO_USER_ID,
   SITELAB_VIEWS,
@@ -26,7 +27,6 @@ import {
   revokeSitelabAccess,
   verifySitelabPassword,
 } from "@/lib/sitelabAccess";
-import { AGENCY_ADMIN_HOME } from "@/lib/agencyAdmin";
 import sitelabLogo from "@/assets/sitelab/sitelab-base-logo.png.asset.json";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
@@ -50,27 +50,43 @@ function useNoIndex(title: string) {
   }, [title]);
 }
 
-/** Identidade do template-base: apenas nome, logo e paleta. */
-function demoInfo(model: SiteLabModel): AgencyDomainInfo {
+/**
+ * Identidade do template-base: apenas nome, logo e as 3 cores.
+ *
+ * REGRA DO SITE LAB: ele é o CONSUMIDOR MESTRE do mesmo template das agências
+ * (AgencySiteHome/AgencySiteLayout, AgencyClientArea, AgencyAdminArea). Não é
+ * staging, não gera cópias e não existe etapa de "promover para as agências":
+ * uma melhoria no núcleo compartilhado chega no mesmo deploy aqui e em todos os
+ * tenants. Só a identidade (nome, logo, paleta) varia.
+ *
+ * `tenant` é o registro real do tenant técnico do laboratório (isolado e
+ * possivelmente vazio); quando indisponível, mantemos um contorno neutro.
+ */
+function demoInfo(model: SiteLabModel, tenant: AgencyDomainInfo | null): AgencyDomainInfo {
   return {
-    user_id: SITELAB_DEMO_USER_ID,
+    ...(tenant ?? {
+      user_id: SITELAB_DEMO_USER_ID,
+      cover_image_url: null,
+      phone: null,
+      city: null,
+      state: null,
+      bio: null,
+      cnpj: null,
+      is_primary: true,
+    }),
     agency_slug: model.slug,
-    hostname: SITELAB_DEMO_HOSTNAME,
+    hostname: model.adminHostname,
     is_primary: true,
     agency_name: model.name,
     owner_name: model.name,
     logo_url: model.logoUrl,
-    cover_image_url: null,
     primary_color: model.palette.primary,
     secondary_color: model.palette.secondary,
     secondary_auto: false,
-    phone: null,
-    city: null,
-    state: null,
-    bio: null,
+    tertiary_color: model.palette.tertiary,
+    tertiary_auto: false,
     public_slug: model.slug,
-    cnpj: null,
-  };
+  } as AgencyDomainInfo;
 }
 
 function SiteLabTopBar({
@@ -234,6 +250,16 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
     tertiaryAuto: false,
   });
 
+  // Tenant TÉCNICO do laboratório, resolvido no servidor pelo mesmo RPC das
+  // agências. Nunca usa dados de uma agência real.
+  const tenant = useQuery({
+    queryKey: ["sitelab-tenant", model.adminHostname],
+    queryFn: () => fetchAgencyDomain(model.adminHostname),
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
+
   // A sessão vale para as três áreas por até 8 horas.
   useEffect(() => {
     setGranted(hasSitelabAccess(SITELAB_BASE.slug));
@@ -248,7 +274,7 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
     return <PasswordGate model={model} onGranted={() => setGranted(true)} />;
   }
 
-  const info = demoInfo(model);
+  const info = demoInfo(model, tenant.data ?? null);
 
   return (
     <div className="min-h-screen bg-white">
@@ -260,13 +286,12 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
           </AgencySiteLayout>
         ) : view === "clientArea" ? (
           /* Página real: login, sessão, navegação e dados são os do white label. */
-          <AgencyClientArea info={info} basePath="/sitelab-base/area-do-cliente" />
+          <AgencyClientArea info={info} basePath={`${SITELAB_BASE_PATH}/area-do-cliente`} />
         ) : (
           /* Painel real completo: mesmos providers, guard, menu, shell e páginas. */
-          <AgencyAdminArea
-            hostname={typeof window === "undefined" ? "" : window.location.hostname}
-            entryPath={AGENCY_ADMIN_HOME}
-          />
+          /* Painel real: tenant técnico do laboratório (nunca o hostname
+             reservado da plataforma) e rotas sob o prefixo protegido. */
+          <AgencyAdminArea hostname={model.adminHostname} basePath={SITELAB_BASE_PATH} />
         )}
       </Suspense>
     </div>
