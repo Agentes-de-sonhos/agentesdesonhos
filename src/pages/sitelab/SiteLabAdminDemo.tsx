@@ -190,7 +190,7 @@ function SidebarNav({
           ) : (
             <span
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold"
-              style={{ backgroundColor: "var(--brand-primary)", color: "#fff" }}
+              style={{ backgroundColor: "var(--brand-primary)", color: "var(--brand-primary-foreground)" }}
             >
               {agencyName.charAt(0).toUpperCase()}
             </span>
