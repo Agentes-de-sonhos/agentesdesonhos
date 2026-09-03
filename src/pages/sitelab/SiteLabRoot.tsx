@@ -291,7 +291,20 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
           /* Painel real completo: mesmos providers, guard, menu, shell e páginas. */
           /* Painel real: tenant técnico do laboratório (nunca o hostname
              reservado da plataforma) e rotas sob o prefixo protegido. */
-          <AgencyAdminArea hostname={model.adminHostname} basePath={SITELAB_BASE_PATH} />
+          <AgencyAdminArea
+            hostname={model.adminHostname}
+            basePath={SITELAB_BASE_PATH}
+            identity={{
+              agency_name: model.name,
+              owner_name: model.name,
+              logo_url: model.logoUrl,
+              primary_color: model.palette.primary,
+              secondary_color: model.palette.secondary,
+              secondary_auto: false,
+              tertiary_color: model.palette.tertiary,
+              tertiary_auto: false,
+            }}
+          />
         )}
       </Suspense>
     </div>

@@ -175,9 +175,11 @@ function AgencyAdminWorkspace({
 function AgencyAdminEntry({
   hostname,
   basePath,
+  identity,
 }: {
   hostname: string;
   basePath?: string;
+  identity?: Partial<AgencyAdminPortalInfo>;
 }) {
   const mount = agencyAdminMount(basePath);
   const real = window.location.pathname.replace(/\/+$/, "") || "/";
@@ -194,7 +196,12 @@ function AgencyAdminEntry({
   }
   return (
     <AgencyAdminShell hostname={hostname} basePath={mount.base}>
-      {(info) => <AgencyAdminWorkspace info={info} entryPath={entryPath} />}
+      {(info) => (
+        <AgencyAdminWorkspace
+          info={identity ? { ...info, ...identity } : info}
+          entryPath={entryPath}
+        />
+      )}
     </AgencyAdminShell>
   );
 }
@@ -215,9 +222,16 @@ export default function AgencyAdminArea({
    * cópia paralela, nem etapa de "promover" para as agências.
    */
   basePath,
+  /**
+   * Sobreposição APENAS de identidade (nome, logo e paleta) — usada pelo Site
+   * Lab, cujo tenant técnico não tem perfil. Dados e permissões continuam
+   * vindo do servidor.
+   */
+  identity,
 }: {
   hostname: string;
   basePath?: string;
+  identity?: Partial<AgencyAdminPortalInfo>;
 }) {
   return (
     <AuthProvider>
@@ -225,7 +239,11 @@ export default function AgencyAdminArea({
         <SubscriptionProvider>
           {/* Navegação contextual: páginas reutilizadas geram caminhos /gestao/*. */}
           <AgencyAdminNavProvider>
-            <AgencyAdminEntry hostname={hostname} basePath={basePath} />
+            <AgencyAdminEntry
+              hostname={hostname}
+              basePath={basePath}
+              identity={identity}
+            />
           </AgencyAdminNavProvider>
         </SubscriptionProvider>
       </TeamSessionProvider>
