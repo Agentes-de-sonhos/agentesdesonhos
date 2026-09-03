@@ -199,6 +199,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
   const [requestOpen, setRequestOpen] = useState(false);
+  // Captação de leads da seção editorial "Receba inspirações" (template compartilhado).
+  const [inspirationOpen, setInspirationOpen] = useState(false);
   const requestCenterRef = useRef<HTMLDivElement | null>(null);
   const quoteCardRef = useRef<HTMLDivElement | null>(null);
   /**
