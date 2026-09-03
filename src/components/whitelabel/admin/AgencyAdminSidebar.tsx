@@ -97,38 +97,7 @@ export function useSidebarCollapsed() {
 }
 
 
-interface MenuItemDef {
-  label: string;
-  to: string;
-  icon: LucideIcon;
-  /** Caminhos (além de `to`) que marcam o item como ativo. */
-  match?: (pathname: string, search: string) => boolean;
-}
 
-function tabMatcher(tab: string) {
-  return (pathname: string, search: string) =>
-    (pathname === "/gestao/meus-projetos" || pathname === "/meus-projetos") &&
-    new URLSearchParams(search).get("tab") === tab;
-}
-
-const PROJECTS_ITEMS: MenuItemDef[] = [
-  {
-    label: "Orçamentos",
-    to: "/gestao/meus-projetos?tab=orcamentos",
-    icon: FileText,
-    match: (p, s) =>
-      (p === "/gestao/meus-projetos" || p === "/meus-projetos") &&
-      (new URLSearchParams(s).get("tab") ?? "orcamentos") === "orcamentos",
-  },
-  { label: "Roteiros", to: "/gestao/meus-projetos?tab=roteiros", icon: Map, match: tabMatcher("roteiros") },
-  {
-    label: "Carteiras digitais",
-    to: "/gestao/meus-projetos?tab=carteiras",
-    icon: WalletCards,
-    match: tabMatcher("carteiras"),
-  },
-  { label: "Modelos", to: "/gestao/meus-projetos?tab=modelos", icon: Layers, match: tabMatcher("modelos") },
-];
 
 export function AgencyAdminSidebar({
   info,
