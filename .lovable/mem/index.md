@@ -7,3 +7,4 @@
 - [Agende → Google Sheets](mem://features/leads/agende-google-sheets) — Espelhamento dos leads de /agende na planilha EducaTravel via connector gateway
 - [White-label Brand Identity](mem://features/whitelabel/global-brand-identity) — Cor principal/secundária centralizadas em brandTheme, aplicadas em todas as superfícies da agência
 - [Faé Viagens](mem://features/whitelabel/fae-viagens-tenant) — Tenant white label faeviagens.com.br, perfil faeCurated, tema roxo/dourado, hosts em construção
+- [SiteLab Base](mem://features/whitelabel/sitelab-base) — Laboratório privado /sitelab-base e contrato de paleta primária/secundária/terciária
