@@ -396,10 +396,35 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const isUnitPrice = true;
   const adultPrice = form.watch("adult_price");
   const childPrice = form.watch("child_price");
+  const watchedAirline = form.watch("airline");
+  const watchedOrigin = form.watch("origin_city");
+  const watchedDestination = form.watch("destination_city");
+  const watchedDeparture = form.watch("departure_date");
+  const watchedReturn = form.watch("return_date");
 
   const totalAdults = adultPrice * adultsCount;
   const totalChildren = childPrice * childrenCount;
   const totalAmount = totalAdults + totalChildren;
+
+  const isEditing = !!initialData;
+  const flightAnalysis = useMemo(() => analyzeFlight({
+    airline: watchedAirline,
+    origin_city: watchedOrigin,
+    destination_city: watchedDestination,
+    departure_date: watchedDeparture ? "set" : "",
+    return_date: watchedReturn ? "set" : "",
+    is_one_way: isOneWay,
+    outbound_legs: outboundLegs,
+    return_legs: returnLegs,
+    adult_price: adultPrice,
+    child_price: childPrice,
+  }, totalAmount || initialData?.amount), [watchedAirline, watchedOrigin, watchedDestination, watchedDeparture, watchedReturn, isOneWay, outboundLegs, returnLegs, adultPrice, childPrice, totalAmount, initialData?.amount]);
+  const missingPrice = flightAnalysis.missing.includes("valor do serviço");
+
+  useEffect(() => {
+    if (isEditing && missingPrice) setShowPricing(true);
+  }, [isEditing, missingPrice]);
+
 
   const hasNonEmptyLegs = (legs: z.infer<typeof flightLegSchema>[]) =>
     legs.some(l => Object.entries(l).some(([key, v]) => key !== "segment_type" && v && String(v).length > 0));
