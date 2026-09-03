@@ -529,6 +529,50 @@ img {
   --wl-sand: 340 46% 95%;
 }
 
+/* ===== Acabamento "siteBaseEditorial" (SiteLab Base) =========================
+   Camada FINA e NEUTRA sobre `.wl-editorial`: mesma estrutura e comportamento,
+   superfícies neutras e acentos derivados dos tokens de marca do laboratório
+   (--brand-primary / --brand-secondary / --brand-tertiary). Nenhum tenant real
+   é afetado e `.wl-fae` permanece intacta. */
+.wl-editorial.wl-site-base {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 16%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 16%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 16%;
+
+  --primary: 270 44% 30%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 268 20% 96%;
+  --secondary-foreground: 240 10% 16%;
+  --muted: 240 12% 97%;
+  --muted-foreground: 240 6% 42%;
+  --accent: 268 24% 95%;
+  --accent-foreground: 240 10% 16%;
+
+  --border: 240 10% 90%;
+  --input: 240 10% 86%;
+  --ring: 270 44% 30%;
+  --radius: 0.75rem;
+
+  --wl-red: 270 44% 30%;
+  --wl-navy: 270 30% 20%;
+  --wl-ink: 270 32% 16%;
+  --wl-sand: 270 22% 97%;
+}
+
+.wl-editorial.wl-site-base h1,
+.wl-editorial.wl-site-base h2,
+.wl-editorial.wl-site-base h3 {
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.14;
+}
+
 /* ===== Acabamento "faeEditorial" (Faé Viagens) ================================
    Camada FINA sobre `.wl-editorial`: mesmo layout e comportamento, identidade
    derivada do logotipo (roxo profundo, dourado quente nos detalhes, superfícies
