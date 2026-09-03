@@ -613,15 +613,19 @@ export default function Perfil() {
             initialColor={profile?.agency_primary_color ?? null}
             initialSecondaryColor={profile?.agency_secondary_color ?? null}
             initialSecondaryAuto={profile?.agency_secondary_auto ?? true}
+            initialTertiaryColor={(profile as any)?.agency_tertiary_color ?? null}
+            initialTertiaryAuto={(profile as any)?.agency_tertiary_auto ?? true}
             agencyLogoUrl={profile?.agency_logo_url ?? null}
-            onSaved={(color, secondary, auto) => {
+            onSaved={(color, secondary, auto, tertiary, tertiaryAuto) => {
               const patch = {
                 agency_primary_color: color,
                 agency_secondary_color: secondary ?? null,
                 agency_secondary_auto: auto ?? true,
+                agency_tertiary_color: tertiary ?? null,
+                agency_tertiary_auto: tertiaryAuto ?? true,
               };
-              setProfile((prev) => (prev ? { ...prev, ...patch } : prev));
-              setFormData((prev) => (prev ? { ...prev, ...patch } : prev));
+              setProfile((prev) => (prev ? { ...prev, ...patch } as any : prev));
+              setFormData((prev) => (prev ? { ...prev, ...patch } as any : prev));
             }}
           />
         </div>

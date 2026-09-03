@@ -98,14 +98,24 @@ export function deriveSecondaryColor(primary: string | null | undefined): string
   return toHex(mix(WHITE, rgb, 0.12));
 }
 
+/** Tom muito claro derivado (superfícies, cards, miolo de intervalo). */
+export function deriveTertiaryColor(primary: string | null | undefined): string {
+  return deriveSecondaryColor(primary);
+}
+
 export interface BrandPalette {
   primary: string;
   /** Variante da principal ajustada para leitura sobre fundos claros. */
   primaryReadable: string;
   primaryHover: string;
   onPrimary: string;
+  /** Segundo acento real da marca (ações secundárias, foco/borda ativa). */
   secondary: string;
   secondaryHover: string;
+  onSecondary: string;
+  /** Tom muito claro: fundos suaves, cards selecionados, miolo de intervalo. */
+  tertiary: string;
+  onTertiary: string;
   /** Fundo de item selecionado / intervalo de datas. */
   selection: string;
   border: string;
@@ -113,15 +123,29 @@ export interface BrandPalette {
 
 export interface AgencyBrandInput {
   primary?: string | null;
+  /**
+   * Segundo acento da marca. Em cadastros legados este campo guardava o
+   * "tom claro" — nesse caso ele é reinterpretado como terciária e o acento
+   * acompanha a primária (aparência preservada).
+   */
   secondary?: string | null;
-  /** Quando true (padrão), a secundária é sempre derivada da principal. */
   secondaryAuto?: boolean | null;
+  /** Tom muito claro. Quando ausente/automático, derivado da primária. */
+  tertiary?: string | null;
+  tertiaryAuto?: boolean | null;
+}
+
+/** Texto legível (preto/branco) sobre uma cor de fundo. */
+function readableOn(hex: string): string {
+  const rgb = parseHex(hex) ?? parseHex(BRAND_FALLBACK_PRIMARY)!;
+  return luminance(rgb) > 0.42 ? "#1E293B" : "#FFFFFF";
 }
 
 /**
- * Resolve a paleta efetiva da agência.
+ * Resolve a paleta efetiva da agência (contrato de 3 cores).
  * - Sem cor configurada → azul atual (fallback).
- * - Sem secundária (ou modo automático) → tom claro derivado da principal.
+ * - Terciária ausente/automática → tom claro derivado da primária.
+ * - Secundária ausente/automática → acompanha a primária.
  */
 export function resolveBrandPalette(input: AgencyBrandInput): BrandPalette {
   const primaryHex = normalizeBrandHex(input.primary) ?? BRAND_FALLBACK_PRIMARY;
@@ -136,23 +160,40 @@ export function resolveBrandPalette(input: AgencyBrandInput): BrandPalette {
     guard += 1;
   }
   if (luminance(readable) < 0.02) readable = [readable[0] + 28, readable[1] + 28, readable[2] + 28];
+  const primary = toHex(readable);
 
-  // Automático (padrão) → tom claro derivado. Manual → cor informada, com
-  // fallback seguro para o tom derivado quando o HEX for inválido/ausente.
-  const auto = input.secondaryAuto !== false;
-  const secondary = auto
-    ? deriveSecondaryColor(primaryHex)
-    : normalizeBrandHex(input.secondary) ?? deriveSecondaryColor(primaryHex);
+  const derivedLight = deriveTertiaryColor(primaryHex);
+  const legacyManualLight =
+    input.secondaryAuto === false ? normalizeBrandHex(input.secondary) ?? derivedLight : derivedLight;
+
+  const tertiaryConfigured = normalizeBrandHex(input.tertiary);
+  const tertiaryExplicit = tertiaryConfigured !== null || input.tertiaryAuto === false;
+  // Migração compatível: quando a terciária ainda não foi configurada, ela é
+  // exatamente o antigo "tom claro" (derivado ou manual) do cadastro atual.
+  const tertiary =
+    input.tertiaryAuto === false
+      ? tertiaryConfigured ?? legacyManualLight
+      : legacyManualLight;
+
+  // O acento só entra em cena quando a agência já migrou para 3 cores; nos
+  // cadastros antigos ele acompanha a primária, preservando a aparência.
+  const secondary =
+    tertiaryExplicit && input.secondaryAuto === false
+      ? normalizeBrandHex(input.secondary) ?? primary
+      : primary;
 
   const secondaryRgb = parseHex(secondary)!;
 
   return {
-    primary: toHex(readable),
-    primaryReadable: toHex(readable),
+    primary,
+    primaryReadable: primary,
     primaryHover: toHex([readable[0] * 0.85, readable[1] * 0.85, readable[2] * 0.85]),
     onPrimary: luminance(readable) > 0.42 ? "#1E293B" : "#FFFFFF",
     secondary,
     secondaryHover: toHex(mix(secondaryRgb, readable, 0.12)),
+    onSecondary: readableOn(secondary),
+    tertiary,
+    onTertiary: readableOn(tertiary),
     selection: toHex(mix(WHITE, readable, 0.22)),
     border: toHex(mix(WHITE, readable, 0.45)),
   };
@@ -166,7 +207,7 @@ export function brandThemeVars(input: AgencyBrandInput): Record<string, string> 
   const p = resolveBrandPalette(input);
   const primaryHsl = toHslTriplet(p.primary);
   const onPrimaryHsl = toHslTriplet(p.onPrimary);
-  const secondaryHsl = toHslTriplet(p.secondary);
+  const tertiaryHsl = toHslTriplet(p.tertiary);
   const neutralFg = "222 47% 11%";
 
   return {
@@ -175,12 +216,20 @@ export function brandThemeVars(input: AgencyBrandInput): Record<string, string> 
     "--brand-primary-hover": p.primaryHover,
     "--brand-secondary": p.secondary,
     "--brand-secondary-hover": p.secondaryHover,
+    "--brand-on-secondary": p.onSecondary,
+    "--brand-tertiary": p.tertiary,
+    "--brand-on-tertiary": p.onTertiary,
     "--brand-on-primary": p.onPrimary,
-    "--brand-focus-ring": p.primary,
+    // Foco/borda ativa de campos, checkboxes e controles → secundária.
+    "--brand-focus-ring": p.secondary,
+    // Calendários de intervalo: extremos na primária, miolo na terciária.
+    "--brand-range-edge": p.primary,
+    "--brand-range-fill": p.tertiary,
     "--brand-selection": p.selection,
     "--brand-border": p.border,
 
     // ── Compatibilidade com tokens já usados no produto ───────────────────
+    // (o antigo "tom claro" corresponde agora à terciária)
     "--wl-accent": p.primary,
     "--wl-accent-dark": p.primaryHover,
     "--wl-on-accent": p.onPrimary,
@@ -191,25 +240,25 @@ export function brandThemeVars(input: AgencyBrandInput): Record<string, string> 
     "--agency-primary": p.primary,
     "--agency-primary-hover": p.primaryHover,
     "--agency-primary-active": p.primaryHover,
-    "--agency-primary-soft": p.secondary,
+    "--agency-primary-soft": p.tertiary,
     "--agency-primary-soft-hover": p.secondaryHover,
     "--agency-primary-border": p.border,
     "--agency-primary-foreground": p.onPrimary,
-    "--agency-focus-ring": p.primary,
+    "--agency-focus-ring": p.secondary,
     "--agency-selection": p.selection,
     "--wallet-brand": primaryHsl,
-    "--wallet-brand-soft": secondaryHsl,
+    "--wallet-brand-soft": tertiaryHsl,
 
     // ── Sobrescrita dos tokens shadcn/Tailwind (HSL) ───────────────────────
     "--primary": primaryHsl,
     "--primary-foreground": onPrimaryHsl,
-    "--ring": primaryHsl,
-    "--accent": secondaryHsl,
+    "--ring": toHslTriplet(p.secondary),
+    "--accent": tertiaryHsl,
     "--accent-foreground": neutralFg,
     "--sidebar-primary": primaryHsl,
     "--sidebar-primary-foreground": onPrimaryHsl,
-    "--sidebar-ring": primaryHsl,
-    "--sidebar-accent": secondaryHsl,
+    "--sidebar-ring": toHslTriplet(p.secondary),
+    "--sidebar-accent": tertiaryHsl,
     "--sidebar-accent-foreground": neutralFg,
     "--gradient-primary": `linear-gradient(135deg, ${p.primary} 0%, ${p.primaryHover} 100%)`,
   };

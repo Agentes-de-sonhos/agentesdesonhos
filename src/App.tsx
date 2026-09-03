@@ -151,6 +151,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const DashboardFornecedor = lazy(() => import("./pages/DashboardFornecedor"));
 const AgendaTrade = lazy(() => import("./pages/AgendaTrade"));
 const FaturaPublica = lazy(() => import("./pages/FaturaPublica"));
+const SiteLabRoot = lazy(() => import("./pages/sitelab/SiteLabRoot"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -246,6 +247,10 @@ const App = () => (
             <Route path="/criar-cartao" element={<CriarCartao />} />
             <Route path="/captura-cartao/:token" element={<CardCaptureQuickAccess />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
+            {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
+            <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
+            <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
+            <Route path="/sitelab-base/gestao" element={<SiteLabRoot view="admin" />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:agencySlug/:accessCode" element={<PublicCodeResolver />} />
             <Route
