@@ -27,6 +27,8 @@ export interface SiteLabModel {
   /** Logo do próprio SiteLab — provisório e facilmente substituível. */
   logoUrl: string | null;
   palette: SiteLabPalette;
+  /** Hostname do tenant técnico ligado a este modelo (ligação explícita). */
+  adminHostname: string;
   /** Personalizações futuras por modelo, sem duplicar o template. */
   overrides: Record<string, unknown>;
 }
@@ -34,8 +36,18 @@ export interface SiteLabModel {
 /** UUID neutro: nenhum dado real é lido ou gravado pelas telas demonstrativas. */
 export const SITELAB_DEMO_USER_ID = "00000000-0000-0000-0000-000000000000";
 
-/** Hostname sintético usado apenas para resolver o template comum do site. */
+/**
+ * Hostname do TENANT TÉCNICO do Site Lab (registrado em `agency_public_domains`).
+ *
+ * Não é um domínio público: existe para que o laboratório seja resolvido pelo
+ * MESMO caminho de servidor das agências (get_agency_domain /
+ * get_agency_admin_portal), com guard, autenticação e permissões reais. O
+ * tenant é isolado e pode estar vazio — nenhum dado de agência real é usado.
+ */
 export const SITELAB_DEMO_HOSTNAME = "sitelab.local";
+
+/** Prefixo de URL onde o laboratório monta o template compartilhado. */
+export const SITELAB_BASE_PATH = "/sitelab-base";
 
 /**
  * Helper central: identifica o contexto sintético do laboratório.
@@ -49,6 +61,7 @@ export const SITELAB_BASE: SiteLabModel = {
   slug: "sitelab-base",
   name: "SiteLab Base",
   logoUrl: null,
+  adminHostname: SITELAB_DEMO_HOSTNAME,
   palette: {
     primary: "#4B2A6E",
     secondary: "#FFD600",
@@ -91,6 +104,7 @@ export function sitelabModelFromRecord(
     slug: str(r.slug, fallback.slug)!,
     name: str(r.name, fallback.name)!,
     logoUrl: str(r.logo_url, fallback.logoUrl),
+    adminHostname: str(r.admin_hostname, fallback.adminHostname)!,
     palette: {
       primary: str(r.primary_color, fallback.palette.primary)!,
       secondary: str(r.secondary_color, fallback.palette.secondary)!,
