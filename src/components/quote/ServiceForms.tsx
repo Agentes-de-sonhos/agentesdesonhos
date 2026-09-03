@@ -500,16 +500,26 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       data.return_detail = preparedLegs.return_[0];
     }
 
-    onSubmit(data, computedTotalAdults + computedTotalChildren, values.option_label || undefined, values.service_description || undefined);
+    const savedTotal = computedTotalAdults + computedTotalChildren;
+    // Recompute status from the data being saved (never keep a stale one).
+    data.flight_status = computeFlightStatus(data, false, savedTotal || initialData?.amount);
+
+    onSubmit(data, savedTotal, values.option_label || undefined, values.service_description || undefined);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {isEditing && flightAnalysis.status === "incomplete" && (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+            <span className="font-medium">Passagem incompleta</span> — {formatMissingFlightFields(flightAnalysis.missing)}
+          </div>
+        )}
         {/* BLOCO 1 — Informações Principais */}
         <FormField control={form.control} name="airline" render={({ field }) => (
           <FormItem><FormLabel>Companhia Aérea</FormLabel><FormControl><Input placeholder="LATAM, GOL, Air France..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
+
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="origin_city" render={({ field }) => (
             <FormItem><FormLabel>Cidade de Origem</FormLabel><FormControl><Input placeholder="São Paulo" {...field} /></FormControl><FormMessage /></FormItem>
