@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Home, LogOut, MapPinned, MessageCircle, FileText, UserRound } from "lucide-react";
 import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,8 @@ export function ClientAreaShell({
 }: ShellProps) {
   const name = agencyDisplayName(info);
   const initial = (clientName || clientEmail).trim().slice(0, 1).toUpperCase();
+  /* Se o asset da marca falhar, cai para o monograma em vez do ícone quebrado. */
+  const [logoFailed, setLogoFailed] = useState(false);
 
   return (
     <div className="min-h-[70vh] bg-muted/20">
@@ -40,12 +43,13 @@ export function ClientAreaShell({
         {/* Cabeçalho da área autenticada */}
         <header className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-border/60 bg-card p-4 shadow-sm md:p-5">
           <div className="flex min-w-0 items-center gap-3">
-            {info.logo_url ? (
+            {info.logo_url && !logoFailed ? (
               <img
                 src={info.logo_url}
                 alt={`Logotipo da ${name}`}
                 className="h-10 w-auto max-w-[140px] object-contain md:h-12 md:max-w-[180px]"
                 loading="lazy"
+                onError={() => setLogoFailed(true)}
               />
             ) : (
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-primary text-base font-semibold text-primary-foreground">
