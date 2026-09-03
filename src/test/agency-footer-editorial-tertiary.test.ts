@@ -3,16 +3,14 @@ import { describe, expect, it } from "vitest";
 
 const src = readFileSync("src/components/whitelabel/AgencySiteLayout.tsx", "utf8");
 
-function branch(start: string, end: string): string {
-  const a = src.indexOf(start);
-  expect(a).toBeGreaterThan(-1);
-  const b = src.indexOf(end, a);
-  expect(b).toBeGreaterThan(a);
-  return src.slice(a, b);
-}
+const start = src.indexOf('<footer id="rodape" className="bg-[var(--brand-tertiary');
+const end = src.indexOf('<footer id="rodape" className="border-t', start);
 
 describe("rodapé editorial compartilhado", () => {
-  const editorial = branch('<footer id="rodape" className="bg-[var(--brand-tertiary', "if (editorial)".length ? "\n  return (" : "");
+  expect(start).toBeGreaterThan(-1);
+  expect(end).toBeGreaterThan(start);
+  const editorial = src.slice(start, end);
+
 
   it("usa a terciária dinâmica da agência, e não fundo escuro fixo", () => {
     expect(editorial).toContain("bg-[var(--brand-tertiary,hsl(var(--wl-sand)))]");
