@@ -24,7 +24,9 @@ export type AgencySiteProfileKey =
   | "editorialDmc"
   | "luxuryCurated"
   | "editorialRose"
-  | "faeCurated";
+  | "faeCurated"
+  /** Laboratório visual neutro (SiteLab Base): estrutura editorial, conteúdo demo. */
+  | "siteLabBase";
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
 export interface AgencySignatureContent {
@@ -548,6 +550,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "www.destinoscomaju.com.br": "editorialRose",
   "faeviagens.com.br": "faeCurated",
   "www.faeviagens.com.br": "faeCurated",
+  /** Host sintético do laboratório — nunca aponta para tenants reais. */
+  "sitelab.local": "siteLabBase",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
@@ -556,6 +560,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   luxuryCurated: LUXURY_CURATED,
   editorialRose: EDITORIAL_ROSE,
   faeCurated: FAE_CURATED,
+  siteLabBase: SITE_LAB_BASE,
 };
 
 function normalizeHost(hostname?: string | null): string {

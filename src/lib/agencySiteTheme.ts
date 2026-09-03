@@ -17,7 +17,9 @@ export type AgencySiteThemeKey =
   /** Mesmo layout editorial, identidade rosé/magenta (Destinos com a Ju). */
   | "roseEditorial"
   /** Mesmo layout editorial, identidade roxo profundo + dourado (Faé Viagens). */
-  | "faeEditorial";
+  | "faeEditorial"
+  /** Mesmo layout editorial, acabamento base NEUTRO (SiteLab Base). */
+  | "siteBaseEditorial";
 
 const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "100limites.tur.br": "travelEditorial",
@@ -28,6 +30,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "www.destinoscomaju.com.br": "roseEditorial",
   "faeviagens.com.br": "faeEditorial",
   "www.faeviagens.com.br": "faeEditorial",
+  "sitelab.local": "siteBaseEditorial",
 };
 
 function normalizeHost(hostname?: string | null): string {
@@ -48,7 +51,8 @@ export function isEditorialTheme(hostname?: string | null): boolean {
     theme === "travelEditorial" ||
     theme === "luxuryEditorial" ||
     theme === "roseEditorial" ||
-    theme === "faeEditorial"
+    theme === "faeEditorial" ||
+    theme === "siteBaseEditorial"
   );
 }
 
@@ -62,6 +66,7 @@ export const EDITORIAL_ROOT_CLASS = "wl-editorial";
 export const LUXURY_ROOT_CLASS = "wl-luxury";
 export const ROSE_ROOT_CLASS = "wl-rose";
 export const FAE_ROOT_CLASS = "wl-fae";
+export const SITE_BASE_ROOT_CLASS = "wl-site-base";
 
 /** Classe(s) raiz do tema resolvido — única fonte de verdade para o layout. */
 export function siteThemeRootClass(hostname?: string | null): string {
@@ -69,6 +74,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
   if (theme === "luxuryEditorial") return `${EDITORIAL_ROOT_CLASS} ${LUXURY_ROOT_CLASS}`;
   if (theme === "roseEditorial") return `${EDITORIAL_ROOT_CLASS} ${ROSE_ROOT_CLASS}`;
   if (theme === "faeEditorial") return `${EDITORIAL_ROOT_CLASS} ${FAE_ROOT_CLASS}`;
+  if (theme === "siteBaseEditorial") return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}`;
   if (theme === "travelEditorial") return EDITORIAL_ROOT_CLASS;
   return "";
 }
