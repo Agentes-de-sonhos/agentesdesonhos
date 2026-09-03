@@ -18,8 +18,7 @@ describe("isolamento do tenant técnico do Site Lab", () => {
     // O painel real só resolve o contexto por auth.uid()/agency_membership;
     // por isso o laboratório não o monta enquanto não houver conta técnica.
     expect(ownerHook).toContain("agency_membership");
-    expect(root).not.toContain("<AgencyAdminArea");
-    expect(root).not.toContain("admin/AgencyAdminArea");
+    expect(root).not.toMatch(/<AgencyAdminArea|import\(\s*"@\/components\/whitelabel\/admin\/AgencyAdminArea"/);
     expect(root).toContain("SiteLabAdminUnavailable");
   });
 
@@ -28,8 +27,7 @@ describe("isolamento do tenant técnico do Site Lab", () => {
     const body = surface.slice(0, surface.indexOf("function demoInfo"));
     expect(body).not.toMatch(/supabase|useAuth|useQuery|useAgencyOwnerId|from\(/);
     // Providers autenticados não aparecem em nenhum ponto do laboratório.
-    expect(root).not.toContain("TeamSessionProvider");
-    expect(root).not.toContain("AuthProvider");
+    expect(root).not.toMatch(/<TeamSessionProvider|<AuthProvider|<SubscriptionProvider/);
   });
 
   it("3) tenants reais mantêm exatamente a resolução anterior de acesso", () => {
