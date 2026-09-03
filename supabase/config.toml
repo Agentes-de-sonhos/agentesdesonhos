@@ -116,6 +116,9 @@ verify_jwt = false
 [functions.verify-agency-preview]
 verify_jwt = false
 
+[functions.verify-sitelab-access]
+verify_jwt = false
+
 [functions.fx-rate]
 verify_jwt = false
 
