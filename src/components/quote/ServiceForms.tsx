@@ -3318,7 +3318,7 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
     />
   );
   const formProps = {
-    onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions,
+    onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions || !!showOptionLabel,
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
     ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
   };
