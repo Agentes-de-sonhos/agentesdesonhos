@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { analyzeFlight, computeFlightStatus, formatMissingFlightFields } from "./flight-wizard/flightStatus";
+import { analyzeFlight, computeFlightStatus, formatMissingFlightFields, resolveFlightSaveTotal } from "./flight-wizard/flightStatus";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -500,11 +500,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       data.return_detail = preparedLegs.return_[0];
     }
 
-    const savedTotal = computedTotalAdults + computedTotalChildren;
+    const computedTotal = computedTotalAdults + computedTotalChildren;
+    const effectiveTotal = resolveFlightSaveTotal(computedTotal, initialData?.amount);
     // Recompute status from the data being saved (never keep a stale one).
-    data.flight_status = computeFlightStatus(data, false, savedTotal || initialData?.amount);
+    data.flight_status = computeFlightStatus(data, false, effectiveTotal);
 
-    onSubmit(data, savedTotal, values.option_label || undefined, values.service_description || undefined);
+    onSubmit(data, effectiveTotal, values.option_label || undefined, values.service_description || undefined);
   };
 
   return (
