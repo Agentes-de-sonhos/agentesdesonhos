@@ -3,7 +3,7 @@
  * gaveta, colapso, espaçamentos e breakpoints).
  *
  * Usado pelo painel real (`AgencyAdminLayout`) e pelo laboratório
- * (`SiteLabAdminDemo`), garantindo o MESMO markup estrutural — a única
+ * (`SiteLabRoot`), garantindo o MESMO markup estrutural — a única
  * variação é identidade (nome, logotipo, paleta) e o conteúdo renderizado.
  */
 import { useState, type CSSProperties, type ReactNode } from "react";

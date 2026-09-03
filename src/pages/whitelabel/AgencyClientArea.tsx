@@ -42,7 +42,15 @@ interface SessionClient {
  * autenticada com navegação e páginas estruturais (sem consultar viagens,
  * documentos ou dados do CRM).
  */
-export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
+export default function AgencyClientArea({
+  info,
+  /** Prefixo real das URLs desta área (o template-base monta sob /sitelab-base). */
+  basePath = "/area-do-cliente",
+}: {
+  info: AgencyDomainInfo;
+  basePath?: string;
+}) {
+
   const hostname = typeof window === "undefined" ? "" : window.location.hostname;
 
   // Área privada do passageiro: nunca indexada por buscadores.
@@ -77,7 +85,7 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     setTripId(null);
     try {
       const url = new URL(window.location.href);
-      if (tripIdFromPath(url.pathname)) url.pathname = "/area-do-cliente";
+      if (tripIdFromPath(url.pathname)) url.pathname = basePath;
       url.searchParams.set("area", next);
       window.history.replaceState(null, "", url.toString());
     } catch {
@@ -258,7 +266,7 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
     setTripId(id);
     setView("viagens");
     try {
-      window.history.pushState(null, "", tripPathFor(id));
+      window.history.pushState(null, "", tripPathFor(id, basePath));
     } catch {
       /* histórico indisponível: a navegação continua em memória */
     }
@@ -268,7 +276,7 @@ export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
   const backToTrips = () => {
     setTripId(null);
     try {
-      window.history.pushState(null, "", "/area-do-cliente?area=viagens");
+      window.history.pushState(null, "", `${basePath}?area=viagens`);
     } catch {
       /* histórico indisponível */
     }
