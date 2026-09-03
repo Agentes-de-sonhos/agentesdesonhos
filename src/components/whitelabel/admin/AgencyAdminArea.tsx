@@ -218,7 +218,7 @@ export default function AgencyAdminArea({
 }: {
   hostname: string;
   basePath?: string;
-  identity?: Partial<AgencyAdminPortalInfo>;
+  
 }) {
   return (
     <AuthProvider>
