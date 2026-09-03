@@ -90,7 +90,7 @@ export default function AgencyAdminLogin({
       return <AgencyAdminLoading />;
     }
     if (access.data === true) {
-      return <AgencyAdminRedirect />;
+      return <AgencyAdminRedirect basePath={basePath} />;
     }
   }
 
