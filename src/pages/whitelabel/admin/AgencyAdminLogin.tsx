@@ -8,6 +8,7 @@ import { resolveAgencyAdminLogin } from "@/lib/agencyAdminLogin";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import {
   AGENCY_ADMIN_HOME,
+  agencyAdminMount,
   PLATFORM_APP_ORIGIN,
   brandAccent,
   checkAgencyAdminAccess,
@@ -35,7 +36,14 @@ const GENERIC_ERROR = "Não foi possível entrar. Verifique seu e-mail e senha e
  * o vínculo com a agência dona do domínio; sem vínculo, a sessão é encerrada
  * imediatamente e o erro exibido é genérico.
  */
-export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
+export default function AgencyAdminLogin({
+  hostname,
+  basePath,
+}: {
+  hostname: string;
+  /** Prefixo de montagem (ex.: `/sitelab-base`); vazio nos domínios reais. */
+  basePath?: string;
+}) {
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
 
@@ -312,12 +320,13 @@ export default function AgencyAdminLogin({ hostname }: { hostname: string }) {
  * Pós-login: navegação real (o painel autenticado monta o workspace de abas,
  * que substitui o router desta página). Respeita o destino guardado.
  */
-function AgencyAdminRedirect() {
+function AgencyAdminRedirect({ basePath }: { basePath?: string }) {
   useEffect(() => {
-    let target = AGENCY_ADMIN_HOME;
+    const mount = agencyAdminMount(basePath);
+    let target = mount.home;
     try {
       const from = sessionStorage.getItem(AGENCY_ADMIN_FROM_KEY);
-      if (from && isAgencyAdminPath(from)) target = from;
+      if (from && isAgencyAdminPath(mount.toInternal(from))) target = from;
       sessionStorage.removeItem(AGENCY_ADMIN_FROM_KEY);
     } catch {
       /* storage indisponível: usa a home do painel */
