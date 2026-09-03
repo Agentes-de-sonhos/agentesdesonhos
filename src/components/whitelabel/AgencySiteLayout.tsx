@@ -320,7 +320,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
       { label: "Termos de Uso", to: "/termosdeuso" },
     ];
     return (
-      <footer id="rodape" className="bg-[hsl(var(--wl-ink))] text-white">
+      <footer id="rodape" className="bg-[var(--brand-tertiary,hsl(var(--wl-sand)))] text-[hsl(var(--wl-ink))]">
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             {logoUrl ? (
@@ -334,28 +334,28 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               </span>
 
             ) : (
-              <p className="text-lg font-bold tracking-tight text-white">
+              <p className="text-lg font-bold tracking-tight text-[hsl(var(--wl-ink))]">
                 <BrandText>{name}</BrandText>
               </p>
             )}
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/70">
+            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
               Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
             </p>
             {location && (
-              <p className="mt-6 flex items-center gap-2 text-sm text-white/70">
-                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> {location}
+              <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)_/_0.75)]">
+                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {location}
               </p>
             )}
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-accent-icon">Navegação</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-ink)_/_0.7)]">Navegação</p>
             <ul className="mt-5 space-y-3">
               {navLinks.map((l) => (
                 <li key={l.to}>
                   <a
                     href={l.to}
-                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="inline-block py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     {l.label}
                   </a>
@@ -365,7 +365,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-accent-icon">Atendimento</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-ink)_/_0.7)]">Atendimento</p>
             <ul className="mt-5 space-y-3">
               {wa ? (
                 <li>
@@ -373,36 +373,36 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                     href={`https://wa.me/${wa}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
-                    <MessageCircle className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> Falar no WhatsApp
+                    <MessageCircle className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> Falar no WhatsApp
                   </a>
                 </li>
               ) : null}
               {info.phone ? (
-                <li className="flex items-center gap-2 text-[15px] text-white/75">
-                  <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> {info.phone}
+                <li className="flex items-center gap-2 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)]">
+                  <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {info.phone}
                 </li>
               ) : null}
               <li>
                 <a
                   href="/area-do-cliente"
-                  className="inline-flex items-center gap-2 py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                 >
-                  <UserRound className="h-4 w-4 shrink-0 text-[hsl(var(--wl-red))] wl-accent-icon" aria-hidden="true" /> Área do Cliente
+                  <UserRound className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> Área do Cliente
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))] wl-accent-icon">Legal</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-ink)_/_0.7)]">Legal</p>
             <ul className="mt-5 space-y-3">
               {legalLinks.map((l) => (
                 <li key={l.to}>
                   <a
                     href={l.to}
-                    className="inline-block py-0.5 text-[15px] text-white/75 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                    className="inline-block py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     {l.label}
                   </a>
@@ -411,12 +411,13 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
             </ul>
           </div>
         </div>
-        <div className="border-t border-white/12">
-          <div className={`${siteContainer(true)} py-6 text-xs text-white/60`}>
+        <div className="border-t border-[var(--brand-border,hsl(var(--wl-ink)_/_0.12))] bg-[var(--brand-tertiary,hsl(var(--wl-sand)))]">
+          <div className={`${siteContainer(true)} py-6 text-xs text-[hsl(var(--wl-ink)_/_0.65)]`}>
             © {new Date().getFullYear()} <BrandText>{name}</BrandText>. Todos os direitos reservados.
           </div>
         </div>
       </footer>
+
     );
   }
 
