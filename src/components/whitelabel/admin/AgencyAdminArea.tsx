@@ -140,8 +140,14 @@ function initialWorkspacePath(): string {
  * internas da plataforma principal (WorkspaceProvider + WorkspaceShell), com
  * a barra de abas renderizada pelo layout da agência.
  */
-function AgencyAdminWorkspace({ info }: { info: AgencyAdminPortalInfo }) {
-  const initialPath = initialWorkspacePath();
+function AgencyAdminWorkspace({
+  info,
+  entryPath,
+}: {
+  info: AgencyAdminPortalInfo;
+  entryPath?: string;
+}) {
+  const initialPath = entryPath ?? initialWorkspacePath();
   return (
     <WorkspaceProvider
       initialPath={initialPath}
@@ -161,8 +167,14 @@ function AgencyAdminWorkspace({ info }: { info: AgencyAdminPortalInfo }) {
  * memória) e o React Router não permite routers aninhados. O login, que é uma
  * página isolada, monta o seu próprio BrowserRouter.
  */
-function AgencyAdminEntry({ hostname }: { hostname: string }) {
-  const clean = window.location.pathname.replace(/\/+$/, "") || "/";
+function AgencyAdminEntry({
+  hostname,
+  entryPath,
+}: {
+  hostname: string;
+  entryPath?: string;
+}) {
+  const clean = entryPath ?? (window.location.pathname.replace(/\/+$/, "") || "/");
   if (clean === AGENCY_ADMIN_LOGIN) {
     return (
       <BrowserRouter>
@@ -172,7 +184,7 @@ function AgencyAdminEntry({ hostname }: { hostname: string }) {
   }
   return (
     <AgencyAdminShell hostname={hostname}>
-      {(info) => <AgencyAdminWorkspace info={info} />}
+      {(info) => <AgencyAdminWorkspace info={info} entryPath={entryPath} />}
     </AgencyAdminShell>
   );
 }
@@ -183,14 +195,25 @@ function AgencyAdminEntry({ hostname }: { hostname: string }) {
  * isso precisam existir aqui para as páginas reutilizadas funcionarem no
  * domínio da agência.
  */
-export default function AgencyAdminArea({ hostname }: { hostname: string }) {
+export default function AgencyAdminArea({
+  hostname,
+  /**
+   * Caminho inicial das rotas internas quando o painel é montado sob outro
+   * prefixo de URL (o template-base do Site Lab). Sem ele, o comportamento é
+   * exatamente o atual: a árvore usa a URL real do navegador.
+   */
+  entryPath,
+}: {
+  hostname: string;
+  entryPath?: string;
+}) {
   return (
     <AuthProvider>
       <TeamSessionProvider>
         <SubscriptionProvider>
           {/* Navegação contextual: páginas reutilizadas geram caminhos /gestao/*. */}
           <AgencyAdminNavProvider>
-            <AgencyAdminEntry hostname={hostname} />
+            <AgencyAdminEntry hostname={hostname} entryPath={entryPath} />
           </AgencyAdminNavProvider>
         </SubscriptionProvider>
       </TeamSessionProvider>
