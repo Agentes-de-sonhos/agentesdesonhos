@@ -12665,6 +12665,7 @@ export type Database = {
       }
       sitelab_templates: {
         Row: {
+          admin_hostname: string | null
           background_color: string
           created_at: string
           custom_overrides: Json
@@ -12680,6 +12681,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_hostname?: string | null
           background_color?: string
           created_at?: string
           custom_overrides?: Json
@@ -12695,6 +12697,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_hostname?: string | null
           background_color?: string
           created_at?: string
           custom_overrides?: Json

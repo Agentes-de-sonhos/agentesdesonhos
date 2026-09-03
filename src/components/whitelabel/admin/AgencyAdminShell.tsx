@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import {
   AGENCY_ADMIN_FROM_KEY,
-  AGENCY_ADMIN_LOGIN,
+  agencyAdminMount,
   checkAgencyAdminAccess,
   fetchAgencyAdminPortal,
   type AgencyAdminPortalInfo,
@@ -24,11 +24,15 @@ import { AgencyAdminLoading, AgencyAdminUnavailable } from "./AgencyAdminStatus"
  */
 export function AgencyAdminShell({
   hostname,
+  basePath,
   children,
 }: {
   hostname: string;
+  /** Prefixo de montagem (ex.: `/sitelab-base`); vazio nos domínios reais. */
+  basePath?: string;
   children: (info: AgencyAdminPortalInfo) => ReactNode;
 }) {
+  const mount = agencyAdminMount(basePath);
   const { user, loading: authLoading, signOut } = useAuth();
 
   const portal = useQuery({
@@ -71,7 +75,7 @@ export function AgencyAdminShell({
     } catch {
       /* storage indisponível: apenas segue para o login */
     }
-    window.location.replace(AGENCY_ADMIN_LOGIN);
+    window.location.replace(mount.login);
     return <AgencyAdminLoading />;
   }
 

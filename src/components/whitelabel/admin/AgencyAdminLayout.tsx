@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { agencyDisplayName } from "@/lib/agencyDomains";
+import { agencyBrandInput, agencyDisplayName } from "@/lib/agencyDomains";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import {
   AGENCY_ADMIN_HOME,
@@ -41,11 +41,7 @@ export function AgencyAdminLayout({
   const logoUrl = resolveAgencyLogoUrl(info);
 
   // Tema global do painel: também cobre dialogs/popovers em Portal.
-  useAgencyBrandTheme({
-    primary: info.primary_color,
-    secondary,
-    secondaryAuto: info.secondary_auto !== false,
-  });
+  useAgencyBrandTheme(agencyBrandInput(info));
 
   useAgencyAdminHead(`${agencyName} | Gestão`, logoUrl);
 
@@ -55,7 +51,7 @@ export function AgencyAdminLayout({
         agencyName={agencyName}
         logoUrl={logoUrl}
         homeTo={AGENCY_ADMIN_HOME}
-        brandStyle={brandCssVars(brand, secondary) as React.CSSProperties}
+        brandStyle={brandCssVars(brand, secondary, agencyBrandInput(info)) as React.CSSProperties}
         sidebar={({ collapsed, onToggle, onNavigate }) => (
           <AgencyAdminSidebar
             info={info}

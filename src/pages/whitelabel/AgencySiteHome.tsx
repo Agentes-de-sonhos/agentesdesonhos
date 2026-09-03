@@ -49,6 +49,7 @@ import destinoNorteAfrica from "@/assets/whitelabel/destino-norte-africa.jpg";
 import destinoEscandinavia from "@/assets/whitelabel/destino-escandinavia.jpg";
 import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { agencyBrandInput } from "@/lib/agencyDomains";
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
@@ -160,11 +161,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const name = agencyDisplayName(info);
   // Tema global do tenant: variáveis aplicadas na raiz do documento para que
   // modais, selects, calendários e demais portals também usem a marca.
-  useAgencyBrandTheme({
-    primary: info.primary_color,
-    secondary: info.secondary_color ?? null,
-    secondaryAuto: info.secondary_auto !== false,
-  });
+  // Paleta COMPLETA (primária/secundária/terciária) via fonte única.
+  useAgencyBrandTheme(agencyBrandInput(info));
   const wa = agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;

@@ -251,6 +251,8 @@ const App = () => (
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
             <Route path="/sitelab-base/gestao" element={<SiteLabRoot view="admin" />} />
+            {/* Subrotas reais do painel (inclui /gestao/login) sob o prefixo protegido. */}
+            <Route path="/sitelab-base/gestao/*" element={<SiteLabRoot view="admin" />} />
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:agencySlug/:accessCode" element={<PublicCodeResolver />} />
             <Route

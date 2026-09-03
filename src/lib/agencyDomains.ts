@@ -22,6 +22,10 @@ export interface AgencyDomainInfo {
   secondary_color?: string | null;
   /** Quando true, a secundária é derivada da principal. */
   secondary_auto?: boolean | null;
+  /** Tom muito claro (fundos suaves, seções alternadas, rodapé, intervalos). */
+  tertiary_color?: string | null;
+  /** Quando true, a terciária é derivada automaticamente da principal. */
+  tertiary_auto?: boolean | null;
   phone: string | null;
   city: string | null;
   state: string | null;
@@ -90,6 +94,25 @@ export async function fetchAgencyDomain(hostname: string): Promise<AgencyDomainI
   const info = data as AgencyDomainInfo | null;
   if (!info || !info.user_id) return null;
   return info;
+}
+
+/**
+ * Paleta completa (3 cores) do tenant no formato aceito por
+ * `useAgencyBrandTheme`/`brandThemeVars`. Fonte ÚNICA de conversão
+ * AgencyDomainInfo → tema: site público, área do cliente e painel de gestão
+ * usam esta função, então a terciária nunca se perde no caminho.
+ *
+ * Contas legadas (só primária) continuam com fallback seguro: os flags `*_auto`
+ * chegam como true e a derivação atual é preservada.
+ */
+export function agencyBrandInput(info: AgencyDomainInfo | null | undefined) {
+  return {
+    primary: info?.primary_color ?? null,
+    secondary: info?.secondary_color ?? null,
+    secondaryAuto: info?.secondary_auto !== false,
+    tertiary: info?.tertiary_color ?? null,
+    tertiaryAuto: info?.tertiary_auto !== false,
+  };
 }
 
 /** Display name with elegant fallback. */

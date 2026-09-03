@@ -8,7 +8,12 @@ import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { AgencyAdminShell } from "./AgencyAdminShell";
 import { AgencyAdminLayout } from "./AgencyAdminLayout";
 import AgencyAdminLogin from "@/pages/whitelabel/admin/AgencyAdminLogin";
-import { AGENCY_ADMIN_HOME, AGENCY_ADMIN_LOGIN, type AgencyAdminPortalInfo } from "@/lib/agencyAdmin";
+import {
+  AGENCY_ADMIN_HOME,
+  AGENCY_ADMIN_LOGIN,
+  agencyAdminMount,
+  type AgencyAdminPortalInfo,
+} from "@/lib/agencyAdmin";
 import { AgencyAdminNavProvider } from "@/lib/agencyAdminNav";
 import { WorkspaceProvider } from "@/workspace/WorkspaceProvider";
 import { WorkspaceShell } from "@/workspace/WorkspaceShell";
@@ -169,22 +174,34 @@ function AgencyAdminWorkspace({
  */
 function AgencyAdminEntry({
   hostname,
-  entryPath,
+  basePath,
+  identity,
 }: {
   hostname: string;
-  entryPath?: string;
+  basePath?: string;
+  identity?: Partial<AgencyAdminPortalInfo>;
 }) {
-  const clean = entryPath ?? (window.location.pathname.replace(/\/+$/, "") || "/");
+  const mount = agencyAdminMount(basePath);
+  const real = window.location.pathname.replace(/\/+$/, "") || "/";
+  const clean = mount.toInternal(real);
+  const entryPath = mount.base
+    ? `${clean}${window.location.search}`
+    : undefined;
   if (clean === AGENCY_ADMIN_LOGIN) {
     return (
       <BrowserRouter>
-        <AgencyAdminLogin hostname={hostname} />
+        <AgencyAdminLogin hostname={hostname} basePath={mount.base} />
       </BrowserRouter>
     );
   }
   return (
-    <AgencyAdminShell hostname={hostname}>
-      {(info) => <AgencyAdminWorkspace info={info} entryPath={entryPath} />}
+    <AgencyAdminShell hostname={hostname} basePath={mount.base}>
+      {(info) => (
+        <AgencyAdminWorkspace
+          info={identity ? { ...info, ...identity } : info}
+          entryPath={entryPath}
+        />
+      )}
     </AgencyAdminShell>
   );
 }
@@ -198,14 +215,23 @@ function AgencyAdminEntry({
 export default function AgencyAdminArea({
   hostname,
   /**
-   * Caminho inicial das rotas internas quando o painel é montado sob outro
-   * prefixo de URL (o template-base do Site Lab). Sem ele, o comportamento é
-   * exatamente o atual: a árvore usa a URL real do navegador.
+   * Prefixo de URL sob o qual o painel está montado (ex.: `/sitelab-base`).
+   * Sem ele o comportamento é exatamente o atual dos domínios das agências.
+   *
+   * REGRA: o Site Lab é consumidor mestre deste MESMO painel — não existe
+   * cópia paralela, nem etapa de "promover" para as agências.
    */
-  entryPath,
+  basePath,
+  /**
+   * Sobreposição APENAS de identidade (nome, logo e paleta) — usada pelo Site
+   * Lab, cujo tenant técnico não tem perfil. Dados e permissões continuam
+   * vindo do servidor.
+   */
+  identity,
 }: {
   hostname: string;
-  entryPath?: string;
+  basePath?: string;
+  identity?: Partial<AgencyAdminPortalInfo>;
 }) {
   return (
     <AuthProvider>
@@ -213,7 +239,11 @@ export default function AgencyAdminArea({
         <SubscriptionProvider>
           {/* Navegação contextual: páginas reutilizadas geram caminhos /gestao/*. */}
           <AgencyAdminNavProvider>
-            <AgencyAdminEntry hostname={hostname} entryPath={entryPath} />
+            <AgencyAdminEntry
+              hostname={hostname}
+              basePath={basePath}
+              identity={identity}
+            />
           </AgencyAdminNavProvider>
         </SubscriptionProvider>
       </TeamSessionProvider>

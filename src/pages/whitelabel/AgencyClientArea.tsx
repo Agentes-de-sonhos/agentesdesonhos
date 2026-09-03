@@ -25,6 +25,7 @@ import {
 import { agencyWhatsappNumber } from "@/lib/agencyDomains";
 import { groupTrips, highlightTrip, tripIdFromPath, tripPathFor } from "@/lib/clientAreaTrips";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { agencyBrandInput } from "@/lib/agencyDomains";
 
 interface SessionClient {
   id: string | null;
@@ -302,11 +303,7 @@ export default function AgencyClientArea({
   };
 
   const brandStyle = getWalletBrandStyle(info.primary_color, info.secondary_color ?? null);
-  useAgencyBrandTheme({
-    primary: info.primary_color,
-    secondary: info.secondary_color ?? null,
-    secondaryAuto: info.secondary_auto !== false,
-  });
+  useAgencyBrandTheme(agencyBrandInput(info));
 
   if (checking) {
     return (
