@@ -421,11 +421,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     adult_price: adultPrice,
     child_price: childPrice,
   }, totalAmount || initialData?.amount), [watchedAirline, watchedOrigin, watchedDestination, watchedDeparture, watchedReturn, isOneWay, outboundLegs, returnLegs, adultPrice, childPrice, totalAmount, initialData?.amount]);
-  const missingPrice = flightAnalysis.missing.includes("valor do serviço");
 
-  useEffect(() => {
-    if (isEditing && missingPrice) setShowPricing(true);
-  }, [isEditing, missingPrice]);
+
 
 
   const hasNonEmptyLegs = (legs: z.infer<typeof flightLegSchema>[]) =>
@@ -670,7 +667,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
         {/* BLOCO 5 — Apresentação do Serviço */}
         {/* BLOCO 5 — Financeiro (prioritário) */}
-        <div className={cn("border rounded-lg", isEditing && missingPrice ? "border-amber-500/50 ring-1 ring-amber-500/30" : "border-border/60")}>
+        <div className="border rounded-lg border-border/60">
 
           <button
             type="button"
