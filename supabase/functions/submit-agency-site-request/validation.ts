@@ -11,6 +11,8 @@ export const ALLOWED_SERVICE_KEYS = [
   "seguro",
   "cruzeiros",
   "pacotes",
+  // Captação editorial "Receba inspirações" (seção compartilhada do template).
+  "inspiracoes",
 ] as const;
 
 export function isAllowedServiceKey(key: string): boolean {
