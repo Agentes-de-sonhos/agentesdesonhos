@@ -999,7 +999,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           return (
             <section key={key} id="novidades" className="bg-background">
               <div className={`${container} py-14 md:py-24`}>
-                <div className="overflow-hidden rounded-2xl bg-[hsl(var(--wl-navy))] px-8 py-12 md:px-14 md:py-16">
+                <div className="overflow-hidden rounded-2xl bg-[var(--brand-primary)] px-8 py-12 md:px-14 md:py-16">
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
                       <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
