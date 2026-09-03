@@ -19,7 +19,13 @@ export function useAgencyBrandTheme(input: AgencyBrandInput | null | undefined):
     () => (input ? brandThemeVars(input) : null),
     // Serializa para evitar reaplicação a cada render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [input?.primary, input?.secondary, input?.secondaryAuto],
+    [
+      input?.primary,
+      input?.secondary,
+      input?.secondaryAuto,
+      input?.tertiary,
+      input?.tertiaryAuto,
+    ],
   );
 
   useEffect(() => {
