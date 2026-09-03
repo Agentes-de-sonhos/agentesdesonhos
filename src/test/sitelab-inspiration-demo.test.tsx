@@ -4,9 +4,11 @@ import { SITELAB_DEMO_HOSTNAME, isSiteLabDemoHost } from "@/lib/sitelabModels";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 
 const submit = vi.fn();
+const reset = vi.fn();
+const hookValue = { state: "idle" as const, error: null, submit, reset };
 
 vi.mock("@/hooks/useAgencySiteRequest", () => ({
-  useAgencySiteRequest: () => ({ state: "idle", error: null, submit, reset: vi.fn() }),
+  useAgencySiteRequest: () => hookValue,
 }));
 
 function fill() {
