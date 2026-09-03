@@ -42,7 +42,15 @@ interface SessionClient {
  * autenticada com navegação e páginas estruturais (sem consultar viagens,
  * documentos ou dados do CRM).
  */
-export default function AgencyClientArea({ info }: { info: AgencyDomainInfo }) {
+export default function AgencyClientArea({
+  info,
+  /** Prefixo real das URLs desta área (o template-base monta sob /sitelab-base). */
+  basePath = "/area-do-cliente",
+}: {
+  info: AgencyDomainInfo;
+  basePath?: string;
+}) {
+
   const hostname = typeof window === "undefined" ? "" : window.location.hostname;
 
   // Área privada do passageiro: nunca indexada por buscadores.
