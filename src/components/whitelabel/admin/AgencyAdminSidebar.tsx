@@ -58,6 +58,14 @@ import { getPersonInitials } from "@/components/shared/ClientAvatar";
 import { densityForHeight, sidebarDensity, useViewport } from "@/lib/agencyAdminDensity";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/workspace/WorkspaceProvider";
+import {
+  CREATE_ITEMS,
+  MANAGEMENT_ITEMS,
+  PROJECTS_ITEMS,
+  USER_ITEMS,
+  filterMenuByPermission,
+  type MenuItemDef,
+} from "@/lib/agencyAdminMenu";
 
 
 const SIDEBAR_PREF_KEY = "wl-admin-sidebar-collapsed";
