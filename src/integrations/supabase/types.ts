@@ -10395,6 +10395,8 @@ export type Database = {
           agency_primary_color: string | null
           agency_secondary_auto: boolean
           agency_secondary_color: string | null
+          agency_tertiary_auto: boolean
+          agency_tertiary_color: string | null
           avatar_url: string | null
           bio: string | null
           city: string | null
@@ -10428,6 +10430,8 @@ export type Database = {
           agency_primary_color?: string | null
           agency_secondary_auto?: boolean
           agency_secondary_color?: string | null
+          agency_tertiary_auto?: boolean
+          agency_tertiary_color?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -10461,6 +10465,8 @@ export type Database = {
           agency_primary_color?: string | null
           agency_secondary_auto?: boolean
           agency_secondary_color?: string | null
+          agency_tertiary_auto?: boolean
+          agency_tertiary_color?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -12653,6 +12659,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sitelab_templates: {
+        Row: {
+          background_color: string
+          created_at: string
+          custom_overrides: Json
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          password_sha256: string
+          primary_color: string
+          secondary_color: string
+          slug: string
+          tertiary_color: string
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string
+          created_at?: string
+          custom_overrides?: Json
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          password_sha256: string
+          primary_color?: string
+          secondary_color?: string
+          slug: string
+          tertiary_color?: string
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string
+          created_at?: string
+          custom_overrides?: Json
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          password_sha256?: string
+          primary_color?: string
+          secondary_color?: string
+          slug?: string
+          tertiary_color?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       specialties: {
         Row: {
@@ -16045,7 +16099,10 @@ export type Database = {
           agency_logo_url: string
           agency_name: string
           agency_primary_color: string
+          agency_secondary_auto: boolean
           agency_secondary_color: string
+          agency_tertiary_auto: boolean
+          agency_tertiary_color: string
           avatar_url: string
           city: string
           name: string
@@ -16128,6 +16185,7 @@ export type Database = {
           uses_count: number
         }[]
       }
+      get_sitelab_template: { Args: { p_slug: string }; Returns: Json }
       get_supplier_review_stats: {
         Args: never
         Returns: {

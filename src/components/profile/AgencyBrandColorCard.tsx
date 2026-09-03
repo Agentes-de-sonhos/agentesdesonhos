@@ -21,12 +21,21 @@ import { deriveSecondaryColor } from "@/lib/brandTheme";
 
 interface Props {
   initialColor: string | null;
-  /** Tom claro salvo (quando a agência optou por definir manualmente). */
+  /** Segundo acento real da marca (foco/borda ativa e ações secundárias). */
   initialSecondaryColor?: string | null;
-  /** Gerar o tom claro automaticamente a partir da cor principal. */
   initialSecondaryAuto?: boolean | null;
+  /** Tom muito claro (fundos, superfícies, miolo de intervalos). */
+  initialTertiaryColor?: string | null;
+  /** Gerar o tom claro automaticamente a partir da cor principal. */
+  initialTertiaryAuto?: boolean | null;
   agencyLogoUrl: string | null;
-  onSaved?: (color: string | null, secondary?: string | null, auto?: boolean) => void;
+  onSaved?: (
+    color: string | null,
+    secondary?: string | null,
+    auto?: boolean,
+    tertiary?: string | null,
+    tertiaryAuto?: boolean,
+  ) => void;
 }
 
 const PRESETS = [
@@ -39,6 +48,8 @@ export function AgencyBrandColorCard({
   initialColor,
   initialSecondaryColor = null,
   initialSecondaryAuto = true,
+  initialTertiaryColor = null,
+  initialTertiaryAuto = true,
   agencyLogoUrl,
   onSaved,
 }: Props) {
@@ -47,12 +58,28 @@ export function AgencyBrandColorCard({
   const queryClient = useQueryClient();
   const [color, setColor] = useState<string>(normalizeHex(initialColor) || "#0284C7");
   const [savedColor, setSavedColor] = useState<string | null>(normalizeHex(initialColor));
-  const [auto, setAuto] = useState<boolean>(initialSecondaryAuto !== false);
+
+  // Secundária: acento real da marca. Em cadastros antigos o campo guardava o
+  // tom claro automático, então ali a secundária efetiva acompanha a principal.
+  const legacySecondary = initialSecondaryAuto !== false && !initialTertiaryColor;
   const [secondary, setSecondary] = useState<string>(
-    normalizeHex(initialSecondaryColor) || deriveSecondaryColor(initialColor),
+    (legacySecondary ? null : normalizeHex(initialSecondaryColor)) ||
+      normalizeHex(initialColor) ||
+      "#0284C7",
   );
-  const [savedSecondary, setSavedSecondary] = useState<string | null>(normalizeHex(initialSecondaryColor));
-  const [savedAuto, setSavedAuto] = useState<boolean>(initialSecondaryAuto !== false);
+  const [savedSecondary, setSavedSecondary] = useState<string | null>(
+    legacySecondary ? null : normalizeHex(initialSecondaryColor),
+  );
+
+  // Terciária: tom muito claro, com automação própria.
+  const [tertAuto, setTertAuto] = useState<boolean>(initialTertiaryAuto !== false);
+  const [tertiary, setTertiary] = useState<string>(
+    normalizeHex(initialTertiaryColor) ||
+      normalizeHex(legacySecondary ? initialSecondaryColor : null) ||
+      deriveSecondaryColor(initialColor),
+  );
+  const [savedTertiary, setSavedTertiary] = useState<string | null>(normalizeHex(initialTertiaryColor));
+  const [savedTertAuto, setSavedTertAuto] = useState<boolean>(initialTertiaryAuto !== false);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -62,23 +89,35 @@ export function AgencyBrandColorCard({
   }, [initialColor]);
 
   useEffect(() => {
-    setSecondary(normalizeHex(initialSecondaryColor) || deriveSecondaryColor(initialColor));
-    setSavedSecondary(normalizeHex(initialSecondaryColor));
-    setAuto(initialSecondaryAuto !== false);
-    setSavedAuto(initialSecondaryAuto !== false);
-  }, [initialSecondaryColor, initialSecondaryAuto, initialColor]);
+    const legacy = initialSecondaryAuto !== false && !initialTertiaryColor;
+    setSecondary(
+      (legacy ? null : normalizeHex(initialSecondaryColor)) || normalizeHex(initialColor) || "#0284C7",
+    );
+    setSavedSecondary(legacy ? null : normalizeHex(initialSecondaryColor));
+    setTertiary(
+      normalizeHex(initialTertiaryColor) ||
+        normalizeHex(legacy ? initialSecondaryColor : null) ||
+        deriveSecondaryColor(initialColor),
+    );
+    setSavedTertiary(normalizeHex(initialTertiaryColor));
+    setTertAuto(initialTertiaryAuto !== false);
+    setSavedTertAuto(initialTertiaryAuto !== false);
+  }, [initialSecondaryColor, initialSecondaryAuto, initialTertiaryColor, initialTertiaryAuto, initialColor]);
 
-  // No modo automático a secundária acompanha a principal (10–15% da cor
-  // principal misturada com branco).
+  // No modo automático a terciária acompanha a principal (mistura com branco).
   useEffect(() => {
-    if (auto) setSecondary(deriveSecondaryColor(color));
-  }, [auto, color]);
+    if (tertAuto) setTertiary(deriveSecondaryColor(color));
+  }, [tertAuto, color]);
 
-  const effectiveSecondary = auto ? deriveSecondaryColor(color) : normalizeHex(secondary) || deriveSecondaryColor(color);
+  const effectiveSecondary = normalizeHex(secondary) || normalizeHex(color) || "#0284C7";
+  const effectiveTertiary = tertAuto
+    ? deriveSecondaryColor(color)
+    : normalizeHex(tertiary) || deriveSecondaryColor(color);
   const dirty =
     (savedColor || "") !== (normalizeHex(color) || "") ||
-    savedAuto !== auto ||
-    (!auto && (savedSecondary || "") !== (normalizeHex(secondary) || ""));
+    (savedSecondary || "") !== effectiveSecondary ||
+    savedTertAuto !== tertAuto ||
+    (savedTertiary || "") !== effectiveTertiary;
 
   const handleSave = async () => {
     if (!user) return;
@@ -87,21 +126,33 @@ export function AgencyBrandColorCard({
       toast({ title: "Cor inválida", description: "Use um HEX no formato #RRGGBB.", variant: "destructive" });
       return;
     }
+    if (!normalizeHex(secondary) || !normalizeHex(effectiveTertiary)) {
+      toast({
+        title: "Cor inválida",
+        description: "Verifique os HEX da secundária e da terciária.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSaving(true);
     try {
       const { error } = await supabase
         .from("profiles")
         .update({
           agency_primary_color: hex,
-          agency_secondary_color: auto ? null : effectiveSecondary,
-          agency_secondary_auto: auto,
+          // A secundária passa a ser um acento real e explícito.
+          agency_secondary_color: effectiveSecondary,
+          agency_secondary_auto: false,
+          agency_tertiary_color: effectiveTertiary,
+          agency_tertiary_auto: tertAuto,
         } as any)
         .eq("user_id", user.id);
       if (error) throw error;
       setSavedColor(hex);
-      setSavedSecondary(auto ? null : effectiveSecondary);
-      setSavedAuto(auto);
-      onSaved?.(hex, auto ? null : effectiveSecondary, auto);
+      setSavedSecondary(effectiveSecondary);
+      setSavedTertiary(effectiveTertiary);
+      setSavedTertAuto(tertAuto);
+      onSaved?.(hex, effectiveSecondary, false, effectiveTertiary, tertAuto);
       // Reflete a mudança imediatamente em todas as telas e links públicos.
       queryClient.invalidateQueries({ queryKey: ["agency-admin-portal"] });
       queryClient.invalidateQueries({ queryKey: ["agency-domain"] });
@@ -113,6 +164,7 @@ export function AgencyBrandColorCard({
       setSaving(false);
     }
   };
+
 
   return (
     <Card className="shadow-card">
@@ -206,36 +258,30 @@ export function AgencyBrandColorCard({
           </div>
         </div>
 
-        {/* Cor secundária (tom claro) */}
+        {/* Secundária — acento real da marca */}
         <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <Label className="text-sm font-medium">Gerar tom claro automaticamente</Label>
-              <p className="text-xs text-muted-foreground">
-                A cor secundária é usada em fundos claros, hovers, itens selecionados e no
-                intervalo de datas do calendário.
-              </p>
-            </div>
-            <Switch checked={auto} onCheckedChange={setAuto} aria-label="Gerar tom claro automaticamente" />
+          <div className="min-w-0">
+            <Label className="text-sm font-medium">Cor secundária</Label>
+            <p className="text-xs text-muted-foreground">
+              Segundo acento da marca: ações secundárias e foco/borda ativa de campos,
+              checkboxes e controles.
+            </p>
           </div>
-
           <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-end">
             <div className="space-y-2">
-              <Label className="text-xs">Secundária</Label>
+              <Label className="text-xs">Seletor</Label>
               <input
                 type="color"
                 value={effectiveSecondary}
-                disabled={auto}
                 onChange={(e) => setSecondary(e.target.value.toUpperCase())}
-                className="h-10 w-16 cursor-pointer rounded-md border border-input bg-background p-1 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-10 w-16 cursor-pointer rounded-md border border-input bg-background p-1"
                 aria-label="Escolher cor secundária"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-xs">HEX secundário</Label>
               <Input
-                value={effectiveSecondary}
-                disabled={auto}
+                value={secondary}
                 onChange={(e) => setSecondary(e.target.value.toUpperCase())}
                 onBlur={() => {
                   const n = normalizeHex(secondary);
@@ -245,12 +291,56 @@ export function AgencyBrandColorCard({
               />
             </div>
           </div>
+        </div>
 
+        {/* Terciária — tom muito claro */}
+        <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <Label className="text-sm font-medium">Gerar tom claro automaticamente</Label>
+              <p className="text-xs text-muted-foreground">
+                A cor terciária é usada em fundos suaves, superfícies, cards selecionados e no
+                preenchimento dos dias entre início e fim nos calendários.
+              </p>
+            </div>
+            <Switch checked={tertAuto} onCheckedChange={setTertAuto} aria-label="Gerar tom claro automaticamente" />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-end">
+            <div className="space-y-2">
+              <Label className="text-xs">Terciária</Label>
+              <input
+                type="color"
+                value={effectiveTertiary}
+                disabled={tertAuto}
+                onChange={(e) => setTertiary(e.target.value.toUpperCase())}
+                className="h-10 w-16 cursor-pointer rounded-md border border-input bg-background p-1 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label="Escolher cor terciária"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">HEX terciário</Label>
+              <Input
+                value={effectiveTertiary}
+                disabled={tertAuto}
+                onChange={(e) => setTertiary(e.target.value.toUpperCase())}
+                onBlur={() => {
+                  const n = normalizeHex(tertiary);
+                  if (n) setTertiary(n);
+                }}
+                className="font-mono"
+              />
+            </div>
+          </div>
+
+          {/* Prévia da paleta completa */}
           <div className="flex items-center gap-2">
             <span className="h-8 flex-1 rounded-md border" style={{ backgroundColor: color }} />
             <span className="h-8 flex-1 rounded-md border" style={{ backgroundColor: effectiveSecondary }} />
+            <span className="h-8 flex-1 rounded-md border" style={{ backgroundColor: effectiveTertiary }} />
           </div>
         </div>
+
 
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={!dirty || saving}>
