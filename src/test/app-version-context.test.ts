@@ -64,7 +64,29 @@ describe("isPublicUpdateContext — white label suppression", () => {
       expect(isPublicUpdateContext(), path).toBe(true);
     }
   });
+
+  it("suppresses Site Lab demo routes on the main host", () => {
+    for (const path of ["/sitelab-base", "/sitelab-base/area-do-cliente", "/sitelab-base/gestao"]) {
+      setLocation(`https://app.agentesdesonhos.com.br${path}`);
+      expect(isPublicUpdateContext(), path).toBe(true);
+    }
+  });
+
+  it("suppresses agency client area and agency management surfaces", () => {
+    for (const path of ["/area-do-cliente", "/area-do-cliente/viagens/1", "/gestao", "/gestao/clientes"]) {
+      setLocation(`https://app.agentesdesonhos.com.br${path}`);
+      expect(isPublicUpdateContext(), path).toBe(true);
+      setLocation(`https://exemploagencia.com.br${path}`);
+      expect(isPublicUpdateContext(), `agency ${path}`).toBe(true);
+    }
+  });
+
+  it("keeps the main platform CRM management route eligible", () => {
+    setLocation("https://app.agentesdesonhos.com.br/gestao-clientes/funil");
+    expect(isPublicUpdateContext()).toBe(false);
+  });
 });
+
 
 describe("useAppVersion — no polling in white-label context", () => {
   const fetchSpy = vi.fn();

@@ -18,6 +18,7 @@ import {
   performAppUpdate,
   hasUnsavedChanges,
   dismissAppUpdate,
+  isPublicUpdateContext,
 } from "@/hooks/useAppVersion";
 
 /**
@@ -26,6 +27,9 @@ import {
  * explicit action and never appears on public / white-label routes.
  */
 export function AppUpdateModal() {
+  // Structural guard: agency / Site Lab surfaces must never mount the
+  // Agentes de Sonhos update prompt, even if a version is detected.
+  const suppressed = isPublicUpdateContext();
   const { updateAvailable, remoteVersion } = useAppVersion();
   const [open, setOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -36,6 +40,7 @@ export function AppUpdateModal() {
   // right away or fall back to a discreet, non-blocking toast when the
   // user is in the middle of unsaved edits.
   useEffect(() => {
+    if (suppressed) return;
     if (!updateAvailable || !remoteVersion) return;
     if (hasUnsavedChanges()) {
       if (toastShownForRef.current === remoteVersion) return;
@@ -50,8 +55,9 @@ export function AppUpdateModal() {
       return;
     }
     setOpen(true);
-  }, [updateAvailable, remoteVersion]);
+  }, [suppressed, updateAvailable, remoteVersion]);
 
+  if (suppressed) return null;
   if (!updateAvailable || !remoteVersion) return null;
 
   const handleDismiss = () => {
