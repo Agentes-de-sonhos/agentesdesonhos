@@ -18,6 +18,7 @@ import {
   validateInspirationLead,
   type InspirationLeadForm,
 } from "@/lib/agencyInspirationLead";
+import { isSiteLabDemoHost } from "@/lib/sitelabModels";
 
 /**
  * Captador de leads padrão da seção "Receba inspirações" (template compartilhado).
@@ -49,6 +50,8 @@ export function AgencyInspirationDialog({
   const [done, setDone] = useState(false);
   const submittingRef = useRef(false);
   const safeUrl = safeWhatsappGroupUrl(groupUrl);
+  // Site Lab: tenant sintético, sem endpoint real, sem dados e sem redirecionamento.
+  const isDemo = isSiteLabDemoHost(hostname);
 
   useEffect(() => {
     if (!open) return;
@@ -68,6 +71,11 @@ export function AgencyInspirationDialog({
       if (Object.keys(found).length) return;
 
       submittingRef.current = true;
+      if (isDemo) {
+        setDone(true);
+        submittingRef.current = false;
+        return;
+      }
       const result = await submit(buildInspirationPayload(form));
       if (!("success" in result) || !result.success) {
         submittingRef.current = false;
@@ -80,7 +88,7 @@ export function AgencyInspirationDialog({
       setDone(true);
       submittingRef.current = false;
     },
-    [form, safeUrl, submit],
+    [form, isDemo, safeUrl, submit],
   );
 
   const submitting = state === "submitting";
@@ -187,6 +195,11 @@ export function AgencyInspirationDialog({
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               Confirmar
             </Button>
+            {isDemo && (
+              <p className="rounded-lg bg-[var(--brand-tertiary)] px-3 py-2 text-center text-[11px] text-[var(--brand-primary)]">
+                Demonstração: nenhum dado será enviado.
+              </p>
+            )}
             <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
               Ao confirmar, você autoriza o contato da agência para envio de inspirações,
               novidades e promoções de viagem.
