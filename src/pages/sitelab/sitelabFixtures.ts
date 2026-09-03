@@ -109,6 +109,62 @@ export const DEMO_CLIENT_AREA_PROFILE: ClientAreaProfileData = {
   birth_date: null,
 };
 
+/** Clientes demonstrativos (superfície de Clientes). */
+export const DEMO_CLIENTS = [
+  { id: "c1", name: "Camila Duarte", email: "camila.demo@exemplo.com", phone: "(11) 90000-0000", trips: 3 },
+  { id: "c2", name: "Rodrigo Menezes", email: "rodrigo.demo@exemplo.com", phone: "(21) 90000-0000", trips: 1 },
+  { id: "c3", name: "Fernanda Lopes", email: "fernanda.demo@exemplo.com", phone: "(31) 90000-0000", trips: 2 },
+];
+
+/** Colunas e cartões demonstrativos dos funis (Oportunidades/Operações). */
+export const DEMO_KANBAN: { stage: string; cards: { id: string; title: string; client: string; value: string }[] }[] = [
+  {
+    stage: "Novo contato",
+    cards: [{ id: "k1", title: "Portugal essencial", client: "Camila Duarte", value: "R$ 24.800" }],
+  },
+  {
+    stage: "Em cotação",
+    cards: [
+      { id: "k2", title: "Patagônia em família", client: "Rodrigo Menezes", value: "R$ 38.200" },
+      { id: "k3", title: "Fim de semana em Buenos Aires", client: "Fernanda Lopes", value: "R$ 6.400" },
+    ],
+  },
+  { stage: "Proposta enviada", cards: [{ id: "k4", title: "Mediterrâneo", client: "Camila Duarte", value: "R$ 31.900" }] },
+  { stage: "Venda confirmada", cards: [{ id: "k5", title: "Lisboa executiva", client: "Rodrigo Menezes", value: "R$ 12.100" }] },
+];
+
+/** Reservas demonstrativas (superfície de Reservas). */
+export const DEMO_BOOKINGS = [
+  { id: "b1", code: "RSV-1042", client: "Camila Duarte", service: "Hospedagem — Lisboa", date: "2026-10-12", status: "Confirmada" },
+  { id: "b2", code: "RSV-1043", client: "Camila Duarte", service: "Aéreo GRU–LIS", date: "2026-10-11", status: "Emitida" },
+  { id: "b3", code: "RSV-1044", client: "Rodrigo Menezes", service: "Transfer aeroporto", date: "2026-12-05", status: "Pendente" },
+];
+
+/** Lançamentos demonstrativos (superfície Financeiro). */
+export const DEMO_FINANCIAL_ROWS = [
+  { id: "f1", description: "Comissão pacote Portugal", date: "2026-10-20", amount: "R$ 3.720", kind: "Entrada" },
+  { id: "f2", description: "Comissão vendedor", date: "2026-10-22", amount: "R$ 620", kind: "Despesa" },
+  { id: "f3", description: "Comissão cruzeiro Mediterrâneo", date: "2026-05-30", amount: "R$ 2.480", kind: "Entrada" },
+];
+
+/** Compromissos demonstrativos (superfície Agenda). */
+export const DEMO_AGENDA = [
+  { id: "a1", title: "Reunião com Camila Duarte", date: "2026-09-04", time: "10:00" },
+  { id: "a2", title: "Envio de proposta — Patagônia", date: "2026-09-05", time: "14:30" },
+  { id: "a3", title: "Check-in Portugal essencial", date: "2026-10-12", time: "07:00" },
+];
+
+/** Projetos demonstrativos por aba do grupo "Meus projetos". */
+export const DEMO_PROJECTS: Record<string, { id: string; title: string; client: string; updated: string }[]> = {
+  orcamentos: [
+    { id: "p1", title: "Portugal essencial", client: "Camila Duarte", updated: "2026-09-01" },
+    { id: "p2", title: "Patagônia em família", client: "Rodrigo Menezes", updated: "2026-08-30" },
+  ],
+  roteiros: [{ id: "p3", title: "Roteiro Lisboa · Porto", client: "Camila Duarte", updated: "2026-09-02" }],
+  carteiras: [{ id: "p4", title: "Carteira Portugal essencial", client: "Camila Duarte", updated: "2026-09-02" }],
+  modelos: [{ id: "p5", title: "Modelo padrão de orçamento", client: "—", updated: "2026-07-14" }],
+};
+
 export function formatDemoDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, (m || 1) - 1, d || 1).toLocaleDateString("pt-BR");

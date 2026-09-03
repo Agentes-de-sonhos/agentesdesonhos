@@ -88,12 +88,19 @@ function SiteLabTopBar({
   view: SiteLabView;
   onExit: () => void;
 }) {
+  /* O asset pode falhar em ambientes de preview: cai para o nome, sem marca terceira. */
+  const [logoOk, setLogoOk] = useState(true);
   return (
     <div className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2">
         <div className="flex min-w-0 items-center gap-2">
-          {model.logoUrl ? (
-            <img src={model.logoUrl} alt={model.name} className="h-7 w-auto object-contain" />
+          {model.logoUrl && logoOk ? (
+            <img
+              src={model.logoUrl}
+              alt={model.name}
+              className="h-7 w-auto object-contain"
+              onError={() => setLogoOk(false)}
+            />
           ) : null}
           <span className="truncate text-sm font-semibold">{model.name}</span>
           <DemoBadge />

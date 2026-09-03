@@ -8,6 +8,7 @@
  * identidade (nome, logotipo e paleta).
  */
 import {
+  CalendarDays,
   FileText,
   FolderOpen,
   Headphones,
@@ -38,6 +39,17 @@ function tabMatcher(tab: string) {
     (pathname === "/gestao/meus-projetos" || pathname === "/meus-projetos") &&
     new URLSearchParams(search).get("tab") === tab;
 }
+
+/** Raiz do grupo "Meus projetos" (usada pelo item recolhido). */
+export const PROJECTS_ROOT = "/gestao/meus-projetos";
+
+/** Item fixo do grupo "Meu trabalho". */
+export const AGENDA_ITEM: MenuItemDef = {
+  label: "Agenda",
+  to: "/gestao/agenda",
+  icon: CalendarDays,
+  match: (p) => p === "/gestao/agenda" || p === "/agenda",
+};
 
 export const PROJECTS_ITEMS: MenuItemDef[] = [
   {
