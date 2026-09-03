@@ -208,6 +208,10 @@ export function brandThemeVars(input: AgencyBrandInput): Record<string, string> 
   const primaryHsl = toHslTriplet(p.primary);
   const onPrimaryHsl = toHslTriplet(p.onPrimary);
   const tertiaryHsl = toHslTriplet(p.tertiary);
+  const secondaryHsl = toHslTriplet(p.secondary);
+  const onSecondaryHsl = toHslTriplet(p.onSecondary);
+  const onTertiaryHsl = toHslTriplet(p.onTertiary);
+  const primaryHoverHsl = toHslTriplet(p.primaryHover);
   const neutralFg = "222 47% 11%";
 
   return {
@@ -220,6 +224,15 @@ export function brandThemeVars(input: AgencyBrandInput): Record<string, string> 
     "--brand-tertiary": p.tertiary,
     "--brand-on-tertiary": p.onTertiary,
     "--brand-on-primary": p.onPrimary,
+    // Triplets HSL reutilizáveis por acabamentos de tema (ex.: `.wl-site-base`),
+    // para que qualquer camada CSS consuma a paleta configurada sem hardcode.
+    "--brand-primary-hsl": primaryHsl,
+    "--brand-primary-hover-hsl": primaryHoverHsl,
+    "--brand-secondary-hsl": secondaryHsl,
+    "--brand-tertiary-hsl": tertiaryHsl,
+    "--brand-on-primary-hsl": onPrimaryHsl,
+    "--brand-on-secondary-hsl": onSecondaryHsl,
+    "--brand-on-tertiary-hsl": onTertiaryHsl,
     // Foco/borda ativa de campos, checkboxes e controles → secundária.
     "--brand-focus-ring": p.secondary,
     // Calendários de intervalo: extremos na primária, miolo na terciária.
@@ -252,12 +265,12 @@ export function brandThemeVars(input: AgencyBrandInput): Record<string, string> 
     // ── Sobrescrita dos tokens shadcn/Tailwind (HSL) ───────────────────────
     "--primary": primaryHsl,
     "--primary-foreground": onPrimaryHsl,
-    "--ring": toHslTriplet(p.secondary),
+    "--ring": secondaryHsl,
     "--accent": tertiaryHsl,
     "--accent-foreground": neutralFg,
     "--sidebar-primary": primaryHsl,
     "--sidebar-primary-foreground": onPrimaryHsl,
-    "--sidebar-ring": toHslTriplet(p.secondary),
+    "--sidebar-ring": secondaryHsl,
     "--sidebar-accent": tertiaryHsl,
     "--sidebar-accent-foreground": neutralFg,
     "--gradient-primary": `linear-gradient(135deg, ${p.primary} 0%, ${p.primaryHover} 100%)`,
