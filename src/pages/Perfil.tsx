@@ -63,6 +63,8 @@ interface ProfileData {
   agency_primary_color: string | null;
   agency_secondary_color: string | null;
   agency_secondary_auto: boolean | null;
+  agency_tertiary_color: string | null;
+  agency_tertiary_auto: boolean | null;
 }
 
 export default function Perfil() {
@@ -116,6 +118,8 @@ export default function Perfil() {
           agency_primary_color: (data as any).agency_primary_color || null,
           agency_secondary_color: (data as any).agency_secondary_color || null,
           agency_secondary_auto: (data as any).agency_secondary_auto ?? true,
+          agency_tertiary_color: (data as any).agency_tertiary_color || null,
+          agency_tertiary_auto: (data as any).agency_tertiary_auto ?? true,
         };
         setProfile(profileData);
         setFormData(profileData);
@@ -631,8 +635,8 @@ export default function Perfil() {
             initialColor={profile?.agency_primary_color ?? null}
             initialSecondaryColor={profile?.agency_secondary_color ?? null}
             initialSecondaryAuto={profile?.agency_secondary_auto ?? true}
-            initialTertiaryColor={(profile as any)?.agency_tertiary_color ?? null}
-            initialTertiaryAuto={(profile as any)?.agency_tertiary_auto ?? true}
+            initialTertiaryColor={profile?.agency_tertiary_color ?? null}
+            initialTertiaryAuto={profile?.agency_tertiary_auto ?? true}
             agencyLogoUrl={profile?.agency_logo_url ?? null}
             onSaved={(color, secondary, auto, tertiary, tertiaryAuto) => {
               const patch = {

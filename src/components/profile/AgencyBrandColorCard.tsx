@@ -174,8 +174,11 @@ export function AgencyBrandColorCard({
           Identidade Visual
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Defina a cor principal da sua agência. Ela será aplicada na Carteira Digital Pública e,
-          em breve, nos demais links públicos da plataforma.
+          Defina as três cores da sua marca: a <strong>principal</strong> (ações principais),
+          a <strong>secundária</strong> (ações secundárias, foco e bordas ativas) e a{" "}
+          <strong>terciária</strong> (fundos suaves, seções alternadas, cards selecionados,
+          intervalo de datas e rodapé). Você pode editar cada uma delas a qualquer momento; elas
+          são aplicadas no seu site, na área do cliente, na gestão e nos links públicos.
         </p>
       </CardHeader>
       <CardContent className="space-y-5">
