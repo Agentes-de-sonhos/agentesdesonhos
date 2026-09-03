@@ -51,6 +51,8 @@ interface ProfileData {
   agency_name: string | null;
   agency_logo_url: string | null;
   cnpj: string | null;
+  /** Link opcional do grupo de WhatsApp usado na seção "Receba inspirações" do site. */
+  agency_whatsapp_group_url: string | null;
   street: string | null;
   address_number: string | null;
   neighborhood: string | null;
