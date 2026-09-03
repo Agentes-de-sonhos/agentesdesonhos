@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useServiceImages } from "@/hooks/useServiceImages";
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
-import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, computeFlightStatus, type FlightStatus } from "./flight-wizard/flightStatus";
+import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, analyzeFlight, formatMissingFlightFields, type FlightStatus } from "./flight-wizard/flightStatus";
 import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor,
