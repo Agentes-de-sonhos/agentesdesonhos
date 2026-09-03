@@ -228,13 +228,28 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
                   )}
                   {service.service_type === "flight" && (() => {
                     const raw = (service.service_data as any)?.flight_status as FlightStatus | undefined;
-                    const status: FlightStatus = raw || computeFlightStatus(service.service_data);
+                    if (raw === "draft") {
+                      return (
+                        <Badge variant="outline" className={cn("text-[10px] py-0 h-5", FLIGHT_STATUS_CLASS.draft)}>
+                          {FLIGHT_STATUS_LABEL.draft}
+                        </Badge>
+                      );
+                    }
+                    const analysis = analyzeFlight(service.service_data, service.amount);
+                    const text = analysis.status === "incomplete"
+                      ? `${FLIGHT_STATUS_LABEL.incomplete} — ${formatMissingFlightFields(analysis.missing)}`
+                      : FLIGHT_STATUS_LABEL.ready;
                     return (
-                      <Badge variant="outline" className={cn("text-[10px] py-0 h-5", FLIGHT_STATUS_CLASS[status])}>
-                        {FLIGHT_STATUS_LABEL[status]}
+                      <Badge
+                        variant="outline"
+                        title={text}
+                        className={cn("text-[10px] py-0 h-auto max-w-full whitespace-normal text-left leading-tight py-0.5", FLIGHT_STATUS_CLASS[analysis.status])}
+                      >
+                        {text}
                       </Badge>
                     );
                   })()}
+
                 </div>
                 <p className="font-medium break-words whitespace-pre-wrap">{getServiceDescription(service)}</p>
               </div>
