@@ -404,7 +404,142 @@ const FAE_CURATED: AgencySiteProfile = {
   },
 };
 
+/**
+ * SiteLab Base — laboratório visual NEUTRO. Herda a estrutura editorial
+ * compartilhada (`CURATED_SECTIONS`) e usa apenas textos de demonstração:
+ * nenhum nome, ano de fundação, selo ou alegação factual de agência real.
+ */
+const SITE_LAB_BASE: AgencySiteProfile = {
+  key: "siteLabBase",
+  sections: { ...CURATED_SECTIONS },
+  heroImage: "praia",
+  hero: [
+    {
+      title: "Viagens sob medida, planejadas com cuidado",
+      subtitle:
+        "Modelo de demonstração: roteiros autênticos, experiências selecionadas e atendimento próximo em cada etapa.",
+      order: 1,
+      enabled: true,
+    },
+    {
+      title: "Curadoria humana, do início ao fim",
+      subtitle:
+        "Conteúdo de exemplo para avaliar layout, densidade e ritmo das seções deste modelo base.",
+      order: 2,
+      enabled: true,
+    },
+    {
+      title: "Atendimento próximo em cada etapa",
+      subtitle:
+        "Texto demonstrativo, sem dados de agência: a marca real substitui este conteúdo na publicação.",
+      order: 3,
+      enabled: true,
+    },
+  ],
+  signature: {
+    kicker: "MODELO BASE",
+    title: "Cada viagem começa por uma boa conversa.",
+    text:
+      "Conteúdo de demonstração usado para validar a linguagem visual do modelo: entender quem viaja orienta destinos, hospedagens e ritmo da viagem.",
+  },
+  destinations: [
+    { key: "europa-cultural", image: "europa", label: "Cultura", title: "Europa com tempo para viver", text: "Exemplo de destino cultural: cidades históricas, museus e estradas cênicas no seu ritmo.", service: "pacotes", enabled: true, order: 1 },
+    { key: "litoral-brasil", image: "litoral", label: "Praias", title: "Litoral brasileiro", text: "Exemplo de destino de praia, com hospedagens escolhidas por localização e serviço.", service: "pacotes", enabled: true, order: 2 },
+    { key: "escandinavia", image: "escandinavia", label: "Natureza", title: "Paisagens do Norte", text: "Exemplo de destino de natureza: fiordes, auroras e cidades tranquilas com boa logística.", service: "pacotes", enabled: true, order: 3 },
+    { key: "gastronomia-vinhos", image: "gastronomia", label: "Gastronomia", title: "Gastronomia e vinhos", text: "Exemplo de tema gastronômico: mesas, mercados e vinícolas integrados ao roteiro.", service: "pacotes", enabled: true, order: 4 },
+    { key: "resorts", image: "resort", label: "All inclusive", title: "Resorts e all inclusive", text: "Exemplo de estadia com tudo incluído e programação para diferentes idades.", service: "hospedagem", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "roteiros-sob-medida", title: "Roteiros sob medida", text: "Bloco demonstrativo: do primeiro rascunho ao roteiro final, com cada escolha explicada.", service: "pacotes", image: "europa", enabled: true, order: 1 },
+    { key: "grupos-acompanhados", title: "Grupos e viagens acompanhadas", text: "Bloco demonstrativo de saídas em grupo, com ritmo equilibrado e apoio na viagem.", service: "pacotes", image: "grupos", enabled: true, order: 2 },
+    { key: "cultura-historia", title: "Viagens culturais", text: "Bloco demonstrativo de museus, cidades históricas e experiências locais.", service: "pacotes", image: "norteafrica", enabled: true, order: 3 },
+    { key: "natureza-paisagens", title: "Natureza e grandes paisagens", text: "Bloco demonstrativo de trilhas e cenários marcantes com logística resolvida.", service: "pacotes", image: "escandinavia", enabled: true, order: 4 },
+    { key: "gastronomia", title: "Gastronomia e vinhos", text: "Bloco demonstrativo de mesas e vinícolas com reservas antecipadas.", service: "pacotes", image: "gastronomia", enabled: true, order: 5 },
+    { key: "hospedagem-selecionada", title: "Hospedagens selecionadas", text: "Bloco demonstrativo de endereços escolhidos por localização, serviço e atmosfera.", service: "hospedagem", image: "villa", enabled: true, order: 6 },
+    { key: "aereo-seguro", title: "Aéreo e seguro viagem", text: "Bloco demonstrativo de rotas, conexões e coberturas explicadas com transparência.", service: "aereo", image: "litoral", enabled: true, order: 7 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Bloco demonstrativo de itinerários, cabines e categorias apresentados com clareza.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 8 },
+  ],
+  highlights: [
+    { title: "Roteiros desenhados para cada viajante", text: "Texto de exemplo: a viagem nasce da conversa — seu tempo, seu ritmo e o que você quer viver.", service: "pacotes", cta: "Começar a planejar" },
+    { title: "Seleção criteriosa de hospedagens", text: "Texto de exemplo: endereços indicados com critério e o porquê de cada escolha.", service: "hospedagem", cta: "Falar sobre hospedagem" },
+    { title: "Parceiros especializados", text: "Texto de exemplo: operadoras, receptivos e guias escolhidos pela especialidade no destino.", service: "pacotes", cta: "Solicitar proposta" },
+  ],
+  differentials: [
+    { title: "Curadoria humana em cada etapa", text: "Texto de exemplo: planejamento conduzido por pessoas, sem roteiro automático.", icon: "consultivo" },
+    { title: "Planejamento conferido nos detalhes", text: "Texto de exemplo: horários, conexões, traslados e reservas revisados antes da confirmação.", icon: "conferido" },
+    { title: "Parceiros locais de confiança", text: "Texto de exemplo: fornecedores escolhidos pela especialidade, não por volume.", icon: "fornecedores" },
+    { title: "Acompanhamento antes, durante e depois", text: "Texto de exemplo: sempre há com quem falar em qualquer momento da viagem.", icon: "acompanhamento" },
+  ],
+  about: {
+    kicker: "SOBRE ESTE MODELO",
+    title: "Um modelo base para viagens sob medida.",
+    text:
+      "Ambiente de demonstração do modelo editorial: viagens sob medida, curadoria humana e atendimento próximo. Os textos e imagens são de exemplo e serão substituídos pelo conteúdo real de cada agência.",
+    image: "europa",
+    badge: { value: "Modelo base", label: "Conteúdo de demonstração, sem dados reais." },
+  },
+  faq: [
+    {
+      q: "O que é uma viagem sob medida?",
+      a: "Resposta de exemplo: é uma viagem desenhada a partir do seu contexto — quem viaja, quanto tempo tem e o que quer viver — com roteiro, hospedagens e experiências explicados.",
+    },
+    {
+      q: "É possível organizar viagens em grupo?",
+      a: "Resposta de exemplo: sim, além de roteiros individuais e em família, este modelo prevê grupos e viagens acompanhadas.",
+    },
+    {
+      q: "É possível solicitar apenas um serviço?",
+      a: "Resposta de exemplo: sim — aéreo, hospedagem, transfer, seguro ou ingressos isolados, ou o planejamento completo.",
+    },
+    {
+      q: "Como funciona o atendimento?",
+      a: "Resposta de exemplo: a solicitação chega pela Central, a conversa detalha o pedido e a proposta é apresentada com clareza.",
+    },
+    {
+      q: "Como começar a planejar?",
+      a: "Resposta de exemplo: enviando uma solicitação pela Central ou pelo WhatsApp com a ideia inicial da viagem.",
+    },
+  ],
+  copy: {
+    destinations: {
+      title: "Inspirações para a sua próxima viagem",
+      subtitle:
+        "Exemplos de referência para a curadoria. Escolha um e veja como o fluxo de solicitação se comporta.",
+    },
+    modules: {
+      title: "Como podemos planejar com você",
+      subtitle: "Temas de demonstração. Escolha um e conte o que você imagina.",
+    },
+    highlights: {
+      title: "Curadoria sob medida",
+      subtitle: "Três princípios de exemplo que orientam cada viagem desenhada.",
+    },
+    differentials: {
+      title: "Como cuidamos de cada viagem",
+      subtitle: "O que sustenta a experiência, do primeiro contato ao retorno.",
+    },
+    concierge: {
+      kicker: "ATENDIMENTO PERSONALIZADO",
+      title: "Um consultor dedicado à sua viagem",
+      subtitle:
+        "Conteúdo de demonstração: conversamos, entendemos o momento e apresentamos as opções.",
+      cta: "Planeje sua viagem",
+    },
+    newsletter: {
+      kicker: "INSPIRAÇÕES",
+      title: "Receba inspirações de viagem",
+      subtitle:
+        "Formulário de demonstração: deixe o contato e o canal preferido para receber ideias de destinos.",
+      cta: "Quero receber inspirações",
+    },
+    faq: {
+      title: "Perguntas frequentes",
+    },
+  },
+};
+
 const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
+
   "100limites.tur.br": "editorialDmc",
   "www.100limites.tur.br": "editorialDmc",
   "paraisoviagens.com": "luxuryCurated",
