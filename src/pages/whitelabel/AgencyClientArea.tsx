@@ -85,7 +85,7 @@ export default function AgencyClientArea({
     setTripId(null);
     try {
       const url = new URL(window.location.href);
-      if (tripIdFromPath(url.pathname)) url.pathname = "/area-do-cliente";
+      if (tripIdFromPath(url.pathname)) url.pathname = basePath;
       url.searchParams.set("area", next);
       window.history.replaceState(null, "", url.toString());
     } catch {
@@ -266,7 +266,7 @@ export default function AgencyClientArea({
     setTripId(id);
     setView("viagens");
     try {
-      window.history.pushState(null, "", tripPathFor(id));
+      window.history.pushState(null, "", tripPathFor(id, basePath));
     } catch {
       /* histórico indisponível: a navegação continua em memória */
     }
@@ -276,7 +276,7 @@ export default function AgencyClientArea({
   const backToTrips = () => {
     setTripId(null);
     try {
-      window.history.pushState(null, "", "/area-do-cliente?area=viagens");
+      window.history.pushState(null, "", `${basePath}?area=viagens`);
     } catch {
       /* histórico indisponível */
     }
