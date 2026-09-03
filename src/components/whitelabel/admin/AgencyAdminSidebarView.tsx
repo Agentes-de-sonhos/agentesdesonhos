@@ -8,7 +8,7 @@
  *
  * Consumidores:
  * - `AgencyAdminSidebar` (painel real: auth, permissões, dados, abas);
- * - `SiteLabAdminDemo` (laboratório: itens da fonte central + callbacks locais).
+ * - `SiteLabRoot` (template base: monta o painel real sob outro prefixo).
  *
  * Assim a paridade visual/comportamental é estrutural, não copiada.
  */
