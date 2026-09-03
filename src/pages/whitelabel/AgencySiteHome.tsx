@@ -1046,8 +1046,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </p>
                 </div>
               </div>
-              <Button size="lg" variant="outline" onClick={() => openRequest("pacotes")}>
-                {copy.cta ?? "Quero receber novidades"}
+              <Button
+                size="lg"
+                className="bg-[var(--brand-secondary)] text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)]"
+                onClick={() => setInspirationOpen(true)}
+              >
+                {copy.cta ?? "Quero receber inspirações"}
               </Button>
             </Card>
           </section>
