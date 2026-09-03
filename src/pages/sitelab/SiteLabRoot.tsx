@@ -32,7 +32,6 @@ import sitelabLogo from "@/assets/sitelab/sitelab-base-logo.png.asset.json";
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 /* Áreas internas: as PRÓPRIAS páginas reais do white label, sem versão paralela. */
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
-const AgencyAdminArea = lazy(() => import("@/components/whitelabel/admin/AgencyAdminArea"));
 
 /** noindex/nofollow em todas as áreas do laboratório. */
 function useNoIndex(title: string) {
@@ -62,6 +61,40 @@ function useNoIndex(title: string) {
  * `tenant` é o registro real do tenant técnico do laboratório (isolado e
  * possivelmente vazio); quando indisponível, mantemos um contorno neutro.
  */
+/**
+ * Gestão do laboratório: estado seguro e explícito.
+ *
+ * Regra de isolamento: dentro de `/sitelab-base/gestao` nenhuma consulta ou
+ * gravação pode usar a agência/conta real do usuário logado. Como o tenant
+ * técnico não possui usuário de autenticação, o painel real não é montado —
+ * nem mesmo os providers — até que a conta técnica seja provisionada.
+ */
+function SiteLabAdminUnavailable({ model }: { model: SiteLabModel }) {
+  return (
+    <main className="mx-auto flex min-h-[60vh] w-full max-w-[720px] flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+      <div
+        className="flex h-12 w-12 items-center justify-center rounded-full"
+        style={{ background: "var(--brand-tertiary)" }}
+      >
+        <Lock className="h-5 w-5" style={{ color: "var(--brand-primary)" }} />
+      </div>
+      <h1 className="text-2xl font-semibold text-foreground">
+        Gestão do {model.name} aguardando conta técnica
+      </h1>
+      <p className="max-w-[52ch] text-sm text-muted-foreground">
+        O painel de gestão usa exatamente as mesmas páginas das agências, e essas
+        páginas leem e gravam sempre no contexto da conta autenticada. Para que o
+        laboratório não exiba nem altere dados de nenhuma conta real, esta área
+        permanece inativa até que uma conta técnica exclusiva do laboratório seja
+        provisionada.
+      </p>
+      <p className="text-xs text-muted-foreground">
+        O site e a Área do Cliente do laboratório continuam disponíveis nas abas acima.
+      </p>
+    </main>
+  );
+}
+
 function demoInfo(model: SiteLabModel, tenant: AgencyDomainInfo | null): AgencyDomainInfo {
   return {
     ...(tenant ?? {
@@ -288,23 +321,15 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
           /* Página real: login, sessão, navegação e dados são os do white label. */
           <AgencyClientArea info={info} basePath={`${SITELAB_BASE_PATH}/area-do-cliente`} />
         ) : (
-          /* Painel real completo: mesmos providers, guard, menu, shell e páginas. */
-          /* Painel real: tenant técnico do laboratório (nunca o hostname
-             reservado da plataforma) e rotas sob o prefixo protegido. */
-          <AgencyAdminArea
-            hostname={model.adminHostname}
-            basePath={SITELAB_BASE_PATH}
-            identity={{
-              agency_name: model.name,
-              owner_name: model.name,
-              logo_url: model.logoUrl,
-              primary_color: model.palette.primary,
-              secondary_color: model.palette.secondary,
-              secondary_auto: false,
-              tertiary_color: model.palette.tertiary,
-              tertiary_auto: false,
-            }}
-          />
+          /* GESTÃO: estado seguro explícito.
+             O tenant técnico do laboratório NÃO tem conta de autenticação nem
+             perfil próprios. Montar aqui o painel real (AgencyAdminArea) faria
+             TeamSessionProvider/useAgencyOwnerId caírem em auth.uid(), ou seja,
+             o painel com a identidade do laboratório leria e gravaria dados da
+             conta administrativa logada. Enquanto não houver provisionamento de
+             conta técnica, nada de autenticado é montado aqui — sem providers,
+             sem sessão, sem consultas. */
+          <SiteLabAdminUnavailable model={model} />
         )}
       </Suspense>
     </div>
