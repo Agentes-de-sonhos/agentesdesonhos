@@ -103,7 +103,11 @@ export const DEMO_CLIENT_AREA_PROFILE: ClientAreaProfileData = {
   name: DEMO_CLIENT.name,
   email: DEMO_CLIENT.email,
   phone: DEMO_CLIENT.phone,
-} as ClientAreaProfileData;
+  city: "São Paulo",
+  state: "SP",
+  country: "Brasil",
+  birth_date: null,
+};
 
 export function formatDemoDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
