@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConical, Loader2, Lock, LogOut } from "lucide-react";
+import { Loader2, Lock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,11 +26,13 @@ import {
   revokeSitelabAccess,
   verifySitelabPassword,
 } from "@/lib/sitelabAccess";
+import { AGENCY_ADMIN_HOME } from "@/lib/agencyAdmin";
 import sitelabLogo from "@/assets/sitelab/sitelab-base-logo.png.asset.json";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
-const SiteLabClientAreaDemo = lazy(() => import("@/pages/sitelab/SiteLabClientAreaDemo"));
-const SiteLabAdminDemo = lazy(() => import("@/pages/sitelab/SiteLabAdminDemo"));
+/* Áreas internas: as PRÓPRIAS páginas reais do white label, sem versão paralela. */
+const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
+const AgencyAdminArea = lazy(() => import("@/components/whitelabel/admin/AgencyAdminArea"));
 
 /** noindex/nofollow em todas as áreas do laboratório. */
 function useNoIndex(title: string) {
@@ -48,7 +50,7 @@ function useNoIndex(title: string) {
   }, [title]);
 }
 
-/** Tenant SINTÉTICO do laboratório: nunca usa dados de agências reais. */
+/** Identidade do template-base: apenas nome, logo e paleta. */
 function demoInfo(model: SiteLabModel): AgencyDomainInfo {
   return {
     user_id: SITELAB_DEMO_USER_ID,
@@ -69,14 +71,6 @@ function demoInfo(model: SiteLabModel): AgencyDomainInfo {
     public_slug: model.slug,
     cnpj: null,
   };
-}
-
-function DemoBadge() {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--brand-border)] bg-[var(--brand-tertiary)] px-2 py-0.5 text-[11px] font-medium text-[var(--brand-primary)]">
-      <FlaskConical className="h-3 w-3" aria-hidden="true" /> Ambiente de demonstração
-    </span>
-  );
 }
 
 function SiteLabTopBar({
@@ -103,7 +97,6 @@ function SiteLabTopBar({
             />
           ) : null}
           <span className="truncate text-sm font-semibold">{model.name}</span>
-          <DemoBadge />
         </div>
         <nav className="ml-auto flex items-center gap-1">
           {SITELAB_VIEWS.map((entry) => (
@@ -178,7 +171,7 @@ function PasswordGate({
           </span>
           <h1 className="text-lg font-semibold">{model.name}</h1>
           <p className="text-sm text-muted-foreground">
-            Ambiente privado de demonstração. Informe a senha de acesso.
+            Ambiente privado. Informe a senha de acesso.
           </p>
         </div>
         <div className="space-y-1.5">
@@ -232,7 +225,7 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
     return { ...base, logoUrl: base.logoUrl ?? sitelabLogo.url };
   }, [data]);
 
-  useNoIndex(`${model.name} — ambiente de demonstração`);
+  useNoIndex(`${model.name} — template base`);
   useAgencyBrandTheme({
     primary: model.palette.primary,
     secondary: model.palette.secondary,
@@ -266,9 +259,14 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
             <AgencySiteHome info={info} />
           </AgencySiteLayout>
         ) : view === "clientArea" ? (
-          <SiteLabClientAreaDemo info={info} />
+          /* Página real: login, sessão, navegação e dados são os do white label. */
+          <AgencyClientArea info={info} basePath="/sitelab-base/area-do-cliente" />
         ) : (
-          <SiteLabAdminDemo info={info} />
+          /* Painel real completo: mesmos providers, guard, menu, shell e páginas. */
+          <AgencyAdminArea
+            hostname={typeof window === "undefined" ? "" : window.location.hostname}
+            entryPath={AGENCY_ADMIN_HOME}
+          />
         )}
       </Suspense>
     </div>
