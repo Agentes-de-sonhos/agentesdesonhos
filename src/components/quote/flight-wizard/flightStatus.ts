@@ -66,3 +66,14 @@ export function computeFlightStatus(data: any, savedAsDraft = false, totalAmount
   if (savedAsDraft) return 'draft';
   return analyzeFlight(data, totalAmount).status;
 }
+
+/**
+ * Decide the effective total to save for a flight service.
+ * If the user entered positive unit prices, use the computed total.
+ * Otherwise, preserve an existing service amount (e.g. AI import or manual total).
+ */
+export function resolveFlightSaveTotal(computedTotal: number, existingAmount?: number | null): number {
+  if (computedTotal > 0) return computedTotal;
+  if (existingAmount && existingAmount > 0) return existingAmount;
+  return 0;
+}

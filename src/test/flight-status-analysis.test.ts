@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { analyzeFlight, computeFlightStatus, formatMissingFlightFields } from "@/components/quote/flight-wizard/flightStatus";
+import { analyzeFlight, computeFlightStatus, formatMissingFlightFields, resolveFlightSaveTotal } from "@/components/quote/flight-wizard/flightStatus";
 
 const base = {
   airline: "LATAM",
@@ -46,5 +46,19 @@ describe("analyzeFlight", () => {
     expect(r.missing).toEqual(["data de volta", "valor do serviço"]);
     expect(formatMissingFlightFields(r.missing)).toBe("faltam: data de volta, valor do serviço");
     expect(formatMissingFlightFields(["valor do serviço"])).toBe("falta: valor do serviço");
+  });
+
+  it("preserva o amount total ao salvar passagem importada com preços unitários zerados", () => {
+    const computedTotal = 0;
+    const existingAmount = 4500;
+    const effectiveTotal = resolveFlightSaveTotal(computedTotal, existingAmount);
+    expect(effectiveTotal).toBe(existingAmount);
+
+    const status = computeFlightStatus(
+      { ...base, departure_date: "2026-05-01", return_date: "2026-05-10", adult_price: 0, child_price: 0 },
+      false,
+      effectiveTotal
+    );
+    expect(status).toBe("ready");
   });
 });
