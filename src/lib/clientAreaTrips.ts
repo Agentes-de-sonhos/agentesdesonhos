@@ -203,9 +203,10 @@ export function tripTravelersLabel(trip: ClientAreaTrip): string | null {
   return n === 1 ? "1 viajante" : `${n} viajantes`;
 }
 
-export function tripPathFor(id: string): string {
-  return `/area-do-cliente/viagens/${id}`;
+export function tripPathFor(id: string, basePath = "/area-do-cliente"): string {
+  return `${basePath}/viagens/${id}`;
 }
+
 
 /** Lê o id da viagem do caminho `/area-do-cliente/viagens/:id`. */
 export function tripIdFromPath(pathname: string): string | null {
