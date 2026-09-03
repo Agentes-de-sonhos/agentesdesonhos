@@ -37,6 +37,14 @@ export const SITELAB_DEMO_USER_ID = "00000000-0000-0000-0000-000000000000";
 /** Hostname sintético usado apenas para resolver o template comum do site. */
 export const SITELAB_DEMO_HOSTNAME = "sitelab.local";
 
+/**
+ * Helper central: identifica o contexto sintético do laboratório.
+ * Nenhuma chamada a endpoints reais nem gravação de dados deve ocorrer quando true.
+ */
+export function isSiteLabDemoHost(hostname?: string | null): boolean {
+  return (hostname || "").trim().toLowerCase() === SITELAB_DEMO_HOSTNAME;
+}
+
 export const SITELAB_BASE: SiteLabModel = {
   slug: "sitelab-base",
   name: "SiteLab Base",
