@@ -421,11 +421,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     adult_price: adultPrice,
     child_price: childPrice,
   }, totalAmount || initialData?.amount), [watchedAirline, watchedOrigin, watchedDestination, watchedDeparture, watchedReturn, isOneWay, outboundLegs, returnLegs, adultPrice, childPrice, totalAmount, initialData?.amount]);
-  const missingPrice = flightAnalysis.missing.includes("valor do serviço");
 
-  useEffect(() => {
-    if (isEditing && missingPrice) setShowPricing(true);
-  }, [isEditing, missingPrice]);
+
 
 
   const hasNonEmptyLegs = (legs: z.infer<typeof flightLegSchema>[]) =>
