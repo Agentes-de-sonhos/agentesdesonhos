@@ -91,7 +91,6 @@ export function isPublicUpdateContext(): boolean {
     "/gestao/",
   ];
   if (path === "/gestao") return true;
-  ];
   if (publicPrefixes.some((p) => path === p || path.startsWith(p))) return true;
   if (/^\/[^/]+\/ofertas\/?$/.test(path)) return true;
 
