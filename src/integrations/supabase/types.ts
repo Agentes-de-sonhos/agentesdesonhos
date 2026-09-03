@@ -10397,6 +10397,7 @@ export type Database = {
           agency_secondary_color: string | null
           agency_tertiary_auto: boolean
           agency_tertiary_color: string | null
+          agency_whatsapp_group_url: string | null
           avatar_url: string | null
           bio: string | null
           city: string | null
@@ -10432,6 +10433,7 @@ export type Database = {
           agency_secondary_color?: string | null
           agency_tertiary_auto?: boolean
           agency_tertiary_color?: string | null
+          agency_whatsapp_group_url?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
@@ -10467,6 +10469,7 @@ export type Database = {
           agency_secondary_color?: string | null
           agency_tertiary_auto?: boolean
           agency_tertiary_color?: string | null
+          agency_whatsapp_group_url?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null

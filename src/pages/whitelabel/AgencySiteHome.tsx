@@ -21,6 +21,7 @@ import {
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
+import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
@@ -199,6 +200,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
   const [requestOpen, setRequestOpen] = useState(false);
+  // Captação de leads da seção editorial "Receba inspirações" (template compartilhado).
+  const [inspirationOpen, setInspirationOpen] = useState(false);
   const requestCenterRef = useRef<HTMLDivElement | null>(null);
   const quoteCardRef = useRef<HTMLDivElement | null>(null);
   /**
@@ -997,7 +1000,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           return (
             <section key={key} id="novidades" className="bg-background">
               <div className={`${container} py-14 md:py-24`}>
-                <div className="overflow-hidden rounded-2xl bg-[hsl(var(--wl-navy))] px-8 py-12 md:px-14 md:py-16">
+                <div className="overflow-hidden rounded-2xl bg-[var(--brand-primary)] px-8 py-12 md:px-14 md:py-16">
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
                       <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
@@ -1014,10 +1017,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     <div className="md:justify-self-end">
                       <Button
                         size="lg"
-                        className="wl-cta-invert h-12 w-full px-7 text-white [&_svg]:text-white md:w-auto"
-                        onClick={() => openRequest("pacotes")}
+                        className="h-12 w-full rounded-xl border border-[var(--brand-secondary)] bg-[var(--brand-secondary)] px-7 text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)] [&_svg]:text-[var(--brand-on-secondary)] md:w-auto"
+                        onClick={() => setInspirationOpen(true)}
                       >
-                        {copy.cta ?? "Quero receber novidades"}{" "}
+                        {copy.cta ?? "Quero receber inspirações"}{" "}
                         <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
@@ -1044,8 +1047,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </p>
                 </div>
               </div>
-              <Button size="lg" variant="outline" onClick={() => openRequest("pacotes")}>
-                {copy.cta ?? "Quero receber novidades"}
+              <Button
+                size="lg"
+                className="bg-[var(--brand-secondary)] text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)]"
+                onClick={() => setInspirationOpen(true)}
+              >
+                {copy.cta ?? "Quero receber inspirações"}
               </Button>
             </Card>
           </section>
@@ -1237,6 +1244,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           </div>
         );
       })}
+
+      {/* Captação "Receba inspirações": tenant resolvido no servidor pelo hostname. */}
+      <AgencyInspirationDialog
+        open={inspirationOpen}
+        onOpenChange={setInspirationOpen}
+        hostname={hostname}
+        agencyName={name}
+        groupUrl={info.whatsapp_group_url}
+      />
     </>
   );
 }

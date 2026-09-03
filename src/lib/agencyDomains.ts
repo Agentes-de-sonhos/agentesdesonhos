@@ -29,6 +29,11 @@ export interface AgencyDomainInfo {
   public_slug: string | null;
   /** CNPJ do cadastro da agência (exposto pelo RPC get_agency_domain). */
   cnpj: string | null;
+  /**
+   * Link opcional do grupo de WhatsApp de inspirações. Quando vazio, a seção
+   * "Receba inspirações" opera apenas em modo captação (sem redirecionamento).
+   */
+  whatsapp_group_url?: string | null;
 }
 
 /** Hosts owned by the platform — never resolved as agency domains. */
