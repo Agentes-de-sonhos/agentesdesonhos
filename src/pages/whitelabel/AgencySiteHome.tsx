@@ -860,6 +860,27 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </ol>
                 </div>
               </div>
+              {/* Valor da consultoria humana: lista opcional definida pelo perfil. */}
+              {!!profile.conciergePoints?.length && (
+                <div className={`${container} pb-14 md:pb-24`}>
+                  <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {profile.conciergePoints.map((p) => (
+                      <li
+                        key={p.key}
+                        className="rounded-xl border border-border/70 bg-card p-6"
+                      >
+                        <CheckCircle2
+                          className="h-6 w-6 text-primary wl-accent-icon"
+                          aria-hidden="true"
+                          strokeWidth={1.6}
+                        />
+                        <h3 className="mt-4 text-base font-semibold text-foreground">{p.title}</h3>
+                        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{p.text}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           );
         }
