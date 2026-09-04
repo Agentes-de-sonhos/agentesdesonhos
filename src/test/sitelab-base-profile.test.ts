@@ -19,11 +19,15 @@ describe("SiteLab Base — perfil e tema próprios", () => {
     expect(isLuxuryTheme(HOST)).toBe(false);
   });
 
-  it("herda a mesma estrutura/ordem editorial do preset curado", () => {
+  it("é superconjunto editorial do preset curado (catálogo mestre)", () => {
     const sitelab = resolveSiteProfile(HOST);
     const fae = resolveSiteProfile("faeviagens.com.br");
     const order = (p: typeof sitelab) => resolveSections(p.sections).map((s) => s.key);
-    expect(order(sitelab)).toEqual(order(fae));
+    const labOrder = order(sitelab);
+    // Todas as seções da Faé existem no laboratório e na mesma ordem relativa.
+    expect(order(fae).every((k) => labOrder.includes(k))).toBe(true);
+    expect(labOrder.filter((k) => order(fae).includes(k))).toEqual(order(fae));
+    expect(labOrder.length).toBeGreaterThan(order(fae).length);
     expect(sitelab.modules?.map((m) => m.key)).toContain("roteiros-sob-medida");
     expect(sitelab.destinations?.length).toBeGreaterThan(3);
     expect(sitelab.heroImage).not.toBe("fae");
