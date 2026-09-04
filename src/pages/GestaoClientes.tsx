@@ -108,8 +108,8 @@ function KanbanTabsSurface({
         className={cn("flex w-full min-h-0 flex-1 flex-col")}
       >
 
-        {/* Linha única: abas + controles da aba ativa (portal), sem quebra */}
-        <div className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 md:mx-0 scrollbar-thin">
+        {/* Navegação + ações: quebra em linhas no mobile, sem scroll horizontal */}
+        <div className="-mx-1 flex flex-wrap items-center gap-2 px-1 md:mx-0">
           <TabsList className="inline-flex w-max shrink-0 gap-0.5">
             {can('opportunities.view') && (
               <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
@@ -129,6 +129,17 @@ function KanbanTabsSurface({
                 Clientes
               </TabsTrigger>
             )}
+          </TabsList>
+
+          {/* Ações da aba ativa (busca, + Nova, Maximizar) */}
+          <div
+            ref={setToolbarEl}
+            data-testid="crm-toolbar-slot"
+            className="flex min-w-0 flex-wrap items-center gap-1.5"
+          />
+
+          {/* Visão Geral e Meta de Vendas alinhados à direita */}
+          <TabsList className="ml-auto inline-flex w-max shrink-0 gap-0.5">
             {can('dashboard.view') && (
               <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
@@ -143,8 +154,8 @@ function KanbanTabsSurface({
               </TabsTrigger>
             )}
           </TabsList>
-          <div ref={setToolbarEl} className="flex min-w-0 flex-1 items-center justify-end gap-1.5" />
         </div>
+
 
         <TabsContent
           value="funil"

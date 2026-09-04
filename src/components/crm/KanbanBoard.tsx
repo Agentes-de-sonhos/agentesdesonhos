@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Filter, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,14 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
 import {
   DndContext,
   closestCenter,
@@ -112,7 +106,7 @@ export function KanbanBoard() {
   } = usePipelineStages();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [filterClient, setFilterClient] = useState<string>("all");
+  const [filterClient] = useState<string>("all");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
@@ -330,30 +324,17 @@ export function KanbanBoard() {
           <div className="relative w-[150px] shrink-0 lg:w-[190px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
-              placeholder="Buscar oportunidades..."
+              placeholder="Buscar"
+              aria-label="Buscar oportunidades"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="h-8 pl-8 text-xs"
             />
           </div>
-          <Select value={filterClient} onValueChange={setFilterClient}>
-            <SelectTrigger className="h-8 w-[130px] shrink-0 text-xs lg:w-[150px]">
-              <Filter className="mr-1.5 h-3.5 w-3.5 shrink-0" />
-              <SelectValue placeholder="Filtrar cliente" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os clientes</SelectItem>
-              {clients.map((client) => (
-                <SelectItem key={client.id} value={client.id}>
-                  {client.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             {canCreateOpp && (
               <DialogTrigger asChild>
-                <Button size="sm" className="h-8 shrink-0 gap-1 px-2.5 text-xs">
+                <Button size="sm" className="h-8 shrink-0 gap-1 px-2.5 text-xs" title="Nova oportunidade" aria-label="Nova oportunidade">
                   <Plus className="h-3.5 w-3.5" /> Nova
                 </Button>
               </DialogTrigger>

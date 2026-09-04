@@ -19,6 +19,8 @@ import {
   Cake,
   Upload,
   Loader2,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +31,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -82,6 +83,8 @@ import { cn } from "@/lib/utils";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
+import { KanbanToolbarSlot } from "@/components/crm/kanban/KanbanToolbarSlot";
+import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
 
 function ClientStatusBadge({ status }: { status: ClientStatus }) {
   const label = CLIENT_STATUS_LABELS[status] || "Lead";
@@ -160,7 +163,8 @@ export function ClientsModule() {
   const canDelete = can('clients.delete');
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter] = useState<string>("all");
+  const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(CLIENTS_DEFAULT_PAGE_SIZE);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -344,42 +348,47 @@ export function ClientsModule() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="space-y-4">
+        <KanbanToolbarSlot>
+          <div className="relative w-[150px] shrink-0 lg:w-[190px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Buscar"
+              aria-label="Buscar clientes"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-8 pl-8 text-xs"
+            />
+          </div>
+          {canCreate && (
+            <Button
+              size="sm"
+              className="h-8 shrink-0 gap-1 px-2.5 text-xs"
+              onClick={() => handleOpenDialog()}
+              title="Novo cliente"
+              aria-label="Novo cliente"
+            >
+              <Plus className="h-3.5 w-3.5" /> Nova
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 shrink-0 gap-1.5 px-2.5 text-xs"
+            onClick={toggleMaximize}
+            title={isMaximized ? "Minimizar" : "Maximizar"}
+          >
+            {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            {isMaximized ? "Minimizar" : "Maximizar"}
+          </Button>
+        </KanbanToolbarSlot>
         <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar clientes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrar status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
-            {Object.entries(CLIENT_STATUS_LABELS).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
         {canCreate && (
           <Button variant="outline" onClick={() => setIsImportOpen(true)} className="gap-2">
             <Upload className="h-4 w-4" /> Importar Contatos
           </Button>
         )}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          {canCreate && (
-            <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
-                <Plus className="mr-2 h-4 w-4" /> Novo Cliente
-              </Button>
-            </DialogTrigger>
-          )}
+
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingClient ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
