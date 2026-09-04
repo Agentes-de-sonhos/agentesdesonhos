@@ -24,6 +24,20 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
     expect(page).toContain("flex flex-wrap items-start justify-between gap-3");
   });
 
+  it("exibe a identidade compartilhada 'CRM | Gestão de relacionamento com clientes' nas três abas", () => {
+    expect(page).toContain('title="CRM"');
+    expect(page).toContain("Gestão de relacionamento com clientes");
+    expect(page).toContain('titleAfter={');
+    expect(page).not.toContain('title="Gestão de Clientes"');
+    expect(page).not.toContain("Gerencie clientes, oportunidades e metas de vendas");
+  });
+
+  it("mantém o subtítulo exato compartilhado em todas as abas", () => {
+    expect(page).toContain(
+      "Centralize clientes, oportunidades, operações e metas de vendas em um só lugar."
+    );
+  });
+
   it("mantém a ordem Clientes | Oportunidades | Operações antes do slot de ações", () => {
     const cli = page.indexOf('value="clientes"');
     const funil = page.indexOf('value="funil"');
