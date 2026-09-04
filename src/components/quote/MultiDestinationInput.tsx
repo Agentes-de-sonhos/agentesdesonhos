@@ -248,36 +248,8 @@ export function MultiDestinationInput({ value, onChange, layout = "stacked" }: M
 
       {/* Add additional destination */}
       <div className="flex items-center gap-2 pt-1">
-        <div className="flex-1">
-          <PlacesAutocomplete
-            value={draft}
-            onChange={setDraft}
-            onPlaceSelect={(pred) => {
-              const v = pred.name.trim();
-              if (!v) return;
-              if (destinations.some((d) => d.toLowerCase() === v.toLowerCase())) {
-                setDraft("");
-                return;
-              }
-              update([...destinations, v]);
-              setDraft("");
-            }}
-            placeType="city"
-            placeholder="+ Adicionar outra cidade (ex: Roma)"
-            fetchDetailsOnSelect={false}
-          />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addDraft}
-          disabled={!draft.trim()}
-          className="shrink-0"
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Adicionar
-        </Button>
+        <div className="flex-1">{draftField}</div>
+        {addButton}
       </div>
 
       {destinations.length > 1 && (
