@@ -24,9 +24,9 @@ describe("SiteLab Base — perfil e tema próprios", () => {
     const fae = resolveSiteProfile("faeviagens.com.br");
     const order = (p: typeof sitelab) => resolveSections(p.sections).map((s) => s.key);
     const labOrder = order(sitelab);
-    // Todas as seções da Faé existem no laboratório e na mesma ordem relativa.
+    // Todas as seções da Faé existem no laboratório; a ordem do catálogo é a
+    // do showroom (o tenant real mantém a sua própria ordem, intacta).
     expect(order(fae).every((k) => labOrder.includes(k))).toBe(true);
-    expect(labOrder.filter((k) => order(fae).includes(k))).toEqual(order(fae));
     expect(labOrder.length).toBeGreaterThan(order(fae).length);
     expect(sitelab.modules?.map((m) => m.key)).toContain("roteiros-sob-medida");
     expect(sitelab.destinations?.length).toBeGreaterThan(3);
