@@ -301,6 +301,20 @@ export default function MeusProjetos() {
     next.set("tab", tab);
     setSearchParams(next);
   };
+  /**
+   * "Modelos" passou a ser uma visualização com duas subabas (Roteiros e
+   * Textos Prontos). Links antigos com ?tab=bloco-notas continuam abrindo
+   * direto em Textos Prontos, sem alterar rota, dados ou tabela.
+   */
+  const isModelosTab = activeTab === "modelos" || activeTab === "bloco-notas";
+  const tabsValue = isModelosTab ? "modelos" : activeTab;
+  const isProjectTab =
+    activeTab === "orcamentos" || activeTab === "carteiras" || activeTab === "roteiros";
+  const canUseTextosProntos = !isAgencyAdmin && !isStartPlan;
+  const [modelosSub, setModelosSub] = useState<"roteiros" | "textos">(
+    activeTab === "bloco-notas" && canUseTextosProntos ? "textos" : "roteiros"
+  );
+
   const { counts: travelFileCounts, unreadCount: filesUnread } =
     useTravelFilesSummary(canUseBookingRequests);
   const { quoteFiles } = useQuoteFileNumbers(canUseBookingRequests);
@@ -614,75 +628,8 @@ export default function MeusProjetos() {
             </div>
           </div>
 
-          {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <div className="relative flex-1 sm:max-w-[380px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome, cliente ou destino..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-10 rounded-lg bg-background"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-10 rounded-lg gap-2 text-muted-foreground hover:text-foreground"
-                  >
-                    <SlidersHorizontal className="h-4 w-4" />
-                    <span className="text-sm">
-                      Filtros
-                      {statusFilter !== "all" && (
-                        <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-semibold text-primary">
-                          1
-                        </span>
-                      )}
-                    </span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-56 p-2">
-                  <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
-                  {(
-                    [
-                      { v: "all", label: "Todos" },
-                      { v: "published", label: "Publicado" },
-                      { v: "draft", label: "Rascunho" },
-                    ] as { v: StatusFilter; label: string }[]
-                  ).map((opt) => (
-                    <button
-                      key={opt.v}
-                      type="button"
-                      onClick={() => setStatusFilter(opt.v)}
-                      className={cn(
-                        "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
-                        statusFilter === opt.v
-                          ? "bg-muted text-foreground font-medium"
-                          : "hover:bg-muted/60"
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </PopoverContent>
-              </Popover>
-              <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as SortOrder)}>
-                <SelectTrigger className="w-[150px] h-10 rounded-lg">
-                  <SelectValue placeholder="Ordenar" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Mais recentes</SelectItem>
-                  <SelectItem value="az">Nome A-Z</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={tabsValue} onValueChange={setActiveTab}>
             <div className="border-b border-border/60">
               <TabsList className="h-auto w-full sm:w-auto bg-transparent p-0 gap-4 sm:gap-6 rounded-none justify-start overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
@@ -759,6 +706,75 @@ export default function MeusProjetos() {
                 )}
               </TabsList>
             </div>
+
+            {isProjectTab && (
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="relative flex-1 sm:max-w-[380px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome, cliente ou destino..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 h-10 rounded-lg bg-background"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 rounded-lg gap-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <SlidersHorizontal className="h-4 w-4" />
+                      <span className="text-sm">
+                        Filtros
+                        {statusFilter !== "all" && (
+                          <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary/10 px-1 text-[10px] font-semibold text-primary">
+                            1
+                          </span>
+                        )}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-56 p-2">
+                    <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Status</p>
+                    {(
+                      [
+                        { v: "all", label: "Todos" },
+                        { v: "published", label: "Publicado" },
+                        { v: "draft", label: "Rascunho" },
+                      ] as { v: StatusFilter; label: string }[]
+                    ).map((opt) => (
+                      <button
+                        key={opt.v}
+                        type="button"
+                        onClick={() => setStatusFilter(opt.v)}
+                        className={cn(
+                          "w-full text-left rounded-md px-2 py-1.5 text-sm transition-colors",
+                          statusFilter === opt.v
+                            ? "bg-muted text-foreground font-medium"
+                            : "hover:bg-muted/60"
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+                <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as SortOrder)}>
+                  <SelectTrigger className="w-[150px] h-10 rounded-lg">
+                    <SelectValue placeholder="Ordenar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Mais recentes</SelectItem>
+                    <SelectItem value="az">Nome A-Z</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            )}
 
             {!isStartPlan && (
               <TabsContent value="orcamentos" className="mt-5 space-y-4">
