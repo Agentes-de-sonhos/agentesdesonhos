@@ -6,7 +6,7 @@
  * vive em `AgencyAdminSidebarView`, compartilhada com o laboratório (Site Lab),
  * o que garante paridade visual/comportamental estrutural.
  */
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,7 @@ import {
   type MenuItemDef,
 } from "@/lib/agencyAdminMenu";
 import { AgencyAdminSidebarView } from "./AgencyAdminSidebarView";
+import { QuickAddClientDialog } from "@/components/crm/QuickAddClientDialog";
 
 export { useSidebarCollapsed } from "./useSidebarCollapsed";
 
@@ -52,8 +53,15 @@ export function AgencyAdminSidebar({
   const agencyName = agencyDisplayName(info);
   const logoUrl = resolveAgencyLogoUrl(info);
 
+  const [newClientOpen, setNewClientOpen] = useState(false);
+
   const openOrActivate = useCallback(
     (item: MenuItemDef) => {
+      if (item.action === "new-client") {
+        setNewClientOpen(true);
+        onNavigate?.();
+        return;
+      }
       if (workspace) workspace.openOrActivateTab(item.to, item.label);
       else navigate(item.to);
       onNavigate?.();
@@ -97,6 +105,7 @@ export function AgencyAdminSidebar({
     item.match ? item.match(location.pathname, location.search) : location.pathname === item.to;
 
   return (
+    <>
     <AgencyAdminSidebarView
       agencyName={agencyName}
       logoUrl={logoUrl}
@@ -123,5 +132,7 @@ export function AgencyAdminSidebar({
       onSignOut={handleSignOut}
       menuResetKey={`${location.pathname}${location.search}|${workspace?.activeId ?? ""}`}
     />
+    <QuickAddClientDialog open={newClientOpen} onOpenChange={setNewClientOpen} />
+    </>
   );
 }
