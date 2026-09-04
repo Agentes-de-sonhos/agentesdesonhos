@@ -186,8 +186,8 @@ export function useItineraries() {
         tripType: formData.tripType,
         budgetLevel: formData.budgetLevel,
         interests: formData.interests || [],
-        travelPace: formData.travelPace || "moderado",
-        additionalPreferences: formData.additionalPreferences || {},
+        travelPace: formData.travelPace,
+        additionalPreferences: formData.additionalPreferences,
         passengers: formData.passengers,
         arrivalInfo: formData.arrivalInfo
           ? { transport: formData.arrivalInfo.transport, period: formData.arrivalInfo.period }

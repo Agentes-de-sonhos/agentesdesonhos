@@ -185,8 +185,9 @@ export interface ItineraryFormData {
   tripType: TripProfile;
   budgetLevel: 'economico' | 'conforto' | 'luxo';
   interests: TravelInterest[];
-  travelPace: TravelPace;
-  additionalPreferences: AdditionalPreferences;
+  /** Opcional: novos roteiros não enviam ritmo. Mantido para dados/telas antigas. */
+  travelPace?: TravelPace;
+  additionalPreferences?: AdditionalPreferences;
   outboundFlight?: FlightInfo;
   returnFlight?: FlightInfo;
   arrivalInfo?: JourneyInfo;

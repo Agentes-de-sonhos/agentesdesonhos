@@ -552,7 +552,16 @@ export default function CriarRoteiro() {
         />
 
         {!currentItinerary ? (
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list" | "templates")}>
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => {
+              // "Meus Roteiros" e "Meus Modelos" passam a navegar para Meus Projetos,
+              // usando o helper contextual (plataforma, SiteLab e sites das agências).
+              if (v === "list") { navigate(nav.projects("roteiros")); return; }
+              if (v === "templates") { navigate(nav.projects("modelos")); return; }
+              setActiveTab(v as "create" | "list" | "templates");
+            }}
+          >
             <div className="flex items-end justify-between gap-4 border-b border-border/60">
               <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start">
                 <TabsTrigger
@@ -610,13 +619,37 @@ export default function CriarRoteiro() {
               ) : null}
               <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
-                  <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    Novo Roteiro de Viagem
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Preencha os dados e deixe a IA criar um roteiro personalizado.
-                  </p>
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                        Novo Roteiro de Viagem
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Preencha os dados e deixe a IA criar um roteiro personalizado.
+                      </p>
+                    </div>
+
+                    {/* Importação de roteiro pronto (mesma funcionalidade/modal de antes) */}
+                    <div className="sm:text-right sm:shrink-0">
+                      <div className="flex items-center gap-2 font-medium text-sm sm:justify-end">
+                        <FileText className="h-4 w-4 text-primary" />
+                        Já tem um roteiro pronto?
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 sm:max-w-[16rem]">
+                        Importe PDFs, DOCs ou texto colado e a IA monta o roteiro para você.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setImportWizardOpen(true)}
+                        className="mt-2 h-9 rounded-lg"
+                      >
+                        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                        Importar roteiro
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <ItineraryForm
@@ -627,28 +660,6 @@ export default function CriarRoteiro() {
                 </CardContent>
               </Card>
 
-              <Card className="max-w-3xl rounded-2xl border-dashed border-border/70 bg-muted/10">
-                <CardContent className="p-4 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 font-medium text-sm">
-                      <FileText className="h-4 w-4 text-primary" />
-                      Já tem um roteiro pronto?
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Importe PDFs, DOCs ou texto colado e a IA monta o roteiro para você.
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setImportWizardOpen(true)}
-                    className="shrink-0 h-9 rounded-lg"
-                  >
-                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                    Importar roteiro
-                  </Button>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             <TabsContent value="list" className="mt-5">
