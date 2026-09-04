@@ -45,7 +45,12 @@ Deno.serve(async (req) => {
 
     // Chamada de plataforma (service role) já é privilégio máximo: aceita direto.
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const isServiceCall = authHeader.replace(/^Bearer\s+/i, "").trim() === serviceKey;
+    const opToken = (Deno.env.get("SITELAB_PROVISION_TOKEN") || "").trim();
+    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+    const headerToken = (req.headers.get("x-sitelab-token") || "").trim();
+    const isServiceCall =
+      bearer === serviceKey || (opToken.length > 0 && headerToken === opToken);
+
 
     if (!isServiceCall) {
       const caller = createClient(url, anonKey, {
