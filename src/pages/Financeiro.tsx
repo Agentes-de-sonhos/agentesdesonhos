@@ -39,18 +39,22 @@ const MONTH_NAMES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
+/** Abas superiores (ordem exata). "Visão Geral" fica ao lado do seletor de mês. */
 const ALL_TABS_DEF = [
-  { key: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
   { key: "vendas", label: "Vendas", icon: ShoppingBag },
   { key: "entradas", label: "Entradas", icon: ArrowUpCircle },
-  { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
-  { key: "faturas", label: "Faturas", icon: FileText },
   { key: "comissoes", label: "Comissões", icon: Receipt },
-  { key: "fornecedores", label: "Fornecedores", icon: Truck },
+  { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
   { key: "vendedores", label: "Vendedores", icon: Users },
+  { key: "recibos", label: "Recibos", icon: ReceiptText },
+  { key: "faturas", label: "Faturas", icon: FileText },
+  { key: "notas-fiscais", label: "Notas Fiscais", icon: FileSpreadsheet },
+  { key: "contratos", label: "Contratos", icon: FileSignature },
+  { key: "fornecedores", label: "Fornecedores", icon: Truck },
 ] as const;
 
-const ALL_TABS = ALL_TABS_DEF.map(t => t.key);
+const ALL_TABS = ["dashboard", ...ALL_TABS_DEF.map(t => t.key)];
+
 
 type PeriodPreset = "this_month" | "last_month" | "last_3_months";
 
