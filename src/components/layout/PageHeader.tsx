@@ -10,9 +10,10 @@ interface PageHeaderProps {
   icon: LucideIcon;
   adminTab?: string;
   children?: React.ReactNode;
+  titleAfter?: React.ReactNode;
 }
 
-export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab, children }: PageHeaderProps) {
+export function PageHeader({ pageKey, title, subtitle, icon: Icon, adminTab, children, titleAfter }: PageHeaderProps) {
   const { data: bannerUrl } = useQuery({
     queryKey: ["page-banner", pageKey],
     queryFn: async () => {
