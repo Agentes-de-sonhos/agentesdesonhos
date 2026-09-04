@@ -13,7 +13,6 @@ import {
   FolderOpen,
   Headphones,
   KanbanSquare,
-  Layers,
   Map,
   Ticket,
   UserCog,
@@ -32,6 +31,8 @@ export interface MenuItemDef {
   match?: (pathname: string, search: string) => boolean;
   /** Permissão exigida; ausente = sempre visível. */
   permission?: string;
+  /** Ação local (abre fluxo existente) em vez de navegação. */
+  action?: "new-client";
 }
 
 function tabMatcher(tab: string) {
@@ -67,18 +68,31 @@ export const PROJECTS_ITEMS: MenuItemDef[] = [
     icon: WalletCards,
     match: tabMatcher("carteiras"),
   },
-  { label: "Modelos", to: "/gestao/meus-projetos?tab=modelos", icon: Layers, match: tabMatcher("modelos") },
 ];
 
 export const CREATE_ITEMS: MenuItemDef[] = [
-  { label: "Novo orçamento", to: "/gestao/criar/orcamento", icon: FileText },
-  { label: "Novo roteiro", to: "/gestao/criar/roteiro", icon: Map },
-  { label: "Nova carteira digital", to: "/gestao/criar/carteira", icon: WalletCards },
-  { label: "Nova oportunidade", to: "/gestao/crm/funil", icon: KanbanSquare, permission: "opportunities.view" },
-  { label: "Nova operação", to: "/gestao/crm/operacoes", icon: FolderOpen, permission: "operations.view" },
+  { label: "Orçamento", to: "/gestao/criar/orcamento", icon: FileText },
+  { label: "Roteiro", to: "/gestao/criar/roteiro", icon: Map },
+  { label: "Carteira Digital", to: "/gestao/criar/carteira", icon: WalletCards },
+  {
+    label: "Cliente",
+    to: "/gestao/crm/clientes",
+    icon: UsersRound,
+    action: "new-client",
+    permission: "clients.view",
+  },
+  { label: "Oportunidade", to: "/gestao/crm/funil", icon: KanbanSquare, permission: "opportunities.view" },
+  { label: "Operação", to: "/gestao/crm/operacoes", icon: FolderOpen, permission: "operations.view" },
 ];
 
 export const MANAGEMENT_ITEMS: MenuItemDef[] = [
+  {
+    label: "Clientes",
+    to: "/gestao/crm/clientes",
+    icon: UsersRound,
+    match: (p) => p.includes("/clientes"),
+    permission: "clients.view",
+  },
   {
     label: "Oportunidades",
     to: "/gestao/crm/funil",
@@ -92,13 +106,6 @@ export const MANAGEMENT_ITEMS: MenuItemDef[] = [
     icon: FolderOpen,
     match: (p) => p.includes("/operacoes"),
     permission: "operations.view",
-  },
-  {
-    label: "Clientes",
-    to: "/gestao/crm/clientes",
-    icon: UsersRound,
-    match: (p) => p.includes("/clientes"),
-    permission: "clients.view",
   },
   {
     label: "Reservas",
