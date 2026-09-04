@@ -74,3 +74,21 @@ describe("Textos Prontos — reuso de notes", () => {
     expect(notesGrid).toContain('create: "Nova Nota"');
   });
 });
+
+describe("Textos Prontos — disponibilidade no SiteLab/agências", () => {
+  it("não é ocultado por isAgencyAdmin", () => {
+    expect(page).toContain("const canUseTextosProntos = !isStartPlan;");
+    expect(page).not.toContain("canUseTextosProntos = !isAgencyAdmin");
+    expect(page).toContain('if (!isStartPlan) tabs.push("bloco-notas");');
+  });
+
+  it("mantém Reservas fora da navegação principal no contexto de agência", () => {
+    expect(page).toContain('if (!isAgencyAdmin && canUseBookingRequests) tabs.push("reservas");');
+    expect(page).toContain("{!isAgencyAdmin && canUseBookingRequests && (");
+  });
+
+  it("não cria schema/tabela nova (segue usando useNotes/notes)", () => {
+    expect(page).not.toMatch(/create table|text_templates|notes_templates/i);
+    expect(blocoNotas).toContain('from "@/hooks/useNotes"');
+  });
+});
