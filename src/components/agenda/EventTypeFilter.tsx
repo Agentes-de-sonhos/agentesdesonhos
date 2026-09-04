@@ -16,6 +16,8 @@ interface EventTypeFilterProps {
   hiddenTypes: string[];
   onToggleType: (typeId: string, hidden: boolean) => void;
   className?: string;
+  /** Controls rendered inline, before the "Filtrar" trigger, in the same bar. */
+  leading?: ReactNode;
 }
 
 export function EventTypeFilter({
@@ -23,13 +25,18 @@ export function EventTypeFilter({
   hiddenTypes,
   onToggleType,
   className,
+  leading,
 }: EventTypeFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className={className}>
-      <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/30 rounded-lg border border-border/50">
-        <CollapsibleTrigger className="flex items-center gap-2 hover:bg-muted/50 px-2 py-1 rounded-md transition-colors">
+      <div
+        data-testid="agenda-toolbar"
+        className="flex flex-wrap items-center gap-4 p-4 bg-muted/30 rounded-lg border border-border/50 overflow-x-hidden"
+      >
+        {leading}
+        <CollapsibleTrigger className="flex items-center gap-2 hover:bg-muted/50 px-2 py-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Filtrar</span>
           <ChevronDown 
             className={cn(
