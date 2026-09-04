@@ -1,38 +1,43 @@
 ---
 name: SiteLab Base — consumidor mestre do template white label e paleta de 3 cores
-description: Laboratório privado /sitelab-base (site, área do cliente, gestão) que renderiza as páginas reais das agências, tenant técnico isolado e contrato de paleta primária/secundária/terciária
+description: Laboratório privado /sitelab-base (site, área do cliente, gestão bloqueada por isolamento) e contrato de paleta primária/secundária/terciária
 type: feature
 ---
 
 ## Regra definitiva
 SiteLab Base NÃO é staging nem demo: é o CONSUMIDOR MESTRE do mesmo template.
-Um único código e um único deploy — melhoria no núcleo compartilhado chega ao SiteLab
-e a todos os tenants ao mesmo tempo. `SiteLabRoot.tsx` é só compositor fino de
-`AgencySiteLayout`/`AgencySiteHome`, `AgencyClientArea` e `AgencyAdminArea`.
-Proibido criar cópias/telas paralelas do SiteLab.
+Um único código e um único deploy. `SiteLabRoot.tsx` é só compositor fino de
+`AgencySiteLayout`/`AgencySiteHome` e `AgencyClientArea`. Proibido criar cópias
+ou telas paralelas.
 
-## Tenant técnico
-`sitelab_templates.admin_hostname` liga o modelo a um tenant técnico isolado
-(`sitelab.local` em `agency_public_domains`, user_id `1111...1111`), sem perfil e sem
-vínculo com agência real. `agency_admin_access_check` tem regra ADITIVA restrita a esse
-tenant: apenas `has_role(uid,'admin')` entra. Identidade (nome/logo/paleta) chega via
-prop `identity` de `AgencyAdminArea` (só apresentação). Rotas sob `/sitelab-base` via
-`basePath` + `agencyAdminMount`; `/sitelab-base/gestao/*` cobre login e subrotas.
+## Isolamento (regra crítica)
+As páginas compartilhadas resolvem o contexto de dados por `auth.uid()`
+(`useAgencyOwnerId` faz fallback para o próprio usuário; `TeamSessionProvider`
+idem). Logo, montar `AgencyAdminArea` no laboratório faria o painel ler/gravar
+dados da conta administrativa logada. Por isso:
+- `/sitelab-base/gestao` renderiza estado seguro `SiteLabAdminUnavailable`
+  (sem providers, sem sessão, sem consultas);
+- `agency_admin_access_check` permanece EXATAMENTE na lógica original
+  (dono do domínio ou `agency_membership`) — sem exceção para admins;
+- o tenant técnico `sitelab.local` (user_id `1111...1111`, ligado por
+  `sitelab_templates.admin_hostname`) fica com `admin_portal_enabled = false`;
+- identidade visual nunca é usada para mascarar escopo de dados.
+Ativar CRUD real exige provisionar UMA conta técnica de autenticação exclusiva
+do laboratório (com profile e membership próprios) e reabilitar o painel.
 
 ## Contrato de paleta (3 cores)
-Fonte única: `src/lib/brandTheme.ts`; conversão central `agencyBrandInput(info)` em
+Fonte única `src/lib/brandTheme.ts` + conversor `agencyBrandInput(info)` em
 `src/lib/agencyDomains.ts` (inclui `tertiary_color`/`tertiary_auto`).
-- primária: marca e ações principais; bordas de intervalo (`--brand-range-edge`);
+- primária: marca/ações principais e bordas de intervalo (`--brand-range-edge`);
 - secundária: ações secundárias, foco/borda ativa (`--brand-focus-ring`);
-- terciária: fundos suaves, seções alternadas, cards selecionados, miolo de intervalos
-  e rodapé (`--brand-range-fill`).
-Dados: `profiles.agency_primary_color`, `agency_secondary_color/_auto`,
-`agency_tertiary_color/_auto`, expostos por `get_agency_domain`, `get_public_profile` e
-`get_agency_admin_portal`. Legado só com primária mantém fallback derivado.
-Editor: `AgencyBrandColorCard` (Perfil), três cores editáveis a qualquer momento.
+- terciária: fundos suaves, seções alternadas, cards selecionados, miolo de
+  intervalos e rodapé (`--brand-range-fill`).
+Dados em `profiles.agency_*_color/_auto`, expostos por `get_agency_domain`,
+`get_public_profile` e `get_agency_admin_portal`. Legado só com primária mantém
+fallback derivado. Editor: `AgencyBrandColorCard` (Perfil), três cores livres.
 SiteLab: #4B2A6E / #FFD600 / #F3EFF7.
 
 ## Acesso
-Senha validada só no servidor (`verify-sitelab-access`, SHA-256 em `sitelab_templates`),
-grant em `sessionStorage` por slug até 8h (`src/lib/sitelabAccess.ts`), bloqueio
-progressivo, noindex/nofollow e supressão do modal global de nova versão.
+Senha validada no servidor (`verify-sitelab-access`), grant em `sessionStorage`
+por slug até 8h, bloqueio progressivo, noindex/nofollow, modal global de nova
+versão suprimido.

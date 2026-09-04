@@ -63,14 +63,11 @@ describe("Site Lab é consumidor mestre do template compartilhado", () => {
     expect(root).toContain("AgencySiteHome");
     expect(root).toContain("AgencySiteLayout");
     expect(root).toContain("AgencyClientArea");
-    expect(root).toContain("AgencyAdminArea");
     expect(root).not.toMatch(/SiteLabAdmin(Demo|Surfaces)/);
   });
 
   it("resolve o tenant técnico e não usa o hostname reservado da plataforma", () => {
     expect(SITELAB_BASE.adminHostname).toBe(SITELAB_DEMO_HOSTNAME);
-    expect(root).toContain("hostname={model.adminHostname}");
-    expect(root).toContain("basePath={SITELAB_BASE_PATH}");
     expect(root).not.toContain("window.location.hostname");
     expect(SITELAB_BASE_PATH).toBe("/sitelab-base");
   });
