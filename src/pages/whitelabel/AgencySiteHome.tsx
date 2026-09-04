@@ -202,7 +202,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const highlights = profile.highlights ?? DEFAULT_HIGHLIGHTS;
   const differentials = profile.differentials ?? DEFAULT_DIFFERENTIALS;
   const faq = profile.faq ?? DEFAULT_FAQ;
-  const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
+  // No laboratório nenhuma consulta de vitrine real é disparada.
+  const showcasePublished = useAgencyShowcasePublished(
+    lab ? null : info.public_slug || info.agency_slug,
+  );
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
   const [requestOpen, setRequestOpen] = useState(false);
