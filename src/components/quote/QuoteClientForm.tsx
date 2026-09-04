@@ -182,18 +182,18 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Client Selector */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Cliente *</Label>
-          <ClientSelector
-            value={selectedClient}
-            onChange={setSelectedClient}
-            required
-            error={clientError}
-          />
-        </div>
+        {/* Linha 1: Cliente (50%) | Adultos (25%) | Crianças (25%) */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+          <div className="space-y-2 md:col-span-2 min-w-0">
+            <Label className="text-sm font-medium">Cliente *</Label>
+            <ClientSelector
+              value={selectedClient}
+              onChange={setSelectedClient}
+              required
+              error={clientError}
+            />
+          </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="adults_count"
