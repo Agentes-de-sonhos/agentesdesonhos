@@ -31,8 +31,6 @@ export interface MenuItemDef {
   match?: (pathname: string, search: string) => boolean;
   /** Permissão exigida; ausente = sempre visível. */
   permission?: string;
-  /** Ação local (abre fluxo existente) em vez de navegação. */
-  action?: "new-client";
 }
 
 function tabMatcher(tab: string) {
@@ -76,10 +74,9 @@ export const CREATE_ITEMS: MenuItemDef[] = [
   { label: "Carteira Digital", to: "/gestao/criar/carteira", icon: WalletCards },
   {
     label: "Cliente",
-    to: "/gestao/crm/clientes",
+    to: "/gestao/crm/clientes?novo=1",
     icon: UsersRound,
-    action: "new-client",
-    permission: "clients.view",
+    permission: "clients.create",
   },
   { label: "Oportunidade", to: "/gestao/crm/funil", icon: KanbanSquare, permission: "opportunities.view" },
   { label: "Operação", to: "/gestao/crm/operacoes", icon: FolderOpen, permission: "operations.view" },

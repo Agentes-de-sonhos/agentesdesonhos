@@ -35,14 +35,30 @@ describe("menu lateral da gestão (compartilhado)", () => {
     ]);
   });
 
-  it('"Cliente" aciona o fluxo existente de criação de cliente', () => {
+  it('"Cliente" abre o formulário completo da aba Clientes via deep link', () => {
     const cliente = CREATE_ITEMS.find((i) => i.label === "Cliente");
-    expect(cliente?.action).toBe("new-client");
+    expect(cliente?.to).toBe("/gestao/crm/clientes?novo=1");
+    expect(cliente?.permission).toBe("clients.create");
+    expect(JSON.stringify(cliente)).not.toContain("new-client");
+  });
+
+  it("sidebar não referencia mais o QuickAddClientDialog", () => {
     const sidebar = readFileSync(
       "src/components/whitelabel/admin/AgencyAdminSidebar.tsx",
       "utf8",
     );
-    expect(sidebar).toContain("QuickAddClientDialog");
-    expect(sidebar).toContain('item.action === "new-client"');
+    expect(sidebar).not.toContain("QuickAddClientDialog");
+    expect(sidebar).not.toContain("new-client");
   });
+
+  it("ClientsModule abre apenas o formulário de cliente com ?novo=1 e respeita clients.create", () => {
+    const mod = readFileSync("src/components/crm/ClientsModule.tsx", "utf8");
+    expect(mod).toContain('searchParams.get("novo") === "1"');
+    expect(mod).toContain("if (!canCreate) return;");
+    expect(mod).toContain("handleOpenDialogRef.current()");
+    expect(mod).not.toContain("QuickAddClientDialog");
+    // nenhum registro extra (oportunidade/operação) é criado por esse fluxo
+    expect(mod).not.toContain("from(\"opportunities\").insert");
+  });
+
 });
