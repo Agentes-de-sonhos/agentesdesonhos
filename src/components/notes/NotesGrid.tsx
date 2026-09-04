@@ -39,6 +39,44 @@ import {
 import { cn } from "@/lib/utils";
 import { Note, NoteFilters, NoteSortOption, NoteTypeFilter } from "@/types/notes";
 
+export type NotesVariant = "notes" | "texts";
+
+/**
+ * Mesma funcionalidade e mesmos dados (tabela `notes`): apenas os rótulos
+ * visíveis mudam quando a listagem aparece dentro de "Modelos → Textos Prontos".
+ */
+export const NOTES_COPY: Record<
+  NotesVariant,
+  {
+    create: string;
+    search: string;
+    emptyNotFound: string;
+    emptyNone: string;
+    emptyTemplates: string;
+    helpSearch: string;
+    helpNone: string;
+  }
+> = {
+  notes: {
+    create: "Nova Nota",
+    search: "Buscar notas...",
+    emptyNotFound: "Nenhuma nota encontrada",
+    emptyNone: "Nenhuma nota criada ainda",
+    emptyTemplates: "Nenhum modelo criado ainda",
+    helpSearch: "Ajuste sua busca para encontrar a nota desejada.",
+    helpNone: "Crie sua primeira nota para começar a organizar suas ideias.",
+  },
+  texts: {
+    create: "Novo texto",
+    search: "Buscar textos...",
+    emptyNotFound: "Nenhum texto encontrado",
+    emptyNone: "Nenhum texto pronto criado ainda",
+    emptyTemplates: "Nenhum texto reutilizável criado ainda",
+    helpSearch: "Ajuste sua busca para encontrar o texto desejado.",
+    helpNone: "Crie seu primeiro texto pronto para reutilizar nos seus projetos.",
+  },
+};
+
 interface NotesGridProps {
   notes: Note[];
   onSelectNote: (note: Note) => void;
@@ -50,6 +88,7 @@ interface NotesGridProps {
   filters: NoteFilters;
   onFiltersChange: (filters: NoteFilters) => void;
   isLoading: boolean;
+  variant?: NotesVariant;
 }
 
 const typeFilterOptions: { value: NoteTypeFilter; label: string }[] = [
@@ -57,6 +96,7 @@ const typeFilterOptions: { value: NoteTypeFilter; label: string }[] = [
   { value: "notes", label: "Notas" },
   { value: "templates", label: "Modelos" },
 ];
+
 
 const sortOptions: { value: NoteSortOption; label: string }[] = [
   { value: "updated_at", label: "Última edição" },
@@ -103,7 +143,9 @@ export function NotesGrid({
   filters,
   onFiltersChange,
   isLoading,
+  variant = "notes",
 }: NotesGridProps) {
+  const copy = NOTES_COPY[variant];
   const handleSortChange = (value: NoteSortOption) => {
     onFiltersChange({
       ...filters,
@@ -119,7 +161,8 @@ export function NotesGrid({
         <div className="relative flex-1 sm:max-w-[380px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar notas..."
+            placeholder={copy.search}
+
             value={filters.search}
             onChange={(e) =>
               onFiltersChange({ ...filters, search: e.target.value })
@@ -184,7 +227,7 @@ export function NotesGrid({
           </Select>
           <Button onClick={onCreateNote} className="h-10 rounded-lg gap-1.5">
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Nova Nota</span>
+            <span className="hidden sm:inline">{copy.create}</span>
           </Button>
         </div>
       </div>
@@ -202,21 +245,20 @@ export function NotesGrid({
             </div>
             <p className="text-sm font-medium text-foreground">
               {filters.search
-                ? "Nenhuma nota encontrada"
+                ? copy.emptyNotFound
                 : filters.typeFilter === "templates"
-                ? "Nenhum modelo criado ainda"
-                : "Nenhuma nota criada ainda"}
+                ? copy.emptyTemplates
+                : copy.emptyNone}
             </p>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-              {filters.search
-                ? "Ajuste sua busca para encontrar a nota desejada."
-                : "Crie sua primeira nota para começar a organizar suas ideias."}
+              {filters.search ? copy.helpSearch : copy.helpNone}
             </p>
             {!filters.search && (
               <Button onClick={onCreateNote} className="mt-4 h-10 rounded-lg">
                 <Plus className="h-4 w-4" />
-                Nova Nota
+                {copy.create}
               </Button>
+
             )}
           </div>
         </Card>
