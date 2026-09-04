@@ -34,8 +34,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
 
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return json({ error: "Não autorizado" }, 401);
+    const authHeader = req.headers.get("Authorization") || "";
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -60,6 +59,7 @@ Deno.serve(async (req) => {
     });
 
     if (!isServiceCall) {
+      if (!authHeader) return json({ error: "Não autorizado" }, 401);
       const caller = createClient(url, anonKey, {
         global: { headers: { Authorization: authHeader } },
       });
