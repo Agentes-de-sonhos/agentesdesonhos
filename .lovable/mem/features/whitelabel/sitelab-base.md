@@ -11,19 +11,22 @@ Um único código e um único deploy. `SiteLabRoot.tsx` é só compositor fino d
 ou telas paralelas.
 
 ## Isolamento (regra crítica)
-As páginas compartilhadas resolvem o contexto de dados por `auth.uid()`
-(`useAgencyOwnerId` faz fallback para o próprio usuário; `TeamSessionProvider`
-idem). Logo, montar `AgencyAdminArea` no laboratório faria o painel ler/gravar
-dados da conta administrativa logada. Por isso:
-- `/sitelab-base/gestao` renderiza estado seguro `SiteLabAdminUnavailable`
-  (sem providers, sem sessão, sem consultas);
-- `agency_admin_access_check` permanece EXATAMENTE na lógica original
-  (dono do domínio ou `agency_membership`) — sem exceção para admins;
-- o tenant técnico `sitelab.local` (user_id `1111...1111`, ligado por
-  `sitelab_templates.admin_hostname`) fica com `admin_portal_enabled = false`;
-- identidade visual nunca é usada para mascarar escopo de dados.
-Ativar CRUD real exige provisionar UMA conta técnica de autenticação exclusiva
-do laboratório (com profile e membership próprios) e reabilitar o painel.
+As páginas compartilhadas resolvem o contexto por `auth.uid()`. Por isso o
+laboratório tem CONTA TÉCNICA EXCLUSIVA provisionada
+(`sitelab.base@agentesdesonhos.com.br`, plano premium, profile próprio,
+`agency_membership` master de si mesma) ligada ao tenant `sitelab.local`
+(`agency_public_domains.admin_portal_enabled = true`, ligado por
+`sitelab_templates.admin_hostname`). `/sitelab-base/gestao` monta o painel real
+`AgencyAdminArea` com `basePath=/sitelab-base`.
+- `agency_admin_access_check` permanece EXATAMENTE na lógica original (dono do
+  domínio ou `agency_membership`) — administradores da plataforma NÃO têm
+  exceção: se um admin logado abrir a gestão do laboratório, o guard recusa e
+  encerra a sessão;
+- identidade visual nunca é usada para mascarar escopo de dados;
+- provisionamento idempotente pela Edge Function `sitelab-provision` (só admin);
+  a senha da conta técnica é aleatória — defina-a pelo fluxo administrativo de
+  redefinição de senha.
+
 
 ## Contrato de paleta (3 cores)
 Fonte única `src/lib/brandTheme.ts` + conversor `agencyBrandInput(info)` em
