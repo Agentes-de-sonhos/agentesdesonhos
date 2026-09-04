@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Kanban, Target, Briefcase, LayoutDashboard } from "lucide-react";
+import { Users, Kanban, Briefcase, LayoutDashboard } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
 import { SalesGoalsModule } from "@/components/crm/SalesGoalsModule";
@@ -102,7 +102,7 @@ function KanbanTabsSurface({
         className={cn("flex w-full min-h-0 flex-1 flex-col")}
       >
 
-        {/* Linha superior: título + navegação secundária (Visão Geral / Meta de Vendas) */}
+        {/* Linha superior: identidade compartilhada do CRM */}
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <PageHeader
@@ -123,30 +123,6 @@ function KanbanTabsSurface({
               icon={Users}
             />
           </div>
-          <TabsList
-            data-testid="crm-secondary-nav"
-            className="inline-flex w-max shrink-0 gap-0.5 bg-transparent p-0"
-          >
-            {can('dashboard.view') && (
-              <TabsTrigger
-                value="dashboard"
-                className="gap-1.5 whitespace-nowrap px-2.5 text-xs text-muted-foreground"
-              >
-                <LayoutDashboard className="h-4 w-4 shrink-0" />
-                Visão Geral
-              </TabsTrigger>
-            )}
-            {can('goals.view') && (
-              <TabsTrigger
-                value="metas"
-                className="gap-1.5 whitespace-nowrap px-2.5 text-xs text-muted-foreground"
-              >
-                <Target className="h-4 w-4 shrink-0" />
-                <span className="md:hidden">Metas</span>
-                <span className="hidden md:inline">Meta de Vendas</span>
-              </TabsTrigger>
-            )}
-          </TabsList>
         </div>
 
         {/* Linha inferior: abas principais + ações da aba ativa */}
@@ -168,6 +144,12 @@ function KanbanTabsSurface({
               <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Briefcase className="h-4 w-4 shrink-0" />
                 Operações
+              </TabsTrigger>
+            )}
+            {can('dashboard.view') && (
+              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                Visão Geral
               </TabsTrigger>
             )}
           </TabsList>

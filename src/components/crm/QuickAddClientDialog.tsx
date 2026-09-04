@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InternationalPhoneInput } from "@/components/ui/international-phone-input";
 import { Label } from "@/components/ui/label";
-import { useClients, useOpportunities } from "@/hooks/useCRM";
+import { useClients } from "@/hooks/useCRM";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -35,11 +35,16 @@ const schema = z.object({
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Chamado após criar o cliente com sucesso (sem criar nenhum outro registro). */
+  onCreated?: (client: { id: string; name: string }) => void;
 }
 
-export function QuickAddClientDialog({ open, onOpenChange }: Props) {
+/**
+ * Cadastro rápido de cliente. Cria SOMENTE o cliente, com a mesma regra padrão
+ * do cadastro de Clientes — nunca uma oportunidade/card de funil.
+ */
+export function QuickAddClientDialog({ open, onOpenChange, onCreated }: Props) {
   const { clients, createClient } = useClients();
-  const { createOpportunity } = useOpportunities();
   const { toast } = useToast();
 
   const [name, setName] = useState("");
@@ -81,16 +86,9 @@ export function QuickAddClientDialog({ open, onOpenChange }: Props) {
         status: "lead",
       });
       if (!client?.id) throw new Error("Falha ao criar cliente");
-      await createOpportunity({
-        client_id: client.id,
-        destination: "A definir",
-        passengers_count: 1,
-        adults_count: 1,
-        children_count: 0,
-        estimated_value: 0,
-      });
-      toast({ title: "Cliente adicionado ao funil" });
+      toast({ title: "Cliente cadastrado" });
       handleClose(false);
+      onCreated?.({ id: client.id, name: client.name });
     } catch (err: any) {
       toast({ title: "Erro", description: err.message, variant: "destructive" });
     } finally {
@@ -124,9 +122,9 @@ export function QuickAddClientDialog({ open, onOpenChange }: Props) {
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Adicionar novo cliente</DialogTitle>
+            <DialogTitle>Cadastrar cliente</DialogTitle>
             <DialogDescription>
-              Cadastro rápido. O cliente entra direto no funil em "Novo Contato".
+              Cadastro rápido. Cria apenas o cliente, sem gerar oportunidade no funil.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-3">
@@ -167,7 +165,7 @@ export function QuickAddClientDialog({ open, onOpenChange }: Props) {
               </Button>
               <Button type="submit" disabled={submitting || !name.trim()}>
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                Adicionar ao funil
+                Cadastrar cliente
               </Button>
             </DialogFooter>
           </form>

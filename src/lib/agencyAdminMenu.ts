@@ -78,8 +78,18 @@ export const CREATE_ITEMS: MenuItemDef[] = [
     icon: UsersRound,
     permission: "clients.create",
   },
-  { label: "Oportunidade", to: "/gestao/crm/funil", icon: KanbanSquare, permission: "opportunities.view" },
-  { label: "Operação", to: "/gestao/crm/operacoes", icon: FolderOpen, permission: "operations.view" },
+  {
+    label: "Oportunidade",
+    to: "/gestao/crm/funil?new=1",
+    icon: KanbanSquare,
+    permission: "opportunities.create",
+  },
+  {
+    label: "Operação",
+    to: "/gestao/crm/operacoes?new=1",
+    icon: FolderOpen,
+    permission: "operations.create",
+  },
 ];
 
 export const MANAGEMENT_ITEMS: MenuItemDef[] = [

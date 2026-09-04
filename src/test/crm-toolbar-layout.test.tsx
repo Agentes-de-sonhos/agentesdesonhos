@@ -10,18 +10,25 @@ const operations = read("src/components/crm/operations/OperationsModule.tsx");
 const clients = read("src/components/crm/ClientsModule.tsx");
 
 describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
-  it("linha superior traz o PageHeader com Visão Geral e Meta de Vendas à direita", () => {
+  it("linha superior traz apenas o PageHeader e as abas ficam abaixo", () => {
     const header = page.indexOf("<PageHeader");
-    const secondary = page.indexOf('data-testid="crm-secondary-nav"');
-    const dashboard = page.indexOf('value="dashboard"');
-    const metas = page.indexOf('value="metas"');
     const mainTabs = page.indexOf('value="clientes"');
     expect(header).toBeGreaterThan(-1);
-    expect(header).toBeLessThan(secondary);
-    expect(secondary).toBeLessThan(dashboard);
-    expect(dashboard).toBeLessThan(metas);
-    expect(metas).toBeLessThan(mainTabs);
+    expect(header).toBeLessThan(mainTabs);
+    expect(page).not.toContain('data-testid="crm-secondary-nav"');
     expect(page).toContain("flex flex-wrap items-start justify-between gap-3");
+  });
+
+  it("abas principais na ordem Clientes | Oportunidades | Operações | Visão Geral", () => {
+    const cli = page.indexOf('value="clientes"');
+    const funil = page.indexOf('value="funil"');
+    const ops = page.indexOf('value="operacoes"');
+    const dash = page.indexOf('value="dashboard"');
+    const slot = page.lastIndexOf("setToolbarEl");
+    expect(cli).toBeLessThan(funil);
+    expect(funil).toBeLessThan(ops);
+    expect(ops).toBeLessThan(dash);
+    expect(dash).toBeLessThan(slot);
   });
 
   it("exibe a identidade compartilhada 'CRM | Gestão de relacionamento com clientes' nas três abas", () => {
@@ -36,17 +43,6 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
     expect(page).toContain(
       "Centralize clientes, oportunidades, operações e metas de vendas em um só lugar."
     );
-  });
-
-  it("mantém a ordem Clientes | Oportunidades | Operações antes do slot de ações", () => {
-    const cli = page.indexOf('value="clientes"');
-    const funil = page.indexOf('value="funil"');
-    const ops = page.indexOf('value="operacoes"');
-    const slot = page.lastIndexOf("setToolbarEl");
-    expect(cli).toBeGreaterThan(-1);
-    expect(cli).toBeLessThan(funil);
-    expect(funil).toBeLessThan(ops);
-    expect(ops).toBeLessThan(slot);
   });
 
   it("slot de ações ocupa o espaço disponível para empurrar Importar à direita", () => {

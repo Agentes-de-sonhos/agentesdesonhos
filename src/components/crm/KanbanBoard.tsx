@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
@@ -112,6 +113,20 @@ export function KanbanBoard() {
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  /* Comando de URL "?new=1" (atalhos do menu/painel): abre o formulário real de
+     nova oportunidade, respeitando a permissão de criação. */
+  const canCreateOppRef = useRef(canCreateOpp);
+  canCreateOppRef.current = canCreateOpp;
+  useEffect(() => {
+    if (searchParams.get("new") !== "1") return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("new");
+    setSearchParams(next, { replace: true });
+    if (!canCreateOppRef.current) return;
+    setIsDialogOpen(true);
+  }, [searchParams, setSearchParams]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
