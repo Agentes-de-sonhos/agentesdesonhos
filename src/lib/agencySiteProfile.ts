@@ -479,6 +479,57 @@ const SITE_LAB_BASE: AgencySiteProfile = {
     { key: "hospedagem-selecionada", title: "Hospedagens selecionadas", text: "Bloco demonstrativo de endereços escolhidos por localização, serviço e atmosfera.", service: "hospedagem", image: "villa", enabled: true, order: 6 },
     { key: "aereo-seguro", title: "Aéreo e seguro viagem", text: "Bloco demonstrativo de rotas, conexões e coberturas explicadas com transparência.", service: "aereo", image: "litoral", enabled: true, order: 7 },
     { key: "cruzeiros", title: "Cruzeiros", text: "Bloco demonstrativo de itinerários, cabines e categorias apresentados com clareza.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 8 },
+    { key: "resorts", title: "Resorts e all inclusive", text: "Bloco demonstrativo de estadias com tudo incluído e programação para todas as idades.", service: "hospedagem", image: "resort", enabled: true, order: 9 },
+    { key: "circuitos", title: "Circuitos e multidestinos", text: "Bloco demonstrativo de vários destinos em uma só viagem, com logística resolvida.", service: "pacotes", image: "europa", enabled: true, order: 10 },
+    { key: "orlando-parques", title: "Orlando, parques e ingressos", text: "Bloco demonstrativo de parques, ingressos e deslocamentos organizados dia a dia.", service: "ingressos", image: "parques", enabled: true, order: 11 },
+    { key: "lua-de-mel", title: "Lua de mel e celebrações", text: "Bloco demonstrativo de roteiros para datas marcantes, com detalhes combinados antes.", service: "pacotes", image: "luademel", enabled: true, order: 12 },
+    { key: "familia", title: "Viagens em família", text: "Bloco demonstrativo de hospedagens e roteiros pensados para diferentes idades.", service: "pacotes", image: "brasil", enabled: true, order: 13 },
+  ],
+  /* Blocos normalmente condicionados a dados reais — aqui apenas exemplos. */
+  dmc: {
+    kicker: "EXEMPLO — EXCLUSIVO PARA AGÊNCIAS DE VIAGENS",
+    title: "Bloco B2B / DMC de demonstração",
+    text:
+      "Exemplo de faixa para agências com operação receptiva: serviços locais, apoio a outras agências e coordenação de experiências no destino. O conteúdo real de cada operação substitui este texto.",
+    services: [
+      { key: "transfers", label: "Transfers privativos (exemplo)" },
+      { key: "passeios", label: "Passeios e experiências (exemplo)" },
+      { key: "roteiros", label: "Roteiros personalizados (exemplo)" },
+      { key: "acompanhamento", label: "Acompanhamento local (exemplo)" },
+      { key: "guias", label: "Guias e parceiros (exemplo)" },
+      { key: "concierge", label: "Concierge no destino (exemplo)" },
+    ],
+    cta: "Falar sobre uma parceria",
+    whatsappMessage: "Exemplo de mensagem: gostaria de conhecer os serviços B2B deste modelo.",
+    note: "Texto demonstrativo: o cliente final continua sendo da agência parceira.",
+  },
+  credentials: {
+    kicker: "CREDENCIAIS E CONEXÕES (EXEMPLO)",
+    title: "Espaço para associações, selos e redes reais.",
+    text:
+      "Exemplo de bloco de credenciais. Em um site publicado, aqui entram apenas associações, certificações e redes verificáveis da agência.",
+    items: [
+      { key: "associacao", name: "Associação do setor (exemplo)", text: "Espaço para uma associação real da qual a agência participa." },
+      { key: "rede", name: "Rede de curadoria (exemplo)", text: "Espaço para comunidades e redes de agências das quais a agência faz parte." },
+      { key: "certificacao", name: "Certificação (exemplo)", text: "Espaço para certificações e formações comprovadas da equipe." },
+    ],
+  },
+  team: [
+    { key: "consultor-1", name: "Consultor(a) — exemplo", role: "Consultoria de viagens", text: "Espaço para apresentar quem atende o cliente, com especialidades e destinos de referência." },
+    { key: "consultor-2", name: "Consultor(a) — exemplo", role: "Roteiros e grupos", text: "Espaço para o segundo integrante da equipe: função, experiência e temas que domina." },
+    { key: "consultor-3", name: "Consultor(a) — exemplo", role: "Atendimento e pós-venda", text: "Espaço para quem acompanha documentos, vouchers e o suporte durante a viagem." },
+  ],
+  testimonials: [
+    { key: "dep-1", quote: "Depoimento de exemplo: o planejamento chegou pronto, explicado e sem surpresas.", author: "Cliente (exemplo)", context: "Viagem em família" },
+    { key: "dep-2", quote: "Depoimento de exemplo: ter alguém para falar durante a viagem fez toda a diferença.", author: "Cliente (exemplo)", context: "Europa" },
+    { key: "dep-3", quote: "Depoimento de exemplo: cada escolha do roteiro foi justificada antes de decidirmos.", author: "Cliente (exemplo)", context: "Lua de mel" },
+  ],
+  conciergePoints: [
+    { key: "escuta", title: "Escuta antes da pesquisa", text: "A conversa vem primeiro: quem viaja, quando, com quem e o que quer viver." },
+    { key: "curadoria", title: "Curadoria além do preço", text: "As opções são comparadas por localização, serviço, horários e adequação ao perfil." },
+    { key: "planejamento", title: "Planejamento integrado", text: "Aéreo, hospedagem, traslados, ingressos e seguro combinados em um roteiro coerente." },
+    { key: "contato", title: "Alguém com quem falar", text: "Um consultor responsável acompanha o antes, o durante e o depois da viagem." },
+    { key: "organizacao", title: "Organização na Área do Cliente", text: "Orçamento, roteiro, vouchers e documentos reunidos em um só lugar." },
   ],
   highlights: [
     { title: "Roteiros desenhados para cada viajante", text: "Texto de exemplo: a viagem nasce da conversa — seu tempo, seu ritmo e o que você quer viver.", service: "pacotes", cta: "Começar a planejar" },
