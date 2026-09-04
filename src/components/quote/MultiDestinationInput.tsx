@@ -36,7 +36,7 @@ function getAdditionalDestinations(v: string): string[] {
   return splitDestinations(v.slice(commaIndex + 1));
 }
 
-export function MultiDestinationInput({ value, onChange }: MultiDestinationInputProps) {
+export function MultiDestinationInput({ value, onChange, layout = "stacked" }: MultiDestinationInputProps) {
   const primary = getPrimaryInputValue(value);
   const additional = getAdditionalDestinations(value);
   const destinations = [primary.trim(), ...additional].filter(Boolean);
