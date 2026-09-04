@@ -485,7 +485,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         }
 
       case "offers":
-        if (!showcasePublished) return null;
+        // Tenants reais só exibem ofertas com vitrine publicada; o laboratório
+        // mostra o bloco com exemplos editoriais para referência visual.
+        if (!showcasePublished && !lab) return null;
         return (
           <section key={key} id="ofertas" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
             <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
