@@ -28,6 +28,14 @@ laboratório tem CONTA TÉCNICA EXCLUSIVA provisionada
   redefinição de senha.
 
 
+## Montagem da Gestão (regra crítica)
+`/sitelab-base/gestao/*` é decidido em `App.tsx` ANTES de qualquer router
+(`isSiteLabAdminPath` → `SiteLabAdminEntry`), igual ao que `AgencyDomainRoutes`
+faz nos domínios próprios: o painel real usa o workspace de abas (um router por
+aba) e Router dentro de Router quebra em produção sem mensagem. Site e Área do
+Cliente seguem dentro do router do App via `SiteLabRoot`; a chrome (senha, barra
+superior, paleta) é compartilhada em `SiteLabChrome.tsx`.
+
 ## Contrato de paleta (3 cores)
 Fonte única `src/lib/brandTheme.ts` + conversor `agencyBrandInput(info)` em
 `src/lib/agencyDomains.ts` (inclui `tertiary_color`/`tertiary_auto`).
