@@ -8,6 +8,12 @@ interface MultiDestinationInputProps {
   /** Stored as comma-separated string for backward compatibility (e.g. "Paris, Roma"). */
   value: string;
   onChange: (value: string) => void;
+  /**
+   * "stacked" (padrão) mantém o layout atual em coluna.
+   * "row" distribui, no desktop, Destinos (50%), outra cidade (25%) e o
+   * botão Adicionar (25%) na mesma linha. Em telas menores empilha.
+   */
+  layout?: "stacked" | "row";
 }
 
 function splitDestinations(v: string): string[] {
