@@ -299,16 +299,13 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
           /* Página real: login, sessão, navegação e dados são os do white label. */
           <AgencyClientArea info={info} basePath={`${SITELAB_BASE_PATH}/area-do-cliente`} />
         ) : (
-          /* GESTÃO: estado seguro explícito.
-             O tenant técnico do laboratório NÃO tem conta de autenticação nem
-             perfil próprios. Montar aqui o painel real (AgencyAdminArea) faria
-             TeamSessionProvider/useAgencyOwnerId caírem em auth.uid(), ou seja,
-             o painel com a identidade do laboratório leria e gravaria dados da
-             conta administrativa logada. Enquanto não houver provisionamento de
-             conta técnica, nada de autenticado é montado aqui — sem providers,
-             sem sessão, sem consultas. */
-          <SiteLabAdminUnavailable model={model} />
+          /* GESTÃO: o painel real, montado no tenant técnico do laboratório.
+             O guard real resolve a agência pelo hostname técnico e exige que a
+             conta autenticada seja a dona desse domínio — nenhuma conta de
+             agência real (nem de administrador) obtém acesso aqui. */
+          <AgencyAdminArea hostname={model.adminHostname} basePath={SITELAB_BASE_PATH} />
         )}
+
       </Suspense>
     </div>
   );
