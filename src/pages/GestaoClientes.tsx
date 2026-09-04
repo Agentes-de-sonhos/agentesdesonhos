@@ -102,9 +102,51 @@ function KanbanTabsSurface({
         className={cn("flex w-full min-h-0 flex-1 flex-col")}
       >
 
-        {/* Navegação + ações: quebra em linhas no mobile, sem scroll horizontal */}
+        {/* Linha superior: título + navegação secundária (Visão Geral / Meta de Vendas) */}
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <PageHeader
+              pageKey="gestao-clientes"
+              title="Gestão de Clientes"
+              subtitle="Gerencie clientes, oportunidades e metas de vendas"
+              icon={Users}
+            />
+          </div>
+          <TabsList
+            data-testid="crm-secondary-nav"
+            className="inline-flex w-max shrink-0 gap-0.5 bg-transparent p-0"
+          >
+            {can('dashboard.view') && (
+              <TabsTrigger
+                value="dashboard"
+                className="gap-1.5 whitespace-nowrap px-2.5 text-xs text-muted-foreground"
+              >
+                <LayoutDashboard className="h-4 w-4 shrink-0" />
+                Visão Geral
+              </TabsTrigger>
+            )}
+            {can('goals.view') && (
+              <TabsTrigger
+                value="metas"
+                className="gap-1.5 whitespace-nowrap px-2.5 text-xs text-muted-foreground"
+              >
+                <Target className="h-4 w-4 shrink-0" />
+                <span className="md:hidden">Metas</span>
+                <span className="hidden md:inline">Meta de Vendas</span>
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
+
+        {/* Linha inferior: abas principais + ações da aba ativa */}
         <div className="-mx-1 flex flex-wrap items-center gap-2 px-1 md:mx-0">
           <TabsList className="inline-flex w-max shrink-0 gap-0.5">
+            {can('clients.view') && (
+              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
+                <Users className="h-4 w-4 shrink-0" />
+                Clientes
+              </TabsTrigger>
+            )}
             {can('opportunities.view') && (
               <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Kanban className="h-4 w-4 shrink-0" />
@@ -117,38 +159,16 @@ function KanbanTabsSurface({
                 Operações
               </TabsTrigger>
             )}
-            {can('clients.view') && (
-              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
-                <Users className="h-4 w-4 shrink-0" />
-                Clientes
-              </TabsTrigger>
-            )}
           </TabsList>
 
-          {/* Ações da aba ativa (busca, + Nova, Maximizar) */}
+          {/* Ações da aba ativa (busca, + Nova, Maximizar, Importar) */}
           <div
             ref={setToolbarEl}
             data-testid="crm-toolbar-slot"
-            className="flex min-w-0 flex-wrap items-center gap-1.5"
+            className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
           />
-
-          {/* Visão Geral e Meta de Vendas alinhados à direita */}
-          <TabsList className="ml-auto inline-flex w-max shrink-0 gap-0.5">
-            {can('dashboard.view') && (
-              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
-                <LayoutDashboard className="h-4 w-4 shrink-0" />
-                Visão Geral
-              </TabsTrigger>
-            )}
-            {can('goals.view') && (
-              <TabsTrigger value="metas" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
-                <Target className="h-4 w-4 shrink-0" />
-                <span className="md:hidden">Metas</span>
-                <span className="hidden md:inline">Meta de Vendas</span>
-              </TabsTrigger>
-            )}
-          </TabsList>
         </div>
+
 
 
         <TabsContent
