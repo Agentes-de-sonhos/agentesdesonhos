@@ -204,15 +204,20 @@ export function ClientsModule() {
     setSearchParams(next, { replace: true });
   }, [deepLinkId, deepLinkClient, searchParams, setSearchParams]);
 
-  // Abre o formulário completo de novo cliente via deep link (?novo=1),
+  // Abre o formulário completo de novo cliente via deep link (?new=1),
   // usado pelo item "Cliente" do menu global "Criar novo".
-  const wantsNewClient = searchParams.get("novo") === "1";
+  // ?novo=1 é mantido apenas por compatibilidade com links antigos.
+  const wantsNewClient =
+    searchParams.get("new") === "1" || searchParams.get("novo") === "1";
+  const openProfileAfterCreateRef = useRef(false);
   useEffect(() => {
     if (!wantsNewClient) return;
     const next = new URLSearchParams(searchParams);
+    next.delete("new");
     next.delete("novo");
     setSearchParams(next, { replace: true });
     if (!canCreate) return;
+    openProfileAfterCreateRef.current = true;
     handleOpenDialogRef.current();
   }, [wantsNewClient, canCreate, searchParams, setSearchParams]);
 
