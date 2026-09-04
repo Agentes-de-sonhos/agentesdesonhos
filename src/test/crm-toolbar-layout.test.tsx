@@ -10,22 +10,33 @@ const operations = read("src/components/crm/operations/OperationsModule.tsx");
 const clients = read("src/components/crm/ClientsModule.tsx");
 
 describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
-  it("mantém a ordem Oportunidades | Operações | Clientes antes do slot de ações", () => {
-    const funil = page.indexOf('value="funil"');
-    const ops = page.indexOf('value="operacoes"');
-    const cli = page.indexOf('value="clientes"');
-    const slot = page.lastIndexOf("setToolbarEl");
-    expect(funil).toBeGreaterThan(-1);
-    expect(funil).toBeLessThan(ops);
-    expect(ops).toBeLessThan(cli);
-    expect(cli).toBeLessThan(slot);
+  it("linha superior traz o PageHeader com Visão Geral e Meta de Vendas à direita", () => {
+    const header = page.indexOf("<PageHeader");
+    const secondary = page.indexOf('data-testid="crm-secondary-nav"');
+    const dashboard = page.indexOf('value="dashboard"');
+    const metas = page.indexOf('value="metas"');
+    const mainTabs = page.indexOf('value="clientes"');
+    expect(header).toBeGreaterThan(-1);
+    expect(header).toBeLessThan(secondary);
+    expect(secondary).toBeLessThan(dashboard);
+    expect(dashboard).toBeLessThan(metas);
+    expect(metas).toBeLessThan(mainTabs);
+    expect(page).toContain("flex flex-wrap items-start justify-between gap-3");
   });
 
-  it("posiciona Visão Geral e Meta de Vendas à direita, após o slot", () => {
+  it("mantém a ordem Clientes | Oportunidades | Operações antes do slot de ações", () => {
+    const cli = page.indexOf('value="clientes"');
+    const funil = page.indexOf('value="funil"');
+    const ops = page.indexOf('value="operacoes"');
     const slot = page.lastIndexOf("setToolbarEl");
-    expect(page.lastIndexOf('value="dashboard"')).toBeGreaterThan(slot);
-    expect(page.lastIndexOf('value="metas"')).toBeGreaterThan(slot);
-    expect(page).toContain('className="ml-auto inline-flex');
+    expect(cli).toBeGreaterThan(-1);
+    expect(cli).toBeLessThan(funil);
+    expect(funil).toBeLessThan(ops);
+    expect(ops).toBeLessThan(slot);
+  });
+
+  it("slot de ações ocupa o espaço disponível para empurrar Importar à direita", () => {
+    expect(page).toContain("flex min-w-0 flex-1 flex-wrap items-center gap-1.5");
   });
 
   it("permite quebra em linhas no mobile, sem scroll horizontal no cabeçalho", () => {
@@ -42,6 +53,25 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
     expect(source).toContain('placeholder="Buscar"');
     expect(source).toContain("Nova");
     expect(source).toContain("Maximizar");
+  });
+
+  it("Importar aparece só na aba Clientes, dentro do slot e depois de Maximizar", () => {
+    const slotStart = clients.indexOf("<KanbanToolbarSlot>");
+    const slotEnd = clients.indexOf("</KanbanToolbarSlot>");
+    const slotContent = clients.slice(slotStart, slotEnd);
+    const maximizar = slotContent.indexOf("Maximizar");
+    const importar = slotContent.indexOf("Importar");
+    expect(maximizar).toBeGreaterThan(-1);
+    expect(importar).toBeGreaterThan(maximizar);
+    expect(slotContent).toContain("ml-auto");
+    expect(kanban).not.toContain("Importar");
+    expect(operations).not.toContain("Importar");
+  });
+
+  it("remove a posição antiga 'Importar Contatos' sem duplicar botão e preserva o modal", () => {
+    expect(clients).not.toContain("Importar Contatos");
+    expect(clients.match(/setIsImportOpen\(true\)/g)?.length).toBe(1);
+    expect(clients).toContain("ImportContactsDialog");
   });
 
   it("remove o filtro 'Todos os...' da toolbar do CRM", () => {

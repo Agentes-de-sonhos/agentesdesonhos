@@ -18,7 +18,7 @@ export function KanbanToolbarSlot({
 
   if (toolbarEl) {
     return createPortal(
-      <div className={cn("flex min-w-0 items-center gap-1.5", className)}>{children}</div>,
+      <div className={cn("flex w-full min-w-0 flex-wrap items-center gap-1.5", className)}>{children}</div>,
       toolbarEl
     );
   }

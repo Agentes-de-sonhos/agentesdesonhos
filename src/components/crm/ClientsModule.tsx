@@ -380,14 +380,22 @@ export function ClientsModule() {
             {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
             {isMaximized ? "Minimizar" : "Maximizar"}
           </Button>
+          {canCreate && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto h-8 shrink-0 gap-1.5 px-2.5 text-xs"
+              onClick={() => setIsImportOpen(true)}
+              title="Importar contatos"
+              aria-label="Importar contatos"
+            >
+              <Upload className="h-3.5 w-3.5" /> Importar
+            </Button>
+          )}
         </KanbanToolbarSlot>
         <div className="flex flex-wrap items-center gap-3">
-        {canCreate && (
-          <Button variant="outline" onClick={() => setIsImportOpen(true)} className="gap-2">
-            <Upload className="h-4 w-4" /> Importar Contatos
-          </Button>
-        )}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+
 
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
