@@ -49,7 +49,7 @@ export function SellersManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-lg font-semibold">Vendedores</h3>

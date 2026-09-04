@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Loader2, Settings2, ExternalLink, CheckCircle2, AlertCircle, Search } from "lucide-react";
+import { Loader2, Settings2, ExternalLink, CheckCircle2, AlertCircle, Search, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { useAgencySupplierTerms, type SupplierTerms } from "@/hooks/useAgencySupplierTerms";
 import { SupplierTermsDialog } from "./SupplierTermsDialog";
+import { SupplierCreateDialog } from "./SupplierCreateDialog";
 
 type SupplierRow = {
   id: string;
@@ -47,6 +48,7 @@ export function SuppliersManager() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<{ operatorId: string; operatorName: string } | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const { data: termsData } = useAgencySupplierTerms();
 
@@ -117,21 +119,28 @@ export function SuppliersManager() {
     <div className="space-y-4">
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="text-base font-semibold">Meus Fornecedores</h3>
-              <p className="text-sm text-muted-foreground">
-                Configure regras comerciais por fornecedor para auto-preencher a Gestão Financeira.
-              </p>
-            </div>
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar fornecedor"
-                className="pl-8"
-              />
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-base font-semibold">Meus Fornecedores</h3>
+                <p className="text-sm text-muted-foreground">
+                  Configure regras comerciais por fornecedor para auto-preencher a Gestão Financeira.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-full sm:w-72">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Buscar fornecedor"
+                    className="pl-8"
+                  />
+                </div>
+                <Button onClick={() => setCreating(true)}>
+                  <Plus className="h-4 w-4 mr-1" /> Cadastrar novo fornecedor
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -147,7 +156,7 @@ export function SuppliersManager() {
             <p className="text-sm font-medium">Nenhum fornecedor encontrado.</p>
             <p className="text-xs text-muted-foreground mt-1">
               Vincule fornecedores ao cadastrar vendas, orçamentos ou serviços da Carteira Digital,
-              ou cadastre seus próprios fornecedores no Mapa do Turismo.
+              ou cadastre seus próprios fornecedores.
             </p>
           </CardContent>
         </Card>
@@ -225,6 +234,8 @@ export function SuppliersManager() {
           </CardContent>
         </Card>
       )}
+
+      <SupplierCreateDialog open={creating} onOpenChange={setCreating} />
 
       {editing && (
         <SupplierTermsDialog
