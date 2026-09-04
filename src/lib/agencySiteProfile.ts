@@ -423,13 +423,16 @@ const FAE_CURATED: AgencySiteProfile = {
 };
 
 /**
- * SiteLab Base — laboratório visual NEUTRO. Herda a estrutura editorial
- * compartilhada (`CURATED_SECTIONS`) e usa apenas textos de demonstração:
+ * SiteLab Base — CATÁLOGO MESTRE do template. Mantém a mesma engine e a mesma
+ * linguagem editorial de `CURATED_SECTIONS`, mas liga TODAS as seções do
+ * catálogo (`sitelabSectionOverrides`) com conteúdo puramente demonstrativo:
  * nenhum nome, ano de fundação, selo ou alegação factual de agência real.
  */
 const SITE_LAB_BASE: AgencySiteProfile = {
   key: "siteLabBase",
-  sections: { ...CURATED_SECTIONS },
+  demo: true,
+  /** Derivado da fonte única: um item novo no catálogo já aparece aqui. */
+  sections: sitelabSectionOverrides(),
   heroImage: "praia",
   hero: [
     {
