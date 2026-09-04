@@ -29,7 +29,6 @@ import {
   ItineraryFormData,
   TripProfile,
   TravelInterest,
-  TravelPace,
   JourneyInfo,
   JourneyPeriod,
   JOURNEY_PERIOD_LABELS,
@@ -41,7 +40,6 @@ import {
   TRIP_PROFILE_LABELS,
   TRAVEL_INTEREST_LABELS,
   TRAVEL_INTEREST_ICONS,
-  TRAVEL_PACE_LABELS,
   Passenger,
   PassengerInterest,
   PassengerNeed,
@@ -60,10 +58,6 @@ const formSchema = z.object({
   tripType: z.string(),
   budgetLevel: z.enum(["economico", "conforto", "luxo"]),
   interests: z.array(z.string()).default([]),
-  travelPace: z.string().default("moderado"),
-  dietaryRestrictions: z.string().optional(),
-  localOrTouristy: z.string().optional(),
-  exclusiveOrPopular: z.string().optional(),
   mobilityLimitations: z.string().optional(),
 });
 
@@ -105,10 +99,6 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
       tripType: "casal",
       budgetLevel: "conforto",
       interests: [],
-      travelPace: "moderado",
-      dietaryRestrictions: "",
-      localOrTouristy: "mix",
-      exclusiveOrPopular: "mix",
       mobilityLimitations: "",
     },
   });
@@ -162,11 +152,7 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
       tripType: values.tripType as TripProfile,
       budgetLevel: values.budgetLevel,
       interests: selectedInterests,
-      travelPace: (values.travelPace || "moderado") as TravelPace,
       additionalPreferences: {
-        dietaryRestrictions: values.dietaryRestrictions || undefined,
-        localOrTouristy: (values.localOrTouristy as "local" | "touristy" | "mix") || "mix",
-        exclusiveOrPopular: (values.exclusiveOrPopular as "exclusive" | "popular" | "mix") || "mix",
         mobilityLimitations: values.mobilityLimitations || undefined,
       },
       arrivalInfo: journeyEnabled ? arrivalInfo : undefined,
@@ -538,7 +524,7 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
           onClick={() => setShowInterests(!showInterests)}
         >
           <span>
-            Interesses da viagem
+            Interesses principais da viagem
             {selectedInterests.length > 0 && (
               <span className="ml-2 text-xs text-primary">({selectedInterests.length} selecionados)</span>
             )}
@@ -585,70 +571,6 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
 
         {showAdvanced && (
           <div className="space-y-4 rounded-lg border border-border p-4">
-            <div className="space-y-2">
-              <Label>Ritmo da viagem</Label>
-              <Select
-                defaultValue={form.watch("travelPace") || "moderado"}
-                onValueChange={(value) => form.setValue("travelPace", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ritmo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.entries(TRAVEL_PACE_LABELS) as [TravelPace, string][]).map(
-                    ([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dietaryRestrictions">Restrições alimentares</Label>
-              <Input
-                id="dietaryRestrictions"
-                placeholder="Ex: vegetariano, sem glúten, kosher..."
-                {...form.register("dietaryRestrictions")}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Preferência de experiências</Label>
-              <Select
-                defaultValue="mix"
-                onValueChange={(value) => form.setValue("localOrTouristy", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="local">Experiências locais e autênticas</SelectItem>
-                  <SelectItem value="touristy">Pontos turísticos clássicos</SelectItem>
-                  <SelectItem value="mix">Mistura de ambos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Tipo de locais</Label>
-              <Select
-                defaultValue="mix"
-                onValueChange={(value) => form.setValue("exclusiveOrPopular", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="exclusive">Locais exclusivos e reservados</SelectItem>
-                  <SelectItem value="popular">Locais populares e movimentados</SelectItem>
-                  <SelectItem value="mix">Mistura de ambos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="mobilityLimitations">Mais alguma preferência?</Label>
               <Textarea
