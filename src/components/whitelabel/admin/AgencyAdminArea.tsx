@@ -101,6 +101,8 @@ function AgencyAdminPages({ info }: { info: AgencyAdminPortalInfo }) {
     ["/meus-projetos", MeusProjetos],
     ["/agenda", Agenda],
     ["/gestao-clientes", GestaoClientes],
+    ["/gestao-clientes/dashboard", GestaoClientes],
+    ["/gestao-clientes/metas", GestaoClientes],
     ["/financeiro", Financeiro],
     ["/perfil", Perfil],
     ["/minha-conta", MinhaConta],
