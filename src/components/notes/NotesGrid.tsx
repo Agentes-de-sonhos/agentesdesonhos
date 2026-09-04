@@ -227,7 +227,7 @@ export function NotesGrid({
           </Select>
           <Button onClick={onCreateNote} className="h-10 rounded-lg gap-1.5">
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Nova Nota</span>
+            <span className="hidden sm:inline">{copy.create}</span>
           </Button>
         </div>
       </div>
@@ -245,21 +245,20 @@ export function NotesGrid({
             </div>
             <p className="text-sm font-medium text-foreground">
               {filters.search
-                ? "Nenhuma nota encontrada"
+                ? copy.emptyNotFound
                 : filters.typeFilter === "templates"
-                ? "Nenhum modelo criado ainda"
-                : "Nenhuma nota criada ainda"}
+                ? copy.emptyTemplates
+                : copy.emptyNone}
             </p>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-              {filters.search
-                ? "Ajuste sua busca para encontrar a nota desejada."
-                : "Crie sua primeira nota para começar a organizar suas ideias."}
+              {filters.search ? copy.helpSearch : copy.helpNone}
             </p>
             {!filters.search && (
               <Button onClick={onCreateNote} className="mt-4 h-10 rounded-lg">
                 <Plus className="h-4 w-4" />
-                Nova Nota
+                {copy.create}
               </Button>
+
             )}
           </div>
         </Card>
