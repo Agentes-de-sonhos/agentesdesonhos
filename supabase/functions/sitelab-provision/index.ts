@@ -44,19 +44,9 @@ Deno.serve(async (req) => {
 
     // Chamada de plataforma (service role) já é privilégio máximo: aceita direto.
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const opToken = (Deno.env.get("SITELAB_PROVISION_TOKEN") || "").trim();
-    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
-    const headerToken = (req.headers.get("x-sitelab-token") || "").trim();
-    const isServiceCall =
-      bearer === serviceKey || (opToken.length > 0 && headerToken === opToken);
+    const isServiceCall = authHeader.replace(/^Bearer\s+/i, "").trim() === serviceKey;
 
 
-    console.log("sitelab-provision auth", {
-      hasOpToken: opToken.length > 0,
-      hasHeaderToken: headerToken.length > 0,
-      match: opToken.length > 0 && headerToken === opToken,
-      headerNames: [...req.headers.keys()].join(","),
-    });
 
     if (!isServiceCall) {
       if (!authHeader) return json({ error: "Não autorizado" }, 401);
