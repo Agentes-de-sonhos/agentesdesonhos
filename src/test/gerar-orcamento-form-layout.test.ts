@@ -22,8 +22,8 @@ describe("Gerar Orçamento — navegação e layout", () => {
     expect(form).toContain("md:grid-cols-4");
     expect(form).toContain("md:col-span-2");
     const cliente = form.indexOf("Cliente *");
-    const adultos = form.indexOf("Adultos");
-    const criancas = form.indexOf("Crianças");
+    const adultos = form.indexOf("  Adultos\n");
+    const criancas = form.indexOf("  Crianças\n");
     expect(cliente).toBeGreaterThan(-1);
     expect(cliente).toBeLessThan(adultos);
     expect(adultos).toBeLessThan(criancas);
