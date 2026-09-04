@@ -118,6 +118,7 @@ export default function CriarRoteiro() {
     itineraries,
     isLoading,
     createItinerary,
+    createItineraryWithAI,
     generateWithAI,
     saveGeneratedItinerary,
     getItineraryWithDetails,
@@ -190,8 +191,6 @@ export default function CriarRoteiro() {
   };
 
   const handleCreateItinerary = async (data: ItineraryFormData) => {
-    let createdItineraryId: string | null = null;
-
     if (!canCreateItinerary) {
       toast.error("Limite diário atingido. Faça upgrade para o Plano Fundador para criar roteiros ilimitados.");
       return;
@@ -202,15 +201,8 @@ export default function CriarRoteiro() {
     setGenerationError(null);
 
     try {
-      // Create itinerary record
-      const itinerary = await createItinerary.mutateAsync(data);
-      createdItineraryId = itinerary.id;
-
-      // Generate with AI
-      const generatedData = await generateWithAI(data);
-
-      // Save generated data
-      await saveGeneratedItinerary(itinerary.id, generatedData, data.startDate);
+      // Fluxo compartilhado: cria, gera com IA, salva e limpa em caso de falha
+      const itinerary = await createItineraryWithAI(data);
 
       // Load complete itinerary
       const completeItinerary = await getItineraryWithDetails(itinerary.id);
@@ -233,15 +225,6 @@ export default function CriarRoteiro() {
       toast.success("Roteiro gerado com sucesso!");
     } catch (error) {
       console.error("Error creating itinerary:", error);
-
-      if (createdItineraryId) {
-        try {
-          await deleteItinerary.mutateAsync(createdItineraryId);
-        } catch (cleanupError) {
-          console.error("Error cleaning up failed itinerary:", cleanupError);
-        }
-      }
-
       const message = error instanceof Error ? error.message : "Erro ao gerar roteiro";
       setGenerationError(message);
       toast.error(message);

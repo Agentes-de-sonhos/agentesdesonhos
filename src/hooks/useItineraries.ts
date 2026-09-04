@@ -891,9 +891,31 @@ export function useItineraries() {
     },
   });
 
+  /**
+   * Núcleo COMPARTILHADO da criação de roteiro com IA (página Criar Roteiro e
+   * atalho do painel da agência usam exatamente este fluxo): cria o registro,
+   * gera com IA, salva os dias e remove o registro se a geração falhar.
+   */
+  const createItineraryWithAI = async (formData: ItineraryFormData) => {
+    const itinerary = await createItinerary.mutateAsync(formData);
+    try {
+      const generatedData = await generateWithAI(formData);
+      await saveGeneratedItinerary(itinerary.id, generatedData, formData.startDate);
+      return itinerary;
+    } catch (error) {
+      try {
+        await deleteItinerary.mutateAsync(itinerary.id);
+      } catch (cleanupError) {
+        console.error("Error cleaning up failed itinerary:", cleanupError);
+      }
+      throw error;
+    }
+  };
+
   return {
     itineraries: itinerariesQuery.data || [],
     isLoading: itinerariesQuery.isLoading,
+    createItineraryWithAI,
     getItineraryWithDetails,
     createItinerary,
     generateWithAI,
