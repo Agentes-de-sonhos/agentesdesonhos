@@ -1301,9 +1301,22 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       )}
 
+      {/* Mapa do catálogo: EXCLUSIVO do laboratório (nunca em tenants reais). */}
+      {lab && <SiteLabCatalogMap />}
+
       {sections.map((section, index) => {
         const node = renderSection(section.key);
-        if (!editorial || index !== 0 || !node) return node;
+        if (!node) return null;
+        // Etiqueta interna do módulo: só no laboratório, para referência nas conversas.
+        const tagged = lab ? (
+          <div key={`${section.key}-lab`}>
+            <SiteLabSectionTag sectionKey={section.key} />
+            {node}
+          </div>
+        ) : (
+          node
+        );
+        if (!editorial || index !== 0) return tagged;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).
         // A cor precisa ser a MESMA superfície da seção que abre a página.
@@ -1322,7 +1335,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             className={surface}
             style={{ paddingTop: halfPx }}
           >
-            {node}
+            {tagged}
           </div>
         );
       })}
