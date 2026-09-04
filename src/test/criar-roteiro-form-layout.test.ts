@@ -18,7 +18,7 @@ describe("Criar Roteiro — navegação e layout", () => {
   it("bloco de importação fica no cabeçalho do card, antes do formulário", () => {
     const header = page.indexOf("Novo Roteiro de Viagem");
     const importBlock = page.indexOf("Já tem um roteiro pronto?");
-    const formTag = page.indexOf("<ItineraryForm");
+    const formTag = page.indexOf("onSubmit={handleCreateItinerary}");
     expect(header).toBeLessThan(importBlock);
     expect(importBlock).toBeLessThan(formTag);
     expect(page).toContain("setImportWizardOpen(true)");
@@ -29,7 +29,7 @@ describe("Criar Roteiro — navegação e layout", () => {
     expect(form).toContain("md:grid-cols-4");
     expect(form).toContain("md:col-span-2");
     const cliente = form.indexOf("<Label>Cliente *</Label>");
-    const viajantes = form.indexOf("Viajantes");
+    const viajantes = form.indexOf("              Viajantes");
     const origem = form.indexOf("Cidade de origem");
     const destino = form.indexOf("Destino principal");
     const periodo = form.indexOf("Período da Viagem");
