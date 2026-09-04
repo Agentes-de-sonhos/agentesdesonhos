@@ -902,36 +902,81 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
         }
 
-      case "team":
+      case "team": {
+        // Lista vinda do perfil (equipe apresentada); sem lista, cai no titular real.
+        const team = profile.team ?? [];
+        const copy = copyFor("team");
         return (
-          <section key={key} id="equipe" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <SectionHeading title="Equipe" />
-            {info.owner_name ? (
-              <Card className="flex items-center gap-4 p-6">
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
-                  {info.owner_name.slice(0, 1).toUpperCase()}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{info.owner_name}</p>
-                  <p className="text-sm text-muted-foreground">Consultoria de viagens</p>
+          <section key={key} id="equipe" className="bg-background">
+            <div className={editorial ? `${container} py-14 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}>
+              <SectionHeading
+                title={copy.title ?? "Equipe e consultores"}
+                subtitle={copy.subtitle}
+                editorial={editorial}
+              />
+              {team.length ? (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {team.map((m) => (
+                    <Card key={m.key} className="flex h-full flex-col gap-3 p-6">
+                      <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
+                        <UserRound className="h-6 w-6" aria-hidden="true" strokeWidth={1.6} />
+                      </span>
+                      <p className="text-base font-semibold text-foreground">{m.name}</p>
+                      <p className="text-sm font-medium text-primary">{m.role}</p>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{m.text}</p>
+                    </Card>
+                  ))}
                 </div>
-              </Card>
-            ) : null}
+              ) : info.owner_name ? (
+                <Card className="flex items-center gap-4 p-6">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
+                    {info.owner_name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{info.owner_name}</p>
+                    <p className="text-sm text-muted-foreground">Consultoria de viagens</p>
+                  </div>
+                </Card>
+              ) : null}
+            </div>
           </section>
         );
+      }
 
-      case "testimonials":
+      case "testimonials": {
+        const items = profile.testimonials ?? [];
+        const copy = copyFor("testimonials");
         return (
-          <section key={key} id="depoimentos" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <SectionHeading title="Depoimentos" />
-            <Card className="p-6">
-              <Quote className="h-5 w-5 text-primary" aria-hidden="true" />
-              <p className="mt-3 text-sm text-muted-foreground">
-                Espaço reservado para depoimentos reais de clientes, publicados pela agência.
-              </p>
-            </Card>
+          <section key={key} id="depoimentos" className="bg-background">
+            <div className={editorial ? `${container} py-14 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}>
+              <SectionHeading
+                title={copy.title ?? "Depoimentos"}
+                subtitle={copy.subtitle}
+                editorial={editorial}
+              />
+              {items.length ? (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((t) => (
+                    <Card key={t.key} className="flex h-full flex-col p-6">
+                      <Quote className="h-5 w-5 text-primary" aria-hidden="true" />
+                      <p className="mt-4 flex-1 text-[15px] leading-relaxed text-foreground">{t.quote}</p>
+                      <p className="mt-5 text-sm font-semibold text-foreground">{t.author}</p>
+                      {t.context && <p className="text-sm text-muted-foreground">{t.context}</p>}
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-6">
+                  <Quote className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Espaço reservado para depoimentos reais de clientes, publicados pela agência.
+                  </p>
+                </Card>
+              )}
+            </div>
           </section>
         );
+      }
 
       case "faq":
         {
