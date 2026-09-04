@@ -78,6 +78,8 @@ function AgencyAdminPages({ info }: { info: AgencyAdminPortalInfo }) {
     ["crm/funil", GestaoClientes],
     ["crm/operacoes", GestaoClientes],
     ["crm/clientes", GestaoClientes],
+    ["crm/dashboard", GestaoClientes],
+    ["crm/metas", GestaoClientes],
     ["crm/agenda", GestaoClientes],
     ["crm/documentos", GestaoClientes],
     ["reservas", AgencyReservas],

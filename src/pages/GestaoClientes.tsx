@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Kanban, Target, Briefcase, LayoutDashboard } from "lucide-react";
+import { Users, Kanban, Briefcase, LayoutDashboard } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
 import { SalesGoalsModule } from "@/components/crm/SalesGoalsModule";
