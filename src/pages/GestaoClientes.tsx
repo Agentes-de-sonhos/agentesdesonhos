@@ -107,18 +107,7 @@ function KanbanTabsSurface({
           <div className="min-w-0 flex-1">
             <PageHeader
               pageKey="gestao-clientes"
-              title="CRM"
-              titleAfter={
-                <>
-                  <span
-                    className="hidden sm:inline-block h-7 w-px bg-border/60 mx-1"
-                    aria-hidden="true"
-                  />
-                  <span className="text-lg sm:text-xl font-medium text-muted-foreground">
-                    Gestão de relacionamento com clientes
-                  </span>
-                </>
-              }
+              title="Gestão de Relacionamento com Clientes"
               subtitle="Centralize clientes, oportunidades, operações e metas de vendas em um só lugar."
               icon={Users}
             />

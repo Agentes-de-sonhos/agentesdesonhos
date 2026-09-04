@@ -31,10 +31,10 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
     expect(dash).toBeLessThan(slot);
   });
 
-  it("exibe a identidade compartilhada 'CRM | Gestão de relacionamento com clientes' nas três abas", () => {
-    expect(page).toContain('title="CRM"');
-    expect(page).toContain("Gestão de relacionamento com clientes");
-    expect(page).toContain('titleAfter={');
+  it("exibe o título único 'Gestão de Relacionamento com Clientes' nas três abas", () => {
+    expect(page).toContain('title="Gestão de Relacionamento com Clientes"');
+    expect(page).not.toContain('title="CRM"');
+    expect(page).not.toContain("titleAfter");
     expect(page).not.toContain('title="Gestão de Clientes"');
     expect(page).not.toContain("Gerencie clientes, oportunidades e metas de vendas");
   });
