@@ -151,61 +151,69 @@ export default function Agenda() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <PageHeader
-            pageKey="agenda"
-            title="Minha Agenda"
-            subtitle="Planeje e gerencie todos os seus eventos do ano"
-            icon={Calendar}
-            adminTab="agenda-events"
-          />
+        <PageHeader
+          pageKey="agenda"
+          title="Minha Agenda"
+          subtitle="Planeje e gerencie todos os seus eventos do ano"
+          icon={Calendar}
+          adminTab="agenda-events"
+        />
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant={viewMode === "day" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleViewChange("day")}
-            >
-              <Clock className="h-4 w-4 mr-2" />
-              Dia
-            </Button>
-            <Button
-              variant={viewMode === "week" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleViewChange("week")}
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Semana
-            </Button>
-            <Button
-              variant={viewMode === "month" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleViewChange("month")}
-            >
-              <CalendarDays className="h-4 w-4 mr-2" />
-              Mês
-            </Button>
-            <Button
-              variant={viewMode === "year" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleViewChange("year")}
-            >
-              <CalendarRange className="h-4 w-4 mr-2" />
-              Ano
-            </Button>
-          </div>
-        </div>
-
-        {/* Google Calendar Sync */}
-        <div className="flex justify-end">
-          <GoogleCalendarSyncButton onSyncComplete={handleSyncComplete} />
-        </div>
-
-        {/* Filter Bar */}
+        {/* Unified toolbar: view selector | Google Calendar | Filtrar */}
         <EventTypeFilter
           eventTypes={allEventTypes}
           hiddenTypes={hiddenTypes}
           onToggleType={toggleEventTypeVisibility}
+          leading={
+            <>
+              <div
+                data-testid="agenda-view-selector"
+                className="flex flex-wrap items-center gap-2"
+                role="group"
+                aria-label="Modo de visualização"
+              >
+                <Button
+                  variant={viewMode === "day" ? "default" : "outline"}
+                  size="sm"
+                  aria-pressed={viewMode === "day"}
+                  onClick={() => handleViewChange("day")}
+                >
+                  <Clock className="h-4 w-4 mr-2" />
+                  Dia
+                </Button>
+                <Button
+                  variant={viewMode === "week" ? "default" : "outline"}
+                  size="sm"
+                  aria-pressed={viewMode === "week"}
+                  onClick={() => handleViewChange("week")}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Semana
+                </Button>
+                <Button
+                  variant={viewMode === "month" ? "default" : "outline"}
+                  size="sm"
+                  aria-pressed={viewMode === "month"}
+                  onClick={() => handleViewChange("month")}
+                >
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  Mês
+                </Button>
+                <Button
+                  variant={viewMode === "year" ? "default" : "outline"}
+                  size="sm"
+                  aria-pressed={viewMode === "year"}
+                  onClick={() => handleViewChange("year")}
+                >
+                  <CalendarRange className="h-4 w-4 mr-2" />
+                  Ano
+                </Button>
+              </div>
+              <div data-testid="agenda-google-sync" className="flex items-center">
+                <GoogleCalendarSyncButton onSyncComplete={handleSyncComplete} />
+              </div>
+            </>
+          }
         />
 
         {/* Calendar Card */}
