@@ -43,19 +43,26 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     });
 
-    const caller = createClient(url, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user } } = await caller.auth.getUser();
-    if (!user) return json({ error: "Não autorizado" }, 401);
+    // Chamada de plataforma (service role) já é privilégio máximo: aceita direto.
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const isServiceCall = authHeader.replace(/^Bearer\s+/i, "").trim() === serviceKey;
 
-    const { data: role } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!role) return json({ error: "Acesso negado" }, 403);
+    if (!isServiceCall) {
+      const caller = createClient(url, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user } } = await caller.auth.getUser();
+      if (!user) return json({ error: "Não autorizado" }, 401);
+
+      const { data: role } = await admin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (!role) return json({ error: "Acesso negado" }, 403);
+    }
+
 
     // Ação opcional: trocar SOMENTE o e-mail da conta técnica já existente,
     // pelo mecanismo oficial do Auth Admin (sem UPDATE manual em auth.*).
