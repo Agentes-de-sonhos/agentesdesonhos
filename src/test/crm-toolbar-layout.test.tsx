@@ -14,7 +14,7 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
     const funil = page.indexOf('value="funil"');
     const ops = page.indexOf('value="operacoes"');
     const cli = page.indexOf('value="clientes"');
-    const slot = page.indexOf("setToolbarEl");
+    const slot = page.lastIndexOf("setToolbarEl");
     expect(funil).toBeGreaterThan(-1);
     expect(funil).toBeLessThan(ops);
     expect(ops).toBeLessThan(cli);
@@ -22,9 +22,9 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
   });
 
   it("posiciona Visão Geral e Meta de Vendas à direita, após o slot", () => {
-    const slot = page.indexOf("setToolbarEl");
-    expect(page.indexOf('value="dashboard"')).toBeGreaterThan(slot);
-    expect(page.indexOf('value="metas"')).toBeGreaterThan(slot);
+    const slot = page.lastIndexOf("setToolbarEl");
+    expect(page.lastIndexOf('value="dashboard"')).toBeGreaterThan(slot);
+    expect(page.lastIndexOf('value="metas"')).toBeGreaterThan(slot);
     expect(page).toContain('className="ml-auto inline-flex');
   });
 
