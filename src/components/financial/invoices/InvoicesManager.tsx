@@ -79,44 +79,7 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
   }, [invoices]);
 
   const today = new Date().toISOString().slice(0, 10);
-    let totalOpen = 0, totalPaid = 0, totalOverdue = 0;
-    let countOpen = 0, countOverdue = 0, countPaid = 0;
-    for (const i of invoices) {
-      if (i.status === "cancelled") continue;
-      totalPaid += i.paid_amount || 0;
-      if (i.balance > 0) {
-        totalOpen += i.balance;
-        countOpen++;
-        if (i.due_date && i.due_date < today) {
-          totalOverdue += i.balance;
-          countOverdue++;
-        }
-      } else if (i.status === "paid") {
-        countPaid++;
-      }
-    }
-    return { totalOpen, totalPaid, totalOverdue, countOpen, countOverdue, countPaid };
-  }, [invoices]);
 
-  // Load recent payments when entering "recibos" subtab
-  useEffect(() => {
-    if (subtab !== "recibos" || !user) return;
-    (async () => {
-      const { data } = await (supabase as any)
-        .from("invoice_payments")
-        .select("*, invoices(invoice_number, client_name)")
-        .eq("user_id", user.id)
-        .order("payment_date", { ascending: false })
-        .limit(100);
-      setRecentPayments((data || []).map((p: any) => ({
-        ...p,
-        invoice_number: p.invoices?.invoice_number,
-        client_name: p.invoices?.client_name,
-      })));
-    })();
-  }, [subtab, user, invoices.length]);
-
-  const today = new Date().toISOString().slice(0, 10);
   const baseList = invoices.filter(i =>
     !query ||
     i.invoice_number.toLowerCase().includes(query.toLowerCase()) ||
