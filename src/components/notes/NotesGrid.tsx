@@ -39,6 +39,44 @@ import {
 import { cn } from "@/lib/utils";
 import { Note, NoteFilters, NoteSortOption, NoteTypeFilter } from "@/types/notes";
 
+export type NotesVariant = "notes" | "texts";
+
+/**
+ * Mesma funcionalidade e mesmos dados (tabela `notes`): apenas os rótulos
+ * visíveis mudam quando a listagem aparece dentro de "Modelos → Textos Prontos".
+ */
+export const NOTES_COPY: Record<
+  NotesVariant,
+  {
+    create: string;
+    search: string;
+    emptyNotFound: string;
+    emptyNone: string;
+    emptyTemplates: string;
+    helpSearch: string;
+    helpNone: string;
+  }
+> = {
+  notes: {
+    create: "Nova Nota",
+    search: "Buscar notas...",
+    emptyNotFound: "Nenhuma nota encontrada",
+    emptyNone: "Nenhuma nota criada ainda",
+    emptyTemplates: "Nenhum modelo criado ainda",
+    helpSearch: "Ajuste sua busca para encontrar a nota desejada.",
+    helpNone: "Crie sua primeira nota para começar a organizar suas ideias.",
+  },
+  texts: {
+    create: "Novo texto",
+    search: "Buscar textos...",
+    emptyNotFound: "Nenhum texto encontrado",
+    emptyNone: "Nenhum texto pronto criado ainda",
+    emptyTemplates: "Nenhum texto reutilizável criado ainda",
+    helpSearch: "Ajuste sua busca para encontrar o texto desejado.",
+    helpNone: "Crie seu primeiro texto pronto para reutilizar nos seus projetos.",
+  },
+};
+
 interface NotesGridProps {
   notes: Note[];
   onSelectNote: (note: Note) => void;
@@ -50,6 +88,7 @@ interface NotesGridProps {
   filters: NoteFilters;
   onFiltersChange: (filters: NoteFilters) => void;
   isLoading: boolean;
+  variant?: NotesVariant;
 }
 
 const typeFilterOptions: { value: NoteTypeFilter; label: string }[] = [
@@ -57,6 +96,7 @@ const typeFilterOptions: { value: NoteTypeFilter; label: string }[] = [
   { value: "notes", label: "Notas" },
   { value: "templates", label: "Modelos" },
 ];
+
 
 const sortOptions: { value: NoteSortOption; label: string }[] = [
   { value: "updated_at", label: "Última edição" },
