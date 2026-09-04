@@ -256,6 +256,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                 <MultiDestinationInput
                   value={field.value || ""}
                   onChange={field.onChange}
+                  layout="row"
                 />
               </FormControl>
               <FormMessage />
