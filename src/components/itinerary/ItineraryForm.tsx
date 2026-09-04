@@ -326,6 +326,66 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
         </div>
 
 
+        {/* Passageiros (cadastro individual) */}
+        <div className="space-y-2">
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full justify-between text-muted-foreground"
+            onClick={() => setShowPassengers(!showPassengers)}
+          >
+            <span className="flex items-center gap-2">
+              👥 Passageiros
+              {passengers.length > 0 && (
+                <span className="text-xs text-primary">({passengers.length} cadastrado{passengers.length > 1 ? "s" : ""})</span>
+              )}
+            </span>
+            {showPassengers ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+
+          {showPassengers && (
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Cadastre cada viajante com seu perfil. A IA usa essas informações para personalizar o roteiro.{" "}
+                <span className="font-medium text-foreground">Necessidades e observações ficam internas</span> e não aparecem publicamente.
+              </p>
+
+              {passengers.length === 0 && (
+                <p className="text-xs italic text-muted-foreground">Nenhum passageiro cadastrado ainda.</p>
+              )}
+
+              {passengers.map((p, idx) => (
+                <PassengerCard
+                  key={idx}
+                  index={idx}
+                  value={p}
+                  onChange={(next) =>
+                    setPassengers((prev) => prev.map((x, i) => (i === idx ? next : x)))
+                  }
+                  onRemove={() => setPassengers((prev) => prev.filter((_, i) => i !== idx))}
+                />
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPassengers((prev) => [
+                    ...prev,
+                    { name: "", age: undefined, interests: [], notes: "", needs: [] },
+                  ])
+                }
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Adicionar passageiro
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Chegada/Retorno e Múltiplos destinos lado a lado no desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
         {/* Chegada e Retorno (opcional, mesmo padrão de múltiplos destinos) */}
         <div className="space-y-2">
           <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
@@ -424,63 +484,6 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
             </div>
           )}
         </div>
-
-        {/* Passageiros (cadastro individual) */}
-        <div className="space-y-2">
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full justify-between text-muted-foreground"
-            onClick={() => setShowPassengers(!showPassengers)}
-          >
-            <span className="flex items-center gap-2">
-              👥 Passageiros
-              {passengers.length > 0 && (
-                <span className="text-xs text-primary">({passengers.length} cadastrado{passengers.length > 1 ? "s" : ""})</span>
-              )}
-            </span>
-            {showPassengers ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
-
-          {showPassengers && (
-            <div className="rounded-lg border border-border p-4 space-y-3">
-              <p className="text-xs text-muted-foreground">
-                Cadastre cada viajante com seu perfil. A IA usa essas informações para personalizar o roteiro.{" "}
-                <span className="font-medium text-foreground">Necessidades e observações ficam internas</span> e não aparecem publicamente.
-              </p>
-
-              {passengers.length === 0 && (
-                <p className="text-xs italic text-muted-foreground">Nenhum passageiro cadastrado ainda.</p>
-              )}
-
-              {passengers.map((p, idx) => (
-                <PassengerCard
-                  key={idx}
-                  index={idx}
-                  value={p}
-                  onChange={(next) =>
-                    setPassengers((prev) => prev.map((x, i) => (i === idx ? next : x)))
-                  }
-                  onRemove={() => setPassengers((prev) => prev.filter((_, i) => i !== idx))}
-                />
-              ))}
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setPassengers((prev) => [
-                    ...prev,
-                    { name: "", age: undefined, interests: [], notes: "", needs: [] },
-                  ])
-                }
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Adicionar passageiro
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Perfil + Orçamento */}
