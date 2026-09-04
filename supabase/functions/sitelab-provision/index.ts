@@ -52,6 +52,13 @@ Deno.serve(async (req) => {
       bearer === serviceKey || (opToken.length > 0 && headerToken === opToken);
 
 
+    console.log("sitelab-provision auth", {
+      hasOpToken: opToken.length > 0,
+      hasHeaderToken: headerToken.length > 0,
+      match: opToken.length > 0 && headerToken === opToken,
+      headerNames: [...req.headers.keys()].join(","),
+    });
+
     if (!isServiceCall) {
       const caller = createClient(url, anonKey, {
         global: { headers: { Authorization: authHeader } },
