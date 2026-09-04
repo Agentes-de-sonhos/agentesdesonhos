@@ -322,34 +322,8 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
             <p className="text-sm text-destructive">Selecione o período completo da viagem</p>
           )}
           </div>
-
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Viajantes
-            </Label>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Input
-                  type="number"
-                  min={1}
-                  placeholder="Adultos"
-                  {...form.register("adultsCount", { valueAsNumber: true })}
-                />
-                <p className="text-[11px] text-muted-foreground mt-1">Adultos</p>
-              </div>
-              <div>
-                <Input
-                  type="number"
-                  min={0}
-                  placeholder="Crianças"
-                  {...form.register("childrenCount", { valueAsNumber: true })}
-                />
-                <p className="text-[11px] text-muted-foreground mt-1">Crianças</p>
-              </div>
-            </div>
-          </div>
         </div>
+
 
         {/* Chegada e Retorno (opcional, mesmo padrão de múltiplos destinos) */}
         <div className="space-y-2">
