@@ -9,6 +9,7 @@ import {
   sitelabModelFromRecord,
 } from "@/lib/sitelabModels";
 
+const chrome = readFileSync("src/pages/sitelab/SiteLabChrome.tsx", "utf8");
 const root = readFileSync("src/pages/sitelab/SiteLabRoot.tsx", "utf8");
 
 function info(extra: Partial<AgencyDomainInfo>): AgencyDomainInfo {
@@ -73,7 +74,7 @@ describe("Site Lab é consumidor mestre do template compartilhado", () => {
   });
 
   it("entrega a paleta completa ao template", () => {
-    expect(root).toContain("tertiary_color: model.palette.tertiary");
+    expect(chrome).toContain("tertiary_color: model.palette.tertiary");
     const model = sitelabModelFromRecord(SITELAB_BASE, {
       admin_hostname: "outro.local",
     });
