@@ -409,7 +409,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
           <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/30 transition-colors rounded-lg">
             <div className="flex items-center gap-2">
               <Settings2 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Configuração avançada</span>
+              <span className="text-sm font-medium">Outras Configurações</span>
             </div>
             <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]_&]:rotate-180" />
           </CollapsibleTrigger>
