@@ -57,7 +57,40 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!role) return json({ error: "Acesso negado" }, 403);
 
+    // Ação opcional: trocar SOMENTE o e-mail da conta técnica já existente,
+    // pelo mecanismo oficial do Auth Admin (sem UPDATE manual em auth.*).
+    let body: Record<string, unknown> = {};
+    try {
+      body = (await req.json()) ?? {};
+    } catch {
+      body = {};
+    }
+    if (body.action === "set_email") {
+      const targetId = String(body.user_id || "");
+      const newEmail = String(body.email || "").trim().toLowerCase();
+      if (!targetId || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(newEmail)) {
+        return json({ error: "Parâmetros inválidos" }, 400);
+      }
+      const { data: target } = await admin.auth.admin.getUserById(targetId);
+      const isTechnical =
+        target?.user?.email?.toLowerCase() === LAB_EMAIL ||
+        target?.user?.user_metadata?.sitelab_technical_account === true;
+      if (!target?.user || !isTechnical) {
+        return json({ error: "Conta alvo não é a conta técnica do SiteLab" }, 400);
+      }
+      const { data: updated, error: updateError } = await admin.auth.admin.updateUserById(targetId, {
+        email: newEmail,
+        email_confirm: true,
+      });
+      if (updateError || !updated?.user) {
+        console.error("sitelab-provision set_email", updateError);
+        return json({ error: "Falha ao atualizar o e-mail da conta técnica" }, 400);
+      }
+      return json({ success: true, action: "set_email", user_id: targetId, email: updated.user.email });
+    }
+
     // 1) Conta de autenticação exclusiva (criada apenas uma vez).
+
     const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
     let labUser = list?.users?.find((u) => u.email?.toLowerCase() === LAB_EMAIL);
     let created = false;
