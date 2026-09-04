@@ -43,10 +43,11 @@ describe("Comissões", () => {
   const CC = read("src/components/financial/commissions/CommissionsCenter.tsx");
   it("abre direto o conteúdo de comissões, sem submenu", () => {
     expect(CC).toContain("CommissionsReceivable");
-    expect(CC).not.toContain("Fluxo Futuro");
-    expect(CC).not.toContain("Ranking Fornecedores");
+    expect(CC).not.toContain("FutureCashflow");
+    expect(CC).not.toContain("SuppliersRanking");
     expect(CC).not.toContain("SUBTABS");
   });
+
   it("Notas Fiscais reutiliza o InvoicesCenter existente", () => {
     const FN = read("src/components/financial/commissions/FiscalNotesTab.tsx");
     expect(FN).toContain('from "./InvoicesCenter"');
