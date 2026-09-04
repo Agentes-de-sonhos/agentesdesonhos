@@ -176,8 +176,16 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     [profile],
   );
 
-  // Faixa B2B/DMC: exclusiva das agências configuradas por hostname.
-  const dmc = useMemo(() => resolveDmc(hostname), [hostname]);
+  /**
+   * Laboratório (SiteLab): perfil demonstrativo. Libera as seções que dependem
+   * de dados reais com conteúdo de exemplo e ativa a chrome do catálogo.
+   * Nenhum tenant real marca `demo`.
+   */
+  const lab = !!profile.demo;
+
+  // Faixa B2B/DMC: por hostname nos tenants reais; o laboratório usa o exemplo
+  // declarado no próprio perfil.
+  const dmc = useMemo(() => resolveDmc(hostname) ?? profile.dmc ?? null, [hostname, profile]);
   const sections = useMemo(() => {
     const overrides: Partial<Record<AgencySectionKey, AgencySectionOverride>> = {
       ...(profile.sections ?? {}),
