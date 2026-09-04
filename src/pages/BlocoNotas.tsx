@@ -37,13 +37,13 @@ function BlocoNotasInner({ variant = "notes" }: { variant?: NotesVariant }) {
 
   const handleCreateNote = useCallback(async () => {
     try {
-      const newNote = await createNote({ title: "Nova Nota" });
+      const newNote = await createNote({ title: isTexts ? "Novo texto" : "Nova Nota" });
       setSelectedNote(newNote);
     } catch (error) {
       console.error("Error creating note:", error);
       toast({ title: "Erro ao criar nota", description: "Tente novamente.", variant: "destructive" });
     }
-  }, [createNote]);
+  }, [createNote, isTexts]);
 
   const handleSelectNote = useCallback((note: Note) => {
     setSelectedNote(note);
