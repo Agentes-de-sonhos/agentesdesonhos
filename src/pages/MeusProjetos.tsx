@@ -692,24 +692,12 @@ export default function MeusProjetos() {
                     </Badge>
                   </TabsTrigger>
                 )}
-                {!isAgencyAdmin && !isStartPlan && (
-                  <TabsTrigger
-                    value="bloco-notas"
-                    className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
-                  >
-                    <StickyNote className="h-4 w-4" />
-                    <span className="hidden sm:inline">Bloco de Notas</span>
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
-                      {getTabCount("bloco-notas")}
-                    </Badge>
-                  </TabsTrigger>
-                )}
               </TabsList>
             </div>
 
             {isProjectTab && (
-            {/* Toolbar */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              /* Toolbar de busca, filtros e ordenação (Orçamentos/Carteiras/Roteiros) */
+              <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="relative flex-1 sm:max-w-[380px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -876,17 +864,50 @@ export default function MeusProjetos() {
                 {renderList()}
               </Card>
             </TabsContent>
-            <TabsContent value="modelos" className="mt-5">
-              <TemplatesGrid />
+            <TabsContent value="modelos" className="mt-5 space-y-5">
+              <div>
+                <h2 className="font-display text-xl font-semibold text-foreground">Modelos</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Organize e reutilize roteiros e textos para criar seus projetos com mais agilidade.
+                </p>
+              </div>
+              <Tabs
+                value={modelosSub}
+                onValueChange={(v) => setModelosSub(v as "roteiros" | "textos")}
+              >
+                <div className="border-b border-border/60">
+                  <TabsList className="h-auto w-full sm:w-auto bg-transparent p-0 gap-4 sm:gap-6 rounded-none justify-start overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <TabsTrigger value="roteiros" className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100">
+                      <Route className="h-4 w-4" />
+                      Roteiros
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                        {getTabCount("modelos")}
+                      </Badge>
+                    </TabsTrigger>
+                    {canUseTextosProntos && (
+                      <TabsTrigger value="textos" className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100">
+                        <StickyNote className="h-4 w-4" />
+                        Textos Prontos
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 ml-1">
+                          {getTabCount("bloco-notas")}
+                        </Badge>
+                      </TabsTrigger>
+                    )}
+                  </TabsList>
+                </div>
+                <TabsContent value="roteiros" className="mt-5">
+                  <TemplatesGrid />
+                </TabsContent>
+                {canUseTextosProntos && (
+                  <TabsContent value="textos" className="mt-5">
+                    <BlocoNotasContent variant="texts" />
+                  </TabsContent>
+                )}
+              </Tabs>
             </TabsContent>
             {!isAgencyAdmin && canUseBookingRequests && (
               <TabsContent value="reservas" className="mt-5">
                 <ReservasTab />
-              </TabsContent>
-            )}
-            {!isAgencyAdmin && !isStartPlan && (
-              <TabsContent value="bloco-notas" className="mt-5">
-                <BlocoNotasContent />
               </TabsContent>
             )}
           </Tabs>
