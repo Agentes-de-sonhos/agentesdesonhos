@@ -54,8 +54,22 @@ export interface AgencySectionCopy {
 
 export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
+  /**
+   * Perfil DEMONSTRATIVO (laboratório): libera conteúdo de exemplo em seções
+   * normalmente condicionadas a dados reais e ativa a chrome do catálogo.
+   * Nenhum tenant real usa esta marcação.
+   */
+  demo?: boolean;
   /** Ativa/oculta/reordena seções sobre os defaults compartilhados. */
   sections?: Partial<Record<AgencySectionKey, AgencySectionOverride>>;
+  /** Conteúdo B2B/DMC do próprio perfil (tenants reais resolvem por hostname). */
+  dmc?: AgencyDmcConfig;
+  /** Equipe/consultores apresentados na seção "team". */
+  team?: { key: string; name: string; role: string; text: string }[];
+  /** Depoimentos publicados na seção "testimonials". */
+  testimonials?: { key: string; quote: string; author: string; context?: string }[];
+  /** Pontos do atendimento humano exibidos na seção "concierge". */
+  conciergePoints?: { key: string; title: string; text: string }[];
   hero?: AgencyHeroSlide[];
   /** Slot de imagem de fallback do hero (resolvido na apresentação). */
   heroImage?: string;
