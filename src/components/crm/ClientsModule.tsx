@@ -19,6 +19,8 @@ import {
   Cake,
   Upload,
   Loader2,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +31,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -82,6 +83,8 @@ import { cn } from "@/lib/utils";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
+import { KanbanToolbarSlot } from "@/components/crm/kanban/KanbanToolbarSlot";
+import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
 
 function ClientStatusBadge({ status }: { status: ClientStatus }) {
   const label = CLIENT_STATUS_LABELS[status] || "Lead";
@@ -160,7 +163,8 @@ export function ClientsModule() {
   const canDelete = can('clients.delete');
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter] = useState<string>("all");
+  const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(CLIENTS_DEFAULT_PAGE_SIZE);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
