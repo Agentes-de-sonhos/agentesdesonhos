@@ -74,7 +74,7 @@ export const CREATE_ITEMS: MenuItemDef[] = [
   { label: "Carteira Digital", to: "/gestao/criar/carteira", icon: WalletCards },
   {
     label: "Cliente",
-    to: "/gestao/crm/clientes?novo=1",
+    to: "/gestao/crm/clientes?new=1",
     icon: UsersRound,
     permission: "clients.create",
   },
