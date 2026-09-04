@@ -52,3 +52,13 @@ SiteLab: #4B2A6E / #FFD600 / #F3EFF7.
 Senha validada no servidor (`verify-sitelab-access`), grant em `sessionStorage`
 por slug até 8h, bloqueio progressivo, noindex/nofollow, modal global de nova
 versão suprimido.
+
+## Catálogo mestre (showroom)
+Fonte única `src/lib/agencySiteCatalog.ts` (`SITE_CATALOG` + `MODULE_CATALOG`,
+com chave, nome PT, classificação recomendada/opcional/especializada/alternativa,
+descrição de uso, âncora). O perfil `siteLabBase` deriva as seções de
+`sitelabSectionOverrides()` e é o ÚNICO marcado `demo: true`: só ele libera
+ofertas/DMC/credenciais/equipe/depoimentos com conteúdo de exemplo e renderiza
+`SiteLabCatalogMap` + `SiteLabSectionTag` (chrome exclusiva do laboratório).
+Tenants reais nunca recebem `demo`, conteúdo fictício nem etiquetas. Novo bloco
+= registrar no catálogo, sem espalhar condicionais.

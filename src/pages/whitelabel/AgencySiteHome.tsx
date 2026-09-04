@@ -29,6 +29,10 @@ import {
   type AgencySectionKey, type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
 import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProfile";
+import {
+  SiteLabCatalogMap,
+  SiteLabSectionTag,
+} from "@/components/whitelabel/SiteLabCatalogChrome";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
@@ -176,8 +180,16 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     [profile],
   );
 
-  // Faixa B2B/DMC: exclusiva das agências configuradas por hostname.
-  const dmc = useMemo(() => resolveDmc(hostname), [hostname]);
+  /**
+   * Laboratório (SiteLab): perfil demonstrativo. Libera as seções que dependem
+   * de dados reais com conteúdo de exemplo e ativa a chrome do catálogo.
+   * Nenhum tenant real marca `demo`.
+   */
+  const lab = !!profile.demo;
+
+  // Faixa B2B/DMC: por hostname nos tenants reais; o laboratório usa o exemplo
+  // declarado no próprio perfil.
+  const dmc = useMemo(() => resolveDmc(hostname) ?? profile.dmc ?? null, [hostname, profile]);
   const sections = useMemo(() => {
     const overrides: Partial<Record<AgencySectionKey, AgencySectionOverride>> = {
       ...(profile.sections ?? {}),
@@ -194,7 +206,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const highlights = profile.highlights ?? DEFAULT_HIGHLIGHTS;
   const differentials = profile.differentials ?? DEFAULT_DIFFERENTIALS;
   const faq = profile.faq ?? DEFAULT_FAQ;
-  const showcasePublished = useAgencyShowcasePublished(info.public_slug || info.agency_slug);
+  // No laboratório nenhuma consulta de vitrine real é disparada.
+  const showcasePublished = useAgencyShowcasePublished(
+    lab ? null : info.public_slug || info.agency_slug,
+  );
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
   const [requestOpen, setRequestOpen] = useState(false);
@@ -470,7 +485,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         }
 
       case "offers":
-        if (!showcasePublished) return null;
+        // Tenants reais só exibem ofertas com vitrine publicada; o laboratório
+        // mostra o bloco com exemplos editoriais para referência visual.
+        if (!showcasePublished && !lab) return null;
         return (
           <section key={key} id="ofertas" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
             <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -843,6 +860,27 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   </ol>
                 </div>
               </div>
+              {/* Valor da consultoria humana: lista opcional definida pelo perfil. */}
+              {!!profile.conciergePoints?.length && (
+                <div className={`${container} pb-14 md:pb-24`}>
+                  <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {profile.conciergePoints.map((p) => (
+                      <li
+                        key={p.key}
+                        className="rounded-xl border border-border/70 bg-card p-6"
+                      >
+                        <CheckCircle2
+                          className="h-6 w-6 text-primary wl-accent-icon"
+                          aria-hidden="true"
+                          strokeWidth={1.6}
+                        />
+                        <h3 className="mt-4 text-base font-semibold text-foreground">{p.title}</h3>
+                        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{p.text}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           );
         }
@@ -887,36 +925,81 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
         }
 
-      case "team":
+      case "team": {
+        // Lista vinda do perfil (equipe apresentada); sem lista, cai no titular real.
+        const team = profile.team ?? [];
+        const copy = copyFor("team");
         return (
-          <section key={key} id="equipe" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <SectionHeading title="Equipe" />
-            {info.owner_name ? (
-              <Card className="flex items-center gap-4 p-6">
-                <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
-                  {info.owner_name.slice(0, 1).toUpperCase()}
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{info.owner_name}</p>
-                  <p className="text-sm text-muted-foreground">Consultoria de viagens</p>
+          <section key={key} id="equipe" className="bg-background">
+            <div className={editorial ? `${container} py-14 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}>
+              <SectionHeading
+                title={copy.title ?? "Equipe e consultores"}
+                subtitle={copy.subtitle}
+                editorial={editorial}
+              />
+              {team.length ? (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {team.map((m) => (
+                    <Card key={m.key} className="flex h-full flex-col gap-3 p-6">
+                      <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
+                        <UserRound className="h-6 w-6" aria-hidden="true" strokeWidth={1.6} />
+                      </span>
+                      <p className="text-base font-semibold text-foreground">{m.name}</p>
+                      <p className="text-sm font-medium text-primary">{m.role}</p>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{m.text}</p>
+                    </Card>
+                  ))}
                 </div>
-              </Card>
-            ) : null}
+              ) : info.owner_name ? (
+                <Card className="flex items-center gap-4 p-6">
+                  <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 font-semibold text-primary">
+                    {info.owner_name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{info.owner_name}</p>
+                    <p className="text-sm text-muted-foreground">Consultoria de viagens</p>
+                  </div>
+                </Card>
+              ) : null}
+            </div>
           </section>
         );
+      }
 
-      case "testimonials":
+      case "testimonials": {
+        const items = profile.testimonials ?? [];
+        const copy = copyFor("testimonials");
         return (
-          <section key={key} id="depoimentos" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-            <SectionHeading title="Depoimentos" />
-            <Card className="p-6">
-              <Quote className="h-5 w-5 text-primary" aria-hidden="true" />
-              <p className="mt-3 text-sm text-muted-foreground">
-                Espaço reservado para depoimentos reais de clientes, publicados pela agência.
-              </p>
-            </Card>
+          <section key={key} id="depoimentos" className="bg-background">
+            <div className={editorial ? `${container} py-14 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}>
+              <SectionHeading
+                title={copy.title ?? "Depoimentos"}
+                subtitle={copy.subtitle}
+                editorial={editorial}
+              />
+              {items.length ? (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {items.map((t) => (
+                    <Card key={t.key} className="flex h-full flex-col p-6">
+                      <Quote className="h-5 w-5 text-primary" aria-hidden="true" />
+                      <p className="mt-4 flex-1 text-[15px] leading-relaxed text-foreground">{t.quote}</p>
+                      <p className="mt-5 text-sm font-semibold text-foreground">{t.author}</p>
+                      {t.context && <p className="text-sm text-muted-foreground">{t.context}</p>}
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="p-6">
+                  <Quote className="h-5 w-5 text-primary" aria-hidden="true" />
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Espaço reservado para depoimentos reais de clientes, publicados pela agência.
+                  </p>
+                </Card>
+              )}
+            </div>
           </section>
         );
+      }
 
       case "faq":
         {
@@ -1066,6 +1149,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     <>
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
+        id="topo"
         className={
           editorial
             ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
@@ -1217,9 +1301,22 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       )}
 
+      {/* Mapa do catálogo: EXCLUSIVO do laboratório (nunca em tenants reais). */}
+      {lab && <SiteLabCatalogMap container={container} />}
+
       {sections.map((section, index) => {
         const node = renderSection(section.key);
-        if (!editorial || index !== 0 || !node) return node;
+        if (!node) return null;
+        // Etiqueta interna do módulo: só no laboratório, para referência nas conversas.
+        const tagged = lab ? (
+          <div key={`${section.key}-lab`}>
+            <SiteLabSectionTag sectionKey={section.key} />
+            {node}
+          </div>
+        ) : (
+          node
+        );
+        if (!editorial || index !== 0) return tagged;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).
         // A cor precisa ser a MESMA superfície da seção que abre a página.
@@ -1238,7 +1335,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             className={surface}
             style={{ paddingTop: halfPx }}
           >
-            {node}
+            {tagged}
           </div>
         );
       })}
