@@ -37,7 +37,7 @@ describe("menu lateral da gestão (compartilhado)", () => {
 
   it('"Cliente" abre o formulário completo da aba Clientes via deep link', () => {
     const cliente = CREATE_ITEMS.find((i) => i.label === "Cliente");
-    expect(cliente?.to).toBe("/gestao/crm/clientes?novo=1");
+    expect(cliente?.to).toBe("/gestao/crm/clientes?new=1");
     expect(cliente?.permission).toBe("clients.create");
     expect(JSON.stringify(cliente)).not.toContain("new-client");
   });
@@ -51,9 +51,9 @@ describe("menu lateral da gestão (compartilhado)", () => {
     expect(sidebar).not.toContain("new-client");
   });
 
-  it("ClientsModule abre apenas o formulário de cliente com ?novo=1 e respeita clients.create", () => {
+  it("ClientsModule abre apenas o formulário de cliente com ?new=1 e respeita clients.create", () => {
     const mod = readFileSync("src/components/crm/ClientsModule.tsx", "utf8");
-    expect(mod).toContain('searchParams.get("novo") === "1"');
+    expect(mod).toContain('searchParams.get("new") === "1"');
     expect(mod).toContain("if (!canCreate) return;");
     expect(mod).toContain("handleOpenDialogRef.current()");
     expect(mod).not.toContain("QuickAddClientDialog");
