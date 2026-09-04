@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,20 @@ export function OperationsModule() {
   const [dragOver, setDragOver] = useState<{ stageKey: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteStageTarget, setDeleteStageTarget] = useState<{ id: string; name: string } | null>(null);
   const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  /* Comando de URL "?new=1" (atalhos do menu/painel): abre o formulário real de
+     nova operação, respeitando a permissão de criação. */
+  const canCreateRef = useRef(canCreate);
+  canCreateRef.current = canCreate;
+  useEffect(() => {
+    if (searchParams.get("new") !== "1") return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("new");
+    setSearchParams(next, { replace: true });
+    if (!canCreateRef.current) return;
+    setCreateOpen(true);
+  }, [searchParams, setSearchParams]);
 
   const filtered = useMemo(
     () =>
