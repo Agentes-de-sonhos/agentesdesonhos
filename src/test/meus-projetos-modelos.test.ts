@@ -49,7 +49,7 @@ describe("Meus Projetos — visualização Modelos", () => {
     const start = page.indexOf('<TabsContent value="modelos"');
     const end = page.indexOf('<TabsContent value="reservas"');
     const block = page.slice(start, end > start ? end : undefined);
-    expect(block).toContain(">Roteiros");
+    expect(block).toMatch(/value="roteiros"[\s\S]*Roteiros/);
     expect(block).toContain("Textos Prontos");
     expect(block).not.toContain("Orçamentos");
     expect(block).not.toContain("Carteiras");
