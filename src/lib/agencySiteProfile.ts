@@ -12,12 +12,14 @@
 import {
   type AgencyDestination,
   type AgencyDifferential,
+  type AgencyDmcConfig,
   type AgencyHeroSlide,
   type AgencyHighlight,
   type AgencyModule,
   type AgencySectionKey,
   type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
+import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 
 export type AgencySiteProfileKey =
   | "classic"
