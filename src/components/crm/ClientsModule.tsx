@@ -324,12 +324,14 @@ export function ClientsModule() {
     };
 
     let clientId: string | undefined;
+    let createdClient: Client | null = null;
     if (editingClient) {
       await updateClient({ id: editingClient.id, ...payload });
       clientId = editingClient.id;
     } else {
       const result = await createClient(payload);
       clientId = result?.id;
+      createdClient = (result as Client) ?? null;
     }
 
     if (clientId && bDay && bMonth) {
@@ -344,6 +346,13 @@ export function ClientsModule() {
 
     setIsDialogOpen(false);
     form.reset();
+
+    // Abre o perfil do cliente recém-criado quando o formulário veio do
+    // comando "Cliente" do menu global "Criar novo".
+    if (openProfileAfterCreateRef.current) {
+      openProfileAfterCreateRef.current = false;
+      if (createdClient?.id) setSelectedClient(createdClient);
+    }
   };
 
   const handleDelete = async () => {
