@@ -182,18 +182,18 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {/* Client Selector */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Cliente *</Label>
-          <ClientSelector
-            value={selectedClient}
-            onChange={setSelectedClient}
-            required
-            error={clientError}
-          />
-        </div>
+        {/* Linha 1: Cliente (50%) | Adultos (25%) | Crianças (25%) */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+          <div className="space-y-2 md:col-span-2 min-w-0">
+            <Label className="text-sm font-medium">Cliente *</Label>
+            <ClientSelector
+              value={selectedClient}
+              onChange={setSelectedClient}
+              required
+              error={clientError}
+            />
+          </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
             name="adults_count"
@@ -256,6 +256,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
                 <MultiDestinationInput
                   value={field.value || ""}
                   onChange={field.onChange}
+                  layout="row"
                 />
               </FormControl>
               <FormMessage />
@@ -408,7 +409,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
           <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/30 transition-colors rounded-lg">
             <div className="flex items-center gap-2">
               <Settings2 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Configuração avançada</span>
+              <span className="text-sm font-medium">Outras Configurações</span>
             </div>
             <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]_&]:rotate-180" />
           </CollapsibleTrigger>

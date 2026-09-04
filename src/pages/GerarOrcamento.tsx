@@ -1053,7 +1053,13 @@ export default function GerarOrcamento() {
   if (!id) {
     const activeTab = (location.hash === "#list" ? "list" : "create") as "create" | "list";
     const setActiveTab = (val: "create" | "list") => {
-      navigate({ pathname: location.pathname, hash: val === "list" ? "#list" : "" }, { replace: true });
+      // "Meus Orçamentos" funciona como navegação: leva para Meus Projetos
+      // na aba Orçamentos, respeitando o contexto (plataforma/SiteLab/agências).
+      if (val === "list") {
+        navigate(nav.projects("orcamentos"));
+        return;
+      }
+      navigate({ pathname: location.pathname, hash: "" }, { replace: true });
     };
 
     return (

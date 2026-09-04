@@ -8,6 +8,12 @@ interface MultiDestinationInputProps {
   /** Stored as comma-separated string for backward compatibility (e.g. "Paris, Roma"). */
   value: string;
   onChange: (value: string) => void;
+  /**
+   * "stacked" (padrão) mantém o layout atual em coluna.
+   * "row" distribui, no desktop, Destinos (50%), outra cidade (25%) e o
+   * botão Adicionar (25%) na mesma linha. Em telas menores empilha.
+   */
+  layout?: "stacked" | "row";
 }
 
 function splitDestinations(v: string): string[] {
@@ -30,7 +36,7 @@ function getAdditionalDestinations(v: string): string[] {
   return splitDestinations(v.slice(commaIndex + 1));
 }
 
-export function MultiDestinationInput({ value, onChange }: MultiDestinationInputProps) {
+export function MultiDestinationInput({ value, onChange, layout = "stacked" }: MultiDestinationInputProps) {
   const primary = getPrimaryInputValue(value);
   const additional = getAdditionalDestinations(value);
   const destinations = [primary.trim(), ...additional].filter(Boolean);
@@ -79,17 +85,120 @@ export function MultiDestinationInput({ value, onChange }: MultiDestinationInput
     update(next);
   };
 
+  const isRow = layout === "row";
+
+  const primaryField = (
+    <PlacesAutocomplete
+      value={primary}
+      onChange={handleSelectPrimary}
+      onPlaceSelect={(pred) => handleSelectPrimary(pred.name)}
+      placeType="city"
+      placeholder="Ex: Paris, França"
+      fetchDetailsOnSelect={false}
+    />
+  );
+
+  const draftField = (
+    <PlacesAutocomplete
+      value={draft}
+      onChange={setDraft}
+      onPlaceSelect={(pred) => {
+        const v = pred.name.trim();
+        if (!v) return;
+        if (destinations.some((d) => d.toLowerCase() === v.toLowerCase())) {
+          setDraft("");
+          return;
+        }
+        update([...destinations, v]);
+        setDraft("");
+      }}
+      placeType="city"
+      placeholder="+ Adicionar outra cidade"
+      fetchDetailsOnSelect={false}
+    />
+  );
+
+  const addButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={addDraft}
+      disabled={!draft.trim()}
+      className={isRow ? "h-10 w-full" : "shrink-0"}
+    >
+      <Plus className="h-4 w-4 mr-1" />
+      Adicionar
+    </Button>
+  );
+
+  if (isRow) {
+    return (
+      <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-4 md:items-start">
+          <div className="min-w-0 md:col-span-2">{primaryField}</div>
+          <div className="min-w-0">{draftField}</div>
+          <div className="min-w-0">{addButton}</div>
+        </div>
+
+        {additional.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Badge variant="secondary" className="gap-1">
+              <Star className="h-3 w-3 fill-current" />
+              {primary.trim() || "Principal"}
+            </Badge>
+            {additional.map((dest, i) => {
+              const realIdx = i + 1;
+              return (
+                <Badge key={`${dest}-${realIdx}`} variant="outline" className="gap-1 pl-2 pr-1 py-1">
+                  <span>{dest}</span>
+                  <button
+                    type="button"
+                    onClick={() => moveUp(realIdx)}
+                    className="ml-1 hover:text-primary"
+                    title="Mover para cima"
+                    aria-label="Mover para cima"
+                  >
+                    <ArrowUp className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveDown(realIdx)}
+                    className="hover:text-primary"
+                    title="Mover para baixo"
+                    aria-label="Mover para baixo"
+                    disabled={realIdx >= destinations.length - 1}
+                  >
+                    <ArrowDown className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeAt(realIdx)}
+                    className="ml-0.5 rounded-full hover:bg-destructive/10 hover:text-destructive p-0.5"
+                    title="Remover"
+                    aria-label="Remover destino"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              );
+            })}
+          </div>
+        )}
+
+        {destinations.length > 1 && (
+          <p className="text-xs text-muted-foreground">
+            A primeira cidade é o destino principal. Você pode reordenar ou remover as demais.
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
       {/* Primary destination input (kept compatible with single-field forms) */}
-      <PlacesAutocomplete
-        value={primary}
-        onChange={handleSelectPrimary}
-        onPlaceSelect={(pred) => handleSelectPrimary(pred.name)}
-        placeType="city"
-        placeholder="Ex: Paris, França"
-        fetchDetailsOnSelect={false}
-      />
+      {primaryField}
 
       {/* List of additional destinations */}
       {additional.length > 0 && (
@@ -139,36 +248,8 @@ export function MultiDestinationInput({ value, onChange }: MultiDestinationInput
 
       {/* Add additional destination */}
       <div className="flex items-center gap-2 pt-1">
-        <div className="flex-1">
-          <PlacesAutocomplete
-            value={draft}
-            onChange={setDraft}
-            onPlaceSelect={(pred) => {
-              const v = pred.name.trim();
-              if (!v) return;
-              if (destinations.some((d) => d.toLowerCase() === v.toLowerCase())) {
-                setDraft("");
-                return;
-              }
-              update([...destinations, v]);
-              setDraft("");
-            }}
-            placeType="city"
-            placeholder="+ Adicionar outra cidade (ex: Roma)"
-            fetchDetailsOnSelect={false}
-          />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addDraft}
-          disabled={!draft.trim()}
-          className="shrink-0"
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Adicionar
-        </Button>
+        <div className="flex-1">{draftField}</div>
+        {addButton}
       </div>
 
       {destinations.length > 1 && (
