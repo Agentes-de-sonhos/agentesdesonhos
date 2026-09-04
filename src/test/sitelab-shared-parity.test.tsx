@@ -13,10 +13,12 @@ const adminArea = read("src/components/whitelabel/admin/AgencyAdminArea.tsx");
 const app = read("src/App.tsx");
 
 describe("Site Lab Base — áreas internas reais", () => {
-  it("gestão monta a árvore real (AgencyAdminArea), não um demo", () => {
-    expect(root).toContain('import("@/components/whitelabel/admin/AgencyAdminArea")');
-    expect(root).toContain("<AgencyAdminArea");
+  it("gestão nunca usa demo nem monta painel com sessão real (isolamento)", () => {
+    // O painel real resolve o contexto de dados por auth.uid(); enquanto o
+    // tenant técnico não tiver conta própria, a gestão exibe estado seguro.
     expect(root).not.toMatch(/SiteLabAdminDemo|SiteLabAdminSurfaces/);
+    expect(root).not.toMatch(/<AgencyAdminArea/);
+    expect(root).toContain("SiteLabAdminUnavailable");
   });
 
   it("área do cliente monta a página real (AgencyClientArea)", () => {
