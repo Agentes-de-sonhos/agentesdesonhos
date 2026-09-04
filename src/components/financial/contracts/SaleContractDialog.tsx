@@ -54,6 +54,7 @@ import {
 import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
+import { ContractTemplateMissingNotice } from './ContractTemplateMissingNotice';
 
 interface Props {
   sale: Sale | null;
