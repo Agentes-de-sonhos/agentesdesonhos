@@ -4,16 +4,10 @@ import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
   ShoppingBag, ArrowUpCircle, Receipt, Users,
   ChevronLeft, ChevronRight, Calendar, FileText, Truck,
-  MoreHorizontal,
+  ReceiptText, FileSpreadsheet, FileSignature,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsTeamMember } from "@/contexts/TeamSessionContext";
 import { Button } from "@/components/ui/button";
@@ -30,6 +24,9 @@ import { SellersManager } from "@/components/financial/SellersManager";
 import { SellersCommissionReport } from "@/components/financial/SellersCommissionReport";
 import { InvoicesManager } from "@/components/financial/invoices/InvoicesManager";
 import { SuppliersManager } from "@/components/financial/SuppliersManager";
+import { FiscalNotesTab } from "@/components/financial/commissions/FiscalNotesTab";
+import { ReceiptsCenter } from "@/components/financial/receipts/ReceiptsCenter";
+import { ContractsCenter } from "@/components/financial/contracts/ContractsCenter";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
 import { useAdminNav } from "@/lib/agencyAdminNav";
@@ -39,18 +36,22 @@ const MONTH_NAMES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
+/** Abas superiores (ordem exata). "Visão Geral" fica ao lado do seletor de mês. */
 const ALL_TABS_DEF = [
-  { key: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
   { key: "vendas", label: "Vendas", icon: ShoppingBag },
   { key: "entradas", label: "Entradas", icon: ArrowUpCircle },
-  { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
-  { key: "faturas", label: "Faturas", icon: FileText },
   { key: "comissoes", label: "Comissões", icon: Receipt },
-  { key: "fornecedores", label: "Fornecedores", icon: Truck },
+  { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
   { key: "vendedores", label: "Vendedores", icon: Users },
+  { key: "recibos", label: "Recibos", icon: ReceiptText },
+  { key: "faturas", label: "Faturas", icon: FileText },
+  { key: "notas-fiscais", label: "Notas Fiscais", icon: FileSpreadsheet },
+  { key: "contratos", label: "Contratos", icon: FileSignature },
+  { key: "fornecedores", label: "Fornecedores", icon: Truck },
 ] as const;
 
-const ALL_TABS = ALL_TABS_DEF.map(t => t.key);
+const ALL_TABS = ["dashboard", ...ALL_TABS_DEF.map(t => t.key)];
+
 
 type PeriodPreset = "this_month" | "last_month" | "last_3_months";
 
@@ -137,13 +138,6 @@ export default function Financeiro() {
         : "text-muted-foreground hover:bg-muted hover:text-foreground"
     );
 
-  const PRIMARY_TAB_KEYS = ["dashboard", "vendas", "entradas", "despesas", "comissoes"];
-  const MORE_TAB_KEYS = ["vendedores", "faturas", "fornecedores"];
-
-  const primaryTabs = ALL_TABS_DEF.filter(tab => PRIMARY_TAB_KEYS.includes(tab.key));
-  const moreTabs = MORE_TAB_KEYS.map(key => ALL_TABS_DEF.find(tab => tab.key === key)!).filter(Boolean);
-  const isMoreActive = MORE_TAB_KEYS.includes(activeTab);
-
   return (
     <DashboardLayout>
       <div className="space-y-4 animate-fade-in relative">
@@ -174,6 +168,14 @@ export default function Financeiro() {
                   Hoje
                 </Button>
               )}
+              <Button
+                variant={activeTab === "dashboard" ? "default" : "outline"}
+                className="gap-1.5"
+                onClick={() => handleTabChange("dashboard")}
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Visão Geral
+              </Button>
             </div>
           )}
         </div>
@@ -184,48 +186,27 @@ export default function Financeiro() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-1 flex-wrap">
-              {primaryTabs.map(tab => {
+            <div
+              className="flex items-center gap-1 overflow-x-auto pb-1 -mb-1"
+              role="tablist"
+              aria-label="Seções da Gestão Financeira"
+            >
+              {ALL_TABS_DEF.map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
                 return (
                   <button
                     key={tab.key}
+                    role="tab"
+                    aria-selected={isActive}
                     onClick={() => handleTabChange(tab.key)}
                     className={tabClass(isActive)}
                   >
                     <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span>{tab.label}</span>
                   </button>
                 );
               })}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className={tabClass(isMoreActive)}>
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="hidden sm:inline">Mais</span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="min-w-[12rem]">
-                  {moreTabs.map(tab => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.key;
-                    return (
-                      <DropdownMenuItem
-                        key={tab.key}
-                        onClick={() => handleTabChange(tab.key)}
-                        className={cn(
-                          "flex items-center gap-2 cursor-pointer",
-                          isActive && "bg-accent text-accent-foreground"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span>{tab.label}</span>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
 
             <div>
@@ -237,6 +218,9 @@ export default function Financeiro() {
               {activeTab === "faturas" && <InvoicesManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "vendas" && <SalesManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "comissoes" && <CommissionsCenter viewMonth={viewMonth} viewYear={viewYear} />}
+              {activeTab === "recibos" && <ReceiptsCenter viewMonth={viewMonth} viewYear={viewYear} />}
+              {activeTab === "notas-fiscais" && <FiscalNotesTab />}
+              {activeTab === "contratos" && <ContractsCenter />}
               {activeTab === "fornecedores" && <SuppliersManager />}
               {activeTab === "vendedores" && (
                 <div className="space-y-8">

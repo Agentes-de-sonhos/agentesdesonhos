@@ -54,8 +54,7 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [payingInvoice, setPayingInvoice] = useState<Invoice | null>(null);
-  const [subtab, setSubtab] = useState<"faturas" | "cobrancas" | "recibos">("faturas");
-  const [recentPayments, setRecentPayments] = useState<Array<InvoicePayment & { invoice_number?: string; client_name?: string }>>([]);
+  const [subtab, setSubtab] = useState<"faturas" | "cobrancas">("faturas");
 
   // KPIs
   const kpis = useMemo(() => {
@@ -79,25 +78,8 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
     return { totalOpen, totalPaid, totalOverdue, countOpen, countOverdue, countPaid };
   }, [invoices]);
 
-  // Load recent payments when entering "recibos" subtab
-  useEffect(() => {
-    if (subtab !== "recibos" || !user) return;
-    (async () => {
-      const { data } = await (supabase as any)
-        .from("invoice_payments")
-        .select("*, invoices(invoice_number, client_name)")
-        .eq("user_id", user.id)
-        .order("payment_date", { ascending: false })
-        .limit(100);
-      setRecentPayments((data || []).map((p: any) => ({
-        ...p,
-        invoice_number: p.invoices?.invoice_number,
-        client_name: p.invoices?.client_name,
-      })));
-    })();
-  }, [subtab, user, invoices.length]);
-
   const today = new Date().toISOString().slice(0, 10);
+
   const baseList = invoices.filter(i =>
     !query ||
     i.invoice_number.toLowerCase().includes(query.toLowerCase()) ||
@@ -148,16 +130,15 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
 
   return (
     <div className="space-y-4">
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard icon={Wallet} label="A receber" value={fmt(kpis.totalOpen)} hint={`${kpis.countOpen} fatura(s)`} tone="amber" />
-        <KpiCard icon={AlertCircle} label="Em atraso" value={fmt(kpis.totalOverdue)} hint={`${kpis.countOverdue} vencida(s)`} tone="rose" />
-        <KpiCard icon={CheckCircle2} label="Recebido" value={fmt(kpis.totalPaid)} hint={`${kpis.countPaid} paga(s)`} tone="emerald" />
-        <KpiCard icon={FileText} label="Total emitido" value={String(invoices.length)} hint="faturas no histórico" tone="slate" />
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="text-lg font-semibold">Faturas</h2>
+        <Button onClick={() => setOpenForm(true)}>
+          <Plus className="h-4 w-4 mr-1" /> Nova fatura
+        </Button>
       </div>
 
       <Tabs value={subtab} onValueChange={(v) => setSubtab(v as any)}>
-        <TabsList className="grid grid-cols-3 max-w-md">
+        <TabsList className="grid grid-cols-2 max-w-sm">
           <TabsTrigger value="faturas">Faturas</TabsTrigger>
           <TabsTrigger value="cobrancas">
             Cobranças
@@ -167,8 +148,7 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="recibos">Recibos</TabsTrigger>
-        </TabsList>
+          </TabsList>
 
         <TabsContent value="faturas" className="space-y-4 pt-4">
           {renderInvoiceList()}
@@ -181,33 +161,6 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
           {renderInvoiceList()}
         </TabsContent>
 
-        <TabsContent value="recibos" className="space-y-2 pt-4">
-          {recentPayments.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">
-              <Receipt className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              <p>Nenhum recibo registrado ainda.</p>
-            </CardContent></Card>
-          ) : (
-            recentPayments.map(p => (
-              <Card key={p.id}>
-                <CardContent className="p-4 flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold">{p.receipt_number}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {INVOICE_PAYMENT_METHODS[p.method] || p.method}
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1 truncate">
-                      {p.client_name || "—"} • Fatura {p.invoice_number || "—"} • {p.payment_date.split("-").reverse().join("/")}
-                    </div>
-                  </div>
-                  <div className="text-right font-semibold text-emerald-600">{fmt(p.amount)}</div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </TabsContent>
       </Tabs>
 
       <InvoiceFormDialog open={openForm} onOpenChange={setOpenForm} />
@@ -251,9 +204,6 @@ export function InvoicesManager({ viewMonth, viewYear }: { viewMonth?: number; v
           className="max-w-md"
         />
         <div className="flex-1" />
-        <Button onClick={() => setOpenForm(true)}>
-          <Plus className="h-4 w-4 mr-1" /> Nova fatura
-        </Button>
       </div>
 
       {isLoading ? (

@@ -151,41 +151,12 @@ export function SellersCommissionReport({ viewMonth, viewYear }: { viewMonth?: n
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-center flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-lg font-semibold">Relatório de Comissões</h3>
         </div>
         <ExportButton onClick={() => setShowExport(true)} />
-      </div>
-
-      {/* Resumo */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard
-          icon={DollarSign}
-          label="Total de Comissões"
-          value={fmtBRL(summary.totalCommission)}
-          sub={`${fmtBRL(summary.totalSold)} vendido`}
-        />
-        <SummaryCard
-          icon={Users}
-          label="Vendas com Comissão"
-          value={String(summary.count)}
-          sub={`${summary.sellerCount} vendedor(es)`}
-        />
-        <SummaryCard
-          icon={Wallet}
-          label="Comissão Média"
-          value={fmtBRL(summary.avg)}
-          sub="por venda"
-        />
-        <SummaryCard
-          icon={BarChart3}
-          label="Pago / Pendente"
-          value={fmtBRL(summary.paid)}
-          valueClassName="text-emerald-600 dark:text-emerald-400"
-          sub={`${fmtBRL(summary.pending)} pendente`}
-        />
       </div>
 
       {/* Filtros */}
