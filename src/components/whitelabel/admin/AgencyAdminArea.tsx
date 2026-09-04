@@ -186,6 +186,12 @@ function AgencyAdminEntry({
     ? `${clean}${window.location.search}`
     : undefined;
   if (clean === AGENCY_ADMIN_LOGIN) {
+    // Com basePath (SiteLab embutido no router principal do App) um
+    // BrowserRouter próprio geraria router aninhado; sem basePath (domínio
+    // próprio da agência) não há router externo e o login precisa do dele.
+    if (mount.base) {
+      return <AgencyAdminLogin hostname={hostname} basePath={mount.base} />;
+    }
     return (
       <BrowserRouter>
         <AgencyAdminLogin hostname={hostname} basePath={mount.base} />
