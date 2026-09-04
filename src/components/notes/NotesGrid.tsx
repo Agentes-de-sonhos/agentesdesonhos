@@ -143,7 +143,9 @@ export function NotesGrid({
   filters,
   onFiltersChange,
   isLoading,
+  variant = "notes",
 }: NotesGridProps) {
+  const copy = NOTES_COPY[variant];
   const handleSortChange = (value: NoteSortOption) => {
     onFiltersChange({
       ...filters,
@@ -159,7 +161,8 @@ export function NotesGrid({
         <div className="relative flex-1 sm:max-w-[380px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar notas..."
+            placeholder={copy.search}
+
             value={filters.search}
             onChange={(e) =>
               onFiltersChange({ ...filters, search: e.target.value })
