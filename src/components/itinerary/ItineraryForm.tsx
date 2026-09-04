@@ -187,16 +187,46 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       <div className="space-y-4">
-        {/* Linha 1: Cliente */}
-        <div className="space-y-2">
-          <Label>Cliente *</Label>
-          <ClientSelector
-            value={selectedClient}
-            onChange={(c) => { setSelectedClient(c); setClientError(""); }}
-            required
-            error={clientError}
-          />
+        {/* Linha 1: Cliente (50%) + Viajantes: Adultos (25%) e Crianças (25%) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-2 md:col-span-2 min-w-0">
+            <Label>Cliente *</Label>
+            <ClientSelector
+              value={selectedClient}
+              onChange={(c) => { setSelectedClient(c); setClientError(""); }}
+              required
+              error={clientError}
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-2 min-w-0">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Viajantes
+            </Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Adultos"
+                  {...form.register("adultsCount", { valueAsNumber: true })}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">Adultos</p>
+              </div>
+              <div>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="Crianças"
+                  {...form.register("childrenCount", { valueAsNumber: true })}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">Crianças</p>
+              </div>
+            </div>
+          </div>
         </div>
+
 
         {/* Linha 2: Origem + Destino */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
