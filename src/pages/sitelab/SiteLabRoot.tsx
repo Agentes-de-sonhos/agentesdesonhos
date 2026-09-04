@@ -62,38 +62,16 @@ function useNoIndex(title: string) {
  * possivelmente vazio); quando indisponível, mantemos um contorno neutro.
  */
 /**
- * Gestão do laboratório: estado seguro e explícito.
+ * Gestão do laboratório: o PRÓPRIO painel real das agências.
  *
- * Regra de isolamento: dentro de `/sitelab-base/gestao` nenhuma consulta ou
- * gravação pode usar a agência/conta real do usuário logado. Como o tenant
- * técnico não possui usuário de autenticação, o painel real não é montado —
- * nem mesmo os providers — até que a conta técnica seja provisionada.
+ * Isolamento: o laboratório tem conta técnica exclusiva (auth user, profile,
+ * membership e domínio próprios). O guard real (`agency_admin_access_check`)
+ * só libera o dono do domínio técnico ou um vínculo dele — a conta de um
+ * administrador da plataforma é recusada e a sessão é encerrada. Assim, todas
+ * as leituras/gravações das páginas compartilhadas ficam sempre no tenant
+ * técnico, nunca na agência de quem estava logado.
  */
-function SiteLabAdminUnavailable({ model }: { model: SiteLabModel }) {
-  return (
-    <main className="mx-auto flex min-h-[60vh] w-full max-w-[720px] flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-      <div
-        className="flex h-12 w-12 items-center justify-center rounded-full"
-        style={{ background: "var(--brand-tertiary)" }}
-      >
-        <Lock className="h-5 w-5" style={{ color: "var(--brand-primary)" }} />
-      </div>
-      <h1 className="text-2xl font-semibold text-foreground">
-        Gestão do {model.name} aguardando conta técnica
-      </h1>
-      <p className="max-w-[52ch] text-sm text-muted-foreground">
-        O painel de gestão usa exatamente as mesmas páginas das agências, e essas
-        páginas leem e gravam sempre no contexto da conta autenticada. Para que o
-        laboratório não exiba nem altere dados de nenhuma conta real, esta área
-        permanece inativa até que uma conta técnica exclusiva do laboratório seja
-        provisionada.
-      </p>
-      <p className="text-xs text-muted-foreground">
-        O site e a Área do Cliente do laboratório continuam disponíveis nas abas acima.
-      </p>
-    </main>
-  );
-}
+
 
 function demoInfo(model: SiteLabModel, tenant: AgencyDomainInfo | null): AgencyDomainInfo {
   return {
