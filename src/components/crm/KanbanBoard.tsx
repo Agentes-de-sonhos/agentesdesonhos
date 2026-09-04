@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Filter, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -112,7 +112,7 @@ export function KanbanBoard() {
   } = usePipelineStages();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [filterClient, setFilterClient] = useState<string>("all");
+  const [filterClient] = useState<string>("all");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
