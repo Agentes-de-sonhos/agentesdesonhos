@@ -1302,7 +1302,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       )}
 
       {/* Mapa do catálogo: EXCLUSIVO do laboratório (nunca em tenants reais). */}
-      {lab && <SiteLabCatalogMap />}
+      {lab && <SiteLabCatalogMap container={container} />}
 
       {sections.map((section, index) => {
         const node = renderSection(section.key);
