@@ -280,7 +280,7 @@ export default function MeusProjetos() {
     if (!isStartPlan) tabs.push("carteiras");
     tabs.push("roteiros", "modelos");
     if (!isAgencyAdmin && canUseBookingRequests) tabs.push("reservas");
-    if (!isAgencyAdmin && !isStartPlan) tabs.push("bloco-notas");
+    if (!isStartPlan) tabs.push("bloco-notas");
     return tabs;
   }, [isStartPlan, isAgencyAdmin, canUseBookingRequests]);
 
@@ -310,7 +310,8 @@ export default function MeusProjetos() {
   const tabsValue = isModelosTab ? "modelos" : activeTab;
   const isProjectTab =
     activeTab === "orcamentos" || activeTab === "carteiras" || activeTab === "roteiros";
-  const canUseTextosProntos = !isAgencyAdmin && !isStartPlan;
+  /** Textos Prontos segue apenas a limitação de plano/assinatura do Bloco de Notas. */
+  const canUseTextosProntos = !isStartPlan;
   const [modelosSub, setModelosSub] = useState<"roteiros" | "textos">(
     activeTab === "bloco-notas" && canUseTextosProntos ? "textos" : "roteiros"
   );
