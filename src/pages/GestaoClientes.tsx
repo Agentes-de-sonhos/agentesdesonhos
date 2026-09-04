@@ -73,19 +73,13 @@ function GestaoClientesContent() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
-        <PageHeader
-          pageKey="gestao-clientes"
-          title="Gestão de Clientes"
-          subtitle="Gerencie clientes, oportunidades e metas de vendas"
-          icon={Users}
-        />
-
         <KanbanMaximizeProvider>
           <KanbanTabsSurface currentTab={currentTab} onTabChange={handleTabChange} can={can} />
         </KanbanMaximizeProvider>
 
       </div>
     </DashboardLayout>
+
   );
 }
 
