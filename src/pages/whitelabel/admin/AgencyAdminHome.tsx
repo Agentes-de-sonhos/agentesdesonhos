@@ -31,12 +31,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -47,7 +41,11 @@ import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useWorkspace } from "@/workspace/WorkspaceProvider";
 import { useViewport } from "@/lib/agencyAdminDensity";
 import { QuickAddClientDialog } from "@/components/crm/QuickAddClientDialog";
-import { CreateOperationDialog } from "@/components/crm/operations/CreateOperationDialog";
+import {
+  QuickCreateItineraryDialog,
+  QuickCreateQuoteDialog,
+  QuickCreateWalletDialog,
+} from "@/components/whitelabel/admin/quickstart/QuickCreateDialogs";
 import { useFinancial } from "@/hooks/useFinancial";
 import { useCommissionsReceivable } from "@/hooks/useCommissionsReceivable";
 import { computeMonthIncomeSummary } from "@/lib/financialMonthSummary";
@@ -291,7 +289,9 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const brand = brandAccent(info.primary_color);
   const { data, isLoading, isError, error, refetch } = useAgencyAdminDashboard();
   const [newClientOpen, setNewClientOpen] = useState(false);
-  const [newOperationOpen, setNewOperationOpen] = useState(false);
+  const [newQuoteOpen, setNewQuoteOpen] = useState(false);
+  const [newItineraryOpen, setNewItineraryOpen] = useState(false);
+  const [newWalletOpen, setNewWalletOpen] = useState(false);
   const [todayPage, setTodayPage] = useState(0);
   const [upcomingPage, setUpcomingPage] = useState(0);
   const [tripsPage, setTripsPage] = useState(0);
@@ -324,6 +324,8 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   );
 
   /* ------------------------- Atalhos (somente ícones) ------------------------ */
+  /* Somente Cliente, Orçamento, Roteiro e Carteira Digital — cada um abre um
+     pop-up com o formulário inicial real e só cria ao confirmar. */
   const actions = useMemo(() => {
     const list: {
       label: string;
@@ -334,53 +336,18 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
     if (!can || can.clients_create)
       list.push({ label: "Criar cliente", icon: Users, create: true, onClick: () => setNewClientOpen(true) });
     if (!can || can.quotes_create)
-      list.push({
-        label: "Criar orçamento",
-        icon: FileText,
-        create: true,
-        onClick: () => openTab(nav.quote(), "Novo orçamento"),
-      });
+      list.push({ label: "Criar orçamento", icon: FileText, create: true, onClick: () => setNewQuoteOpen(true) });
     if (!can || can.itineraries_create)
-      list.push({
-        label: "Criar roteiro",
-        icon: Map,
-        create: true,
-        onClick: () => openTab(nav.itinerary(), "Novo roteiro"),
-      });
+      list.push({ label: "Criar roteiro", icon: Map, create: true, onClick: () => setNewItineraryOpen(true) });
     if (!can || can.wallet_create)
       list.push({
         label: "Criar carteira digital",
         icon: Wallet,
         create: true,
-        onClick: () => openTab(nav.wallet(), "Nova carteira digital"),
-      });
-    if (!can || can.opportunities)
-      list.push({
-        label: "Criar oportunidade",
-        icon: KanbanSquare,
-        create: true,
-        onClick: () => openTab(`${nav.crm("funil")}?new=1`, "Nova oportunidade"),
-      });
-    if (can?.operations_create)
-      list.push({
-        label: "Criar operação",
-        icon: Briefcase,
-        create: true,
-        onClick: () => setNewOperationOpen(true),
+        onClick: () => setNewWalletOpen(true),
       });
     return list;
-  }, [can, nav, openTab]);
-
-  const financialMenu = useMemo(
-    () => [
-      { label: "Vendas", tab: "vendas" },
-      { label: "Entradas", tab: "entradas" },
-      { label: "Despesas", tab: "despesas" },
-      { label: "Comissões", tab: "comissoes" },
-      { label: "Notas fiscais", tab: "faturas" },
-    ],
-    [],
-  );
+  }, [can]);
 
   /* --------------------------- Indicadores (3) ------------------------------ */
   const counters = useMemo(() => {
@@ -531,50 +498,30 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                 onClick={a.onClick}
               />
             ))}
-            {canFinancial && (
-              <DropdownMenu>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label="Gestão financeira"
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-card shadow-sm transition-colors hover:border-transparent focus-visible:outline-none xl:h-14 xl:w-14"
-                        style={{ color: "var(--wl-accent)" }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "var(--wl-accent)";
-                          e.currentTarget.style.color = "#fff";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "";
-                          e.currentTarget.style.color = "var(--wl-accent)";
-                        }}
-                      >
-                        <DollarSign className="h-6 w-6 xl:h-[26px] xl:w-[26px]" />
-                      </button>
-                    </DropdownMenuTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">Gestão financeira</TooltipContent>
-                </Tooltip>
-                <DropdownMenuContent align="end" className="min-w-[11rem]">
-                  {financialMenu.map((m) => (
-                    <DropdownMenuItem
-                      key={m.tab}
-                      className="cursor-pointer"
-                      onSelect={() => openTab(`${nav.financeiro}?tab=${m.tab}`, m.label)}
-                    >
-                      {m.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
           </div>
         </header>
 
         {/* Formulários abertos direto do painel da agência */}
-        <QuickAddClientDialog open={newClientOpen} onOpenChange={setNewClientOpen} />
-        <CreateOperationDialog open={newOperationOpen} onOpenChange={setNewOperationOpen} />
+        <QuickAddClientDialog
+          open={newClientOpen}
+          onOpenChange={setNewClientOpen}
+          onCreated={(client) => openTab(`${nav.crm("clientes")}?client=${client.id}`, "Clientes")}
+        />
+        <QuickCreateQuoteDialog
+          open={newQuoteOpen}
+          onOpenChange={setNewQuoteOpen}
+          onCreated={(id) => openTab(nav.quote(id), "Orçamento")}
+        />
+        <QuickCreateItineraryDialog
+          open={newItineraryOpen}
+          onOpenChange={setNewItineraryOpen}
+          onCreated={(id) => openTab(nav.itinerary(id), "Roteiro")}
+        />
+        <QuickCreateWalletDialog
+          open={newWalletOpen}
+          onOpenChange={setNewWalletOpen}
+          onCreated={(id) => openTab(nav.wallet(id), "Carteira digital")}
+        />
 
         {isError ? (
           <Card className="min-w-0 rounded-2xl border-border/60 p-6 text-center shadow-sm">
