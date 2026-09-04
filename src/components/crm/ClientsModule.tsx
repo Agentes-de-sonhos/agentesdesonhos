@@ -204,6 +204,18 @@ export function ClientsModule() {
     setSearchParams(next, { replace: true });
   }, [deepLinkId, deepLinkClient, searchParams, setSearchParams]);
 
+  // Abre o formulário completo de novo cliente via deep link (?novo=1),
+  // usado pelo item "Cliente" do menu global "Criar novo".
+  const wantsNewClient = searchParams.get("novo") === "1";
+  useEffect(() => {
+    if (!wantsNewClient) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("novo");
+    setSearchParams(next, { replace: true });
+    if (!canCreate) return;
+    handleOpenDialogRef.current();
+  }, [wantsNewClient, canCreate, searchParams, setSearchParams]);
+
   const { data: existingPhones } = useClientPhoneIndex(isImportOpen);
 
 
@@ -223,6 +235,8 @@ export function ClientsModule() {
       birthday_year: "",
     },
   });
+
+  const handleOpenDialogRef = useRef<() => void>(() => {});
 
   const handleOpenDialog = (client?: Client) => {
     if (client) {
