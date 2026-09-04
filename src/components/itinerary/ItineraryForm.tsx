@@ -260,9 +260,10 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
           </div>
         </div>
 
-        {/* Período + Número de Viajantes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Período da Viagem */}
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
+
           <Label className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4" />
             Período da Viagem
