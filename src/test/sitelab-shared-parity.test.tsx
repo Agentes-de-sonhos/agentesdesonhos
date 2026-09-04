@@ -9,6 +9,8 @@ import { resolve } from "node:path";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 const root = read("src/pages/sitelab/SiteLabRoot.tsx");
+const adminEntry = read("src/pages/sitelab/SiteLabAdminEntry.tsx");
+const chrome = read("src/pages/sitelab/SiteLabChrome.tsx");
 const adminArea = read("src/components/whitelabel/admin/AgencyAdminArea.tsx");
 const app = read("src/App.tsx");
 
@@ -16,8 +18,10 @@ describe("Site Lab Base — áreas internas reais", () => {
   it("gestão usa o painel real da conta técnica, nunca demo", () => {
     // O painel real resolve o contexto por auth.uid() da conta técnica do
     // SiteLab (provisionada como master apenas do tenant sintético).
-    expect(root).not.toMatch(/SiteLabAdminDemo|SiteLabAdminSurfaces/);
-    expect(root).toMatch(/<AgencyAdminArea/);
+    expect(adminEntry).not.toMatch(/SiteLabAdminDemo|SiteLabAdminSurfaces/);
+    expect(adminEntry).toMatch(/<AgencyAdminArea/);
+    /* Montada FORA do router do App: um único workspace/router ativo. */
+    expect(adminEntry).toContain("SITELAB_BASE_PATH");
   });
 
   it("área do cliente monta a página real (AgencyClientArea)", () => {
@@ -47,8 +51,10 @@ describe("Site Lab Base — áreas internas reais", () => {
 
   it("a senha externa do laboratório continua antes das áreas", () => {
     expect(root).toContain("PasswordGate");
-    expect(root).toContain("verifySitelabPassword");
+    expect(adminEntry).toContain("PasswordGate");
+    expect(chrome).toContain("verifySitelabPassword");
     expect(root).toContain("hasSitelabAccess");
+    expect(adminEntry).toContain("hasSitelabAccess");
   });
 
   it("as rotas reais do painel continuam registradas na árvore compartilhada", () => {
@@ -85,7 +91,9 @@ describe("Site Lab Base — áreas internas reais", () => {
   it("as três rotas do laboratório continuam existindo", () => {
     expect(app).toContain('path="/sitelab-base"');
     expect(app).toContain('path="/sitelab-base/area-do-cliente"');
-    expect(app).toContain('path="/sitelab-base/gestao"');
+    /* A gestão é decidida antes do router do App (painel real com abas). */
+    expect(app).toContain("isSiteLabAdminPath(window.location.pathname)");
+    expect(app).toContain("<SiteLabAdminEntry />");
   });
 
   it("identidade do Site Lab é só nome, logo e paleta, sem cor de agência", () => {
@@ -93,7 +101,7 @@ describe("Site Lab Base — áreas internas reais", () => {
     expect(models).toContain("primary");
     expect(models).toContain("secondary");
     expect(models).toContain("tertiary");
-    expect(root).toContain("useAgencyBrandTheme");
+    expect(chrome).toContain("useAgencyBrandTheme");
     /* Nenhuma cor de tenant real embutida. */
     expect(root).not.toMatch(/#(?:8B1|A31|0B2|1B2)/i);
   });

@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { isSiteLabAdminPath } from "@/lib/sitelabModels";
+
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
@@ -152,6 +154,7 @@ const DashboardFornecedor = lazy(() => import("./pages/DashboardFornecedor"));
 const AgendaTrade = lazy(() => import("./pages/AgendaTrade"));
 const FaturaPublica = lazy(() => import("./pages/FaturaPublica"));
 const SiteLabRoot = lazy(() => import("./pages/sitelab/SiteLabRoot"));
+const SiteLabAdminEntry = lazy(() => import("./pages/sitelab/SiteLabAdminEntry"));
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -170,8 +173,33 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
+const App = () => {
+  /**
+   * GESTÃO DO SITELAB — decidida ANTES de qualquer router do App.
+   *
+   * O painel real usa o workspace de abas (um router por aba). Se ele fosse
+   * montado dentro do WorkspaceGate/Routes, haveria Router dentro de Router.
+   * É o mesmo padrão já usado por `AgencyDomainRoutes` nos domínios próprios.
+   */
+  if (typeof window !== "undefined" && isSiteLabAdminPath(window.location.pathname)) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <ErrorBoundary>
+            <Suspense fallback={<PageFallback />}>
+              <SiteLabAdminEntry />
+            </Suspense>
+          </ErrorBoundary>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  return (
   <QueryClientProvider client={queryClient}>
+
     <TooltipProvider>
       <LaunchOverlay />
       <Toaster />
@@ -250,9 +278,8 @@ const App = () => (
             {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
-            <Route path="/sitelab-base/gestao" element={<SiteLabRoot view="admin" />} />
-            {/* Subrotas reais do painel (inclui /gestao/login) sob o prefixo protegido. */}
-            <Route path="/sitelab-base/gestao/*" element={<SiteLabRoot view="admin" />} />
+            {/* /sitelab-base/gestao/* é montado fora deste router (ver topo). */}
+
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:agencySlug/:accessCode" element={<PublicCodeResolver />} />
             <Route
@@ -375,6 +402,7 @@ const App = () => (
         </ErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

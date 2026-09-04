@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SITELAB_BASE, SITELAB_BASE_PATH } from "@/lib/sitelabModels";
 
 const root = readFileSync("src/pages/sitelab/SiteLabRoot.tsx", "utf8");
+const adminEntry = readFileSync("src/pages/sitelab/SiteLabAdminEntry.tsx", "utf8");
 const adminArea = readFileSync(
   "src/components/whitelabel/admin/AgencyAdminArea.tsx",
   "utf8",
@@ -19,9 +20,9 @@ const migration = readFileSync(
 
 describe("isolamento do tenant técnico do Site Lab", () => {
   it("1) a gestão do laboratório usa o painel real montado no hostname técnico", () => {
-    expect(root).toContain("<AgencyAdminArea");
-    expect(root).toContain("hostname={model.adminHostname}");
-    expect(root).toContain(`basePath={SITELAB_BASE_PATH}`);
+    expect(adminEntry).toContain("<AgencyAdminArea");
+    expect(adminEntry).toContain("hostname={model.adminHostname}");
+    expect(adminEntry).toContain(`basePath={SITELAB_BASE_PATH}`);
   });
 
   it("2) o escopo de dados vem do guard real, não de identidade visual", () => {
@@ -31,6 +32,7 @@ describe("isolamento do tenant técnico do Site Lab", () => {
     expect(shell).toContain("void signOut()");
     expect(adminArea).not.toContain("identity");
     expect(root).not.toMatch(/identity=\{\{/);
+    expect(adminEntry).not.toMatch(/identity=\{\{/);
   });
 
   it("3) tenants reais mantêm exatamente a resolução anterior de acesso", () => {
@@ -53,6 +55,7 @@ describe("isolamento do tenant técnico do Site Lab", () => {
     expect(SITELAB_BASE_PATH).toBe("/sitelab-base");
     expect(root).toContain(`${"${SITELAB_BASE_PATH}"}/area-do-cliente`);
     expect(root).not.toMatch(/"\/gestao"/);
+    expect(adminEntry).not.toMatch(/"\/gestao"/);
     expect(SITELAB_BASE.adminHostname).toBe("sitelab.local");
   });
 });

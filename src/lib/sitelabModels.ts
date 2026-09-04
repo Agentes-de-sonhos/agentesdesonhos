@@ -50,6 +50,19 @@ export const SITELAB_DEMO_HOSTNAME = "sitelab.local";
 export const SITELAB_BASE_PATH = "/sitelab-base";
 
 /**
+ * Helper central: a URL é da GESTÃO do laboratório?
+ *
+ * A gestão precisa ser decidida ANTES do router do App (o painel real usa o
+ * workspace de abas, com um router por aba). Análogo a `isAgencyAdminPath`.
+ */
+export function isSiteLabAdminPath(pathname: string | null | undefined): boolean {
+  const clean = (pathname || "").replace(/\/+$/, "");
+  const base = `${SITELAB_BASE_PATH}/gestao`;
+  return clean === base || clean.startsWith(`${base}/`);
+}
+
+
+/**
  * Helper central: identifica o contexto sintético do laboratório.
  * Nenhuma chamada a endpoints reais nem gravação de dados deve ocorrer quando true.
  */
