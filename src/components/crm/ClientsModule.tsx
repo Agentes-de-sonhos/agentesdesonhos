@@ -273,6 +273,8 @@ export function ClientsModule() {
     setIsDialogOpen(true);
   };
 
+  handleOpenDialogRef.current = () => handleOpenDialog();
+
   const upsertBirthdayEvent = async (clientId: string, clientName: string, day: number, month: number) => {
     if (!user) return;
     await supabase.from("agency_events")
