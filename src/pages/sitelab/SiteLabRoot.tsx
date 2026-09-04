@@ -32,6 +32,10 @@ import sitelabLogo from "@/assets/sitelab/sitelab-base-logo.png.asset.json";
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 /* Áreas internas: as PRÓPRIAS páginas reais do white label, sem versão paralela. */
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
+const AgencyAdminArea = lazy(
+  () => import("@/components/whitelabel/admin/AgencyAdminArea"),
+);
+
 
 /** noindex/nofollow em todas as áreas do laboratório. */
 function useNoIndex(title: string) {
