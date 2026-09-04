@@ -29,6 +29,10 @@ import {
   type AgencySectionKey, type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
 import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProfile";
+import {
+  SiteLabCatalogMap,
+  SiteLabSectionTag,
+} from "@/components/whitelabel/SiteLabCatalogChrome";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
