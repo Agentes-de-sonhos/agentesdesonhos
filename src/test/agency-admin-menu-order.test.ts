@@ -39,7 +39,7 @@ describe("menu lateral da gestão (compartilhado)", () => {
     const cliente = CREATE_ITEMS.find((i) => i.label === "Cliente");
     expect(cliente?.to).toBe("/gestao/crm/clientes?novo=1");
     expect(cliente?.permission).toBe("clients.create");
-    expect((cliente as Record<string, unknown> | undefined)?.action).toBeUndefined();
+    expect(JSON.stringify(cliente)).not.toContain("new-client");
   });
 
   it("sidebar não referencia mais o QuickAddClientDialog", () => {
