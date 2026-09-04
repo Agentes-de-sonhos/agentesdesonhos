@@ -1149,6 +1149,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     <>
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
+        id="topo"
         className={
           editorial
             ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
