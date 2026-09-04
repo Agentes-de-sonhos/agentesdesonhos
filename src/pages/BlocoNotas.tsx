@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { NotesGrid } from "@/components/notes/NotesGrid";
+import { NotesGrid, type NotesVariant } from "@/components/notes/NotesGrid";
 import { NoteEditor } from "@/components/notes/NoteEditor";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -18,7 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Note } from "@/types/notes";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 
-function BlocoNotasInner() {
+function BlocoNotasInner({ variant = "notes" }: { variant?: NotesVariant }) {
+  const isTexts = variant === "texts";
   const {
     notes,
     isLoading,
@@ -183,6 +184,7 @@ function BlocoNotasInner() {
         filters={filters}
         onFiltersChange={setFilters}
         isLoading={isLoading}
+        variant={variant}
       />
 
       {/* Note Editor Modal */}
@@ -207,10 +209,11 @@ function BlocoNotasInner() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir nota</AlertDialogTitle>
+            <AlertDialogTitle>{isTexts ? "Excluir texto" : "Excluir nota"}</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir esta nota? Esta ação não pode ser
-              desfeita.
+              {isTexts
+                ? "Tem certeza que deseja excluir este texto? Esta ação não pode ser desfeita."
+                : "Tem certeza que deseja excluir esta nota? Esta ação não pode ser desfeita."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -228,10 +231,10 @@ function BlocoNotasInner() {
   );
 }
 
-export function BlocoNotasContent() {
+export function BlocoNotasContent({ variant = "notes" }: { variant?: NotesVariant } = {}) {
   return (
     <SubscriptionGuard feature="notepad">
-      <BlocoNotasInner />
+      <BlocoNotasInner variant={variant} />
     </SubscriptionGuard>
   );
 }
