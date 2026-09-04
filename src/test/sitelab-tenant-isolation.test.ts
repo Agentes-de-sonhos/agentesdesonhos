@@ -7,41 +7,46 @@ const adminArea = readFileSync(
   "src/components/whitelabel/admin/AgencyAdminArea.tsx",
   "utf8",
 );
-const ownerHook = readFileSync("src/hooks/useAgencyOwnerId.ts", "utf8");
+const shell = readFileSync(
+  "src/components/whitelabel/admin/AgencyAdminShell.tsx",
+  "utf8",
+);
+const provision = readFileSync("supabase/functions/sitelab-provision/index.ts", "utf8");
 const migration = readFileSync(
   "supabase/migrations/20260825220502_b41eab45-749e-4906-ae67-c82ed5a5932c.sql",
   "utf8",
 );
 
 describe("isolamento do tenant técnico do Site Lab", () => {
-  it("1) o laboratório não monta o painel autenticado — agencyOwnerId nunca vira o auth.uid() do admin", () => {
-    // O painel real só resolve o contexto por auth.uid()/agency_membership;
-    // por isso o laboratório não o monta enquanto não houver conta técnica.
-    expect(ownerHook).toContain("agency_membership");
-    expect(root).not.toMatch(/<AgencyAdminArea|import\(\s*"@\/components\/whitelabel\/admin\/AgencyAdminArea"/);
-    expect(root).toContain("SiteLabAdminUnavailable");
+  it("1) a gestão do laboratório usa o painel real montado no hostname técnico", () => {
+    expect(root).toContain("<AgencyAdminArea");
+    expect(root).toContain("hostname={model.adminHostname}");
+    expect(root).toContain(`basePath={SITELAB_BASE_PATH}`);
   });
 
-  it("2) a gestão do laboratório não faz nenhuma consulta autenticada", () => {
-    const surface = root.slice(root.indexOf("function SiteLabAdminUnavailable"));
-    const body = surface.slice(0, surface.indexOf("function demoInfo"));
-    expect(body).not.toMatch(/supabase|useAuth|useQuery|useAgencyOwnerId|from\(/);
-    // Providers autenticados não aparecem em nenhum ponto do laboratório.
-    expect(root).not.toMatch(/<TeamSessionProvider|<AuthProvider|<SubscriptionProvider/);
+  it("2) o escopo de dados vem do guard real, não de identidade visual", () => {
+    // O guard resolve a agência pelo hostname e confirma o vínculo no servidor.
+    expect(shell).toContain("fetchAgencyAdminPortal(hostname)");
+    expect(shell).toContain("checkAgencyAdminAccess(hostname)");
+    expect(shell).toContain("void signOut()");
+    expect(adminArea).not.toContain("identity");
+    expect(root).not.toMatch(/identity=\{\{/);
   });
 
   it("3) tenants reais mantêm exatamente a resolução anterior de acesso", () => {
-    // A função foi revertida à lógica original: dono do domínio ou vínculo real.
     expect(migration).toContain("v_allowed := v_agency = v_uid");
     expect(migration).toContain("FROM public.agency_membership m");
     expect(adminArea).toContain("AgencyAdminShell");
     expect(adminArea).toContain("TeamSessionProvider");
   });
 
-  it("4) identidade visual não altera escopo de dados", () => {
-    // Nenhuma sobreposição de identidade é injetada no painel real.
-    expect(adminArea).not.toContain("identity");
-    expect(root).not.toMatch(/identity=\{\{/);
+  it("4) a conta técnica é exclusiva do laboratório e master apenas de si mesma", () => {
+    expect(provision).toContain("sitelab.base@agentesdesonhos.com.br");
+    expect(provision).toContain("agency_id: labId");
+    expect(provision).toContain('role: "master"');
+    // Nunca reutiliza conta/dados de agência real e nunca toca auth por SQL.
+    expect(provision).not.toMatch(/destinoscomaju|paraiso|100limites/i);
+    expect(provision).toContain('.eq("hostname", LAB_HOSTNAME)');
   });
 
   it("5) nenhuma rota do laboratório escapa do prefixo", () => {
