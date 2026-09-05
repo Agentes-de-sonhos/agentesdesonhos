@@ -98,13 +98,30 @@ export function UpgradeDialog({
   title,
   description,
 }: UpgradeDialogProps) {
-  const { plan: currentPlan, getPlanLabel } = useSubscription();
-  const { user } = useAuth();
+  const {
+    plan: currentPlan,
+    getPlanLabel,
+    subscription,
+    loading: subscriptionLoading,
+    planInherited,
+  } = useSubscription();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
+  const offer = getPlanOfferState({
+    loading: !!authLoading || (!!user && !!subscriptionLoading),
+    hasUser: !!user,
+    plan: currentPlan,
+    subscription: subscription as any,
+    planInherited: !!planInherited,
+  });
+
   const handleUpgrade = async (planId: SubscriptionPlan) => {
+    // Mesma checagem do botão: bloqueia carregamento, promoção vigente e
+    // colaborador com plano herdado da conta master.
+    if (offer.purchaseBlocked) return;
     setLoadingPlan(planId);
     try {
       if (!user) {
