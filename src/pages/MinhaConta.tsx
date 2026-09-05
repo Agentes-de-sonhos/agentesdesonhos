@@ -170,7 +170,7 @@ export default function MinhaConta() {
             </div>
           </CardHeader>
           <CardContent>
-            {!isPaid && (
+            {!isPaid && !promo.isPromo && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border bg-muted/30 p-4">
                 <p className="text-sm text-muted-foreground">
                   Você está no plano gratuito. Faça upgrade para desbloquear mais recursos.
@@ -180,6 +180,54 @@ export default function MinhaConta() {
                 </Button>
               </div>
             )}
+
+            {promo.isPromo && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="flex flex-col gap-2 rounded-lg border bg-muted/30 p-4"
+              >
+                <p className="text-sm font-semibold leading-none">{getPlanLabel(plan)}</p>
+                {promo.status === "active" && promo.endDateLabel && (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Acesso promocional válido até {promo.endDateLabel}.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Enquanto vigente, seus recursos são equivalentes ao Plano Premium.
+                    </p>
+                  </>
+                )}
+                {promo.status === "unknown" && (
+                  <p className="text-sm text-muted-foreground">
+                    Acesso promocional com recursos equivalentes ao Plano Premium. A data de validade
+                    não está registrada — fale com o suporte para confirmar o prazo.
+                  </p>
+                )}
+                {promo.status === "expired" && (
+                  <p className="text-sm text-muted-foreground">
+                    Acesso promocional encerrado em {promo.endDateLabel}.
+                  </p>
+                )}
+                {promo.status === "inactive" && (
+                  <p className="text-sm text-muted-foreground">
+                    Acesso promocional encerrado.
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Este é um acesso promocional sem cobrança recorrente: não há renovação automática
+                  nem cobranças no cartão.
+                </p>
+                {(promo.status === "expired" || promo.status === "inactive") && (
+                  <div className="pt-1">
+                    <Button asChild>
+                      <Link to="/planos">Ver planos</Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
 
             {isPaid && cancellation.scheduled && (
               <div
