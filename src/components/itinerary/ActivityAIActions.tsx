@@ -234,7 +234,7 @@ export function ActivityAIActions({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80" align="end">
+        <PopoverContent className="w-80 max-w-[92vw]" align="end">
           <div className="space-y-3">
             <div>
               <p className="text-sm font-medium">Refinar com IA</p>
