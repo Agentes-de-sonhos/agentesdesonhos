@@ -48,10 +48,13 @@ export function buildBirthDate(
   year: unknown,
 ): string | null {
   if (!isInt(day) || !isInt(month) || !isInt(year)) return null
-  if (year < 1900 || year > 2200) return null
+  if (year < 1 || year > 9999) return null
   if (month < 1 || month > 12) return null
   if (day < 1 || day > 31) return null
-  const probe = new Date(Date.UTC(year, month - 1, day))
+  // Use setUTCFullYear so years 1-99 are validated literally instead of being
+  // mapped to 1900-1999 by Date.UTC.
+  const probe = new Date(Date.UTC(2000, month - 1, day))
+  probe.setUTCFullYear(year)
   if (
     probe.getUTCFullYear() !== year ||
     probe.getUTCMonth() !== month - 1 ||
@@ -59,9 +62,10 @@ export function buildBirthDate(
   ) {
     return null
   }
+  const yyyy = String(year).padStart(4, '0')
   const mm = String(month).padStart(2, '0')
   const dd = String(day).padStart(2, '0')
-  return `${year}-${mm}-${dd}`
+  return `${yyyy}-${mm}-${dd}`
 }
 
 export function mapClientProfile(

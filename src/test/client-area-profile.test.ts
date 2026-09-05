@@ -88,6 +88,8 @@ describe('data de nascimento', () => {
   it('monta YYYY-MM-DD com dia, mês e ano inteiros válidos', () => {
     expect(buildBirthDate(5, 3, 1988)).toBe('1988-03-05')
     expect(buildBirthDate(29, 2, 2000)).toBe('2000-02-29')
+    expect(buildBirthDate(1, 1, 1899)).toBe('1899-01-01')
+    expect(buildBirthDate(1, 1, 99)).toBe('0099-01-01')
   })
 
   it('devolve null quando incompleta, sem inventar o ano', () => {
@@ -95,10 +97,12 @@ describe('data de nascimento', () => {
     expect(buildBirthDate(null, 3, 1988)).toBeNull()
     expect(buildBirthDate(5, null, 1988)).toBeNull()
     expect(buildBirthDate(5, 3, undefined)).toBeNull()
+    expect(buildBirthDate(1, 1, 0)).toBeNull() // ano 0000 não é válido
   })
 
   it('devolve null para datas de calendário inválidas', () => {
     expect(buildBirthDate(29, 2, 2001)).toBeNull() // não bissexto
+    expect(buildBirthDate(29, 2, 1900)).toBeNull() // não bissexto (divisível por 100, não por 400)
     expect(buildBirthDate(31, 4, 1990)).toBeNull()
     expect(buildBirthDate(0, 1, 1990)).toBeNull()
     expect(buildBirthDate(10, 13, 1990)).toBeNull()
