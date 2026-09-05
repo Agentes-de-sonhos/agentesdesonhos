@@ -257,13 +257,24 @@ export function OperationCard({
       open={showHistory}
       onOpenChange={setShowHistory}
     />
-    {operation.client && (
-      <EditClientDialog
-        clientId={operation.client.id}
-        open={showEditClient}
-        onOpenChange={setShowEditClient}
+    <QuickOperationNoteDialog
+      operationId={operation.id}
+      contextLabel={[operation.title || operation.client?.name, operation.destination]
+        .filter(Boolean)
+        .join(" · ")}
+      open={showNote}
+      onOpenChange={setShowNote}
+    />
+    {focusedSection && (
+      <OperationDetailDialog
+        operation={operation}
+        open
+        focused
+        defaultTab={focusedSection}
+        onOpenChange={(o) => !o && setFocusedSection(null)}
       />
     )}
+
     <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
       <AlertDialogContent>
         <AlertDialogHeader>
