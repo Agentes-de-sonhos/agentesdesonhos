@@ -33,6 +33,7 @@ vi.mock("@/hooks/usePermissions", () => ({
   usePermissions: () => ({ isMaster: false, can: () => false }),
 }));
 vi.mock("@/hooks/useTeamMembers", () => ({ useTeamQuota: () => ({ data: null }) }));
+vi.mock("@/components/seo/SEO", () => ({ SEO: () => null }));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 const PLAN_LABELS_PROMO = "Promoção Grupo SC";
