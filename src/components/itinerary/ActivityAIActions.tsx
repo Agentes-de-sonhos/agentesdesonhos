@@ -545,8 +545,8 @@ export function EmptyPeriodAISlot({
   };
 
   return (
-    <div className="ml-6 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex items-center justify-between gap-3">
-      <p className="text-sm text-muted-foreground italic">Nenhuma atividade definida</p>
+    <div className="ml-0 sm:ml-6 min-w-0 max-w-full rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <p className="text-sm text-muted-foreground italic min-w-0 break-words">Nenhuma atividade definida</p>
       <Popover
         open={open}
         onOpenChange={(o) => {
