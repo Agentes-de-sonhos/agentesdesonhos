@@ -156,7 +156,8 @@ export function UpgradeDialog({
     ? `${FEATURE_LABELS[requiredFeature!]} está disponível a partir do plano ${getPlanLabel(requiredPlan)}. Escolha o melhor plano para você.`
     : "Escolha o plano ideal para desbloquear todas as funcionalidades.");
 
-  const currentLevel = PLAN_HIERARCHY[currentPlan] ?? 0;
+  const effectivePlan = offer.effectivePlan;
+  const currentLevel = PLAN_HIERARCHY[effectivePlan] ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
