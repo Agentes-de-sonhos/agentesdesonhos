@@ -475,6 +475,17 @@ export function OpportunityCard({
                 <DropdownMenuItem onClick={() => setShowHistory(true)}>
                   <History className="mr-2 h-4 w-4" /> Histórico
                 </DropdownMenuItem>
+                {showGenerateQuote && (
+                  <DropdownMenuItem onClick={handleCreateQuote} disabled={isCheckingLink}>
+                    <FileText className="mr-2 h-4 w-4" /> Gerar orçamento
+                  </DropdownMenuItem>
+                )}
+                {showGenerateWallet && (
+                  <DropdownMenuItem onClick={handleCreateTripWallet} disabled={isCheckingLink}>
+                    <Wallet className="mr-2 h-4 w-4" /> Gerar carteira digital
+                  </DropdownMenuItem>
+                )}
+
                 {hasBookingRequest && (
                   <DropdownMenuItem
                     onClick={() => {
