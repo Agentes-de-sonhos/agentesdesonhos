@@ -35,7 +35,13 @@ function moveContainer() {
   const el = getToastContainer();
   if (!el) return;
   const parent = currentHost ?? document.body;
-  if (el.parentNode !== parent) parent.appendChild(el);
+  if (el.parentNode !== parent) {
+    if (typeof console !== "undefined" && (globalThis as any).__toastDebug) {
+      console.log("BEFORE", el.innerHTML.length);
+    }
+    parent.appendChild(el);
+    if ((globalThis as any).__toastDebug) console.log("AFTER", el.innerHTML.length);
+  }
 }
 
 function emit() {

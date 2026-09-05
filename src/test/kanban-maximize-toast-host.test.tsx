@@ -59,6 +59,7 @@ describe("toasts com Kanban maximizado", () => {
     );
     expect(surface().querySelector('section[aria-label^="Notifications"]')).toBeNull();
 
+    (globalThis as any).__toastDebug = true;
     act(() => {
       screen.getByText("toggle-a").click();
     });
