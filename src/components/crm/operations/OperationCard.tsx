@@ -2,7 +2,7 @@ import { useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import {
   Calendar, Users, DollarSign, AlertCircle, Wallet, Plane,
-  MoreVertical, Tag, MessageSquare, Edit2, User, History, ListChecks, Paperclip, Trash2,
+  MoreVertical, Tag, MessageSquare, Edit2, History, ListChecks, Paperclip, Trash2, Luggage,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,8 @@ import { useOperationLabelAssignments } from "@/hooks/useOperationLabels";
 import { useOperations } from "@/hooks/useOperations";
 import { OperationLabelPicker } from "./OperationLabelPicker";
 import { OperationHistoryDialog } from "./OperationHistoryDialog";
-import { EditClientDialog } from "../EditClientDialog";
+import { QuickOperationNoteDialog } from "./QuickOperationNoteDialog";
+import { OperationDetailDialog, type OperationDetailTab } from "./OperationDetailDialog";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useNavigate } from "react-router-dom";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -31,7 +32,6 @@ export type OperationCardTab = "overview" | "checklist" | "timeline" | "attachme
 interface Props {
   operation: Operation;
   onClick?: () => void;
-  onOpenTab?: (tab: OperationCardTab) => void;
   onDragStart?: (e: React.DragEvent, id: string) => void;
   canEdit?: boolean;
   moveTargets?: MoveStageTarget[];
@@ -40,6 +40,7 @@ interface Props {
   /** Exibe "Gerar carteira digital" (1ª e 2ª colunas da ordem configurada). */
   showGenerateWallet?: boolean;
 }
+
 
 function textColorFor(hex: string) {
   const h = hex.replace("#", "");
@@ -53,7 +54,6 @@ function textColorFor(hex: string) {
 export function OperationCard({
   operation,
   onClick,
-  onOpenTab,
   onDragStart,
   canEdit = true,
   moveTargets,
@@ -68,7 +68,8 @@ export function OperationCard({
   const { deleteOperation } = useOperations();
   const [showLabels, setShowLabels] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [showEditClient, setShowEditClient] = useState(false);
+  const [showNote, setShowNote] = useState(false);
+  const [focusedSection, setFocusedSection] = useState<OperationDetailTab | null>(null);
   const [showDelete, setShowDelete] = useState(false);
 
   const appliedLabels = byOperation[operation.id] || [];
@@ -79,11 +80,8 @@ export function OperationCard({
 
   const travelClose = daysToTravel !== null && daysToTravel >= 0 && daysToTravel <= 14;
 
-  const openTab = (tab: OperationCardTab) => {
-    onOpenTab ? onOpenTab(tab) : onClick?.();
-  };
-
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+
 
   /* Reaproveita o fluxo existente de carteira digital: abre a carteira já
      vinculada quando existir, senão a criação pré-preenchida da operação. */
@@ -136,21 +134,7 @@ export function OperationCard({
                 <MoreVertical className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52" onClick={stop}>
-              <DropdownMenuItem onClick={() => setShowLabels(true)}>
-                <Tag className="mr-2 h-4 w-4" /> Etiquetas
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openTab("timeline")}>
-                <MessageSquare className="mr-2 h-4 w-4" /> Anotações
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openTab("overview")}>
-                <Edit2 className="mr-2 h-4 w-4" /> Editar viagem
-              </DropdownMenuItem>
-              {operation.client && (
-                <DropdownMenuItem onClick={() => setShowEditClient(true)}>
-                  <User className="mr-2 h-4 w-4" /> Editar cliente
-                </DropdownMenuItem>
-              )}
+            <DropdownMenuContent align="end" className="w-56" onClick={stop}>
               {canEdit && onMoveToStage && moveTargets && moveTargets.length > 0 && (
                 <MoveToStageMenu
                   targets={moveTargets}
@@ -158,19 +142,31 @@ export function OperationCard({
                   onMoveToStage={onMoveToStage}
                 />
               )}
-              <DropdownMenuItem onClick={() => setShowHistory(true)}>
-                <History className="mr-2 h-4 w-4" /> Histórico
+              <DropdownMenuItem onClick={() => setFocusedSection("overview")}>
+                <Edit2 className="mr-2 h-4 w-4" /> Editar viagem
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFocusedSection("services")}>
+                <Luggage className="mr-2 h-4 w-4" /> Conferir serviços
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFocusedSection("checklist")}>
+                <ListChecks className="mr-2 h-4 w-4" /> Fazer checklist
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowNote(true)}>
+                <MessageSquare className="mr-2 h-4 w-4" /> Criar anotações
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFocusedSection("attachments")}>
+                <Paperclip className="mr-2 h-4 w-4" /> Anexar arquivos
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowLabels(true)}>
+                <Tag className="mr-2 h-4 w-4" /> Etiquetas
               </DropdownMenuItem>
               {canGenerateWallet && (
                 <DropdownMenuItem onClick={handleGenerateWallet}>
                   <Wallet className="mr-2 h-4 w-4" /> Gerar carteira digital
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => openTab("checklist")}>
-                <ListChecks className="mr-2 h-4 w-4" /> Checklist
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openTab("attachments")}>
-                <Paperclip className="mr-2 h-4 w-4" /> Anexos
+              <DropdownMenuItem onClick={() => setShowHistory(true)}>
+                <History className="mr-2 h-4 w-4" /> Histórico
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -179,6 +175,7 @@ export function OperationCard({
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Excluir operação
               </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -260,13 +257,24 @@ export function OperationCard({
       open={showHistory}
       onOpenChange={setShowHistory}
     />
-    {operation.client && (
-      <EditClientDialog
-        clientId={operation.client.id}
-        open={showEditClient}
-        onOpenChange={setShowEditClient}
+    <QuickOperationNoteDialog
+      operationId={operation.id}
+      contextLabel={[operation.title || operation.client?.name, operation.destination]
+        .filter(Boolean)
+        .join(" · ")}
+      open={showNote}
+      onOpenChange={setShowNote}
+    />
+    {focusedSection && (
+      <OperationDetailDialog
+        operation={operation}
+        open
+        focused
+        defaultTab={focusedSection}
+        onOpenChange={(o) => !o && setFocusedSection(null)}
       />
     )}
+
     <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
       <AlertDialogContent>
         <AlertDialogHeader>

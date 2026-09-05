@@ -53,14 +53,33 @@ function StageChip({ stage }: { stage: OperationStage }) {
   );
 }
 
+export type OperationDetailTab =
+  | "overview"
+  | "services"
+  | "checklist"
+  | "timeline"
+  | "attachments";
+
+/** Títulos dos pop-ups focados (atalhos do menu do card). */
+export const FOCUSED_SECTION_TITLES: Record<OperationDetailTab, string> = {
+  overview: "Editar viagem",
+  services: "Conferir serviços",
+  checklist: "Fazer checklist",
+  timeline: "Anotações da operação",
+  attachments: "Anexar arquivos",
+};
+
 interface Props {
   operation: Operation | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultTab?: "overview" | "services" | "checklist" | "timeline" | "attachments";
+  defaultTab?: OperationDetailTab;
+  /** Pop-up focado: esconde as abas e mostra apenas a seção solicitada. */
+  focused?: boolean;
 }
 
-export function OperationDetailDialog({ operation, open, onOpenChange, defaultTab = "overview" }: Props) {
+export function OperationDetailDialog({ operation, open, onOpenChange, defaultTab = "overview", focused = false }: Props) {
+
   const { updateOperation, deleteOperation } = useOperations();
   const { tasks, seedChecklist, toggleTask, addTask, removeTask } = useOperationTasks(operation?.id ?? null);
   const { events, addNote } = useOperationTimeline(operation?.id ?? null);
@@ -82,12 +101,13 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   }, [operation]);
 
   useEffect(() => {
-    if (operation && open) {
+    if (operation && open && (!focused || defaultTab === "checklist")) {
       // Auto-seed checklist for current stage if none exists yet
       seedChecklist(operation.stage).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [operation?.id, operation?.stage, open]);
+  }, [operation?.id, operation?.stage, open, focused, defaultTab]);
+
 
   if (!operation) return null;
 
@@ -124,14 +144,27 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   const whatsappLink = phone ? `https://wa.me/55${phone}` : null;
   const computedPaymentStatus = computeOperationPaymentStatus(opServices as any[]);
 
+  const focusedWide = focused && defaultTab === "services";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-[1560px] lg:w-[93vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
+      <DialogContent
+        className={
+          focused && !focusedWide
+            ? "w-[calc(100vw-1.5rem)] max-w-[720px] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6"
+            : "w-[calc(100vw-1.5rem)] max-w-[1560px] lg:w-[93vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6"
+        }
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-lg sm:text-xl break-words">{operation.title || operation.client?.name}</DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl break-words">
+                {focused ? FOCUSED_SECTION_TITLES[defaultTab] : operation.title || operation.client?.name}
+              </DialogTitle>
               <p className="text-sm text-muted-foreground mt-1 break-words">
+                {focused && (operation.title || operation.client?.name) ? `${operation.title || operation.client?.name} · ` : ""}
                 {operation.client?.name} {operation.destination && `· ${operation.destination}`}
               </p>
             </div>
@@ -140,6 +173,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
         </DialogHeader>
 
         <Tabs key={`${operation.id}-${defaultTab}`} defaultValue={defaultTab} className="mt-2">
+          {!focused && (
           <div className="-mx-1 overflow-x-auto sm:mx-0 sm:overflow-visible">
             <TabsList className="inline-flex w-max gap-1 sm:grid sm:w-full sm:grid-cols-5">
               <TabsTrigger value="overview" className="gap-1 whitespace-nowrap px-3"><Info className="h-3.5 w-3.5 shrink-0" />Visão geral</TabsTrigger>
@@ -149,6 +183,8 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
               <TabsTrigger value="attachments" className="gap-1 whitespace-nowrap px-3"><Paperclip className="h-3.5 w-3.5 shrink-0" />Anexos</TabsTrigger>
             </TabsList>
           </div>
+          )}
+
 
           {/* OVERVIEW */}
           <TabsContent value="overview" className="space-y-4 mt-4">
