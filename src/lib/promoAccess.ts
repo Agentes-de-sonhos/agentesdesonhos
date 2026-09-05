@@ -111,8 +111,9 @@ export type PlanOfferState = {
  * o usuário volta às opções tradicionais existentes.
  */
 export function getPlanOfferState(input: PlanOfferInput): PlanOfferState {
+  const rawPlan = input.plan ?? input.subscription?.plan ?? null;
   const promo = getPromoAccessState(
-    input.subscription ?? (input.plan ? { plan: input.plan } : null),
+    input.subscription ?? (rawPlan ? { plan: rawPlan } : null),
     input.now,
   );
   const coveredByPromo = isPromoAccessCurrent(promo);
@@ -121,9 +122,9 @@ export function getPlanOfferState(input: PlanOfferInput): PlanOfferState {
   if (promo.isPromo) {
     // Vigente → equivalente ao plano base (Premium). Encerrada → volta ao Start,
     // nunca marcando Premium como ativo.
-    effectivePlan = coveredByPromo ? resolveEffectivePlan(promo.isPromo ? (input.plan ?? null) : null) : "start";
+    effectivePlan = coveredByPromo ? resolveEffectivePlan(rawPlan) : "start";
   } else {
-    effectivePlan = (input.plan as SubscriptionPlan) || "start";
+    effectivePlan = (rawPlan as SubscriptionPlan) || "start";
   }
 
   let blockedReason: PlanOfferState["blockedReason"] = null;
