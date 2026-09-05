@@ -379,16 +379,21 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 export async function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const formatCurrency = (v: number) => formatQuoteCurrency(v, currency);
+  const C = getQuotePdfTokens(profile || null);
 
   // Abrir a janela ANTES do await para evitar bloqueio de popup pelo navegador.
   const printWindow = window.open("", "_blank");
   if (printWindow) {
     try {
+      // Aviso de carregamento: existe apenas na TELA e é totalmente descartado
+      // com document.open() antes de escrever o HTML final (nunca é impresso).
       printWindow.document.write(
-        '<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Gerando PDF do orçamento…</body></html>',
+        '<!doctype html><html><head><meta charset="utf-8"><title>Gerando PDF…</title></head><body style="font-family:sans-serif;padding:24px;color:#475569;">Gerando PDF do orçamento…</body></html>',
       );
+      printWindow.document.close();
     } catch {}
   }
+
 
   const quoteDocuments = quote?.id ? await fetchQuoteDocumentsForPDF(quote.id) : [];
 
