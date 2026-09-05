@@ -544,7 +544,7 @@ export function ItineraryEditor({
                         <Plus className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
+                    <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto [&>*]:min-w-0">
                       <DialogHeader>
                         <DialogTitle>Adicionar Atividade</DialogTitle>
                         <DialogDescription>
@@ -817,7 +817,7 @@ export function ItineraryEditor({
                                     <Pencil className="h-4 w-4" />
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-y-auto">
+                                <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto [&>*]:min-w-0">
                                   <DialogHeader>
                                     <DialogTitle>Editar Atividade</DialogTitle>
                                   </DialogHeader>
