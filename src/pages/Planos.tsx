@@ -95,15 +95,27 @@ const PLAN_HIERARCHY: Record<string, number> = {
 
 export default function Planos() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const subscriptionCtx = (() => {
     try { return useSubscription(); } catch { return null; }
   })();
   const currentPlan = subscriptionCtx?.plan || null;
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
+  const offer = getPlanOfferState({
+    loading: !!authLoading || (!!user && !!subscriptionCtx?.loading),
+    hasUser: !!user,
+    plan: currentPlan,
+    subscription: subscriptionCtx?.subscription as any,
+    planInherited: !!subscriptionCtx?.planInherited,
+  });
+  const effectivePlan = user ? offer.effectivePlan : null;
+
   const handleAction = async (plan: PlanConfig) => {
     if (loadingPlan) return;
+    // Mesma checagem do botão: nunca iniciar checkout durante carregamento,
+    // com promoção vigente, com plano herdado da master ou já contratado.
+    if (getButtonConfig(plan).disabled) return;
 
     // Paid plan — go directly to Stripe checkout (both logged-in and not)
     setLoadingPlan(plan.id);
@@ -123,11 +135,24 @@ export default function Planos() {
   };
 
   const getButtonConfig = (plan: PlanConfig) => {
-    const currentLevel = currentPlan ? (PLAN_HIERARCHY[currentPlan] ?? 0) : -1;
+    if (offer.blockedReason === "loading") {
+      return { label: "Carregando…", disabled: true };
+    }
+    if (offer.blockedReason === "team_inherited") {
+      return { label: "Plano da conta principal", disabled: true };
+    }
+    if (offer.coveredByPromo) {
+      return {
+        label: plan.id === "premium" ? "Incluído na sua promoção" : "Incluído no seu acesso atual",
+        disabled: true,
+      };
+    }
+
+    const currentLevel = effectivePlan ? (PLAN_HIERARCHY[effectivePlan] ?? 0) : -1;
     const targetLevel = PLAN_HIERARCHY[plan.id] ?? 0;
 
-    if (user && currentPlan) {
-      if (currentPlan === plan.id || (currentPlan === "fundador" && plan.id === "premium")) {
+    if (user && effectivePlan) {
+      if (effectivePlan === plan.id || (effectivePlan === "fundador" && plan.id === "premium")) {
         return { label: "Seu plano atual", disabled: true };
       }
       if (targetLevel > currentLevel) {
