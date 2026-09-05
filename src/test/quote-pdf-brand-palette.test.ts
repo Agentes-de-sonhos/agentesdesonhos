@@ -199,7 +199,9 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     const { captured } = stubPrintWindow();
     await generateQuotePDF(quote, baseProfile);
     const fallback = resolveBrandPalette({ primary: null });
-    expect(captured.html).toContain(fallback.primary);
+    const tokens = getQuotePdfTokens(baseProfile);
+    expect(fallback.primary).toBe("#0284C7");
+    expect(captured.html).toContain(tokens.primary);
     expect(captured.html).toContain(fallback.tertiary);
     // arco-íris por categoria eliminado
     expect(captured.html).not.toContain("#b45309");
@@ -225,7 +227,7 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
       tertiary: "#FFF0F6",
       tertiaryAuto: false,
     });
-    expect(captured.html).toContain(palette.primary);
+    expect(captured.html).toContain(getQuotePdfTokens(profile).primary);
     expect(captured.html).toContain("#FFF0F6");
     expect(captured.html).toContain(getQuotePdfTokens(profile).border);
     // fundo da página usa a terciária, também na impressão
@@ -240,7 +242,7 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     await generateQuotePDF(quote, { ...baseProfile, agency_primary_color: "#D6336C" });
     const palette = resolveBrandPalette({ primary: "#D6336C" });
     expect(captured.html).toContain(palette.tertiary);
-    expect(captured.html).toContain(palette.primary);
+    expect(captured.html).toContain(getQuotePdfTokens({ ...baseProfile, agency_primary_color: "#D6336C" }).primary);
   });
 
   it("preserva valores e serviços", async () => {
