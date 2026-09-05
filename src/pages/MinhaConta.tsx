@@ -237,8 +237,8 @@ export default function MinhaConta() {
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Este é um acesso promocional sem cobrança recorrente: não há renovação automática
-                  nem cobranças no cartão.
+                  A promoção não é renovada automaticamente. Eventuais parcelas da contratação
+                  original continuam conforme o pagamento acordado.
                 </p>
                 {(promo.status === "expired" || promo.status === "inactive") && (
                   <div className="pt-1">
