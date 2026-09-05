@@ -31,7 +31,7 @@ describe("menu de 3 pontinhos das Operações", () => {
       "Histórico",
       "Excluir operação",
     ];
-    const positions = labels.map((l) => cardSrc.indexOf(`} /> ${l}`));
+    const positions = labels.map((l) => cardSrc.indexOf(`h-4 w-4" /> ${l}`));
     expect(positions.some((p) => p < 0)).toBe(false);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
     // "Mover" (MoveToStageMenu) é o primeiro item do menu
