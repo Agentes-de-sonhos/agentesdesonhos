@@ -53,33 +53,45 @@ export function GoogleHotelPhotos({
   const [showGallery, setShowGallery] = useState(false);
   const fetchedRef = useRef<string | null>(null);
 
+  const [requested, setRequested] = useState(autoShow || alwaysOpen);
+
   useEffect(() => {
-    if (!placeId || placeId === fetchedRef.current) return;
+    // Nova seleção de lugar: descarta o estado anterior e NÃO busca fotos
+    // automaticamente (cada busca é cobrada pelo Google).
+    if (!placeId) return;
+    if (placeId !== fetchedRef.current) {
+      setPhotos([]);
+      setShowGallery(false);
+      setRequested(autoShow || alwaysOpen);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placeId]);
+
+  useEffect(() => {
+    if (!placeId || !requested || placeId === fetchedRef.current) return;
 
     const cached = photoCache.get(placeId);
     if (cached) {
       setPhotos(cached);
       fetchedRef.current = placeId;
-      if (autoShow && cached.length > 0) setShowGallery(true);
-      else setShowGallery(false);
+      if (cached.length > 0) setShowGallery(true);
       return;
     }
 
     fetchedRef.current = placeId;
     setLoading(true);
     setPhotos([]);
-    setShowGallery(false);
 
     supabase.functions.invoke("hotel-photos", { body: { place_id: placeId } })
       .then(({ data }) => {
         const fetched = data?.photos || [];
         setPhotos(fetched);
         photoCache.set(placeId, fetched);
-        if (autoShow && fetched.length > 0) setShowGallery(true);
+        if (fetched.length > 0) setShowGallery(true);
       })
       .catch(() => setPhotos([]))
       .finally(() => setLoading(false));
-  }, [placeId]);
+  }, [placeId, requested]);
 
   const togglePhoto = useCallback((index: number) => {
     const photo = photos[index];
@@ -103,7 +115,24 @@ export function GoogleHotelPhotos({
 
   const selectedCount = photos.filter((p, i) => isPhotoSelected(p, i)).length;
 
-  if (!placeId || (!loading && photos.length === 0)) return null;
+  if (!placeId) return null;
+
+  if (!requested) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setRequested(true)}
+        className="text-xs gap-1.5 h-8"
+      >
+        <Camera className="h-3.5 w-3.5" />
+        {buttonLabel ?? "Buscar fotos do Google"}
+      </Button>
+    );
+  }
+
+  if (!loading && photos.length === 0) return null;
 
   if (loading) {
     return (

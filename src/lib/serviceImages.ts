@@ -60,23 +60,35 @@ export interface PlacePhoto {
 }
 
 // Cache apenas em memória (sessão), sem persistência — conforme termos do Google.
-const placePhotoCache = new Map<string, Promise<PlacePhoto[]>>();
+// Chave: place_id + índice + tamanho, para nunca repetir uma chamada cobrada.
+const placePhotoCache = new Map<string, Promise<PlacePhoto | null>>();
 
-export function fetchPlacePhotos(placeId: string): Promise<PlacePhoto[]> {
-  const cached = placePhotoCache.get(placeId);
+const DISPLAY_WIDTH = 1600;
+
+/**
+ * Resolve UMA foto persistida (`gplace://place/index`) com no máximo uma
+ * chamada cobrada de Places Photo — nunca o lote inteiro do lugar.
+ */
+export function fetchPlacePhoto(
+  placeId: string,
+  index: number,
+  size: number = DISPLAY_WIDTH,
+): Promise<PlacePhoto | null> {
+  const key = `${placeId}|${index}|${size}`;
+  const cached = placePhotoCache.get(key);
   if (cached) return cached;
   const p = supabase.functions
-    .invoke("hotel-photos", { body: { place_id: placeId } })
+    .invoke("hotel-photos", { body: { place_id: placeId, photo_index: index, size } })
     .then(({ data, error }) => {
       if (error) throw error;
-      return (data?.photos || []) as PlacePhoto[];
+      return (data?.photo ?? null) as PlacePhoto | null;
     })
     .catch((e) => {
-      console.warn("[serviceImages] falha ao resolver fotos do Google Places", placeId, e?.message || e);
-      placePhotoCache.delete(placeId);
-      return [] as PlacePhoto[];
+      console.warn("[serviceImages] falha ao resolver foto do Google Places", placeId, index, e?.message || e);
+      placePhotoCache.delete(key);
+      return null;
     });
-  placePhotoCache.set(placeId, p);
+  placePhotoCache.set(key, p);
   return p;
 }
 
@@ -90,17 +102,13 @@ export async function resolveServiceImages(
   placeId?: string | null,
 ): Promise<ResolvedServiceImage[]> {
   const list = (refs || []).filter(Boolean);
-  const needsGoogle = list.some((r) => isGoogleImageRef(r));
-  let photos: PlacePhoto[] = [];
-  if (needsGoogle && placeId) photos = await fetchPlacePhotos(placeId);
 
   let legacyCursor = 0;
   const out: ResolvedServiceImage[] = [];
   for (const ref of list) {
     const gp = parseGplaceRef(ref);
     if (gp) {
-      const photos2 = gp.placeId === placeId ? photos : await fetchPlacePhotos(gp.placeId);
-      const photo = photos2[gp.index];
+      const photo = await fetchPlacePhoto(gp.placeId, gp.index);
       out.push({
         ref,
         origin: "google_places",
@@ -112,7 +120,8 @@ export async function resolveServiceImages(
     if (isGooglePhotoUrl(ref)) {
       // Legado: tenta re-resolver pela mesma posição; sem place_id, mantém a URL
       // antiga (o componente aplica fallback caso ela falhe).
-      const photo = photos[legacyCursor++];
+      const photo = placeId ? await fetchPlacePhoto(placeId, legacyCursor) : null;
+      legacyCursor += 1;
       out.push({
         ref,
         origin: "google_places",

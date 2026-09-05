@@ -352,11 +352,10 @@ export function HotelPhotoGallery({
               onPhotosSelected={handleGoogleSelected}
               onPhotoRemoved={handleRemove}
               existingUrls={draft}
-              autoShow
-              alwaysOpen
               hideCounter
               disabled={atLimit}
               headingLabel={HOTEL_GALLERY_SUGGESTIONS_TITLE}
+              buttonLabel="Buscar fotos do Google"
               loadingLabel="Buscando sugestões do Google…"
             />
           )}

@@ -5,14 +5,14 @@ import { isGoogleImageRef, parseGplaceRef } from "@/lib/serviceImages";
  *
  * Os demais serviços permanecem no limite histórico de 5 fotos
  * (`MAX_IMAGES_PER_SERVICE` em ServiceForms). Aqui o total combinado
- * (Google + URL manual + upload local) é 10.
+ * (Google + URL manual + upload local) é 5.
  */
-export const MAX_HOTEL_GALLERY_IMAGES = 10;
+export const MAX_HOTEL_GALLERY_IMAGES = 5;
 
 export const HOTEL_GALLERY_TITLE = "Galeria de fotos";
 export const HOTEL_GALLERY_SUGGESTIONS_TITLE = "Sugestões do Google";
 export const HOTEL_GALLERY_LIMIT_MESSAGE =
-  "Limite de 10 fotos atingido. Remova uma foto para adicionar outra.";
+  "Limite de 5 fotos atingido. Remova uma foto para adicionar outra.";
 export const HOTEL_GALLERY_URL_PLACEHOLDER = "Cole aqui o link direto da imagem";
 
 export type HotelGalleryOrigin = "google" | "upload" | "url";

@@ -417,7 +417,7 @@ function InternetPhotoPickerDialog({
     setPhotos([]);
     try {
       const { data, error } = await supabase.functions.invoke("activity-photo", {
-        body: { query: q, destination, location, limit: 12 },
+        body: { query: q, destination, location, limit: 5 },
       });
       if (error) throw error;
       const list: PhotoCandidate[] = data?.photos ?? [];

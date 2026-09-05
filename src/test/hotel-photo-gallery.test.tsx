@@ -53,16 +53,16 @@ beforeEach(() => {
 
 /* ────────── regras puras ────────── */
 describe("quoteHotelGallery (regras)", () => {
-  it("limite exclusivo de hospedagem é 10 e o contador é exato", () => {
-    expect(MAX_HOTEL_GALLERY_IMAGES).toBe(10);
-    expect(galleryCounterLabel(3)).toBe("3 de 10 fotos selecionadas");
+  it("limite exclusivo de hospedagem é 5 e o contador é exato", () => {
+    expect(MAX_HOTEL_GALLERY_IMAGES).toBe(5);
+    expect(galleryCounterLabel(3)).toBe("3 de 5 fotos selecionadas");
   });
 
   it("não trunca silenciosamente ao atingir o limite", () => {
-    const ten = Array.from({ length: 10 }, (_, i) => `https://cdn.example/${i}.jpg`);
+    const ten = Array.from({ length: 5 }, (_, i) => `https://cdn.example/${i}.jpg`);
     const res = addImageRef(ten, "https://cdn.example/nova.jpg");
     expect(res.ok).toBe(false);
-    expect(res.urls).toHaveLength(10);
+    expect(res.urls).toHaveLength(5);
     expect(res.error).toBe(HOTEL_GALLERY_LIMIT_MESSAGE);
   });
 
@@ -105,7 +105,13 @@ describe("quoteHotelGallery (regras)", () => {
 });
 
 /* ────────── componente ────────── */
+/**
+ * As sugestões do Google passaram a ser SOB DEMANDA (cada busca é cobrada):
+ * é preciso acionar "Buscar fotos do Google" explicitamente.
+ */
 async function findSuggestions() {
+  const btn = screen.queryByText("Buscar fotos do Google");
+  if (btn) fireEvent.click(btn);
   return waitFor(() => screen.getByText("Sugestões do Google"));
 }
 
@@ -115,13 +121,16 @@ describe("HotelPhotoGallery", () => {
     expect(screen.getByText("Galeria de fotos")).toBeInTheDocument();
   });
 
-  it("nova hospedagem abre sugestões ao selecionar o place_id", async () => {
+  it("nova hospedagem NÃO busca fotos automaticamente: só sob demanda", async () => {
     const { rerender } = render(
       <HotelPhotoGallery imageUrls={[]} onImageUrlsChange={vi.fn()} placeId={null} />,
     );
     rerender(<HotelPhotoGallery imageUrls={[]} onImageUrlsChange={vi.fn()} placeId="P1" />);
-    await findSuggestions();
     expect(screen.getByLabelText("Salvar galeria de fotos")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Buscar fotos do Google")).toBeInTheDocument());
+    expect(invoke).not.toHaveBeenCalledWith("hotel-photos", expect.anything());
+    await findSuggestions();
+    expect(invoke).toHaveBeenCalledWith("hotel-photos", { body: { place_id: "P1" } });
   });
 
   it("hospedagem existente inicia em visualização, só com as salvas", async () => {
@@ -253,8 +262,8 @@ describe("HotelPhotoGallery", () => {
     );
   });
 
-  it("ao atingir 10 fotos desabilita novas adições e mostra a mensagem de limite", async () => {
-    const ten = Array.from({ length: 10 }, (_, i) => `https://cdn.example/s${i}.jpg`);
+  it("ao atingir 5 fotos desabilita novas adições e mostra a mensagem de limite", async () => {
+    const ten = Array.from({ length: 5 }, (_, i) => `https://cdn.example/s${i}.jpg`);
     render(<HotelPhotoGallery imageUrls={ten} onImageUrlsChange={vi.fn()} placeId="P1" hasSavedService />);
     fireEvent.click(screen.getByLabelText("Editar galeria de fotos"));
     expect(screen.getByTestId("hotel-gallery-limit").textContent).toBe(HOTEL_GALLERY_LIMIT_MESSAGE);
