@@ -119,10 +119,23 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
  * azul padrão quando a agência não configurou cores. Não altera o tema global.
  */
 type PdfTokens = {
+  /** Primária legível sobre BRANCO (>= 4.5:1). */
   primary: string;
+  /** Primária legível sobre a TERCIÁRIA (>= 4.5:1). */
+  primaryOnTertiary: string;
   tertiary: string;
+  /** Bordas/divisórias: tom suavizado derivado da SECUNDÁRIA. */
   border: string;
+  /** Compat.: título das faixas terciárias. */
   headerText: string;
+  /** Textos sobre BRANCO. */
+  text: string;
+  muted: string;
+  faint: string;
+  /** Textos sobre a TERCIÁRIA (fundo da página, chips, faixas). */
+  textT: string;
+  mutedT: string;
+  faintT: string;
 };
 
 function luminanceOf(hex: string): number {
@@ -144,6 +157,42 @@ function contrastRatio(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+function toRgb(hex: string): [number, number, number] {
+  const m = /^#?([0-9a-f]{6})$/i.exec((hex || "").trim());
+  if (!m) return [255, 255, 255];
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function mixHex(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = toRgb(a);
+  const [r2, g2, b2] = toRgb(b);
+  const f = (x: number, y: number) => Math.round(x + (y - x) * t);
+  return (
+    "#" +
+    [f(r1, r2), f(g1, g2), f(b1, b2)]
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("")
+      .toUpperCase()
+  );
+}
+
+/**
+ * Garante contraste mínimo do texto sobre o fundo informado, sem alterar o
+ * fundo configurado pela agência: escurece a cor sobre fundos claros e a
+ * clareia sobre fundos escuros, apenas o necessário.
+ */
+function ensureReadable(fg: string, bg: string, min = 4.5): string {
+  if (contrastRatio(fg, bg) >= min) return fg;
+  const target = luminanceOf(bg) > 0.4 ? "#0B1220" : "#F8FAFC";
+  let out = fg;
+  for (let t = 0.1; t <= 1.0001; t += 0.1) {
+    out = mixHex(fg, target, t);
+    if (contrastRatio(out, bg) >= min) return out;
+  }
+  return target;
+}
+
 export function getQuotePdfTokens(profile: AgentProfile | null | undefined): PdfTokens {
   const palette = resolveBrandPalette({
     primary: profile?.agency_primary_color ?? null,
@@ -152,14 +201,27 @@ export function getQuotePdfTokens(profile: AgentProfile | null | undefined): Pdf
     tertiary: profile?.agency_tertiary_color ?? null,
     tertiaryAuto: profile?.agency_tertiary_auto ?? null,
   });
-  // Bordas/divisórias discretas usam o tom suavizado da paleta.
-  const border = palette.border;
-  // Título sobre a faixa terciária: usa a primária e só cai para o texto
-  // legível da paleta quando o contraste for insuficiente.
-  const headerText =
-    contrastRatio(palette.primary, palette.tertiary) >= 3 ? palette.primary : palette.onTertiary;
-  return { primary: palette.primary, tertiary: palette.tertiary, border, headerText };
+  const tertiary = palette.tertiary;
+  // Bordas/divisórias/detalhes: SECUNDÁRIA suavizada (misturada com o fundo).
+  const tertLight = luminanceOf(tertiary) > 0.4;
+  const border = mixHex(palette.secondary, tertLight ? "#FFFFFF" : "#0B1220", 0.55);
+  const primary = ensureReadable(palette.primary, "#FFFFFF");
+  const primaryOnTertiary = ensureReadable(palette.primary, tertiary);
+  return {
+    primary,
+    primaryOnTertiary,
+    tertiary,
+    border,
+    headerText: primaryOnTertiary,
+    text: ensureReadable("#0F172A", "#FFFFFF"),
+    muted: ensureReadable("#475569", "#FFFFFF"),
+    faint: ensureReadable("#64748B", "#FFFFFF"),
+    textT: ensureReadable("#0F172A", tertiary),
+    mutedT: ensureReadable("#475569", tertiary),
+    faintT: ensureReadable("#64748B", tertiary),
+  };
 }
+
 
 function formatLabel(value: string) {
   if (!value) return value;
@@ -355,13 +417,13 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   return `
     <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid ${C.border};border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
       <div style="background:linear-gradient(90deg,${C.tertiary},${C.tertiary});padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;">Seu consultor de viagens</p>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;">Seu consultor de viagens</p>
       </div>
       <div style="padding:14px 18px;text-align:center;">
         ${avatarHtml.replace(/width:96px;height:96px/g, "width:68px;height:68px").replace(/font-size:36px/g, "font-size:26px")}
         <p style="font-size:17px;font-weight:800;color:${C.primary};margin:8px 0 1px;">${profile.name}</p>
-        ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
-        ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
+        ${profile.agency_name ? `<p style="font-size:12px;color:${C.muted};margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
+        ${profile.city || profile.state ? `<p style="font-size:11px;color:${C.faint};margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
         ${
           whatsappLink
             ? `<div style="margin-top:10px;">
@@ -388,7 +450,10 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       // Aviso de carregamento: existe apenas na TELA e é totalmente descartado
       // com document.open() antes de escrever o HTML final (nunca é impresso).
       printWindow.document.write(
-        '<!doctype html><html><head><meta charset="utf-8"><title>Gerando PDF…</title></head><body style="font-family:sans-serif;padding:24px;color:#475569;">Gerando PDF do orçamento…</body></html>',
+        '<!doctype html><html><head><meta charset="utf-8"><title>Gerando PDF…</title>' +
+          '<style>@media print{.screen-only{display:none !important}}</style></head>' +
+          '<body style="font-family:sans-serif;padding:24px;color:#475569;">' +
+          '<p class="screen-only">Gerando PDF do orçamento…</p></body></html>',
       );
       printWindow.document.close();
     } catch {}
@@ -494,15 +559,15 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             const total = Number(r.total_price) || unit * qty;
             const sim = getRoomPaymentSimulation(total, service, quote);
             const installmentLine = sim.installmentValue != null
-              ? `<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:#64748b;">ou ${sim.installmentsCount}x de</span><span style="color:${C.primary};font-weight:700;">${formatCurrency(sim.installmentValue)}</span></div>`
+              ? `<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:${C.mutedT};">ou ${sim.installmentsCount}x de</span><span style="color:${C.primaryOnTertiary};font-weight:700;">${formatCurrency(sim.installmentValue)}</span></div>`
               : "";
             return `
               <div style="border:1px solid ${C.border};border-radius:10px;padding:10px 12px;margin-bottom:6px;background:${C.tertiary};">
-                <div style="font-size:13px;font-weight:700;color:#0f172a;">${qty}x ${r.room_type || ""}</div>
-                ${paxParts.length ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">${paxParts.join(" + ")}</div>` : ""}
-                ${r.notes ? `<div style="font-size:11px;color:#64748b;font-style:italic;margin-top:2px;">${r.notes}</div>` : ""}
+                <div style="font-size:13px;font-weight:700;color:${C.textT};">${qty}x ${r.room_type || ""}</div>
+                ${paxParts.length ? `<div style="font-size:11px;color:${C.mutedT};margin-top:2px;">${paxParts.join(" + ")}</div>` : ""}
+                ${r.notes ? `<div style="font-size:11px;color:${C.mutedT};font-style:italic;margin-top:2px;">${r.notes}</div>` : ""}
                 <div style="border-top:1px solid ${C.border};margin-top:8px;padding-top:6px;">
-                  <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748b;">Valor</span><span style="color:#0f172a;font-weight:700;">${formatCurrency(sim.total)}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:${C.mutedT};">Valor</span><span style="color:${C.textT};font-weight:700;">${formatCurrency(sim.total)}</span></div>
                   ${installmentLine}
                 </div>
               </div>
@@ -510,7 +575,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }).join("");
           hotelRoomsHtml = `
             <div class="pdf-block pdf-hotel-rooms" style="margin-top:10px;">
-              <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0f172a;margin:0 0 6px;">Acomodações</p>
+              <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${C.text};margin:0 0 6px;">Acomodações</p>
               ${rowsHtml}
             </div>
           `;
@@ -526,8 +591,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             if (display) {
               paymentHtml = `
                 <div class="pdf-block pdf-payment" style="margin-top:10px;background:${C.tertiary};border:1px solid ${C.border};border-radius:10px;padding:10px 12px;">
-                  <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${C.primary};margin:0 0 2px;">💳 Parcelamento</p>
-                  <p style="font-size:13px;font-weight:600;color:${C.primary};margin:0;">${display}</p>
+                  <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${C.primaryOnTertiary};margin:0 0 2px;">💳 Parcelamento</p>
+                  <p style="font-size:13px;font-weight:600;color:${C.primaryOnTertiary};margin:0;">${display}</p>
                 </div>
               `;
             }
@@ -574,8 +639,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               for (let i = 0; i < chipItems.length; i += 2) {
                 const cells = chipItems.slice(i, i + 2).map((c) => `
                   <td style="width:50%;vertical-align:top;background:${C.tertiary};border:1px solid ${C.border};border-radius:8px;padding:6px 10px;">
-                    <p style="margin:0 0 2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:${C.primary};line-height:1.2;">${c.key}</p>
-                    <p style="margin:0;font-size:12px;color:#1e293b;line-height:1.4;word-break:break-word;${/^\d{1,2}:\d{2}$/.test(c.value) ? 'white-space:nowrap;' : ''}">${renderChipValue(c.value)}</p>
+                    <p style="margin:0 0 2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:${C.primaryOnTertiary};line-height:1.2;">${c.key}</p>
+                    <p style="margin:0;font-size:12px;color:${C.textT};line-height:1.4;word-break:break-word;${/^\d{1,2}:\d{2}$/.test(c.value) ? 'white-space:nowrap;' : ''}">${renderChipValue(c.value)}</p>
                   </td>
                 `).join("");
                 const padCount = 2 - chipItems.slice(i, i + 2).length;
@@ -589,7 +654,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         const freeHtml = freeItems.length > 0 ? `
           <div class="pdf-block pdf-details" style="margin-top:${chipItems.length > 0 ? 6 : 0}px;word-wrap:break-word;overflow-wrap:break-word;">
-            ${freeItems.map((d) => `<p style="margin:2px 0;font-size:12px;color:#475569;line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
+            ${freeItems.map((d) => `<p style="margin:2px 0;font-size:12px;color:${C.muted};line-height:1.45;white-space:pre-wrap;word-break:break-word;">${d}</p>`).join("")}
           </div>
         ` : "";
 
@@ -597,13 +662,13 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         const descHtml = descText ? `
           <div class="pdf-block pdf-desc" style="margin-top:8px;background:${C.tertiary};border-left:3px solid ${C.border};border-radius:6px;padding:8px 12px;word-wrap:break-word;overflow-wrap:break-word;">
-            <p style="margin:0;font-size:12px;color:#475569;line-height:1.5;white-space:pre-wrap;word-break:break-word;">${descText}</p>
+            <p style="margin:0;font-size:12px;color:${C.mutedT};line-height:1.5;white-space:pre-wrap;word-break:break-word;">${descText}</p>
           </div>
         ` : "";
 
         const notesHtml = notesText ? `
           <div class="pdf-block pdf-notes" style="margin-top:4px;">
-            <p style="margin:2px 0;font-size:12px;color:#64748b;line-height:1.45;font-style:italic;border-left:2px solid ${C.border};padding-left:10px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
+            <p style="margin:2px 0;font-size:12px;color:${C.muted};line-height:1.45;font-style:italic;border-left:2px solid ${C.border};padding-left:10px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
           </div>
         ` : "";
 
@@ -695,7 +760,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       <title>Orçamento — ${quote.client_name}</title>
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:${C.tertiary}; }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:${C.textT}; line-height:1.5; background:${C.tertiary}; }
         img { max-width:100%; height:auto; }
 
         /* ----- SMART PAGINATION (briefing) -----
@@ -706,9 +771,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
            of pages and avoid almost-empty trailing pages.                   */
         @media print {
           /* Numeração própria "1 de N" via margin box do CSS Paged Media.
-             Navegadores Chromium ainda ignoram margin boxes; nesse caso o
-             rodapé nativo do navegador (about:blank + página) continua sendo
-             a única numeração — por isso a orientação aparece na tela. */
+             Comprovado no Chromium: a numeração própria é impressa. O CSS não
+             remove o cabeçalho/rodapé NATIVO do navegador (about:blank e data)
+             quando ele está ativado — por isso a dica aparece na tela. */
           @page {
             size: A4;
             margin: 14mm 10mm 12mm 10mm;
@@ -844,34 +909,34 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <div style="padding:6px 32px 0;">
         <!-- Hero -->
         <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
-          <div style="display:inline-block;background:${C.tertiary};color:${C.primary};padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
+          <div style="display:inline-block;background:${C.tertiary};color:${C.primaryOnTertiary};padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
             📍 Proposta de Viagem
           </div>
           ${(quote as any).trip_title ? `
-            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
-            <p style="font-size:17px;font-weight:600;color:#64748b;margin:0 0 4px;">${quote.destination}</p>
+            <h1 style="font-size:32px;font-weight:800;color:${C.textT};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
+            <p style="font-size:17px;font-weight:600;color:${C.mutedT};margin:0 0 4px;">${quote.destination}</p>
           ` : `
-            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
+            <h1 style="font-size:32px;font-weight:800;color:${C.textT};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
           `}
-          <p style="font-size:14px;color:#64748b;margin-top:4px;">
-            Preparado especialmente para <strong style="color:#1e293b;">${quote.client_name}</strong>
+          <p style="font-size:14px;color:${C.mutedT};margin-top:4px;">
+            Preparado especialmente para <strong style="color:${C.textT};">${quote.client_name}</strong>
           </p>
         </div>
 
         <!-- Overview -->
         <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid ${C.border};border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
           <div>
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
-            <p style="font-size:14px;font-weight:700;color:#1e293b;">${quote.destination}</p>
+            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
+            <p style="font-size:14px;font-weight:700;color:${C.text};">${quote.destination}</p>
           </div>
-          <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
-            <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(quote.start_date)} — ${formatDate(quote.end_date)}</p>
-            <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} dias</p>
+          <div style="border-left:1px solid ${C.border};padding-left:18px;">
+            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
+            <p style="font-size:14px;font-weight:700;color:${C.text};">${formatDate(quote.start_date)} — ${formatDate(quote.end_date)}</p>
+            <p style="font-size:12px;color:${C.faint};margin-top:2px;">${days} dias</p>
           </div>
-          <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-            <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👥 Viajantes</p>
-            <p style="font-size:14px;font-weight:700;color:#1e293b;">${quote.adults_count} adulto${quote.adults_count > 1 ? "s" : ""}${quote.children_count > 0 ? ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}` : ""}</p>
+          <div style="border-left:1px solid ${C.border};padding-left:18px;">
+            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👥 Viajantes</p>
+            <p style="font-size:14px;font-weight:700;color:${C.text};">${quote.adults_count} adulto${quote.adults_count > 1 ? "s" : ""}${quote.children_count > 0 ? ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}` : ""}</p>
           </div>
         </div>
 
@@ -900,7 +965,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                       <img src="${firstImg}" alt="${quote.destination}" style="width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid ${C.border};display:block;" />
                     </td>
                     <td style="vertical-align:top;">
-                      <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
+                      <p style="font-size:13px;color:${C.mutedT};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
                     </td>
                   </tr>
                 </table>
@@ -916,7 +981,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }
           return `
             <div class="pdf-block destination-intro" style="margin-bottom:20px;">
-              <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
+              <p style="font-size:13px;color:${C.mutedT};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
             </div>
           `;
         })()}
@@ -932,8 +997,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               return `
                 <td style="width:50%;vertical-align:top;padding:6px 8px;">
                   <div style="display:flex;align-items:flex-start;gap:8px;">
-                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:${C.tertiary};color:${C.primary};font-size:13px;flex:0 0 auto;">${emoji}</span>
-                    <span style="font-size:13px;color:#0f172a;line-height:1.5;font-weight:500;">${safe}</span>
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:${C.tertiary};color:${C.primaryOnTertiary};font-size:13px;flex:0 0 auto;">${emoji}</span>
+                    <span style="font-size:13px;color:${C.text};line-height:1.5;font-weight:500;">${safe}</span>
                   </div>
                 </td>`;
             });
@@ -954,10 +1019,10 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <div style="margin-bottom:18px;">
           <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
             <div style="flex:1;height:1px;background:${C.border};"></div>
-            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
+            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
             <div style="flex:1;height:1px;background:${C.border};"></div>
           </div>
-          ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
+          ${servicesHtml || '<p style="text-align:center;color:${C.faintT};padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
         <!-- Documentos anexados (logo após os serviços, como item integrado do roteiro) -->
@@ -966,20 +1031,20 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(90deg,${C.tertiary},${C.tertiary});border-bottom:1px solid ${C.border};">
               <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#ffffff;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">📎</span>
               <div style="flex:1;">
-                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:${C.primary};margin:0;">Anexos</p>
-                <p style="font-size:14px;font-weight:700;color:#0f172a;margin:1px 0 0;">Documentos do seu orçamento</p>
+                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:${C.primaryOnTertiary};margin:0;">Anexos</p>
+                <p style="font-size:14px;font-weight:700;color:${C.text};margin:1px 0 0;">Documentos do seu orçamento</p>
               </div>
-              <span style="font-size:11px;color:#94a3b8;">${quoteDocuments.length} ${quoteDocuments.length === 1 ? "arquivo" : "arquivos"}</span>
+              <span style="font-size:11px;color:${C.faint};">${quoteDocuments.length} ${quoteDocuments.length === 1 ? "arquivo" : "arquivos"}</span>
             </div>
             <table style="width:100%;border-collapse:collapse;">
               ${quoteDocuments.map((doc, idx) => `
-                <tr style="${idx > 0 ? "border-top:1px solid #f1f5f9;" : ""}">
+                <tr style="${idx > 0 ? "border-top:1px solid ${C.border};" : ""}">
                   <td style="padding:12px 18px;vertical-align:middle;width:44px;">
                     <div style="width:36px;height:36px;border-radius:10px;background:${C.tertiary};display:inline-flex;align-items:center;justify-content:center;font-size:16px;">${emojiForDoc(doc.file_name, doc.file_type)}</div>
                   </td>
                   <td style="padding:12px 8px 12px 0;vertical-align:middle;">
-                    <p style="font-size:13px;font-weight:600;color:#0f172a;margin:0;word-break:break-word;">${(doc.file_name || "").replace(/</g, "&lt;")}</p>
-                    ${doc.file_size ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${formatDocSizePDF(doc.file_size)}</p>` : ""}
+                    <p style="font-size:13px;font-weight:600;color:${C.text};margin:0;word-break:break-word;">${(doc.file_name || "").replace(/</g, "&lt;")}</p>
+                    ${doc.file_size ? `<p style="font-size:11px;color:${C.faint};margin:2px 0 0;">${formatDocSizePDF(doc.file_size)}</p>` : ""}
                   </td>
                   <td style="padding:12px 18px;vertical-align:middle;text-align:right;white-space:nowrap;">
                     ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:${C.primary};text-decoration:none;border:1px solid ${C.primary};border-radius:999px;padding:6px 12px;">Abrir</a>` : ""}
@@ -1003,31 +1068,31 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           if (mode === "installments") {
             const iv = total / (installments || 1);
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">A partir de</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">A partir de</p>
               <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${installments}x de ${formatCurrency(iv)}</p>
-              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
             `;
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const iv = remainder / (installments || 1);
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Condição especial</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">Condição especial</p>
               <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:${C.primary};">Entrada de ${formatCurrency(entryValue)} + ${installments}x de ${formatCurrency(iv)}</p>
-              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
           } else if (mode === "total_only") {
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">${packagePricing ? PACKAGE_TOTAL_LABEL : "Valor total da viagem"}</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${packagePricing ? PACKAGE_TOTAL_LABEL : "Valor total da viagem"}</p>
               <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${formatCurrency(total)}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">${packagePricing ? PACKAGE_TOTAL_LABEL : "Investimento"}</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${packagePricing ? PACKAGE_TOTAL_LABEL : "Investimento"}</p>
               <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${formatCurrency(discountedTotal)}</p>
-              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:#94a3b8;">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:${C.primary};font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
-              ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">${methodLabel}</p>` : ""}
+              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:${C.faint};">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:${C.primary};font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">${methodLabel}</p>` : ""}
             `;
           }
 
@@ -1041,7 +1106,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           return `
             <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid ${C.border};border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:10px;margin:10px 0 0;line-height:1.3;color:#94a3b8;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:10px;margin:10px 0 0;line-height:1.3;color:${C.faint};">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
             </div>
           `;
         })()}
@@ -1050,12 +1115,12 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         ${quote.show_investment_section !== false && quote.payment_terms ? `
           <div class="pdf-block payment-terms" style="border:1px solid ${C.border};border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
             <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin-bottom:10px;">💳 Condições de Pagamento</p>
-            <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
+            <p style="font-size:13px;color:${C.mutedT};line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
         ` : ""}
 
         <!-- Validity -->
-        <p style="text-align:center;font-size:12px;color:#94a3b8;margin:8px 0 16px;">
+        <p style="text-align:center;font-size:12px;color:${C.faintT};margin:8px 0 16px;">
           ${quote.valid_until ? `Proposta válida até ${formatDate(quote.valid_until)}` : ""}
           ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : (quote.valid_until ? " Valores sujeitos a alteração conforme disponibilidade." : "")}
         </p>
@@ -1065,7 +1130,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         <!-- Footer -->
         <div style="text-align:center;padding-top:20px;">
-          <p style="font-size:10px;color:#cbd5e1;">
+          <p style="font-size:10px;color:${C.faintT};">
             Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} • Agentes de Sonhos
           </p>
         </div>
@@ -1075,9 +1140,12 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
     </html>
   `;
 
-  if (!printWindow || printWindow.closed) {
-    // Popup bloqueado ou janela fechada: nunca dispara impressão vazia.
+  if (!printWindow) {
+    // Popup bloqueado pelo navegador: nunca dispara impressão vazia.
     return { printed: false as const, reason: "popup-blocked" as const };
+  }
+  if (printWindow.closed) {
+    return { printed: false as const, reason: "window-closed" as const };
   }
 
   const doc = printWindow.document;
@@ -1087,31 +1155,52 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   doc.write(html);
   doc.close();
 
-  // Espera o documento final, as fontes e as imagens antes de imprimir.
-  if (doc.readyState !== "complete") {
-    await new Promise<void>((resolve) => {
+  // Esperas com prazo e vigiando a janela: os timers são do opener, de modo
+  // que fechar o popup nunca deixa a promise pendurada.
+  const waitWithDeadline = (attach: (done: () => void) => void, timeoutMs = 10000) =>
+    new Promise<void>((resolve) => {
       let settled = false;
       const done = () => {
         if (settled) return;
         settled = true;
+        window.clearInterval(watch);
+        window.clearTimeout(timer);
         resolve();
       };
-      printWindow.addEventListener("load", done, { once: true });
-      printWindow.setTimeout(done, 10000);
+      const watch = window.setInterval(() => {
+        if (printWindow.closed) done();
+      }, 200);
+      const timer = window.setTimeout(done, timeoutMs);
+      try {
+        attach(done);
+      } catch {
+        done();
+      }
     });
+
+  if (doc.readyState !== "complete") {
+    await waitWithDeadline((done) => printWindow.addEventListener("load", done, { once: true }));
+  }
+  if (printWindow.closed) {
+    return { printed: false as const, reason: "window-closed" as const };
   }
   try {
-    await (doc as any).fonts?.ready;
+    await Promise.race([
+      (doc as any).fonts?.ready ?? Promise.resolve(),
+      waitWithDeadline(() => {}, 5000),
+    ]);
   } catch {}
+  if (printWindow.closed) {
+    return { printed: false as const, reason: "window-closed" as const };
+  }
   try {
     await Promise.all(
       Array.from(doc.images || []).map((img) =>
         img.complete
           ? Promise.resolve()
-          : new Promise<void>((resolve) => {
-              img.addEventListener("load", () => resolve(), { once: true });
-              img.addEventListener("error", () => resolve(), { once: true });
-              printWindow.setTimeout(() => resolve(), 10000);
+          : waitWithDeadline((done) => {
+              img.addEventListener("load", done, { once: true });
+              img.addEventListener("error", done, { once: true });
             }),
       ),
     );
@@ -1125,5 +1214,6 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   } catch {}
   printWindow.print();
   return { printed: true as const };
+
 
 }
