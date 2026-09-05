@@ -197,7 +197,11 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
 
   it("payment_terms usa texto legível sobre card branco e título de anexos sobre terciária", async () => {
     const { captured } = stubPrintWindow();
-    const q = { ...quote, payment_terms: "Entrada de 30% e saldo em até 10x." };
+    const q = {
+      ...quote,
+      payment_terms: "Entrada de 30% e saldo em até 10x.",
+      quote_documents: [{ id: "d1", file_name: "roteiro.pdf", file_path: "x", file_type: "pdf", file_size: 1024 }],
+    };
     const profile = {
       ...baseProfile,
       agency_primary_color: "#1D4ED8",
