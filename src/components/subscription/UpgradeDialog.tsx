@@ -19,6 +19,7 @@ import {
   REQUIRED_PLAN_FOR_FEATURE
 } from "@/types/subscription";
 import { useSubscription } from "@/hooks/useSubscription";
+import { getPlanOfferState } from "@/lib/promoAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -98,13 +99,30 @@ export function UpgradeDialog({
   title,
   description,
 }: UpgradeDialogProps) {
-  const { plan: currentPlan, getPlanLabel } = useSubscription();
-  const { user } = useAuth();
+  const {
+    plan: currentPlan,
+    getPlanLabel,
+    subscription,
+    loading: subscriptionLoading,
+    planInherited,
+  } = useSubscription();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
+  const offer = getPlanOfferState({
+    loading: !!authLoading || (!!user && !!subscriptionLoading),
+    hasUser: !!user,
+    plan: currentPlan,
+    subscription: subscription as any,
+    planInherited: !!planInherited,
+  });
+
   const handleUpgrade = async (planId: SubscriptionPlan) => {
+    // Mesma checagem do botão: bloqueia carregamento, promoção vigente e
+    // colaborador com plano herdado da conta master.
+    if (offer.purchaseBlocked) return;
     setLoadingPlan(planId);
     try {
       if (!user) {
@@ -139,7 +157,8 @@ export function UpgradeDialog({
     ? `${FEATURE_LABELS[requiredFeature!]} está disponível a partir do plano ${getPlanLabel(requiredPlan)}. Escolha o melhor plano para você.`
     : "Escolha o plano ideal para desbloquear todas as funcionalidades.");
 
-  const currentLevel = PLAN_HIERARCHY[currentPlan] ?? 0;
+  const effectivePlan = offer.effectivePlan;
+  const currentLevel = PLAN_HIERARCHY[effectivePlan] ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -154,9 +173,10 @@ export function UpgradeDialog({
 
         <div className="grid gap-4 md:grid-cols-2 mt-4">
           {UPGRADE_PLANS.map((plan) => {
-            const isCurrentPlan = plan.id === currentPlan || (currentPlan === "fundador" && plan.id === "premium");
+            const isCurrentPlan =
+              plan.id === effectivePlan || (effectivePlan === "fundador" && plan.id === "premium");
             const targetLevel = PLAN_HIERARCHY[plan.id] ?? 0;
-            const canUpgrade = targetLevel > currentLevel;
+            const canUpgrade = targetLevel > currentLevel && !offer.purchaseBlocked;
             const isRecommended = plan.id === requiredPlan;
 
             return (
@@ -229,11 +249,17 @@ export function UpgradeDialog({
                 >
                   {loadingPlan === plan.id ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Redirecionando...</>
-                  ) : isCurrentPlan 
-                    ? "Plano Atual" 
-                    : canUpgrade
-                      ? <>Fazer Upgrade <ArrowRight className="h-4 w-4" /></>
-                      : "Plano Inferior"}
+                  ) : offer.blockedReason === "loading"
+                    ? "Carregando…"
+                    : offer.coveredByPromo
+                      ? (plan.id === "premium" ? "Incluído na sua promoção" : "Incluído no seu acesso atual")
+                      : offer.blockedReason === "team_inherited"
+                        ? "Plano da conta principal"
+                        : isCurrentPlan
+                          ? "Plano Atual"
+                          : canUpgrade
+                            ? <>Fazer Upgrade <ArrowRight className="h-4 w-4" /></>
+                            : "Plano Inferior"}
                 </Button>
               </div>
             );
