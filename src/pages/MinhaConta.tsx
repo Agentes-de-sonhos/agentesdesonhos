@@ -45,8 +45,15 @@ import { useTeamQuota } from "@/hooks/useTeamMembers";
 import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 
 export default function MinhaConta() {
-  const { user } = useAuth();
-  const { plan, getPlanLabel, subscription, refetch } = useSubscription();
+  const { user, loading: authLoading } = useAuth();
+  const {
+    plan,
+    getPlanLabel,
+    subscription,
+    refetch,
+    loading: subscriptionLoading,
+    planInherited,
+  } = useSubscription();
   const { role } = useUserRole();
   const [loadingPortal, setLoadingPortal] = useState<null | "manage" | "cancel">(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
