@@ -468,12 +468,18 @@ export default function Perfil() {
               {/* Logo Section */}
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="h-20 w-20 rounded-xl border-2 border-dashed border-muted-foreground/30 flex items-center justify-center overflow-hidden bg-muted/50">
+                  <div
+                    className={`h-20 w-20 rounded-full overflow-hidden flex items-center justify-center ${
+                      profile?.agency_logo_url
+                        ? "bg-white"
+                        : "border-2 border-dashed border-muted-foreground/30 bg-muted/50"
+                    }`}
+                  >
                     {profile?.agency_logo_url ? (
                       <img
                         src={profile.agency_logo_url}
                         alt="Logo da agência"
-                        className="h-full w-full object-contain"
+                        className="h-full w-full object-cover object-center"
                       />
                     ) : (
                       <Image className="h-8 w-8 text-muted-foreground/50" />

@@ -1498,11 +1498,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
           {/* floating agency logo badge — premium circular signature */}
           {agentProfile?.agency_logo_url && (
-            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full bg-white p-2.5 sm:p-3 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
+            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full bg-white shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
               <img
                 src={agentProfile.agency_logo_url}
                 alt={agentProfile.agency_name || "Agência"}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-cover object-center"
               />
             </div>
           )}
