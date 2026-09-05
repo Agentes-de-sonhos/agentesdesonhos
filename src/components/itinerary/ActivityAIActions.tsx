@@ -234,7 +234,7 @@ export function ActivityAIActions({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80" align="end">
+        <PopoverContent className="w-80 max-w-[92vw]" align="end">
           <div className="space-y-3">
             <div>
               <p className="text-sm font-medium">Refinar com IA</p>
@@ -545,8 +545,8 @@ export function EmptyPeriodAISlot({
   };
 
   return (
-    <div className="ml-6 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex items-center justify-between gap-3">
-      <p className="text-sm text-muted-foreground italic">Nenhuma atividade definida</p>
+    <div className="ml-0 sm:ml-6 min-w-0 max-w-full rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <p className="text-sm text-muted-foreground italic min-w-0 break-words">Nenhuma atividade definida</p>
       <Popover
         open={open}
         onOpenChange={(o) => {
@@ -564,7 +564,7 @@ export function EmptyPeriodAISlot({
           <Button
             size="sm"
             variant="outline"
-            className="border-primary/50 text-primary hover:bg-primary/10"
+            className="w-full sm:w-auto border-primary/50 text-primary hover:bg-primary/10"
           >
             {loading ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
