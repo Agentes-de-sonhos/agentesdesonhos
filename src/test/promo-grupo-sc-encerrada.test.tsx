@@ -211,6 +211,56 @@ describe("MinhaConta — promoção manual", () => {
     await renderMinhaConta();
     expect(screen.getByText(/plano gratuito/)).toBeTruthy();
   });
+
+  it("carregando -> promo carregada: sem flash de gratuito/Start e sem portal", async () => {
+    authState = { user: { id: "u1", email: "a@b.c" }, loading: true };
+    subState = makeSubscriptionCtx("start", null, { loading: true });
+    const { unmount } = await renderMinhaConta();
+    expect(screen.getByText("Carregando plano…")).toBeTruthy();
+    expect(screen.queryByText(/plano gratuito/)).toBeNull();
+    expect(screen.queryByText("Plano Start")).toBeNull();
+    expect(screen.queryByText("Gerenciar assinatura")).toBeNull();
+    expect(screen.queryByText("Cancelar assinatura")).toBeNull();
+    unmount();
+    cleanup();
+
+    authState = { user: { id: "u1", email: "a@b.c" }, loading: false };
+    subState = makeSubscriptionCtx("promo_grupo_sc", {
+      plan: "promo_grupo_sc",
+      expires_at: FUTURE,
+      is_active: true,
+    });
+    await renderMinhaConta();
+    expect(screen.queryByText("Carregando plano…")).toBeNull();
+    expect(screen.getByText(/Acesso promocional válido até/)).toBeTruthy();
+    expect(screen.queryByText(/plano gratuito/)).toBeNull();
+    expect(screen.queryByText("Gerenciar assinatura")).toBeNull();
+    expect(invokeMock).not.toHaveBeenCalled();
+  });
+
+  it("colaborador com plano herdado não vê portal nem cancelamento", async () => {
+    subState = makeSubscriptionCtx("premium", { plan: "premium", expires_at: null, is_active: true }, {
+      planInherited: true,
+    });
+    await renderMinhaConta();
+    expect(screen.queryByText("Gerenciar assinatura")).toBeNull();
+    expect(screen.queryByText("Cancelar assinatura")).toBeNull();
+    expect(screen.queryByText(/plano gratuito/)).toBeNull();
+    expect(invokeMock).not.toHaveBeenCalled();
+  });
+
+  it("copy da promoção não promete ausência de cobranças de parcelas", async () => {
+    subState = makeSubscriptionCtx("promo_grupo_sc", {
+      plan: "promo_grupo_sc",
+      expires_at: FUTURE,
+      is_active: true,
+    });
+    await renderMinhaConta();
+    expect(
+      screen.getByText(/A promoção não é renovada automaticamente\. Eventuais parcelas da contratação\s+original continuam conforme o pagamento acordado\./),
+    ).toBeTruthy();
+    expect(screen.queryByText(/nem cobranças no cartão/)).toBeNull();
+  });
 });
 
 // ------------------------------------------------------------------ Planos
