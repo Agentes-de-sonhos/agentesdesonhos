@@ -59,7 +59,6 @@ describe("toasts com Kanban maximizado", () => {
     );
     expect(surface().querySelector('section[aria-label^="Notifications"]')).toBeNull();
 
-    (globalThis as any).__toastDebug = true;
     act(() => {
       screen.getByText("toggle-a").click();
     });
@@ -69,7 +68,8 @@ describe("toasts com Kanban maximizado", () => {
       expect(surface().querySelectorAll("[data-toast-host]").length).toBe(1)
     );
     expect(document.querySelectorAll("[data-toast-host]").length).toBe(1);
-    console.log("BODY:", document.body.innerHTML.slice(0,2500));
+    // toast já em tela continua visível (sem remontagem/perda)
+    expect(getToastHost()!.textContent).toContain("Salvo com sucesso");
 
     // erro emitido enquanto maximizado (ex.: falha ao salvar anotação) fica visível
     act(() => {

@@ -23,11 +23,14 @@ const listeners = new Set<Listener>();
  */
 export function getToastContainer(): HTMLElement | null {
   if (typeof document === "undefined") return null;
-  if (!containerEl || !containerEl.isConnected) {
+  if (!containerEl) {
     containerEl = document.createElement("div");
     containerEl.setAttribute("data-toast-host", "");
-    (currentHost ?? document.body).appendChild(containerEl);
   }
+  // Mantém SEMPRE o mesmo elemento (identidade estável para o portal do React);
+  // se ficou órfão, apenas o reanexamos ao host atual.
+  const parent = currentHost ?? document.body;
+  if (containerEl.parentNode !== parent) parent.appendChild(containerEl);
   return containerEl;
 }
 
@@ -35,13 +38,7 @@ function moveContainer() {
   const el = getToastContainer();
   if (!el) return;
   const parent = currentHost ?? document.body;
-  if (el.parentNode !== parent) {
-    if (typeof console !== "undefined" && (globalThis as any).__toastDebug) {
-      console.log("BEFORE", el.innerHTML.length);
-    }
-    parent.appendChild(el);
-    if ((globalThis as any).__toastDebug) console.log("AFTER", el.innerHTML.length);
-  }
+  if (el.parentNode !== parent) parent.appendChild(el);
 }
 
 function emit() {
