@@ -692,7 +692,8 @@ export function ItineraryEditor({
                           isApproved={activity.isApproved}
                         >
                           {(handle) => (
-                          <div className="flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                            <div className="flex items-center gap-2 sm:items-start sm:gap-3">
                             {onMoveActivity && activity.id && (
                               <DragHandleButton {...handle} />
                             )}
@@ -709,6 +710,7 @@ export function ItineraryEditor({
                                 } as Partial<Activity>)
                               }
                             />
+                            </div>
                             <div className="w-full min-w-0 space-y-1 sm:flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <h4 className="min-w-0 break-words font-medium">{activity.title}</h4>
