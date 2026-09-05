@@ -41,8 +41,8 @@ const surface = () => document.querySelector('[data-testid="kanban-maximize-surf
 describe("toasts com Kanban maximizado", () => {
   beforeEach(() => {
     // fullscreen indisponível: exercita o fallback `fixed`
-    // @ts-expect-error jsdom
-    Element.prototype.requestFullscreen = undefined;
+    // fullscreen indisponível no jsdom: mantém o fallback `fixed`
+    (Element.prototype as unknown as Record<string, unknown>).requestFullscreen = undefined;
   });
 
   it("mantém um único host de cada sistema e move para a superfície ao maximizar", async () => {
