@@ -184,13 +184,18 @@ function mixHex(a: string, b: string, t: number): string {
  */
 function ensureReadable(fg: string, bg: string, min = 4.5): string {
   if (contrastRatio(fg, bg) >= min) return fg;
-  const target = luminanceOf(bg) > 0.4 ? "#0B1220" : "#F8FAFC";
+  // Escolhe entre preto puro e branco puro pelo MAIOR contraste contra o fundo,
+  // depois mescla gradualmente a partir da cor original. Isso cobre fundos
+  // intermediários (ex: #999999) onde o corte por luminância falharia.
+  const black = "#000000";
+  const white = "#FFFFFF";
+  const target = contrastRatio(black, bg) >= contrastRatio(white, bg) ? black : white;
   let out = fg;
   for (let t = 0.1; t <= 1.0001; t += 0.1) {
     out = mixHex(fg, target, t);
     if (contrastRatio(out, bg) >= min) return out;
   }
-  return target;
+  return contrastRatio(target, bg) >= min ? target : target === black ? "#FFFFFF" : "#000000";
 }
 
 export function getQuotePdfTokens(profile: AgentProfile | null | undefined): PdfTokens {
@@ -1022,7 +1027,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
             <div style="flex:1;height:1px;background:${C.border};"></div>
           </div>
-          ${servicesHtml || '<p style="text-align:center;color:${C.faintT};padding:32px;">Nenhum serviço adicionado</p>'}
+          ${servicesHtml || `<p style="text-align:center;color:${C.faintT};padding:32px;">Nenhum serviço adicionado</p>`}
         </div>
 
         <!-- Documentos anexados (logo após os serviços, como item integrado do roteiro) -->
@@ -1032,7 +1037,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#ffffff;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">📎</span>
               <div style="flex:1;">
                 <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:${C.primaryOnTertiary};margin:0;">Anexos</p>
-                <p style="font-size:14px;font-weight:700;color:${C.text};margin:1px 0 0;">Documentos do seu orçamento</p>
+                <p style="font-size:14px;font-weight:700;color:${C.textT};margin:1px 0 0;">Documentos do seu orçamento</p>
               </div>
               <span style="font-size:11px;color:${C.faint};">${quoteDocuments.length} ${quoteDocuments.length === 1 ? "arquivo" : "arquivos"}</span>
             </div>
@@ -1115,7 +1120,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         ${quote.show_investment_section !== false && quote.payment_terms ? `
           <div class="pdf-block payment-terms" style="border:1px solid ${C.border};border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
             <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin-bottom:10px;">💳 Condições de Pagamento</p>
-            <p style="font-size:13px;color:${C.mutedT};line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
+            <p style="font-size:13px;color:${C.muted};line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
         ` : ""}
 
