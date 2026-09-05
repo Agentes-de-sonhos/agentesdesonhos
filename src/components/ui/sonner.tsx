@@ -1,13 +1,13 @@
 import { createPortal } from "react-dom";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, toast } from "sonner";
-import { useToastHost } from "@/components/ui/toast-host";
+import { useToastContainer } from "@/components/ui/toast-host";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
-  const host = useToastHost();
+  const container = useToastContainer();
 
   const content = (
     <Sonner
@@ -27,8 +27,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     />
   );
 
-  // Superfície maximizada/fullscreen: mesmo host, apenas outro container.
-  if (host) return createPortal(content, host);
+  // Um único host: o container é movido para a superfície maximizada/fullscreen.
+  if (container) return createPortal(content, container);
 
   return content;
 };

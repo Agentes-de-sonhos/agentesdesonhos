@@ -1,11 +1,11 @@
 import { createPortal } from "react-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useToastHost } from "@/components/ui/toast-host";
+import { useToastContainer } from "@/components/ui/toast-host";
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from "@/components/ui/toast";
 
 export function Toaster() {
   const { toasts } = useToast();
-  const host = useToastHost();
+  const container = useToastContainer();
 
   const content = (
     <ToastProvider>
@@ -25,8 +25,8 @@ export function Toaster() {
     </ToastProvider>
   );
 
-  // Superfície maximizada/fullscreen: mesmo host, apenas outro container.
-  if (host) return createPortal(content, host);
+  // Um único host: o container é movido para a superfície maximizada/fullscreen.
+  if (container) return createPortal(content, container);
 
   return content;
 }

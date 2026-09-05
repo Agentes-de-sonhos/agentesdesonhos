@@ -13,9 +13,33 @@ type Listener = (el: HTMLElement | null) => void;
 
 let currentHost: HTMLElement | null = null;
 let currentOwner: unknown = null;
+let containerEl: HTMLElement | null = null;
 const listeners = new Set<Listener>();
 
+/**
+ * Container estável (um único nó) onde os toasters são renderizados via portal.
+ * Ao mudar de host apenas movemos este nó no DOM — os componentes não são
+ * remontados, então nenhuma notificação em tela é perdida ou repetida.
+ */
+export function getToastContainer(): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  if (!containerEl || !containerEl.isConnected) {
+    containerEl = document.createElement("div");
+    containerEl.setAttribute("data-toast-host", "");
+    (currentHost ?? document.body).appendChild(containerEl);
+  }
+  return containerEl;
+}
+
+function moveContainer() {
+  const el = getToastContainer();
+  if (!el) return;
+  const parent = currentHost ?? document.body;
+  if (el.parentNode !== parent) parent.appendChild(el);
+}
+
 function emit() {
+  moveContainer();
   listeners.forEach((l) => l(currentHost));
 }
 
@@ -58,4 +82,14 @@ export function useToastHost(): HTMLElement | null {
     };
   }, []);
   return host;
+}
+
+/** Container estável dos toasters (portal). */
+export function useToastContainer(): HTMLElement | null {
+  const [el, setEl] = React.useState<HTMLElement | null>(() => getToastContainer());
+  React.useEffect(() => {
+    setEl(getToastContainer());
+  }, []);
+  useToastHost();
+  return el;
 }
