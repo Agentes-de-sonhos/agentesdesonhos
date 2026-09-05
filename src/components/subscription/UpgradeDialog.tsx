@@ -172,9 +172,10 @@ export function UpgradeDialog({
 
         <div className="grid gap-4 md:grid-cols-2 mt-4">
           {UPGRADE_PLANS.map((plan) => {
-            const isCurrentPlan = plan.id === currentPlan || (currentPlan === "fundador" && plan.id === "premium");
+            const isCurrentPlan =
+              plan.id === effectivePlan || (effectivePlan === "fundador" && plan.id === "premium");
             const targetLevel = PLAN_HIERARCHY[plan.id] ?? 0;
-            const canUpgrade = targetLevel > currentLevel;
+            const canUpgrade = targetLevel > currentLevel && !offer.purchaseBlocked;
             const isRecommended = plan.id === requiredPlan;
 
             return (
