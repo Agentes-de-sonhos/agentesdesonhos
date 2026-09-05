@@ -195,6 +195,38 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     expect(captured.html).toContain(tokens.text);
   });
 
+  it("payment_terms usa texto legível sobre card branco e título de anexos sobre terciária", async () => {
+    const { captured } = stubPrintWindow();
+    const q = { ...quote, payment_terms: "Entrada de 30% e saldo em até 10x." };
+    await generateQuotePDF(q, baseProfile);
+    const tokens = getQuotePdfTokens(baseProfile);
+    const paymentBlock = captured.html.match(/💳 Condições de Pagamento[\s\S]*?<\/p>\s*<\/div>/)?.[0] || "";
+    expect(paymentBlock).toContain(tokens.muted);
+    expect(paymentBlock).not.toContain(tokens.mutedT);
+    const docTitleIdx = captured.html.indexOf("Documentos do seu orçamento");
+    const snippet = captured.html.slice(Math.max(0, docTitleIdx - 120), docTitleIdx + 40);
+    expect(snippet).toContain(tokens.textT);
+  });
+
+  it("fallback de serviços vazio interpola a cor corretamente", async () => {
+    const { captured } = stubPrintWindow();
+    await generateQuotePDF({ ...quote, services: [] }, baseProfile);
+    const tokens = getQuotePdfTokens(baseProfile);
+    expect(captured.html).toContain("Nenhum serviço adicionado");
+    expect(captured.html).toContain(`color:${tokens.faintT}`);
+  });
+
+  it("ensureReadable garante contraste mínimo inclusive sobre fundos intermediários", () => {
+    const tokens = getQuotePdfTokens({
+      ...baseProfile,
+      agency_tertiary_color: "#999999",
+      agency_tertiary_auto: false,
+    } as any);
+    for (const t of [tokens.textT, tokens.mutedT, tokens.faintT, tokens.primaryOnTertiary]) {
+      expect(contrast(t, "#999999")).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   it("usa o azul padrão quando a agência não configurou cores", async () => {
     const { captured } = stubPrintWindow();
     await generateQuotePDF(quote, baseProfile);
