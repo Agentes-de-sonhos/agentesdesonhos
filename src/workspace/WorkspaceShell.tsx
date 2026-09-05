@@ -16,6 +16,13 @@ interface Props {
    * white label, que a posiciona no cabeçalho da área de conteúdo).
    */
   showTabBar?: boolean;
+  /**
+   * Conversor opcional de caminho interno (rotas do workspace) para a URL real
+   * do navegador. Usado por montagens sob prefixo (ex.: painel white label
+   * embutido em outro caminho) para que a barra de endereço não perca o
+   * prefixo. Padrão: identidade — nada muda nos demais contextos.
+   */
+  toExternalPath?: (path: string) => string;
 }
 
 /**
@@ -44,7 +51,9 @@ export function scrollWorkspaceToTop(root: HTMLElement | null) {
  * inside a `<nav>` / `<aside>` (i.e. sidebar or drawer) into an openTab() call.
  * This avoids touching AppSidebar/MobileDrawerMenu source.
  */
-export function WorkspaceShell({ children, showTabBar = true }: Props) {
+const identityPath = (path: string) => path;
+
+export function WorkspaceShell({ children, showTabBar = true, toExternalPath = identityPath }: Props) {
   const ws = useWorkspace();
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -70,14 +79,18 @@ export function WorkspaceShell({ children, showTabBar = true }: Props) {
   useEffect(() => {
     if (!ws) return;
     const active = ws.tabs.find((t) => t.id === ws.activeId);
-    if (active && active.path !== window.location.pathname + window.location.search) {
+    if (!active) return;
+    const external = toExternalPath(active.path);
+    const current =
+      window.location.pathname + window.location.search + window.location.hash;
+    if (external !== current) {
       try {
-        window.history.replaceState(null, "", active.path);
+        window.history.replaceState(null, "", external);
       } catch {
         // ignore
       }
     }
-  }, [ws?.activeId, ws?.tabs]);
+  }, [ws?.activeId, ws?.tabs, toExternalPath]);
 
   // Global sidebar/nav link interception (capture phase).
   useEffect(() => {

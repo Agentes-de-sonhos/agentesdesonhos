@@ -1,4 +1,4 @@
-import { ComponentType, lazy } from "react";
+import { ComponentType, lazy, useCallback } from "react";
 import { BrowserRouter, Navigate, useParams, useRoutes } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
@@ -152,9 +152,11 @@ function initialWorkspacePath(): string {
 function AgencyAdminWorkspace({
   info,
   entryPath,
+  toExternalPath,
 }: {
   info: AgencyAdminPortalInfo;
   entryPath?: string;
+  toExternalPath?: (path: string) => string;
 }) {
   const initialPath = entryPath ?? initialWorkspacePath();
   return (
@@ -163,7 +165,7 @@ function AgencyAdminWorkspace({
       initialTitle={titleForPath(initialPath)}
       homePath={AGENCY_ADMIN_HOME}
     >
-      <WorkspaceShell showTabBar={false}>
+      <WorkspaceShell showTabBar={false} toExternalPath={toExternalPath}>
         <AgencyAdminPages info={info} />
       </WorkspaceShell>
     </WorkspaceProvider>
@@ -184,10 +186,15 @@ function AgencyAdminEntry({
   basePath?: string;
 }) {
   const mount = agencyAdminMount(basePath);
+  /* Estável entre renders: o shell usa a função como dependência de efeito. */
+  const toExternal = useCallback(
+    (path: string) => agencyAdminMount(basePath).toExternal(path),
+    [basePath],
+  );
   const real = window.location.pathname.replace(/\/+$/, "") || "/";
   const clean = mount.toInternal(real);
   const entryPath = mount.base
-    ? `${clean}${window.location.search}`
+    ? `${clean}${window.location.search}${window.location.hash}`
     : undefined;
   if (clean === AGENCY_ADMIN_LOGIN) {
     // Com basePath (SiteLab embutido no router principal do App) um
@@ -204,7 +211,13 @@ function AgencyAdminEntry({
   }
   return (
     <AgencyAdminShell hostname={hostname} basePath={mount.base}>
-      {(info) => <AgencyAdminWorkspace info={info} entryPath={entryPath} />}
+      {(info) => (
+        <AgencyAdminWorkspace
+          info={info}
+          entryPath={entryPath}
+          toExternalPath={mount.base ? toExternal : undefined}
+        />
+      )}
     </AgencyAdminShell>
   );
 }
