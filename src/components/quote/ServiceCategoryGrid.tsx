@@ -36,8 +36,8 @@ interface Props {
 export function ServiceCategoryGrid({ countByType = {}, onSelect, onOpenAIImport, showAIImport = false, onOpenFullPackage, showFullPackage = true }: Props) {
   return (
     <div
-      className="grid gap-3 w-full"
-      style={{ gridTemplateColumns: "repeat(auto-fit, minmax(100px, 1fr))" }}
+      className="grid w-full min-w-0 max-w-full gap-3"
+      style={{ gridTemplateColumns: "repeat(auto-fit, minmax(84px, 1fr))" }}
     >
       {showAIImport && onOpenAIImport && (
       <button

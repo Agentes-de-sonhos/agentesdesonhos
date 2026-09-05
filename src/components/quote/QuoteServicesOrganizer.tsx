@@ -475,7 +475,7 @@ function SortableSection({
         isDragging && "opacity-70 shadow-lg",
       )}
     >
-      <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/40">
+      <div className="flex min-w-0 flex-wrap items-center gap-2 px-3 py-2.5 bg-muted/40">
         <button
           type="button"
           className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none"
