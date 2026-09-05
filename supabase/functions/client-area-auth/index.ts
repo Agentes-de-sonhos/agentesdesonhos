@@ -692,24 +692,16 @@ Deno.serve(async (req) => {
       if (action === 'profile') {
         const clientId = resolved.account.client_id
         if (!clientId) return json({ profile: null })
-        const { data: client } = await admin
-          .from('clients')
-          .select('nome_completo, email, telefone, cidade, estado, pais, data_nascimento')
-          .eq('user_id', agencyId)
-          .eq('id', clientId)
-          .maybeSingle()
-        return json({
-          profile: {
-            name: client?.nome_completo ?? null,
-            email: resolved.account.email_normalized ?? client?.email ?? null,
-            phone: client?.telefone ?? null,
-            city: client?.cidade ?? null,
-            state: client?.estado ?? null,
-            country: client?.pais ?? null,
-            birth_date: client?.data_nascimento ?? null,
-          },
-        })
+        const result = await loadClientProfile(
+          admin as never,
+          agencyId,
+          clientId,
+          resolved.account.email_normalized,
+        )
+        if (!result.ok) return json({ error: 'Não foi possível carregar seu perfil.' }, 500)
+        return json({ profile: result.profile })
       }
+
 
       if (action === 'session') {
         const rotated = await touchSession(resolved.session)
