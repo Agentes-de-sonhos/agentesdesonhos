@@ -564,7 +564,7 @@ export function EmptyPeriodAISlot({
           <Button
             size="sm"
             variant="outline"
-            className="border-primary/50 text-primary hover:bg-primary/10"
+            className="w-full sm:w-auto border-primary/50 text-primary hover:bg-primary/10"
           >
             {loading ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
