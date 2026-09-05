@@ -11,7 +11,7 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
-import { generateQuotePDF } from "@/components/quote/QuotePDF";
+import { generateQuotePDF, getQuotePdfTokens } from "@/components/quote/QuotePDF";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { resolveBrandPalette } from "@/lib/brandTheme";
 
@@ -60,10 +60,24 @@ const baseProfile: AgentProfile = {
 
 type Captured = { html: string; opened: number; printed: number; closed: number };
 
-function stubPrintWindow(): { captured: Captured } {
+function contrast(a: string, b: string): number {
+  const lum = (hex: string) => {
+    const n = parseInt(hex.replace("#", ""), 16);
+    const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => {
+      const x = c / 255;
+      return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+  };
+  const la = lum(a);
+  const lb = lum(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+function stubPrintWindow(opts: { pending?: boolean } = {}): { captured: Captured; win: any } {
   const captured: Captured = { html: "", opened: 0, printed: 0, closed: 0 };
   const fakeDoc: any = {
-    readyState: "complete",
+    readyState: opts.pending ? "loading" : "complete",
     images: [],
     open: () => {
       captured.opened += 1;
@@ -87,7 +101,7 @@ function stubPrintWindow(): { captured: Captured } {
     setTimeout: (fn: () => void) => setTimeout(fn, 0),
   };
   vi.spyOn(window, "open").mockReturnValue(fakeWin as any);
-  return { captured };
+  return { captured, win: fakeWin };
 }
 
 describe("PDF do orçamento — documento final e paleta da agência", () => {
@@ -117,15 +131,68 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     expect(result).toEqual({ printed: false, reason: "popup-blocked" });
   });
 
-  it("não imprime quando a janela foi fechada antes do fim", async () => {
+  it("não imprime quando a janela é fechada durante a espera (reason window-closed)", async () => {
+    const { captured, win } = stubPrintWindow({ pending: true });
+    setTimeout(() => {
+      win.closed = true;
+    }, 30);
+    const result = await generateQuotePDF(quote, baseProfile);
+    expect(result).toEqual({ printed: false, reason: "window-closed" });
+    expect(captured.printed).toBe(0);
+  });
+
+  it("aviso de carregamento é oculto na impressão", async () => {
     const { captured } = stubPrintWindow();
-    const win: any = (window.open as any).mock.results[0]?.value;
-    const result = await generateQuotePDF(quote, {
-      ...baseProfile,
-    });
-    expect(result.printed).toBe(true);
+    await generateQuotePDF(quote, baseProfile);
+    // o documento de carregamento (escrito antes do open()) traz a regra de print
+    expect(captured.opened).toBe(1);
     expect(captured.printed).toBe(1);
-    expect(win === undefined || true).toBe(true);
+  });
+
+  it("bordas vêm da SECUNDÁRIA: secundárias diferentes mudam as bordas", () => {
+    const base = { agency_primary_color: "#D6336C", agency_tertiary_color: "#FFF0F6", agency_tertiary_auto: false, agency_secondary_auto: false } as any;
+    const a = getQuotePdfTokens({ ...baseProfile, ...base, agency_secondary_color: "#F783AC" });
+    const b = getQuotePdfTokens({ ...baseProfile, ...base, agency_secondary_color: "#2F855A" });
+    expect(a.primary).toBe(b.primary);
+    expect(a.tertiary).toBe(b.tertiary);
+    expect(a.border).not.toBe(b.border);
+  });
+
+  it("garante 4.5:1 para textos pequenos sobre branco e sobre terciária escura", () => {
+    const dark = getQuotePdfTokens({
+      ...baseProfile,
+      agency_primary_color: "#1D4ED8",
+      agency_tertiary_color: "#111827",
+      agency_tertiary_auto: false,
+    } as any);
+    for (const t of [dark.textT, dark.mutedT, dark.faintT, dark.primaryOnTertiary]) {
+      expect(contrast(t, "#111827")).toBeGreaterThanOrEqual(4.5);
+    }
+    for (const t of [dark.text, dark.muted, dark.faint, dark.primary]) {
+      expect(contrast(t, "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
+    }
+    // fundo configurado é preservado
+    expect(dark.tertiary).toBe("#111827");
+  });
+
+  it("com terciária escura os textos do fundo da página não ficam escuros", async () => {
+    const { captured } = stubPrintWindow();
+    await generateQuotePDF(quote, {
+      ...baseProfile,
+      agency_primary_color: "#1D4ED8",
+      agency_tertiary_color: "#111827",
+      agency_tertiary_auto: false,
+    } as any);
+    const tokens = getQuotePdfTokens({
+      ...baseProfile,
+      agency_primary_color: "#1D4ED8",
+      agency_tertiary_color: "#111827",
+      agency_tertiary_auto: false,
+    } as any);
+    expect(captured.html).toContain(tokens.textT);
+    expect(captured.html).toContain(tokens.faintT);
+    // textos dos cards brancos continuam escuros (sem substituição global)
+    expect(captured.html).toContain(tokens.text);
   });
 
   it("usa o azul padrão quando a agência não configurou cores", async () => {
@@ -160,7 +227,7 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     });
     expect(captured.html).toContain(palette.primary);
     expect(captured.html).toContain("#FFF0F6");
-    expect(captured.html).toContain(palette.border);
+    expect(captured.html).toContain(getQuotePdfTokens(profile).border);
     // fundo da página usa a terciária, também na impressão
     expect(captured.html).toContain(`background:${palette.tertiary}`);
     expect(captured.html).not.toContain("background: #fff !important");
