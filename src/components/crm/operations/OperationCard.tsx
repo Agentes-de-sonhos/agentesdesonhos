@@ -22,6 +22,9 @@ import { useOperations } from "@/hooks/useOperations";
 import { OperationLabelPicker } from "./OperationLabelPicker";
 import { OperationHistoryDialog } from "./OperationHistoryDialog";
 import { EditClientDialog } from "../EditClientDialog";
+import { useAdminNav } from "@/lib/agencyAdminNav";
+import { useNavigate } from "react-router-dom";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export type OperationCardTab = "overview" | "checklist" | "timeline" | "attachments";
 
@@ -34,6 +37,8 @@ interface Props {
   moveTargets?: MoveStageTarget[];
   currentStageId?: string | null;
   onMoveToStage?: (stageId: string) => void | Promise<void>;
+  /** Exibe "Gerar carteira digital" (1ª e 2ª colunas da ordem configurada). */
+  showGenerateWallet?: boolean;
 }
 
 function textColorFor(hex: string) {
@@ -54,7 +59,11 @@ export function OperationCard({
   moveTargets,
   currentStageId,
   onMoveToStage,
+  showGenerateWallet = false,
 }: Props) {
+  const navigate = useNavigate();
+  const nav = useAdminNav();
+  const { can } = usePermissions();
   const { byOperation } = useOperationLabelAssignments();
   const { deleteOperation } = useOperations();
   const [showLabels, setShowLabels] = useState(false);
@@ -75,6 +84,27 @@ export function OperationCard({
   };
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+
+  /* Reaproveita o fluxo existente de carteira digital: abre a carteira já
+     vinculada quando existir, senão a criação pré-preenchida da operação. */
+  const handleGenerateWallet = () => {
+    if (operation.trip_id) {
+      navigate(nav.wallet(operation.trip_id));
+      return;
+    }
+    navigate(nav.wallet("nova"), {
+      state: {
+        opportunity_id: operation.opportunity_id,
+        client_id: operation.client_id,
+        client_name: operation.client?.name,
+        destination: operation.destination || "",
+        start_date: operation.travel_start_date,
+        end_date: operation.travel_end_date,
+      },
+    });
+  };
+
+  const canGenerateWallet = showGenerateWallet && can("opportunities.generate_wallet");
 
   return (
     <>
@@ -131,6 +161,11 @@ export function OperationCard({
               <DropdownMenuItem onClick={() => setShowHistory(true)}>
                 <History className="mr-2 h-4 w-4" /> Histórico
               </DropdownMenuItem>
+              {canGenerateWallet && (
+                <DropdownMenuItem onClick={handleGenerateWallet}>
+                  <Wallet className="mr-2 h-4 w-4" /> Gerar carteira digital
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => openTab("checklist")}>
                 <ListChecks className="mr-2 h-4 w-4" /> Checklist
               </DropdownMenuItem>
