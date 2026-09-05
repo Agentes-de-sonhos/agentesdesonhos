@@ -18,6 +18,7 @@ import { type Operation } from "@/types/operations";
 import { OperationCard, type OperationCardTab } from "./OperationCard";
 import { OperationDetailDialog } from "./OperationDetailDialog";
 import { CreateOperationDialog } from "./CreateOperationDialog";
+import { operationStageShowsWallet } from "@/lib/crmCardShortcuts";
 import { OperationStageColumnHeader } from "./OperationStageColumnHeader";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -276,6 +277,7 @@ export function OperationsModule() {
                               canEdit={canEdit}
                               moveTargets={moveTargets}
                               currentStageId={stage.key}
+                              showGenerateWallet={operationStageShowsWallet(stages, stage.key)}
                               onMoveToStage={(toStageKey) => handleMoveToStage(op, toStageKey)}
                             />
                           </div>

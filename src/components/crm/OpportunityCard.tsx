@@ -92,6 +92,7 @@ import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, CLIENT_STATUS_LABELS, ty
 import { cn } from "@/lib/utils";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { getOpportunityCardShortcuts } from "@/lib/crmCardShortcuts";
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -148,15 +149,18 @@ export function OpportunityCard({
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
   const { stages } = usePipelineStages();
-  // Show "Gerar Orçamento" only up to the stage immediately before "Orçamento Enviado"
-  const quoteSentStage = stages.find((s) => s.legacy_key === "quote_sent");
   const currentStage = stages.find(
     (s) => s.id === opportunity.stage_id || s.legacy_key === opportunity.stage
   );
-  const canGenerateQuote =
-    !quoteSentStage ||
-    !currentStage ||
-    currentStage.position < quoteSentStage.position;
+  /* Atalhos por POSIÇÃO configurada das colunas (nomes podem ser renomeados):
+     orçamento nas 3 primeiras; carteira digital na etapa de fechamento. */
+  const shortcuts = getOpportunityCardShortcuts(
+    stages,
+    currentStageId ?? currentStage?.id ?? null
+  );
+  const showGenerateQuote = shortcuts.quote && can("opportunities.generate_quote");
+  const showGenerateWallet = shortcuts.wallet && can("opportunities.generate_wallet");
+
   const [isEditing, setIsEditing] = useState(false);
   // Reutiliza o MESMO modal de edição, apenas focado no bloco do pedido de reserva.
   const [editFocus, setEditFocus] = useState<"booking-request" | undefined>(undefined);
@@ -472,6 +476,17 @@ export function OpportunityCard({
                 <DropdownMenuItem onClick={() => setShowHistory(true)}>
                   <History className="mr-2 h-4 w-4" /> Histórico
                 </DropdownMenuItem>
+                {showGenerateQuote && (
+                  <DropdownMenuItem onClick={handleCreateQuote} disabled={isCheckingLink}>
+                    <FileText className="mr-2 h-4 w-4" /> Gerar orçamento
+                  </DropdownMenuItem>
+                )}
+                {showGenerateWallet && (
+                  <DropdownMenuItem onClick={handleCreateTripWallet} disabled={isCheckingLink}>
+                    <Wallet className="mr-2 h-4 w-4" /> Gerar carteira digital
+                  </DropdownMenuItem>
+                )}
+
                 {hasBookingRequest && (
                   <DropdownMenuItem
                     onClick={() => {

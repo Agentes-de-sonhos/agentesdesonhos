@@ -53,6 +53,8 @@ import {
   type StageColor,
 } from "@/types/crm";
 import { cn } from "@/lib/utils";
+import { isClosedOpportunityStage } from "@/lib/crmCardShortcuts";
+import { fireCelebrationConfetti } from "@/lib/celebrationConfetti";
 
 function SortableColumn({
   stage,
@@ -226,6 +228,11 @@ export function KanbanBoard() {
     targetList.splice(insertIdx, 0, draggedId);
 
 
+    const celebrate =
+      stageChanged &&
+      isClosedOpportunityStage(toStage) &&
+      !isClosedOpportunityStage(fromStage);
+
     await reorderOpportunities({
       movedId: draggedId,
       fromStageId,
@@ -237,6 +244,9 @@ export function KanbanBoard() {
       orderedTargetIds: targetList,
       orderedSourceIds: sourceList,
     });
+
+    // Só após a persistência confirmada (uma vez por movimentação bem-sucedida).
+    if (celebrate) fireCelebrationConfetti();
   };
 
   // Reuso direto da lógica do drag and drop (mesma reordenação, permissões e cache).
