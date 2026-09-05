@@ -1,4 +1,4 @@
-import { ComponentType, lazy } from "react";
+import { ComponentType, lazy, useCallback } from "react";
 import { BrowserRouter, Navigate, useParams, useRoutes } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
