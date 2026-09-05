@@ -208,6 +208,19 @@ export default function Planos() {
           </p>
         </div>
 
+        {offer.coveredByPromo && (
+          <div
+            role="status"
+            className="max-w-3xl mx-auto mb-8 rounded-2xl border border-primary/20 bg-primary/[0.03] p-5 text-sm text-muted-foreground"
+          >
+            Seu acesso promocional já inclui os recursos do Plano Premium
+            {offer.promo.endDateLabel ? ` até ${offer.promo.endDateLabel}` : ""}. Não é necessário
+            contratar nenhum plano agora.
+          </div>
+        )}
+
+
+
         {/* Plans grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch max-w-3xl mx-auto">
           {plans.map((plan) => {
