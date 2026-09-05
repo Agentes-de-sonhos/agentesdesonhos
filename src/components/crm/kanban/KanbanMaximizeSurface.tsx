@@ -1,8 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { PortalContainerProvider } from "@/components/ui/portal-container-context";
+import { claimToastHost, releaseToastHost } from "@/components/ui/toast-host";
 import { useKanbanMaximize } from "./KanbanMaximizeContext";
+
 
 /**
  * Superfície que delimita a área maximizada dos funis.
