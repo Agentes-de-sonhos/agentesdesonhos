@@ -119,7 +119,9 @@ export function getPlanOfferState(input: PlanOfferInput): PlanOfferState {
 
   let effectivePlan: SubscriptionPlan;
   if (promo.isPromo) {
-    effectivePlan = coveredByPromo ? resolveEffectivePlan(promo.isPromo ? "promo_grupo_sc" : null) : "start";
+    // Vigente → equivalente ao plano base (Premium). Encerrada → volta ao Start,
+    // nunca marcando Premium como ativo.
+    effectivePlan = coveredByPromo ? resolveEffectivePlan(promo.isPromo ? (input.plan ?? null) : null) : "start";
   } else {
     effectivePlan = (input.plan as SubscriptionPlan) || "start";
   }
