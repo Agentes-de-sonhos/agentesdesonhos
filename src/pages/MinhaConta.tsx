@@ -178,13 +178,21 @@ export default function MinhaConta() {
                   E-mail da conta: <span className="font-medium">{user?.email}</span>
                 </CardDescription>
               </div>
-              <Badge variant="secondary" className="text-sm">
-                {getPlanLabel(plan)}
-              </Badge>
+              {!planResolving && (
+                <Badge variant="secondary" className="text-sm">
+                  {getPlanLabel(plan)}
+                </Badge>
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            {!isPaid && !promo.isPromo && (
+            {planResolving && (
+              <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+                Carregando plano…
+              </p>
+            )}
+
+            {!planResolving && !isPaid && !promo.isPromo && !planInherited && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border bg-muted/30 p-4">
                 <p className="text-sm text-muted-foreground">
                   Você está no plano gratuito. Faça upgrade para desbloquear mais recursos.
