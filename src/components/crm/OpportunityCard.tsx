@@ -92,6 +92,7 @@ import { STAGE_LABELS, STAGE_COLORS, STAGE_TEXT_COLORS, CLIENT_STATUS_LABELS, ty
 import { cn } from "@/lib/utils";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { getOpportunityCardShortcuts } from "@/lib/crmCardShortcuts";
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
