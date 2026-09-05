@@ -1240,7 +1240,7 @@ export default function GerarOrcamento() {
   /* ═══════════════════  QUOTE EDITOR ═══════════════════ */
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="w-full min-w-0 max-w-full space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex w-full min-w-0 flex-col gap-3">
           <div className="flex w-full min-w-0 flex-wrap items-start justify-between gap-3">
@@ -1346,8 +1346,8 @@ export default function GerarOrcamento() {
           )}
         </div>
 
-        <div className="grid gap-4 sm:gap-6">
-          <div className="space-y-4">
+        <div className="grid w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] gap-4 sm:gap-6">
+          <div className="min-w-0 space-y-4">
             <QuoteStepsGuide steps={QUOTE_STEPS} onSelect={openStep} />
 
             {/* 1. Adicionar serviços */}
