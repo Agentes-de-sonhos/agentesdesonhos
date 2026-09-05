@@ -119,6 +119,7 @@ export default function MinhaConta() {
   };
 
   const handleCancelSubscription = async () => {
+    if (billingActionsBlocked) return;
     try {
       setLoadingPortal("cancel");
       const { data, error } = await supabase.functions.invoke("cancel-subscription", {
