@@ -19,6 +19,7 @@ import {
   REQUIRED_PLAN_FOR_FEATURE
 } from "@/types/subscription";
 import { useSubscription } from "@/hooks/useSubscription";
+import { getPlanOfferState } from "@/lib/promoAccess";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
