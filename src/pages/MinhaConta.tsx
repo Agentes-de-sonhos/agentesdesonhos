@@ -83,12 +83,18 @@ export default function MinhaConta() {
   // Promoção manual (Grupo SC) não é assinatura recorrente: sem portal Stripe,
   // sem cancelamento e sem "próxima renovação".
   const promo = getPromoAccessState(subscription as any);
+  // Enquanto auth/assinatura carregam, nada de plano é afirmado na tela.
+  const planResolving = !!authLoading || (!!user && !!subscriptionLoading);
   const isRecurringPaid =
     plan === "profissional" || plan === "premium" || plan === "fundador";
-  const isPaid = isRecurringPaid;
+  // Colaborador com plano herdado não gerencia a assinatura da conta master.
+  const isPaid = !planResolving && isRecurringPaid && !planInherited;
   const cancellation = getScheduledCancellation(subscription as any);
+  /** Nenhuma ação de cobrança pode partir daqui nesses estados. */
+  const billingActionsBlocked = planResolving || promo.isPromo || !!planInherited;
 
   const openPortal = async (mode: "manage" | "cancel") => {
+    if (billingActionsBlocked) return;
     // Abre uma janela placeholder no gesto do clique para não ser bloqueada
     // pelo navegador depois do await.
     const placeholder = window.open("", "_blank");
