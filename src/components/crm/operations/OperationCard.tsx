@@ -134,21 +134,7 @@ export function OperationCard({
                 <MoreVertical className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52" onClick={stop}>
-              <DropdownMenuItem onClick={() => setShowLabels(true)}>
-                <Tag className="mr-2 h-4 w-4" /> Etiquetas
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openTab("timeline")}>
-                <MessageSquare className="mr-2 h-4 w-4" /> Anotações
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openTab("overview")}>
-                <Edit2 className="mr-2 h-4 w-4" /> Editar viagem
-              </DropdownMenuItem>
-              {operation.client && (
-                <DropdownMenuItem onClick={() => setShowEditClient(true)}>
-                  <User className="mr-2 h-4 w-4" /> Editar cliente
-                </DropdownMenuItem>
-              )}
+            <DropdownMenuContent align="end" className="w-56" onClick={stop}>
               {canEdit && onMoveToStage && moveTargets && moveTargets.length > 0 && (
                 <MoveToStageMenu
                   targets={moveTargets}
@@ -156,19 +142,31 @@ export function OperationCard({
                   onMoveToStage={onMoveToStage}
                 />
               )}
-              <DropdownMenuItem onClick={() => setShowHistory(true)}>
-                <History className="mr-2 h-4 w-4" /> Histórico
+              <DropdownMenuItem onClick={() => setFocusedSection("overview")}>
+                <Edit2 className="mr-2 h-4 w-4" /> Editar viagem
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFocusedSection("services")}>
+                <Luggage className="mr-2 h-4 w-4" /> Conferir serviços
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFocusedSection("checklist")}>
+                <ListChecks className="mr-2 h-4 w-4" /> Fazer checklist
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowNote(true)}>
+                <MessageSquare className="mr-2 h-4 w-4" /> Criar anotações
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFocusedSection("attachments")}>
+                <Paperclip className="mr-2 h-4 w-4" /> Anexar arquivos
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowLabels(true)}>
+                <Tag className="mr-2 h-4 w-4" /> Etiquetas
               </DropdownMenuItem>
               {canGenerateWallet && (
                 <DropdownMenuItem onClick={handleGenerateWallet}>
                   <Wallet className="mr-2 h-4 w-4" /> Gerar carteira digital
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => openTab("checklist")}>
-                <ListChecks className="mr-2 h-4 w-4" /> Checklist
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => openTab("attachments")}>
-                <Paperclip className="mr-2 h-4 w-4" /> Anexos
+              <DropdownMenuItem onClick={() => setShowHistory(true)}>
+                <History className="mr-2 h-4 w-4" /> Histórico
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -177,6 +175,7 @@ export function OperationCard({
               >
                 <Trash2 className="mr-2 h-4 w-4" /> Excluir operação
               </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
