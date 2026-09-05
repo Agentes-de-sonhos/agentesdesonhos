@@ -2,7 +2,7 @@ import { useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import {
   Calendar, Users, DollarSign, AlertCircle, Wallet, Plane,
-  MoreVertical, Tag, MessageSquare, Edit2, User, History, ListChecks, Paperclip, Trash2,
+  MoreVertical, Tag, MessageSquare, Edit2, History, ListChecks, Paperclip, Trash2, Luggage,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,8 @@ import { useOperationLabelAssignments } from "@/hooks/useOperationLabels";
 import { useOperations } from "@/hooks/useOperations";
 import { OperationLabelPicker } from "./OperationLabelPicker";
 import { OperationHistoryDialog } from "./OperationHistoryDialog";
-import { EditClientDialog } from "../EditClientDialog";
+import { QuickOperationNoteDialog } from "./QuickOperationNoteDialog";
+import { OperationDetailDialog, type OperationDetailTab } from "./OperationDetailDialog";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useNavigate } from "react-router-dom";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -31,7 +32,6 @@ export type OperationCardTab = "overview" | "checklist" | "timeline" | "attachme
 interface Props {
   operation: Operation;
   onClick?: () => void;
-  onOpenTab?: (tab: OperationCardTab) => void;
   onDragStart?: (e: React.DragEvent, id: string) => void;
   canEdit?: boolean;
   moveTargets?: MoveStageTarget[];
@@ -40,6 +40,7 @@ interface Props {
   /** Exibe "Gerar carteira digital" (1ª e 2ª colunas da ordem configurada). */
   showGenerateWallet?: boolean;
 }
+
 
 function textColorFor(hex: string) {
   const h = hex.replace("#", "");
