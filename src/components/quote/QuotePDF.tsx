@@ -1137,9 +1137,12 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
     </html>
   `;
 
-  if (!printWindow || printWindow.closed) {
-    // Popup bloqueado ou janela fechada: nunca dispara impressão vazia.
+  if (!printWindow) {
+    // Popup bloqueado pelo navegador: nunca dispara impressão vazia.
     return { printed: false as const, reason: "popup-blocked" as const };
+  }
+  if (printWindow.closed) {
+    return { printed: false as const, reason: "window-closed" as const };
   }
 
   const doc = printWindow.document;
@@ -1149,31 +1152,52 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   doc.write(html);
   doc.close();
 
-  // Espera o documento final, as fontes e as imagens antes de imprimir.
-  if (doc.readyState !== "complete") {
-    await new Promise<void>((resolve) => {
+  // Esperas com prazo e vigiando a janela: os timers são do opener, de modo
+  // que fechar o popup nunca deixa a promise pendurada.
+  const waitWithDeadline = (attach: (done: () => void) => void, timeoutMs = 10000) =>
+    new Promise<void>((resolve) => {
       let settled = false;
       const done = () => {
         if (settled) return;
         settled = true;
+        window.clearInterval(watch);
+        window.clearTimeout(timer);
         resolve();
       };
-      printWindow.addEventListener("load", done, { once: true });
-      printWindow.setTimeout(done, 10000);
+      const watch = window.setInterval(() => {
+        if (printWindow.closed) done();
+      }, 200);
+      const timer = window.setTimeout(done, timeoutMs);
+      try {
+        attach(done);
+      } catch {
+        done();
+      }
     });
+
+  if (doc.readyState !== "complete") {
+    await waitWithDeadline((done) => printWindow.addEventListener("load", done, { once: true }));
+  }
+  if (printWindow.closed) {
+    return { printed: false as const, reason: "window-closed" as const };
   }
   try {
-    await (doc as any).fonts?.ready;
+    await Promise.race([
+      (doc as any).fonts?.ready ?? Promise.resolve(),
+      waitWithDeadline(() => {}, 5000),
+    ]);
   } catch {}
+  if (printWindow.closed) {
+    return { printed: false as const, reason: "window-closed" as const };
+  }
   try {
     await Promise.all(
       Array.from(doc.images || []).map((img) =>
         img.complete
           ? Promise.resolve()
-          : new Promise<void>((resolve) => {
-              img.addEventListener("load", () => resolve(), { once: true });
-              img.addEventListener("error", () => resolve(), { once: true });
-              printWindow.setTimeout(() => resolve(), 10000);
+          : waitWithDeadline((done) => {
+              img.addEventListener("load", done, { once: true });
+              img.addEventListener("error", done, { once: true });
             }),
       ),
     );
@@ -1187,5 +1211,6 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   } catch {}
   printWindow.print();
   return { printed: true as const };
+
 
 }
