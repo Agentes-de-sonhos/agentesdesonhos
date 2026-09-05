@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { toast as sonnerToast } from "sonner";
@@ -54,7 +54,9 @@ describe("toasts com Kanban maximizado", () => {
       sonnerToast.error("Sem permissão");
     });
     // hosts padrão (fora da superfície)
-    expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1);
+    await waitFor(() =>
+      expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1)
+    );
     expect(surface().querySelector("[data-sonner-toaster]")).toBeNull();
 
     act(() => {
@@ -62,8 +64,10 @@ describe("toasts com Kanban maximizado", () => {
     });
 
     expect(getToastHost()).toBe(surface());
+    await waitFor(() =>
+      expect(surface().querySelectorAll("[data-sonner-toaster]").length).toBe(1)
+    );
     expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1);
-    expect(surface().querySelectorAll("[data-sonner-toaster]").length).toBe(1);
     // viewport do shadcn também dentro da superfície
     expect(surface().querySelectorAll("[data-radix-toast-viewport]").length).toBe(1);
     expect(surface().textContent).toContain("Salvo com sucesso");
@@ -73,7 +77,9 @@ describe("toasts com Kanban maximizado", () => {
     act(() => {
       sonnerToast.error("Erro ao salvar anotação");
     });
-    expect(surface().textContent).toContain("Erro ao salvar anotação");
+    await waitFor(() =>
+      expect(surface().textContent).toContain("Erro ao salvar anotação")
+    );
 
     // sair restaura o host habitual, sem duplicar
     act(() => {
@@ -107,7 +113,7 @@ describe("toasts com Kanban maximizado", () => {
     expect(getToastHost()).toBeNull();
   });
 
-  it("trocar de quadro (Oportunidades -> Operações) aponta para a superfície ativa", () => {
+  it("trocar de quadro (Oportunidades -> Operações) aponta para a superfície ativa", async () => {
     const first = render(<App label="op" />);
     act(() => {
       screen.getByText("toggle-op").click();
@@ -123,6 +129,12 @@ describe("toasts com Kanban maximizado", () => {
       screen.getByText("toggle-ope").click();
     });
     expect(getToastHost()).not.toBe(firstHost);
+    act(() => {
+      sonnerToast.success("Movido");
+    });
+    await waitFor(() =>
+      expect(getToastHost()!.querySelectorAll("[data-sonner-toaster]").length).toBe(1)
+    );
     expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1);
     second.unmount();
   });
