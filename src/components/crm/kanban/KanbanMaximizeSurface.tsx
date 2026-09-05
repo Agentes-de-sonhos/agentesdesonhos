@@ -27,6 +27,7 @@ export function KanbanMaximizeSurface({
 }) {
   const { isMaximized, registerSurface } = useKanbanMaximize();
   const [surfaceEl, setSurfaceEl] = useState<HTMLElement | null>(null);
+  const ownerRef = useRef({});
 
   const setRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -35,6 +36,17 @@ export function KanbanMaximizeSurface({
     },
     [registerSurface]
   );
+
+  // Enquanto maximizada, os toasts (shadcn e Sonner) passam a renderizar dentro
+  // desta superfície; ao sair/Esc/desmontar/trocar de aba voltam ao padrão.
+  useEffect(() => {
+    const owner = ownerRef.current;
+    if (isMaximized && surfaceEl) claimToastHost(owner, surfaceEl);
+    else releaseToastHost(owner);
+    return () => releaseToastHost(owner);
+  }, [isMaximized, surfaceEl]);
+
+
 
   const content = (
     <div
