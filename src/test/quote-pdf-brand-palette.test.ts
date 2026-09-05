@@ -197,7 +197,8 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
       agency_tertiary_auto: false,
     } as any);
     expect(captured.html).toContain(tokens.textT);
-    expect(captured.html).toContain(tokens.faintT);
+    // textos sobre o fundo geral branco usam os tokens de branco
+    expect(captured.html).toContain(tokens.faint);
     // textos dos cards brancos continuam escuros (sem substituição global)
     expect(captured.html).toContain(tokens.text);
   });
@@ -230,7 +231,7 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     await generateQuotePDF({ ...quote, services: [] }, baseProfile);
     const tokens = getQuotePdfTokens(baseProfile);
     expect(captured.html).toContain("Nenhum serviço adicionado");
-    expect(captured.html).toContain(`color:${tokens.faintT}`);
+    expect(captured.html).toContain(`color:${tokens.faint}`);
   });
 
   it("ensureReadable garante contraste mínimo inclusive sobre fundos intermediários", () => {
