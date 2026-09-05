@@ -45,8 +45,15 @@ import { useTeamQuota } from "@/hooks/useTeamMembers";
 import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 
 export default function MinhaConta() {
-  const { user } = useAuth();
-  const { plan, getPlanLabel, subscription, refetch } = useSubscription();
+  const { user, loading: authLoading } = useAuth();
+  const {
+    plan,
+    getPlanLabel,
+    subscription,
+    refetch,
+    loading: subscriptionLoading,
+    planInherited,
+  } = useSubscription();
   const { role } = useUserRole();
   const [loadingPortal, setLoadingPortal] = useState<null | "manage" | "cancel">(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -76,12 +83,18 @@ export default function MinhaConta() {
   // Promoção manual (Grupo SC) não é assinatura recorrente: sem portal Stripe,
   // sem cancelamento e sem "próxima renovação".
   const promo = getPromoAccessState(subscription as any);
+  // Enquanto auth/assinatura carregam, nada de plano é afirmado na tela.
+  const planResolving = !!authLoading || (!!user && !!subscriptionLoading);
   const isRecurringPaid =
     plan === "profissional" || plan === "premium" || plan === "fundador";
-  const isPaid = isRecurringPaid;
+  // Colaborador com plano herdado não gerencia a assinatura da conta master.
+  const isPaid = !planResolving && isRecurringPaid && !planInherited;
   const cancellation = getScheduledCancellation(subscription as any);
+  /** Nenhuma ação de cobrança pode partir daqui nesses estados. */
+  const billingActionsBlocked = planResolving || promo.isPromo || !!planInherited;
 
   const openPortal = async (mode: "manage" | "cancel") => {
+    if (billingActionsBlocked) return;
     // Abre uma janela placeholder no gesto do clique para não ser bloqueada
     // pelo navegador depois do await.
     const placeholder = window.open("", "_blank");
@@ -106,6 +119,7 @@ export default function MinhaConta() {
   };
 
   const handleCancelSubscription = async () => {
+    if (billingActionsBlocked) return;
     try {
       setLoadingPortal("cancel");
       const { data, error } = await supabase.functions.invoke("cancel-subscription", {
@@ -164,13 +178,21 @@ export default function MinhaConta() {
                   E-mail da conta: <span className="font-medium">{user?.email}</span>
                 </CardDescription>
               </div>
-              <Badge variant="secondary" className="text-sm">
-                {getPlanLabel(plan)}
-              </Badge>
+              {!planResolving && (
+                <Badge variant="secondary" className="text-sm">
+                  {getPlanLabel(plan)}
+                </Badge>
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            {!isPaid && !promo.isPromo && (
+            {planResolving && (
+              <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+                Carregando plano…
+              </p>
+            )}
+
+            {!planResolving && !isPaid && !promo.isPromo && !planInherited && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border bg-muted/30 p-4">
                 <p className="text-sm text-muted-foreground">
                   Você está no plano gratuito. Faça upgrade para desbloquear mais recursos.
@@ -181,7 +203,7 @@ export default function MinhaConta() {
               </div>
             )}
 
-            {promo.isPromo && (
+            {!planResolving && promo.isPromo && (
               <div
                 role="status"
                 aria-live="polite"
@@ -215,8 +237,8 @@ export default function MinhaConta() {
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Este é um acesso promocional sem cobrança recorrente: não há renovação automática
-                  nem cobranças no cartão.
+                  A promoção não é renovada automaticamente. Eventuais parcelas da contratação
+                  original continuam conforme o pagamento acordado.
                 </p>
                 {(promo.status === "expired" || promo.status === "inactive") && (
                   <div className="pt-1">
