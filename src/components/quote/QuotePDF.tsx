@@ -1055,11 +1055,55 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
     </html>
   `;
 
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      printWindow.print();
-    };
+  if (!printWindow || printWindow.closed) {
+    // Popup bloqueado ou janela fechada: nunca dispara impressão vazia.
+    return { printed: false as const, reason: "popup-blocked" as const };
   }
+
+  const doc = printWindow.document;
+  // Substituição INTEGRAL do documento: o aviso de carregamento é descartado
+  // aqui, então nunca aparece no PDF.
+  doc.open();
+  doc.write(html);
+  doc.close();
+
+  // Espera o documento final, as fontes e as imagens antes de imprimir.
+  if (doc.readyState !== "complete") {
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      const done = () => {
+        if (settled) return;
+        settled = true;
+        resolve();
+      };
+      printWindow.addEventListener("load", done, { once: true });
+      printWindow.setTimeout(done, 10000);
+    });
+  }
+  try {
+    await (doc as any).fonts?.ready;
+  } catch {}
+  try {
+    await Promise.all(
+      Array.from(doc.images || []).map((img) =>
+        img.complete
+          ? Promise.resolve()
+          : new Promise<void>((resolve) => {
+              img.addEventListener("load", () => resolve(), { once: true });
+              img.addEventListener("error", () => resolve(), { once: true });
+              printWindow.setTimeout(() => resolve(), 10000);
+            }),
+      ),
+    );
+  } catch {}
+
+  if (printWindow.closed) {
+    return { printed: false as const, reason: "window-closed" as const };
+  }
+  try {
+    printWindow.focus();
+  } catch {}
+  printWindow.print();
+  return { printed: true as const };
+
 }
