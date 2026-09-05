@@ -1308,7 +1308,31 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     heroFallbackService ? resolveServicePlaceId(heroFallbackService) : null,
   );
 
+  // Timeline horizontal scroll: show a right arrow only when there are hidden items.
+  const journeyScrollRef = useRef<HTMLDivElement>(null);
+  const [journeyCanScrollRight, setJourneyCanScrollRight] = useState(false);
+  useEffect(() => {
+    const el = journeyScrollRef.current;
+    if (!el) return;
+    const check = () => {
+      const hasOverflow = el.scrollWidth > el.clientWidth + 4;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      setJourneyCanScrollRight(hasOverflow && !atEnd);
+    };
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      el.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, [quote?.services?.length, quote?.destination]);
 
+  useAgencyBrandTheme({
+    primary: agentProfile?.agency_primary_color ?? null,
+    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
+    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
+  });
 
   if (isLoading) {
     return (
@@ -1421,31 +1445,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   if (svcTypes.has("attraction")) timelineNodes.push({ icon: <Ticket className="h-4 w-4" />, label: "Experiências" });
   if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: "Retorno" });
 
-  // Timeline horizontal scroll: show a right arrow only when there are hidden items.
-  const journeyScrollRef = useRef<HTMLDivElement>(null);
-  const [journeyCanScrollRight, setJourneyCanScrollRight] = useState(false);
-  useEffect(() => {
-    const el = journeyScrollRef.current;
-    if (!el) return;
-    const check = () => {
-      const hasOverflow = el.scrollWidth > el.clientWidth + 4;
-      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-      setJourneyCanScrollRight(hasOverflow && !atEnd);
-    };
-    check();
-    el.addEventListener("scroll", check, { passive: true });
-    window.addEventListener("resize", check);
-    return () => {
-      el.removeEventListener("scroll", check);
-      window.removeEventListener("resize", check);
-    };
-  }, [timelineNodes.length]);
-
-  useAgencyBrandTheme({
-    primary: agentProfile?.agency_primary_color ?? null,
-    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
-    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
-  });
 
   return (
     <BookingCartProvider
