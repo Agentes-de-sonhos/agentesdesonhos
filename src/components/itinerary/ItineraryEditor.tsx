@@ -439,9 +439,9 @@ export function ItineraryEditor({
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveDragId(null)}
     >
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="min-w-0 space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
           <h3 className="font-display text-lg font-semibold">
             Revisar e Editar Roteiro
           </h3>
@@ -449,27 +449,28 @@ export function ItineraryEditor({
             Aprove, edite ou remova atividades
           </p>
         </div>
-        {onReorderDays && days.length > 1 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setReorderOpen(true)}
-          >
-            <ListRestart className="mr-1 h-4 w-4" />
-            Reordenar dias
-          </Button>
-        )}
-        {onAddDay && itineraryStartDate && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAddDayOpen(true)}
-            className="ml-2"
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            Adicionar dia
-          </Button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {onReorderDays && days.length > 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setReorderOpen(true)}
+            >
+              <ListRestart className="mr-1 h-4 w-4" />
+              Reordenar dias
+            </Button>
+          )}
+          {onAddDay && itineraryStartDate && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAddDayOpen(true)}
+            >
+              <Plus className="mr-1 h-4 w-4" />
+              Adicionar dia
+            </Button>
+          )}
+        </div>
       </div>
 
       {onReorderDays && (
@@ -517,8 +518,8 @@ export function ItineraryEditor({
         {days.map((day) => (
           <Card key={day.id}>
             <CardHeader className="pb-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
                   <CardTitle className="text-base">
                     Dia {day.dayNumber}
                   </CardTitle>
@@ -526,7 +527,7 @@ export function ItineraryEditor({
                     {formatItineraryDayHeader(parseLocalDate(day.date))}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex flex-wrap items-center gap-1">
                   <Dialog
                     open={addingToDayId === day.id}
                     onOpenChange={(open) => !open && setAddingToDayId(null)}
@@ -708,9 +709,9 @@ export function ItineraryEditor({
                                 } as Partial<Activity>)
                               }
                             />
-                            <div className="space-y-1 flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <h4 className="font-medium">{activity.title}</h4>
+                            <div className="w-full min-w-0 space-y-1 sm:flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h4 className="min-w-0 break-words font-medium">{activity.title}</h4>
                                 {activity.isApproved && (
                                   <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
                                     <Check className="mr-1 h-3 w-3" />
@@ -753,7 +754,7 @@ export function ItineraryEditor({
                                 }
                               />
                             </div>
-                            <div className="flex items-start gap-1">
+                            <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto sm:flex-nowrap sm:items-start sm:justify-start">
                               {!activity.isApproved && (
                                 <Button
                                   variant="ghost"
@@ -845,7 +846,7 @@ export function ItineraryEditor({
                                           editorClassName="min-h-[300px] [&_.ProseMirror]:min-h-[280px]"
                                         />
                                       </div>
-                                      <div className="grid grid-cols-2 gap-4">
+                                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div className="space-y-2">
                                           <Label>Local</Label>
                                           <Input
