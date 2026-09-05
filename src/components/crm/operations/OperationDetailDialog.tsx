@@ -101,12 +101,13 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   }, [operation]);
 
   useEffect(() => {
-    if (operation && open) {
+    if (operation && open && (!focused || defaultTab === "checklist")) {
       // Auto-seed checklist for current stage if none exists yet
       seedChecklist(operation.stage).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [operation?.id, operation?.stage, open]);
+  }, [operation?.id, operation?.stage, open, focused, defaultTab]);
+
 
   if (!operation) return null;
 
