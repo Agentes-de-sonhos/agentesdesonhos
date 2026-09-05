@@ -272,7 +272,6 @@ export function OperationsModule() {
                             <OperationCard
                               operation={op}
                               onClick={() => { setSelectedTab("overview"); setSelected(op); }}
-                              onOpenTab={(t) => { setSelectedTab(t); setSelected(op); }}
                               onDragStart={handleDragStart}
                               canEdit={canEdit}
                               moveTargets={moveTargets}
