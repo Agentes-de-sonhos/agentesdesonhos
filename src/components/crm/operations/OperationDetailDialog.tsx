@@ -53,14 +53,33 @@ function StageChip({ stage }: { stage: OperationStage }) {
   );
 }
 
+export type OperationDetailTab =
+  | "overview"
+  | "services"
+  | "checklist"
+  | "timeline"
+  | "attachments";
+
+/** Títulos dos pop-ups focados (atalhos do menu do card). */
+export const FOCUSED_SECTION_TITLES: Record<OperationDetailTab, string> = {
+  overview: "Editar viagem",
+  services: "Conferir serviços",
+  checklist: "Fazer checklist",
+  timeline: "Anotações da operação",
+  attachments: "Anexar arquivos",
+};
+
 interface Props {
   operation: Operation | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultTab?: "overview" | "services" | "checklist" | "timeline" | "attachments";
+  defaultTab?: OperationDetailTab;
+  /** Pop-up focado: esconde as abas e mostra apenas a seção solicitada. */
+  focused?: boolean;
 }
 
-export function OperationDetailDialog({ operation, open, onOpenChange, defaultTab = "overview" }: Props) {
+export function OperationDetailDialog({ operation, open, onOpenChange, defaultTab = "overview", focused = false }: Props) {
+
   const { updateOperation, deleteOperation } = useOperations();
   const { tasks, seedChecklist, toggleTask, addTask, removeTask } = useOperationTasks(operation?.id ?? null);
   const { events, addNote } = useOperationTimeline(operation?.id ?? null);
