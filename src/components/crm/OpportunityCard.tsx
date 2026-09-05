@@ -148,15 +148,18 @@ export function OpportunityCard({
   const notesCounts = useOpportunityNotesCounts();
   const { byOpportunity } = useOpportunityLabelAssignments();
   const { stages } = usePipelineStages();
-  // Show "Gerar Orçamento" only up to the stage immediately before "Orçamento Enviado"
-  const quoteSentStage = stages.find((s) => s.legacy_key === "quote_sent");
   const currentStage = stages.find(
     (s) => s.id === opportunity.stage_id || s.legacy_key === opportunity.stage
   );
-  const canGenerateQuote =
-    !quoteSentStage ||
-    !currentStage ||
-    currentStage.position < quoteSentStage.position;
+  /* Atalhos por POSIÇÃO configurada das colunas (nomes podem ser renomeados):
+     orçamento nas 3 primeiras; carteira digital na etapa de fechamento. */
+  const shortcuts = getOpportunityCardShortcuts(
+    stages,
+    currentStageId ?? currentStage?.id ?? null
+  );
+  const showGenerateQuote = shortcuts.quote && can("opportunities.generate_quote");
+  const showGenerateWallet = shortcuts.wallet && can("opportunities.generate_wallet");
+
   const [isEditing, setIsEditing] = useState(false);
   // Reutiliza o MESMO modal de edição, apenas focado no bloco do pedido de reserva.
   const [editFocus, setEditFocus] = useState<"booking-request" | undefined>(undefined);
