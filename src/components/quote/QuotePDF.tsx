@@ -119,10 +119,23 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
  * azul padrão quando a agência não configurou cores. Não altera o tema global.
  */
 type PdfTokens = {
+  /** Primária legível sobre BRANCO (>= 4.5:1). */
   primary: string;
+  /** Primária legível sobre a TERCIÁRIA (>= 4.5:1). */
+  primaryOnTertiary: string;
   tertiary: string;
+  /** Bordas/divisórias: tom suavizado derivado da SECUNDÁRIA. */
   border: string;
+  /** Compat.: título das faixas terciárias. */
   headerText: string;
+  /** Textos sobre BRANCO. */
+  text: string;
+  muted: string;
+  faint: string;
+  /** Textos sobre a TERCIÁRIA (fundo da página, chips, faixas). */
+  textT: string;
+  mutedT: string;
+  faintT: string;
 };
 
 function luminanceOf(hex: string): number {
@@ -144,6 +157,42 @@ function contrastRatio(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+function toRgb(hex: string): [number, number, number] {
+  const m = /^#?([0-9a-f]{6})$/i.exec((hex || "").trim());
+  if (!m) return [255, 255, 255];
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function mixHex(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = toRgb(a);
+  const [r2, g2, b2] = toRgb(b);
+  const f = (x: number, y: number) => Math.round(x + (y - x) * t);
+  return (
+    "#" +
+    [f(r1, r2), f(g1, g2), f(b1, b2)]
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("")
+      .toUpperCase()
+  );
+}
+
+/**
+ * Garante contraste mínimo do texto sobre o fundo informado, sem alterar o
+ * fundo configurado pela agência: escurece a cor sobre fundos claros e a
+ * clareia sobre fundos escuros, apenas o necessário.
+ */
+function ensureReadable(fg: string, bg: string, min = 4.5): string {
+  if (contrastRatio(fg, bg) >= min) return fg;
+  const target = luminanceOf(bg) > 0.4 ? "#0B1220" : "#F8FAFC";
+  let out = fg;
+  for (let t = 0.1; t <= 1.0001; t += 0.1) {
+    out = mixHex(fg, target, t);
+    if (contrastRatio(out, bg) >= min) return out;
+  }
+  return target;
+}
+
 export function getQuotePdfTokens(profile: AgentProfile | null | undefined): PdfTokens {
   const palette = resolveBrandPalette({
     primary: profile?.agency_primary_color ?? null,
@@ -152,14 +201,27 @@ export function getQuotePdfTokens(profile: AgentProfile | null | undefined): Pdf
     tertiary: profile?.agency_tertiary_color ?? null,
     tertiaryAuto: profile?.agency_tertiary_auto ?? null,
   });
-  // Bordas/divisórias discretas usam o tom suavizado da paleta.
-  const border = palette.border;
-  // Título sobre a faixa terciária: usa a primária e só cai para o texto
-  // legível da paleta quando o contraste for insuficiente.
-  const headerText =
-    contrastRatio(palette.primary, palette.tertiary) >= 3 ? palette.primary : palette.onTertiary;
-  return { primary: palette.primary, tertiary: palette.tertiary, border, headerText };
+  const tertiary = palette.tertiary;
+  // Bordas/divisórias/detalhes: SECUNDÁRIA suavizada (misturada com o fundo).
+  const tertLight = luminanceOf(tertiary) > 0.4;
+  const border = mixHex(palette.secondary, tertLight ? "#FFFFFF" : "#0B1220", 0.55);
+  const primary = ensureReadable(palette.primary, "#FFFFFF");
+  const primaryOnTertiary = ensureReadable(palette.primary, tertiary);
+  return {
+    primary,
+    primaryOnTertiary,
+    tertiary,
+    border,
+    headerText: primaryOnTertiary,
+    text: ensureReadable("#0F172A", "#FFFFFF"),
+    muted: ensureReadable("#475569", "#FFFFFF"),
+    faint: ensureReadable("#64748B", "#FFFFFF"),
+    textT: ensureReadable("#0F172A", tertiary),
+    mutedT: ensureReadable("#475569", tertiary),
+    faintT: ensureReadable("#64748B", tertiary),
+  };
 }
+
 
 function formatLabel(value: string) {
   if (!value) return value;
