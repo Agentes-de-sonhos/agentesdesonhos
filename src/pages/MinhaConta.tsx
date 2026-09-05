@@ -203,7 +203,7 @@ export default function MinhaConta() {
               </div>
             )}
 
-            {promo.isPromo && (
+            {!planResolving && promo.isPromo && (
               <div
                 role="status"
                 aria-live="polite"
