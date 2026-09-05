@@ -5,6 +5,7 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
+import { resolveBrandPalette } from "@/lib/brandTheme";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
@@ -111,20 +112,54 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
   other: "📦",
 };
 
-// Cores de gradiente do header de cada serviço — alinhadas ao link público
-// (SERVICE_COLORS no OrcamentoPublico). Mapeia para gradiente + cor da label.
-const SERVICE_GRADIENTS: Record<ServiceType, { bg: string; fg: string; iconBg: string }> = {
-  flight:     { bg: "linear-gradient(90deg,${C.tertiary},${C.tertiary})", fg: "${C.primary}", iconBg: "rgba(255,255,255,0.85)" },
-  hotel:      { bg: "linear-gradient(90deg,rgba(245,158,11,0.18),rgba(217,119,6,0.05))",  fg: "#b45309", iconBg: "rgba(255,255,255,0.85)" },
-  car_rental: { bg: "linear-gradient(90deg,rgba(16,185,129,0.18),rgba(5,150,105,0.05))",  fg: "#047857", iconBg: "rgba(255,255,255,0.85)" },
-  transfer:   { bg: "linear-gradient(90deg,rgba(139,92,246,0.18),rgba(124,58,237,0.05))", fg: "#6d28d9", iconBg: "rgba(255,255,255,0.85)" },
-  attraction: { bg: "linear-gradient(90deg,rgba(236,72,153,0.18),rgba(219,39,119,0.05))", fg: "#be185d", iconBg: "rgba(255,255,255,0.85)" },
-  insurance:  { bg: "linear-gradient(90deg,rgba(6,182,212,0.18),rgba(8,145,178,0.05))",   fg: "#0e7490", iconBg: "rgba(255,255,255,0.85)" },
-  cruise:     { bg: "linear-gradient(90deg,${C.tertiary},${C.tertiary})", fg: "${C.primary}", iconBg: "rgba(255,255,255,0.85)" },
-  rail_transport: { bg: "linear-gradient(90deg,rgba(20,184,166,0.18),rgba(13,148,136,0.05))", fg: "${C.primary}", iconBg: "rgba(255,255,255,0.85)" },
-  circuit:    { bg: "linear-gradient(90deg,rgba(99,102,241,0.18),rgba(79,70,229,0.05))",  fg: "#4338ca", iconBg: "rgba(255,255,255,0.85)" },
-  other:      { bg: "linear-gradient(90deg,rgba(148,163,184,0.18),rgba(100,116,139,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
+
+/**
+ * Tokens de cor EXCLUSIVOS do PDF do orçamento.
+ * Fonte única: a paleta da agência (`resolveBrandPalette`), com o fallback
+ * azul padrão quando a agência não configurou cores. Não altera o tema global.
+ */
+type PdfTokens = {
+  primary: string;
+  tertiary: string;
+  border: string;
+  headerText: string;
 };
+
+function luminanceOf(hex: string): number {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return 1;
+  const n = parseInt(m[1], 16);
+  const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => {
+    const x = c / 255;
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+}
+
+function contrastRatio(a: string, b: string): number {
+  const la = luminanceOf(a);
+  const lb = luminanceOf(b);
+  const hi = Math.max(la, lb);
+  const lo = Math.min(la, lb);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+export function getQuotePdfTokens(profile: AgentProfile | null | undefined): PdfTokens {
+  const palette = resolveBrandPalette({
+    primary: profile?.agency_primary_color ?? null,
+    secondary: profile?.agency_secondary_color ?? null,
+    secondaryAuto: profile?.agency_secondary_auto ?? null,
+    tertiary: profile?.agency_tertiary_color ?? null,
+    tertiaryAuto: profile?.agency_tertiary_auto ?? null,
+  });
+  // Bordas/divisórias discretas usam o tom suavizado da paleta.
+  const border = palette.border;
+  // Título sobre a faixa terciária: usa a primária e só cai para o texto
+  // legível da paleta quando o contraste for insuficiente.
+  const headerText =
+    contrastRatio(palette.primary, palette.tertiary) >= 3 ? palette.primary : palette.onTertiary;
+  return { primary: palette.primary, tertiary: palette.tertiary, border, headerText };
+}
 
 function formatLabel(value: string) {
   if (!value) return value;
@@ -284,6 +319,7 @@ function getServiceDetails(service: QuoteService): string[] {
 }
 
 function generateAgencyHeader(profile: AgentProfile | null): string {
+  const C = getQuotePdfTokens(profile);
   if (!profile?.agency_logo_url) {
     return `
       <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid ${C.border};border-radius:0;">
@@ -302,6 +338,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
 }
 
 function generateAgentSignature(profile: AgentProfile | null): string {
+  const C = getQuotePdfTokens(profile);
   if (!profile) {
     return "";
   }
@@ -318,11 +355,11 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   return `
     <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid ${C.border};border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
       <div style="background:linear-gradient(90deg,${C.tertiary},${C.tertiary});padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;">Seu consultor de viagens</p>
       </div>
       <div style="padding:14px 18px;text-align:center;">
         ${avatarHtml.replace(/width:96px;height:96px/g, "width:68px;height:68px").replace(/font-size:36px/g, "font-size:26px")}
-        <p style="font-size:17px;font-weight:800;color:#1e293b;margin:8px 0 1px;">${profile.name}</p>
+        <p style="font-size:17px;font-weight:800;color:${C.primary};margin:8px 0 1px;">${profile.name}</p>
         ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
         ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
         ${
@@ -397,7 +434,6 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       ?.map((service) => {
         const label = getServiceLabel(service);
         const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
-        const grad = SERVICE_GRADIENTS[service.service_type as ServiceType] || SERVICE_GRADIENTS.other;
         const details = getServiceDetails(service);
         const data = service.service_data as any;
         const notesText = service.service_type === "attraction" ? data?.notes : null;
@@ -533,7 +569,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               for (let i = 0; i < chipItems.length; i += 2) {
                 const cells = chipItems.slice(i, i + 2).map((c) => `
                   <td style="width:50%;vertical-align:top;background:${C.tertiary};border:1px solid ${C.border};border-radius:8px;padding:6px 10px;">
-                    <p style="margin:0 0 2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;line-height:1.2;">${c.key}</p>
+                    <p style="margin:0 0 2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:${C.primary};line-height:1.2;">${c.key}</p>
                     <p style="margin:0;font-size:12px;color:#1e293b;line-height:1.4;word-break:break-word;${/^\d{1,2}:\d{2}$/.test(c.value) ? 'white-space:nowrap;' : ''}">${renderChipValue(c.value)}</p>
                   </td>
                 `).join("");
@@ -624,18 +660,18 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         return `
         <div class="pdf-card service-card" style="border:1px solid ${C.border};border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
+          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${C.tertiary};padding:8px 14px;color:${C.headerText};">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-              <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
+              <div style="width:34px;height:34px;border-radius:9px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
               <div style="min-width:0;">
-                <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
-                ${summary ? `<p style="font-size:12px;color:${grad.fg};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
+                <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${C.headerText};margin:0;line-height:1.2;">${label}</p>
+                ${summary ? `<p style="font-size:12px;color:${C.headerText};opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;word-break:break-word;">${summary}</p>` : ""}
               </div>
             </div>
             ${packagePricing
-              ? `<span style="font-size:11px;font-weight:600;color:${grad.fg};opacity:0.8;white-space:nowrap;">${PACKAGE_INCLUDED_LABEL}</span>`
+              ? `<span style="font-size:11px;font-weight:600;color:${C.headerText};opacity:0.8;white-space:nowrap;">${PACKAGE_INCLUDED_LABEL}</span>`
               : showDetailedPrices && !hotelHasMultipleRooms
-                ? `<span style="font-size:17px;font-weight:800;color:${grad.fg};white-space:nowrap;">${formatCurrency(service.amount)}</span>`
+                ? `<span style="font-size:17px;font-weight:800;color:${C.headerText};white-space:nowrap;">${formatCurrency(service.amount)}</span>`
                 : ""}
           </div>
           <div style="padding:12px 16px;">
@@ -893,7 +929,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <div style="margin-bottom:18px;">
           <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
             <div style="flex:1;height:1px;background:${C.border};"></div>
-            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços Incluídos</h3>
+            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
             <div style="flex:1;height:1px;background:${C.border};"></div>
           </div>
           ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
@@ -943,7 +979,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             const iv = total / (installments || 1);
             paymentHtml = `
               <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">A partir de</p>
-              <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${installments}x de ${formatCurrency(iv)}</p>
               <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
             `;
           } else if (mode === "installments_with_entry") {
@@ -952,19 +988,19 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             const iv = remainder / (installments || 1);
             paymentHtml = `
               <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">Condição especial</p>
-              <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:#0f172a;">Entrada de ${formatCurrency(entryValue)} + ${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:${C.primary};">Entrada de ${formatCurrency(entryValue)} + ${installments}x de ${formatCurrency(iv)}</p>
               <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
           } else if (mode === "total_only") {
             paymentHtml = `
               <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">${packagePricing ? PACKAGE_TOTAL_LABEL : "Valor total da viagem"}</p>
-              <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(total)}</p>
+              <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${formatCurrency(total)}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
               <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">${packagePricing ? PACKAGE_TOTAL_LABEL : "Investimento"}</p>
-              <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(discountedTotal)}</p>
+              <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${formatCurrency(discountedTotal)}</p>
               ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:#94a3b8;">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:${C.primary};font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
               ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">${methodLabel}</p>` : ""}
             `;
@@ -988,7 +1024,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <!-- Payment Terms -->
         ${quote.show_investment_section !== false && quote.payment_terms ? `
           <div class="pdf-block payment-terms" style="border:1px solid ${C.border};border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin-bottom:10px;">💳 Condições de Pagamento</p>
+            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin-bottom:10px;">💳 Condições de Pagamento</p>
             <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
         ` : ""}
