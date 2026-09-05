@@ -54,7 +54,6 @@ function textColorFor(hex: string) {
 export function OperationCard({
   operation,
   onClick,
-  onOpenTab,
   onDragStart,
   canEdit = true,
   moveTargets,
@@ -69,7 +68,8 @@ export function OperationCard({
   const { deleteOperation } = useOperations();
   const [showLabels, setShowLabels] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [showEditClient, setShowEditClient] = useState(false);
+  const [showNote, setShowNote] = useState(false);
+  const [focusedSection, setFocusedSection] = useState<OperationDetailTab | null>(null);
   const [showDelete, setShowDelete] = useState(false);
 
   const appliedLabels = byOperation[operation.id] || [];
@@ -80,11 +80,8 @@ export function OperationCard({
 
   const travelClose = daysToTravel !== null && daysToTravel >= 0 && daysToTravel <= 14;
 
-  const openTab = (tab: OperationCardTab) => {
-    onOpenTab ? onOpenTab(tab) : onClick?.();
-  };
-
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+
 
   /* Reaproveita o fluxo existente de carteira digital: abre a carteira já
      vinculada quando existir, senão a criação pré-preenchida da operação. */
