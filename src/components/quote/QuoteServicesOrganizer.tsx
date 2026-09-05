@@ -252,7 +252,7 @@ export function QuoteServicesOrganizer({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       {services.length === 0 && !hasSections ? (
         <div className="flex flex-col items-center justify-center py-10 text-center gap-4">
           {addSectionButton}
