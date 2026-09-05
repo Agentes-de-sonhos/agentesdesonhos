@@ -55,9 +55,9 @@ describe("toasts com Kanban maximizado", () => {
     });
     // hosts padrão (fora da superfície)
     await waitFor(() =>
-      expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1)
+      expect(document.querySelectorAll("section[aria-label^="Notifications"]").length).toBe(1)
     );
-    expect(surface().querySelector("[data-sonner-toaster]")).toBeNull();
+    expect(surface().querySelector("section[aria-label^="Notifications"]")).toBeNull();
 
     act(() => {
       screen.getByText("toggle-a").click();
@@ -68,7 +68,7 @@ describe("toasts com Kanban maximizado", () => {
       expect(surface().querySelectorAll("[data-toast-host]").length).toBe(1)
     );
     expect(document.querySelectorAll("[data-toast-host]").length).toBe(1);
-    expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1);
+    expect(document.querySelectorAll("section[aria-label^="Notifications"]").length).toBe(1);
     // viewport do shadcn também dentro da superfície
     expect(surface().textContent).toContain("Salvo com sucesso");
     expect(surface().textContent).toContain("Sem permissão");
