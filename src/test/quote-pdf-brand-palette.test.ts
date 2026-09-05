@@ -197,7 +197,8 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
       agency_tertiary_auto: false,
     } as any);
     expect(captured.html).toContain(tokens.textT);
-    expect(captured.html).toContain(tokens.faintT);
+    // textos sobre o fundo geral branco usam os tokens de branco
+    expect(captured.html).toContain(tokens.faint);
     // textos dos cards brancos continuam escuros (sem substituição global)
     expect(captured.html).toContain(tokens.text);
   });
@@ -230,7 +231,7 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     await generateQuotePDF({ ...quote, services: [] }, baseProfile);
     const tokens = getQuotePdfTokens(baseProfile);
     expect(captured.html).toContain("Nenhum serviço adicionado");
-    expect(captured.html).toContain(`color:${tokens.faintT}`);
+    expect(captured.html).toContain(`color:${tokens.faint}`);
   });
 
   it("ensureReadable garante contraste mínimo inclusive sobre fundos intermediários", () => {
@@ -279,9 +280,11 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     expect(captured.html).toContain(getQuotePdfTokens(profile).primary);
     expect(captured.html).toContain("#FFF0F6");
     expect(captured.html).toContain(getQuotePdfTokens(profile).border);
-    // fundo da página usa a terciária, também na impressão
+    // fundo geral das páginas é sempre branco; terciária só em elementos internos
+    expect(captured.html).toContain("body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:");
+    expect(captured.html).toContain("background:#ffffff; }");
+    expect(captured.html).toContain("background: #ffffff !important;");
     expect(captured.html).toContain(`background:${palette.tertiary}`);
-    expect(captured.html).not.toContain("background: #fff !important");
     // verde semântico do WhatsApp preservado
     expect(captured.html).toContain("#25D366");
   });

@@ -765,7 +765,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       <title>Orçamento — ${quote.client_name}</title>
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:${C.textT}; line-height:1.5; background:${C.tertiary}; }
+        html { background:#ffffff; }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:${C.text}; line-height:1.5; background:#ffffff; }
         img { max-width:100%; height:auto; }
 
         /* ----- SMART PAGINATION (briefing) -----
@@ -796,6 +797,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             line-height: 1.42 !important;
+            background: #ffffff !important;
           }
           .page-break { page-break-before: always; break-before: page; }
 
@@ -918,13 +920,13 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             📍 Proposta de Viagem
           </div>
           ${(quote as any).trip_title ? `
-            <h1 style="font-size:32px;font-weight:800;color:${C.textT};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
-            <p style="font-size:17px;font-weight:600;color:${C.mutedT};margin:0 0 4px;">${quote.destination}</p>
+            <h1 style="font-size:32px;font-weight:800;color:${C.text};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
+            <p style="font-size:17px;font-weight:600;color:${C.muted};margin:0 0 4px;">${quote.destination}</p>
           ` : `
-            <h1 style="font-size:32px;font-weight:800;color:${C.textT};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
+            <h1 style="font-size:32px;font-weight:800;color:${C.text};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
           `}
-          <p style="font-size:14px;color:${C.mutedT};margin-top:4px;">
-            Preparado especialmente para <strong style="color:${C.textT};">${quote.client_name}</strong>
+          <p style="font-size:14px;color:${C.muted};margin-top:4px;">
+            Preparado especialmente para <strong style="color:${C.text};">${quote.client_name}</strong>
           </p>
         </div>
 
@@ -970,7 +972,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                       <img src="${firstImg}" alt="${quote.destination}" style="width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid ${C.border};display:block;" />
                     </td>
                     <td style="vertical-align:top;">
-                      <p style="font-size:13px;color:${C.mutedT};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
+                      <p style="font-size:13px;color:${C.muted};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
                     </td>
                   </tr>
                 </table>
@@ -986,7 +988,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }
           return `
             <div class="pdf-block destination-intro" style="margin-bottom:20px;">
-              <p style="font-size:13px;color:${C.mutedT};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
+              <p style="font-size:13px;color:${C.muted};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
             </div>
           `;
         })()}
@@ -1024,10 +1026,10 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <div style="margin-bottom:18px;">
           <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
             <div style="flex:1;height:1px;background:${C.border};"></div>
-            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
+            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
             <div style="flex:1;height:1px;background:${C.border};"></div>
           </div>
-          ${servicesHtml || `<p style="text-align:center;color:${C.faintT};padding:32px;">Nenhum serviço adicionado</p>`}
+          ${servicesHtml || `<p style="text-align:center;color:${C.faint};padding:32px;">Nenhum serviço adicionado</p>`}
         </div>
 
         <!-- Documentos anexados (logo após os serviços, como item integrado do roteiro) -->
@@ -1125,7 +1127,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         ` : ""}
 
         <!-- Validity -->
-        <p style="text-align:center;font-size:12px;color:${C.faintT};margin:8px 0 16px;">
+        <p style="text-align:center;font-size:12px;color:${C.faint};margin:8px 0 16px;">
           ${quote.valid_until ? `Proposta válida até ${formatDate(quote.valid_until)}` : ""}
           ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : (quote.valid_until ? " Valores sujeitos a alteração conforme disponibilidade." : "")}
         </p>
@@ -1135,7 +1137,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         <!-- Footer -->
         <div style="text-align:center;padding-top:20px;">
-          <p style="font-size:10px;color:${C.faintT};">
+          <p style="font-size:10px;color:${C.faint};">
             Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} • Agentes de Sonhos
           </p>
         </div>
