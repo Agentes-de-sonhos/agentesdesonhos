@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { parseFunctionsError, formatCancelDate } from "@/lib/subscriptionCancel";
 import { parsePortalError } from "@/lib/customerPortal";
 import { getScheduledCancellation } from "@/lib/subscriptionState";
+import { getPromoAccessState } from "@/lib/promoAccess";
 import {
   CalendarClock,
   CreditCard,
