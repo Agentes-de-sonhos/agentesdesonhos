@@ -450,7 +450,10 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       // Aviso de carregamento: existe apenas na TELA e é totalmente descartado
       // com document.open() antes de escrever o HTML final (nunca é impresso).
       printWindow.document.write(
-        '<!doctype html><html><head><meta charset="utf-8"><title>Gerando PDF…</title></head><body style="font-family:sans-serif;padding:24px;color:#475569;">Gerando PDF do orçamento…</body></html>',
+        '<!doctype html><html><head><meta charset="utf-8"><title>Gerando PDF…</title>' +
+          '<style>@media print{.screen-only{display:none !important}}</style></head>' +
+          '<body style="font-family:sans-serif;padding:24px;color:#475569;">' +
+          '<p class="screen-only">Gerando PDF do orçamento…</p></body></html>',
       );
       printWindow.document.close();
     } catch {}
@@ -768,9 +771,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
            of pages and avoid almost-empty trailing pages.                   */
         @media print {
           /* Numeração própria "1 de N" via margin box do CSS Paged Media.
-             Navegadores Chromium ainda ignoram margin boxes; nesse caso o
-             rodapé nativo do navegador (about:blank + página) continua sendo
-             a única numeração — por isso a orientação aparece na tela. */
+             Comprovado no Chromium: a numeração própria é impressa. O CSS não
+             remove o cabeçalho/rodapé NATIVO do navegador (about:blank e data)
+             quando ele está ativado — por isso a dica aparece na tela. */
           @page {
             size: A4;
             margin: 14mm 10mm 12mm 10mm;
