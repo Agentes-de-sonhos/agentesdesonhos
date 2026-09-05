@@ -72,7 +72,12 @@ export default function MinhaConta() {
     setTimeout(() => window.location.reload(), 400);
   };
 
-  const isPaid = plan === "profissional" || plan === "premium" || plan === "fundador";
+  // Promoção manual (Grupo SC) não é assinatura recorrente: sem portal Stripe,
+  // sem cancelamento e sem "próxima renovação".
+  const promo = getPromoAccessState(subscription as any);
+  const isRecurringPaid =
+    plan === "profissional" || plan === "premium" || plan === "fundador";
+  const isPaid = isRecurringPaid;
   const cancellation = getScheduledCancellation(subscription as any);
 
   const openPortal = async (mode: "manage" | "cancel") => {
