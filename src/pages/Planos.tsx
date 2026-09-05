@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { SubscriptionPlan } from "@/types/subscription";
+import { getPlanOfferState } from "@/lib/promoAccess";
 import { cn } from "@/lib/utils";
 
 interface PlanConfig {
