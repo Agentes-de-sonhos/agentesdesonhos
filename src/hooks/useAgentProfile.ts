@@ -8,6 +8,12 @@ export interface AgentProfile {
   state: string | null;
   agency_primary_color: string | null;
   agency_secondary_color?: string | null;
+  /** Quando true (default), o tom secundário é derivado da cor principal. */
+  agency_secondary_auto?: boolean | null;
+  agency_tertiary_color?: string | null;
+  /** Quando true (default), o tom terciário é derivado da cor principal. */
+  agency_tertiary_auto?: boolean | null;
+
 }
 
 export async function fetchAgentProfile(userId: string, supabase: any): Promise<AgentProfile | null> {
