@@ -248,11 +248,17 @@ export function UpgradeDialog({
                 >
                   {loadingPlan === plan.id ? (
                     <><Loader2 className="h-4 w-4 animate-spin" /> Redirecionando...</>
-                  ) : isCurrentPlan 
-                    ? "Plano Atual" 
-                    : canUpgrade
-                      ? <>Fazer Upgrade <ArrowRight className="h-4 w-4" /></>
-                      : "Plano Inferior"}
+                  ) : offer.blockedReason === "loading"
+                    ? "Carregando…"
+                    : offer.coveredByPromo
+                      ? (plan.id === "premium" ? "Incluído na sua promoção" : "Incluído no seu acesso atual")
+                      : offer.blockedReason === "team_inherited"
+                        ? "Plano da conta principal"
+                        : isCurrentPlan
+                          ? "Plano Atual"
+                          : canUpgrade
+                            ? <>Fazer Upgrade <ArrowRight className="h-4 w-4" /></>
+                            : "Plano Inferior"}
                 </Button>
               </div>
             );
