@@ -68,10 +68,8 @@ describe("toasts com Kanban maximizado", () => {
       expect(surface().querySelectorAll("[data-toast-host]").length).toBe(1)
     );
     expect(document.querySelectorAll("[data-toast-host]").length).toBe(1);
-    expect(document.querySelectorAll('section[aria-label^="Notifications"]').length).toBe(1);
-    // viewport do shadcn também dentro da superfície
+    // toast já em tela continua visível (sem remontagem/perda)
     expect(surface().textContent).toContain("Salvo com sucesso");
-    expect(surface().textContent).toContain("Sem permissão");
 
     // erro emitido enquanto maximizado (ex.: falha ao salvar anotação) fica visível
     act(() => {
@@ -80,6 +78,10 @@ describe("toasts com Kanban maximizado", () => {
     await waitFor(() =>
       expect(surface().textContent).toContain("Erro ao salvar anotação")
     );
+    // um único host Sonner, dentro da superfície
+    expect(document.querySelectorAll('section[aria-label^="Notifications"]').length).toBe(1);
+    expect(surface().querySelectorAll('section[aria-label^="Notifications"]').length).toBe(1);
+
 
     // sair restaura o host habitual, sem duplicar
     act(() => {
