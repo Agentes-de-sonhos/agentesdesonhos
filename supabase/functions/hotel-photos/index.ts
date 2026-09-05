@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { place_id } = await req.json();
+    const { place_id, photo_index, size } = await req.json();
 
     if (!place_id) {
       return new Response(
@@ -43,20 +43,42 @@ serve(async (req) => {
       );
     }
 
-    // Resolve every photo to its final googleusercontent.com URL so we
-    // never leak the API key in public HTML and avoid broken photo_reference
-    // tokens once Google rotates them.
-    const refs = (data.result.photos || []).slice(0, 10);
+    const all = (data.result.photos || []) as any[];
+
+    // Caminho econômico: resolve APENAS a foto pedida (referência gplace://).
+    // Uma única chamada cobrada de Places Photo por foto exibida.
+    if (photo_index !== undefined && photo_index !== null) {
+      const idx = Number(photo_index);
+      const p = Number.isFinite(idx) ? all[idx] : null;
+      const width = Number(size) > 0 ? Math.min(Number(size), 1600) : 1600;
+      const url = p?.photo_reference
+        ? await resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, width)
+        : null;
+      const photo = url
+        ? {
+            url,
+            thumb_url: url,
+            width: p.width,
+            height: p.height,
+            attributions: p.html_attributions || [],
+          }
+        : null;
+      return new Response(
+        JSON.stringify({ hotel_name: data.result.name || "", photo, photos: photo ? [photo] : [] }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Modo seleção: no máximo 5 sugestões e SOMENTE a miniatura (1 chamada por
+    // foto). A versão grande é resolvida depois, só para a foto escolhida.
+    const refs = all.slice(0, 5);
     const resolved = await Promise.all(
       refs.map(async (p: any) => {
-        const [full, thumb] = await Promise.all([
-          resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 1600),
-          resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 320),
-        ]);
-        if (!full) return null;
+        const thumb = await resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 320);
+        if (!thumb) return null;
         return {
-          url: full,
-          thumb_url: thumb || full,
+          url: thumb,
+          thumb_url: thumb,
           width: p.width,
           height: p.height,
           attributions: p.html_attributions || [],

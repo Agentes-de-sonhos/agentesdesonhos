@@ -51,7 +51,7 @@ serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
     const key = normalizeKey(body.query, body.destination, body.location);
     const wantMulti = Number(body.limit ?? 1) > 1;
-    const want = Math.min(Math.max(Number(body.limit ?? 1), 1), 18);
+    const want = Math.min(Math.max(Number(body.limit ?? 1), 1), 5);
     const queryText = [body.query, body.location, body.destination].filter(Boolean).join(" ");
 
     // ─── Multi-photo search (gallery) — bypass cache, aggregate sources ───
@@ -84,14 +84,13 @@ serve(async (req) => {
             const refs: any[] = detData?.result?.photos ?? candidate.photos ?? [];
             for (const p of refs.slice(0, want)) {
               if (!p?.photo_reference) continue;
-              const [full, thumb] = await Promise.all([
-                resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 1600),
-                resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 320),
-              ]);
+              // Uma única chamada cobrada por candidata: a mesma URL serve
+              // para a grade de seleção e para a foto efetivamente aplicada.
+              const full = await resolveGooglePlacePhotoUrl(p.photo_reference, GOOGLE_PLACES_API_KEY, 1600);
               if (!full) continue;
               photos.push({
                 photo_url: full,
-                thumb_url: thumb || full,
+                thumb_url: full,
                 source: "google_places",
                 attributions: p.html_attributions ?? [],
               });
