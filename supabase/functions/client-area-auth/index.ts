@@ -50,6 +50,8 @@ import {
   storagePathFromValue,
 } from '../_shared/clientAreaDocs.ts'
 import { checkRateLimit, getClientIP } from '../_shared/rate-limiter.ts'
+import { loadClientProfile } from '../_shared/clientAreaProfile.ts'
+
 
 const BASE_HEADERS = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
