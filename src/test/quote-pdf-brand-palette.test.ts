@@ -279,9 +279,11 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     expect(captured.html).toContain(getQuotePdfTokens(profile).primary);
     expect(captured.html).toContain("#FFF0F6");
     expect(captured.html).toContain(getQuotePdfTokens(profile).border);
-    // fundo da página usa a terciária, também na impressão
+    // fundo geral das páginas é sempre branco; terciária só em elementos internos
+    expect(captured.html).toContain("body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:");
+    expect(captured.html).toContain("background:#ffffff; }");
+    expect(captured.html).toContain("background: #ffffff !important;");
     expect(captured.html).toContain(`background:${palette.tertiary}`);
-    expect(captured.html).not.toContain("background: #fff !important");
     // verde semântico do WhatsApp preservado
     expect(captured.html).toContain("#25D366");
   });
