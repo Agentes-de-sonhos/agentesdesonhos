@@ -4,10 +4,17 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     from: () => ({
       select: () => ({
-        eq: () => ({ eq: () => ({ order: async () => ({ data: [], error: null }) }) }),
+        eq: () => ({
+          eq: () => ({
+            order: async () => ({
+              data: [{ id: "d1", file_name: "roteiro.pdf", file_path: "x", file_type: "pdf", file_size: 1024 }],
+              error: null,
+            }),
+          }),
+        }),
       }),
     }),
-    storage: { from: () => ({ createSignedUrl: async () => ({ data: null }) }) },
+    storage: { from: () => ({ createSignedUrl: async () => ({ data: { signedUrl: "https://x" } }) }) },
   },
 }));
 
