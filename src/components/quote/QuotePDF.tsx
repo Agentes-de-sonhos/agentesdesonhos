@@ -1019,7 +1019,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <div style="margin-bottom:18px;">
           <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
             <div style="flex:1;height:1px;background:${C.border};"></div>
-            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
+            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
             <div style="flex:1;height:1px;background:${C.border};"></div>
           </div>
           ${servicesHtml || '<p style="text-align:center;color:${C.faintT};padding:32px;">Nenhum serviço adicionado</p>'}
