@@ -713,7 +713,7 @@ export function ItineraryEditor({
                             </div>
                             <div className="w-full min-w-0 space-y-1 sm:flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <h4 className="min-w-0 break-words font-medium">{activity.title}</h4>
+                                <h4 className="min-w-0 break-words [overflow-wrap:anywhere] font-medium">{activity.title}</h4>
                                 {activity.isApproved && (
                                   <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
                                     <Check className="mr-1 h-3 w-3" />
@@ -723,7 +723,7 @@ export function ItineraryEditor({
                               </div>
                               {activity.description && (
                                 <div
-                                  className="prose prose-sm max-w-none text-sm text-muted-foreground break-words [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md"
+                                  className="prose prose-sm max-w-none text-sm text-muted-foreground break-words [overflow-wrap:anywhere] [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md"
                                   dangerouslySetInnerHTML={{ __html: sanitizedDescriptionHtml(activity.description) }}
                                 />
                               )}
