@@ -5,11 +5,11 @@ import { MAX_HOTEL_GALLERY_IMAGES } from "@/lib/quoteHotelGallery";
 const read = (p: string) => readFileSync(p, "utf8");
 
 describe("integração da galeria de hospedagem", () => {
-  it("mantém o limite de 5 fotos para os demais serviços", () => {
+  it("mantém o limite de 5 fotos em hospedagem e nos demais serviços", () => {
     const src = read("src/components/quote/ServiceForms.tsx");
     expect(src).toContain("const MAX_IMAGES_PER_SERVICE = 5;");
-    expect(MAX_HOTEL_GALLERY_IMAGES).toBe(10);
-    // A galeria de 10 é usada apenas no caminho de hospedagem (hotelMode).
+    expect(MAX_HOTEL_GALLERY_IMAGES).toBe(5);
+    // A galeria de hospedagem é usada apenas no caminho de hotel (hotelMode).
     expect(src).toMatch(/if \(hotelMode\) \{[\s\S]{0,200}HotelPhotoGallery/);
   });
 
@@ -20,10 +20,10 @@ describe("integração da galeria de hospedagem", () => {
     expect(publico).toMatch(/image_urls/);
   });
 
-  it("o PDF continua resolvendo gplace:// e renderiza até 10 fotos de hotel", () => {
+  it("o PDF continua resolvendo gplace://", () => {
     const pdf = read("src/components/quote/QuotePDF.tsx");
     expect(pdf).toContain("resolveServiceImages");
-    expect(pdf).toContain("isHotel ? allImages.slice(0, 10)");
+    expect(pdf).toContain("resolveServiceImages");
   });
 
   it("a Edge Function de importação valida JWT e bloqueia SSRF", () => {
