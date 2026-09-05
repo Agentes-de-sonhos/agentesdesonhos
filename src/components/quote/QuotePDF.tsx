@@ -833,7 +833,12 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       </style>
     </head>
     <body>
+      <div class="screen-only" style="max-width:820px;margin:0 auto 12px;padding:10px 14px;border-radius:12px;background:#ffffff;border:1px solid ${C.border};font-size:12px;color:#475569;">
+        Dica: na janela de impressão, desative <strong>“Cabeçalhos e rodapés”</strong> para remover o
+        endereço (about:blank) e a data das bordas do PDF. Este aviso não é impresso.
+      </div>
       <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
+
         ${generateAgencyHeader(profile || null)}
 
         <div style="padding:6px 32px 0;">
