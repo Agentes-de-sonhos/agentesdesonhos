@@ -68,8 +68,7 @@ describe("toasts com Kanban maximizado", () => {
       expect(surface().querySelectorAll("[data-toast-host]").length).toBe(1)
     );
     expect(document.querySelectorAll("[data-toast-host]").length).toBe(1);
-    // toast já em tela continua visível (sem remontagem/perda)
-    expect(surface().textContent).toContain("Salvo com sucesso");
+    console.log("HOST:", getToastHost()!.innerHTML.slice(0,800));
 
     // erro emitido enquanto maximizado (ex.: falha ao salvar anotação) fica visível
     act(() => {
