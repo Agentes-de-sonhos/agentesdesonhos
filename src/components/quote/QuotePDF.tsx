@@ -705,8 +705,23 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
            subtle vertical compression so we don't waste space at the bottom
            of pages and avoid almost-empty trailing pages.                   */
         @media print {
-          @page { size: A4; margin: 14mm 10mm 10mm 10mm; }
+          /* Numeração própria "1 de N" via margin box do CSS Paged Media.
+             Navegadores Chromium ainda ignoram margin boxes; nesse caso o
+             rodapé nativo do navegador (about:blank + página) continua sendo
+             a única numeração — por isso a orientação aparece na tela. */
+          @page {
+            size: A4;
+            margin: 14mm 10mm 12mm 10mm;
+            @bottom-right {
+              content: "Página " counter(page) " de " counter(pages);
+              font-family: 'Segoe UI', system-ui, sans-serif;
+              font-size: 9px;
+              color: #94a3b8;
+            }
+          }
           @page :first { margin-top: 8mm; }
+          .screen-only { display: none !important; }
+
           html, body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
