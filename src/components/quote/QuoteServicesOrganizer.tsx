@@ -252,7 +252,7 @@ export function QuoteServicesOrganizer({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       {services.length === 0 && !hasSections ? (
         <div className="flex flex-col items-center justify-center py-10 text-center gap-4">
           {addSectionButton}
@@ -475,7 +475,7 @@ function SortableSection({
         isDragging && "opacity-70 shadow-lg",
       )}
     >
-      <div className="flex items-center gap-2 px-3 py-2.5 bg-muted/40">
+      <div className="flex min-w-0 flex-wrap items-center gap-2 px-3 py-2.5 bg-muted/40">
         <button
           type="button"
           className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none"

@@ -526,7 +526,7 @@ export default function CriarRoteiro() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="w-full min-w-0 max-w-full space-y-6 animate-fade-in">
         <PageHeader
           pageKey="criar-roteiro"
           title="Criar Roteiro"

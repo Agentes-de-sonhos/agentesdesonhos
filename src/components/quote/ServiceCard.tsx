@@ -209,8 +209,8 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
       <CardContent className="p-0">
         <Collapsible open={open} onOpenChange={setOpen}>
           {/* Header — always visible */}
-          <div className="flex items-center justify-between gap-3 p-4">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="flex min-w-0 flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
               {dragHandle}
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
                 <Icon className="h-5 w-5 text-primary" />
@@ -254,7 +254,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
                 <p className="font-medium break-words whitespace-pre-wrap">{getServiceDescription(service)}</p>
               </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto sm:flex-nowrap sm:shrink-0">
               <span className="font-semibold text-primary mr-1 whitespace-nowrap">{formatCurrency(service.amount, currency)}</span>
               {hasExpandableContent && (
                 <CollapsibleTrigger asChild>

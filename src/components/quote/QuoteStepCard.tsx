@@ -70,7 +70,7 @@ export function QuoteStepCard({
         )}
       </button>
       {showBody && (
-        <CardContent id={panelId} className="pt-0">
+        <CardContent id={panelId} className="min-w-0 pt-0">
           {children}
         </CardContent>
       )}

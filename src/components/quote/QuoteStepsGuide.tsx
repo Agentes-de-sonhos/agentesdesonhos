@@ -28,7 +28,7 @@ export function QuoteStepsGuide({ steps, onSelect }: Props) {
 
   return (
     <>
-      <nav aria-label="Etapas do orçamento" className="my-1 -mx-1 overflow-x-auto px-1 pb-1">
+      <nav aria-label="Etapas do orçamento" className="my-1 -mx-1 w-full min-w-0 max-w-full overflow-x-auto px-1 pb-1">
         <ol className="flex w-max items-center gap-x-2">
           {steps.map((s, i) => (
             <li key={s.step} className="flex items-center gap-2">
