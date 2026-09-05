@@ -114,14 +114,14 @@ const SERVICE_EMOJI: Record<ServiceType, string> = {
 // Cores de gradiente do header de cada serviço — alinhadas ao link público
 // (SERVICE_COLORS no OrcamentoPublico). Mapeia para gradiente + cor da label.
 const SERVICE_GRADIENTS: Record<ServiceType, { bg: string; fg: string; iconBg: string }> = {
-  flight:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.15),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
+  flight:     { bg: "linear-gradient(90deg,${C.tertiary},${C.tertiary})", fg: "${C.primary}", iconBg: "rgba(255,255,255,0.85)" },
   hotel:      { bg: "linear-gradient(90deg,rgba(245,158,11,0.18),rgba(217,119,6,0.05))",  fg: "#b45309", iconBg: "rgba(255,255,255,0.85)" },
   car_rental: { bg: "linear-gradient(90deg,rgba(16,185,129,0.18),rgba(5,150,105,0.05))",  fg: "#047857", iconBg: "rgba(255,255,255,0.85)" },
   transfer:   { bg: "linear-gradient(90deg,rgba(139,92,246,0.18),rgba(124,58,237,0.05))", fg: "#6d28d9", iconBg: "rgba(255,255,255,0.85)" },
   attraction: { bg: "linear-gradient(90deg,rgba(236,72,153,0.18),rgba(219,39,119,0.05))", fg: "#be185d", iconBg: "rgba(255,255,255,0.85)" },
   insurance:  { bg: "linear-gradient(90deg,rgba(6,182,212,0.18),rgba(8,145,178,0.05))",   fg: "#0e7490", iconBg: "rgba(255,255,255,0.85)" },
-  cruise:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.12),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
-  rail_transport: { bg: "linear-gradient(90deg,rgba(20,184,166,0.18),rgba(13,148,136,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
+  cruise:     { bg: "linear-gradient(90deg,${C.tertiary},${C.tertiary})", fg: "${C.primary}", iconBg: "rgba(255,255,255,0.85)" },
+  rail_transport: { bg: "linear-gradient(90deg,rgba(20,184,166,0.18),rgba(13,148,136,0.05))", fg: "${C.primary}", iconBg: "rgba(255,255,255,0.85)" },
   circuit:    { bg: "linear-gradient(90deg,rgba(99,102,241,0.18),rgba(79,70,229,0.05))",  fg: "#4338ca", iconBg: "rgba(255,255,255,0.85)" },
   other:      { bg: "linear-gradient(90deg,rgba(148,163,184,0.18),rgba(100,116,139,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
 };
@@ -286,8 +286,8 @@ function getServiceDetails(service: QuoteService): string[] {
 function generateAgencyHeader(profile: AgentProfile | null): string {
   if (!profile?.agency_logo_url) {
     return `
-      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
-        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
+      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid ${C.border};border-radius:0;">
+        <p style="font-size:22px;font-weight:800;color:${C.primary};margin:0;letter-spacing:-0.3px;">
           ${profile?.agency_name || "Proposta de Viagem"}
         </p>
       </div>
@@ -307,8 +307,8 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   }
 
   const avatarHtml = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid rgba(15,118,110,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
-    : `<div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#0f766e,#14b8a6);display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:36px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">${profile.name.charAt(0).toUpperCase()}</div>`;
+    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid ${C.border};box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
+    : `<div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,${C.primary},${C.primary});display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:36px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">${profile.name.charAt(0).toUpperCase()}</div>`;
 
   const whatsappNumber = profile.phone?.replace(/\D/g, "") || "";
   const whatsappLink = whatsappNumber
@@ -316,8 +316,8 @@ function generateAgentSignature(profile: AgentProfile | null): string {
     : "";
 
   return `
-    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
+    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid ${C.border};border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <div style="background:linear-gradient(90deg,${C.tertiary},${C.tertiary});padding:8px 18px;text-align:center;">
         <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
       </div>
       <div style="padding:14px 18px;text-align:center;">
@@ -453,14 +453,14 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             const total = Number(r.total_price) || unit * qty;
             const sim = getRoomPaymentSimulation(total, service, quote);
             const installmentLine = sim.installmentValue != null
-              ? `<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:#64748b;">ou ${sim.installmentsCount}x de</span><span style="color:#0f766e;font-weight:700;">${formatCurrency(sim.installmentValue)}</span></div>`
+              ? `<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:#64748b;">ou ${sim.installmentsCount}x de</span><span style="color:${C.primary};font-weight:700;">${formatCurrency(sim.installmentValue)}</span></div>`
               : "";
             return `
-              <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:6px;background:#f8fafc;">
+              <div style="border:1px solid ${C.border};border-radius:10px;padding:10px 12px;margin-bottom:6px;background:${C.tertiary};">
                 <div style="font-size:13px;font-weight:700;color:#0f172a;">${qty}x ${r.room_type || ""}</div>
                 ${paxParts.length ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">${paxParts.join(" + ")}</div>` : ""}
                 ${r.notes ? `<div style="font-size:11px;color:#64748b;font-style:italic;margin-top:2px;">${r.notes}</div>` : ""}
-                <div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:6px;">
+                <div style="border-top:1px solid ${C.border};margin-top:8px;padding-top:6px;">
                   <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:#64748b;">Valor</span><span style="color:#0f172a;font-weight:700;">${formatCurrency(sim.total)}</span></div>
                   ${installmentLine}
                 </div>
@@ -484,9 +484,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             const display = getServicePaymentDisplay(service.amount, payConfig, feeInfo);
             if (display) {
               paymentHtml = `
-                <div class="pdf-block pdf-payment" style="margin-top:10px;background:rgba(15,118,110,0.05);border:1px solid rgba(15,118,110,0.20);border-radius:10px;padding:10px 12px;">
-                  <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#0f766e;margin:0 0 2px;">💳 Parcelamento</p>
-                  <p style="font-size:13px;font-weight:600;color:#0f766e;margin:0;">${display}</p>
+                <div class="pdf-block pdf-payment" style="margin-top:10px;background:${C.tertiary};border:1px solid ${C.border};border-radius:10px;padding:10px 12px;">
+                  <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:${C.primary};margin:0 0 2px;">💳 Parcelamento</p>
+                  <p style="font-size:13px;font-weight:600;color:${C.primary};margin:0;">${display}</p>
                 </div>
               `;
             }
@@ -532,7 +532,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               const rows: string[] = [];
               for (let i = 0; i < chipItems.length; i += 2) {
                 const cells = chipItems.slice(i, i + 2).map((c) => `
-                  <td style="width:50%;vertical-align:top;background:rgba(241,245,249,0.6);border:1px solid rgba(226,232,240,0.7);border-radius:8px;padding:6px 10px;">
+                  <td style="width:50%;vertical-align:top;background:${C.tertiary};border:1px solid ${C.border};border-radius:8px;padding:6px 10px;">
                     <p style="margin:0 0 2px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;line-height:1.2;">${c.key}</p>
                     <p style="margin:0;font-size:12px;color:#1e293b;line-height:1.4;word-break:break-word;${/^\d{1,2}:\d{2}$/.test(c.value) ? 'white-space:nowrap;' : ''}">${renderChipValue(c.value)}</p>
                   </td>
@@ -555,14 +555,14 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         const detailsHtml = `${chipsHtml}${freeHtml}`;
 
         const descHtml = descText ? `
-          <div class="pdf-block pdf-desc" style="margin-top:8px;background:rgba(241,245,249,0.5);border-left:3px solid rgba(15,118,110,0.4);border-radius:6px;padding:8px 12px;word-wrap:break-word;overflow-wrap:break-word;">
+          <div class="pdf-block pdf-desc" style="margin-top:8px;background:${C.tertiary};border-left:3px solid ${C.border};border-radius:6px;padding:8px 12px;word-wrap:break-word;overflow-wrap:break-word;">
             <p style="margin:0;font-size:12px;color:#475569;line-height:1.5;white-space:pre-wrap;word-break:break-word;">${descText}</p>
           </div>
         ` : "";
 
         const notesHtml = notesText ? `
           <div class="pdf-block pdf-notes" style="margin-top:4px;">
-            <p style="margin:2px 0;font-size:12px;color:#64748b;line-height:1.45;font-style:italic;border-left:2px solid rgba(15,118,110,0.2);padding-left:10px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
+            <p style="margin:2px 0;font-size:12px;color:#64748b;line-height:1.45;font-style:italic;border-left:2px solid ${C.border};padding-left:10px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
           </div>
         ` : "";
 
@@ -584,7 +584,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                   .map(
                     (src) => `
                       <td style="width:20%;vertical-align:middle;padding:3px;">
-                        <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-align:center;line-height:78px;font-size:0;">
+                        <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid ${C.border};border-radius:8px;overflow:hidden;text-align:center;line-height:78px;font-size:0;">
                           <img src="${src}" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:inline-block;" />
                         </div>
                       </td>
@@ -612,7 +612,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
               <tr>
                 <td style="width:30%;vertical-align:top;padding:0 14px 0 0;">
-                  <img src="${firstImage}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;display:block;" />
+                  <img src="${firstImage}" style="width:100%;height:130px;object-fit:cover;border-radius:12px;border:1px solid ${C.border};display:block;" />
                 </td>
                 <td style="vertical-align:top;">
                   ${bodyInner}
@@ -623,7 +623,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           : bodyInner;
 
         return `
-        <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div class="pdf-card service-card" style="border:1px solid ${C.border};border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
           <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
               <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
@@ -654,7 +654,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       <title>Orçamento — ${quote.client_name}</title>
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:#f8fafc; }
+        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:${C.tertiary}; }
         img { max-width:100%; height:auto; }
 
         /* ----- SMART PAGINATION (briefing) -----
@@ -669,7 +669,6 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           html, body {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
-            background: #fff !important;
             line-height: 1.42 !important;
           }
           .page-break { page-break-before: always; break-before: page; }
@@ -784,7 +783,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <div style="padding:6px 32px 0;">
         <!-- Hero -->
         <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
-          <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
+          <div style="display:inline-block;background:${C.tertiary};color:${C.primary};padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
             📍 Proposta de Viagem
           </div>
           ${(quote as any).trip_title ? `
@@ -799,7 +798,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         </div>
 
         <!-- Overview -->
-        <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+        <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid ${C.border};border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
           <div>
             <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
             <p style="font-size:14px;font-weight:700;color:#1e293b;">${quote.destination}</p>
@@ -837,7 +836,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                 <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
                   <tr>
                     <td style="width:25%;vertical-align:top;padding:0 16px 0 0;">
-                      <img src="${firstImg}" alt="${quote.destination}" style="width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid #e2e8f0;display:block;" />
+                      <img src="${firstImg}" alt="${quote.destination}" style="width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid ${C.border};display:block;" />
                     </td>
                     <td style="vertical-align:top;">
                       <p style="font-size:13px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
@@ -849,7 +848,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }
           if (firstImg) {
             return `
-              <div class="pdf-block destination-intro" style="margin-bottom:20px;border-radius:14px;overflow:hidden;border:1px solid #e2e8f0;">
+              <div class="pdf-block destination-intro" style="margin-bottom:20px;border-radius:14px;overflow:hidden;border:1px solid ${C.border};">
                 <img src="${firstImg}" alt="${quote.destination}" style="width:100%;max-height:240px;object-fit:cover;display:block;" />
               </div>
             `;
@@ -872,7 +871,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               return `
                 <td style="width:50%;vertical-align:top;padding:6px 8px;">
                   <div style="display:flex;align-items:flex-start;gap:8px;">
-                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:#ecfeff;color:#0f766e;font-size:13px;flex:0 0 auto;">${emoji}</span>
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:${C.tertiary};color:${C.primary};font-size:13px;flex:0 0 auto;">${emoji}</span>
                     <span style="font-size:13px;color:#0f172a;line-height:1.5;font-weight:500;">${safe}</span>
                   </div>
                 </td>`;
@@ -883,8 +882,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             rows.push(`<tr>${cells[i] || ""}${cells[i + 1] || '<td style="width:50%"></td>'}</tr>`);
           }
           return `
-            <div class="pdf-block whats-included" style="border:1px solid #e2e8f0;border-radius:16px;padding:18px 20px;margin-bottom:18px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-              <p style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#0f766e;margin:0 0 10px;">O que está incluso</p>
+            <div class="pdf-block whats-included" style="border:1px solid ${C.border};border-radius:16px;padding:18px 20px;margin-bottom:18px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+              <p style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0 0 10px;">O que está incluso</p>
               <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">${rows.join("")}</table>
             </div>
           `;
@@ -893,20 +892,20 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <!-- Services -->
         <div style="margin-bottom:18px;">
           <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
-            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+            <div style="flex:1;height:1px;background:${C.border};"></div>
             <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços Incluídos</h3>
-            <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+            <div style="flex:1;height:1px;background:${C.border};"></div>
           </div>
           ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
         </div>
 
         <!-- Documentos anexados (logo após os serviços, como item integrado do roteiro) -->
         ${quoteDocuments.length > 0 ? `
-          <div class="pdf-block quote-documents" style="border:1px solid #e2e8f0;border-radius:16px;margin-bottom:18px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-            <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(90deg,rgba(15,118,110,0.10),rgba(15,118,110,0.03));border-bottom:1px solid #e2e8f0;">
+          <div class="pdf-block quote-documents" style="border:1px solid ${C.border};border-radius:16px;margin-bottom:18px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(90deg,${C.tertiary},${C.tertiary});border-bottom:1px solid ${C.border};">
               <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#ffffff;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">📎</span>
               <div style="flex:1;">
-                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:#0f766e;margin:0;">Anexos</p>
+                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:${C.primary};margin:0;">Anexos</p>
                 <p style="font-size:14px;font-weight:700;color:#0f172a;margin:1px 0 0;">Documentos do seu orçamento</p>
               </div>
               <span style="font-size:11px;color:#94a3b8;">${quoteDocuments.length} ${quoteDocuments.length === 1 ? "arquivo" : "arquivos"}</span>
@@ -915,14 +914,14 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               ${quoteDocuments.map((doc, idx) => `
                 <tr style="${idx > 0 ? "border-top:1px solid #f1f5f9;" : ""}">
                   <td style="padding:12px 18px;vertical-align:middle;width:44px;">
-                    <div style="width:36px;height:36px;border-radius:10px;background:#ecfeff;display:inline-flex;align-items:center;justify-content:center;font-size:16px;">${emojiForDoc(doc.file_name, doc.file_type)}</div>
+                    <div style="width:36px;height:36px;border-radius:10px;background:${C.tertiary};display:inline-flex;align-items:center;justify-content:center;font-size:16px;">${emojiForDoc(doc.file_name, doc.file_type)}</div>
                   </td>
                   <td style="padding:12px 8px 12px 0;vertical-align:middle;">
                     <p style="font-size:13px;font-weight:600;color:#0f172a;margin:0;word-break:break-word;">${(doc.file_name || "").replace(/</g, "&lt;")}</p>
                     ${doc.file_size ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${formatDocSizePDF(doc.file_size)}</p>` : ""}
                   </td>
                   <td style="padding:12px 18px;vertical-align:middle;text-align:right;white-space:nowrap;">
-                    ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#0f766e;text-decoration:none;border:1px solid #0f766e;border-radius:999px;padding:6px 12px;">Abrir</a>` : ""}
+                    ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:${C.primary};text-decoration:none;border:1px solid ${C.primary};border-radius:999px;padding:6px 12px;">Abrir</a>` : ""}
                   </td>
                 </tr>
               `).join("")}
@@ -966,7 +965,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             paymentHtml = `
               <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:#64748b;">${packagePricing ? PACKAGE_TOTAL_LABEL : "Investimento"}</p>
               <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:#0f172a;">${formatCurrency(discountedTotal)}</p>
-              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:#94a3b8;">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:#0f766e;font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:#94a3b8;">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:${C.primary};font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
               ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:#64748b;">${methodLabel}</p>` : ""}
             `;
           }
@@ -979,7 +978,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             && getInvestmentPresentationLayout(quote) !== 'consolidated') return '';
 
           return `
-            <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid ${C.border};border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
               ${paymentHtml}
               ${quote.services && quote.services.length > 0 ? `<p style="font-size:10px;margin:10px 0 0;line-height:1.3;color:#94a3b8;">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
             </div>
@@ -988,7 +987,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         <!-- Payment Terms -->
         ${quote.show_investment_section !== false && quote.payment_terms ? `
-          <div class="pdf-block payment-terms" style="border:1px solid #e2e8f0;border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+          <div class="pdf-block payment-terms" style="border:1px solid ${C.border};border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
             <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin-bottom:10px;">💳 Condições de Pagamento</p>
             <p style="font-size:13px;color:#475569;line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
