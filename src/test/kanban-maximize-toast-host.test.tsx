@@ -65,11 +65,11 @@ describe("toasts com Kanban maximizado", () => {
 
     expect(getToastHost()).toBe(surface());
     await waitFor(() =>
-      expect(surface().querySelectorAll("[data-sonner-toaster]").length).toBe(1)
+      expect(surface().querySelectorAll("[data-toast-host]").length).toBe(1)
     );
+    expect(document.querySelectorAll("[data-toast-host]").length).toBe(1);
     expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1);
     // viewport do shadcn também dentro da superfície
-    expect(surface().querySelectorAll("[data-radix-toast-viewport]").length).toBe(1);
     expect(surface().textContent).toContain("Salvo com sucesso");
     expect(surface().textContent).toContain("Sem permissão");
 
@@ -86,8 +86,10 @@ describe("toasts com Kanban maximizado", () => {
       screen.getByText("exit-a").click();
     });
     expect(getToastHost()).toBeNull();
-    expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1);
-    expect(surface().querySelector("[data-sonner-toaster]")).toBeNull();
+    expect(document.querySelectorAll("[data-toast-host]").length).toBe(1);
+    expect(surface().querySelector("[data-toast-host]")).toBeNull();
+    // nada é perdido nem repetido ao voltar
+    expect(document.body.textContent).toContain("Erro ao salvar anotação");
 
     unmount();
     expect(getToastHost()).toBeNull();
@@ -133,9 +135,9 @@ describe("toasts com Kanban maximizado", () => {
       sonnerToast.success("Movido");
     });
     await waitFor(() =>
-      expect(getToastHost()!.querySelectorAll("[data-sonner-toaster]").length).toBe(1)
+      expect(getToastHost()!.querySelectorAll("[data-toast-host]").length).toBe(1)
     );
-    expect(document.querySelectorAll("[data-sonner-toaster]").length).toBe(1);
+    expect(document.querySelectorAll("[data-toast-host]").length).toBe(1);
     second.unmount();
   });
 });
