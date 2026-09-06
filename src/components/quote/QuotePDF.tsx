@@ -123,10 +123,12 @@ type PdfTokens = {
   primary: string;
   /** Primária legível sobre a TERCIÁRIA (>= 4.5:1). */
   primaryOnTertiary: string;
+  /** Cor secundária efetiva da agência (usada nas faixas de serviço). */
+  secondary: string;
   tertiary: string;
-  /** Bordas/divisórias: tom suavizado derivado da SECUNDÁRIA. */
+  /** Bordas/divisórias/detalhes: tom suavizado derivado da SECUNDÁRIA. */
   border: string;
-  /** Compat.: título das faixas terciárias. */
+  /** Título/destaques das faixas de serviço: primária ajustada para ler sobre a SECUNDÁRIA. */
   headerText: string;
   /** Textos sobre BRANCO. */
   text: string;
