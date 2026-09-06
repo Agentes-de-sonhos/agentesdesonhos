@@ -123,10 +123,12 @@ type PdfTokens = {
   primary: string;
   /** Primária legível sobre a TERCIÁRIA (>= 4.5:1). */
   primaryOnTertiary: string;
+  /** Cor secundária efetiva da agência (usada nas faixas de serviço). */
+  secondary: string;
   tertiary: string;
-  /** Bordas/divisórias: tom suavizado derivado da SECUNDÁRIA. */
+  /** Bordas/divisórias/detalhes: tom suavizado derivado da SECUNDÁRIA. */
   border: string;
-  /** Compat.: título das faixas terciárias. */
+  /** Título/destaques das faixas de serviço: primária ajustada para ler sobre a SECUNDÁRIA. */
   headerText: string;
   /** Textos sobre BRANCO. */
   text: string;
@@ -215,9 +217,10 @@ export function getQuotePdfTokens(profile: AgentProfile | null | undefined): Pdf
   return {
     primary,
     primaryOnTertiary,
+    secondary: palette.secondary,
     tertiary,
     border,
-    headerText: primaryOnTertiary,
+    headerText: ensureReadable(palette.primary, palette.secondary),
     text: ensureReadable("#0F172A", "#FFFFFF"),
     muted: ensureReadable("#475569", "#FFFFFF"),
     faint: ensureReadable("#64748B", "#FFFFFF"),
@@ -695,7 +698,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                   .map(
                     (src) => `
                       <td style="width:20%;vertical-align:middle;padding:3px;">
-                        <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid ${C.border};border-radius:8px;overflow:hidden;text-align:center;line-height:78px;font-size:0;">
+                        <div style="width:100%;height:78px;background:#F3F4F6;border:1px solid ${C.border};border-radius:8px;overflow:hidden;text-align:center;line-height:78px;font-size:0;">
                           <img src="${src}" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:inline-block;" />
                         </div>
                       </td>
@@ -735,7 +738,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         return `
         <div class="pdf-card service-card" style="border:1px solid ${C.border};border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${C.tertiary};padding:8px 14px;color:${C.headerText};">
+          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${C.secondary};padding:8px 14px;color:${C.headerText};">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
               <div style="width:34px;height:34px;border-radius:9px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
               <div style="min-width:0;">
