@@ -738,7 +738,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         return `
         <div class="pdf-card service-card" style="border:1px solid ${C.border};border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${C.tertiary};padding:8px 14px;color:${C.headerText};">
+          <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${C.secondary};padding:8px 14px;color:${C.headerText};">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
               <div style="width:34px;height:34px;border-radius:9px;background:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
               <div style="min-width:0;">
