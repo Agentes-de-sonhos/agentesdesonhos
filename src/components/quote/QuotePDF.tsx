@@ -217,9 +217,10 @@ export function getQuotePdfTokens(profile: AgentProfile | null | undefined): Pdf
   return {
     primary,
     primaryOnTertiary,
+    secondary: palette.secondary,
     tertiary,
     border,
-    headerText: primaryOnTertiary,
+    headerText: ensureReadable(palette.primary, palette.secondary),
     text: ensureReadable("#0F172A", "#FFFFFF"),
     muted: ensureReadable("#475569", "#FFFFFF"),
     faint: ensureReadable("#64748B", "#FFFFFF"),
