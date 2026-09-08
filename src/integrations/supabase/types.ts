@@ -10414,6 +10414,7 @@ export type Database = {
           niches: string[] | null
           partnership_interests: string[] | null
           phone: string | null
+          public_content_locale: string
           public_slug: string | null
           services: string[] | null
           specialties: string[] | null
@@ -10450,6 +10451,7 @@ export type Database = {
           niches?: string[] | null
           partnership_interests?: string[] | null
           phone?: string | null
+          public_content_locale?: string
           public_slug?: string | null
           services?: string[] | null
           specialties?: string[] | null
@@ -10486,6 +10488,7 @@ export type Database = {
           niches?: string[] | null
           partnership_interests?: string[] | null
           phone?: string | null
+          public_content_locale?: string
           public_slug?: string | null
           services?: string[] | null
           specialties?: string[] | null
@@ -16113,6 +16116,7 @@ export type Database = {
           city: string
           name: string
           phone: string
+          public_content_locale: string
           state: string
           user_id: string
         }[]

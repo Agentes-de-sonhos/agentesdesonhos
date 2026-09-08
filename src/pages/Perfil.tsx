@@ -36,6 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { CommunityProfileCard } from "@/components/profile/CommunityProfileCard";
 import { AgencyBrandColorCard } from "@/components/profile/AgencyBrandColorCard";
+import { PublicContentLocaleCard } from "@/components/profile/PublicContentLocaleCard";
+
 
 const brazilianStates = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -65,6 +67,9 @@ interface ProfileData {
   agency_secondary_auto: boolean | null;
   agency_tertiary_color: string | null;
   agency_tertiary_auto: boolean | null;
+  /** Idioma dos materiais públicos enviados ao cliente final. */
+  public_content_locale: string | null;
+
 }
 
 export default function Perfil() {
@@ -120,6 +125,8 @@ export default function Perfil() {
           agency_secondary_auto: (data as any).agency_secondary_auto ?? true,
           agency_tertiary_color: (data as any).agency_tertiary_color || null,
           agency_tertiary_auto: (data as any).agency_tertiary_auto ?? true,
+          public_content_locale: (data as any).public_content_locale || "pt-BR",
+
         };
         setProfile(profileData);
         setFormData(profileData);
@@ -656,7 +663,16 @@ export default function Perfil() {
               setFormData((prev) => (prev ? { ...prev, ...patch } as any : prev));
             }}
           />
+
+          <PublicContentLocaleCard
+            initialLocale={profile?.public_content_locale ?? null}
+            onSaved={(loc) => {
+              setProfile((prev) => (prev ? ({ ...prev, public_content_locale: loc } as any) : prev));
+              setFormData((prev) => (prev ? ({ ...prev, public_content_locale: loc } as any) : prev));
+            }}
+          />
         </div>
+
 
         {/* Assinaturas Comerciais */}
         <Card className="shadow-card">

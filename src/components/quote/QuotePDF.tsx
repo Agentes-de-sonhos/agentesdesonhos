@@ -1,5 +1,6 @@
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
+import { type PublicLocale, DEFAULT_PUBLIC_LOCALE, formatPublicShortDate, formatPublicLongDate, pluralize } from "@/i18n/publicMaterials/locale";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
@@ -78,25 +79,13 @@ const INCLUDED_EMOJI: Record<string, string> = {
   sparkles: "✨",
 };
 
-const SERVICE_LABELS: Record<ServiceType, string> = {
-  flight: "Passagem Aérea",
-  hotel: "Hospedagem",
-  car_rental: "Locação de Veículo",
-  transfer: "Transfer",
-  attraction: "Ingressos/Atrações",
-  insurance: "Seguro Viagem",
-  cruise: "Cruzeiro",
-  rail_transport: "Transporte Ferroviário",
-  circuit: "Circuitos",
-  other: "Outros Serviços",
-};
-
-function getServiceLabel(service: QuoteService): string {
+function getServiceLabel(service: QuoteService, t: ReturnType<typeof translateQuote>): string {
   if (service.service_type === "other") {
     const customTitle = (service.service_data as any)?.custom_title?.trim();
     if (customTitle) return customTitle;
   }
-  return SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+  const key = `svc_${service.service_type}` as any;
+  return t(key) || t("svc_default");
 }
 
 const SERVICE_EMOJI: Record<ServiceType, string> = {
@@ -241,64 +230,66 @@ function parseLocalDate(dateStr: string) {
   return new Date(y, m - 1, d);
 }
 
-function formatDate(dateStr: string) {
-  try {
-    return format(parseLocalDate(dateStr), "dd/MM/yyyy", { locale: ptBR });
-  } catch {
-    return dateStr;
-  }
+function makeFormatDate(locale: PublicLocale) {
+  return (dateStr: string) => {
+    try {
+      return formatPublicShortDate(dateStr, locale) || dateStr;
+    } catch {
+      return dateStr;
+    }
+  };
 }
 
-function getServiceDetails(service: QuoteService): string[] {
+function getServiceDetails(service: QuoteService, t: ReturnType<typeof translateQuote>, formatDate: (d: string) => string): string[] {
   const data = service.service_data as any;
   const details: string[] = [];
   switch (service.service_type) {
     case "flight":
       if (data.return_date && !data.is_one_way) {
-        details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
+        details.push(`${t("ida")}: ${formatDate(data.departure_date)} | ${t("volta")}: ${formatDate(data.return_date)}`);
       } else {
-        details.push(`Ida: ${formatDate(data.departure_date)} (somente ida)`);
+        details.push(`${t("ida")}: ${formatDate(data.departure_date)} (${t("somenteIda")})`);
       }
       // Multi-leg support — re-bucket by segment_type so internal flights aren't shown under "Ida".
       const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data);
       outLegs.forEach((ob: any, i: number) => {
         const parts: string[] = [];
         if (ob.leg_date) parts.push(formatDate(ob.leg_date));
-        if (ob.flight_number) parts.push(`Voo ${ob.flight_number}`);
+        if (ob.flight_number) parts.push(`${t("voo")} ${ob.flight_number}`);
         if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
-        if (ob.departure_time) parts.push(`Saída: ${ob.departure_time}`);
-        if (ob.arrival_time) parts.push(`Chegada: ${ob.arrival_time}`);
+        if (ob.departure_time) parts.push(`${t("saida")}: ${ob.departure_time}`);
+        if (ob.arrival_time) parts.push(`${t("chegada")}: ${ob.arrival_time}`);
         const label = outLegs.length > 1 ? `✈ Ida (trecho ${i + 1})` : `✈ Ida`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
       intLegs.forEach((it: any, i: number) => {
         const parts: string[] = [];
         if (it.leg_date) parts.push(formatDate(it.leg_date));
-        if (it.flight_number) parts.push(`Voo ${it.flight_number}`);
+        if (it.flight_number) parts.push(`${t("voo")} ${it.flight_number}`);
         if (it.airport_origin && it.airport_destination) parts.push(`${it.airport_origin} → ${it.airport_destination}`);
-        if (it.departure_time) parts.push(`Saída: ${it.departure_time}`);
-        if (it.arrival_time) parts.push(`Chegada: ${it.arrival_time}`);
+        if (it.departure_time) parts.push(`${t("saida")}: ${it.departure_time}`);
+        if (it.arrival_time) parts.push(`${t("chegada")}: ${it.arrival_time}`);
         const label = intLegs.length > 1 ? `✈ Trecho interno (${i + 1})` : `✈ Trecho interno`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
       retLegs.forEach((rt: any, i: number) => {
         const parts: string[] = [];
         if (rt.leg_date) parts.push(formatDate(rt.leg_date));
-        if (rt.flight_number) parts.push(`Voo ${rt.flight_number}`);
+        if (rt.flight_number) parts.push(`${t("voo")} ${rt.flight_number}`);
         if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
-        if (rt.departure_time) parts.push(`Saída: ${rt.departure_time}`);
-        if (rt.arrival_time) parts.push(`Chegada: ${rt.arrival_time}`);
+        if (rt.departure_time) parts.push(`${t("saida")}: ${rt.departure_time}`);
+        if (rt.arrival_time) parts.push(`${t("chegada")}: ${rt.arrival_time}`);
         const label = retLegs.length > 1 ? `✈ Volta (trecho ${i + 1})` : `✈ Volta`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
-      if (data.includes_baggage) details.push("✓ Bagagem incluída");
-      if (data.includes_boarding_fee) details.push("✓ Taxa de embarque incluída");
+      if (data.includes_baggage) details.push(`✓ ${t("baggageIncluded")}`);
+      if (data.includes_boarding_fee) details.push(`✓ ${t("boardingFeeIncluded")}`);
       if (data.notes) details.push(data.notes);
       break;
     case "hotel":
       details.push(`${data.hotel_name} — ${data.city}`);
-      details.push(`Check-in: ${formatDate(data.check_in)} | Check-out: ${formatDate(data.check_out)}`);
-      if (data.meal_plan) details.push(`Regime: ${formatLabel(data.meal_plan)}`);
+      details.push(`${t("checkIn")}: ${formatDate(data.check_in)} | ${t("checkOut")}: ${formatDate(data.check_out)}`);
+      if (data.meal_plan) details.push(`${t("regime")}: ${formatLabel(data.meal_plan)}`);
       if (Array.isArray(data.rooms) && data.rooms.length === 1) {
         details.push("Acomodações:");
         data.rooms.forEach((r: any) => {
@@ -313,24 +304,24 @@ function getServiceDetails(service: QuoteService): string[] {
           details.push(`  • ${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
         });
       } else if (data.room_type) {
-        details.push(`Quarto: ${formatLabel(data.room_type)}`);
+        details.push(`${t("quarto")}: ${formatLabel(data.room_type)}`);
       }
-      if (data.notes) details.push(`Obs: ${data.notes}`);
+      if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
       break;
     case "car_rental":
-      details.push(`Tipo: ${data.car_type} | ${data.days} diária(s)`);
-      details.push(`Retirada: ${data.pickup_location}`);
-      details.push(`Devolução: ${data.dropoff_location}`);
-      if (data.notes) details.push(`Obs: ${data.notes}`);
+      details.push(`${t("tipo")}: ${data.car_type} | ${data.days} diária(s)`);
+      details.push(`${t("retirada")}: ${data.pickup_location}`);
+      details.push(`${t("devolucao")}: ${data.dropoff_location}`);
+      if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
       break;
     case "transfer":
-      details.push(`Tipo: ${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"}`);
-      details.push(`Local: ${data.location}`);
+      details.push(`${t("tipo")}: ${data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")}`);
+      details.push(`${t("local")}: ${data.location}`);
       if (data.transfer_type === "round_trip") {
-        details.push(`Chegada: ${formatDate(data.arrival_date || data.date)}`);
-        if (data.departure_date) details.push(`Saída: ${formatDate(data.departure_date)}`);
+        details.push(`${t("chegada")}: ${formatDate(data.arrival_date || data.date)}`);
+        if (data.departure_date) details.push(`${t("saida")}: ${formatDate(data.departure_date)}`);
       } else {
-        details.push(`Data: ${formatDate(data.date)}`);
+        details.push(`${t("data")}: ${formatDate(data.date)}`);
       }
       break;
     case "attraction":
@@ -388,13 +379,13 @@ function getServiceDetails(service: QuoteService): string[] {
   return details;
 }
 
-function generateAgencyHeader(profile: AgentProfile | null): string {
+function generateAgencyHeader(profile: AgentProfile | null, t: ReturnType<typeof translateQuote>): string {
   const C = getQuotePdfTokens(profile);
   if (!profile?.agency_logo_url) {
     return `
       <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid ${C.border};border-radius:0;">
         <p style="font-size:22px;font-weight:800;color:${C.primary};margin:0;letter-spacing:-0.3px;">
-          ${profile?.agency_name || "Proposta de Viagem"}
+          ${profile?.agency_name || t("proposalBadge")}
         </p>
       </div>
     `;
@@ -407,7 +398,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
   `;
 }
 
-function generateAgentSignature(profile: AgentProfile | null): string {
+function generateAgentSignature(profile: AgentProfile | null, t: ReturnType<typeof translateQuote>): string {
   const C = getQuotePdfTokens(profile);
   if (!profile) {
     return "";
@@ -425,7 +416,7 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   return `
     <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid ${C.border};border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
       <div style="background:linear-gradient(90deg,${C.tertiary},${C.tertiary});padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;">Seu consultor de viagens</p>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;">${t("yourConsultant")}</p>
       </div>
       <div style="padding:14px 18px;text-align:center;">
         ${avatarHtml.replace(/width:96px;height:96px/g, "width:68px;height:68px").replace(/font-size:36px/g, "font-size:26px")}
@@ -436,7 +427,7 @@ function generateAgentSignature(profile: AgentProfile | null): string {
           whatsappLink
             ? `<div style="margin-top:10px;">
                 <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
-                  💬 Falar no WhatsApp
+                  💬 ${t("whatsappCta")}
                 </a>
               </div>`
             : ""
@@ -446,10 +437,12 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   `;
 }
 
-export async function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null) {
+export async function generateQuotePDF(quote: Quote & Record<string, any>, profile?: AgentProfile | null, locale: PublicLocale = DEFAULT_PUBLIC_LOCALE) {
   const { currency } = getQuoteCurrencyInfo(quote);
   const formatCurrency = (v: number) => formatQuoteCurrency(v, currency);
   const C = getQuotePdfTokens(profile || null);
+  const t = translateQuote(locale);
+  const formatDate = makeFormatDate(locale);
 
   // Abrir a janela ANTES do await para evitar bloqueio de popup pelo navegador.
   const printWindow = window.open("", "_blank");
@@ -461,7 +454,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         '<!doctype html><html><head><meta charset="utf-8"><title>Gerando PDF…</title>' +
           '<style>@media print{.screen-only{display:none !important}}</style></head>' +
           '<body style="font-family:sans-serif;padding:24px;color:#475569;">' +
-          '<p class="screen-only">Gerando PDF do orçamento…</p></body></html>',
+          `<p class="screen-only">${t("generatingPdf")}</p></body></html>`,
       );
       printWindow.document.close();
     } catch {}
@@ -510,9 +503,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
   const servicesHtml =
     quote.services
       ?.map((service) => {
-        const label = getServiceLabel(service);
+        const label = getServiceLabel(service, t);
         const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
-        const details = getServiceDetails(service);
+        const details = getServiceDetails(service, t, formatDate);
         const data = service.service_data as any;
         const notesText = service.service_type === "attraction" ? data?.notes : null;
         const descText = service.description || null;
@@ -787,7 +780,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             size: A4;
             margin: 14mm 10mm 12mm 10mm;
             @bottom-right {
-              content: "Página " counter(page) " de " counter(pages);
+              content: "${t("pdfPagePrefix")} " counter(page) " ${t("pdfPageOf")} " counter(pages);
               font-family: 'Segoe UI', system-ui, sans-serif;
               font-size: 9px;
               color: #94a3b8;
@@ -909,18 +902,17 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
     </head>
     <body>
       <div class="screen-only" style="max-width:820px;margin:0 auto 12px;padding:10px 14px;border-radius:12px;background:#ffffff;border:1px solid ${C.border};font-size:12px;color:#475569;">
-        Dica: na janela de impressão, desative <strong>“Cabeçalhos e rodapés”</strong> para remover o
-        endereço (about:blank) e a data das bordas do PDF. Este aviso não é impresso.
+        ${t("printTip")}
       </div>
       <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
 
-        ${generateAgencyHeader(profile || null)}
+        ${generateAgencyHeader(profile || null, t)}
 
         <div style="padding:6px 32px 0;">
         <!-- Hero -->
         <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
           <div style="display:inline-block;background:${C.tertiary};color:${C.primaryOnTertiary};padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
-            📍 Proposta de Viagem
+            📍 ${t("proposalBadge")}
           </div>
           ${(quote as any).trip_title ? `
             <h1 style="font-size:32px;font-weight:800;color:${C.text};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(quote as any).trip_title}</h1>
@@ -929,23 +921,23 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             <h1 style="font-size:32px;font-weight:800;color:${C.text};margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${quote.destination}</h1>
           `}
           <p style="font-size:14px;color:${C.muted};margin-top:4px;">
-            Preparado especialmente para <strong style="color:${C.text};">${quote.client_name}</strong>
+            ${t("preparedFor", { name: "" })} <strong style="color:${C.text};">${quote.client_name}</strong>
           </p>
         </div>
 
         <!-- Overview -->
         <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid ${C.border};border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
           <div>
-            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
+            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 ${t("destino")}</p>
             <p style="font-size:14px;font-weight:700;color:${C.text};">${quote.destination}</p>
           </div>
           <div style="border-left:1px solid ${C.border};padding-left:18px;">
-            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
+            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 ${t("period")}</p>
             <p style="font-size:14px;font-weight:700;color:${C.text};">${formatDate(quote.start_date)} — ${formatDate(quote.end_date)}</p>
-            <p style="font-size:12px;color:${C.faint};margin-top:2px;">${days} dias</p>
+            <p style="font-size:12px;color:${C.faint};margin-top:2px;">${days} ${t("days")}</p>
           </div>
           <div style="border-left:1px solid ${C.border};padding-left:18px;">
-            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👥 Viajantes</p>
+            <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👥 ${t("travelers")}</p>
             <p style="font-size:14px;font-weight:700;color:${C.text};">${quote.adults_count} adulto${quote.adults_count > 1 ? "s" : ""}${quote.children_count > 0 ? ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}` : ""}</p>
           </div>
         </div>
@@ -1019,7 +1011,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }
           return `
             <div class="pdf-block whats-included" style="border:1px solid ${C.border};border-radius:16px;padding:18px 20px;margin-bottom:18px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-              <p style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0 0 10px;">O que está incluso</p>
+              <p style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0 0 10px;">${t("whatsIncluded")}</p>
               <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">${rows.join("")}</table>
             </div>
           `;
@@ -1029,10 +1021,10 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <div style="margin-bottom:18px;">
           <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
             <div style="flex:1;height:1px;background:${C.border};"></div>
-            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;white-space:nowrap;">Serviços Incluídos</h3>
+            <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin:0;white-space:nowrap;">${t("servicesIncluded")}</h3>
             <div style="flex:1;height:1px;background:${C.border};"></div>
           </div>
-          ${servicesHtml || `<p style="text-align:center;color:${C.faint};padding:32px;">Nenhum serviço adicionado</p>`}
+          ${servicesHtml || `<p style="text-align:center;color:${C.faint};padding:32px;">${t("noServicesAdded")}</p>`}
         </div>
 
         <!-- Documentos anexados (logo após os serviços, como item integrado do roteiro) -->
@@ -1041,10 +1033,10 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(90deg,${C.tertiary},${C.tertiary});border-bottom:1px solid ${C.border};">
               <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:#ffffff;font-size:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05);">📎</span>
               <div style="flex:1;">
-                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:${C.primaryOnTertiary};margin:0;">Anexos</p>
-                <p style="font-size:14px;font-weight:700;color:${C.textT};margin:1px 0 0;">Documentos do seu orçamento</p>
+                <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:${C.primaryOnTertiary};margin:0;">${t("attachments")}</p>
+                <p style="font-size:14px;font-weight:700;color:${C.textT};margin:1px 0 0;">${t("quoteDocuments")}</p>
               </div>
-              <span style="font-size:11px;color:${C.faint};">${quoteDocuments.length} ${quoteDocuments.length === 1 ? "arquivo" : "arquivos"}</span>
+              <span style="font-size:11px;color:${C.faint};">${quoteDocuments.length} ${pluralize(locale, quoteDocuments.length, { one: t("fileOne"), other: t("fileOther") })}</span>
             </div>
             <table style="width:100%;border-collapse:collapse;">
               ${quoteDocuments.map((doc, idx) => `
@@ -1057,7 +1049,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                     ${doc.file_size ? `<p style="font-size:11px;color:${C.faint};margin:2px 0 0;">${formatDocSizePDF(doc.file_size)}</p>` : ""}
                   </td>
                   <td style="padding:12px 18px;vertical-align:middle;text-align:right;white-space:nowrap;">
-                    ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:${C.primary};text-decoration:none;border:1px solid ${C.primary};border-radius:999px;padding:6px 12px;">Abrir</a>` : ""}
+                    ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:${C.primary};text-decoration:none;border:1px solid ${C.primary};border-radius:999px;padding:6px 12px;">${t("open")}</a>` : ""}
                   </td>
                 </tr>
               `).join("")}
@@ -1078,30 +1070,30 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           if (mode === "installments") {
             const iv = total / (installments || 1);
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">A partir de</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${t("startingFrom")}</p>
               <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${installments}x de ${formatCurrency(iv)}</p>
-              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • sem juros</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">${t("total")}: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • ${t("noInterest")}</p>
             `;
           } else if (mode === "installments_with_entry") {
             const entryValue = total * (entryPct / 100);
             const remainder = total - entryValue;
             const iv = remainder / (installments || 1);
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">Condição especial</p>
-              <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:${C.primary};">Entrada de ${formatCurrency(entryValue)} + ${installments}x de ${formatCurrency(iv)}</p>
-              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">Total: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${t("specialCondition")}</p>
+              <p style="font-size:20px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.25;color:${C.primary};">${t("entryOf", { value: formatCurrency(entryValue) })} + ${t("installmentsPlain", { count: installments, value: formatCurrency(iv) })}</p>
+              <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">${t("total")}: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""}</p>
             `;
           } else if (mode === "total_only") {
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${packagePricing ? PACKAGE_TOTAL_LABEL : "Valor total da viagem"}</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${packagePricing ? PACKAGE_TOTAL_LABEL : t("totalTripValue")}</p>
               <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${formatCurrency(total)}</p>
             `;
           } else {
             const discountedTotal = total * (1 - discountPct / 100);
             paymentHtml = `
-              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${packagePricing ? PACKAGE_TOTAL_LABEL : "Investimento"}</p>
+              <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${packagePricing ? PACKAGE_TOTAL_LABEL : t("investment")}</p>
               <p style="font-size:26px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${formatCurrency(discountedTotal)}</p>
-              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:${C.faint};">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:${C.primary};font-weight:600;">${discountPct}% de desconto${methodLabel ? ` via ${methodLabel}` : ""}</p>` : ""}
+              ${discountPct > 0 ? `<p style="font-size:12px;text-decoration:line-through;margin:4px 0 0;line-height:1.3;color:${C.faint};">${formatCurrency(total)}</p><p style="font-size:12px;margin:4px 0 0;line-height:1.3;color:${C.primary};font-weight:600;">${t("discountApplied", { percent: discountPct })}${methodLabel ? ` • ${methodLabel}` : ""}</p>` : ""}
               ${discountPct === 0 && methodLabel ? `<p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">${methodLabel}</p>` : ""}
             `;
           }
@@ -1116,7 +1108,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           return `
             <div class="pdf-block investment-card" style="background:#ffffff;border:1px solid ${C.border};border-radius:16px;padding:20px 24px;margin-bottom:16px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
               ${paymentHtml}
-              ${quote.services && quote.services.length > 0 ? `<p style="font-size:10px;margin:10px 0 0;line-height:1.3;color:${C.faint};">${quote.services.length} serviço${quote.services.length > 1 ? "s" : ""} incluído${quote.services.length > 1 ? "s" : ""}</p>` : ""}
+              ${quote.services && quote.services.length > 0 ? `<p style="font-size:10px;margin:10px 0 0;line-height:1.3;color:${C.faint};">${quote.services.length} ${pluralize(locale, quote.services.length, { one: t("serviceOne"), other: t("serviceOther") })}</p>` : ""}
             </div>
           `;
         })()}
@@ -1124,24 +1116,24 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         <!-- Payment Terms -->
         ${quote.show_investment_section !== false && quote.payment_terms ? `
           <div class="pdf-block payment-terms" style="border:1px solid ${C.border};border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin-bottom:10px;">💳 Condições de Pagamento</p>
+            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin-bottom:10px;">💳 ${t("paymentConditions")}</p>
             <p style="font-size:13px;color:${C.muted};line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
           </div>
         ` : ""}
 
         <!-- Validity -->
         <p style="text-align:center;font-size:12px;color:${C.faint};margin:8px 0 16px;">
-          ${quote.valid_until ? `Proposta válida até ${formatDate(quote.valid_until)}` : ""}
-          ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : (quote.valid_until ? " Valores sujeitos a alteração conforme disponibilidade." : "")}
+          ${quote.valid_until ? t("validUntil", { date: formatDate(quote.valid_until) }) : ""}
+          ${quote.validity_disclaimer ? `<br/>${quote.validity_disclaimer}` : (quote.valid_until ? ` ${t("validityDisclaimerTail")}` : "")}
         </p>
 
         <!-- Agent Signature -->
-        ${generateAgentSignature(profile || null)}
+        ${generateAgentSignature(profile || null, t)}
 
         <!-- Footer -->
         <div style="text-align:center;padding-top:20px;">
           <p style="font-size:10px;color:${C.faint};">
-            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} • Agentes de Sonhos
+            ${t("generatedOn", { date: formatPublicLongDate(new Date(), locale) })} • ${t("createdWith")}
           </p>
         </div>
         </div>

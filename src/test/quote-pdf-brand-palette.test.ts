@@ -218,7 +218,7 @@ describe("PDF do orçamento — documento final e paleta da agência", () => {
     } as any;
     const tokens = getQuotePdfTokens(profile);
     await generateQuotePDF(q, profile);
-    const paymentBlock = captured.html.match(/💳 Condições de Pagamento[\s\S]*?<\/p>\s*<\/div>/)?.[0] || "";
+    const paymentBlock = captured.html.match(/💳 Condições de [Pp]agamento[\s\S]*?<\/p>\s*<\/div>/)?.[0] || "";
     expect(paymentBlock).toContain(tokens.muted);
     expect(paymentBlock).not.toContain(tokens.mutedT);
     const docTitleIdx = captured.html.indexOf("Documentos do seu orçamento");

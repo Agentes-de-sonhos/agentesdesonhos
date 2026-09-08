@@ -5,6 +5,8 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { extractVoucherPath } from "@/lib/secureVoucher";
 import { toast } from "sonner";
 import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@/lib/serviceImages";
+import { formatPublicLongDate, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 /** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
 export type PdfImageResolver = (ref: string) => string | null;
@@ -106,6 +108,13 @@ export interface VoucherAccessOptions {
   password?: string;
 }
 
+function getServiceLabels(locale: PublicLocale): Record<TripServiceType, string> {
+  const t = tWallet(locale);
+  return {
+  flight: t("serviceFlight"), hotel: t("serviceHotel"), car_rental: t("serviceCarRental"), transfer: t("serviceTransfer"),
+  attraction: t("serviceAttraction"), insurance: t("serviceInsurance"), cruise: t("serviceCruise"), train: t("serviceTrain"), other: t("serviceOther"),
+  };
+}
 const SERVICE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea",
   hotel: "Hospedagem",
@@ -135,10 +144,11 @@ const SERVICE_GRADIENTS: Record<TripServiceType, { bg: string; fg: string; iconB
   other:      { bg: "linear-gradient(90deg,rgba(148,163,184,0.18),rgba(100,116,139,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
 };
 
-function formatDate(dateStr: string) {
+function formatDate(dateStr: string, locale: PublicLocale = "pt-BR") {
   try {
     const [y, m, d] = dateStr.split('-').map(Number);
-    return format(new Date(y, m - 1, d), "dd/MM/yyyy", { locale: ptBR });
+    const fmt = locale === "it-IT" ? "dd/MM/yyyy" : "dd/MM/yyyy";
+    return format(new Date(y, m - 1, d), fmt, { locale: ptBR });
   } catch {
     return dateStr;
   }
@@ -1184,11 +1194,13 @@ export interface ItineraryActivityForPDF {
 
 function generateItinerarySection(
   activities: ItineraryActivityForPDF[],
-  resolveUrl: (path: string) => string | null
+  resolveUrl: (path: string) => string | null,
+  locale: PublicLocale = "pt-BR"
 ): string {
+  const t = tWallet(locale);
   if (!activities || activities.length === 0) return "";
 
-  const PERIOD_LABELS: Record<string, string> = { morning: "☀️ Manhã", afternoon: "🌅 Tarde", evening: "🌙 Noite" };
+  const PERIOD_LABELS: Record<string, string> = { morning: t("pdfMorning"), afternoon: t("pdfAfternoon"), evening: t("pdfEvening") };
   
   const grouped = activities.reduce((acc, act) => {
     if (!acc[act.day_date]) acc[act.day_date] = [];
@@ -1215,7 +1227,7 @@ function generateItinerarySection(
           ${act.start_time ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">⏰ ${act.start_time}</p>` : ''}
           ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">📍 ${act.location}</p>` : ''}
           ${act.notes ? `<p style="font-size: 11px; color: #64748b; font-style: italic; margin: 2px 0 0 0;">${act.notes}</p>` : ''}
-          ${act.maps_url ? `<p style="font-size: 11px; margin: 2px 0 0 0;"><a href="${act.maps_url.startsWith('http') ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}" style="color: #0f766e; text-decoration: underline;">🗺️ Ver no Google Maps</a></p>` : ''}
+          ${act.maps_url ? `<p style="font-size: 11px; margin: 2px 0 0 0;"><a href="${act.maps_url.startsWith('http') ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}" style="color: #0f766e; text-decoration: underline;">${t("pdfMapsLink")}</a></p>` : ''}
           ${(() => {
             const photos = (act.photo_urls || [])
               .map(p => resolveUrl(p))
@@ -1243,7 +1255,9 @@ function generateItinerarySection(
       `;
     }).join("");
 
-    const formattedDate = format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR });
+    const formattedDate = locale === "it-IT"
+      ? new Intl.DateTimeFormat("it-IT", { weekday: "long", day: "2-digit", month: "long" }).format(dayDate)
+      : format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR });
 
     return `
       <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white; page-break-inside: avoid;">
@@ -1252,7 +1266,7 @@ function generateItinerarySection(
             ${idx + 1}
           </div>
           <div>
-            <p style="font-weight: 600; font-size: 14px; margin: 0;">Dia ${idx + 1}</p>
+            <p style="font-weight: 600; font-size: 14px; margin: 0;">${t("pdfDayLabel", { n: String(idx + 1) })}</p>
             <p style="font-size: 12px; color: #64748b; margin: 0; text-transform: capitalize;">${formattedDate}</p>
           </div>
         </div>
@@ -1264,7 +1278,7 @@ function generateItinerarySection(
   return `
     <div style="margin-top: 32px; page-break-before: auto;">
       <h3 style="font-size: 20px; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
-        📅 Roteiro Dia a Dia
+        ${t("pdfItineraryTitle")}
       </h3>
       ${daysHtml}
     </div>
@@ -1275,8 +1289,10 @@ export async function generateTripPDF(
   trip: Trip,
   profile?: AgentProfile | null,
   itineraryActivities?: ItineraryActivityForPDF[],
-  voucherAccess?: VoucherAccessOptions
+  voucherAccess?: VoucherAccessOptions,
+  locale: PublicLocale = "pt-BR"
 ) {
+  const t = tWallet(locale);
   const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   // Abrir a janela ANTES dos awaits para evitar bloqueio de popup pelo navegador.
   const printWindow = window.open("", "_blank");
@@ -1331,7 +1347,8 @@ export async function generateTripPDF(
   // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
   const servicesHtml = sortedServices.map((service) => {
     const type = service.service_type as TripServiceType;
-    const label = SERVICE_LABELS[type] || "Serviço";
+    const serviceLabels = getServiceLabels(locale);
+    const label = serviceLabels[type] || t("serviceOther");
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
     const bodyHtml = renderServiceBody(service);
@@ -1387,7 +1404,7 @@ export async function generateTripPDF(
     if (!cleanPath) return null;
     return `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(cleanPath)}`;
   };
-  const itineraryHtml = generateItinerarySection(itineraryActivities || [], resolveItineraryUrl);
+  const itineraryHtml = generateItinerarySection(itineraryActivities || [], resolveItineraryUrl, locale);
 
   const html = `
     <!DOCTYPE html>
@@ -1452,27 +1469,27 @@ export async function generateTripPDF(
           <!-- Hero -->
           <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
             <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
-              🧳 Carteira Digital
+              ${t("pdfWalletBadge")}
             </div>
             <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(trip as any).trip_title || trip.destination}</h1>
             <p style="font-size:14px;color:#64748b;margin-top:4px;">
-              ${(trip as any).trip_title ? `<span>${trip.destination} • </span>` : ''}Preparado especialmente para <strong style="color:#1e293b;">${trip.client_name}</strong>
+              ${(trip as any).trip_title ? `<span>${trip.destination} • </span>` : ''}${t("pdfPreparedFor")} <strong style="color:#1e293b;">${trip.client_name}</strong>
             </p>
           </div>
 
           <!-- Overview -->
           <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
             <div>
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 ${t("pdfDestination")}</p>
               <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.destination}</p>
             </div>
             <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
-              <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(trip.start_date)} — ${formatDate(trip.end_date)}</p>
-              <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} dias</p>
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 ${t("pdfPeriod")}</p>
+              <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(trip.start_date, locale)} — ${formatDate(trip.end_date, locale)}</p>
+              <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} ${days === 1 ? t("daysLabelOne") : t("daysLabelOther")}</p>
             </div>
             <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👤 Cliente</p>
+              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👤 ${t("pdfClient")}</p>
               <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.client_name}</p>
             </div>
           </div>
@@ -1481,10 +1498,10 @@ export async function generateTripPDF(
           <div style="margin-bottom:18px;">
             <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
               <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-              <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Serviços da Viagem</h3>
+              <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">${t("pdfServicesTitle")}</h3>
               <div style="flex:1;height:1px;background:#e2e8f0;"></div>
             </div>
-            ${servicesHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum serviço adicionado</p>'}
+            ${servicesHtml || `<p style="text-align:center;color:#94a3b8;padding:32px;">${t('pdfNoServices')}</p>`}
           </div>
 
           <!-- Itinerary -->
@@ -1494,7 +1511,7 @@ export async function generateTripPDF(
           ${generateAgentSignature(profile || null)}
 
           <p style="text-align:center;font-size:10px;color:#94a3b8;margin-top:14px;">
-            Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
+            ${t("pdfGeneratedAt", { date: locale === "it-IT" ? new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date()) : format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR }) })}
           </p>
         </div>
       </div>
@@ -1503,7 +1520,7 @@ export async function generateTripPDF(
   `;
 
   if (!printWindow) {
-    toast.error("Não foi possível abrir a janela de impressão. Permita pop-ups e tente novamente.");
+    toast.error(t("pdfPopupBlocked"));
     return;
   }
 

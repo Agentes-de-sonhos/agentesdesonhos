@@ -13,8 +13,13 @@ export interface AgentProfile {
   agency_tertiary_color?: string | null;
   /** Quando true (default), o tom terciário é derivado da cor principal. */
   agency_tertiary_auto?: boolean | null;
-
+  /**
+   * Idioma dos materiais públicos do cliente final ("pt-BR" | "it-IT").
+   * Ausente/nulo => pt-BR (fallback seguro).
+   */
+  public_content_locale?: string | null;
 }
+
 
 export async function fetchAgentProfile(userId: string, supabase: any): Promise<AgentProfile | null> {
   const { data, error } = await supabase

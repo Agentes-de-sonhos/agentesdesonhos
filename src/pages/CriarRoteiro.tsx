@@ -27,6 +27,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { downloadPDF } from "@/components/itinerary/ItineraryPDF";
+import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { PublishReviewDialog } from "@/components/itinerary/PublishReviewDialog";
 import { useItineraries } from "@/hooks/useItineraries";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
@@ -352,7 +353,7 @@ export default function CriarRoteiro() {
   const handleGeneratePDF = async (itineraryId: string) => {
     try {
       const data = await getItineraryWithDetails(itineraryId);
-      downloadPDF(data, agentProfile, weatherByDate);
+      downloadPDF(data, agentProfile, weatherByDate, resolvePublicLocale(agentProfile));
     } catch (error) {
       toast.error("Erro ao gerar PDF");
     }
