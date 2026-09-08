@@ -49,6 +49,8 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
     { category: "outros", description: "", fare: 0, taxes: 0, discount: 0, commission: 0, rav: 0 },
   ]);
   const [installments, setInstallments] = useState<Array<{ label: string; amount: number; due_date: string }>>([]);
+  const [pixError, setPixError] = useState<string | null>(null);
+
 
   const totals = useMemo(() => computeInvoiceTotals(services), [services]);
 
