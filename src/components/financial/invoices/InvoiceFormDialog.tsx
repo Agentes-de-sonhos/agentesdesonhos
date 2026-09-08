@@ -19,6 +19,8 @@ import { useQuotes } from "@/hooks/useQuotes";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { normalizePixKey, PIX_KEY_INVALID_MESSAGE } from "@/lib/pixBrCode";
+
 
 interface Props {
   open: boolean;
