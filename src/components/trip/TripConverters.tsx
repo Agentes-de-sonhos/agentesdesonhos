@@ -123,21 +123,21 @@ function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-primary" />
-            Conversor de moedas
+            {t("convCurTitle")}
           </DialogTitle>
           <DialogDescription>
-            Cotação comercial atualizada (referência).
+            {t("convCurDesc")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Moeda do destino</label>
+            <label className="text-sm font-medium">{t("convCurDestLabel")}</label>
             <Select value={target} onValueChange={setTarget}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {CURRENCIES.map((c) => (
                   <SelectItem key={c.code} value={c.code}>
-                    {c.code} — {c.name}
+                    {c.code} — {currencyName(c.code, locale)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -147,7 +147,7 @@ function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt
           <div className="flex items-end gap-2">
             <div className="flex-1 space-y-2">
               <label className="text-sm font-medium">
-                {direction === "BRL_TO" ? "Valor em Real (BRL)" : `Valor em ${target}`}
+                {direction === "BRL_TO" ? t("convValorReal") : t("convValorEm", { target })}
               </label>
               <Input
                 type="number"
