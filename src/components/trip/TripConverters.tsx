@@ -10,7 +10,8 @@ import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
 import { TripBudgetDialog } from "@/components/wallet/TripBudgetDialog";
 import { convertWithRate, fxRateUrl, isValidRate, parseAmount } from "@/lib/fxConversion";
-import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import { normalizePublicLocale, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 
 // Simple destination -> currency inference (best-effort)
