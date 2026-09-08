@@ -216,7 +216,8 @@ const SHOE_TABLE: { br: number; eu: number; usM: number; usW: number; uk: number
   { br: 46, eu: 47, usM: 13, usW: 14.5, uk: 12 },
 ];
 
-function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void; }) {
+function ShoeSizeDialog({ open, onOpenChange, locale = "pt-BR" }: { open: boolean; onOpenChange: (v: boolean) => void; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const [br, setBr] = useState<number>(39);
   const row = SHOE_TABLE.find((r) => r.br === br) ?? SHOE_TABLE[6];
 
