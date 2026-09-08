@@ -775,13 +775,14 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
 
 function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
+  const t = tWallet(locale);
   const head = renderServiceHeadline({
     title: data.name,
-    dates: data.date ? fmtDate(data.date) : "",
+    dates: data.date ? fmtDate(data.date, locale) : "",
     lines: [
-      data.attraction_type ? `Tipo: ${data.attraction_type}` : "",
+      data.attraction_type ? `${t("fldTipo")}: ${data.attraction_type}` : "",
       data.city ? `${data.city}${data.country ? `, ${data.country}` : ''}` : "",
-      `Quantidade: ${data.quantity || 1}x`,
+      `${t("fldQuantidade")}: ${data.quantity || 1}x`,
     ],
   });
 
@@ -791,68 +792,69 @@ function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-B
     ...(data.order_number ? [String(data.order_number).trim()] : []),
   ].filter(Boolean);
   const codes = codeList.length
-    ? miniCard("📱 Códigos do Ingresso", codeList.map((c) =>
+    ? miniCard(t("sectionCodigosIngresso"), codeList.map((c) =>
         `<p style="font-family:'Courier New',monospace;font-weight:700;color:#1e293b;font-size:13px;margin:1px 0;">🎟️ ${escapeHtml(c)}</p>`
       ))
     : "";
 
   const usage = (data.entry_time || data.usage_window || data.duration || data.access_type)
-    ? miniCard("📅 Detalhes de Uso", [
-        p("Horário de entrada", data.entry_time),
-        p("Janela de uso", data.usage_window),
-        p("Duração", data.duration),
-        data.access_type ? p("Acesso", data.access_type === '1_dia' ? '1 Dia' : data.access_type === 'multi_day' ? 'Multi-Day' : data.access_type === 'open_date' ? 'Data Aberta' : 'Horário Marcado') : "",
-        data.requires_reservation ? p("Reserva", data.requires_reservation === 'sim' ? '✅ Necessária' : data.requires_reservation === 'recomendado' ? '📌 Recomendada' : '❌ Não necessária') : "",
+    ? miniCard(t("sectionDetalhesUso"), [
+        p(t("fldHorarioEntrada"), data.entry_time),
+        p(t("fldJanelaUso"), data.usage_window),
+        p(t("fldDuracao"), data.duration),
+        data.access_type ? p(t("fldAcesso"), data.access_type === '1_dia' ? t("access1Dia") : data.access_type === 'multi_day' ? t("accessMultiDay") : data.access_type === 'open_date' ? t("accessOpenDate") : t("accessHorarioMarcado")) : "",
+        data.requires_reservation ? p(t("fldReserva"), data.requires_reservation === 'sim' ? t("reservNecessaria") : data.requires_reservation === 'recomendado' ? t("reservRecomendada") : t("reservNaoNecessaria")) : "",
       ])
     : "";
 
   const instructions = data.usage_instructions
-    ? miniCard("📋 Instruções Importantes", [`<p style="${TXT_FG}">${escapeHtml(data.usage_instructions)}</p>`], "primary")
+    ? miniCard(t("sectionInstrucoesImportantes"), [`<p style="${TXT_FG}">${escapeHtml(data.usage_instructions)}</p>`], "primary")
     : "";
 
   const passengers = data.passengers?.length > 0
-    ? miniCard("👨‍👩‍👧 Ingressos por Pessoa", data.passengers.map((p: any) => `<p style="${TXT}">🎟️ ${escapeHtml(p.name)} (${p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})${p.document ? ` • ${escapeHtml(p.document)}` : ''}</p>`))
+    ? miniCard(t("sectionIngressosPorPessoa"), data.passengers.map((p: any) => `<p style="${TXT}">🎟️ ${escapeHtml(p.name)} (${p.ticket_type === 'adulto' ? t("ticketAdulto") : p.ticket_type === 'crianca' ? t("ticketCrianca") : t("ticketSenior")})${p.document ? ` • ${escapeHtml(p.document)}` : ''}</p>`))
     : "";
 
   const location = (data.address || data.venue_name)
-    ? miniCard("📍 Localização", [
+    ? miniCard(t("sectionLocalizacao"), [
         data.venue_name ? `<p style="${TXT_FG}font-weight:600;">${escapeHtml(data.venue_name)}</p>` : "",
         data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
-        p("Entrada", data.entry_point),
-        data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">🗺️ Ver no mapa</a></p>` : "",
+        p(t("fldEntrada"), data.entry_point),
+        data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">${t("ctaVerNoMapa")}</a></p>` : "",
       ])
     : "";
 
   const rules = (data.attraction_rules || data.cancellation_policy || data.prohibited_items || data.dress_code || data.required_documents)
-    ? miniCard("📌 Regras e Políticas", [
-        p("Cancelamento", data.cancellation_policy),
-        p("Alteração", data.change_policy),
+    ? miniCard(t("sectionRegrasPoliticas"), [
+        p(t("fldCancelamento"), data.cancellation_policy),
+        p(t("fldAlteracao"), data.change_policy),
         data.attraction_rules ? `<p style="${TXT}">${escapeHtml(data.attraction_rules)}</p>` : "",
-        data.prohibited_items ? `<p style="${TXT}">🚫 Proibido: ${escapeHtml(data.prohibited_items)}</p>` : "",
-        data.dress_code ? `<p style="${TXT}">👔 Dress code: ${escapeHtml(data.dress_code)}</p>` : "",
-        data.required_documents ? `<p style="${TXT}">📄 Documentos: ${escapeHtml(data.required_documents)}</p>` : "",
+        data.prohibited_items ? `<p style="${TXT}">${t("ctaProibido")}: ${escapeHtml(data.prohibited_items)}</p>` : "",
+        data.dress_code ? `<p style="${TXT}">👔 ${t("fldDressCode")}: ${escapeHtml(data.dress_code)}</p>` : "",
+        data.required_documents ? `<p style="${TXT}">📄 ${t("fldDocumentos")}: ${escapeHtml(data.required_documents)}</p>` : "",
       ])
     : "";
 
   const tips = data.agency_tips
-    ? miniCard("🧠 Dicas do seu Agente de Viagem", [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    ? miniCard(t("sectionDicasAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
     : "";
 
   const contacts = (data.attraction_contact || data.operator_contact || data.agency_contact || data.emergency_contact)
-    ? miniCard("📞 Contatos", [
-        p("Atração", data.attraction_contact),
-        p("Operadora", data.operator_contact),
-        p("Agência", data.agency_contact),
-        data.emergency_contact ? `<p style="${TXT}">🆘 Emergência: ${escapeHtml(data.emergency_contact)}</p>` : "",
+    ? miniCard(t("sectionContatos"), [
+        p(t("fldAtracao"), data.attraction_contact),
+        p(t("fldOperadora"), data.operator_contact),
+        p(t("fldAgencia"), data.agency_contact),
+        data.emergency_contact ? `<p style="${TXT}">🆘 ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
       ])
     : "";
 
   const notes = data.agency_notes
-    ? miniCard("📝 Observações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
     : "";
 
   return head + codes + usage + instructions + passengers + location + rules + tips + contacts + notes;
 }
+
 
 function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
