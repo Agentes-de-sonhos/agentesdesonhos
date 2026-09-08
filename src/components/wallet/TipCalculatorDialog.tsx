@@ -2,14 +2,17 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Receipt } from "lucide-react";
+import { normalizePublicLocale, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 const TIPS = [15, 18, 20];
 
-function fmt(n: number) {
-  return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function fmt(n: number, locale: PublicLocale) {
+  return n.toLocaleString(normalizePublicLocale(locale), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export function TipCalculatorDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function TipCalculatorDialog({ open, onOpenChange, locale = "pt-BR" }: { open: boolean; onOpenChange: (v: boolean) => void; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const [amount, setAmount] = useState("100");
   const num = parseFloat(amount.replace(",", ".")) || 0;
 
@@ -19,15 +22,15 @@ export function TipCalculatorDialog({ open, onOpenChange }: { open: boolean; onO
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" style={{ color: "hsl(var(--wallet-brand))" }} />
-            Calculadora de gorjetas
+            {t("tipTitle")}
           </DialogTitle>
           <DialogDescription>
-            Veja rapidamente a gorjeta e o valor total da conta.
+            {t("tipDesc")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground/70">Valor da conta</label>
+            <label className="text-xs font-medium text-foreground/70">{t("tipValorConta")}</label>
             <Input
               inputMode="decimal"
               value={amount}
@@ -48,17 +51,17 @@ export function TipCalculatorDialog({ open, onOpenChange }: { open: boolean; onO
                   <div className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "hsl(var(--wallet-brand))" }}>
                     {p}%
                   </div>
-                  <div className="mt-1 text-[10px] text-muted-foreground">Gorjeta</div>
-                  <div className="text-base font-bold">{fmt(tip)}</div>
-                  <div className="mt-1 text-[10px] text-muted-foreground">Total</div>
-                  <div className="text-sm font-semibold text-foreground/80">{fmt(total)}</div>
+                  <div className="mt-1 text-[10px] text-muted-foreground">{t("tipGorjeta")}</div>
+                  <div className="text-base font-bold">{fmt(tip, locale)}</div>
+                  <div className="mt-1 text-[10px] text-muted-foreground">{t("tipTotal")}</div>
+                  <div className="text-sm font-semibold text-foreground/80">{fmt(total, locale)}</div>
                 </div>
               );
             })}
           </div>
 
           <p className="text-[11px] text-muted-foreground text-center">
-            Valores na mesma moeda informada. Verifique se a gorjeta já está inclusa na conta.
+            {t("tipNote")}
           </p>
         </div>
       </DialogContent>

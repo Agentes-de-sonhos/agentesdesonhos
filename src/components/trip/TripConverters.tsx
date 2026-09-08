@@ -351,8 +351,8 @@ export function TripConverters({ destination, tripId, services, international = 
         )}
       </div>
       {international && <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} locale={locale} />}
-      {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />}
-      {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />}
+      {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} locale={locale} />}
+      {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} locale={locale} />}
       {tripId && (
         <TripChecklistDialog open={openChecklist} onOpenChange={setOpenChecklist} tripId={tripId} services={services || []} locale={locale} />
       )}

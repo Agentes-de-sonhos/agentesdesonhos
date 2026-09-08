@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Ruler, Thermometer, Footprints, Shirt, Weight, ArrowRightLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { normalizePublicLocale, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 function ResultCard({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
@@ -18,13 +20,14 @@ function ResultCard({ label, value, unit }: { label: string; value: string; unit
   );
 }
 
-function fmt(n: number, digits = 2) {
+function fmt(n: number, locale: PublicLocale, digits = 2) {
   if (!Number.isFinite(n)) return "—";
-  return n.toLocaleString("pt-BR", { maximumFractionDigits: digits });
+  return n.toLocaleString(normalizePublicLocale(locale), { maximumFractionDigits: digits });
 }
 
 /* Temperature */
-function TemperatureTab() {
+function TemperatureTab({ locale }: { locale: PublicLocale }) {
+  const t = tWallet(locale);
   const [value, setValue] = useState("25");
   const [from, setFrom] = useState<"C" | "F">("C");
   const num = parseFloat(value.replace(",", ".")) || 0;
@@ -34,11 +37,11 @@ function TemperatureTab() {
     <div className="space-y-4">
       <div className="flex items-end gap-2">
         <div className="flex-1 space-y-1.5">
-          <label className="text-xs font-medium text-foreground/70">Temperatura</label>
+          <label className="text-xs font-medium text-foreground/70">{t("measTemperatura")}</label>
           <Input inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} />
         </div>
         <div className="space-y-1.5 w-28">
-          <label className="text-xs font-medium text-foreground/70">Unidade</label>
+          <label className="text-xs font-medium text-foreground/70">{t("measUnidade")}</label>
           <Select value={from} onValueChange={(v) => setFrom(v as any)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -47,20 +50,21 @@ function TemperatureTab() {
             </SelectContent>
           </Select>
         </div>
-        <Button type="button" variant="outline" size="icon" onClick={() => setFrom((d) => (d === "C" ? "F" : "C"))} title="Inverter">
+        <Button type="button" variant="outline" size="icon" onClick={() => setFrom((d) => (d === "C" ? "F" : "C"))} title={t("measInverter")}>
           <ArrowRightLeft className="h-4 w-4" />
         </Button>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <ResultCard label="Celsius" value={fmt(c, 1)} unit="°C" />
-        <ResultCard label="Fahrenheit" value={fmt(f, 1)} unit="°F" />
+        <ResultCard label={t("measCelsius")} value={fmt(c, locale, 1)} unit="°C" />
+        <ResultCard label={t("measFahrenheit")} value={fmt(f, locale, 1)} unit="°F" />
       </div>
     </div>
   );
 }
 
 /* Distance */
-function DistanceTab() {
+function DistanceTab({ locale }: { locale: PublicLocale }) {
+  const t = tWallet(locale);
   const [value, setValue] = useState("10");
   const [from, setFrom] = useState<"KM" | "MI">("KM");
   const num = parseFloat(value.replace(",", ".")) || 0;
@@ -70,33 +74,34 @@ function DistanceTab() {
     <div className="space-y-4">
       <div className="flex items-end gap-2">
         <div className="flex-1 space-y-1.5">
-          <label className="text-xs font-medium text-foreground/70">Distância</label>
+          <label className="text-xs font-medium text-foreground/70">{t("measDistancia")}</label>
           <Input inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} />
         </div>
         <div className="space-y-1.5 w-28">
-          <label className="text-xs font-medium text-foreground/70">Unidade</label>
+          <label className="text-xs font-medium text-foreground/70">{t("measUnidade")}</label>
           <Select value={from} onValueChange={(v) => setFrom(v as any)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="KM">Km</SelectItem>
-              <SelectItem value="MI">Milhas</SelectItem>
+              <SelectItem value="KM">{t("measUnitKm")}</SelectItem>
+              <SelectItem value="MI">{t("measUnitMilhas")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <Button type="button" variant="outline" size="icon" onClick={() => setFrom((d) => (d === "KM" ? "MI" : "KM"))} title="Inverter">
+        <Button type="button" variant="outline" size="icon" onClick={() => setFrom((d) => (d === "KM" ? "MI" : "KM"))} title={t("measInverter")}>
           <ArrowRightLeft className="h-4 w-4" />
         </Button>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <ResultCard label="Quilômetros" value={fmt(km)} unit="km" />
-        <ResultCard label="Milhas" value={fmt(mi)} unit="mi" />
+        <ResultCard label={t("measQuilometros")} value={fmt(km, locale)} unit="km" />
+        <ResultCard label={t("measMilhas")} value={fmt(mi, locale)} unit="mi" />
       </div>
     </div>
   );
 }
 
 /* Weight */
-function WeightTab() {
+function WeightTab({ locale }: { locale: PublicLocale }) {
+  const t = tWallet(locale);
   const [value, setValue] = useState("23");
   const [from, setFrom] = useState<"KG" | "LB">("KG");
   const num = parseFloat(value.replace(",", ".")) || 0;
@@ -106,26 +111,26 @@ function WeightTab() {
     <div className="space-y-4">
       <div className="flex items-end gap-2">
         <div className="flex-1 space-y-1.5">
-          <label className="text-xs font-medium text-foreground/70">Peso</label>
+          <label className="text-xs font-medium text-foreground/70">{t("measPeso")}</label>
           <Input inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} />
         </div>
         <div className="space-y-1.5 w-28">
-          <label className="text-xs font-medium text-foreground/70">Unidade</label>
+          <label className="text-xs font-medium text-foreground/70">{t("measUnidade")}</label>
           <Select value={from} onValueChange={(v) => setFrom(v as any)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="KG">Kg</SelectItem>
-              <SelectItem value="LB">Libras</SelectItem>
+              <SelectItem value="KG">{t("measUnitKg")}</SelectItem>
+              <SelectItem value="LB">{t("measUnitLibras")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <Button type="button" variant="outline" size="icon" onClick={() => setFrom((d) => (d === "KG" ? "LB" : "KG"))} title="Inverter">
+        <Button type="button" variant="outline" size="icon" onClick={() => setFrom((d) => (d === "KG" ? "LB" : "KG"))} title={t("measInverter")}>
           <ArrowRightLeft className="h-4 w-4" />
         </Button>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <ResultCard label="Quilogramas" value={fmt(kg)} unit="kg" />
-        <ResultCard label="Libras" value={fmt(lb)} unit="lb" />
+        <ResultCard label={t("measQuilogramas")} value={fmt(kg, locale)} unit="kg" />
+        <ResultCard label={t("measLibras")} value={fmt(lb, locale)} unit="lb" />
       </div>
     </div>
   );
@@ -152,13 +157,14 @@ const SHOES_K: ShoeRow[] = [
   { br: 30, eu: 31, us: 12.5 }, { br: 31, eu: 32, us: 13 }, { br: 32, eu: 33, us: 1 },
 ];
 
-function ShoeBlock({ table, defaultBr }: { table: ShoeRow[]; defaultBr: number }) {
+function ShoeBlock({ table, defaultBr, locale }: { table: ShoeRow[]; defaultBr: number; locale: PublicLocale }) {
+  const t = tWallet(locale);
   const [br, setBr] = useState<number>(defaultBr);
   const row = useMemo(() => table.find((r) => r.br === br) ?? table[0], [table, br]);
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-foreground/70">Numeração Brasil</label>
+        <label className="text-xs font-medium text-foreground/70">{t("measNumBrasil")}</label>
         <Select value={String(br)} onValueChange={(v) => setBr(Number(v))}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -167,15 +173,16 @@ function ShoeBlock({ table, defaultBr }: { table: ShoeRow[]; defaultBr: number }
         </Select>
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <ResultCard label="Brasil" value={String(row.br)} />
-        <ResultCard label="EUA" value={String(row.us)} />
-        <ResultCard label="Europa" value={String(row.eu)} />
+        <ResultCard label={t("measBrasil")} value={String(row.br)} />
+        <ResultCard label={t("measEUA")} value={String(row.us)} />
+        <ResultCard label={t("measEuropa")} value={String(row.eu)} />
       </div>
     </div>
   );
 }
 
-function ShoesTab() {
+function ShoesTab({ locale }: { locale: PublicLocale }) {
+  const tr = tWallet(locale);
   const [g, setG] = useState<"M" | "F" | "K">("F");
   const tables: Record<string, { table: ShoeRow[]; def: number }> = {
     M: { table: SHOES_M, def: 41 },
@@ -187,7 +194,7 @@ function ShoesTab() {
     <div className="space-y-3">
       <div className="flex gap-2">
         {[
-          { v: "F", l: "Feminino" }, { v: "M", l: "Masculino" }, { v: "K", l: "Infantil" },
+          { v: "F", l: tr("measFeminino") }, { v: "M", l: tr("measMasculino") }, { v: "K", l: tr("measInfantil") },
         ].map((opt) => (
           <button
             key={opt.v}
@@ -203,8 +210,8 @@ function ShoesTab() {
           </button>
         ))}
       </div>
-      <ShoeBlock key={g} table={t.table} defaultBr={t.def} />
-      <p className="text-[11px] text-muted-foreground text-center">Tabela de referência. A numeração pode variar conforme a marca.</p>
+      <ShoeBlock key={g} table={t.table} defaultBr={t.def} locale={locale} />
+      <p className="text-[11px] text-muted-foreground text-center">{tr("measShoeNote")}</p>
     </div>
   );
 }
@@ -236,13 +243,14 @@ const JACKETS: ApparelRow[] = [
   { br: "XGG", us: "44", eu: "54" },
 ];
 
-function ApparelBlock({ table }: { table: ApparelRow[] }) {
+function ApparelBlock({ table, locale }: { table: ApparelRow[]; locale: PublicLocale }) {
+  const t = tWallet(locale);
   const [br, setBr] = useState<string>(table[Math.floor(table.length / 2)].br);
   const row = useMemo(() => table.find((r) => r.br === br) ?? table[0], [table, br]);
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-foreground/70">Tamanho Brasil</label>
+        <label className="text-xs font-medium text-foreground/70">{t("measTamanhoBrasil")}</label>
         <Select value={br} onValueChange={setBr}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -251,22 +259,23 @@ function ApparelBlock({ table }: { table: ApparelRow[] }) {
         </Select>
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <ResultCard label="Brasil" value={row.br} />
-        <ResultCard label="EUA" value={row.us} />
-        <ResultCard label="Europa" value={row.eu} />
+        <ResultCard label={t("measBrasil")} value={row.br} />
+        <ResultCard label={t("measEUA")} value={row.us} />
+        <ResultCard label={t("measEuropa")} value={row.eu} />
       </div>
     </div>
   );
 }
 
-function ApparelTab() {
+function ApparelTab({ locale }: { locale: PublicLocale }) {
+  const t = tWallet(locale);
   const [g, setG] = useState<"T" | "P" | "J">("T");
   const map: Record<string, ApparelRow[]> = { T: TSHIRT, P: PANTS, J: JACKETS };
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
         {[
-          { v: "T", l: "Camiseta" }, { v: "P", l: "Calça" }, { v: "J", l: "Jaqueta" },
+          { v: "T", l: t("measCamiseta") }, { v: "P", l: t("measCalca") }, { v: "J", l: t("measJaqueta") },
         ].map((opt) => (
           <button
             key={opt.v}
@@ -282,48 +291,49 @@ function ApparelTab() {
           </button>
         ))}
       </div>
-      <ApparelBlock key={g} table={map[g]} />
-      <p className="text-[11px] text-muted-foreground text-center">Tabela de referência. O caimento pode variar entre marcas.</p>
+      <ApparelBlock key={g} table={map[g]} locale={locale} />
+      <p className="text-[11px] text-muted-foreground text-center">{t("measApparelNote")}</p>
     </div>
   );
 }
 
-export function MeasurementsConverterDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function MeasurementsConverterDialog({ open, onOpenChange, locale = "pt-BR" }: { open: boolean; onOpenChange: (v: boolean) => void; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Ruler className="h-5 w-5" style={{ color: "hsl(var(--wallet-brand))" }} />
-            Conversor de medidas
+            {t("measTitle")}
           </DialogTitle>
           <DialogDescription>
-            Conversões rápidas para o dia a dia da viagem.
+            {t("measDesc")}
           </DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="temp" className="w-full">
           <TabsList className="w-full grid grid-cols-5 h-auto p-1">
             <TabsTrigger value="temp" className="flex flex-col gap-0.5 py-2 text-[10px]">
-              <Thermometer className="h-4 w-4" /> Temp
+              <Thermometer className="h-4 w-4" /> {t("measTabTemp")}
             </TabsTrigger>
             <TabsTrigger value="dist" className="flex flex-col gap-0.5 py-2 text-[10px]">
-              <Ruler className="h-4 w-4" /> Dist
+              <Ruler className="h-4 w-4" /> {t("measTabDist")}
             </TabsTrigger>
             <TabsTrigger value="weight" className="flex flex-col gap-0.5 py-2 text-[10px]">
-              <Weight className="h-4 w-4" /> Peso
+              <Weight className="h-4 w-4" /> {t("measTabWeight")}
             </TabsTrigger>
             <TabsTrigger value="shoes" className="flex flex-col gap-0.5 py-2 text-[10px]">
-              <Footprints className="h-4 w-4" /> Calçados
+              <Footprints className="h-4 w-4" /> {t("measTabShoes")}
             </TabsTrigger>
             <TabsTrigger value="apparel" className="flex flex-col gap-0.5 py-2 text-[10px]">
-              <Shirt className="h-4 w-4" /> Roupas
+              <Shirt className="h-4 w-4" /> {t("measTabApparel")}
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="temp" className="mt-4"><TemperatureTab /></TabsContent>
-          <TabsContent value="dist" className="mt-4"><DistanceTab /></TabsContent>
-          <TabsContent value="weight" className="mt-4"><WeightTab /></TabsContent>
-          <TabsContent value="shoes" className="mt-4"><ShoesTab /></TabsContent>
-          <TabsContent value="apparel" className="mt-4"><ApparelTab /></TabsContent>
+          <TabsContent value="temp" className="mt-4"><TemperatureTab locale={locale} /></TabsContent>
+          <TabsContent value="dist" className="mt-4"><DistanceTab locale={locale} /></TabsContent>
+          <TabsContent value="weight" className="mt-4"><WeightTab locale={locale} /></TabsContent>
+          <TabsContent value="shoes" className="mt-4"><ShoesTab locale={locale} /></TabsContent>
+          <TabsContent value="apparel" className="mt-4"><ApparelTab locale={locale} /></TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
