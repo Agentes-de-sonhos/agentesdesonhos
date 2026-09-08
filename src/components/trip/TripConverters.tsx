@@ -161,7 +161,7 @@ function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt
               variant="outline"
               size="icon"
               onClick={() => setDirection((d) => (d === "BRL_TO" ? "TO_BRL" : "BRL_TO"))}
-              title="Inverter"
+              title={t("convInverter")}
             >
               <ArrowRightLeft className="h-4 w-4" />
             </Button>
