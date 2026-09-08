@@ -4,6 +4,8 @@ import { ptBR } from "date-fns/locale";
 import { MapPin, Sunrise, Sun, Moon, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 type Period = "morning" | "afternoon" | "evening";
 
@@ -23,10 +25,10 @@ const PERIOD_HOUR: Record<Period, number> = {
   evening: 19,
 };
 
-const PERIOD_LABEL: Record<Period, string> = {
-  morning: "Manhã",
-  afternoon: "Tarde",
-  evening: "Noite",
+const PERIOD_LABEL_KEY: Record<Period, "periodMorning" | "periodAfternoon" | "periodEvening"> = {
+  morning: "periodMorning",
+  afternoon: "periodAfternoon",
+  evening: "periodEvening",
 };
 
 const PERIOD_ICON: Record<Period, any> = {
@@ -54,10 +56,13 @@ function activityWhen(a: ItineraryActivityLike): { d: Date; period: Period } | n
 export function NextActivityCard({
   activities,
   onOpenItinerary,
+  locale = "pt-BR",
 }: {
   activities: ItineraryActivityLike[];
   onOpenItinerary: (dayDate?: string) => void;
+  locale?: PublicLocale;
 }) {
+  const t = tWallet(locale);
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
@@ -91,7 +96,7 @@ export function NextActivityCard({
 
   return (
     <section
-      aria-label="Próxima atividade do roteiro"
+      aria-label={t("nextActSectionAria")}
       className="rounded-2xl border bg-card shadow-sm overflow-hidden"
       style={{ borderColor: "hsl(var(--wallet-brand) / 0.18)" }}
     >
@@ -112,23 +117,23 @@ export function NextActivityCard({
           className="text-[13px] font-bold uppercase tracking-wider"
           style={{ color: "hsl(var(--wallet-brand))" }}
         >
-          Próxima atividade do roteiro
+          {t("nextActSectionAria")}
         </h3>
       </div>
 
       {!next ? (
         <div className="px-4 py-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Nenhuma atividade futura no seu roteiro.
+            {t("nextActEmpty1")}
           </p>
           <p className="text-[12px] text-muted-foreground/80 mt-1">
-            Quando houver uma próxima atividade programada, ela aparecerá aqui.
+            {t("nextActEmpty2")}
           </p>
         </div>
       ) : (() => {
         const Icon = PERIOD_ICON[next.period];
         const dateLabel = format(next.when, "EEE, dd 'de' MMM", { locale: ptBR });
-        const periodLabel = PERIOD_LABEL[next.period];
+        const periodLabel = t(PERIOD_LABEL_KEY[next.period]);
         return (
           <div className="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3 min-w-0">
@@ -154,7 +159,7 @@ export function NextActivityCard({
                   </span>
                 </div>
                 <p className="mt-1 font-semibold text-sm text-foreground leading-snug break-words">
-                  {next.a.title || "Atividade do roteiro"}
+                  {next.a.title || t("nextActFallbackTitle")}
                 </p>
                 {next.a.location && (
                   <p className="text-[12px] text-muted-foreground leading-snug break-words inline-flex items-start gap-1">
@@ -180,7 +185,7 @@ export function NextActivityCard({
                 "hover:bg-[hsl(var(--wallet-brand-soft))] hover:text-[hsl(var(--wallet-brand))]"
               )}
             >
-              Ver no roteiro
+              {t("nextActViewBtn")}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>

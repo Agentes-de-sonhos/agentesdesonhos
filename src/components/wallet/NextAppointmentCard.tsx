@@ -8,6 +8,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { TripService, TripServiceType } from "@/types/trip";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import type { WalletDictKey } from "@/i18n/publicMaterials/wallet";
 
 type EventKind =
   | "transfer" | "flight" | "train" | "cruise"
@@ -49,17 +52,17 @@ const ICON_FOR: Record<EventKind, any> = {
   other: FileText,
 };
 
-const LABEL_FOR: Record<EventKind, string> = {
-  transfer: "Transfer",
-  flight: "Voo",
-  train: "Trem",
-  cruise: "Cruzeiro",
-  hotel_checkin: "Check-in",
-  hotel_checkout: "Check-out",
-  attraction: "Atração",
-  car_pickup: "Retirada do veículo",
-  car_dropoff: "Devolução do veículo",
-  other: "Compromisso",
+const LABEL_KEY_FOR: Record<EventKind, WalletDictKey> = {
+  transfer: "kindTransfer",
+  flight: "fldVoo",
+  train: "fldTrem",
+  cruise: "serviceCruise",
+  hotel_checkin: "fldCheckin",
+  hotel_checkout: "fldCheckout",
+  attraction: "fldAtracao",
+  car_pickup: "kindCarPickup",
+  car_dropoff: "kindCarDropoff",
+  other: "kindOther",
 };
 
 function parseDateTime(dateStr?: string, timeStr?: string): { d: Date; hasTime: boolean } | null {
@@ -169,40 +172,43 @@ function pickNext(items: Appointment[], now: Date): Appointment | null {
   return future[0];
 }
 
-function formatRemaining(target: Date, hasTime: boolean, now: Date): string {
+function formatRemaining(target: Date, hasTime: boolean, now: Date, locale: PublicLocale = "pt-BR"): string {
+  const t = tWallet(locale);
   const ms = target.getTime() - now.getTime();
   if (ms <= 0) {
     if (!hasTime) {
-      // Same day, all-day event — still "hoje".
       const sameDay = target.toDateString() === now.toDateString();
-      if (sameDay) return "hoje";
+      if (sameDay) return t("remainToday");
     }
-    return "agora";
+    return t("remainNow");
   }
   const min = Math.floor(ms / 60000);
-  if (min < 60) return `em ${min} min`;
+  if (min < 60) return t("remainMin", { min });
   const hours = Math.floor(min / 60);
   if (hours < 24) {
     const rm = min % 60;
-    return rm > 0 ? `em ${hours}h ${rm}min` : `em ${hours}h`;
+    return rm > 0 ? t("remainHoursMin", { h: hours, m: rm }) : t("remainHours", { h: hours });
   }
   const days = Math.floor(hours / 24);
   const rh = hours % 24;
-  if (days < 7) return rh > 0 ? `em ${days}d ${rh}h` : `em ${days} ${days === 1 ? "dia" : "dias"}`;
+  if (days < 7) return rh > 0 ? t("remainDaysHours", { d: days, h: rh }) : t("remainDaysOnly", { d: days, unit: days === 1 ? t("daysLabelOne") : t("daysLabelOther") });
   const weeks = Math.floor(days / 7);
   const rd = days % 7;
-  if (weeks < 5) return rd > 0 ? `em ${weeks} sem ${rd}d` : `em ${weeks} ${weeks === 1 ? "semana" : "semanas"}`;
+  if (weeks < 5) return rd > 0 ? t("remainWeeksDays", { w: weeks, d: rd }) : t("remainWeeksOnly", { w: weeks, unit: weeks === 1 ? "semana" : "semanas" });
   const months = Math.round(days / 30);
-  return `em ~${months} ${months === 1 ? "mês" : "meses"}`;
+  return t("remainMonths", { m: months, unit: months === 1 ? "mês" : "meses" });
 }
 
 export function NextAppointmentCard({
   services,
   onOpenService,
+  locale = "pt-BR",
 }: {
   services: TripService[];
   onOpenService: (service: TripService) => void;
+  locale?: PublicLocale;
 }) {
+  const t = tWallet(locale);
   const appointments = useMemo(() => buildAppointments(services), [services]);
   const [now, setNow] = useState<Date>(() => new Date());
 
@@ -215,7 +221,7 @@ export function NextAppointmentCard({
 
   return (
     <section
-      aria-label="Próximo serviço contratado"
+      aria-label={t("nextApptSectionAria")}
       className="rounded-2xl border bg-card shadow-sm overflow-hidden"
       style={{ borderColor: "hsl(var(--wallet-brand) / 0.18)" }}
     >
@@ -233,25 +239,25 @@ export function NextAppointmentCard({
           className="text-[13px] font-bold uppercase tracking-wider"
           style={{ color: "hsl(var(--wallet-brand))" }}
         >
-          Próximo serviço contratado
+          {t("nextApptSectionAria")}
         </h3>
       </div>
 
       {!next ? (
         <div className="px-4 py-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Nenhum serviço futuro na sua agenda.
+            {t("nextApptEmpty1")}
           </p>
           <p className="text-[12px] text-muted-foreground/80 mt-1">
-            Quando houver um próximo serviço programado, ele aparecerá aqui.
+            {t("nextApptEmpty2")}
           </p>
         </div>
       ) : (() => {
         const Icon = ICON_FOR[next.kind];
         const dateLabel = format(next.when, "EEE, dd 'de' MMM", { locale: ptBR });
         const timeLabel = next.hasTime ? format(next.when, "HH:mm", { locale: ptBR }) : null;
-        const remaining = formatRemaining(next.when, next.hasTime, now);
-        const kindLabel = LABEL_FOR[next.kind];
+        const remaining = formatRemaining(next.when, next.hasTime, now, locale);
+        const kindLabel = t(LABEL_KEY_FOR[next.kind]);
 
         return (
           <div className="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -294,7 +300,7 @@ export function NextAppointmentCard({
                 "hover:bg-[hsl(var(--wallet-brand-soft))] hover:text-[hsl(var(--wallet-brand))]"
               )}
             >
-              Ver detalhes
+              {t("apptViewDetails")}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
