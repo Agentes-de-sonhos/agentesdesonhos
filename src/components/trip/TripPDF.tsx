@@ -1172,7 +1172,7 @@ function generateAgentSignature(profile: AgentProfile | null, locale: PublicLoca
   return `
     <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
       <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">${tWallet(locale)("pdfConsultant")}</p>
       </div>
       <div style="padding:14px 18px;text-align:center;">
         ${avatarHtml}
