@@ -1147,7 +1147,7 @@ function generateAgencyHeader(profile: AgentProfile | null, locale: PublicLocale
     return `
       <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
         <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
-          ${profile?.agency_name || "Carteira Digital"}
+          ${profile?.agency_name || tWallet(locale)("agencyFallbackName")}
         </p>
       </div>
     `;
