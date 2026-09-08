@@ -858,67 +858,69 @@ function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-B
 
 function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
+  const t = tWallet(locale);
   let days: number | null = null;
   try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); days = Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / 86400000); } catch {}
 
   const head = renderServiceHeadline({
     title: data.provider,
-    dates: `${fmtDate(data.start_date)} - ${fmtDate(data.end_date)}${days ? ` (${days} dias)` : ''}`,
+    dates: `${fmtDate(data.start_date, locale)} - ${fmtDate(data.end_date, locale)}${days ? ` (${days} ${pluralize(locale, days, { one: t("daysLabelOne"), other: t("daysLabelOther") })})` : ''}`,
     lines: [
-      data.plan_name ? `Plano: ${data.plan_name}` : "",
-      data.policy_number ? `Apólice: ${data.policy_number}` : "",
-      data.destination_covered ? `Destino: ${data.destination_covered}` : "",
-      data.coverage_type ? `Tipo: ${data.coverage_type}` : "",
+      data.plan_name ? `${t("fldPlano")}: ${data.plan_name}` : "",
+      data.policy_number ? `${t("fldApolice")}: ${data.policy_number}` : "",
+      data.destination_covered ? `${t("fldDestino")}: ${data.destination_covered}` : "",
+      data.coverage_type ? `${t("fldTipo")}: ${data.coverage_type}` : "",
     ],
   });
 
   const emergency = (data.emergency_phone || data.emergency_whatsapp || data.emergency_email)
-    ? miniCard("🆘 Contatos de Emergência", [
+    ? miniCard(t("sectionContatosEmergencia"), [
         data.emergency_phone ? `<p style="${TXT_FG}font-weight:600;">📞 ${escapeHtml(data.emergency_phone)}</p>` : "",
         data.emergency_whatsapp ? `<p style="${TXT}">💬 WhatsApp: ${escapeHtml(data.emergency_whatsapp)}</p>` : "",
         data.emergency_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.emergency_email)}</p>` : "",
-        data.emergency_24h === 'sim' ? `<p style="${TXT}color:#0f766e;font-weight:600;">✅ Atendimento 24 horas</p>` : "",
-        p("Idiomas", data.emergency_languages),
-        data.insurer_website ? `<p style="${TXT}"><a href="${escapeHtml(data.insurer_website)}" style="color:#0f766e;text-decoration:underline;">🌐 Site da Seguradora</a></p>` : "",
+        data.emergency_24h === 'sim' ? `<p style="${TXT}color:#0f766e;font-weight:600;">${t("badge24h")}</p>` : "",
+        p(t("fldIdiomas"), data.emergency_languages),
+        data.insurer_website ? `<p style="${TXT}"><a href="${escapeHtml(data.insurer_website)}" style="color:#0f766e;text-decoration:underline;">${t("ctaSiteSeguradora")}</a></p>` : "",
       ], "destructive")
     : "";
 
   const coverages = (data.medical_assistance || data.hospital_expenses || data.lost_baggage || data.trip_cancellation)
-    ? miniCard("🏥 Coberturas", [
-        data.medical_assistance ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Assistência Médica</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.medical_assistance)}</span></p>` : "",
-        data.hospital_expenses ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Despesas Hospitalares</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.hospital_expenses)}</span></p>` : "",
-        data.lost_baggage ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Bagagem Extraviada</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.lost_baggage)}</span></p>` : "",
-        data.trip_cancellation ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Cancelamento</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.trip_cancellation)}</span></p>` : "",
-        data.trip_interruption ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Interrupção</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.trip_interruption)}</span></p>` : "",
-        data.dental_assistance ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Odontológica</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.dental_assistance)}</span></p>` : "",
-        data.medical_repatriation ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>Repatriação</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.medical_repatriation)}</span></p>` : "",
-        data.covid_coverage ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>COVID</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.covid_coverage)}</span></p>` : "",
+    ? miniCard(t("sectionCoberturas"), [
+        data.medical_assistance ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldAssistenciaMedica")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.medical_assistance)}</span></p>` : "",
+        data.hospital_expenses ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldDespesasHospitalares")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.hospital_expenses)}</span></p>` : "",
+        data.lost_baggage ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldBagagemExtraviada")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.lost_baggage)}</span></p>` : "",
+        data.trip_cancellation ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldCancelamento")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.trip_cancellation)}</span></p>` : "",
+        data.trip_interruption ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldInterrupcao")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.trip_interruption)}</span></p>` : "",
+        data.dental_assistance ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldOdontologica")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.dental_assistance)}</span></p>` : "",
+        data.medical_repatriation ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldRepatriacao")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.medical_repatriation)}</span></p>` : "",
+        data.covid_coverage ? `<p style="${TXT}display:flex;justify-content:space-between;"><span>${t("fldCovid")}</span><span style="font-weight:600;color:#1e293b;">${escapeHtml(data.covid_coverage)}</span></p>` : "",
       ])
     : "";
 
   const procedure = (data.how_to_activate || data.hospital_procedure || data.reimbursement_info)
-    ? miniCard("🆘 O que Fazer em Emergência", [
+    ? miniCard(t("sectionOQueFazerEmergencia"), [
         data.how_to_activate ? `<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.how_to_activate)}</p>` : "",
-        p("📄 Documentos", data.required_documents_claim),
+        p(`📄 ${t("fldDocumentos")}`, data.required_documents_claim),
         data.hospital_procedure ? `<p style="${TXT}">🏥 ${escapeHtml(data.hospital_procedure)}</p>` : "",
-        data.reimbursement_info ? `<p style="${TXT}">💰 Reembolso: ${escapeHtml(data.reimbursement_info)}</p>` : "",
+        data.reimbursement_info ? `<p style="${TXT}">💰 ${t("fldReembolso")}: ${escapeHtml(data.reimbursement_info)}</p>` : "",
       ], "primary")
     : "";
 
   const insured = data.insured_persons?.length > 0
-    ? miniCard("👨‍👩‍👧 Segurados", data.insured_persons.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}${p.coverage_type ? ` (${p.coverage_type === 'individual' ? 'Individual' : 'Familiar'})` : ''}${p.birth_date ? ` • ${escapeHtml(p.birth_date)}` : ''}</p>`))
+    ? miniCard(t("sectionSeguradosFamily"), data.insured_persons.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}${p.coverage_type ? ` (${p.coverage_type === 'individual' ? t("coverageIndividual") : t("coverageFamiliar")})` : ''}${p.birth_date ? ` • ${escapeHtml(p.birth_date)}` : ''}</p>`))
     : "";
 
   const tips = data.agency_tips
-    ? miniCard("🧠 Orientações do seu Agente", [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    ? miniCard(t("sectionOrientacoesAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
     : "";
 
   const notes = data.agency_notes
-    ? miniCard("📝 Observações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
     : "";
 
   return head + emergency + coverages + procedure + insured + tips + notes;
 }
+
 
 function renderCruiseBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
