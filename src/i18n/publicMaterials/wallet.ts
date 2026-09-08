@@ -224,6 +224,7 @@ const dict = {
     incorrectPassword: "Senha incorreta",
     incorrectPasswordAttempts2: "Senha incorreta. Você tem mais 2 tentativas.",
     incorrectPasswordAttempts1: "Senha incorreta. Você tem mais 1 tentativa antes do bloqueio.",
+    talkOnWhatsAppPlain: "Falar no WhatsApp",
     lockedNotice: "Por segurança, este acesso foi bloqueado após 3 tentativas. Entre em contato com sua agência para liberar novamente.",
     fldPassageiros: "Passageiros",
 
@@ -568,6 +569,7 @@ const dict = {
     incorrectPassword: "Password errata",
     incorrectPasswordAttempts2: "Password errata. Hai ancora 2 tentativi.",
     incorrectPasswordAttempts1: "Password errata. Hai ancora 1 tentativo prima del blocco.",
+    talkOnWhatsAppPlain: "Parla su WhatsApp",
     lockedNotice: "Per motivi di sicurezza, questo accesso è stato bloccato dopo 3 tentativi. Contatta la tua agenzia per sbloccarlo di nuovo.",
     fldPassageiros: "Passeggeri",
 

@@ -2619,7 +2619,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-3.5 py-2 font-semibold text-xs shadow-sm transition-colors shrink-0">
                   <WhatsAppIcon className="h-4 w-4" />
-                  WhatsApp
+                  {tWallet(publicLocale)("whatsapp")}
                 </a>
               </div>
             );
@@ -2650,7 +2650,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-3.5 py-2 font-semibold text-xs shadow-sm transition-colors shrink-0">
                       <WhatsAppIcon className="h-4 w-4" />
-                      WhatsApp
+                      {tWallet(publicLocale)("whatsapp")}
                     </a>
                   )}
                 </div>
