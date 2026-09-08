@@ -605,85 +605,87 @@ function renderHotelBody(service: TripService, locale: PublicLocale = "pt-BR"): 
 
 function renderCarRentalBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
+  const t = tWallet(locale);
   const head = renderServiceHeadline({
     title: `${data.car_type ? escapeHtml(data.car_type) : ''}${data.car_model ? ` • ${escapeHtml(data.car_model)}` : ''}`,
-    dates: data.pickup_date && data.dropoff_date ? `${fmtDate(data.pickup_date)} - ${fmtDate(data.dropoff_date)}` : "",
+    dates: data.pickup_date && data.dropoff_date ? `${fmtDate(data.pickup_date, locale)} - ${fmtDate(data.dropoff_date, locale)}` : "",
     lines: [
-      data.rental_company ? `Locadora: ${data.rental_company}` : "",
-      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
+      data.rental_company ? `${t("fldLocadora")}: ${data.rental_company}` : "",
+      data.reservation_code ? `${t("fldReserva")}: ${data.reservation_code}` : "",
     ],
   });
 
-  const pickup = miniCard("📍 Retirada", [
+  const pickup = miniCard(t("sectionRetirada"), [
     data.pickup_address ? `<p style="${TXT}">${escapeHtml(data.pickup_address)}</p>` : "",
     data.pickup_city ? `<p style="${TXT}">${escapeHtml(data.pickup_city)}${data.pickup_country ? `, ${escapeHtml(data.pickup_country)}` : ''}</p>` : "",
-    data.pickup_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.pickup_date))}${data.pickup_time ? ` às ${escapeHtml(data.pickup_time)}` : ''}</p>` : "",
-    p("Terminal", data.pickup_terminal),
+    data.pickup_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.pickup_date, locale))}${data.pickup_time ? ` ${t("wordAs")} ${escapeHtml(data.pickup_time)}` : ''}</p>` : "",
+    p(t("fldTerminal"), data.pickup_terminal),
     data.pickup_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.pickup_phone)}</p>` : "",
     data.pickup_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.pickup_instructions)}</p>` : "",
   ]);
 
-  const dropoff = miniCard("🔁 Devolução", [
+  const dropoff = miniCard(t("sectionDevolucao"), [
     data.dropoff_address ? `<p style="${TXT}">${escapeHtml(data.dropoff_address)}</p>` : "",
     data.dropoff_city ? `<p style="${TXT}">${escapeHtml(data.dropoff_city)}${data.dropoff_country ? `, ${escapeHtml(data.dropoff_country)}` : ''}</p>` : "",
-    data.dropoff_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.dropoff_date))}${data.dropoff_time ? ` às ${escapeHtml(data.dropoff_time)}` : ''}</p>` : "",
+    data.dropoff_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.dropoff_date, locale))}${data.dropoff_time ? ` ${t("wordAs")} ${escapeHtml(data.dropoff_time)}` : ''}</p>` : "",
     data.dropoff_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.dropoff_instructions)}</p>` : "",
     data.dropoff_late_policy ? `<p style="${TXT}">⏰ ${escapeHtml(data.dropoff_late_policy)}</p>` : "",
   ]);
 
-  const vehicle = miniCard("🚘 Veículo", [
-    p("Modelo", data.car_model),
-    data.transmission ? p("Transmissão", data.transmission === 'automatico' ? 'Automático' : 'Manual') : "",
-    p("Combustível", data.fuel_type),
+  const vehicle = miniCard(t("sectionVeiculo"), [
+    p(t("fldModelo"), data.car_model),
+    data.transmission ? p(t("fldTransmissao"), data.transmission === 'automatico' ? t("transmAutomatico") : t("transmManual")) : "",
+    p(t("fldCombustivel"), data.fuel_type),
     badgeRow([
-      data.doors ? `🚪 ${data.doors} portas` : "",
-      data.passenger_capacity ? `👤 ${data.passenger_capacity} passageiros` : "",
+      data.doors ? `🚪 ${data.doors} ${t("wordPortas")}` : "",
+      data.passenger_capacity ? `👤 ${data.passenger_capacity} ${t("wordPassageiros")}` : "",
       data.luggage_capacity ? `🧳 ${data.luggage_capacity}` : "",
     ].filter(Boolean) as string[]),
-    p("Placa", data.plate),
+    p(t("fldPlaca"), data.plate),
   ]);
 
-  const insurance = miniCard("🛡️ Seguros", [
-    p("Básico", data.basic_insurance),
-    p("Total (CDW/LDW)", data.full_insurance),
-    p("Terceiros", data.third_party_protection),
-    p("Roubo", data.theft_protection),
-    p("Danos", data.damage_protection),
-    data.deductible ? `<p style="${TXT_FG}font-weight:600;">Franquia: ${escapeHtml(data.deductible)}</p>` : "",
+  const insurance = miniCard(t("sectionSeguros"), [
+    p(t("fldBasico"), data.basic_insurance),
+    p(t("fldTotalCdwLdw"), data.full_insurance),
+    p(t("fldTerceiros"), data.third_party_protection),
+    p(t("fldRoubo"), data.theft_protection),
+    p(t("fldDanos"), data.damage_protection),
+    data.deductible ? `<p style="${TXT_FG}font-weight:600;">${t("fldFranquia")}: ${escapeHtml(data.deductible)}</p>` : "",
     data.insurance_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.insurance_notes)}</p>` : "",
   ]);
 
   const deposit = data.deposit_amount
-    ? miniCard("💳 Caução e Pagamento", [
-        p("Caução", data.deposit_amount),
-        p("Forma", data.deposit_method),
-        data.card_in_driver_name ? `<p style="${TXT_FG}font-weight:600;">⚠️ Cartão no nome do condutor: ${escapeHtml(data.card_in_driver_name)}</p>` : "",
-        p("Pagamento", data.payment_status),
+    ? miniCard(t("sectionCaucaoPagamento"), [
+        p(t("fldCaucao"), data.deposit_amount),
+        p(t("fldForma"), data.deposit_method),
+        data.card_in_driver_name ? `<p style="${TXT_FG}font-weight:600;">⚠️ ${t("fldCartaoCondutor")}: ${escapeHtml(data.card_in_driver_name)}</p>` : "",
+        p(t("fldPagamento"), data.payment_status),
       ], "amber")
     : "";
 
   const drivers = data.drivers?.length > 0
-    ? miniCard("👤 Condutores", data.drivers.map((d: any, i: number) => `<p style="${TXT}">${i === 0 ? '🔑 ' : '👤 '}${escapeHtml(d.name)}${d.document ? ` • ${escapeHtml(d.document)}` : ''}</p>`))
+    ? miniCard(t("sectionCondutores"), data.drivers.map((d: any, i: number) => `<p style="${TXT}">${i === 0 ? '🔑 ' : '👤 '}${escapeHtml(d.name)}${d.document ? ` • ${escapeHtml(d.document)}` : ''}</p>`))
     : "";
 
   const fuel = data.fuel_policy
-    ? miniCard("⛽ Combustível", [
-        p("Política", data.fuel_policy === 'cheio_cheio' ? 'Cheio-Cheio' : data.fuel_policy === 'cheio_vazio' ? 'Cheio-Vazio' : data.fuel_policy),
-        p("Penalidade", data.fuel_penalty),
+    ? miniCard(t("sectionCombustivel"), [
+        p(t("fldPolitica"), data.fuel_policy === 'cheio_cheio' ? t("fuelCheioCheio") : data.fuel_policy === 'cheio_vazio' ? t("fuelCheioVazio") : data.fuel_policy),
+        p(t("fldPenalidade"), data.fuel_penalty),
         data.fuel_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.fuel_notes)}</p>` : "",
       ])
     : "";
 
-  const orient = miniCard("⚠️ Orientações", [
-    p("Documentos", data.required_documents),
-    p("Idade mínima", data.minimum_age),
-    p("PID", data.international_permit),
+  const orient = miniCard(t("sectionOrientacoes"), [
+    p(t("fldDocumentos"), data.required_documents),
+    p(t("fldIdadeMinima"), data.minimum_age),
+    p(t("fldPid"), data.international_permit),
     data.traffic_rules ? `<p style="${TXT_ITALIC}">${escapeHtml(data.traffic_rules)}</p>` : "",
-    data.emergency_contact ? `<p style="${TXT}">📞 Emergência: ${escapeHtml(data.emergency_contact)}</p>` : "",
+    data.emergency_contact ? `<p style="${TXT}">📞 ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
   ]);
 
   return head + pickup + dropoff + vehicle + insurance + deposit + drivers + fuel + orient;
 }
+
 
 function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
