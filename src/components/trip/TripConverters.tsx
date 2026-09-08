@@ -113,11 +113,9 @@ function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt
 
   const num = parseAmount(amount);
   const result = rate ? convertWithRate(num, rate, direction) : 0;
-  const targetInfo = CURRENCIES.find((c) => c.code === target);
-
 
   const fmt = (v: number, code: string) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency: code }).format(v);
+    new Intl.NumberFormat(normalizePublicLocale(locale), { style: "currency", currency: code }).format(v);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
