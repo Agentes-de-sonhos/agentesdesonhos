@@ -274,6 +274,7 @@ function ShoeSizeDialog({ open, onOpenChange, locale = "pt-BR" }: { open: boolea
 }
 
 export function TripConverters({ destination, tripId, services, international = true, endDate, locale = "pt-BR" }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; international?: boolean; endDate?: Date | null; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const [openCur, setOpenCur] = useState(false);
   const [openMeasure, setOpenMeasure] = useState(false);
   const [openTip, setOpenTip] = useState(false);
@@ -302,7 +303,7 @@ export function TripConverters({ destination, tripId, services, international = 
           onClick={() => setOpenCur(true)}
         >
           <Coins className="h-4 w-4 text-primary" />
-          <span className="text-[11px] font-medium leading-tight text-center">Moeda</span>
+          <span className="text-[11px] font-medium leading-tight text-center">{t("convMoeda")}</span>
         </Button>}
         {buttons.includes("measure") && <Button
           type="button"
@@ -312,7 +313,7 @@ export function TripConverters({ destination, tripId, services, international = 
           onClick={() => setOpenMeasure(true)}
         >
           <Ruler className="h-4 w-4 text-primary" />
-          <span className="text-[11px] font-medium leading-tight text-center">Medidas</span>
+          <span className="text-[11px] font-medium leading-tight text-center">{t("convMedidas")}</span>
         </Button>}
         {buttons.includes("tip") && <Button
           type="button"
@@ -322,7 +323,7 @@ export function TripConverters({ destination, tripId, services, international = 
           onClick={() => setOpenTip(true)}
         >
           <Receipt className="h-4 w-4 text-primary" />
-          <span className="text-[11px] font-medium leading-tight text-center">Gorjetas</span>
+          <span className="text-[11px] font-medium leading-tight text-center">{t("convGorjetas")}</span>
         </Button>}
         {buttons.includes("checklist") && (
           <Button
@@ -333,7 +334,7 @@ export function TripConverters({ destination, tripId, services, international = 
             onClick={() => setOpenChecklist(true)}
           >
             <ListChecks className="h-4 w-4 text-primary" />
-            <span className="text-[11px] font-medium leading-tight text-center">Checklist</span>
+            <span className="text-[11px] font-medium leading-tight text-center">{t("convChecklist")}</span>
           </Button>
         )}
         {buttons.includes("budget") && (
@@ -345,13 +346,13 @@ export function TripConverters({ destination, tripId, services, international = 
             onClick={() => setOpenBudget(true)}
           >
             <Wallet className="h-4 w-4 text-primary" />
-            <span className="text-[11px] font-medium leading-tight text-center">Orçamento</span>
+            <span className="text-[11px] font-medium leading-tight text-center">{t("convOrcamento")}</span>
           </Button>
         )}
       </div>
-      {international && <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} />}
-      {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />}
-      {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />}
+      {international && <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} locale={locale} />}
+      {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} locale={locale} />}
+      {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} locale={locale} />}
       {tripId && (
         <TripChecklistDialog open={openChecklist} onOpenChange={setOpenChecklist} tripId={tripId} services={services || []} locale={locale} />
       )}
