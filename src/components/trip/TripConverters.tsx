@@ -227,15 +227,15 @@ function ShoeSizeDialog({ open, onOpenChange, locale = "pt-BR" }: { open: boolea
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Footprints className="h-5 w-5 text-primary" />
-            Conversor de calçados
+            {t("convShoeTitle")}
           </DialogTitle>
           <DialogDescription>
-            Selecione o número do Brasil para ver a numeração internacional.
+            {t("convShoeDesc")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Numeração no Brasil</label>
+            <label className="text-sm font-medium">{t("convShoeBrLabel")}</label>
             <Select value={String(br)} onValueChange={(v) => setBr(Number(v))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
