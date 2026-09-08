@@ -138,6 +138,18 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
       toast({ title: "Adicione ao menos um serviço", variant: "destructive" });
       return;
     }
+    const rawPix = meta.pix_key.trim();
+    let normalizedPix: string | null = null;
+    if (rawPix) {
+      normalizedPix = normalizePixKey(rawPix);
+      if (!normalizedPix) {
+        setPixError(PIX_KEY_INVALID_MESSAGE);
+        toast({ title: PIX_KEY_INVALID_MESSAGE, variant: "destructive" });
+        return;
+      }
+      setPixError(null);
+      if (normalizedPix !== meta.pix_key) setMeta(m => ({ ...m, pix_key: normalizedPix! }));
+    }
     const input: CreateInvoiceInput = {
       ...client,
       destination: trip.destination || null,
@@ -146,7 +158,8 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
       issue_date: meta.issue_date,
       due_date: meta.due_date || null,
       notes: meta.notes || null,
-      pix_key: meta.pix_key || null,
+      pix_key: normalizedPix,
+
       status: "draft",
       services,
       installments: installments.length ? installments : undefined,
