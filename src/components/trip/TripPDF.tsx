@@ -155,197 +155,198 @@ function formatDate(dateStr: string, locale: PublicLocale = "pt-BR") {
 }
 
 function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR"): string[] {
+  const t = tWallet(locale);
   const data = service.service_data as any;
   const details: string[] = [];
   
   switch (service.service_type) {
     case "flight":
       details.push(`${data.origin_city || ''} → ${data.destination_city || ''}`);
-      details.push(`Companhia: ${data.main_airline || data.airline || ''}`);
-      if (data.locator_code) details.push(`Localizador: ${data.locator_code}`);
+      details.push(`${t("fldCompanhia")}: ${data.main_airline || data.airline || ''}`);
+      if (data.locator_code) details.push(`${t("fldLocalizador")}: ${data.locator_code}`);
       if (data.trip_type) {
-        const types: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
-        details.push(`Tipo: ${types[data.trip_type] || data.trip_type}`);
+        const types: Record<string, string> = { ida: t("tripSomenteIda"), ida_volta: t("tripIdaVolta"), multi_trechos: t("tripMultiTrechos") };
+        details.push(`${t("fldTipo")}: ${types[data.trip_type] || data.trip_type}`);
       }
       if (data.segments?.length > 0) {
-        details.push(`--- Trechos ---`);
+        details.push(t("detailsTrechosSeparator"));
         data.segments.forEach((seg: any, i: number) => {
-          const segType = seg.segment_type === 'ida' ? 'Ida' : seg.segment_type === 'conexao' ? 'Conexão' : 'Volta';
-          details.push(`${segType}: ${seg.origin_airport || seg.origin_city} → ${seg.destination_airport || seg.destination_city} • ${seg.flight_date ? formatDate(seg.flight_date) : ''} ${seg.departure_time || ''} → ${seg.arrival_time || ''} • ${seg.airline || ''} ${seg.flight_number || ''}`);
+          const segType = seg.segment_type === 'ida' ? t("fldIda") : seg.segment_type === 'conexao' ? t("segConexao") : t("segVolta");
+          details.push(`${segType}: ${seg.origin_airport || seg.origin_city} → ${seg.destination_airport || seg.destination_city} • ${seg.flight_date ? formatDate(seg.flight_date, locale) : ''} ${seg.departure_time || ''} → ${seg.arrival_time || ''} • ${seg.airline || ''} ${seg.flight_number || ''}`);
         });
       } else {
-        details.push(`Ida: ${formatDate(data.departure_date)} | Volta: ${formatDate(data.return_date)}`);
+        details.push(`${t("fldIda")}: ${formatDate(data.departure_date, locale)} | ${t("segVolta")}: ${formatDate(data.return_date, locale)}`);
       }
-      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
-      if (data.carry_on || data.checked_baggage) details.push(`Bagagem: ${data.carry_on ? `Mão: ${data.carry_on}` : ''} ${data.checked_baggage ? `Despachada: ${data.checked_baggage}` : ''}`);
-      if (data.recommended_arrival) details.push(`Antecedência: ${data.recommended_arrival}`);
-      if (data.required_documents) details.push(`Documentos: ${data.required_documents}`);
-      if (data.boarding_notes || data.notes) details.push(`Obs: ${data.boarding_notes || data.notes}`);
+      if (data.passengers?.length > 0) details.push(`${t("fldPassageiros")}: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.carry_on || data.checked_baggage) details.push(`${t("fldBagagem")}: ${data.carry_on ? `${t("fldMao")}: ${data.carry_on}` : ''} ${data.checked_baggage ? `${t("fldDespachada")}: ${data.checked_baggage}` : ''}`);
+      if (data.recommended_arrival) details.push(`${t("fldAntecedencia")}: ${data.recommended_arrival}`);
+      if (data.required_documents) details.push(`${t("fldDocumentos")}: ${data.required_documents}`);
+      if (data.boarding_notes || data.notes) details.push(`${t("fldObs")}: ${data.boarding_notes || data.notes}`);
       break;
     case "hotel": {
-      const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: 'Boutique', resort: 'Resort', pousada: 'Pousada' };
-      const roomMap: Record<string, string> = { standard: 'Standard', superior: 'Superior', deluxe: 'Deluxe', suite: 'Suíte', suite_junior: 'Suíte Júnior', presidencial: 'Presidencial', apartamento: 'Apartamento', villa: 'Villa', bangalo: 'Bangalô' };
-      const mealMap: Record<string, string> = { somente_hospedagem: 'Somente Hospedagem', cafe_manha: 'Café da Manhã', meia_pensao: 'Meia Pensão', pensao_completa: 'Pensão Completa', all_inclusive: 'All Inclusive' };
+      const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: t("catBoutique"), resort: t("catResort"), pousada: t("catPousada") };
+      const roomMap: Record<string, string> = { standard: t("roomStandard"), superior: t("roomSuperior"), deluxe: t("roomDeluxe"), suite: t("roomSuite"), suite_junior: t("roomSuiteJunior"), presidencial: t("roomPresidencial"), apartamento: t("roomApartamento"), villa: t("roomVilla"), bangalo: t("roomBangalo") };
+      const mealMap: Record<string, string> = { somente_hospedagem: t("mealSomenteHospedagem"), cafe_manha: t("mealCafeManha"), meia_pensao: t("mealMeiaPensao"), pensao_completa: t("mealPensaoCompleta"), all_inclusive: t("mealAllInclusive") };
       details.push(`${data.hotel_name}${data.hotel_category ? ` ${catMap[data.hotel_category] || data.hotel_category}` : ''}`);
       details.push(`${data.city}${data.country ? `, ${data.country}` : ''}`);
-      details.push(`Check-in: ${formatDate(data.check_in)} | Check-out: ${formatDate(data.check_out)}`);
-      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
-      if (data.room_type) details.push(`Acomodação: ${roomMap[data.room_type] || data.room_type}`);
-      if (data.bed_type) details.push(`Cama: ${data.bed_type}`);
-      if (data.meal_plan) details.push(`Regime: ${mealMap[data.meal_plan] || data.meal_plan}`);
-      if (data.checkin_time) details.push(`Horário check-in: ${data.checkin_time}`);
-      if (data.checkout_time) details.push(`Horário check-out: ${data.checkout_time}`);
-      if (data.address) details.push(`Endereço: ${data.address}`);
-      if (data.hotel_phone) details.push(`Telefone: ${data.hotel_phone}`);
-      if (data.guests?.length > 0) details.push(`Hóspedes: ${data.guests.map((g: any) => g.name).join(', ')}`);
-      if (data.cancellation_policy) details.push(`Cancelamento: ${data.cancellation_policy}`);
-      if (data.mandatory_fees) details.push(`Taxas no destino: ${data.mandatory_fees}`);
-      if (data.notes) details.push(`Obs: ${data.notes}`);
+      details.push(`${t("fldCheckin")}: ${formatDate(data.check_in, locale)} | ${t("fldCheckout")}: ${formatDate(data.check_out, locale)}`);
+      if (data.reservation_code) details.push(`${t("fldReserva")}: ${data.reservation_code}`);
+      if (data.room_type) details.push(`${t("fldAcomodacao")}: ${roomMap[data.room_type] || data.room_type}`);
+      if (data.bed_type) details.push(`${t("fldCama")}: ${data.bed_type}`);
+      if (data.meal_plan) details.push(`${t("fldRegime")}: ${mealMap[data.meal_plan] || data.meal_plan}`);
+      if (data.checkin_time) details.push(`${t("fldHorarioCheckin")}: ${data.checkin_time}`);
+      if (data.checkout_time) details.push(`${t("fldHorarioCheckout")}: ${data.checkout_time}`);
+      if (data.address) details.push(`${t("fldEndereco")}: ${data.address}`);
+      if (data.hotel_phone) details.push(`${t("fldTelefone")}: ${data.hotel_phone}`);
+      if (data.guests?.length > 0) details.push(`${t("fldHospedes")}: ${data.guests.map((g: any) => g.name).join(', ')}`);
+      if (data.cancellation_policy) details.push(`${t("fldCancelamento")}: ${data.cancellation_policy}`);
+      if (data.mandatory_fees) details.push(`${t("fldTaxasDestino")}: ${data.mandatory_fees}`);
+      if (data.notes) details.push(`${t("fldObs")}: ${data.notes}`);
       break;
     }
     case "car_rental":
-      if (data.rental_company) details.push(`Locadora: ${data.rental_company}`);
-      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
-      const catLabels: Record<string, string> = { economico: 'Econômico', compacto: 'Compacto', intermediario: 'Intermediário', suv: 'SUV', premium: 'Premium', luxo: 'Luxo', van: 'Van' };
-      details.push(`Categoria: ${catLabels[data.car_type] || data.car_type || ''}`);
-      if (data.car_model) details.push(`Modelo: ${data.car_model}`);
-      if (data.transmission) details.push(`Transmissão: ${data.transmission === 'automatico' ? 'Automático' : 'Manual'}`);
-      details.push(`Retirada: ${data.pickup_location || ''}${data.pickup_date ? ` • ${formatDate(data.pickup_date)}` : ''}${data.pickup_time ? ` às ${data.pickup_time}` : ''}`);
-      details.push(`Devolução: ${data.dropoff_location || ''}${data.dropoff_date ? ` • ${formatDate(data.dropoff_date)}` : ''}${data.dropoff_time ? ` às ${data.dropoff_time}` : ''}`);
-      if (data.drivers?.length > 0) details.push(`Condutores: ${data.drivers.map((d: any) => d.name).join(', ')}`);
+      if (data.rental_company) details.push(`${t("fldLocadora")}: ${data.rental_company}`);
+      if (data.reservation_code) details.push(`${t("fldReserva")}: ${data.reservation_code}`);
+      const catLabels: Record<string, string> = { economico: t("carEconomico"), compacto: t("carCompacto"), intermediario: t("carIntermediario"), suv: t("carSuv"), premium: t("carPremium"), luxo: t("carLuxo"), van: t("carVan") };
+      details.push(`${t("fldCategoria")}: ${catLabels[data.car_type] || data.car_type || ''}`);
+      if (data.car_model) details.push(`${t("fldModelo")}: ${data.car_model}`);
+      if (data.transmission) details.push(`${t("fldTransmissao")}: ${data.transmission === 'automatico' ? t("transmAutomatico") : t("transmManual")}`);
+      details.push(`${t("fldRetirada")}: ${data.pickup_location || ''}${data.pickup_date ? ` • ${formatDate(data.pickup_date, locale)}` : ''}${data.pickup_time ? ` ${t("wordAs")} ${data.pickup_time}` : ''}`);
+      details.push(`${t("fldDevolucao")}: ${data.dropoff_location || ''}${data.dropoff_date ? ` • ${formatDate(data.dropoff_date, locale)}` : ''}${data.dropoff_time ? ` ${t("wordAs")} ${data.dropoff_time}` : ''}`);
+      if (data.drivers?.length > 0) details.push(`${t("fldCondutores")}: ${data.drivers.map((d: any) => d.name).join(', ')}`);
       if (data.fuel_policy) {
-        const fuelLabels: Record<string, string> = { cheio_cheio: 'Cheio-Cheio', cheio_vazio: 'Cheio-Vazio', outro: 'Outro' };
-        details.push(`Combustível: ${fuelLabels[data.fuel_policy] || data.fuel_policy}`);
+        const fuelLabels: Record<string, string> = { cheio_cheio: t("fuelCheioCheio"), cheio_vazio: t("fuelCheioVazio"), outro: t("fuelOutro") };
+        details.push(`${t("fldCombustivel")}: ${fuelLabels[data.fuel_policy] || data.fuel_policy}`);
       }
-      if (data.deposit_amount) details.push(`Caução: ${data.deposit_amount}`);
-      if (data.required_documents) details.push(`Documentos: ${data.required_documents}`);
-      if (data.notes) details.push(`Obs: ${data.notes}`);
+      if (data.deposit_amount) details.push(`${t("fldCaucao")}: ${data.deposit_amount}`);
+      if (data.required_documents) details.push(`${t("fldDocumentos")}: ${data.required_documents}`);
+      if (data.notes) details.push(`${t("fldObs")}: ${data.notes}`);
       break;
       break;
     case "transfer": {
-      const typeMap: Record<string, string> = { arrival: 'Transfer IN', departure: 'Transfer OUT', inter_hotel: 'Inter-hotel' };
-      const modeMap: Record<string, string> = { privativo: 'Privativo', compartilhado: 'Compartilhado', shuttle: 'Shuttle' };
-      const statusMap: Record<string, string> = { confirmado: 'Confirmado', agendado: 'Agendado', pendente: 'Pendente' };
-      details.push(`Tipo: ${typeMap[data.transfer_type] || data.transfer_type}`);
-      if (data.transfer_mode) details.push(`Modalidade: ${modeMap[data.transfer_mode] || data.transfer_mode}`);
-      if (data.transfer_status) details.push(`Status: ${statusMap[data.transfer_status] || data.transfer_status}`);
+      const typeMap: Record<string, string> = { arrival: t("transferArrival"), departure: t("transferDeparture"), inter_hotel: t("transferInterHotel") };
+      const modeMap: Record<string, string> = { privativo: t("transferModePrivativo"), compartilhado: t("transferModeCompartilhado"), shuttle: t("transferModeShuttle") };
+      const statusMap: Record<string, string> = { confirmado: t("transferStatusConfirmado"), agendado: t("transferStatusAgendado"), pendente: t("transferStatusPendente") };
+      details.push(`${t("fldTipo")}: ${typeMap[data.transfer_type] || data.transfer_type}`);
+      if (data.transfer_mode) details.push(`${t("fldModalidade")}: ${modeMap[data.transfer_mode] || data.transfer_mode}`);
+      if (data.transfer_status) details.push(`${t("fldStatus")}: ${statusMap[data.transfer_status] || data.transfer_status}`);
       const route = data.origin_location && data.destination_location 
         ? `${data.origin_location} → ${data.destination_location}` 
         : data.location || '';
-      if (route) details.push(`Rota: ${route}`);
-      if (data.city) details.push(`Cidade: ${data.city}`);
-      if (data.date) details.push(`Data: ${formatDate(data.date)}${data.time ? ` às ${data.time}` : ''}`);
-      if (data.company_name) details.push(`Empresa: ${data.company_name}`);
-      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
-      if (data.flight_number) details.push(`Voo: ${data.flight_number}`);
-      if (data.meeting_instructions) details.push(`Instruções: ${data.meeting_instructions}`);
-      if (data.driver_name) details.push(`Motorista: ${data.driver_name}`);
-      if (data.driver_phone) details.push(`Telefone: ${data.driver_phone}`);
-      if (data.vehicle_type) details.push(`Veículo: ${data.vehicle_type}`);
-      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
-      if (data.plan_b) details.push(`Plano B: ${data.plan_b}`);
-      if (data.notes) details.push(`Obs: ${data.notes}`);
+      if (route) details.push(`${t("fldRota")}: ${route}`);
+      if (data.city) details.push(`${t("fldCidade")}: ${data.city}`);
+      if (data.date) details.push(`${t("fldData")}: ${formatDate(data.date, locale)}${data.time ? ` ${t("wordAs")} ${data.time}` : ''}`);
+      if (data.company_name) details.push(`${t("fldEmpresa")}: ${data.company_name}`);
+      if (data.reservation_code) details.push(`${t("fldReserva")}: ${data.reservation_code}`);
+      if (data.flight_number) details.push(`${t("fldVoo")}: ${data.flight_number}`);
+      if (data.meeting_instructions) details.push(`${t("fldInstrucoes")}: ${data.meeting_instructions}`);
+      if (data.driver_name) details.push(`${t("fldMotorista")}: ${data.driver_name}`);
+      if (data.driver_phone) details.push(`${t("fldTelefone")}: ${data.driver_phone}`);
+      if (data.vehicle_type) details.push(`${t("fldVeiculo")}: ${data.vehicle_type}`);
+      if (data.passengers?.length > 0) details.push(`${t("fldPassageiros")}: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.plan_b) details.push(`${t("fldPlanoB")}: ${data.plan_b}`);
+      if (data.notes) details.push(`${t("fldObs")}: ${data.notes}`);
       break;
     }
     case "attraction": {
-      const typeMap: Record<string, string> = { parque: 'Parque', show: 'Show', passeio: 'Passeio', museu: 'Museu', tour: 'Tour', evento: 'Evento', experiencia: 'Experiência' };
-      const statusMap: Record<string, string> = { confirmado: 'Confirmado', reservado: 'Reservado', flexivel: 'Flexível', utilizado: 'Utilizado' };
+      const typeMap: Record<string, string> = { parque: t("attrTypeParque"), show: t("attrTypeShow"), passeio: t("attrTypePasseio"), museu: t("attrTypeMuseu"), tour: t("attrTypeTour"), evento: t("attrTypeEvento"), experiencia: t("attrTypeExperiencia") };
+      const statusMap: Record<string, string> = { confirmado: t("attrStatusConfirmado"), reservado: t("attrStatusReservado"), flexivel: t("attrStatusFlexivel"), utilizado: t("attrStatusUtilizado") };
       details.push(`${data.name}`);
-      if (data.attraction_type) details.push(`Tipo: ${typeMap[data.attraction_type] || data.attraction_type}`);
-      if (data.city) details.push(`Local: ${data.city}${data.country ? `, ${data.country}` : ''}`);
-      details.push(`Data: ${formatDate(data.date)} | Quantidade: ${data.quantity}`);
-      if (data.status) details.push(`Status: ${statusMap[data.status] || data.status}`);
-      if (data.entry_time) details.push(`Entrada: ${data.entry_time}`);
-      if (data.duration) details.push(`Duração: ${data.duration}`);
-      if (data.ticket_code) details.push(`Código: ${data.ticket_code}`);
-      if (data.confirmation_code) details.push(`Confirmação: ${data.confirmation_code}`);
-      if (data.venue_name) details.push(`Local: ${data.venue_name}`);
-      if (data.address) details.push(`Endereço: ${data.address}`);
-      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => `${p.name} (${p.ticket_type === 'adulto' ? 'Adulto' : p.ticket_type === 'crianca' ? 'Criança' : 'Senior'})`).join(', ')}`);
-      if (data.usage_instructions) details.push(`Instruções: ${data.usage_instructions}`);
-      if (data.cancellation_policy) details.push(`Cancelamento: ${data.cancellation_policy}`);
-      if (data.agency_tips) details.push(`Dicas: ${data.agency_tips}`);
-      if (data.agency_notes) details.push(`Obs: ${data.agency_notes}`);
+      if (data.attraction_type) details.push(`${t("fldTipo")}: ${typeMap[data.attraction_type] || data.attraction_type}`);
+      if (data.city) details.push(`${t("fldLocal")}: ${data.city}${data.country ? `, ${data.country}` : ''}`);
+      details.push(`${t("fldData")}: ${formatDate(data.date, locale)} | ${t("fldQuantidade")}: ${data.quantity}`);
+      if (data.status) details.push(`${t("fldStatus")}: ${statusMap[data.status] || data.status}`);
+      if (data.entry_time) details.push(`${t("fldEntrada")}: ${data.entry_time}`);
+      if (data.duration) details.push(`${t("fldDuracao")}: ${data.duration}`);
+      if (data.ticket_code) details.push(`${t("fldCodigo")}: ${data.ticket_code}`);
+      if (data.confirmation_code) details.push(`${t("fldConfirmacao")}: ${data.confirmation_code}`);
+      if (data.venue_name) details.push(`${t("fldLocal")}: ${data.venue_name}`);
+      if (data.address) details.push(`${t("fldEndereco")}: ${data.address}`);
+      if (data.passengers?.length > 0) details.push(`${t("fldPassageiros")}: ${data.passengers.map((p: any) => `${p.name} (${p.ticket_type === 'adulto' ? t("ticketAdulto") : p.ticket_type === 'crianca' ? t("ticketCrianca") : t("ticketSenior")})`).join(', ')}`);
+      if (data.usage_instructions) details.push(`${t("fldInstrucoes")}: ${data.usage_instructions}`);
+      if (data.cancellation_policy) details.push(`${t("fldCancelamento")}: ${data.cancellation_policy}`);
+      if (data.agency_tips) details.push(`${t("fldDicas")}: ${data.agency_tips}`);
+      if (data.agency_notes) details.push(`${t("fldObs")}: ${data.agency_notes}`);
       break;
     }
     case "insurance": {
-      details.push(`Seguradora: ${data.provider}`);
-      if (data.plan_name) details.push(`Plano: ${data.plan_name}`);
-      if (data.policy_number) details.push(`Apólice: ${data.policy_number}`);
-      details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
-      if (data.destination_covered) details.push(`Destino coberto: ${data.destination_covered}`);
-      if (data.coverage_type) details.push(`Tipo: ${data.coverage_type}`);
-      if (data.status) details.push(`Status: ${data.status === 'ativo' ? 'Ativo' : data.status === 'expirado' ? 'Expirado' : 'Futuro'}`);
-      if (data.coverage) details.push(`Cobertura: ${data.coverage}`);
-      if (data.medical_assistance) details.push(`Assistência Médica: ${data.medical_assistance}`);
-      if (data.hospital_expenses) details.push(`Despesas Hospitalares: ${data.hospital_expenses}`);
-      if (data.lost_baggage) details.push(`Bagagem Extraviada: ${data.lost_baggage}`);
-      if (data.trip_cancellation) details.push(`Cancelamento: ${data.trip_cancellation}`);
-      if (data.dental_assistance) details.push(`Odontológica: ${data.dental_assistance}`);
-      if (data.medical_repatriation) details.push(`Repatriação: ${data.medical_repatriation}`);
-      if (data.emergency_phone) details.push(`📞 Emergência: ${data.emergency_phone}`);
+      details.push(`${t("fldSeguradora")}: ${data.provider}`);
+      if (data.plan_name) details.push(`${t("fldPlano")}: ${data.plan_name}`);
+      if (data.policy_number) details.push(`${t("fldApolice")}: ${data.policy_number}`);
+      details.push(`${t("fldPeriodo")}: ${formatDate(data.start_date, locale)} ${t("wordPeriodoTo")} ${formatDate(data.end_date, locale)}`);
+      if (data.destination_covered) details.push(`${t("fldDestinoCoberto")}: ${data.destination_covered}`);
+      if (data.coverage_type) details.push(`${t("fldTipo")}: ${data.coverage_type}`);
+      if (data.status) details.push(`${t("fldStatus")}: ${data.status === 'ativo' ? t("insStatusAtivo") : data.status === 'expirado' ? t("insStatusExpirado") : t("insStatusFuturo")}`);
+      if (data.coverage) details.push(`${t("fldCobertura")}: ${data.coverage}`);
+      if (data.medical_assistance) details.push(`${t("fldAssistenciaMedica")}: ${data.medical_assistance}`);
+      if (data.hospital_expenses) details.push(`${t("fldDespesasHospitalares")}: ${data.hospital_expenses}`);
+      if (data.lost_baggage) details.push(`${t("fldBagagemExtraviada")}: ${data.lost_baggage}`);
+      if (data.trip_cancellation) details.push(`${t("fldCancelamento")}: ${data.trip_cancellation}`);
+      if (data.dental_assistance) details.push(`${t("fldOdontologica")}: ${data.dental_assistance}`);
+      if (data.medical_repatriation) details.push(`${t("fldRepatriacao")}: ${data.medical_repatriation}`);
+      if (data.emergency_phone) details.push(`📞 ${t("fldEmergencia")}: ${data.emergency_phone}`);
       if (data.emergency_whatsapp) details.push(`💬 WhatsApp: ${data.emergency_whatsapp}`);
-      if (data.insured_persons?.length > 0) details.push(`Segurados: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
-      if (data.how_to_activate) details.push(`Como acionar: ${data.how_to_activate}`);
-      if (data.agency_tips) details.push(`Dicas: ${data.agency_tips}`);
-      if (data.agency_notes || data.notes) details.push(`Obs: ${data.agency_notes || data.notes}`);
+      if (data.insured_persons?.length > 0) details.push(`${t("fldSegurados")}: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
+      if (data.how_to_activate) details.push(`${t("fldComoAcionar")}: ${data.how_to_activate}`);
+      if (data.agency_tips) details.push(`${t("fldDicas")}: ${data.agency_tips}`);
+      if (data.agency_notes || data.notes) details.push(`${t("fldObs")}: ${data.agency_notes || data.notes}`);
       break;
     }
     case "cruise":
-      if (data.cruise_company) details.push(`Companhia: ${data.cruise_company}`);
-      details.push(`Navio: ${data.ship_name}`);
-      details.push(`Rota: ${data.route}`);
-      if (data.embarkation_port) details.push(`Embarque: ${data.embarkation_port}`);
-      if (data.disembarkation_port) details.push(`Desembarque: ${data.disembarkation_port}`);
-      details.push(`Período: ${formatDate(data.start_date)} a ${formatDate(data.end_date)}`);
-      if (data.booking_number) details.push(`Reserva: ${data.booking_number}`);
-      if (data.cabin_type) details.push(`Cabine: ${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}`);
-      if (data.deck) details.push(`Deck: ${data.deck}`);
-      if (data.occupancy) details.push(`Ocupação: ${data.occupancy}`);
-      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.cruise_company) details.push(`${t("fldCompanhia")}: ${data.cruise_company}`);
+      details.push(`${t("fldNavio")}: ${data.ship_name}`);
+      details.push(`${t("fldRota")}: ${data.route}`);
+      if (data.embarkation_port) details.push(`${t("fldEmbarque")}: ${data.embarkation_port}`);
+      if (data.disembarkation_port) details.push(`${t("fldDesembarque")}: ${data.disembarkation_port}`);
+      details.push(`${t("fldPeriodo")}: ${formatDate(data.start_date, locale)} ${t("wordPeriodoTo")} ${formatDate(data.end_date, locale)}`);
+      if (data.booking_number) details.push(`${t("fldReserva")}: ${data.booking_number}`);
+      if (data.cabin_type) details.push(`${t("fldCabine")}: ${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}`);
+      if (data.deck) details.push(`${t("fldDeck")}: ${data.deck}`);
+      if (data.occupancy) details.push(`${t("fldOcupacao")}: ${data.occupancy}`);
+      if (data.passengers?.length > 0) details.push(`${t("fldPassageiros")}: ${data.passengers.map((p: any) => p.name).join(', ')}`);
       if (data.itinerary?.length > 0) {
-        details.push(`--- Roteiro ---`);
+        details.push(t("detailsRoteiroSeparator"));
         data.itinerary.forEach((stop: any) => {
           details.push(`${stop.date ? stop.date + ' – ' : ''}${stop.port} (${stop.stop_type})${stop.arrival_time ? ' ' + stop.arrival_time : ''}${stop.departure_time ? ' – ' + stop.departure_time : ''}`);
         });
       }
-      if (data.boarding_terminal) details.push(`Terminal: ${data.boarding_terminal}`);
-      if (data.recommended_arrival) details.push(`Chegada recomendada: ${data.recommended_arrival}`);
-      if (data.required_documents) details.push(`Documentos: ${data.required_documents}`);
-      if (data.boarding_notes) details.push(`Orientações: ${data.boarding_notes}`);
+      if (data.boarding_terminal) details.push(`${t("fldTerminal")}: ${data.boarding_terminal}`);
+      if (data.recommended_arrival) details.push(`${t("fldChegadaRecomendada")}: ${data.recommended_arrival}`);
+      if (data.required_documents) details.push(`${t("fldDocumentos")}: ${data.required_documents}`);
+      if (data.boarding_notes) details.push(`${t("fldOrientacoes")}: ${data.boarding_notes}`);
       break;
     case "train":
       details.push(`🚆 ${data.origin_city} → ${data.destination_city}`);
-      if (data.travel_date) details.push(`Data: ${formatDate(data.travel_date)}${data.departure_time ? ` • ${data.departure_time} → ${data.arrival_time || ''}` : ''}`);
-      if (data.train_company) details.push(`Companhia: ${data.train_company}${data.train_number ? ` • Trem ${data.train_number}` : ''}`);
-      if (data.travel_class) details.push(`Classe: ${data.travel_class}`);
-      if (data.coach || data.seat) details.push(`${data.coach ? `Vagão ${data.coach}` : ''}${data.seat ? ` • Assento ${data.seat}` : ''}`);
-      if (data.origin_station) details.push(`Embarque: ${data.origin_station}`);
-      if (data.destination_station) details.push(`Desembarque: ${data.destination_station}`);
-      if (data.passengers?.length > 0) details.push(`Passageiros: ${data.passengers.map((p: any) => p.name).join(', ')}`);
-      if (data.boarding_notes) details.push(`Orientações: ${data.boarding_notes}`);
+      if (data.travel_date) details.push(`${t("fldData")}: ${formatDate(data.travel_date, locale)}${data.departure_time ? ` • ${data.departure_time} → ${data.arrival_time || ''}` : ''}`);
+      if (data.train_company) details.push(`${t("fldCompanhia")}: ${data.train_company}${data.train_number ? ` • ${t("fldTrem")} ${data.train_number}` : ''}`);
+      if (data.travel_class) details.push(`${t("fldClasse")}: ${data.travel_class}`);
+      if (data.coach || data.seat) details.push(`${data.coach ? `${t("fldVagao")} ${data.coach}` : ''}${data.seat ? ` • ${t("fldAssento")} ${data.seat}` : ''}`);
+      if (data.origin_station) details.push(`${t("fldEmbarque")}: ${data.origin_station}`);
+      if (data.destination_station) details.push(`${t("fldDesembarque")}: ${data.destination_station}`);
+      if (data.passengers?.length > 0) details.push(`${t("fldPassageiros")}: ${data.passengers.map((p: any) => p.name).join(', ')}`);
+      if (data.boarding_notes) details.push(`${t("fldOrientacoes")}: ${data.boarding_notes}`);
       break;
     case "other": {
-      const otherTypeMap: Record<string, string> = { restaurante: 'Restaurante', guia_turistico: 'Guia Turístico', chip_internet: 'Chip/Internet', experiencia: 'Experiência', evento: 'Evento', spa_wellness: 'Spa/Bem-estar', servico_vip: 'Serviço VIP', concierge: 'Concierge', personalizado: 'Personalizado' };
-      const statusMap: Record<string, string> = { confirmado: 'Confirmado', agendado: 'Agendado', opcional: 'Opcional' };
-      if (data.service_name) details.push(`Serviço: ${data.service_name}`);
-      if (data.other_service_type) details.push(`Tipo: ${otherTypeMap[data.other_service_type] || data.custom_type_name || data.other_service_type}`);
-      if (data.city) details.push(`Local: ${data.city}${data.country ? `, ${data.country}` : ''}`);
-      if (data.date) details.push(`Data: ${formatDate(data.date)}${data.time ? ` às ${data.time}` : ''}`);
-      if (data.status) details.push(`Status: ${statusMap[data.status] || data.status}`);
-      if (data.duration) details.push(`Duração: ${data.duration}`);
-      if (data.location_name) details.push(`Local: ${data.location_name}`);
-      if (data.address) details.push(`Endereço: ${data.address}`);
-      if (data.reservation_code) details.push(`Reserva: ${data.reservation_code}`);
-      if (data.contact_name) details.push(`Contato: ${data.contact_name}${data.contact_company ? ` — ${data.contact_company}` : ''}`);
-      if (data.contact_phone) details.push(`Telefone: ${data.contact_phone}`);
-      if (data.chip_operator) details.push(`Operadora: ${data.chip_operator} (${data.chip_type === 'esim' ? 'eSIM' : 'Chip Físico'})`);
-      if (data.chip_activation_instructions) details.push(`Ativação: ${data.chip_activation_instructions}`);
-      if (data.guide_name) details.push(`Guia: ${data.guide_name}${data.guide_language ? ` (${data.guide_language})` : ''}`);
-      if (data.guide_meeting_point) details.push(`Ponto de encontro: ${data.guide_meeting_point}`);
+      const otherTypeMap: Record<string, string> = { restaurante: t("otherRestaurante"), guia_turistico: t("otherGuiaTuristico"), chip_internet: t("otherChipInternet"), experiencia: t("otherExperiencia"), evento: t("otherEvento"), spa_wellness: t("otherSpaWellness"), servico_vip: t("otherServicoVip"), concierge: t("otherConcierge"), personalizado: t("otherPersonalizado") };
+      const statusMap: Record<string, string> = { confirmado: t("otherStatusConfirmado"), agendado: t("otherStatusAgendado"), opcional: t("otherStatusOpcional") };
+      if (data.service_name) details.push(`${t("fldServico")}: ${data.service_name}`);
+      if (data.other_service_type) details.push(`${t("fldTipo")}: ${otherTypeMap[data.other_service_type] || data.custom_type_name || data.other_service_type}`);
+      if (data.city) details.push(`${t("fldLocal")}: ${data.city}${data.country ? `, ${data.country}` : ''}`);
+      if (data.date) details.push(`${t("fldData")}: ${formatDate(data.date, locale)}${data.time ? ` ${t("wordAs")} ${data.time}` : ''}`);
+      if (data.status) details.push(`${t("fldStatus")}: ${statusMap[data.status] || data.status}`);
+      if (data.duration) details.push(`${t("fldDuracao")}: ${data.duration}`);
+      if (data.location_name) details.push(`${t("fldLocal")}: ${data.location_name}`);
+      if (data.address) details.push(`${t("fldEndereco")}: ${data.address}`);
+      if (data.reservation_code) details.push(`${t("fldReserva")}: ${data.reservation_code}`);
+      if (data.contact_name) details.push(`${t("fldContato")}: ${data.contact_name}${data.contact_company ? ` — ${data.contact_company}` : ''}`);
+      if (data.contact_phone) details.push(`${t("fldTelefone")}: ${data.contact_phone}`);
+      if (data.chip_operator) details.push(`${t("fldOperadora")}: ${data.chip_operator} (${data.chip_type === 'esim' ? t("chipEsim") : t("chipFisico")})`);
+      if (data.chip_activation_instructions) details.push(`${t("fldAtivacao")}: ${data.chip_activation_instructions}`);
+      if (data.guide_name) details.push(`${t("fldGuia")}: ${data.guide_name}${data.guide_language ? ` (${data.guide_language})` : ''}`);
+      if (data.guide_meeting_point) details.push(`${t("fldPontoEncontro")}: ${data.guide_meeting_point}`);
       if (data.description) details.push(data.description);
-      if (data.agency_tips) details.push(`Dicas: ${data.agency_tips}`);
-      if (data.agency_notes) details.push(`Obs: ${data.agency_notes}`);
+      if (data.agency_tips) details.push(`${t("fldDicas")}: ${data.agency_tips}`);
+      if (data.agency_notes) details.push(`${t("fldObs")}: ${data.agency_notes}`);
       break;
     }
   }
