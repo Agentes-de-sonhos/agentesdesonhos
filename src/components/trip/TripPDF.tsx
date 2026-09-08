@@ -1183,7 +1183,7 @@ function generateAgentSignature(profile: AgentProfile | null, locale: PublicLoca
           whatsappLink
             ? `<div style="margin-top:10px;">
                 <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
-                  💬 Falar no WhatsApp
+                  ${tWallet(locale)("pdfTalkOnWhatsApp")}
                 </a>
               </div>`
             : ""
