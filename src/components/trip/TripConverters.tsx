@@ -189,7 +189,7 @@ function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt
             )}
           </div>
           <p className="text-[11px] text-muted-foreground text-center">
-            Valores de referência. Consulte sua casa de câmbio para a cotação final.
+            {t("convFooterNote")}
           </p>
         </div>
       </DialogContent>
