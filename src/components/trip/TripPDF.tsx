@@ -5,7 +5,7 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { extractVoucherPath } from "@/lib/secureVoucher";
 import { toast } from "sonner";
 import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@/lib/serviceImages";
-import { formatPublicLongDate, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { formatPublicLongDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 /** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
