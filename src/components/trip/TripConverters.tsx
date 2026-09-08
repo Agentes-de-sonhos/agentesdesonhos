@@ -248,24 +248,24 @@ function ShoeSizeDialog({ open, onOpenChange, locale = "pt-BR" }: { open: boolea
 
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">Europa (EU)</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeEU")}</p>
               <p className="text-2xl font-bold">{row.eu}</p>
             </div>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">Reino Unido (UK)</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeUK")}</p>
               <p className="text-2xl font-bold">{row.uk}</p>
             </div>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">EUA Masculino</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeUSM")}</p>
               <p className="text-2xl font-bold">{row.usM}</p>
             </div>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">EUA Feminino</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeUSW")}</p>
               <p className="text-2xl font-bold">{row.usW}</p>
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground text-center">
-            Tabela de referência. A numeração pode variar conforme a marca.
+            {t("convShoeFooterNote")}
           </p>
         </div>
       </DialogContent>
