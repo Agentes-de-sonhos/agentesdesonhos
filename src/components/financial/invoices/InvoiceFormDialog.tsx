@@ -376,8 +376,20 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
               </div>
               <div className="col-span-2">
                 <Label>Chave PIX (opcional)</Label>
-                <Input value={meta.pix_key} onChange={e => setMeta({ ...meta, pix_key: e.target.value })} />
+                <Input
+                  value={meta.pix_key}
+                  onChange={e => { setMeta({ ...meta, pix_key: e.target.value }); setPixError(null); }}
+                  aria-invalid={!!pixError}
+                />
+                {pixError ? (
+                  <p className="text-xs text-destructive mt-1">{pixError}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    CPF/CNPJ com ou sem pontuação, telefone com +55, e-mail ou chave aleatória.
+                  </p>
+                )}
               </div>
+
               <div className="col-span-2">
                 <Label>Observações</Label>
                 <Textarea rows={4} value={meta.notes} onChange={e => setMeta({ ...meta, notes: e.target.value })} />
