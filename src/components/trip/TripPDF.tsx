@@ -987,30 +987,31 @@ function renderTrainBody(service: TripService, locale: PublicLocale = "pt-BR"): 
 
 function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
-  const otherTypeMap: Record<string, string> = { restaurante: '🍽️ Restaurante', guia_turistico: '🧭 Guia Turístico', chip_internet: '📶 Chip/Internet', experiencia: '✨ Experiência', evento: '📅 Evento', spa_wellness: '🧘 Spa/Bem-estar', servico_vip: '👑 Serviço VIP', concierge: '🛎️ Concierge', personalizado: '⭐ Personalizado' };
+  const t = tWallet(locale);
+  const otherTypeMap: Record<string, string> = { restaurante: t("otherRestauranteEmoji"), guia_turistico: t("otherGuiaTuristicoEmoji"), chip_internet: t("otherChipInternetEmoji"), experiencia: t("otherExperienciaEmoji"), evento: t("otherEventoEmoji"), spa_wellness: t("otherSpaWellnessEmoji"), servico_vip: t("otherServicoVipEmoji"), concierge: t("otherConciergeEmoji"), personalizado: t("otherPersonalizadoEmoji") };
   const head = renderServiceHeadline({
-    title: data.service_name || (data.other_service_type ? (otherTypeMap[data.other_service_type] || data.other_service_type) : 'Serviço'),
-    dates: data.date ? `${fmtDate(data.date)}${data.time ? ` às ${data.time}` : ''}` : "",
+    title: data.service_name || (data.other_service_type ? (otherTypeMap[data.other_service_type] || data.other_service_type) : t("fldServico")),
+    dates: data.date ? `${fmtDate(data.date, locale)}${data.time ? ` ${t("wordAs")} ${data.time}` : ''}` : "",
     lines: [
-      data.other_service_type ? `Tipo: ${otherTypeMap[data.other_service_type] || data.custom_type_name || data.other_service_type}` : "",
-      data.city ? `Local: ${data.city}${data.country ? `, ${data.country}` : ''}` : "",
-      data.duration ? `Duração: ${data.duration}` : "",
-      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
+      data.other_service_type ? `${t("fldTipo")}: ${otherTypeMap[data.other_service_type] || data.custom_type_name || data.other_service_type}` : "",
+      data.city ? `${t("fldLocal")}: ${data.city}${data.country ? `, ${data.country}` : ''}` : "",
+      data.duration ? `${t("fldDuracao")}: ${data.duration}` : "",
+      data.reservation_code ? `${t("fldReserva")}: ${data.reservation_code}` : "",
     ],
   });
 
   const location = (data.location_name || data.address || data.maps_url)
-    ? miniCard("📍 Localização", [
+    ? miniCard(t("sectionLocalizacao"), [
         data.location_name ? `<p style="${TXT_FG}font-weight:600;">${escapeHtml(data.location_name)}</p>` : "",
         data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
-        p("Ponto de encontro", data.meeting_point),
+        p(t("fldPontoEncontro"), data.meeting_point),
         data.how_to_arrive ? `<p style="${TXT_ITALIC}">${escapeHtml(data.how_to_arrive)}</p>` : "",
-        data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">🗺️ Abrir no mapa</a></p>` : "",
+        data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">${t("ctaAbrirNoMapa")}</a></p>` : "",
       ])
     : "";
 
   const contact = (data.contact_name || data.contact_phone || data.contact_whatsapp)
-    ? miniCard("👤 Contato", [
+    ? miniCard(t("sectionContato"), [
         data.contact_name ? `<p style="${TXT}">${escapeHtml(data.contact_name)}${data.contact_company ? ` — ${escapeHtml(data.contact_company)}` : ''}</p>` : "",
         p("🌐", data.contact_language),
         data.contact_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.contact_phone)}</p>` : "",
@@ -1020,39 +1021,40 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
     : "";
 
   const chip = data.other_service_type === 'chip_internet' && (data.chip_operator || data.chip_activation_instructions)
-    ? miniCard("📶 Chip / Internet", [
-        p("Operadora", data.chip_operator),
-        data.chip_type ? p("Tipo", data.chip_type === 'esim' ? 'eSIM (digital)' : 'Chip Físico') : "",
-        data.chip_activation_instructions ? `<p style="${TXT_FG}font-weight:600;margin-top:4px;">📲 Instruções de Ativação:</p><p style="${TXT}white-space:pre-line;">${escapeHtml(data.chip_activation_instructions)}</p>` : "",
-        data.chip_activation_url ? `<p style="${TXT}"><a href="${escapeHtml(data.chip_activation_url)}" style="color:#0f766e;text-decoration:underline;">📲 Link de Ativação</a></p>` : "",
-        p("Suporte", data.chip_support),
+    ? miniCard(t("sectionChipInternet"), [
+        p(t("fldOperadora"), data.chip_operator),
+        data.chip_type ? p(t("fldTipo"), data.chip_type === 'esim' ? t("chipEsimDigital") : t("chipFisico")) : "",
+        data.chip_activation_instructions ? `<p style="${TXT_FG}font-weight:600;margin-top:4px;">${t("ctaInstrucoesAtivacao")}</p><p style="${TXT}white-space:pre-line;">${escapeHtml(data.chip_activation_instructions)}</p>` : "",
+        data.chip_activation_url ? `<p style="${TXT}"><a href="${escapeHtml(data.chip_activation_url)}" style="color:#0f766e;text-decoration:underline;">${t("ctaLinkAtivacao")}</a></p>` : "",
+        p(t("fldSuporte"), data.chip_support),
       ], "primary")
     : "";
 
   const guide = data.other_service_type === 'guia_turistico' && (data.guide_name || data.guide_meeting_point)
-    ? miniCard("🧭 Guia Turístico", [
-        p("Guia", data.guide_name),
-        p("Idioma", data.guide_language),
-        p("Horário", data.guide_tour_time),
-        p("Duração", data.guide_tour_duration),
-        data.guide_meeting_point ? `<p style="${TXT}">📍 Encontro: ${escapeHtml(data.guide_meeting_point)}</p>` : "",
+    ? miniCard(t("sectionGuiaTuristico"), [
+        p(t("fldGuia"), data.guide_name),
+        p(t("fldIdioma"), data.guide_language),
+        p(t("fldHorario"), data.guide_tour_time),
+        p(t("fldDuracao"), data.guide_tour_duration),
+        data.guide_meeting_point ? `<p style="${TXT}">📍 ${t("fldEncontro")}: ${escapeHtml(data.guide_meeting_point)}</p>` : "",
       ])
     : "";
 
   const tips = data.agency_tips
-    ? miniCard("🧠 Orientações do seu Agente", [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    ? miniCard(t("sectionOrientacoesAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
     : "";
 
   const description = data.description
-    ? miniCard("📝 Descrição", [`<p style="${TXT}white-space:pre-line;">${escapeHtml(data.description)}</p>`])
+    ? miniCard(t("sectionDescricao"), [`<p style="${TXT}white-space:pre-line;">${escapeHtml(data.description)}</p>`])
     : "";
 
   const notes = data.agency_notes
-    ? miniCard("📝 Observações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
     : "";
 
   return head + location + contact + chip + guide + tips + description + notes;
 }
+
 
 function renderServiceBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   switch (service.service_type) {
