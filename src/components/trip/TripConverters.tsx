@@ -169,12 +169,12 @@ function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt
 
           <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando cotação...</p>
+              <p className="text-sm text-muted-foreground">{t("convCarregando")}</p>
             ) : isError ? (
-              <p className="text-sm text-destructive">Não foi possível carregar a cotação.</p>
+              <p className="text-sm text-destructive">{t("convErro")}</p>
             ) : (
               <>
-                <p className="text-xs text-muted-foreground mb-1">Equivale a</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("convEquivale")}</p>
                 <p className="text-2xl font-bold">
                   {direction === "BRL_TO"
                     ? fmt(result, target)
