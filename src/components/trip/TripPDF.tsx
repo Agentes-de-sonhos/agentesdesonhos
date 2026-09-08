@@ -689,87 +689,89 @@ function renderCarRentalBody(service: TripService, locale: PublicLocale = "pt-BR
 
 function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
-  const typeMap: Record<string, string> = { arrival: 'Transfer IN', departure: 'Transfer OUT', inter_hotel: 'Inter-hotel' };
+  const t = tWallet(locale);
+  const typeMap: Record<string, string> = { arrival: t("transferArrival"), departure: t("transferDeparture"), inter_hotel: t("transferInterHotel") };
   const route = data.origin_location && data.destination_location
     ? `${data.origin_location} → ${data.destination_location}`
     : data.location || '';
   const head = renderServiceHeadline({
-    title: `${typeMap[data.transfer_type] || data.transfer_type || 'Transfer'} — ${route}`,
-    dates: data.date ? `${fmtDate(data.date)}${data.time ? ` às ${data.time}` : ''}` : "",
+    title: `${typeMap[data.transfer_type] || data.transfer_type || t("serviceTransfer")} — ${route}`,
+    dates: data.date ? `${fmtDate(data.date, locale)}${data.time ? ` ${t("wordAs")} ${data.time}` : ''}` : "",
     lines: [
-      data.company_name ? `Empresa: ${data.company_name}` : "",
-      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
-      data.city ? `Cidade: ${data.city}` : "",
+      data.company_name ? `${t("fldEmpresa")}: ${data.company_name}` : "",
+      data.reservation_code ? `${t("fldReserva")}: ${data.reservation_code}` : "",
+      data.city ? `${t("fldCidade")}: ${data.city}` : "",
     ],
   });
 
   const arrival = data.transfer_type === 'arrival' && (data.flight_number || data.arrival_airport || data.meeting_instructions)
-    ? miniCard("✈️ Detalhes da Chegada", [
-        p("Voo", data.flight_number),
-        p("Chegada prevista", data.arrival_time),
-        data.arrival_airport ? p("Aeroporto", `${data.arrival_airport}${data.arrival_terminal ? ` • Terminal ${data.arrival_terminal}` : ''}`) : "",
-        p("Espera do motorista", data.driver_wait_time),
-        data.reception_type ? p("Recepção", data.reception_type === 'placa' ? 'Com placa / nome' : data.reception_type === 'balcao' ? 'Balcão da empresa' : 'Ponto fixo') : "",
-        data.meeting_instructions ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">📍 Onde encontrar o motorista:</p><p style="${TXT_FG}">${escapeHtml(data.meeting_instructions)}</p></div>` : "",
+    ? miniCard(t("sectionDetalhesChegada"), [
+        p(t("fldVoo"), data.flight_number),
+        p(t("fldChegadaPrevista"), data.arrival_time),
+        data.arrival_airport ? p(t("fldAeroporto"), `${data.arrival_airport}${data.arrival_terminal ? ` • ${t("fldTerminal")} ${data.arrival_terminal}` : ''}`) : "",
+        p(t("fldEsperaMotorista"), data.driver_wait_time),
+        data.reception_type ? p(t("fldRecepcao"), data.reception_type === 'placa' ? t("receptionPlaca") : data.reception_type === 'balcao' ? t("receptionBalcao") : t("receptionPontoFixo")) : "",
+        data.meeting_instructions ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaOndeEncontrarMotorista")}</p><p style="${TXT_FG}">${escapeHtml(data.meeting_instructions)}</p></div>` : "",
       ])
     : "";
 
   const departure = data.transfer_type === 'departure' && (data.hotel_departure_time || data.departure_airport || data.departure_alert)
-    ? miniCard("🧳 Detalhes da Saída", [
-        p("Saída do hotel", data.hotel_departure_time),
-        p("Horário do voo", data.departure_flight_time),
-        p("Aeroporto", data.departure_airport),
-        p("Saída recomendada", data.recommended_departure),
-        data.boarding_point ? p("Embarque", data.boarding_point === 'lobby' ? 'Lobby / Recepção' : data.boarding_point === 'entrada' ? 'Entrada Principal' : data.boarding_point === 'estacionamento' ? 'Estacionamento' : data.boarding_point) : "",
+    ? miniCard(t("sectionDetalhesSaida"), [
+        p(t("fldSaidaHotel"), data.hotel_departure_time),
+        p(t("fldHorarioVoo"), data.departure_flight_time),
+        p(t("fldAeroporto"), data.departure_airport),
+        p(t("fldSaidaRecomendada"), data.recommended_departure),
+        data.boarding_point ? p(t("fldEmbarque"), data.boarding_point === 'lobby' ? t("boardingLobby") : data.boarding_point === 'entrada' ? t("boardingEntrada") : data.boarding_point === 'estacionamento' ? t("boardingEstacionamento") : data.boarding_point) : "",
         data.departure_alert ? `<p style="margin-top:4px;font-size:11px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:6px 9px;border-radius:6px;font-weight:600;">⚠️ ${escapeHtml(data.departure_alert)}</p>` : "",
       ])
     : "";
 
   const driver = (data.driver_name || data.driver_phone)
-    ? miniCard("👤 Motorista", [
-        p("Nome", data.driver_name),
-        p("Idioma", data.driver_language),
-        p("Placa", data.vehicle_plate),
+    ? miniCard(t("sectionMotorista"), [
+        p(t("fldNome"), data.driver_name),
+        p(t("fldIdioma"), data.driver_language),
+        p(t("fldPlaca"), data.vehicle_plate),
         data.driver_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.driver_phone)}</p>` : "",
       ])
     : "";
 
   const vehicle = (data.vehicle_type || data.vehicle_capacity)
-    ? miniCard("🚗 Veículo", [
-        data.vehicle_type ? p("Tipo", data.vehicle_type === 'sedan' ? 'Sedan' : data.vehicle_type === 'suv' ? 'SUV' : data.vehicle_type === 'van' ? 'Van' : data.vehicle_type === 'minibus' ? 'Micro-ônibus' : data.vehicle_type === 'onibus' ? 'Ônibus' : data.vehicle_type) : "",
+    ? miniCard(t("sectionVeiculoTransfer"), [
+        data.vehicle_type ? p(t("fldTipo"), data.vehicle_type === 'sedan' ? t("vehicleSedan") : data.vehicle_type === 'suv' ? t("vehicleSuv") : data.vehicle_type === 'van' ? t("vehicleVan") : data.vehicle_type === 'minibus' ? t("vehicleMinibus") : data.vehicle_type === 'onibus' ? t("vehicleOnibus") : data.vehicle_type) : "",
         badgeRow([
-          data.vehicle_capacity ? `👤 ${data.vehicle_capacity} passageiros` : "",
+          data.vehicle_capacity ? `👤 ${data.vehicle_capacity} ${t("wordPassageiros")}` : "",
           data.luggage_capacity ? `🧳 ${data.luggage_capacity}` : "",
-          data.air_conditioning === 'sim' ? '❄️ Ar-condicionado' : "",
+          data.air_conditioning === 'sim' ? t("badgeArCondicionado") : "",
         ].filter(Boolean) as string[]),
         data.vehicle_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.vehicle_notes)}</p>` : "",
       ])
     : "";
 
   const passengers = data.passengers?.length > 0
-    ? miniCard("👨‍👩‍👧 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)} (${p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})${p.needs_child_seat === 'sim' ? ' 🪑 Cadeirinha' : ''}</p>`))
+    ? miniCard(t("sectionPassageirosFamily"), data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)} (${p.passenger_type === 'adulto' ? t("paxAdulto") : p.passenger_type === 'crianca' ? t("paxCrianca") : t("paxBebe")})${p.needs_child_seat === 'sim' ? ` ${t("badgeCadeirinha")}` : ''}</p>`))
     : "";
 
   const locations = (data.pickup_address || data.destination_address)
-    ? miniCard("📍 Locais", [
-        p("Embarque", data.pickup_address),
-        p("Destino", data.destination_address),
+    ? miniCard(t("sectionLocais"), [
+        p(t("fldEmbarque"), data.pickup_address),
+        p(t("fldDestino"), data.destination_address),
         data.location_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.location_notes)}</p>` : "",
       ])
     : "";
 
   const orient = (data.required_documents || data.emergency_contact || data.plan_b || data.agency_notes)
-    ? miniCard("⚠️ Orientações", [
-        p("Documentos", data.required_documents),
-        data.emergency_contact ? `<p style="${TXT}">📞 Emergência: ${escapeHtml(data.emergency_contact)}</p>` : "",
-        data.agency_contact ? `<p style="${TXT}">📱 Agência: ${escapeHtml(data.agency_contact)}</p>` : "",
-        data.plan_b ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">🔄 Plano B:</p><p style="${TXT_FG}">${escapeHtml(data.plan_b)}</p></div>` : "",
+    ? miniCard(t("sectionOrientacoes"), [
+        p(t("fldDocumentos"), data.required_documents),
+        data.emergency_contact ? `<p style="${TXT}">📞 ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
+        data.agency_contact ? `<p style="${TXT}">📱 ${t("fldAgencia")}: ${escapeHtml(data.agency_contact)}</p>` : "",
+        data.plan_b ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaPlanoB")}</p><p style="${TXT_FG}">${escapeHtml(data.plan_b)}</p></div>` : "",
         data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
       ])
     : "";
 
   return head + arrival + departure + driver + vehicle + passengers + locations + orient;
 }
+
 
 function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
