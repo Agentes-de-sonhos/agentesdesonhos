@@ -421,9 +421,10 @@ function renderServiceHeadline(opts: { title?: string; dates?: string; lines?: s
 function fmtDate(d: any, locale: PublicLocale = "pt-BR"): string { return d ? formatDate(String(d), locale) : ""; }
 
 function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
+  const t = tWallet(locale);
   const data = service.service_data as any;
-  const tripTypeMap: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
-  const statusMap: Record<string, string> = { confirmado: '✅ Confirmado', emitido: '📄 Emitido', pendente: '⏳ Pendente' };
+  const tripTypeMap: Record<string, string> = { ida: t("tripSomenteIda"), ida_volta: t("tripIdaVolta"), multi_trechos: t("tripMultiTrechos") };
+  const statusMap: Record<string, string> = { confirmado: t("statusConfirmadoEmoji"), emitido: t("statusEmitidoEmoji"), pendente: t("statusPendenteEmoji") };
   const airline = data.main_airline || data.airline || '';
   const firstDate = data.segments?.[0]?.flight_date || data.departure_date || '';
   const lastDate = data.segments?.[data.segments?.length - 1]?.flight_date || data.return_date || '';
@@ -433,10 +434,10 @@ function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"):
     title: `${data.origin_city || ''} → ${data.destination_city || ''}`,
     dates: datesStr,
     lines: [
-      airline ? `Companhia: ${airline}` : "",
-      data.trip_type ? `Tipo: ${tripTypeMap[data.trip_type] || data.trip_type}` : "",
-      data.locator_code ? `Localizador: ${data.locator_code}` : "",
-      data.flight_status ? `Status: ${statusMap[data.flight_status] || data.flight_status}` : "",
+      airline ? `${t("fldCompanhia")}: ${airline}` : "",
+      data.trip_type ? `${t("fldTipo")}: ${tripTypeMap[data.trip_type] || data.trip_type}` : "",
+      data.locator_code ? `${t("fldLocalizador")}: ${data.locator_code}` : "",
+      data.flight_status ? `${t("fldStatus")}: ${statusMap[data.flight_status] || data.flight_status}` : "",
     ],
   });
 
@@ -444,7 +445,7 @@ function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"):
   let segmentsHtml = "";
   if (data.segments?.length > 0) {
     const segCards = data.segments.map((seg: any, i: number) => {
-      const segType = seg.segment_type === 'ida' ? 'Ida' : seg.segment_type === 'conexao' ? 'Conexão' : 'Volta';
+      const segType = seg.segment_type === 'ida' ? t("fldIda") : seg.segment_type === 'conexao' ? t("segConexao") : t("segVolta");
       let conn = "";
       if (i > 0 && data.segments[i - 1]) {
         const prev = data.segments[i - 1];
@@ -454,7 +455,7 @@ function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"):
           const diff = (sh * 60 + sm) - (ph * 60 + pm);
           if (diff > 0) {
             const h = Math.floor(diff / 60); const m = diff % 60;
-            conn = `<p style="font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:3px 8px;border-radius:6px;margin:4px 0;font-weight:600;">✈️ Conexão em ${escapeHtml(seg.origin_city || seg.origin_airport || '')} — ${h}h${m > 0 ? String(m).padStart(2, '0') : ''}</p>`;
+            conn = `<p style="font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:3px 8px;border-radius:6px;margin:4px 0;font-weight:600;">${escapeHtml(t("sectionConexaoEm"))} ${escapeHtml(seg.origin_city || seg.origin_airport || '')} — ${h}h${m > 0 ? String(m).padStart(2, '0') : ''}</p>`;
           }
         }
       }
@@ -466,133 +467,134 @@ function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"):
         </p>
         <p style="margin:1px 0;font-size:12px;font-weight:600;color:#1e293b;">${escapeHtml(seg.origin_airport || seg.origin_city || '')} → ${escapeHtml(seg.destination_airport || seg.destination_city || '')}</p>
         <p style="margin:1px 0;font-size:10px;color:#64748b;">
-          ${seg.flight_date ? escapeHtml(fmtDate(seg.flight_date)) : ''}${seg.departure_time ? ` • ${escapeHtml(seg.departure_time)}` : ''}${seg.arrival_time ? ` → ${escapeHtml(seg.arrival_time)}` : ''}${seg.terminal ? ` • Terminal ${escapeHtml(seg.terminal)}` : ''}${seg.gate ? ` • Portão ${escapeHtml(seg.gate)}` : ''}
+          ${seg.flight_date ? escapeHtml(fmtDate(seg.flight_date)) : ''}${seg.departure_time ? ` • ${escapeHtml(seg.departure_time)}` : ''}${seg.arrival_time ? ` → ${escapeHtml(seg.arrival_time)}` : ''}${seg.terminal ? ` • ${t("fldTerminal")} ${escapeHtml(seg.terminal)}` : ''}${seg.gate ? ` • ${t("fldPortao")} ${escapeHtml(seg.gate)}` : ''}
         </p>
       </div>`;
     }).join("");
     segmentsHtml = `<div class="pdf-block" style="margin-top:6px;padding:8px 11px;background:#f1f5f9;border-radius:8px;">
-      <p style="${SECTION_TITLE}">🛫 Trechos</p>${segCards}</div>`;
+      <p style="${SECTION_TITLE}">${escapeHtml(t("sectionTrechos"))}</p>${segCards}</div>`;
   }
 
   const passengersHtml = data.passengers?.length > 0
-    ? miniCard("👤 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)} (${p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})${p.seat ? ` • Assento ${escapeHtml(p.seat)}` : ''}</p>`))
+    ? miniCard(t("sectionPassageirosPerson"), data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)} (${p.passenger_type === 'adulto' ? t("paxAdulto") : p.passenger_type === 'crianca' ? t("paxCrianca") : t("paxBebe")})${p.seat ? ` • ${t("fldAssento")} ${escapeHtml(p.seat)}` : ''}</p>`))
     : "";
 
   const baggageHtml = (data.carry_on || data.checked_baggage)
-    ? miniCard("🧳 Bagagem", [
-        p("Mão", data.carry_on),
-        p("Despachada", data.checked_baggage),
-        p("Extra", data.extra_baggage),
+    ? miniCard(t("sectionBagagem"), [
+        p(t("fldMao"), data.carry_on),
+        p(t("fldDespachada"), data.checked_baggage),
+        p(t("fldExtra"), data.extra_baggage),
         data.baggage_rules ? `<p style="${TXT_ITALIC}">${escapeHtml(data.baggage_rules)}</p>` : "",
       ])
     : "";
 
   const boardingHtml = (data.recommended_arrival || data.required_documents || data.boarding_notes)
-    ? miniCard("⚠️ Orientações de Embarque", [
-        p("Antecedência", data.recommended_arrival),
-        p("Terminal", data.boarding_terminal),
-        p("Documentos", data.required_documents),
-        p("Imigração", data.immigration_rules),
+    ? miniCard(t("sectionOrientacoesEmbarque"), [
+        p(t("fldAntecedencia"), data.recommended_arrival),
+        p(t("fldTerminal"), data.boarding_terminal),
+        p(t("fldDocumentos"), data.required_documents),
+        p(t("fldImigracao"), data.immigration_rules),
         data.boarding_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>` : "",
       ])
     : "";
 
   const checkinHtml = data.checkin_url
-    ? `<div class="pdf-block" style="margin-top:6px;"><a href="${escapeHtml(data.checkin_url)}" style="display:inline-block;background:#0f766e;color:#fff;padding:7px 14px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;">✅ Fazer Check-in Online</a>${data.checkin_open_date ? `<p style="${TXT}">Abertura: ${escapeHtml(data.checkin_open_date)}</p>` : ''}</div>`
+    ? `<div class="pdf-block" style="margin-top:6px;"><a href="${escapeHtml(data.checkin_url)}" style="display:inline-block;background:#0f766e;color:#fff;padding:7px 14px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;">${escapeHtml(t("ctaCheckinOnline"))}</a>${data.checkin_open_date ? `<p style="${TXT}">${t("fldAbertura")}: ${escapeHtml(data.checkin_open_date)}</p>` : ''}</div>`
     : "";
 
   return head + segmentsHtml + passengersHtml + baggageHtml + boardingHtml + checkinHtml;
 }
 
 function renderHotelBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
+  const t = tWallet(locale);
   const data = service.service_data as any;
-  const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: 'Boutique', resort: 'Resort', pousada: 'Pousada' };
-  const roomMap: Record<string, string> = { standard: 'Standard', superior: 'Superior', deluxe: 'Deluxe', suite: 'Suíte', suite_junior: 'Suíte Júnior', presidencial: 'Presidencial', apartamento: 'Apartamento', villa: 'Villa', bangalo: 'Bangalô' };
-  const mealMap: Record<string, string> = { somente_hospedagem: 'Somente Hospedagem', cafe_manha: 'Café da Manhã', meia_pensao: 'Meia Pensão', pensao_completa: 'Pensão Completa', all_inclusive: 'All Inclusive' };
-  const bedMap: Record<string, string> = { king: 'King', queen: 'Queen', twin: 'Twin (2 Solteiro)', single: 'Solteiro', double: 'Casal', triple: 'Triplo' };
-  const statusMap: Record<string, string> = { confirmada: '✅ Confirmada', emitida: '📄 Emitida', pre_reserva: '⏳ Pré-reserva' };
+  const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: t("catBoutique"), resort: t("catResort"), pousada: t("catPousada") };
+  const roomMap: Record<string, string> = { standard: t("roomStandard"), superior: t("roomSuperior"), deluxe: t("roomDeluxe"), suite: t("roomSuite"), suite_junior: t("roomSuiteJunior"), presidencial: t("roomPresidencial"), apartamento: t("roomApartamento"), villa: t("roomVilla"), bangalo: t("roomBangalo") };
+  const mealMap: Record<string, string> = { somente_hospedagem: t("mealSomenteHospedagem"), cafe_manha: t("mealCafeManha"), meia_pensao: t("mealMeiaPensao"), pensao_completa: t("mealPensaoCompleta"), all_inclusive: t("mealAllInclusive") };
+  const bedMap: Record<string, string> = { king: t("bedKing"), queen: t("bedQueen"), twin: t("bedTwin"), single: t("bedSingle"), double: t("bedDouble"), triple: t("bedTriple") };
+  const statusMap: Record<string, string> = { confirmada: t("hotelStatusConfirmada"), emitida: t("hotelStatusEmitida"), pre_reserva: t("hotelStatusPreReserva") };
 
   let nights: number | null = null;
   try { const [sy,sm,sd] = data.check_in.split('-').map(Number); const [ey,em,ed] = data.check_out.split('-').map(Number); nights = Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / 86400000); } catch {}
 
   const head = renderServiceHeadline({
     title: `${data.hotel_name}${data.hotel_category ? ` ${catMap[data.hotel_category] || data.hotel_category}` : ''}`,
-    dates: `${fmtDate(data.check_in)} - ${fmtDate(data.check_out)}${nights ? ` (${nights} noites)` : ''}`,
+    dates: `${fmtDate(data.check_in)} - ${fmtDate(data.check_out)}${nights ? ` (${nights} ${t("nightsLabelOther")})` : ''}`,
     lines: [
       `${data.city || ''}${data.country ? `, ${data.country}` : ''}`,
-      data.reservation_status ? `Status: ${statusMap[data.reservation_status] || data.reservation_status}` : "",
-      data.reservation_code ? `Reserva: ${data.reservation_code}` : "",
-      data.room_type ? `Acomodação: ${roomMap[data.room_type] || data.room_type}` : "",
-      data.meal_plan ? `Regime: ${mealMap[data.meal_plan] || data.meal_plan}` : "",
+      data.reservation_status ? `${t("fldStatus")}: ${statusMap[data.reservation_status] || data.reservation_status}` : "",
+      data.reservation_code ? `${t("fldReserva")}: ${data.reservation_code}` : "",
+      data.room_type ? `${t("fldAcomodacao")}: ${roomMap[data.room_type] || data.room_type}` : "",
+      data.meal_plan ? `${t("fldRegime")}: ${mealMap[data.meal_plan] || data.meal_plan}` : "",
     ],
   });
 
-  const checkin = miniCard("📅 Check-in", [
-    p("Horário", data.checkin_time),
-    data.early_checkin ? p("Early check-in", data.early_checkin === 'sim' ? '✅ Incluso' : data.early_checkin === 'mediante_taxa' ? '💰 Mediante taxa' : data.early_checkin === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível') : "",
-    p("Titular", data.checkin_holder),
+  const checkin = miniCard(t("sectionCheckin"), [
+    p(t("fldHorario"), data.checkin_time),
+    data.early_checkin ? p(t("fldEarlyCheckin"), data.early_checkin === 'sim' ? t("availIncluso") : data.early_checkin === 'mediante_taxa' ? t("availMedianteTaxa") : data.early_checkin === 'sob_consulta' ? t("availSobConsulta") : t("availNaoDisponivel")) : "",
+    p(t("fldTitular"), data.checkin_holder),
     data.checkin_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.checkin_instructions)}</p>` : "",
-    p("Chegada tardia", data.late_arrival_policy),
+    p(t("fldChegadaTardia"), data.late_arrival_policy),
   ]);
 
-  const checkout = miniCard("🧳 Check-out", [
-    p("Horário", data.checkout_time),
-    data.late_checkout ? p("Late check-out", data.late_checkout === 'sim' ? '✅ Incluso' : data.late_checkout === 'mediante_taxa' ? `💰 Mediante taxa${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível') : "",
-    data.checkout_procedure ? p("Procedimento", data.checkout_procedure === 'recepcao' ? 'Recepção' : data.checkout_procedure === 'express' ? 'Express' : 'Online') : "",
+  const checkout = miniCard(t("sectionCheckout"), [
+    p(t("fldHorario"), data.checkout_time),
+    data.late_checkout ? p(t("fldLateCheckout"), data.late_checkout === 'sim' ? t("availIncluso") : data.late_checkout === 'mediante_taxa' ? `${t("availMedianteTaxa")}${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? t("availSobConsulta") : t("availNaoDisponivel")) : "",
+    data.checkout_procedure ? p(t("fldProcedimento"), data.checkout_procedure === 'recepcao' ? t("checkoutProcRecepcao") : data.checkout_procedure === 'express' ? t("checkoutProcExpress") : t("checkoutProcOnline")) : "",
     data.checkout_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.checkout_instructions)}</p>` : "",
   ]);
 
-  const room = miniCard("🛏️ Acomodação", [
-    data.bed_type ? p("Cama", bedMap[data.bed_type] || data.bed_type) : "",
-    p("Hóspedes", data.guest_count),
-    p("Vista", data.room_view),
-    p("Amenities", data.amenities),
+  const room = miniCard(t("sectionAcomodacao"), [
+    data.bed_type ? p(t("fldCama"), bedMap[data.bed_type] || data.bed_type) : "",
+    p(t("fldHospedes"), data.guest_count),
+    p(t("fldVista"), data.room_view),
+    p(t("fldAmenities"), data.amenities),
   ]);
 
-  const food = miniCard("🍽️ Alimentação", [
-    p("Café da manhã", data.breakfast_hours),
-    p("Restaurantes", data.restaurants_included),
+  const food = miniCard(t("sectionAlimentacao"), [
+    p(t("fldCafeDaManha"), data.breakfast_hours),
+    p(t("fldRestaurantes"), data.restaurants_included),
     data.food_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.food_notes)}</p>` : "",
-    p("All Inclusive", data.all_inclusive_rules),
+    p(t("fldAllInclusive"), data.all_inclusive_rules),
   ]);
 
   const includedBadges: string[] = [];
-  if (data.breakfast_included === 'sim') includedBadges.push('☕ Café');
-  if (data.wifi_included === 'sim') includedBadges.push('📶 Wi-Fi');
-  if (data.taxes_included === 'sim') includedBadges.push('✅ Taxas');
-  if (data.parking_included === 'sim') includedBadges.push('🅿️ Estacionamento');
-  if (data.transfer_included === 'sim') includedBadges.push('🚐 Transfer');
+  if (data.breakfast_included === 'sim') includedBadges.push(t("badgeCafe"));
+  if (data.wifi_included === 'sim') includedBadges.push(t("badgeWifi"));
+  if (data.taxes_included === 'sim') includedBadges.push(t("badgeTaxas"));
+  if (data.parking_included === 'sim') includedBadges.push(t("badgeEstacionamento"));
+  if (data.transfer_included === 'sim') includedBadges.push(t("badgeTransfer"));
   const included = (includedBadges.length || data.resort_fee || data.other_inclusions)
-    ? miniCard("💰 Inclusos na Reserva", [
+    ? miniCard(t("sectionInclusosReserva"), [
         badgeRow(includedBadges),
-        p("Resort Fee", data.resort_fee),
+        p(t("fldResortFee"), data.resort_fee),
         data.other_inclusions ? `<p style="${TXT}">${escapeHtml(data.other_inclusions)}</p>` : "",
       ])
     : "";
 
-  const policies = miniCard("🧾 Políticas", [
-    p("Cancelamento", data.cancellation_policy),
-    p("Crianças", data.children_policy),
-    p("Pets", data.pet_policy),
-    data.mandatory_fees ? `<p style="${TXT_FG}font-weight:600;">⚠️ Taxas no destino: ${escapeHtml(data.mandatory_fees)}</p>` : "",
-    data.hotel_deposit ? p("Caução", `${data.hotel_deposit}${data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}`) : "",
+  const policies = miniCard(t("sectionPoliticas"), [
+    p(t("fldCancelamento"), data.cancellation_policy),
+    p(t("fldCriancas"), data.children_policy),
+    p(t("fldPets"), data.pet_policy),
+    data.mandatory_fees ? `<p style="${TXT_FG}font-weight:600;">⚠️ ${t("fldTaxasDestino")}: ${escapeHtml(data.mandatory_fees)}</p>` : "",
+    data.hotel_deposit ? p(t("fldCaucao"), `${data.hotel_deposit}${data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}`) : "",
   ]);
 
   const guests = data.guests?.length > 0
-    ? miniCard("👨‍👩‍👧 Hóspedes", data.guests.map((g: any) => `<p style="${TXT}">${escapeHtml(g.name)}${g.age ? ` (${g.age})` : ''}${g.notes ? ` • ${escapeHtml(g.notes)}` : ''}</p>`))
+    ? miniCard(t("sectionHospedesFamily"), data.guests.map((g: any) => `<p style="${TXT}">${escapeHtml(g.name)}${g.age ? ` (${g.age})` : ''}${g.notes ? ` • ${escapeHtml(g.notes)}` : ''}</p>`))
     : "";
 
-  const location = miniCard("📍 Localização e Contato", [
+  const location = miniCard(t("sectionLocalizacaoContato"), [
     data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
     data.hotel_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.hotel_phone)}</p>` : "",
     data.hotel_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.hotel_email)}</p>` : "",
-    data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">🗺️ Ver no mapa</a></p>` : "",
-    data.hotel_website ? `<p style="${TXT}"><a href="${escapeHtml(data.hotel_website)}" style="color:#0f766e;text-decoration:underline;">🌐 Site oficial</a></p>` : "",
+    data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">${escapeHtml(t("ctaVerNoMapa"))}</a></p>` : "",
+    data.hotel_website ? `<p style="${TXT}"><a href="${escapeHtml(data.hotel_website)}" style="color:#0f766e;text-decoration:underline;">${escapeHtml(t("ctaSiteOficial"))}</a></p>` : "",
   ]);
 
   const notes = (data.special_requests || data.agency_notes || data.notes)
-    ? miniCard("📝 Observações", [
-        p("Solicitações", data.special_requests),
+    ? miniCard(t("sectionObservacoes"), [
+        p(t("fldSolicitacoes"), data.special_requests),
         data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
         data.notes && !data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.notes)}</p>` : "",
       ])

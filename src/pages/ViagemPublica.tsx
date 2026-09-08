@@ -312,6 +312,7 @@ function TripCalendarWithWeather(props: {
   itineraryDates?: Set<string>;
   onDayClick?: (dateStr: string) => void;
   compact?: boolean;
+  locale?: PublicLocale;
 }) {
   const { weatherByDate, timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   return (
@@ -324,6 +325,7 @@ function TripCalendarWithWeather(props: {
       timezone={timezone}
       destinationLabel={props.destination}
       compact={props.compact}
+      locale={props.locale}
     />
   );
 }
@@ -361,7 +363,7 @@ function TripLocalClockBar(props: {
   );
 }
 
-function TripConvertersWrapper(props: { destination: string; startDate: Date; endDate: Date; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }> }) {
+function TripConvertersWrapper(props: { destination: string; startDate: Date; endDate: Date; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; locale?: PublicLocale }) {
   const { timezone } = useTripWeather(props.destination, props.startDate, props.endDate);
   if (!timezone) return null;
   const international = isInternationalDestination(props.destination, timezone);
@@ -372,6 +374,7 @@ function TripConvertersWrapper(props: { destination: string; startDate: Date; en
       services={props.services}
       international={international}
       endDate={props.endDate}
+      locale={props.locale}
     />
   );
 }
@@ -1727,6 +1730,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             shareToken: voucherAccess.shareToken || undefined,
             password: voucherAccess.password,
           }}
+          locale={locale}
         />
       </CardContent>
     </Card>
@@ -2385,6 +2389,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                               itineraryDates={itineraryDates}
                               onDayClick={handleCalendarDayClick}
                               compact
+                              locale={publicLocale}
                             />
                           </div>
                         )}
@@ -2393,6 +2398,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                             <NextAppointmentCard
                               services={services}
                               onOpenService={handleOpenService}
+                              locale={publicLocale}
                             />
                           </div>
                         )}
@@ -2400,6 +2406,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           <div className="md:order-2">
                           <NextActivityCard
                             activities={itineraryActivities as any}
+                            locale={publicLocale}
                             onOpenItinerary={(dayDate?: string) => {
                               setItineraryOpen(true);
                               if (dayDate) {
@@ -2438,6 +2445,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                   endDate={endDate}
                   tripId={tripData.id}
                   services={services}
+                  locale={publicLocale}
                 />
               )}
               </div>
@@ -2472,6 +2480,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
               title={tWallet(publicLocale)("itineraryDayByDay")}
               icon={CalendarDays}
               style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
+              locale={publicLocale}
             >
               <div ref={itineraryRef}>
               {v2Days && v2Days.length > 0 ? (
@@ -2689,6 +2698,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         open={activeService !== null}
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
         style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
+        locale={publicLocale}
       >
         {activeService && <PublicServiceCard service={activeService} locale={publicLocale} />}
       </ServiceDetailOverlay>
@@ -2699,6 +2709,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         title={activeGroupType ? getServiceSectionLabel(activeGroupType, publicLocale) : undefined}
         icon={activeGroupType ? SERVICE_ICONS[activeGroupType] : undefined}
         style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
+        locale={publicLocale}
       >
         {activeGroupType && (
           <CategoryServiceView

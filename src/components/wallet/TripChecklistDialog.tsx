@@ -6,12 +6,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ChevronDown, ChevronUp, Plus, Trash2, RotateCcw, Eye, EyeOff, ListChecks, Pencil, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tWallet, type WalletDictKey } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 type ServiceLike = { service_type?: string | null; other_service_type?: string | null };
 
 type ChecklistItem = {
   id: string;
   label: string;
+  labelKey?: WalletDictKey;
   done: boolean;
   source: "default" | "auto" | "manual";
   hidden?: boolean;
@@ -25,57 +28,102 @@ type ChecklistState = {
 
 const CATEGORIES = ["Documentos", "Financeiro", "Tecnologia", "Bagagem", "Pré-embarque", "Inteligente"] as const;
 
-const DEFAULTS: Array<{ category: string; label: string }> = [
-  { category: "Documentos", label: "Passaporte" },
-  { category: "Documentos", label: "Visto" },
-  { category: "Documentos", label: "Seguro viagem" },
-  { category: "Documentos", label: "Documento de identidade" },
-  { category: "Documentos", label: "Autorização para menor, se aplicável" },
-  { category: "Financeiro", label: "Cartão internacional" },
-  { category: "Financeiro", label: "Dinheiro em espécie" },
-  { category: "Financeiro", label: "Limite do cartão conferido" },
-  { category: "Financeiro", label: "Aviso de viagem/cartão, se necessário" },
-  { category: "Tecnologia", label: "eSIM/chip ativado" },
-  { category: "Tecnologia", label: "Carregadores" },
-  { category: "Tecnologia", label: "Adaptador de tomada" },
-  { category: "Tecnologia", label: "Power bank" },
-  { category: "Tecnologia", label: "Apps úteis instalados" },
-  { category: "Bagagem", label: "Roupas" },
-  { category: "Bagagem", label: "Remédios" },
-  { category: "Bagagem", label: "Necessaire" },
-  { category: "Bagagem", label: "Casaco" },
-  { category: "Bagagem", label: "Óculos/boné/protetor solar" },
-  { category: "Pré-embarque", label: "Check-in do voo" },
-  { category: "Pré-embarque", label: "Bagagem conferida" },
-  { category: "Pré-embarque", label: "Voucher dos serviços salvo" },
-  { category: "Pré-embarque", label: "Endereço do hotel salvo" },
-  { category: "Pré-embarque", label: "Horário do transfer conferido" },
+const CATEGORY_KEYS: Record<(typeof CATEGORIES)[number], WalletDictKey> = {
+  "Documentos": "checklistCatDocumentos",
+  "Financeiro": "checklistCatFinanceiro",
+  "Tecnologia": "checklistCatTecnologia",
+  "Bagagem": "checklistCatBagagem",
+  "Pré-embarque": "checklistCatPreEmbarque",
+  "Inteligente": "checklistCatInteligente",
+};
+
+const DEFAULTS: Array<{ category: string; label: string; labelKey: WalletDictKey }> = [
+  { category: "Documentos", label: "Passaporte", labelKey: "chkItemPassaporte" },
+  { category: "Documentos", label: "Visto", labelKey: "chkItemVisto" },
+  { category: "Documentos", label: "Seguro viagem", labelKey: "chkItemSeguroViagem" },
+  { category: "Documentos", label: "Documento de identidade", labelKey: "chkItemDocIdentidade" },
+  { category: "Documentos", label: "Autorização para menor, se aplicável", labelKey: "chkItemAutorizacaoMenor" },
+  { category: "Financeiro", label: "Cartão internacional", labelKey: "chkItemCartaoInternacional" },
+  { category: "Financeiro", label: "Dinheiro em espécie", labelKey: "chkItemDinheiroEspecie" },
+  { category: "Financeiro", label: "Limite do cartão conferido", labelKey: "chkItemLimiteCartao" },
+  { category: "Financeiro", label: "Aviso de viagem/cartão, se necessário", labelKey: "chkItemAvisoViagemCartao" },
+  { category: "Tecnologia", label: "eSIM/chip ativado", labelKey: "chkItemEsimAtivado" },
+  { category: "Tecnologia", label: "Carregadores", labelKey: "chkItemCarregadores" },
+  { category: "Tecnologia", label: "Adaptador de tomada", labelKey: "chkItemAdaptadorTomada" },
+  { category: "Tecnologia", label: "Power bank", labelKey: "chkItemPowerBank" },
+  { category: "Tecnologia", label: "Apps úteis instalados", labelKey: "chkItemAppsUteis" },
+  { category: "Bagagem", label: "Roupas", labelKey: "chkItemRoupas" },
+  { category: "Bagagem", label: "Remédios", labelKey: "chkItemRemedios" },
+  { category: "Bagagem", label: "Necessaire", labelKey: "chkItemNecessaire" },
+  { category: "Bagagem", label: "Casaco", labelKey: "chkItemCasaco" },
+  { category: "Bagagem", label: "Óculos/boné/protetor solar", labelKey: "chkItemOculosBoneProtetor" },
+  { category: "Pré-embarque", label: "Check-in do voo", labelKey: "chkItemCheckinVoo" },
+  { category: "Pré-embarque", label: "Bagagem conferida", labelKey: "chkItemBagagemConferida" },
+  { category: "Pré-embarque", label: "Voucher dos serviços salvo", labelKey: "chkItemVoucherSalvo" },
+  { category: "Pré-embarque", label: "Endereço do hotel salvo", labelKey: "chkItemEnderecoHotelSalvo" },
+  { category: "Pré-embarque", label: "Horário do transfer conferido", labelKey: "chkItemTransferConferido" },
 ];
 
-const SMART_RULES: Array<{ match: (s: ServiceLike) => boolean; items: string[] }> = [
-  { match: (s) => s.service_type === "flight", items: ["Conferir horário do voo", "Fazer check-in do voo", "Conferir franquia de bagagem", "Separar documentos de embarque"] },
-  { match: (s) => s.service_type === "hotel", items: ["Confirmar endereço do hotel", "Separar cartão para caução", "Conferir horário de check-in/check-out"] },
-  { match: (s) => s.service_type === "transfer", items: ["Conferir horário do transfer", "Conferir ponto de encontro", "Salvar contato do motorista/empresa, se disponível"] },
-  { match: (s) => s.service_type === "insurance", items: ["Salvar apólice do seguro", "Salvar contato de emergência da seguradora"] },
-  { match: (s) => s.service_type === "car_rental", items: ["Separar CNH", "Verificar necessidade de PID", "Separar cartão no nome do condutor", "Conferir caução da locadora"] },
-  { match: (s) => s.service_type === "cruise", items: ["Fazer check-in do cruzeiro", "Conferir documentos exigidos pelo cruzeiro", "Conferir etiquetas de bagagem do cruzeiro", "Separar traje para noite especial, se aplicável"] },
-  { match: (s) => s.service_type === "train", items: ["Conferir horário do trem", "Conferir estação de embarque", "Separar bilhetes do trem"] },
-  { match: (s) => s.service_type === "attraction", items: ["Conferir ingressos e reservas", "Salvar QR Codes dos ingressos, se houver"] },
-  { match: (s) => s.service_type === "other" && s.other_service_type === "chip_internet", items: ["Instalar eSIM antes do embarque", "Testar instruções de ativação"] },
+const SMART_RULES: Array<{ match: (s: ServiceLike) => boolean; items: Array<{ label: string; labelKey: WalletDictKey }> }> = [
+  { match: (s) => s.service_type === "flight", items: [
+    { label: "Conferir horário do voo", labelKey: "chkAutoFlightHorario" },
+    { label: "Fazer check-in do voo", labelKey: "chkAutoFlightCheckin" },
+    { label: "Conferir franquia de bagagem", labelKey: "chkAutoFlightFranquia" },
+    { label: "Separar documentos de embarque", labelKey: "chkAutoFlightDocumentos" },
+  ] },
+  { match: (s) => s.service_type === "hotel", items: [
+    { label: "Confirmar endereço do hotel", labelKey: "chkAutoHotelEndereco" },
+    { label: "Separar cartão para caução", labelKey: "chkAutoHotelCartaoCaucao" },
+    { label: "Conferir horário de check-in/check-out", labelKey: "chkAutoHotelHorarioCheckinCheckout" },
+  ] },
+  { match: (s) => s.service_type === "transfer", items: [
+    { label: "Conferir horário do transfer", labelKey: "chkAutoTransferHorario" },
+    { label: "Conferir ponto de encontro", labelKey: "chkAutoTransferPonto" },
+    { label: "Salvar contato do motorista/empresa, se disponível", labelKey: "chkAutoTransferContato" },
+  ] },
+  { match: (s) => s.service_type === "insurance", items: [
+    { label: "Salvar apólice do seguro", labelKey: "chkAutoInsuranceApolice" },
+    { label: "Salvar contato de emergência da seguradora", labelKey: "chkAutoInsuranceContatoEmergencia" },
+  ] },
+  { match: (s) => s.service_type === "car_rental", items: [
+    { label: "Separar CNH", labelKey: "chkAutoCarCnh" },
+    { label: "Verificar necessidade de PID", labelKey: "chkAutoCarPid" },
+    { label: "Separar cartão no nome do condutor", labelKey: "chkAutoCarCartaoCondutor" },
+    { label: "Conferir caução da locadora", labelKey: "chkAutoCarCaucao" },
+  ] },
+  { match: (s) => s.service_type === "cruise", items: [
+    { label: "Fazer check-in do cruzeiro", labelKey: "chkAutoCruiseCheckin" },
+    { label: "Conferir documentos exigidos pelo cruzeiro", labelKey: "chkAutoCruiseDocumentos" },
+    { label: "Conferir etiquetas de bagagem do cruzeiro", labelKey: "chkAutoCruiseEtiquetas" },
+    { label: "Separar traje para noite especial, se aplicável", labelKey: "chkAutoCruiseTraje" },
+  ] },
+  { match: (s) => s.service_type === "train", items: [
+    { label: "Conferir horário do trem", labelKey: "chkAutoTrainHorario" },
+    { label: "Conferir estação de embarque", labelKey: "chkAutoTrainEstacao" },
+    { label: "Separar bilhetes do trem", labelKey: "chkAutoTrainBilhetes" },
+  ] },
+  { match: (s) => s.service_type === "attraction", items: [
+    { label: "Conferir ingressos e reservas", labelKey: "chkAutoAttractionIngressos" },
+    { label: "Salvar QR Codes dos ingressos, se houver", labelKey: "chkAutoAttractionQrCodes" },
+  ] },
+  { match: (s) => s.service_type === "other" && s.other_service_type === "chip_internet", items: [
+    { label: "Instalar eSIM antes do embarque", labelKey: "chkAutoChipEsim" },
+    { label: "Testar instruções de ativação", labelKey: "chkAutoChipInstrucoes" },
+  ] },
 ];
 
 function slug(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
 }
 
-function buildAutoItems(services: ServiceLike[]): Array<{ category: string; label: string }> {
-  const out: Array<{ category: string; label: string }> = [];
+function buildAutoItems(services: ServiceLike[]): Array<{ category: string; label: string; labelKey: WalletDictKey }> {
+  const out: Array<{ category: string; label: string; labelKey: WalletDictKey }> = [];
   const seen = new Set<string>();
   for (const s of services) {
     for (const rule of SMART_RULES) {
       if (rule.match(s)) {
-        for (const label of rule.items) {
-          if (!seen.has(label)) { seen.add(label); out.push({ category: "Inteligente", label }); }
+        for (const item of rule.items) {
+          if (!seen.has(item.label)) { seen.add(item.label); out.push({ category: "Inteligente", label: item.label, labelKey: item.labelKey }); }
         }
       }
     }
@@ -92,15 +140,15 @@ function mergeItems(prev: ChecklistItem[], services: ServiceLike[]): ChecklistIt
   for (const d of DEFAULTS) {
     const key = `default:${slug(d.label)}`;
     const existing = byKey.get(key);
-    if (existing) { result.push({ ...existing, category: d.category, label: d.label }); byKey.delete(key); }
-    else result.push({ id: key, label: d.label, done: false, source: "default", category: d.category });
+    if (existing) { result.push({ ...existing, category: d.category, label: d.label, labelKey: d.labelKey }); byKey.delete(key); }
+    else result.push({ id: key, label: d.label, labelKey: d.labelKey, done: false, source: "default", category: d.category });
   }
   // auto
   for (const a of buildAutoItems(services)) {
     const key = `auto:${slug(a.label)}`;
     const existing = byKey.get(key);
-    if (existing) { result.push({ ...existing, category: "Inteligente", label: a.label }); byKey.delete(key); }
-    else result.push({ id: key, label: a.label, done: false, source: "auto", category: "Inteligente" });
+    if (existing) { result.push({ ...existing, category: "Inteligente", label: a.label, labelKey: a.labelKey }); byKey.delete(key); }
+    else result.push({ id: key, label: a.label, labelKey: a.labelKey, done: false, source: "auto", category: "Inteligente" });
   }
   // manual (and any leftover defaults/auto previously stored)
   for (const [, it] of byKey) {
@@ -109,7 +157,8 @@ function mergeItems(prev: ChecklistItem[], services: ServiceLike[]): ChecklistIt
   return result;
 }
 
-export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { open: boolean; onOpenChange: (v: boolean) => void; tripId: string; services: ServiceLike[] }) {
+export function TripChecklistDialog({ open, onOpenChange, tripId, services, locale = "pt-BR" }: { open: boolean; onOpenChange: (v: boolean) => void; tripId: string; services: ServiceLike[]; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const storageKey = `trip_checklist_${tripId}`;
   const [state, setState] = useState<ChecklistState>({ items: [], collapsed: {} });
   const [showHidden, setShowHidden] = useState(false);
@@ -180,7 +229,7 @@ export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { 
     setState((s) => ({ ...s, collapsed: { ...s.collapsed, [cat]: !s.collapsed[cat] } }));
   }
   function resetAll() {
-    if (!confirm("Resetar checklist? Itens manuais serão removidos e os marcados serão desmarcados.")) return;
+    if (!confirm(t("checklistResetConfirm"))) return;
     setState({ items: mergeItems([], services).map((i) => ({ ...i, done: false, hidden: false })), collapsed: {} });
   }
 
@@ -190,15 +239,15 @@ export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ListChecks className="h-5 w-5" style={{ color: "hsl(var(--wallet-brand))" }} />
-            Checklist da viagem
+            {t("checklistTitle")}
           </DialogTitle>
-          <DialogDescription>Organize tudo que você precisa antes e durante a viagem.</DialogDescription>
+          <DialogDescription>{t("checklistDesc")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="rounded-xl border border-border/50 bg-muted/30 p-3">
             <div className="flex items-center justify-between text-xs font-medium mb-2">
-              <span>{doneCount} de {totalCount} itens concluídos</span>
+              <span>{t("checklistItemsConcluidos", { done: doneCount, total: totalCount })}</span>
               <span className="text-muted-foreground">{pct}%</span>
             </div>
             <Progress value={pct} className="h-2" />
@@ -207,10 +256,10 @@ export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { 
           <div className="flex items-center justify-between gap-2">
             <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => setShowHidden((v) => !v)}>
               {showHidden ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
-              {showHidden ? "Ocultar itens ocultos" : "Mostrar itens ocultos"}
+              {showHidden ? t("checklistHideHidden") : t("checklistShowHidden")}
             </Button>
             <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive" onClick={resetAll}>
-              <RotateCcw className="h-3.5 w-3.5 mr-1" /> Resetar
+              <RotateCcw className="h-3.5 w-3.5 mr-1" /> {t("checklistReset")}
             </Button>
           </div>
 
@@ -221,7 +270,7 @@ export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { 
               <div key={cat} className="rounded-xl border border-border/50 bg-white overflow-hidden">
                 <button type="button" onClick={() => toggleCollapse(cat)} className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-muted/40">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold">{cat}</span>
+                    <span className="text-sm font-semibold">{t(CATEGORY_KEYS[cat as keyof typeof CATEGORY_KEYS] ?? "checklistCatDocumentos")}</span>
                     <span className="text-[11px] text-muted-foreground">{done}/{items.length}</span>
                   </div>
                   {collapsed ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronUp className="h-4 w-4 text-muted-foreground" />}
@@ -239,9 +288,9 @@ export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { 
                           <Input value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEdit(); }} className="h-8 flex-1" autoFocus />
                         ) : (
                           <button type="button" onClick={() => toggle(it.id)} className={cn("flex-1 text-left text-sm", it.done && "line-through text-muted-foreground")}>
-                            {it.label}
-                            {it.source === "auto" && <span className="ml-2 text-[10px] uppercase tracking-wider text-primary/70">auto</span>}
-                            {it.source === "manual" && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">meu</span>}
+                            {it.labelKey ? t(it.labelKey) : it.label}
+                            {it.source === "auto" && <span className="ml-2 text-[10px] uppercase tracking-wider text-primary/70">{t("checklistAutoTag")}</span>}
+                            {it.source === "manual" && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">{t("checklistManualTag")}</span>}
                           </button>
                         )}
                         <div className="flex items-center gap-0.5">
@@ -256,7 +305,7 @@ export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { 
                               <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeItem(it.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                             </>
                           ) : (
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleHidden(it.id)} title={it.hidden ? "Mostrar" : "Ocultar"}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleHidden(it.id)} title={it.hidden ? t("checklistShow") : t("checklistHide")}>
                               {it.hidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                             </Button>
                           )}
@@ -270,12 +319,12 @@ export function TripChecklistDialog({ open, onOpenChange, tripId, services }: { 
           })}
 
           <div className="rounded-xl border border-dashed border-border/60 p-3 space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Adicionar item personalizado</p>
+            <p className="text-xs font-medium text-muted-foreground">{t("checklistAddCustom")}</p>
             <div className="flex gap-2">
               <select value={newCat} onChange={(e) => setNewCat(e.target.value)} className="h-9 rounded-md border border-input bg-background px-2 text-xs">
-                {CATEGORIES.filter((c) => c !== "Inteligente").map((c) => <option key={c} value={c}>{c}</option>)}
+                {CATEGORIES.filter((c) => c !== "Inteligente").map((c) => <option key={c} value={c}>{t(CATEGORY_KEYS[c])}</option>)}
               </select>
-              <Input value={newItem} onChange={(e) => setNewItem(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addManual(); }} placeholder="Ex.: Levar travesseiro de pescoço" className="h-9 flex-1" />
+              <Input value={newItem} onChange={(e) => setNewItem(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addManual(); }} placeholder={t("checklistPlaceholder")} className="h-9 flex-1" />
               <Button size="sm" className="h-9" onClick={addManual}><Plus className="h-3.5 w-3.5" /></Button>
             </div>
           </div>
