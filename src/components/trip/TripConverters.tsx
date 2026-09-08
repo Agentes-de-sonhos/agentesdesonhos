@@ -87,7 +87,8 @@ function inferCurrency(destination: string): string {
   return "EUR";
 }
 
-function CurrencyConverterDialog({ destination, open, onOpenChange }: { destination: string; open: boolean; onOpenChange: (v: boolean) => void; }) {
+function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt-BR" }: { destination: string; open: boolean; onOpenChange: (v: boolean) => void; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const [target, setTarget] = useState(() => inferCurrency(destination || ""));
   const [amount, setAmount] = useState("100");
   const [direction, setDirection] = useState<"BRL_TO" | "TO_BRL">("TO_BRL");
