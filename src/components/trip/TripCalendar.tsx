@@ -29,6 +29,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { DayWeather } from "@/hooks/useTripWeather";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 interface TripCalendarProps {
   startDate: Date;
@@ -44,6 +46,7 @@ interface TripCalendarProps {
   /** Human-readable destination label, used as clock subtitle */
   destinationLabel?: string;
   compact?: boolean;
+  locale?: PublicLocale;
 }
 
 const WEEKDAYS = ["D", "S", "T", "Q", "Q", "S", "S"];
@@ -54,6 +57,7 @@ export function LocalClock({
   weatherByDate,
   standalone = false,
   compact = false,
+  locale = "pt-BR",
 }: {
   timezone: string;
   destinationLabel?: string;
@@ -61,7 +65,9 @@ export function LocalClock({
   /** When true, renders with its own rounded card; otherwise as a header strip. */
   standalone?: boolean;
   compact?: boolean;
+  locale?: PublicLocale;
 }) {
+  const t = tWallet(locale);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000);
@@ -121,7 +127,7 @@ export function LocalClock({
             {timeStr}
           </div>
           <div className="text-[9px] uppercase tracking-[0.18em] text-primary/70 font-semibold leading-none truncate">
-            Hora local{cityLabel ? ` · ${cityLabel}` : ""}
+            {t("calHoraLocal")}{cityLabel ? ` · ${cityLabel}` : ""}
           </div>
         </div>
         <div className="text-sm font-bold tabular-nums text-foreground leading-none shrink-0">
@@ -165,7 +171,9 @@ export function TripCalendar({
   timezone,
   destinationLabel,
   compact = false,
+  locale = "pt-BR",
 }: TripCalendarProps) {
+  const t = tWallet(locale);
   const [cursor, setCursor] = useState<Date>(startOfMonth(startDate));
 
   const days = useMemo(() => {
@@ -194,13 +202,13 @@ export function TripCalendar({
           size="icon"
           className={cn("rounded-full hover:bg-primary/10", compact ? "h-7 w-7" : "h-8 w-8")}
           onClick={() => setCursor((c) => subMonths(c, 1))}
-          aria-label="Mês anterior"
+          aria-label={t("calMesAnterior")}
         >
           <ChevronLeft className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
         </Button>
         <div className="flex flex-col items-center">
           <span className={cn("uppercase tracking-[0.2em] text-primary/70 font-semibold", compact ? "text-[10px]" : "text-xs")}>
-            Calendário da viagem
+            {t("calTitle")}
           </span>
           <span className={cn("font-bold text-foreground capitalize", compact ? "text-[13px]" : "text-sm")}>
             {format(cursor, "MMMM 'de' yyyy", { locale: ptBR })}
@@ -212,7 +220,7 @@ export function TripCalendar({
           size="icon"
           className={cn("rounded-full hover:bg-primary/10", compact ? "h-7 w-7" : "h-8 w-8")}
           onClick={() => setCursor((c) => addMonths(c, 1))}
-          aria-label="Próximo mês"
+          aria-label={t("calProximoMes")}
         >
           <ChevronRight className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
         </Button>
@@ -264,10 +272,10 @@ export function TripCalendar({
               title={
                 wx
                   ? `${format(day, "dd/MM")} • ${wx.tmin}°/${wx.tmax}°C${
-                      clickable ? " — clique para ver o roteiro" : ""
+                      clickable ? t("calCliqueVerRoteiro") : ""
                     }`
                   : clickable
-                  ? `Ver roteiro de ${format(day, "dd/MM")}`
+                  ? t("calVerRoteiroDe", { date: format(day, "dd/MM") })
                   : inTrip
                   ? format(day, "dd/MM")
                   : undefined
@@ -299,17 +307,17 @@ export function TripCalendar({
       {/* Legend */}
       <div className={cn("flex items-center justify-center text-[10px] text-muted-foreground border-t border-border/40 bg-muted/30", compact ? "gap-3 px-3 py-1.5" : "gap-4 px-4 py-2")}>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-primary" /> Início/Fim
+          <span className="h-2.5 w-2.5 rounded-sm bg-primary" /> {t("calLegendInicioFim")}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-sm bg-primary/15" /> Período
+          <span className="h-2.5 w-2.5 rounded-sm bg-primary/15" /> {t("fldPeriodo")}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" /> Roteiro
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" /> {t("fldRoteiro")}
         </span>
         {weatherByDate && Object.keys(weatherByDate).length > 0 && (
           <span className="flex items-center gap-1.5">
-            <Sun className="h-2.5 w-2.5 text-primary/70" /> Clima
+            <Sun className="h-2.5 w-2.5 text-primary/70" /> {t("calLegendClima")}
           </span>
         )}
       </div>

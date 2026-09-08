@@ -154,7 +154,7 @@ function formatDate(dateStr: string, locale: PublicLocale = "pt-BR") {
   }
 }
 
-function getServiceDetails(service: TripService): string[] {
+function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR"): string[] {
   const data = service.service_data as any;
   const details: string[] = [];
   
@@ -417,9 +417,9 @@ function renderServiceHeadline(opts: { title?: string; dates?: string; lines?: s
   return `<div class="pdf-block" style="margin-bottom:4px;">${titleHtml}${datesHtml}${linesHtml}</div>`;
 }
 
-function fmtDate(d: any): string { return d ? formatDate(String(d)) : ""; }
+function fmtDate(d: any, locale: PublicLocale = "pt-BR"): string { return d ? formatDate(String(d), locale) : ""; }
 
-function renderFlightBody(service: TripService): string {
+function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const tripTypeMap: Record<string, string> = { ida: 'Somente Ida', ida_volta: 'Ida e Volta', multi_trechos: 'Multi-trechos' };
   const statusMap: Record<string, string> = { confirmado: '✅ Confirmado', emitido: '📄 Emitido', pendente: '⏳ Pendente' };
@@ -503,7 +503,7 @@ function renderFlightBody(service: TripService): string {
   return head + segmentsHtml + passengersHtml + baggageHtml + boardingHtml + checkinHtml;
 }
 
-function renderHotelBody(service: TripService): string {
+function renderHotelBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: 'Boutique', resort: 'Resort', pousada: 'Pousada' };
   const roomMap: Record<string, string> = { standard: 'Standard', superior: 'Superior', deluxe: 'Deluxe', suite: 'Suíte', suite_junior: 'Suíte Júnior', presidencial: 'Presidencial', apartamento: 'Apartamento', villa: 'Villa', bangalo: 'Bangalô' };
@@ -600,7 +600,7 @@ function renderHotelBody(service: TripService): string {
   return head + checkin + checkout + room + food + included + policies + guests + location + notes;
 }
 
-function renderCarRentalBody(service: TripService): string {
+function renderCarRentalBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const head = renderServiceHeadline({
     title: `${data.car_type ? escapeHtml(data.car_type) : ''}${data.car_model ? ` • ${escapeHtml(data.car_model)}` : ''}`,
@@ -682,7 +682,7 @@ function renderCarRentalBody(service: TripService): string {
   return head + pickup + dropoff + vehicle + insurance + deposit + drivers + fuel + orient;
 }
 
-function renderTransferBody(service: TripService): string {
+function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const typeMap: Record<string, string> = { arrival: 'Transfer IN', departure: 'Transfer OUT', inter_hotel: 'Inter-hotel' };
   const route = data.origin_location && data.destination_location
@@ -766,7 +766,7 @@ function renderTransferBody(service: TripService): string {
   return head + arrival + departure + driver + vehicle + passengers + locations + orient;
 }
 
-function renderAttractionBody(service: TripService): string {
+function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const head = renderServiceHeadline({
     title: data.name,
@@ -847,7 +847,7 @@ function renderAttractionBody(service: TripService): string {
   return head + codes + usage + instructions + passengers + location + rules + tips + contacts + notes;
 }
 
-function renderInsuranceBody(service: TripService): string {
+function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   let days: number | null = null;
   try { const [sy,sm,sd] = data.start_date.split('-').map(Number); const [ey,em,ed] = data.end_date.split('-').map(Number); days = Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / 86400000); } catch {}
@@ -911,7 +911,7 @@ function renderInsuranceBody(service: TripService): string {
   return head + emergency + coverages + procedure + insured + tips + notes;
 }
 
-function renderCruiseBody(service: TripService): string {
+function renderCruiseBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const head = renderServiceHeadline({
     title: data.ship_name,
@@ -948,7 +948,7 @@ function renderCruiseBody(service: TripService): string {
   return head + itinerary + boarding + passengers;
 }
 
-function renderTrainBody(service: TripService): string {
+function renderTrainBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const time = data.departure_time && data.arrival_time ? `${data.departure_time} → ${data.arrival_time}` : '';
   const head = renderServiceHeadline({
@@ -971,7 +971,7 @@ function renderTrainBody(service: TripService): string {
   return head + passengers + notes;
 }
 
-function renderOtherBody(service: TripService): string {
+function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
   const otherTypeMap: Record<string, string> = { restaurante: '🍽️ Restaurante', guia_turistico: '🧭 Guia Turístico', chip_internet: '📶 Chip/Internet', experiencia: '✨ Experiência', evento: '📅 Evento', spa_wellness: '🧘 Spa/Bem-estar', servico_vip: '👑 Serviço VIP', concierge: '🛎️ Concierge', personalizado: '⭐ Personalizado' };
   const head = renderServiceHeadline({
@@ -1040,20 +1040,20 @@ function renderOtherBody(service: TripService): string {
   return head + location + contact + chip + guide + tips + description + notes;
 }
 
-function renderServiceBody(service: TripService): string {
+function renderServiceBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   switch (service.service_type) {
-    case "flight": return renderFlightBody(service);
-    case "hotel": return renderHotelBody(service);
-    case "car_rental": return renderCarRentalBody(service);
-    case "transfer": return renderTransferBody(service);
-    case "attraction": return renderAttractionBody(service);
-    case "insurance": return renderInsuranceBody(service);
-    case "cruise": return renderCruiseBody(service);
-    case "train": return renderTrainBody(service);
-    case "other": return renderOtherBody(service);
+    case "flight": return renderFlightBody(service, locale);
+    case "hotel": return renderHotelBody(service, locale);
+    case "car_rental": return renderCarRentalBody(service, locale);
+    case "transfer": return renderTransferBody(service, locale);
+    case "attraction": return renderAttractionBody(service, locale);
+    case "insurance": return renderInsuranceBody(service, locale);
+    case "cruise": return renderCruiseBody(service, locale);
+    case "train": return renderTrainBody(service, locale);
+    case "other": return renderOtherBody(service, locale);
     default:
       // Fallback to legacy flat list if any future type is unmapped
-      return getServiceDetails(service).map(d => `<p style="${TXT}">${escapeHtml(d)}</p>`).join("");
+      return getServiceDetails(service, locale).map(d => `<p style="${TXT}">${escapeHtml(d)}</p>`).join("");
   }
 }
 
@@ -1126,7 +1126,7 @@ function renderServiceLayout(service: TripService, bodyHtml: string, resolveImg:
   `;
 }
 
-function generateAgencyHeader(profile: AgentProfile | null): string {
+function generateAgencyHeader(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
   if (!profile?.agency_logo_url) {
     return `
       <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
@@ -1144,7 +1144,7 @@ function generateAgencyHeader(profile: AgentProfile | null): string {
   `;
 }
 
-function generateAgentSignature(profile: AgentProfile | null): string {
+function generateAgentSignature(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
   if (!profile) return "";
   const avatarHtml = profile.avatar_url
     ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:4px solid rgba(15,118,110,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
@@ -1351,7 +1351,7 @@ export async function generateTripPDF(
     const label = serviceLabels[type] || t("serviceOther");
     const emoji = SERVICE_EMOJI[type] || "📋";
     const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
-    const bodyHtml = renderServiceBody(service);
+    const bodyHtml = renderServiceBody(service, locale);
     const galleryHtml = renderServiceGallery(service, resolveImg);
 
     let attachmentsHtml = '';
@@ -1463,7 +1463,7 @@ export async function generateTripPDF(
     </head>
     <body>
       <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
-        ${generateAgencyHeader(profile || null)}
+        ${generateAgencyHeader(profile || null, locale)}
 
         <div style="padding:6px 32px 0;">
           <!-- Hero -->
@@ -1508,7 +1508,7 @@ export async function generateTripPDF(
           ${itineraryHtml}
 
           <!-- Agent Signature -->
-          ${generateAgentSignature(profile || null)}
+          ${generateAgentSignature(profile || null, locale)}
 
           <p style="text-align:center;font-size:10px;color:#94a3b8;margin-top:14px;">
             ${t("pdfGeneratedAt", { date: locale === "it-IT" ? new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date()) : format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR }) })}

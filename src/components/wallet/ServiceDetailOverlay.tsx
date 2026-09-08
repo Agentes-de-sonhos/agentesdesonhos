@@ -8,6 +8,8 @@ import {
   Plane, Hotel, Car, Bus, Ticket, Shield, Ship, TrainFront, FileText, Type, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 const ICONS: Record<string, LucideIcon> = {
   flight: Plane,
@@ -31,6 +33,7 @@ interface ServiceDetailOverlayProps {
   children: ReactNode;
   /** Inline CSS variables to theme the portal (e.g. agency brand color). */
   style?: CSSProperties;
+  locale?: PublicLocale;
 }
 
 /**
@@ -49,11 +52,13 @@ export function ServiceDetailOverlay({
   onOpenChange,
   children,
   style,
+  locale = "pt-BR",
 }: ServiceDetailOverlayProps) {
+  const t = tWallet(locale);
   const isMobile = useIsMobile();
   const Icon = icon ?? (service ? ICONS[service.service_type] ?? FileText : FileText);
   const label =
-    title ?? (service ? SERVICE_LABELS[service.service_type] ?? "Serviço" : "Serviço");
+    title ?? (service ? SERVICE_LABELS[service.service_type] ?? t("fldServico") : t("fldServico"));
 
   const [fontScale, setFontScale] = useState<"sm" | "md" | "lg">(() => {
     if (typeof window === "undefined") return "md";
@@ -73,19 +78,19 @@ export function ServiceDetailOverlay({
       <button
         type="button"
         onClick={() => setFontScale("sm")}
-        aria-label="Diminuir fonte"
+        aria-label={t("svcFontDecrease")}
         className={`h-6 w-6 rounded-full text-[11px] font-semibold transition ${fontScale === "sm" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
       >A-</button>
       <button
         type="button"
         onClick={() => setFontScale("md")}
-        aria-label="Fonte padrão"
+        aria-label={t("svcFontDefault")}
         className={`h-6 w-6 rounded-full text-[12px] font-semibold transition ${fontScale === "md" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
       >A</button>
       <button
         type="button"
         onClick={() => setFontScale("lg")}
-        aria-label="Aumentar fonte"
+        aria-label={t("svcFontIncrease")}
         className={`h-6 w-6 rounded-full text-[13px] font-semibold transition ${fontScale === "lg" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
       >A+</button>
     </div>
@@ -98,7 +103,7 @@ export function ServiceDetailOverlay({
       </div>
       <div className="min-w-0">
         <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/80">
-          Serviço
+          {t("fldServico")}
         </span>
         <span className="block text-lg sm:text-xl font-semibold tracking-tight text-foreground break-words">
           {label}
@@ -140,7 +145,7 @@ export function ServiceDetailOverlay({
             }}
           >
             <X className="h-5 w-5" />
-            <span className="sr-only">Fechar</span>
+            <span className="sr-only">{t("svcClose")}</span>
           </SheetClose>
 
           {/* Sticky/fixed header */}

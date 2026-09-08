@@ -143,12 +143,13 @@ function BoardingFact({ icon: Icon, label, value }: { icon: any; label: string; 
   );
 }
 
-function CruiseFactGrid({ data }: { data: any }) {
+function CruiseFactGrid({ data, locale = "pt-BR" }: { data: any; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const mealLabel = (() => {
     if (!data.meal_plan) return null;
-    if (data.meal_plan === 'pensao_completa') return 'Pensão completa';
-    if (data.meal_plan === 'all_inclusive') return 'All inclusive';
-    if (data.meal_plan === 'meia_pensao') return 'Meia pensão';
+    if (data.meal_plan === 'pensao_completa') return t("mealPensaoCompleta");
+    if (data.meal_plan === 'all_inclusive') return t("mealAllInclusive");
+    if (data.meal_plan === 'meia_pensao') return t("mealMeiaPensao");
     return String(data.meal_plan);
   })();
   const cabin = data.cabin_type
@@ -160,24 +161,24 @@ function CruiseFactGrid({ data }: { data: any }) {
   const occupancyText = data.occupancy
     ? String(data.occupancy)
     : (Array.isArray(data.passengers) && data.passengers.length > 0
-        ? `${data.passengers.length} passageiros`
+        ? `${data.passengers.length} ${t("fldPassageiros").toLowerCase()}`
         : null);
 
   const facts: { icon: any; label: string; value: string; sub?: string; full?: boolean }[] = [];
-  if (data.cruise_company) facts.push({ icon: Ship, label: 'Companhia', value: data.cruise_company });
-  if (data.route) facts.push({ icon: Route, label: 'Roteiro', value: data.route, sub: data.reservation_status_label });
-  if (data.embarkation_port) facts.push({ icon: Anchor, label: 'Embarque', value: data.embarkation_port, sub: data.embarkation_port_status });
-  if (data.disembarkation_port) facts.push({ icon: MapPin, label: 'Desembarque', value: data.disembarkation_port, sub: data.disembarkation_port_status });
-  if (data.duration_label || data.nights) facts.push({ icon: Clock, label: 'Duração', value: data.duration_label || `${data.nights} noites` });
-  if (data.booking_number) facts.push({ icon: Ticket, label: 'Reserva', value: data.booking_number });
-  else facts.push({ icon: Ticket, label: 'Reserva', value: 'A confirmar' });
-  if (cabin) facts.push({ icon: BedDouble, label: 'Cabine', value: cabin });
-  else facts.push({ icon: BedDouble, label: 'Cabine', value: 'A confirmar' });
-  if (data.deck) facts.push({ icon: Layers, label: 'Deck', value: data.deck });
-  else facts.push({ icon: Layers, label: 'Deck', value: 'A confirmar' });
-  if (occupancyText) facts.push({ icon: Users, label: 'Ocupação', value: occupancyText });
-  if (mealLabel) facts.push({ icon: UtensilsCrossed, label: 'Alimentação', value: mealLabel });
-  if (passengers) facts.push({ icon: Users, label: 'Passageiros', value: passengers, full: true });
+  if (data.cruise_company) facts.push({ icon: Ship, label: t("fldCompanhia"), value: data.cruise_company });
+  if (data.route) facts.push({ icon: Route, label: t("fldRoteiro"), value: data.route, sub: data.reservation_status_label });
+  if (data.embarkation_port) facts.push({ icon: Anchor, label: t("fldEmbarque"), value: data.embarkation_port, sub: data.embarkation_port_status });
+  if (data.disembarkation_port) facts.push({ icon: MapPin, label: t("fldDesembarque"), value: data.disembarkation_port, sub: data.disembarkation_port_status });
+  if (data.duration_label || data.nights) facts.push({ icon: Clock, label: t("fldDuracao"), value: data.duration_label || `${data.nights} ${pluralize(locale, data.nights, { one: t("nightsLabelOne"), other: t("nightsLabelOther") })}` });
+  if (data.booking_number) facts.push({ icon: Ticket, label: t("fldReserva"), value: data.booking_number });
+  else facts.push({ icon: Ticket, label: t("fldReserva"), value: t("attrConfirmarPending") });
+  if (cabin) facts.push({ icon: BedDouble, label: t("fldCabine"), value: cabin });
+  else facts.push({ icon: BedDouble, label: t("fldCabine"), value: t("attrConfirmarPending") });
+  if (data.deck) facts.push({ icon: Layers, label: t("fldDeck"), value: data.deck });
+  else facts.push({ icon: Layers, label: t("fldDeck"), value: t("attrConfirmarPending") });
+  if (occupancyText) facts.push({ icon: Users, label: t("fldOcupacao"), value: occupancyText });
+  if (mealLabel) facts.push({ icon: UtensilsCrossed, label: t("fldAlimentacao"), value: mealLabel });
+  if (passengers) facts.push({ icon: Users, label: t("fldPassageiros"), value: passengers, full: true });
 
   if (facts.length === 0) return null;
 
@@ -241,22 +242,29 @@ function CruiseDayChip({ dateStr }: { dateStr?: string }) {
   );
 }
 
-function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
+function CruiseItineraryTimeline({ stops, locale = "pt-BR" }: { stops: any[]; locale?: PublicLocale }) {
+  const t = tWallet(locale);
+  const roleLabels = {
+    embarque: t("segEmbarqueRole"),
+    desembarque: t("segDesembarqueRole"),
+    altoMar: t("segAltoMarRole"),
+    porto: t("segPortoRole"),
+  };
   return (
     <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-4 sm:p-5">
       <div className="flex items-center gap-2 mb-4">
         <CalendarDays className="h-4 w-4 text-primary" />
-        <p className="text-[13px] font-semibold tracking-tight text-foreground">Roteiro</p>
+        <p className="text-[13px] font-semibold tracking-tight text-foreground">{t("sectionRoteiroPlain")}</p>
       </div>
       <ol className="space-y-4">
         {stops.map((stop: any, i: number) => {
           const isNav = stop.stop_type === 'navegacao';
           const isLast = i === stops.length - 1;
-          const role = stop.role || (i === 0 ? 'Embarque' : isLast ? 'Desembarque' : isNav ? 'Alto-mar' : 'Porto');
+          const role = stop.role || (i === 0 ? roleLabels.embarque : isLast ? roleLabels.desembarque : isNav ? roleLabels.altoMar : roleLabels.porto);
           const roleTone =
-            role === 'Embarque' ? 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300'
-            : role === 'Desembarque' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
-            : role === 'Alto-mar' ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
+            role === roleLabels.embarque ? 'bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300'
+            : role === roleLabels.desembarque ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+            : role === roleLabels.altoMar ? 'bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300'
             : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
 
           return (
@@ -266,7 +274,7 @@ function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
                 {!isLast && <span className="absolute left-[-31px] top-14 bottom-[-16px] w-px border-l border-dashed border-border" />}
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="min-w-0">
-                    <p className="text-[15px] font-semibold text-foreground leading-tight">{stop.port || 'A confirmar'}</p>
+                    <p className="text-[15px] font-semibold text-foreground leading-tight">{stop.port || t("attrConfirmarPending")}</p>
                     {stop.subtitle && (
                       <p className="text-[12.5px] text-primary/80 font-medium mt-0.5">{stop.subtitle}</p>
                     )}
@@ -280,11 +288,11 @@ function CruiseItineraryTimeline({ stops }: { stops: any[] }) {
                     </span>
                     {(stop.arrival_time || stop.departure_time) ? (
                       <div className="text-[11.5px] text-muted-foreground text-right">
-                        {stop.arrival_time && <div>Chegada <span className="text-foreground font-medium">{stop.arrival_time}</span></div>}
-                        {stop.departure_time && <div>Saída <span className="text-foreground font-medium">{stop.departure_time}</span></div>}
+                        {stop.arrival_time && <div>{t("fldChegada")} <span className="text-foreground font-medium">{stop.arrival_time}</span></div>}
+                        {stop.departure_time && <div>{t("wordSaida")} <span className="text-foreground font-medium">{stop.departure_time}</span></div>}
                       </div>
                     ) : isNav ? null : (
-                      <span className="text-[11px] text-muted-foreground/80 italic">A confirmar</span>
+                      <span className="text-[11px] text-muted-foreground/80 italic">{t("attrConfirmarPending")}</span>
                     )}
                   </div>
                 </div>
@@ -425,6 +433,16 @@ const SERVICE_LABELS: Record<TripServiceType, string> = {
   cruise: "Cruzeiro", train: "Trem", other: "Outros Serviços",
 };
 
+function getServiceSectionLabel(type: TripServiceType, locale: PublicLocale = "pt-BR"): string {
+  const t = tWallet(locale);
+  const map: Record<TripServiceType, string> = {
+    flight: t("svcSectionFlight"), hotel: t("serviceHotel"), car_rental: t("serviceCarRental"),
+    transfer: t("serviceTransfer"), attraction: t("serviceAttraction"), insurance: t("serviceInsurance"),
+    cruise: t("serviceCruise"), train: t("serviceTrain"), other: t("serviceOther"),
+  };
+  return map[type];
+}
+
 
 // Context for passing voucher access credentials to nested components
 interface VoucherAccessContext {
@@ -446,7 +464,8 @@ function formatDate(dateStr: string) {
   catch { return dateStr; }
 }
 
-function getServiceDetails(service: TripService): { title: string; details: string[]; dates?: string } {
+function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR"): { title: string; details: string[]; dates?: string } {
+  const t = tWallet(locale);
   const data = service.service_data as any;
   switch (service.service_type) {
     case "flight": {
@@ -663,12 +682,12 @@ function PasswordGate({ onUnlock }: { onUnlock: (password: string) => void }) {
 
 // Service Section (controlled open/close for exclusive accordion)
 function ServiceSection({ 
-  type, services, isOpen, onToggle, sectionRef 
+  type, services, isOpen, onToggle, sectionRef, locale = "pt-BR"
 }: { 
-  type: TripServiceType; services: TripService[]; isOpen: boolean; onToggle: () => void; sectionRef: (el: HTMLDivElement | null) => void;
+  type: TripServiceType; services: TripService[]; isOpen: boolean; onToggle: () => void; sectionRef: (el: HTMLDivElement | null) => void; locale?: PublicLocale;
 }) {
   const Icon = SERVICE_ICONS[type];
-  const label = SERVICE_LABELS[type];
+  const label = getServiceSectionLabel(type, locale);
   const colors = SERVICE_COLORS[type];
 
   return (
@@ -699,7 +718,7 @@ function ServiceSection({
           )}
         >
           <div className="space-y-2 px-4 pb-4 pt-1">
-            {services.map((s) => <PublicServiceCard key={s.id} service={s} />)}
+            {services.map((s) => <PublicServiceCard key={s.id} service={s} locale={locale} />)}
           </div>
         </div>
       </div>
@@ -708,8 +727,9 @@ function ServiceSection({
 }
 
 // Service Card for Public View
-function PublicServiceCard({ service }: { service: TripService }) {
-  const { title, details, dates } = getServiceDetails(service);
+function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService; locale?: PublicLocale }) {
+  const t = tWallet(locale);
+  const { title, details, dates } = getServiceDetails(service, locale);
   const data = service.service_data as any;
   const voucherAccess = useContext(VoucherAccessCtx);
   const isTrainWithMaps = service.service_type === 'train' && (data.origin_maps_url || data.destination_maps_url);
@@ -771,7 +791,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
         </div>
         {/* Cruise: premium fact grid with icons */}
         {isCruise ? (
-          <CruiseFactGrid data={data} />
+          <CruiseFactGrid data={data} locale={locale} />
         ) : details.length > 0 && (
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-1">
             {details.map((d, i) => {
@@ -903,7 +923,7 @@ function PublicServiceCard({ service }: { service: TripService }) {
         {/* Cruise itinerary */}
         {isCruise && data.itinerary?.length > 0 && (
           <div className="mt-5">
-            <CruiseItineraryTimeline stops={data.itinerary} />
+            <CruiseItineraryTimeline stops={data.itinerary} locale={locale} />
           </div>
         )}
 
@@ -915,12 +935,12 @@ function PublicServiceCard({ service }: { service: TripService }) {
               <p className="text-[13px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4">
-              <BoardingFact icon={Building2} label="Terminal" value={data.boarding_terminal || 'A confirmar'} />
-              <BoardingFact icon={FileText} label="Documentos" value={data.required_documents || 'Passaportes válidos, vistos e formulários de check-in.'} />
-              <BoardingFact icon={Shirt} label="Dress Code" value={data.dress_code || 'Trajes casuais; verificar noites temáticas.'} />
-              <BoardingFact icon={Users} label="Chegada" value={data.recommended_arrival || 'Chegar no horário indicado no voucher final.'} />
-              <BoardingFact icon={Briefcase} label="Bagagem" value={data.baggage_policy || 'A confirmar conforme a companhia.'} />
-              {data.boarding_notes && <BoardingFact icon={FileText} label="Observações" value={data.boarding_notes} />}
+              <BoardingFact icon={Building2} label={t("fldTerminal")} value={data.boarding_terminal || t("attrConfirmarPending")} />
+              <BoardingFact icon={FileText} label={t("fldDocumentos")} value={data.required_documents || t("cruiseDocsDefault")} />
+              <BoardingFact icon={Shirt} label={t("fldDressCode")} value={data.dress_code || t("cruiseDressDefault")} />
+              <BoardingFact icon={Users} label={t("fldChegada")} value={data.recommended_arrival || t("cruiseArrivalDefault")} />
+              <BoardingFact icon={Briefcase} label={t("fldBagagem")} value={data.baggage_policy || t("attrConfirmarPending")} />
+              {data.boarding_notes && <BoardingFact icon={FileText} label={t("fldObservacoes")} value={data.boarding_notes} />}
             </div>
           </div>
         )}
@@ -2288,7 +2308,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", colors.bg)}>
                         <Icon className={cn("h-5 w-5", colors.icon)} />
                       </div>
-                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight break-words line-clamp-2">{SERVICE_LABELS[type]}</span>
+                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight break-words line-clamp-2">{getServiceSectionLabel(type, publicLocale)}</span>
                       <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{grouped[type].length}</span>
                     </button>
                   );
@@ -2666,13 +2686,13 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
         style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
       >
-        {activeService && <PublicServiceCard service={activeService} />}
+        {activeService && <PublicServiceCard service={activeService} locale={publicLocale} />}
       </ServiceDetailOverlay>
       {/* Group overlay: lista todos os serviços de um mesmo tipo (Passagens, Hospedagem, etc.) */}
       <ServiceDetailOverlay
         open={activeGroupType !== null}
         onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
-        title={activeGroupType ? SERVICE_LABELS[activeGroupType] : undefined}
+        title={activeGroupType ? getServiceSectionLabel(activeGroupType, publicLocale) : undefined}
         icon={activeGroupType ? SERVICE_ICONS[activeGroupType] : undefined}
         style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
       >
@@ -2680,7 +2700,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           <CategoryServiceView
             type={activeGroupType}
             services={grouped[activeGroupType] || []}
-            renderFullCard={(s) => <PublicServiceCard service={s} />}
+            renderFullCard={(s) => <PublicServiceCard service={s} locale={publicLocale} />}
           />
         )}
       </ServiceDetailOverlay>

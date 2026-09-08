@@ -21,19 +21,24 @@ import {
   hasAdditionalDetails,
   resolveStatusBadge,
 } from "./categoryPresentation";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 interface CategoryServiceViewProps {
   type: TripServiceType;
   services: TripService[];
   /** Render full details for the expanded body (typically PublicServiceCard). */
   renderFullCard: (service: TripService) => ReactNode;
+  locale?: PublicLocale;
 }
 
 export function CategoryServiceView({
   type,
   services,
   renderFullCard,
+  locale = "pt-BR",
 }: CategoryServiceViewProps) {
+  const t = tWallet(locale);
   const cfg = CATEGORY_CONFIG[type];
   const total = services.length;
   const [gridMode, setGridMode] = useState(false);
@@ -199,13 +204,13 @@ export function CategoryServiceView({
           <button
             type="button"
             onClick={() => setGridMode((v) => !v)}
-            aria-label={gridMode ? "Ver em carrossel" : cfg.seeAllLabel}
+            aria-label={gridMode ? t("catCarousel") : cfg.seeAllLabel}
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--wallet-brand))] hover:opacity-80 transition"
           >
             {gridMode ? (
               <>
                 <Rows3 className="h-4 w-4" aria-hidden />
-                Ver em carrossel
+                {t("catCarousel")}
               </>
             ) : (
               <>
@@ -231,6 +236,7 @@ export function CategoryServiceView({
             onOpenAttachments={() => handleOpenAttachments(s.id)}
             attachAnchorRef={(el) => (attachRefs.current[s.id] = el)}
             renderFullCard={renderFullCard}
+            locale={locale}
           />
         ))}
       </div>
@@ -290,6 +296,7 @@ interface CompactCardProps {
   onOpenAttachments: () => void;
   attachAnchorRef: (el: HTMLDivElement | null) => void;
   renderFullCard: (s: TripService) => ReactNode;
+  locale?: PublicLocale;
 }
 
 const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
@@ -303,9 +310,11 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
       onOpenAttachments,
       attachAnchorRef,
       renderFullCard,
+      locale = "pt-BR",
     },
     ref,
   ) {
+      const t = tWallet(locale);
       const cfg = CATEGORY_CONFIG[type];
       const Icon = cfg.icon;
       const compact = cfg.getCompactFields(service);
@@ -334,7 +343,7 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
             aria-expanded={expandable ? isOpen : undefined}
             aria-label={
               expandable
-                ? `${isOpen ? "Recolher" : "Expandir"} detalhes de ${compact.title}`
+                ? t("catDetailsOfAria", { action: isOpen ? t("catCollapseAria") : t("catExpandAria"), title: compact.title })
                 : undefined
             }
             className={cn(
@@ -418,7 +427,7 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
                           onOpenAttachments();
                         }
                       }}
-                      aria-label={`${compact.title} possui ${filesLabel}`}
+                      aria-label={t("catFilesAria", { title: compact.title, label: filesLabel })}
                       className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-[hsl(var(--wallet-brand))] bg-[hsl(var(--wallet-brand-soft)/0.6)] hover:bg-[hsl(var(--wallet-brand-soft))] transition"
                     >
                       <Paperclip className="h-3.5 w-3.5" />

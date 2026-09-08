@@ -19,6 +19,8 @@ import {
   type ServiceDocument,
   type ServiceDocumentKind,
 } from "@/lib/serviceDocuments";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 const KIND_ICON: Record<ServiceDocumentKind, typeof FileText> = {
   pdf: FileText,
@@ -44,6 +46,7 @@ interface Props {
   /** Quantos itens mostrar antes de recolher o restante. */
   initialVisible?: number;
   className?: string;
+  locale?: PublicLocale;
 }
 
 const INITIAL_LIMIT = 3;
@@ -53,12 +56,15 @@ function DocumentRow({
   onOpen,
   onDownload,
   downloading,
+  locale = "pt-BR",
 }: {
   doc: ServiceDocument;
   onOpen: (doc: ServiceDocument) => void;
   onDownload: (doc: ServiceDocument) => void;
   downloading: boolean;
+  locale?: PublicLocale;
 }) {
+  const t = tWallet(locale);
   const Icon = KIND_ICON[doc.kind];
   const meta = [doc.ext, doc.size].filter(Boolean).join(" · ");
 
@@ -87,20 +93,20 @@ function DocumentRow({
         <button
           type="button"
           onClick={() => onOpen(doc)}
-          aria-label={`Abrir arquivo ${doc.name}`}
+          aria-label={t("docsOpenAria", { name: doc.name })}
           className={cn(
             "inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground sm:flex-none",
             "transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
           )}
         >
           <Eye className="h-3.5 w-3.5" aria-hidden />
-          Abrir arquivo
+          {t("docsOpenBtn")}
         </button>
         <button
           type="button"
           onClick={() => onDownload(doc)}
           disabled={downloading}
-          aria-label={`Baixar arquivo ${doc.name}`}
+          aria-label={t("docsDownloadAria", { name: doc.name })}
           className={cn(
             "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground",
             "transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
@@ -119,7 +125,9 @@ export function ServiceDocumentsCard({
   visible = true,
   initialVisible = INITIAL_LIMIT,
   className,
+  locale = "pt-BR",
 }: Props) {
+  const t = tWallet(locale);
   const [expanded, setExpanded] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<ServiceDocument | null>(null);
   const viewer = useSecureDocument();
@@ -142,7 +150,7 @@ export function ServiceDocumentsCard({
 
   const handleDownload = (doc: ServiceDocument) => {
     void viewer.download(toSource(doc)).catch((err) =>
-      toast.error(err instanceof Error ? err.message : "Não foi possível baixar este arquivo."),
+      toast.error(err instanceof Error ? err.message : t("docsDownloadError")),
     );
   };
 
@@ -167,12 +175,12 @@ export function ServiceDocumentsCard({
         "mt-3 w-full min-w-0 rounded-2xl border border-border bg-background p-3.5",
         className,
       )}
-      aria-label="Documentos do serviço"
+      aria-label={t("docsHeading")}
     >
       <header className="mb-2.5 flex items-center gap-1.5">
         <Paperclip className="h-3.5 w-3.5 text-primary" aria-hidden />
         <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
-          Documentos do serviço
+          {t("docsHeading")}
         </h4>
         {docs.length > 1 && (
           <span className="ml-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
@@ -189,6 +197,7 @@ export function ServiceDocumentsCard({
             onOpen={openDocument}
             onDownload={handleDownload}
             downloading={viewer.downloading}
+            locale={locale}
           />
         ))}
       </ul>
@@ -201,7 +210,7 @@ export function ServiceDocumentsCard({
           onClick={() => setExpanded(true)}
           className="mt-2 h-8 w-full rounded-full text-[12px] font-semibold text-primary hover:bg-primary/10"
         >
-          Ver todos ({docs.length})
+          {t("docsViewAllBtn", { count: docs.length })}
         </Button>
       )}
     </section>
@@ -212,7 +221,7 @@ export function ServiceDocumentsCard({
       downloading={viewer.downloading}
       error={viewer.error}
       doc={viewer.doc}
-      fileName={selectedDocument?.name || "Documento"}
+      fileName={selectedDocument?.name || t("docsDefaultFileName")}
       fileMeta={selectedMeta}
       onClose={closeViewer}
       onRetry={() => {
