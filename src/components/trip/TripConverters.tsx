@@ -10,7 +10,8 @@ import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
 import { TripBudgetDialog } from "@/components/wallet/TripBudgetDialog";
 import { convertWithRate, fxRateUrl, isValidRate, parseAmount } from "@/lib/fxConversion";
-import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import { normalizePublicLocale, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 
 // Simple destination -> currency inference (best-effort)
@@ -69,6 +70,15 @@ const CURRENCIES = [
   { code: "MXN", symbol: "$", name: "Peso Mexicano" },
 ];
 
+function currencyName(code: string, locale: PublicLocale): string {
+  try {
+    const dn = new Intl.DisplayNames([normalizePublicLocale(locale)], { type: "currency" });
+    return dn.of(code) ?? code;
+  } catch {
+    return CURRENCIES.find((c) => c.code === code)?.name ?? code;
+  }
+}
+
 function inferCurrency(destination: string): string {
   const d = destination.toLowerCase();
   for (const key of Object.keys(COUNTRY_CURRENCY)) {
@@ -77,7 +87,8 @@ function inferCurrency(destination: string): string {
   return "EUR";
 }
 
-function CurrencyConverterDialog({ destination, open, onOpenChange }: { destination: string; open: boolean; onOpenChange: (v: boolean) => void; }) {
+function CurrencyConverterDialog({ destination, open, onOpenChange, locale = "pt-BR" }: { destination: string; open: boolean; onOpenChange: (v: boolean) => void; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const [target, setTarget] = useState(() => inferCurrency(destination || ""));
   const [amount, setAmount] = useState("100");
   const [direction, setDirection] = useState<"BRL_TO" | "TO_BRL">("TO_BRL");
@@ -102,11 +113,9 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
 
   const num = parseAmount(amount);
   const result = rate ? convertWithRate(num, rate, direction) : 0;
-  const targetInfo = CURRENCIES.find((c) => c.code === target);
-
 
   const fmt = (v: number, code: string) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency: code }).format(v);
+    new Intl.NumberFormat(normalizePublicLocale(locale), { style: "currency", currency: code }).format(v);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -114,21 +123,21 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Coins className="h-5 w-5 text-primary" />
-            Conversor de moedas
+            {t("convCurTitle")}
           </DialogTitle>
           <DialogDescription>
-            Cotação comercial atualizada (referência).
+            {t("convCurDesc")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Moeda do destino</label>
+            <label className="text-sm font-medium">{t("convCurDestLabel")}</label>
             <Select value={target} onValueChange={setTarget}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {CURRENCIES.map((c) => (
                   <SelectItem key={c.code} value={c.code}>
-                    {c.code} — {c.name}
+                    {c.code} — {currencyName(c.code, locale)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -138,7 +147,7 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
           <div className="flex items-end gap-2">
             <div className="flex-1 space-y-2">
               <label className="text-sm font-medium">
-                {direction === "BRL_TO" ? "Valor em Real (BRL)" : `Valor em ${target}`}
+                {direction === "BRL_TO" ? t("convValorReal") : t("convValorEm", { target })}
               </label>
               <Input
                 type="number"
@@ -152,7 +161,7 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
               variant="outline"
               size="icon"
               onClick={() => setDirection((d) => (d === "BRL_TO" ? "TO_BRL" : "BRL_TO"))}
-              title="Inverter"
+              title={t("convInverter")}
             >
               <ArrowRightLeft className="h-4 w-4" />
             </Button>
@@ -160,12 +169,12 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
 
           <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando cotação...</p>
+              <p className="text-sm text-muted-foreground">{t("convCarregando")}</p>
             ) : isError ? (
-              <p className="text-sm text-destructive">Não foi possível carregar a cotação.</p>
+              <p className="text-sm text-destructive">{t("convErro")}</p>
             ) : (
               <>
-                <p className="text-xs text-muted-foreground mb-1">Equivale a</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("convEquivale")}</p>
                 <p className="text-2xl font-bold">
                   {direction === "BRL_TO"
                     ? fmt(result, target)
@@ -180,7 +189,7 @@ function CurrencyConverterDialog({ destination, open, onOpenChange }: { destinat
             )}
           </div>
           <p className="text-[11px] text-muted-foreground text-center">
-            Valores de referência. Consulte sua casa de câmbio para a cotação final.
+            {t("convFooterNote")}
           </p>
         </div>
       </DialogContent>
@@ -207,7 +216,8 @@ const SHOE_TABLE: { br: number; eu: number; usM: number; usW: number; uk: number
   { br: 46, eu: 47, usM: 13, usW: 14.5, uk: 12 },
 ];
 
-function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void; }) {
+function ShoeSizeDialog({ open, onOpenChange, locale = "pt-BR" }: { open: boolean; onOpenChange: (v: boolean) => void; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const [br, setBr] = useState<number>(39);
   const row = SHOE_TABLE.find((r) => r.br === br) ?? SHOE_TABLE[6];
 
@@ -217,15 +227,15 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Footprints className="h-5 w-5 text-primary" />
-            Conversor de calçados
+            {t("convShoeTitle")}
           </DialogTitle>
           <DialogDescription>
-            Selecione o número do Brasil para ver a numeração internacional.
+            {t("convShoeDesc")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Numeração no Brasil</label>
+            <label className="text-sm font-medium">{t("convShoeBrLabel")}</label>
             <Select value={String(br)} onValueChange={(v) => setBr(Number(v))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -238,24 +248,24 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">Europa (EU)</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeEU")}</p>
               <p className="text-2xl font-bold">{row.eu}</p>
             </div>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">Reino Unido (UK)</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeUK")}</p>
               <p className="text-2xl font-bold">{row.uk}</p>
             </div>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">EUA Masculino</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeUSM")}</p>
               <p className="text-2xl font-bold">{row.usM}</p>
             </div>
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
-              <p className="text-xs text-muted-foreground">EUA Feminino</p>
+              <p className="text-xs text-muted-foreground">{t("convShoeUSW")}</p>
               <p className="text-2xl font-bold">{row.usW}</p>
             </div>
           </div>
           <p className="text-[11px] text-muted-foreground text-center">
-            Tabela de referência. A numeração pode variar conforme a marca.
+            {t("convShoeFooterNote")}
           </p>
         </div>
       </DialogContent>
@@ -264,6 +274,7 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 }
 
 export function TripConverters({ destination, tripId, services, international = true, endDate, locale = "pt-BR" }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; international?: boolean; endDate?: Date | null; locale?: PublicLocale }) {
+  const t = tWallet(locale);
   const [openCur, setOpenCur] = useState(false);
   const [openMeasure, setOpenMeasure] = useState(false);
   const [openTip, setOpenTip] = useState(false);
@@ -292,7 +303,7 @@ export function TripConverters({ destination, tripId, services, international = 
           onClick={() => setOpenCur(true)}
         >
           <Coins className="h-4 w-4 text-primary" />
-          <span className="text-[11px] font-medium leading-tight text-center">Moeda</span>
+          <span className="text-[11px] font-medium leading-tight text-center">{t("convMoeda")}</span>
         </Button>}
         {buttons.includes("measure") && <Button
           type="button"
@@ -302,7 +313,7 @@ export function TripConverters({ destination, tripId, services, international = 
           onClick={() => setOpenMeasure(true)}
         >
           <Ruler className="h-4 w-4 text-primary" />
-          <span className="text-[11px] font-medium leading-tight text-center">Medidas</span>
+          <span className="text-[11px] font-medium leading-tight text-center">{t("convMedidas")}</span>
         </Button>}
         {buttons.includes("tip") && <Button
           type="button"
@@ -312,7 +323,7 @@ export function TripConverters({ destination, tripId, services, international = 
           onClick={() => setOpenTip(true)}
         >
           <Receipt className="h-4 w-4 text-primary" />
-          <span className="text-[11px] font-medium leading-tight text-center">Gorjetas</span>
+          <span className="text-[11px] font-medium leading-tight text-center">{t("convGorjetas")}</span>
         </Button>}
         {buttons.includes("checklist") && (
           <Button
@@ -323,7 +334,7 @@ export function TripConverters({ destination, tripId, services, international = 
             onClick={() => setOpenChecklist(true)}
           >
             <ListChecks className="h-4 w-4 text-primary" />
-            <span className="text-[11px] font-medium leading-tight text-center">Checklist</span>
+            <span className="text-[11px] font-medium leading-tight text-center">{t("convChecklist")}</span>
           </Button>
         )}
         {buttons.includes("budget") && (
@@ -335,11 +346,11 @@ export function TripConverters({ destination, tripId, services, international = 
             onClick={() => setOpenBudget(true)}
           >
             <Wallet className="h-4 w-4 text-primary" />
-            <span className="text-[11px] font-medium leading-tight text-center">Orçamento</span>
+            <span className="text-[11px] font-medium leading-tight text-center">{t("convOrcamento")}</span>
           </Button>
         )}
       </div>
-      {international && <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} />}
+      {international && <CurrencyConverterDialog destination={destination} open={openCur} onOpenChange={setOpenCur} locale={locale} />}
       {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />}
       {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />}
       {tripId && (
