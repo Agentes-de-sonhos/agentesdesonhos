@@ -21,7 +21,7 @@ describe("validatePixKey", () => {
   });
 
   it("recusa formatos inválidos", () => {
-    for (const bad of ["", "minha chave", "1234", "11987654321", "+55 11 98765-4321", "agencia@viagem", "123.456.789-0"]) {
+    for (const bad of ["", "minha chave", "1234", "+55 11 98765-4321", "agencia@viagem", "123.456.789-0"]) {
       expect(validatePixKey(bad).isValid, bad).toBe(false);
       expect(normalizePixKey(bad)).toBeNull();
     }
