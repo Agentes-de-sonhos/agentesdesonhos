@@ -19,6 +19,8 @@ import { useQuotes } from "@/hooks/useQuotes";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { normalizePixKey, PIX_KEY_INVALID_MESSAGE } from "@/lib/pixBrCode";
+
 
 interface Props {
   open: boolean;
@@ -49,6 +51,8 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
     { category: "outros", description: "", fare: 0, taxes: 0, discount: 0, commission: 0, rav: 0 },
   ]);
   const [installments, setInstallments] = useState<Array<{ label: string; amount: number; due_date: string }>>([]);
+  const [pixError, setPixError] = useState<string | null>(null);
+
 
   const totals = useMemo(() => computeInvoiceTotals(services), [services]);
 
@@ -138,6 +142,18 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
       toast({ title: "Adicione ao menos um serviço", variant: "destructive" });
       return;
     }
+    const rawPix = meta.pix_key.trim();
+    let normalizedPix: string | null = null;
+    if (rawPix) {
+      normalizedPix = normalizePixKey(rawPix);
+      if (!normalizedPix) {
+        setPixError(PIX_KEY_INVALID_MESSAGE);
+        toast({ title: PIX_KEY_INVALID_MESSAGE, variant: "destructive" });
+        return;
+      }
+      setPixError(null);
+      if (normalizedPix !== meta.pix_key) setMeta(m => ({ ...m, pix_key: normalizedPix! }));
+    }
     const input: CreateInvoiceInput = {
       ...client,
       destination: trip.destination || null,
@@ -146,7 +162,8 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
       issue_date: meta.issue_date,
       due_date: meta.due_date || null,
       notes: meta.notes || null,
-      pix_key: meta.pix_key || null,
+      pix_key: normalizedPix,
+
       status: "draft",
       services,
       installments: installments.length ? installments : undefined,
@@ -376,8 +393,20 @@ export function InvoiceFormDialog({ open, onOpenChange }: Props) {
               </div>
               <div className="col-span-2">
                 <Label>Chave PIX (opcional)</Label>
-                <Input value={meta.pix_key} onChange={e => setMeta({ ...meta, pix_key: e.target.value })} />
+                <Input
+                  value={meta.pix_key}
+                  onChange={e => { setMeta({ ...meta, pix_key: e.target.value }); setPixError(null); }}
+                  aria-invalid={!!pixError}
+                />
+                {pixError ? (
+                  <p className="text-xs text-destructive mt-1">{pixError}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    CPF/CNPJ com ou sem pontuação, telefone com +55, e-mail ou chave aleatória.
+                  </p>
+                )}
               </div>
+
               <div className="col-span-2">
                 <Label>Observações</Label>
                 <Textarea rows={4} value={meta.notes} onChange={e => setMeta({ ...meta, notes: e.target.value })} />
