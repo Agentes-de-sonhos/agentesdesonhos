@@ -924,36 +924,37 @@ function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR
 
 function renderCruiseBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
+  const t = tWallet(locale);
   const head = renderServiceHeadline({
     title: data.ship_name,
-    dates: `${fmtDate(data.start_date)} - ${fmtDate(data.end_date)}`,
+    dates: `${fmtDate(data.start_date, locale)} - ${fmtDate(data.end_date, locale)}`,
     lines: [
-      data.cruise_company ? `Companhia: ${data.cruise_company}` : "",
-      `Roteiro: ${data.route || ''}`,
-      data.embarkation_port ? `Embarque: ${data.embarkation_port}` : "",
-      data.disembarkation_port ? `Desembarque: ${data.disembarkation_port}` : "",
-      data.cabin_type ? `Cabine: ${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}` : "",
-      data.deck ? `Deck: ${data.deck}` : "",
+      data.cruise_company ? `${t("fldCompanhia")}: ${data.cruise_company}` : "",
+      `${t("fldRoteiro")}: ${data.route || ''}`,
+      data.embarkation_port ? `${t("fldEmbarque")}: ${data.embarkation_port}` : "",
+      data.disembarkation_port ? `${t("fldDesembarque")}: ${data.disembarkation_port}` : "",
+      data.cabin_type ? `${t("fldCabine")}: ${data.cabin_type}${data.cabin_number ? ` #${data.cabin_number}` : ''}` : "",
+      data.deck ? `${t("fldDeck")}: ${data.deck}` : "",
     ],
   });
 
   const itinerary = data.itinerary?.length > 0
-    ? miniCard("🗺 Roteiro", data.itinerary.map((stop: any) => `<p style="${TXT}border-left:2px solid rgba(15,118,110,0.25);padding-left:6px;"><strong>${escapeHtml(stop.date ? `${stop.date} – ` : '')}${escapeHtml(stop.port || '')}</strong>${stop.stop_type === 'navegacao' ? ' (Navegação)' : ''}${stop.arrival_time ? ` ${escapeHtml(stop.arrival_time)}` : ''}${stop.departure_time ? ` – ${escapeHtml(stop.departure_time)}` : ''}</p>`))
+    ? miniCard(t("sectionRoteiro"), data.itinerary.map((stop: any) => `<p style="${TXT}border-left:2px solid rgba(15,118,110,0.25);padding-left:6px;"><strong>${escapeHtml(stop.date ? `${stop.date} – ` : '')}${escapeHtml(stop.port || '')}</strong>${stop.stop_type === 'navegacao' ? ` (${t("stopNavegacao")})` : ''}${stop.arrival_time ? ` ${escapeHtml(stop.arrival_time)}` : ''}${stop.departure_time ? ` – ${escapeHtml(stop.departure_time)}` : ''}</p>`))
     : "";
 
   const boarding = (data.boarding_terminal || data.recommended_arrival || data.required_documents || data.boarding_notes)
-    ? miniCard("⚠️ Orientações de Embarque", [
-        p("Terminal", data.boarding_terminal),
-        p("Chegada", data.recommended_arrival),
-        p("Documentos", data.required_documents),
-        p("Bagagem", data.baggage_policy),
-        p("Dress Code", data.dress_code),
+    ? miniCard(t("sectionOrientacoesEmbarque"), [
+        p(t("fldTerminal"), data.boarding_terminal),
+        p(t("fldChegada"), data.recommended_arrival),
+        p(t("fldDocumentos"), data.required_documents),
+        p(t("fldBagagem"), data.baggage_policy),
+        p(t("fldDressCodeTitle"), data.dress_code),
         data.boarding_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>` : "",
       ])
     : "";
 
   const passengers = data.passengers?.length > 0
-    ? miniCard("👤 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}</p>`))
+    ? miniCard(t("sectionPassageirosPerson"), data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}</p>`))
     : "";
 
   return head + itinerary + boarding + passengers;
@@ -961,26 +962,28 @@ function renderCruiseBody(service: TripService, locale: PublicLocale = "pt-BR"):
 
 function renderTrainBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
+  const t = tWallet(locale);
   const time = data.departure_time && data.arrival_time ? `${data.departure_time} → ${data.arrival_time}` : '';
   const head = renderServiceHeadline({
     title: `🚆 ${data.origin_city || ''} → ${data.destination_city || ''}`,
-    dates: data.travel_date ? `${fmtDate(data.travel_date)}${time ? ` • ${time}` : ''}` : "",
+    dates: data.travel_date ? `${fmtDate(data.travel_date, locale)}${time ? ` • ${time}` : ''}` : "",
     lines: [
-      data.train_company ? `${data.train_company}${data.train_number ? ` • Trem ${data.train_number}` : ''}` : "",
-      data.travel_class ? `Classe: ${data.travel_class}` : "",
-      (data.coach || data.seat) ? `${data.coach ? `Vagão ${data.coach}` : ''}${data.seat ? ` • Assento ${data.seat}` : ''}` : "",
-      data.origin_station ? `Embarque: ${data.origin_station}` : "",
-      data.destination_station ? `Desembarque: ${data.destination_station}` : "",
+      data.train_company ? `${data.train_company}${data.train_number ? ` • ${t("fldTrem")} ${data.train_number}` : ''}` : "",
+      data.travel_class ? `${t("fldClasse")}: ${data.travel_class}` : "",
+      (data.coach || data.seat) ? `${data.coach ? `${t("fldVagao")} ${data.coach}` : ''}${data.seat ? ` • ${t("fldAssento")} ${data.seat}` : ''}` : "",
+      data.origin_station ? `${t("fldEmbarque")}: ${data.origin_station}` : "",
+      data.destination_station ? `${t("fldDesembarque")}: ${data.destination_station}` : "",
     ],
   });
   const passengers = data.passengers?.length > 0
-    ? miniCard("👤 Passageiros", data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}</p>`))
+    ? miniCard(t("sectionPassageirosPerson"), data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}</p>`))
     : "";
   const notes = data.boarding_notes
-    ? miniCard("📋 Orientações", [`<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>`])
+    ? miniCard(t("sectionOrientacoesClipboard"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>`])
     : "";
   return head + passengers + notes;
 }
+
 
 function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
