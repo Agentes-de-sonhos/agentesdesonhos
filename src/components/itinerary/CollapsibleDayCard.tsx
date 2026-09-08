@@ -1,10 +1,10 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
   Calendar, ChevronDown, MapPin, Clock, DollarSign, Sun, Sunset, Moon,
   FileText, Download, Eye, ExternalLink, ArrowRight,
 } from "lucide-react";
-import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
+import { parseLocalDate } from "@/lib/dateParsing";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import { itineraryTranslator, periodLabel, formatPublicItineraryDayHeader, activitiesCountLabel } from "@/i18n/publicMaterials/itinerary";
 import type { ItineraryDay } from "@/types/itinerary";
 import { weatherIconFor } from "@/components/trip/TripCalendar";
 import type { DayWeather } from "@/hooks/useTripWeather";
@@ -14,7 +14,6 @@ import { SERVICE_CHIP_LABELS, SERVICE_ICONS } from "@/lib/tripServiceLabels";
 import { sanitizedDescriptionHtml } from "@/lib/richDescription";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon } as const;
-const periodLabels = { manha: "Manhã", tarde: "Tarde", noite: "Noite" } as const;
 
 export function getFileName(url: string) {
   try { return decodeURIComponent(url.split("/").pop()?.split("?")[0] || "arquivo"); }
@@ -74,7 +73,7 @@ export function ActivityImage({
  */
 export function CollapsibleDayCard({
   day, periodImages, isOpen, onToggle, weather, destination,
-  servicesById, onOpenService,
+  servicesById, onOpenService, locale = "pt-BR",
 }: {
   day: ItineraryDay;
   periodImages: Record<string, string>;
@@ -82,6 +81,8 @@ export function CollapsibleDayCard({
   onToggle: () => void;
   weather?: DayWeather;
   destination?: string;
+  /** Locale dos materiais públicos (roteiro/carteira). Default pt-BR preserva usos internos. */
+  locale?: PublicLocale;
   /**
    * Optional map of `trip_services.id → TripService`. When provided, activities
    * whose `linkedTripServiceId` resolves to one of these services render a
@@ -90,7 +91,8 @@ export function CollapsibleDayCard({
   servicesById?: Map<string, TripService>;
   onOpenService?: (service: TripService) => void;
 }) {
-  const dateFormatted = formatItineraryDayHeader(parseLocalDate(day.date));
+  const t = itineraryTranslator(locale);
+  const dateFormatted = formatPublicItineraryDayHeader(parseLocalDate(day.date), locale);
   const WxIcon = weather ? weatherIconFor(weather.code) : null;
   const totalActivities = day.activities.length;
 
@@ -115,12 +117,12 @@ export function CollapsibleDayCard({
           </div>
           <div className="flex flex-col items-start gap-0.5 min-w-0 flex-1">
             <span className="text-[13px] font-bold tracking-tight text-primary uppercase">
-              Dia {day.dayNumber}
+              {t("pdfDayLabel", { number: day.dayNumber })}
             </span>
             <span className="text-xs text-muted-foreground font-medium truncate w-full">
               {dateFormatted}
               {!isOpen && totalActivities > 0 && (
-                <span className="text-muted-foreground/60"> · {totalActivities} {totalActivities === 1 ? "atividade" : "atividades"}</span>
+                <span className="text-muted-foreground/60"> · {activitiesCountLabel(locale, totalActivities)}</span>
               )}
             </span>
           </div>
@@ -161,14 +163,14 @@ export function CollapsibleDayCard({
                     <Icon className="h-3.5 w-3.5 text-primary" strokeWidth={2.4} />
                   </div>
                   <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
-                    {periodLabels[period]}
+                    {periodLabel(locale, period)}
                   </span>
                   <div className="h-px flex-1 bg-border/50" />
                 </div>
 
                 {periodImage && (
                   <div className="mb-4 rounded-xl overflow-hidden border border-border/40">
-                    <img src={periodImage} alt={periodLabels[period]} className="w-full h-40 sm:h-48 object-cover" />
+                    <img src={periodImage} alt={periodLabel(locale, period)} className="w-full h-40 sm:h-48 object-cover" />
                   </div>
                 )}
 
@@ -204,7 +206,7 @@ export function CollapsibleDayCard({
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
-                                title="Abrir no Google Maps"
+                                title={t("mapsTitle")}
                               >
                                 <MapPin className="h-3 w-3" /> {activity.location}
                               </a>
@@ -249,7 +251,7 @@ export function CollapsibleDayCard({
                         {(activity as any).documentUrls?.length > 0 && (
                           <div className="space-y-1.5 pt-1">
                             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex items-center gap-1">
-                              <FileText className="h-3 w-3" /> Documentos
+                              <FileText className="h-3 w-3" /> {t("documentsLabel")}
                             </p>
                             <div className="space-y-1">
                               {(activity as any).documentUrls.map((url: string, i: number) => {

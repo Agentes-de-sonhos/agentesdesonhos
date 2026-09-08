@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams, Link } from "react-router-dom";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { Itinerary, ItineraryDay, Activity } from "@/types/itinerary";
@@ -26,16 +24,25 @@ import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import {
   isPricingContentEmpty,
   sanitizePricingContent,
-  PRICING_SECTION_TITLE,
 } from "@/lib/pricingSection";
-
-const tripTypeLabels: Record<string, string> = {
-  familia: "Viagem em Família", casal: "Viagem de Casal",
-  lua_de_mel: "Lua de Mel", sozinho: "Viagem Solo", corporativo: "Viagem Corporativa",
+import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
+const BUDGET_STARS: Record<string, string> = {
+  economico: " ⭐⭐⭐",
+  conforto: " ⭐⭐⭐⭐",
+  luxo: " ⭐⭐⭐⭐⭐",
 };
-const budgetLabels: Record<string, string> = {
-  economico: "Econômico ⭐⭐⭐", conforto: "Conforto ⭐⭐⭐⭐", luxo: "Luxo ⭐⭐⭐⭐⭐",
-};
+import {
+  itineraryTranslator,
+  tripTypeLabel,
+  budgetLabel,
+  passengerInterestLabel,
+  daysCountLabel,
+  travelersCountLabel,
+  activitiesCountLabel,
+  formatPublicHeroDateRange,
+  formatPublicDayStripParts,
+  formatPublicItineraryDayHeader,
+} from "@/i18n/publicMaterials/itinerary";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -127,7 +134,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
       const itineraryData = result?.itinerary;
 
       if (itineraryError || result?.error || !itineraryData) {
-        setError("Roteiro não encontrado ou não está público");
+        setError(itineraryTranslator(null)("notFoundGenericMessage"));
         setIsLoading(false);
         return;
       }
@@ -209,7 +216,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
       setItinerary(mappedItinerary);
     } catch (err) {
       console.error("Error loading itinerary:", err);
-      setError("Erro ao carregar roteiro");
+      setError(itineraryTranslator(null)("loadErrorMessage"));
     } finally {
       setIsLoading(false);
     }
@@ -224,17 +231,22 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   }
 
   if (error || !itinerary) {
+    // Locale da agência ainda não foi carregado neste estado (sem itinerário
+    // resolvido) — usa o fallback pt-BR do próprio tradutor.
+    const tErr = itineraryTranslator(null);
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-4">
-        <h1 className="text-2xl font-bold text-foreground">Roteiro não encontrado</h1>
-        <p className="text-muted-foreground">{error || "O link pode estar incorreto ou o roteiro não está mais disponível."}</p>
+        <h1 className="text-2xl font-bold text-foreground">{tErr("notFoundTitle")}</h1>
+        <p className="text-muted-foreground">{error || tErr("notFoundGenericMessage")}</p>
         <Button asChild>
-          <Link to="/">Ir para o início</Link>
+          <Link to="/">{tErr("backHome")}</Link>
         </Button>
       </div>
     );
   }
 
+  const locale = resolvePublicLocale(agentProfile as any);
+  const t = itineraryTranslator(locale);
   const sig = resolveSignatureContact((itinerary as any).signature_snapshot, agentProfile as any);
   /**
    * Logotipos sempre atuais: a foto do consultor e o logotipo da agência vêm
@@ -263,10 +275,10 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Roteiro de Viagem
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> {t("headerBadge")}
           </span>
           <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85 truncate max-w-[55%] text-right">
-            {agentProfile?.agency_name || "Sua viagem"}
+            {agentProfile?.agency_name || t("defaultAgencyName")}
           </BrandText>
         </div>
       </header>
@@ -291,7 +303,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               <div className="absolute top-4 right-4 sm:top-5 sm:right-5 z-10 h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-full bg-white p-1.5 shadow-lg ring-1 ring-black/5 flex items-center justify-center">
                 <img
                   src={agentProfile.agency_logo_url}
-                  alt={agentProfile.agency_name || "Agência"}
+                  alt={agentProfile.agency_name || t("defaultAgencyName")}
                   translate="no"
                   className="h-full w-full object-contain"
                 />
@@ -308,24 +320,24 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               <p className="mt-1.5 text-[13px] sm:text-base font-light text-white/90 leading-snug max-w-2xl">
                 {itinerary.headline?.trim()
                   ? itinerary.headline
-                  : `${itinerary.days.length} ${itinerary.days.length === 1 ? "dia" : "dias"} para viver ${itinerary.destination} de um jeito único.`}
+                  : t("headlineFallback", { count: itinerary.days.length, days: daysCountLabel(locale, itinerary.days.length).replace(/^\d+\s*/, ""), destination: itinerary.destination })}
               </p>
 
               <div className="mt-3 flex flex-wrap gap-1.5">
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
                   <Calendar className="h-3 w-3 opacity-80" />
-                  {format(tripStart, "dd 'de' MMM", { locale: ptBR })} – {format(tripEnd, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
+                  {formatPublicHeroDateRange(tripStart, tripEnd, locale)}
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
                   <Users className="h-3 w-3 opacity-80" />
-                  {itinerary.travelersCount} viajante{itinerary.travelersCount > 1 ? "s" : ""}
+                  {travelersCountLabel(locale, itinerary.travelersCount)}
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium capitalize">
-                  {tripTypeLabels[itinerary.tripType] || itinerary.tripType.replace("_", " ")}
+                  {tripTypeLabel(locale, itinerary.tripType)}
                 </div>
                 {itinerary.budgetLevel && (
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[11px] sm:text-xs font-medium">
-                    {budgetLabels[itinerary.budgetLevel] || itinerary.budgetLevel}
+                    {budgetLabel(locale, itinerary.budgetLevel)}{BUDGET_STARS[itinerary.budgetLevel] || ""}
                   </div>
                 )}
               </div>
@@ -343,19 +355,19 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             <button
               type="button"
               onClick={() => setFontScale("sm")}
-              aria-label="Diminuir fonte"
+              aria-label={t("fontDecreaseAria")}
               className={`h-7 w-7 rounded-full text-[12px] font-semibold transition ${fontScale === "sm" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
             >A-</button>
             <button
               type="button"
               onClick={() => setFontScale("md")}
-              aria-label="Fonte padrão"
+              aria-label={t("fontDefaultAria")}
               className={`h-7 w-7 rounded-full text-[13px] font-semibold transition ${fontScale === "md" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
             >A</button>
             <button
               type="button"
               onClick={() => setFontScale("lg")}
-              aria-label="Aumentar fonte"
+              aria-label={t("fontIncreaseAria")}
               className={`h-7 w-7 rounded-full text-[14px] font-semibold transition ${fontScale === "lg" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
             >A+</button>
           </div>
@@ -392,15 +404,15 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         {itinerary.passengers && itinerary.passengers.length > 0 && (
           <section className="rounded-2xl border border-border/50 bg-card p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <p className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-primary mb-3 flex items-center gap-1.5">
-              <Users className="h-3 w-3" /> Passageiros
+              <Users className="h-3 w-3" /> {t("passengersTitle")}
             </p>
             <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-3">
               {itinerary.passengers.map((p, i) => {
                 const age = p.age;
                 const isChild = typeof age === "number" && age < 18;
                 const profile = isChild
-                  ? age <= 2 ? "Bebê" : `Criança (${age} anos)`
-                  : "Adulto";
+                  ? age <= 2 ? t("babyLabel") : t("childLabel", { age })
+                  : t("adultLabel");
                 const initials = (p.name || "?").split(" ").filter(Boolean).slice(0, 2).map((s) => s.charAt(0).toUpperCase()).join("") || "?";
                 const palette = [
                   "from-sky-400 to-sky-600",
@@ -416,7 +428,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                       {initials}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[13px] font-semibold text-foreground leading-tight truncate">{p.name || "Passageiro"}</p>
+                      <p className="text-[13px] font-semibold text-foreground leading-tight truncate">{p.name || t("passengerFallbackName")}</p>
                       <p className="text-[10.5px] text-muted-foreground leading-tight">{profile}</p>
                     </div>
                   </li>
@@ -427,7 +439,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               <div className="mt-4 pt-4 border-t border-border/40 flex flex-wrap gap-1.5">
                 {itinerary.passengerInterests.map((k) => (
                   <Badge key={k} variant="secondary" className="rounded-full font-normal text-[11px]">
-                    {PASSENGER_INTEREST_LABELS[k as keyof typeof PASSENGER_INTEREST_LABELS] || k}
+                    {passengerInterestLabel(locale, k, PASSENGER_INTEREST_LABELS[k as keyof typeof PASSENGER_INTEREST_LABELS] || k)}
                   </Badge>
                 ))}
               </div>
@@ -451,7 +463,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         {itinerary.days.length > 0 && (
           <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
             <p className="text-center text-[10.5px] font-bold uppercase tracking-[0.22em] text-primary mb-3">
-              Calendário da Viagem
+              {t("calendarSectionTitle")}
             </p>
             <div className="relative">
               <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide -mx-1 px-1">
@@ -476,13 +488,13 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                         }`}
                       >
                         <span className={`text-[9.5px] font-bold uppercase tracking-widest ${isOpen ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                          {format(d, "EEE", { locale: ptBR }).slice(0, 3)}
+                          {formatPublicDayStripParts(d, locale).weekday}
                         </span>
                         <span className={`text-xl sm:text-2xl font-extrabold tabular-nums leading-none mt-1 ${isOpen ? "" : "text-foreground"}`}>
-                          {format(d, "dd")}
+                          {formatPublicDayStripParts(d, locale).day}
                         </span>
                         <span className={`text-[9.5px] font-bold uppercase tracking-widest mt-1 ${isOpen ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                          {format(d, "MMM", { locale: ptBR }).replace(".", "")}
+                          {formatPublicDayStripParts(d, locale).month}
                         </span>
                         <span className={`mt-1.5 h-1 w-1 rounded-full ${isOpen ? "bg-white" : "bg-primary"}`} />
                         {WxIcon && !isOpen && (
@@ -502,7 +514,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
           <section className="space-y-5">
             <div className="flex items-center gap-3">
               <div className="h-px flex-1 bg-border/60" />
-              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Dia a Dia</h2>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{t("dayByDayTitle")}</h2>
               <div className="h-px flex-1 bg-border/60" />
             </div>
             <div className="space-y-3">
@@ -523,6 +535,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                   }}
                   weather={weatherByDate?.[day.date]}
                   destination={itinerary.destination}
+                  locale={locale}
                 />
               ))}
             </div>
@@ -547,7 +560,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 <DollarSign className="h-4 w-4 text-primary" />
               </div>
               <h2 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
-                {PRICING_SECTION_TITLE}
+                {t("pricingSectionTitle")}
               </h2>
             </div>
             <div
@@ -572,10 +585,10 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm sm:text-base font-bold text-foreground leading-tight">
-                  Precisa de ajuda?
+                  {t("helpTitle")}
                 </p>
                 <p className="text-[12px] sm:text-[13px] text-muted-foreground leading-snug truncate">
-                  Fale com seu consultor de viagens.
+                  {t("helpSubtitle")}
                 </p>
               </div>
 
@@ -583,7 +596,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 type="button"
                 onClick={() => setAgentOpen((v) => !v)}
                 className="shrink-0 h-9 w-9 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors"
-                aria-label="Ver consultor"
+                aria-label={t("helpAria")}
               >
                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-300 ${agentOpen ? "rotate-180" : ""}`} />
               </button>
@@ -605,7 +618,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                     aria-label="Falar no WhatsApp"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
                     <WhatsAppIcon className="h-4 w-4" />
-                    Falar no WhatsApp
+                    {t("whatsappCta")}
                   </a>
                 )}
               </div>

@@ -44,6 +44,7 @@ import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
+import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -934,7 +935,7 @@ export default function GerarOrcamento() {
     if (!quote) return;
     if (blockForFareReview()) return;
     if (blockForFareSync()) return;
-    await generateQuotePDF(quote, agentProfile);
+    await generateQuotePDF(quote, agentProfile, resolvePublicLocale(agentProfile));
   };
 
   const handlePublish = async () => {

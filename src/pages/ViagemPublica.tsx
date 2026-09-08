@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext, us
 import { BrandText } from "@/components/ui/brand-text";
 import { useParams, useLocation } from "react-router-dom";
 import { format, addDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
   Wallet, MapPin, Calendar, FileText, Loader2, Lock, Plane, Hotel, Car, Bus,
   Ticket, Shield, Ship, TrainFront, Download, ExternalLink, MessageSquare,
@@ -57,6 +56,8 @@ import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { resolvePublicLocale, formatPublicShortDate, formatPublicDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the
@@ -70,6 +71,7 @@ function TripCoverHero({
   endDate,
   days,
   coverUrl,
+  locale = "pt-BR",
 }: {
   title: string;
   destination: string;
@@ -77,6 +79,7 @@ function TripCoverHero({
   endDate: Date;
   days: number;
   coverUrl?: string | null;
+  locale?: PublicLocale;
 }) {
   // A capa pode ser uma URL do Storage, uma referência `gplace://` ou uma URL
   // legada do Google — resolvemos antes de exibir e caímos para a foto
@@ -110,12 +113,12 @@ function TripCoverHero({
           <span className="inline-flex items-center gap-1.5">
             <Calendar className="h-4 w-4 shrink-0 opacity-90" />
             <span>
-              {format(startDate, "dd/MM", { locale: ptBR })} - {format(endDate, "dd/MM/yyyy", { locale: ptBR })}
+              {formatPublicShortDate(startDate, locale)} - {formatPublicShortDate(endDate, locale)}
             </span>
           </span>
           <span className="inline-flex items-center gap-1.5">
             <CalendarDays className="h-4 w-4 shrink-0 opacity-90" />
-            <span>{days} dias</span>
+            <span>{days} {pluralize(locale, days, { one: tWallet(locale)("daysLabelOne"), other: tWallet(locale)("daysLabelOther") })}</span>
           </span>
         </div>
       </div>
@@ -439,7 +442,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 );
 
 function formatDate(dateStr: string) {
-  try { const [y,m,d] = dateStr.split('-').map(Number); return format(new Date(y, m-1, d), "dd/MM/yyyy", { locale: ptBR }); }
+  try { return formatPublicShortDate(dateStr, "pt-BR") || dateStr; }
   catch { return dateStr; }
 }
 
@@ -618,7 +621,7 @@ function PasswordGate({ onUnlock }: { onUnlock: (password: string) => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password.trim()) { setError("Digite a senha"); return; }
+    if (!password.trim()) { setError(tWallet("pt-BR")("walletSubtitle")); return; }
     setError("");
     setLoading(true);
     onUnlock(password);
@@ -632,9 +635,9 @@ function PasswordGate({ onUnlock }: { onUnlock: (password: string) => void }) {
             <Lock className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
+            <h1 className="text-xl font-bold mb-1">{tWallet("pt-BR")("walletTitle")}</h1>
             <p className="text-sm text-muted-foreground">
-              Digite a senha fornecida pela sua agência
+              {tWallet("pt-BR")("walletSubtitle")}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -642,14 +645,14 @@ function PasswordGate({ onUnlock }: { onUnlock: (password: string) => void }) {
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(""); }}
-              placeholder="Senha de acesso"
+              placeholder={tWallet("pt-BR")("passwordPlaceholder")}
               className="text-center text-lg tracking-widest"
               autoFocus
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-              Acessar Carteira
+              {tWallet("pt-BR")("accessButton")}
             </Button>
           </form>
         </CardContent>
@@ -1723,6 +1726,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   const [authenticated, setAuthenticated] = useState(hasPreData);
   const [tripData, setTripData] = useState<Trip | null>(preLoadedTrip || preAuth?.tripData || null);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(preLoadedAgent ?? preAuth?.agentProfile ?? null);
+  const publicLocale = resolvePublicLocale(agentProfile);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const itineraryRef = useRef<HTMLDivElement | null>(null);
   const dayRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -1947,8 +1951,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
-            <h1 className="text-xl font-bold mb-2">Link inválido</h1>
-            <p className="text-muted-foreground">Verifique o link com a sua agência.</p>
+            <h1 className="text-xl font-bold mb-2">{tWallet(publicLocale)("invalidLink")}</h1>
+            <p className="text-muted-foreground">{tWallet(publicLocale)("invalidLinkDesc")}</p>
           </CardContent>
         </Card>
       </div>
@@ -1957,6 +1961,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
   if (!authenticated) {
     const brand = gateBranding;
+    const gateLocale = resolvePublicLocale(brand);
+    const tg = tWallet(gateLocale);
     const whatsappNumber = brand?.phone?.replace(/\D/g, "") || "";
     const whatsappUrl = whatsappNumber
       ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}?text=${encodeURIComponent("Olá! Preciso de ajuda para acessar minha Carteira de Viagem.")}`
@@ -1972,7 +1978,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             <div className="flex justify-center">
               <img
                 src={brand.agency_logo_url}
-                alt={brand.agency_name || "Agência"}
+                alt={brand.agency_name || tg("fldAgencia")}
                 className="h-24 sm:h-28 w-auto object-contain"
               />
             </div>
@@ -1985,30 +1991,30 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 <Lock className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
+                <h1 className="text-xl font-bold mb-1">{tg("walletTitle")}</h1>
                 <p className="text-sm text-muted-foreground">
                   {gateLocked
-                    ? "Acesso bloqueado por segurança."
-                    : "Digite a senha fornecida pela sua agência"}
+                    ? tg("lockedMessage")
+                    : tg("walletSubtitle")}
                 </p>
               </div>
               {gateLocked ? (
                 <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-                  Por segurança, este acesso foi bloqueado após 3 tentativas. Entre em contato com sua agência para liberar novamente.
+                  {tg("lockedNotice")}
                 </div>
               ) : (
                 <form onSubmit={(e) => { e.preventDefault(); handleUnlock((e.target as any).password.value); }} className="space-y-4">
                   <Input
                     name="password"
                     type="password"
-                    placeholder="Senha de acesso"
+                    placeholder={tg("passwordPlaceholder")}
                     className="text-center text-lg tracking-widest"
                     autoFocus
                   />
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                    Acessar Carteira
+                    {tg("accessButton")}
                   </Button>
                 </form>
               )}
@@ -2020,7 +2026,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
               <div className="bg-gradient-to-r from-muted/50 to-muted/20 px-6 py-3">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground text-center">
-                  Precisa de ajuda?
+                  {tg("needHelp")}
                 </p>
               </div>
               <div className="p-6">
@@ -2040,7 +2046,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
                       className="inline-flex items-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-7 py-3 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
                       <WhatsAppIcon className="h-5 w-5" />
-                      Falar no WhatsApp
+                      {tg("pdfTalkOnWhatsApp").replace("💬 ", "")}
                     </a>
                   )}
                 </div>
@@ -2183,7 +2189,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={6} className="min-w-[10rem]">
                   <DropdownMenuItem
-                    onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}
+                    onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword }, publicLocale)}
                     className="cursor-pointer"
                   >
                     <FileText className="mr-2 h-4 w-4" />
@@ -2198,7 +2204,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword })}>
+              <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword }, publicLocale)}>
                 <FileText className="mr-2 h-4 w-4" /> Baixar PDF
               </Button>
             )}
@@ -2233,6 +2239,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
             endDate={endDate}
             days={days}
             coverUrl={(tripData as any).wallet_cover_url || null}
+            locale={publicLocale}
           />
         </div>
         {/* Trip Overview + Calendar (side-by-side on desktop) */}

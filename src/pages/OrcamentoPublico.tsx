@@ -7,6 +7,8 @@ import { PublicSectionAccordion } from "@/components/quote/PublicSectionAccordio
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,18 +58,13 @@ import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 
-const SERVICE_LABELS: Record<ServiceType, string> = {
-  flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
-  transfer: "Transfer", attraction: "Ingressos/Atrações", insurance: "Seguro Viagem",
-  cruise: "Cruzeiro", rail_transport: "Transporte Ferroviário", circuit: "Circuitos", other: "Outros Serviços",
-};
-
 function getServiceLabel(service: QuoteService): string {
   if (service.service_type === "other") {
     const customTitle = (service.service_data as any)?.custom_title?.trim();
     if (customTitle) return customTitle;
   }
-  return SERVICE_LABELS[service.service_type as ServiceType] || "Serviço";
+  const key = `svc_${service.service_type}` as any;
+  return t(key) || t("svc_default");
 }
 
 const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
@@ -93,6 +90,10 @@ const SERVICE_COLORS: Record<ServiceType, string> = {
 };
 
 let quoteCurrency: QuoteCurrency = 'BRL';
+// Locale dos materiais públicos (definido pela agência); módulo-level seguindo
+// o mesmo padrão já usado por `quoteCurrency` acima.
+let publicLocale: PublicLocale = DEFAULT_PUBLIC_LOCALE;
+const t = (key: Parameters<ReturnType<typeof translateQuote>>[0], vars?: Record<string, string | number>) => translateQuote(publicLocale)(key, vars);
 
 function formatCurrency(value: number, currency?: QuoteCurrency) {
   return formatQuoteCurrency(value, currency ?? quoteCurrency);
@@ -109,11 +110,11 @@ function parseLocalDate(dateStr: string) {
 }
 
 function formatDate(dateStr: string) {
-  try { return format(parseLocalDate(dateStr), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return dateStr; }
+  try { return formatPublicLongDate(dateStr, publicLocale) || dateStr; } catch { return dateStr; }
 }
 
 function formatDateShort(dateStr: string) {
-  try { return format(parseLocalDate(dateStr), "dd/MM/yyyy", { locale: ptBR }); } catch { return dateStr; }
+  try { return formatPublicShortDate(dateStr, publicLocale) || dateStr; } catch { return dateStr; }
 }
 
 function getServiceSummary(service: QuoteService): string {
@@ -121,20 +122,20 @@ function getServiceSummary(service: QuoteService): string {
   switch (service.service_type) {
     case "flight": return `${data.airline} | ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return `${data.hotel_name} — ${data.city}`;
-    case "car_rental": return `${data.car_type} | ${data.days} diária(s)`;
-    case "transfer": return `${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"} — ${data.location}`;
+    case "car_rental": return `${data.car_type} | ${data.days} ${pluralize(publicLocale, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`;
+    case "transfer": return `${data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")} — ${data.location}`;
     case "attraction": return [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name;
     case "insurance": return data.provider;
     case "cruise": return `${data.ship_name} — ${data.route}`;
     case "rail_transport": return `${data.origin_city || ""} → ${data.destination_city || ""}`;
-    case "circuit": return data.circuit_name || "Circuito";
+    case "circuit": return data.circuit_name || t("svc_circuit");
     case "other": {
       // Para evitar duplicação, mostra empresa OU primeira linha da descrição (curta)
       if (data.company_name) return data.company_name;
       const firstLine = (data.description || "").split("\n")[0].trim();
-      return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : (firstLine || "Outros Serviços");
+      return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : (firstLine || t("svc_other"));
     }
-    default: return "Serviço";
+    default: return t("svc_default");
   }
 }
 
@@ -149,9 +150,9 @@ function getServiceName(service: QuoteService): string {
     case "insurance": return data.provider;
     case "cruise": return data.ship_name;
     case "rail_transport": return `${data.origin_city || ""} → ${data.destination_city || ""}`.trim();
-    case "circuit": return data.circuit_name || "Circuito";
-    case "other": return data.company_name || "Outros Serviços";
-    default: return "Serviço";
+    case "circuit": return data.circuit_name || t("svc_circuit");
+    case "other": return data.company_name || t("svc_other");
+    default: return t("svc_default");
   }
 }
 
@@ -1342,12 +1343,14 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     );
   }
 
+  publicLocale = resolvePublicLocale(agentProfile);
+
   if (!quote) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Orçamento não encontrado</h1>
-          <p className="text-muted-foreground">Este link pode ter expirado ou não é válido.</p>
+          <h1 className="text-2xl font-bold">{t("notFoundTitle")}</h1>
+          <p className="text-muted-foreground">{t("notFoundBody")}</p>
         </div>
       </div>
     );
@@ -1461,10 +1464,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> Proposta de Viagem
+            <Sparkles className="h-3.5 w-3.5 text-primary" /> {t("proposalBadge")}
           </span>
           <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85 truncate max-w-[55%] text-right">
-            {agentProfile?.agency_name || "Proposta exclusiva"}
+            {agentProfile?.agency_name || t("exclusiveProposal")}
           </BrandText>
         </div>
       </header>
@@ -1516,8 +1519,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </h1>
             <p className="mt-4 text-base sm:text-xl font-light text-white/90 max-w-2xl leading-relaxed">
               {tripTitle
-                ? `Uma experiência preparada com cuidado para ${quote.client_name}.`
-                : `${days} ${days === 1 ? "dia" : "dias"} para viver ${quote.destination} de um jeito único — feito para ${quote.client_name}.`}
+                ? t("heroWithTitle", { name: quote.client_name })
+                : t("heroNoTitle", {
+                    days: `${days} ${pluralize(publicLocale, days, { one: "dia", other: "dias" })}`,
+                    destination: quote.destination,
+                    name: quote.client_name,
+                  })}
             </p>
 
             {/* meta chips */}
@@ -1528,17 +1535,17 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                 <Sparkles className="h-4 w-4 opacity-80" />
-                {days} {days === 1 ? "dia" : "dias"}
+                {days} {pluralize(publicLocale, days, { one: "dia", other: "dias" })}
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                 <Users className="h-4 w-4 opacity-80" />
-                {quote.adults_count} adulto{quote.adults_count > 1 ? "s" : ""}
-                {quote.children_count > 0 && ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}`}
+                {quote.adults_count} {pluralize(publicLocale, quote.adults_count, { one: "adulto", other: "adultos" })}
+                {quote.children_count > 0 && ` + ${quote.children_count} ${pluralize(publicLocale, quote.children_count, { one: "criança", other: "crianças" })}`}
               </div>
               {flightSvc?.service_data?.origin_city && (
                 <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                   <Plane className="h-4 w-4 opacity-80" />
-                  Saindo de {flightSvc.service_data.origin_city}
+                  {t("leavingFrom", { city: flightSvc.service_data.origin_city })}
                 </div>
               )}
             </div>
@@ -1551,7 +1558,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         {/* ─── Smart Trip Highlights ─── */}
         <section className="-mt-32 sm:-mt-40 relative z-10 animate-fade-up">
           <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] border border-border/40 p-7 sm:p-9 transition-shadow duration-500 hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.3)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80 mb-4">O que está incluso</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80 mb-4">{t("whatsIncluded")}</p>
             <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
               {highlights.map((h, i) => (
                 <li key={i} className="flex items-start gap-3 text-[15px] text-foreground/90 leading-snug">
@@ -1568,7 +1575,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         {/* ─── Timeline visual ─── */}
         {timelineNodes.length >= 2 && (
           <section>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground text-center mb-5">Sua jornada</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground text-center mb-5">{t("yourJourney")}</p>
             {/* Mobile: single-line horizontal scroll with edge fade indicating more items.
                 Tablet/desktop: classic centered flex when space allows. */}
             <div className="relative">
@@ -1804,7 +1811,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             primaryDisplay = (
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">
-                  Condição especial à vista
+                  {t("specialCashCondition")}
                 </span>
                 <span className="text-[1.75rem] sm:text-[2.25rem] font-bold tracking-tight text-foreground leading-tight">
                   {formatCurrency(headlineTotal)}
@@ -1814,14 +1821,14 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             );
             secondaryDisplay = (
               <p className="text-sm font-medium text-primary">
-                {discountPct}% de desconto aplicado{methodLabel ? ` • ${methodLabel}` : ""}
+                {t("discountApplied", { percent: discountPct })}{methodLabel ? ` • ${methodLabel}` : ""}
               </p>
             );
           } else {
             primaryDisplay = (
               <div className="flex flex-col items-center gap-1">
                 <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                  {isTotalOnly ? "Valor total da viagem" : "Investimento"}
+                  {isTotalOnly ? t("totalTripValue") : t("investment")}
                 </span>
                 <span className="text-[1.75rem] sm:text-[2.5rem] font-bold tracking-tight text-primary leading-tight">
                   {formatCurrency(total)}
@@ -1833,7 +1840,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             );
             secondaryDisplay = isTotalOnly
               ? null
-              : <p className="text-sm text-muted-foreground mt-4">Parcelamento disponível</p>;
+              : <p className="text-sm text-muted-foreground mt-4">{t("installmentsAvailable")}</p>;
           }
 
           return (
@@ -1852,11 +1859,11 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   id="investimento-total-title"
                   className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80"
                 >
-                  Investimento Total da Viagem
+                  {t("totalInvestmentTitle")}
                 </p>
                 <div className="mt-4 flex flex-col items-center gap-1">
                   <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                    Número de passageiros
+                    {t("passengerCount")}
                   </p>
                   <p className="text-base sm:text-lg font-semibold text-primary">
                     {buildPassengerLabel(quote)}
@@ -1879,12 +1886,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
             <div className="relative text-center space-y-5 max-w-xl mx-auto">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">Condições flexíveis</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80">{t("flexibleConditionsTag")}</p>
               <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                Monte a melhor condição de pagamento para sua viagem
+                {t("buildBestPaymentTitle")}
               </h3>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Cada serviço pode ser parcelado de forma independente, com condições especiais de acordo com o fornecedor. Fale com seu consultor para encontrar o formato ideal para você.
+                {t("buildBestPaymentBody")}
               </p>
               {whatsappUrl && (
                 <div className="pt-3 flex justify-center">
@@ -1895,7 +1902,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-9 py-4 font-semibold text-sm shadow-[0_10px_30px_-8px_rgba(37,211,102,0.55)] transition-all hover:scale-[1.02] w-full sm:w-auto"
                   >
                     <WhatsAppIcon className="h-4 w-4" />
-                    <span>Falar com meu consultor</span>
+                    <span>{t("talkToConsultant")}</span>
                   </a>
                 </div>
               )}
@@ -1908,7 +1915,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           <div className="rounded-2xl border border-border/40 bg-card p-6 sm:p-8 animate-fade-up">
             <div className="flex items-center gap-2 mb-3">
               <CreditCard className="h-4 w-4 text-primary" />
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Condições de pagamento</h3>
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">{t("paymentConditions")}</h3>
             </div>
             <p className="text-sm text-foreground/85 leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></p>
           </div>
@@ -1921,7 +1928,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         <div className="text-center space-y-1">
           {validUntil && (
             <p className="text-sm font-medium text-foreground">
-              Proposta válida até {formatDate(validUntil)}
+              {t("validUntil", { date: formatDate(validUntil) })}
             </p>
           )}
           {validityDisclaimer && (
@@ -1929,7 +1936,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           )}
           {!validUntil && !validityDisclaimer && (
             <p className="text-xs text-muted-foreground">
-              Proposta válida por 7 dias a partir da data de emissão. Valores sujeitos a alteração conforme disponibilidade.
+              {t("defaultValidityDisclaimer")}
             </p>
           )}
         </div>
@@ -2044,7 +2051,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                       className="inline-flex items-center justify-center gap-2.5 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 lg:px-7 py-3 font-semibold text-sm shadow-[0_6px_20px_-6px_rgba(37,211,102,0.45)] transition-all hover:scale-[1.03] whitespace-nowrap"
                     >
                       <WhatsAppIcon className="h-5 w-5 shrink-0" />
-                      <span>Conversar no WhatsApp</span>
+                      <span>{t("talkOnWhatsApp")}</span>
                     </a>
                   )}
                 </div>

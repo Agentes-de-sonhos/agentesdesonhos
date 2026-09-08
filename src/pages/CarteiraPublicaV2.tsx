@@ -16,6 +16,8 @@ import { InstallWalletButton } from "@/components/wallet/InstallWalletButton";
 import { InstallWalletDialog } from "@/components/wallet/InstallWalletDialog";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { resolvePublicLocale, formatPublicNumber, pluralize } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
@@ -116,6 +118,8 @@ function PasswordGate({
   const [showPassword, setShowPassword] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [remember, setRemember] = useState(true);
+  const locale = resolvePublicLocale(branding);
+  const t = tWallet(locale);
 
   const countdown = (() => {
     if (!tripStartDate) return null;
@@ -140,7 +144,9 @@ function PasswordGate({
   const phoneDigits = (branding?.phone || "").replace(/\D/g, "");
   const whatsappUrl = phoneDigits
     ? `https://wa.me/${phoneDigits.startsWith("55") ? phoneDigits : `55${phoneDigits}`}?text=${encodeURIComponent(
-        "Olá! Preciso de ajuda para acessar minha Carteira de Viagem."
+        locale === "it-IT"
+          ? "Ciao! Ho bisogno di aiuto per accedere al mio Portafoglio di Viaggio."
+          : "Olá! Preciso de ajuda para acessar minha Carteira de Viagem."
       )}`
     : null;
 
@@ -162,25 +168,25 @@ function PasswordGate({
             {countdown > 1 && (
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
                 <Plane className="h-4 w-4" />
-                Faltam {countdown} dias para a sua viagem
+                {t("countdownMany", { count: countdown })}
               </div>
             )}
             {countdown === 1 && (
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
                 <Plane className="h-4 w-4" />
-                Falta 1 dia para a sua viagem
+                {t("countdownOne")}
               </div>
             )}
             {countdown === 0 && (
               <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/70 px-4 py-2 text-sm font-bold text-primary-foreground shadow-md">
                 <Sparkles className="h-4 w-4" />
-                Hoje é o grande dia! Boa viagem 🌍✈️
+                {t("countdownToday")}
               </div>
             )}
             {countdown < 0 && countdown >= -30 && (
               <div className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
                 <Sparkles className="h-4 w-4" />
-                Esperamos que esteja aproveitando muito! ✨
+                {t("countdownPast")}
               </div>
             )}
           </div>
@@ -192,9 +198,9 @@ function PasswordGate({
               <Lock className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
+              <h1 className="text-xl font-bold mb-1">{t("walletTitle")}</h1>
               <p className="text-sm text-muted-foreground">
-                Digite a senha fornecida pela sua agência
+                {t("walletSubtitle")}
               </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -203,7 +209,7 @@ function PasswordGate({
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha de acesso"
+                placeholder={t("passwordPlaceholder")}
                 className="text-center text-lg tracking-widest pr-12"
               />
               <button
@@ -223,7 +229,7 @@ function PasswordGate({
                 onCheckedChange={(v) => setRemember(v === true)}
               />
               <Label htmlFor="remember-device" className="text-sm text-muted-foreground cursor-pointer select-none">
-                Lembrar deste dispositivo
+                {t("rememberDevice")}
               </Label>
             </div>
             {attemptsLeft !== null && attemptsLeft > 0 && (
@@ -231,14 +237,14 @@ function PasswordGate({
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 <span>
                   {attemptsLeft === 1
-                    ? "Atenção: você tem mais 1 tentativa antes do bloqueio."
-                    : `Você tem mais ${attemptsLeft} tentativas antes do bloqueio.`}
+                    ? t("attemptsLeftOne")
+                    : t("attemptsLeftMany", { count: attemptsLeft })}
                 </span>
               </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Acessar Carteira
+              {t("accessButton")}
             </Button>
             </form>
           </CardContent>
@@ -253,7 +259,7 @@ function PasswordGate({
               aria-expanded={helpOpen}
             >
               <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                Precisa de ajuda?
+                {t("needHelp")}
               </span>
               {helpOpen ? (
                 <ChevronUp className="h-4 w-4 text-gray-400" />
@@ -293,7 +299,7 @@ function PasswordGate({
                       className="shrink-0 inline-flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-sm transition-colors"
                     >
                       <WhatsAppIcon className="h-4 w-4" />
-                      WhatsApp
+                      {t("whatsapp")}
                     </a>
                   )}
                 </div>
@@ -562,7 +568,7 @@ export default function CarteiraPublicaV2({
   if (!agencySlug || !accessCode) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Link inválido</p>
+        <p className="text-muted-foreground">{tWallet(resolvePublicLocale(branding))("invalidLink")}</p>
       </div>
     );
   }
@@ -584,9 +590,9 @@ export default function CarteiraPublicaV2({
               <ShieldAlert className="h-8 w-8 text-destructive" />
             </div>
             <div>
-              <h1 className="text-xl font-bold mb-1">Acesso Bloqueado</h1>
+              <h1 className="text-xl font-bold mb-1">{tWallet(resolvePublicLocale(branding))("lockedTitle")}</h1>
               <p className="text-sm text-muted-foreground">
-                Acesso bloqueado por segurança. Entre em contato com a agência responsável.
+                {tWallet(resolvePublicLocale(branding))("lockedMessage")}
               </p>
             </div>
           </CardContent>
@@ -604,7 +610,7 @@ export default function CarteiraPublicaV2({
         error={
           error ||
           (grantExpired
-            ? "Este acesso pela Área do Cliente expirou. Informe a senha da carteira ou abra novamente pela Área do Cliente."
+            ? tWallet(resolvePublicLocale(branding))("grantExpired")
             : "")
         }
         branding={branding}

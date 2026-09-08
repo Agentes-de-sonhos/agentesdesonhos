@@ -1,10 +1,21 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { Itinerary, ItineraryDay } from "@/types/itinerary";
-import { parseLocalDate, formatItineraryDayHeader } from "@/lib/dateParsing";
+import { parseLocalDate } from "@/lib/dateParsing";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 import type { DayWeather } from "@/hooks/useTripWeather";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import {
+  itineraryTranslator,
+  tripTypeLabel,
+  budgetLabel,
+  periodLabel,
+  passengerInterestLabel,
+  daysCountLabel,
+  travelersCountLabel,
+  formatPublicItineraryDayHeader,
+  formatPublicPdfDate,
+  formatPublicLongDateFns,
+} from "@/i18n/publicMaterials/itinerary";
 import {
   isPricingContentEmpty,
   sanitizePricingContent,
@@ -24,37 +35,19 @@ function weatherEmoji(code: number): string {
   return "☁️";
 }
 
-const tripTypeLabels: Record<string, string> = {
-  familia: "Viagem em Família",
-  casal: "Viagem de Casal",
-  lua_de_mel: "Lua de Mel",
-  sozinho: "Viagem Solo",
-  solo: "Viagem Solo",
-  corporativo: "Viagem Corporativa",
-  familia_crianca_pequena: "Família com criança pequena",
-  familia_adolescentes: "Família com adolescentes",
-  grupo_amigos: "Grupo de amigos",
-  melhor_idade: "Melhor idade",
+const periodEmoji: Record<string, string> = {
+  manha: "☀️",
+  tarde: "🌅",
+  noite: "🌙",
 };
 
-const budgetLabels: Record<string, string> = {
-  economico: "Econômico",
-  conforto: "Conforto",
-  luxo: "Luxo",
-};
-
-const periodLabels: Record<string, string> = {
-  manha: "☀️ Manhã",
-  tarde: "🌅 Tarde",
-  noite: "🌙 Noite",
-};
-
-function generateAgencyHeader(profile: AgentProfile | null): string {
+function generateAgencyHeader(profile: AgentProfile | null, locale: PublicLocale): string {
   // Slim top bar mirroring the quote layout
-  const agencyName = profile?.agency_name || "Sua viagem";
+  const t = itineraryTranslator(locale);
+  const agencyName = profile?.agency_name || t("defaultAgencyName");
   return `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#ffffff;border-bottom:1px solid #e2e8f0;">
-      <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:2.5px;color:#64748b;">✦ Roteiro de Viagem</span>
+      <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:2.5px;color:#64748b;">${t("pdfRoteiroBadge")}</span>
       <span style="font-size:12px;font-weight:700;color:#0f172a;">${agencyName}</span>
     </div>
   `;
@@ -65,8 +58,10 @@ function generateHero(
   profile: AgentProfile | null,
   startDate: Date,
   endDate: Date,
-  days: number
+  days: number,
+  locale: PublicLocale
 ): string {
+  const t = itineraryTranslator(locale);
   const cover =
     itinerary.coverImageUrl ||
     (itinerary.destinationIntroImages && itinerary.destinationIntroImages[0]) ||
@@ -81,17 +76,18 @@ function generateHero(
       ${logo ? `<div style="position:absolute;top:14px;left:50%;transform:translateX(-50%);width:78px;height:78px;border-radius:50%;background:#ffffff;display:flex;align-items:center;justify-content:center;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,0.35);"><img src="${logo}" alt="${profile?.agency_name || ""}" style="max-width:100%;max-height:100%;object-fit:contain;" /></div>` : ""}
       <div style="display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);padding:4px 12px;border-radius:9999px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:10px;">📍 ${itinerary.destination}</div>
       <h1 style="font-size:32px;font-weight:800;margin:0 0 6px;letter-spacing:-1px;line-height:1.05;text-shadow:0 2px 16px rgba(0,0,0,0.4);">${itinerary.destination}</h1>
-      <p style="font-size:13px;opacity:0.9;margin:0 0 12px;font-weight:300;">${days} ${days === 1 ? "dia" : "dias"} • ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} — ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}</p>
+      <p style="font-size:13px;opacity:0.9;margin:0 0 12px;font-weight:300;">${daysCountLabel(locale, days)} • ${formatPublicPdfDate(startDate, locale)} — ${formatPublicPdfDate(endDate, locale)}</p>
     </div>
   `;
 }
 
-function generateGallery(images: string[]): string {
+function generateGallery(images: string[], locale: PublicLocale): string {
   if (!images || images.length === 0) return "";
+  const t = itineraryTranslator(locale);
   const shots = images.slice(0, 6);
   return `
     <div class="pdf-block" style="margin:0 0 16px;">
-      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin:0 0 8px;text-align:center;">Galeria do destino</p>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin:0 0 8px;text-align:center;">${t("pdfGalleryTitle")}</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
         ${shots
           .map(
@@ -103,8 +99,9 @@ function generateGallery(images: string[]): string {
   `;
 }
 
-function generateAgentSignature(profile: AgentProfile | null): string {
+function generateAgentSignature(profile: AgentProfile | null, locale: PublicLocale): string {
   if (!profile) return "";
+  const t = itineraryTranslator(locale);
 
   const avatarHtml = profile.avatar_url
     ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:4px solid rgba(15,118,110,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
@@ -118,7 +115,7 @@ function generateAgentSignature(profile: AgentProfile | null): string {
   return `
     <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
       <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">Seu consultor de viagens</p>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">${t("pdfConsultantLabel")}</p>
       </div>
       <div style="padding:14px 18px;text-align:center;">
         ${avatarHtml}
@@ -129,7 +126,7 @@ function generateAgentSignature(profile: AgentProfile | null): string {
           whatsappLink
             ? `<div style="margin-top:10px;">
                 <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
-                  💬 Falar no WhatsApp
+                  ${t("pdfWhatsappCta")}
                 </a>
               </div>`
             : ""
@@ -142,8 +139,10 @@ function generateAgentSignature(profile: AgentProfile | null): string {
 export function generatePDFContent(
   itinerary: Itinerary & { days: ItineraryDay[] } & Record<string, any>,
   profile?: AgentProfile | null,
-  weatherByDate?: Record<string, DayWeather>
+  weatherByDate?: Record<string, DayWeather>,
+  locale: PublicLocale = "pt-BR"
 ): string {
+  const t = itineraryTranslator(locale);
   const startDate = parseLocalDate(itinerary.startDate);
   const endDate = parseLocalDate(itinerary.endDate);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -153,13 +152,13 @@ export function generatePDFContent(
   const passengersHtml = (passengers.length > 0 || passengerInterests.length > 0)
     ? `<div class="pdf-block" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:12px 16px;margin-bottom:14px;">
         ${passengers.length > 0 ? `
-          <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px;">👥 Passageiros</p>
+          <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px;">${t("pdfPassengersLabel")}</p>
           <ul style="margin:0 0 ${passengerInterests.length > 0 ? "10px" : "0"};padding-left:18px;">
-            ${passengers.map((p) => `<li style="font-size:13px;color:#1e293b;font-weight:600;">${p.name}${p.age != null ? `<span style="font-weight:400;color:#64748b;"> · ${p.age} anos</span>` : ""}</li>`).join("")}
+            ${passengers.map((p) => `<li style="font-size:13px;color:#1e293b;font-weight:600;">${p.name}${p.age != null ? `<span style="font-weight:400;color:#64748b;"> · ${t("pdfAgeSuffix", { age: String(p.age) })}</span>` : ""}</li>`).join("")}
           </ul>` : ""}
         ${passengerInterests.length > 0 ? `
-          <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px;">✨ Perfil da viagem</p>
-          <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">${passengerInterests.map((k) => (PASSENGER_INTEREST_LABELS as any)[k] || k).join(" • ")}</p>` : ""}
+          <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 6px;">${t("pdfProfileLabel")}</p>
+          <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">${passengerInterests.map((k) => passengerInterestLabel(locale, k, (PASSENGER_INTEREST_LABELS as any)[k])).join(" • ")}</p>` : ""}
       </div>`
     : "";
 
@@ -176,8 +175,8 @@ export function generatePDFContent(
           <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
           <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.85);display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#0f766e;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${day.dayNumber}</div>
           <div style="min-width:0;flex:1;">
-            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0f766e;margin:0;line-height:1.2;">Dia ${day.dayNumber}</p>
-            <p style="font-size:12px;color:#0f766e;opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;">${formatItineraryDayHeader(parseLocalDate(day.date))}</p>
+            <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0f766e;margin:0;line-height:1.2;">${t("pdfDayLabel", { number: String(day.dayNumber) })}</p>
+            <p style="font-size:12px;color:#0f766e;opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;">${formatPublicItineraryDayHeader(parseLocalDate(day.date), locale)}</p>
           </div>
           </div>
           ${wxChip}
@@ -189,7 +188,7 @@ export function generatePDFContent(
               if (activities.length === 0) return "";
               return `
                 <div class="pdf-block period" style="margin-bottom:10px;">
-                  <p style="font-size:12px;font-weight:700;color:#0f766e;margin:0 0 6px;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">${periodLabels[period]}</p>
+                  <p style="font-size:12px;font-weight:700;color:#0f766e;margin:0 0 6px;border-bottom:1px dashed #e2e8f0;padding-bottom:4px;">${periodEmoji[period]} ${periodLabel(locale, period)}</p>
                   ${activities
                     .map(
                       (a) => `
@@ -231,7 +230,7 @@ export function generatePDFContent(
 
   const html = `
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="${locale}">
 <head>
   <meta charset="UTF-8">
   <title>Roteiro — ${itinerary.destination}</title>
@@ -263,29 +262,29 @@ export function generatePDFContent(
 </head>
 <body>
   <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
-    ${generateAgencyHeader(profile || null)}
+    ${generateAgencyHeader(profile || null, locale)}
 
     <div style="padding:0 24px;">
-      ${generateHero(itinerary, profile || null, startDate, endDate, days)}
-      ${clientName ? `<p style="text-align:center;font-size:13px;color:#64748b;margin:-4px 0 14px;">Preparado especialmente para <strong style="color:#1e293b;">${clientName}</strong></p>` : ""}
-      ${itinerary.showDestinationIntro !== false ? generateGallery(itinerary.destinationIntroImages || []) : ""}
+      ${generateHero(itinerary, profile || null, startDate, endDate, days, locale)}
+      ${clientName ? `<p style="text-align:center;font-size:13px;color:#64748b;margin:-4px 0 14px;">${t("pdfPreparedFor", { name: `<strong style="color:#1e293b;">${clientName}</strong>` })}</p>` : ""}
+      ${itinerary.showDestinationIntro !== false ? generateGallery(itinerary.destinationIntroImages || [], locale) : ""}
       ${itinerary.showDestinationIntro !== false && itinerary.destinationIntroText ? `<div class="pdf-block" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 16px;margin-bottom:16px;"><p style="font-size:12px;color:#475569;line-height:1.6;margin:0;white-space:pre-wrap;">${itinerary.destinationIntroText}</p></div>` : ""}
 
       <!-- Overview -->
       <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
         <div>
-          <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 Destino</p>
+          <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">${t("pdfDestinationLabel")}</p>
           <p style="font-size:14px;font-weight:700;color:#1e293b;">${itinerary.destination}</p>
         </div>
         <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-          <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 Período</p>
-          <p style="font-size:14px;font-weight:700;color:#1e293b;">${format(startDate, "dd/MM/yyyy", { locale: ptBR })} — ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}</p>
-          <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} dias</p>
+          <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">${t("pdfPeriodLabel")}</p>
+          <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatPublicPdfDate(startDate, locale)} — ${formatPublicPdfDate(endDate, locale)}</p>
+          <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${daysCountLabel(locale, days)}</p>
         </div>
         <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-          <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👥 Viajantes</p>
-          <p style="font-size:14px;font-weight:700;color:#1e293b;">${itinerary.travelersCount} viajante${itinerary.travelersCount > 1 ? "s" : ""}</p>
-          <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${tripTypeLabels[itinerary.tripType] || itinerary.tripType}${itinerary.budgetLevel ? ` • ${budgetLabels[itinerary.budgetLevel] || itinerary.budgetLevel}` : ""}</p>
+          <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">${t("pdfTravelersLabel")}</p>
+          <p style="font-size:14px;font-weight:700;color:#1e293b;">${travelersCountLabel(locale, itinerary.travelersCount)}</p>
+          <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${tripTypeLabel(locale, itinerary.tripType)}${itinerary.budgetLevel ? ` • ${budgetLabel(locale, itinerary.budgetLevel)}` : ""}</p>
         </div>
       </div>
 
@@ -294,10 +293,10 @@ export function generatePDFContent(
         ${passengersHtml}
         <div class="pdf-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
           <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-          <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">Programação Dia a Dia</h3>
+          <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">${t("pdfDayProgrammingTitle")}</h3>
           <div style="flex:1;height:1px;background:#e2e8f0;"></div>
         </div>
-        ${daysHtml || '<p style="text-align:center;color:#94a3b8;padding:32px;">Nenhum dia programado</p>'}
+        ${daysHtml || `<p style="text-align:center;color:#94a3b8;padding:32px;">${t("pdfNoDaysScheduled")}</p>`}
       </div>
 
       ${
@@ -314,12 +313,12 @@ export function generatePDFContent(
       }
 
       <!-- Agent Signature -->
-      ${generateAgentSignature(profile || null)}
+      ${generateAgentSignature(profile || null, locale)}
 
       <!-- Footer -->
       <div style="text-align:center;padding-top:20px;">
         <p style="font-size:10px;color:#cbd5e1;">
-          Gerado em ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })} • Agentes de Sonhos
+          ${t("pdfGeneratedAt", { date: formatPublicLongDateFns(new Date(), locale) })}
         </p>
       </div>
     </div>
@@ -333,9 +332,10 @@ export function generatePDFContent(
 export function downloadPDF(
   itinerary: Itinerary & { days: ItineraryDay[] },
   profile?: AgentProfile | null,
-  weatherByDate?: Record<string, DayWeather>
+  weatherByDate?: Record<string, DayWeather>,
+  locale: PublicLocale = "pt-BR"
 ) {
-  const html = generatePDFContent(itinerary, profile, weatherByDate);
+  const html = generatePDFContent(itinerary, profile, weatherByDate, locale);
   const printWindow = window.open("", "_blank");
   if (printWindow) {
     printWindow.document.write(html);

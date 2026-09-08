@@ -33,6 +33,7 @@ import { TripEditForm } from "@/components/trip/TripEditForm";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
+import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
@@ -811,7 +812,7 @@ function TripWalletContent() {
   };
 
   const handleGeneratePDF = async () => {
-    if (trip) await generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[], { mode: "authenticated" });
+    if (trip) await generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[], { mode: "authenticated" }, resolvePublicLocale(agentProfile));
   };
 
   // Listing view

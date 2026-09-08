@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import type { Trip, TripServiceType } from "@/types/trip";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 
 const ViagemPublica = lazy(() => import("@/pages/ViagemPublica"));
 
@@ -35,6 +37,7 @@ async function verifyTripBySlug(slug: string, password: string) {
 function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: string) => void; loading: boolean; error: string }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const t = tWallet(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,9 +53,9 @@ function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: strin
             <Lock className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold mb-1">Carteira de Viagem</h1>
+            <h1 className="text-xl font-bold mb-1">{t("walletTitle")}</h1>
             <p className="text-sm text-muted-foreground">
-              Digite a senha fornecida pela sua agência
+              {t("walletSubtitle")}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -61,7 +64,7 @@ function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: strin
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha de acesso"
+                placeholder={t("passwordPlaceholder")}
                 className="text-center text-lg tracking-widest pr-12"
               />
               <button
@@ -80,7 +83,7 @@ function PasswordGate({ onUnlock, loading, error }: { onUnlock: (password: strin
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Acessar Carteira
+              {t("accessButton")}
             </Button>
           </form>
         </CardContent>
@@ -145,7 +148,7 @@ export default function CarteiraPublica() {
   if (!slug) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Link inválido</p>
+        <p className="text-muted-foreground">{tWallet(null)("invalidLink")}</p>
       </div>
     );
   }
@@ -167,9 +170,9 @@ export default function CarteiraPublica() {
               <ShieldAlert className="h-8 w-8 text-destructive" />
             </div>
             <div>
-              <h1 className="text-xl font-bold mb-1">Acesso Bloqueado</h1>
+              <h1 className="text-xl font-bold mb-1">{tWallet(null)("lockedTitle")}</h1>
               <p className="text-sm text-muted-foreground">
-                Acesso bloqueado por segurança. Entre em contato com a agência responsável.
+                {tWallet(null)("lockedMessage")}
               </p>
             </div>
           </CardContent>
