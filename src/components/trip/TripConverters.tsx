@@ -70,6 +70,15 @@ const CURRENCIES = [
   { code: "MXN", symbol: "$", name: "Peso Mexicano" },
 ];
 
+function currencyName(code: string, locale: PublicLocale): string {
+  try {
+    const dn = new Intl.DisplayNames([normalizePublicLocale(locale)], { type: "currency" });
+    return dn.of(code) ?? code;
+  } catch {
+    return CURRENCIES.find((c) => c.code === code)?.name ?? code;
+  }
+}
+
 function inferCurrency(destination: string): string {
   const d = destination.toLowerCase();
   for (const key of Object.keys(COUNTRY_CURRENCY)) {
