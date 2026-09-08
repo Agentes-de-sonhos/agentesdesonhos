@@ -10,6 +10,7 @@ import { TipCalculatorDialog } from "@/components/wallet/TipCalculatorDialog";
 import { TripChecklistDialog } from "@/components/wallet/TripChecklistDialog";
 import { TripBudgetDialog } from "@/components/wallet/TripBudgetDialog";
 import { convertWithRate, fxRateUrl, isValidRate, parseAmount } from "@/lib/fxConversion";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 
 // Simple destination -> currency inference (best-effort)
@@ -262,7 +263,7 @@ function ShoeSizeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   );
 }
 
-export function TripConverters({ destination, tripId, services, international = true, endDate }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; international?: boolean; endDate?: Date | null }) {
+export function TripConverters({ destination, tripId, services, international = true, endDate, locale = "pt-BR" }: { destination: string; tripId?: string; services?: Array<{ service_type?: string | null; other_service_type?: string | null }>; international?: boolean; endDate?: Date | null; locale?: PublicLocale }) {
   const [openCur, setOpenCur] = useState(false);
   const [openMeasure, setOpenMeasure] = useState(false);
   const [openTip, setOpenTip] = useState(false);
@@ -342,7 +343,7 @@ export function TripConverters({ destination, tripId, services, international = 
       {international && <MeasurementsConverterDialog open={openMeasure} onOpenChange={setOpenMeasure} />}
       {international && <TipCalculatorDialog open={openTip} onOpenChange={setOpenTip} />}
       {tripId && (
-        <TripChecklistDialog open={openChecklist} onOpenChange={setOpenChecklist} tripId={tripId} services={services || []} />
+        <TripChecklistDialog open={openChecklist} onOpenChange={setOpenChecklist} tripId={tripId} services={services || []} locale={locale} />
       )}
       {tripId && (
         <TripBudgetDialog open={openBudget} onOpenChange={setOpenBudget} tripId={tripId} destination={destination} endDate={endDate || null} />

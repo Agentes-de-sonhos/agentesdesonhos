@@ -647,13 +647,14 @@ export default function CarteiraPublicaV2({
         onInstallPrompt={triggerInstall}
       />
       {!isMobile && (
-        <InstallWalletButton agencyName={branding?.agency_name || branding?.name || undefined} />
+        <InstallWalletButton agencyName={branding?.agency_name || branding?.name || undefined} locale={resolvePublicLocale(branding)} />
       )}
       <InstallWalletDialog
         open={showInstructions}
         onOpenChange={setShowInstructions}
         platform={platform}
         agencyName={branding?.agency_name || branding?.name || undefined}
+        locale={resolvePublicLocale(branding)}
       />
     </Suspense>
   );
