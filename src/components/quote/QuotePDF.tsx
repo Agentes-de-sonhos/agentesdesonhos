@@ -506,7 +506,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
       ?.map((service) => {
         const label = getServiceLabel(service, t);
         const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
-        const details = getServiceDetails(service, t, formatDate);
+        const details = getServiceDetails(service, t, formatDate, locale);
         const data = service.service_data as any;
         const notesText = service.service_type === "attraction" ? data?.notes : null;
         const descText = service.description || null;
@@ -515,8 +515,8 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         switch (service.service_type) {
           case "flight": summary = `${data.airline || ""}${data.origin_city ? ` | ${data.origin_city} → ${data.destination_city}` : ""}`.trim(); break;
           case "hotel": summary = `${data.hotel_name || ""}${data.city ? ` — ${data.city}` : ""}`; break;
-          case "car_rental": summary = `${data.car_type || ""}${data.days ? ` | ${data.days} diária(s)` : ""}`; break;
-          case "transfer": summary = `${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"}${data.location ? ` — ${data.location}` : ""}`; break;
+          case "car_rental": summary = `${data.car_type || ""}${data.days ? ` | ${data.days} ${pluralize(locale, Number(data.days) || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}` : ""}`; break;
+          case "transfer": summary = `${data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")}${data.location ? ` — ${data.location}` : ""}`; break;
           case "attraction": summary = [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name || ""; break;
           case "insurance": summary = data.provider || ""; break;
           case "cruise": summary = `${data.ship_name || ""}${data.route ? ` — ${data.route}` : ""}`; break;
@@ -526,7 +526,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             break;
           }
           case "circuit": summary = data.circuit_name || "Circuito"; break;
-          case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || "Outros Serviços"; break;
+          case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || t("svc_other"); break;
         }
         // PDF: usar APENAS a primeira imagem cadastrada para economizar espaço vertical
         const allImages = ([
@@ -549,19 +549,19 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         if (isHotel && hotelHasMultipleRooms && showDetailedPrices) {
           const rowsHtml = hotelRooms.map((r: any) => {
             const paxParts: string[] = [];
-            if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+            if (r.adults) paxParts.push(`${r.adults} ${pluralize(locale, r.adults, { one: t("adultOne"), other: t("adultOther") })}`);
             if (r.children) {
               const ages = Array.isArray(r.children_ages) && r.children_ages.length
-                ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+                ? ` (${r.children_ages.join(", ")} ${pluralize(locale, r.children_ages.length, { one: t("yearOne"), other: t("yearOther") })})`
                 : "";
-              paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+              paxParts.push(`${r.children} ${pluralize(locale, r.children, { one: t("childOne"), other: t("childOther") })}${ages}`);
             }
             const qty = Number(r.quantity) || 1;
             const unit = Number(r.unit_price) || 0;
             const total = Number(r.total_price) || unit * qty;
             const sim = getRoomPaymentSimulation(total, service, quote);
             const installmentLine = sim.installmentValue != null
-              ? `<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:${C.mutedT};">ou ${sim.installmentsCount}x de</span><span style="color:${C.primaryOnTertiary};font-weight:700;">${formatCurrency(sim.installmentValue)}</span></div>`
+              ? `<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:2px;"><span style="color:${C.mutedT};">${t("orInstallmentsCountOf", { count: sim.installmentsCount as number })}</span><span style="color:${C.primaryOnTertiary};font-weight:700;">${formatCurrency(sim.installmentValue)}</span></div>`
               : "";
             return `
               <div style="border:1px solid ${C.border};border-radius:10px;padding:10px 12px;margin-bottom:6px;background:${C.tertiary};">
@@ -939,7 +939,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           </div>
           <div style="border-left:1px solid ${C.border};padding-left:18px;">
             <p style="font-size:11px;color:${C.faint};text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👥 ${t("travelers")}</p>
-            <p style="font-size:14px;font-weight:700;color:${C.text};">${quote.adults_count} adulto${quote.adults_count > 1 ? "s" : ""}${quote.children_count > 0 ? ` + ${quote.children_count} criança${quote.children_count > 1 ? "s" : ""}` : ""}</p>
+            <p style="font-size:14px;font-weight:700;color:${C.text};">${quote.adults_count} ${pluralize(locale, quote.adults_count, { one: t("adultOne"), other: t("adultOther") })}${quote.children_count > 0 ? ` + ${quote.children_count} ${pluralize(locale, quote.children_count, { one: t("childOne"), other: t("childOther") })}` : ""}</p>
           </div>
         </div>
 
@@ -1072,7 +1072,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             const iv = total / (installments || 1);
             paymentHtml = `
               <p style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;margin:0;line-height:1.3;color:${C.faint};">${t("startingFrom")}</p>
-              <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${installments}x de ${formatCurrency(iv)}</p>
+              <p style="font-size:24px;font-weight:700;letter-spacing:-0.5px;margin:6px 0 0;line-height:1.2;color:${C.primary};">${t("installmentsCountOf", { count: installments })} ${formatCurrency(iv)}</p>
               <p style="font-size:12px;margin:6px 0 0;line-height:1.4;color:${C.faint};">${t("total")}: ${formatCurrency(total)}${methodLabel ? ` • ${methodLabel}` : ""} • ${t("noInterest")}</p>
             `;
           } else if (mode === "installments_with_entry") {
