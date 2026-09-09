@@ -406,6 +406,7 @@ export default function GerarOrcamento() {
   const [destinationDraft, setDestinationDraft] = useState("");
   const navigate = useNavigate();
   const nav = useAdminNav();
+  const openInternalWindow = useOpenInternalWindow();
   const queryClient = useQueryClient();
   const { id } = useParams();
   const location = useLocation();

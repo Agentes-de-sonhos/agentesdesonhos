@@ -434,6 +434,7 @@ export default function TripWallet() {
 function TripWalletContent() {
   const navigate = useNavigate();
   const nav = useAdminNav();
+  const openInternalWindow = useOpenInternalWindow();
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();

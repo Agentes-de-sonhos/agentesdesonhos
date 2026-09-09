@@ -70,6 +70,7 @@ import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 export default function CriarRoteiro() {
   const navigate = useNavigate();
   const nav = useAdminNav();
+  const openInternalWindow = useOpenInternalWindow();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const fromTripId = searchParams.get("fromTrip");
