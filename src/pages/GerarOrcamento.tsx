@@ -19,7 +19,7 @@ import {
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
   Pencil, MoreHorizontal, UserCircle2,
 } from "lucide-react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -32,6 +32,7 @@ import {
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
+import { QuoteImportDialog } from "@/components/quote/quote-import/QuoteImportDialog";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { QuoteServicesOrganizer } from "@/components/quote/QuoteServicesOrganizer";
 import {
@@ -448,6 +449,7 @@ export default function GerarOrcamento() {
   const [validUntil, setValidUntil] = useState<Date | undefined>();
   const [validityDisclaimer, setValidityDisclaimer] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const [paymentDisplayMode, setPaymentDisplayMode] = useState<PaymentDisplayMode>("full_payment");
   const [installmentsCount, setInstallmentsCount] = useState(10);
   const [entryPercentage, setEntryPercentage] = useState(30);
@@ -1156,10 +1158,24 @@ export default function GerarOrcamento() {
             <TabsContent value="create" className="mt-5">
               <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
-                  <CardTitle className="text-lg font-semibold tracking-tight">Novo Orçamento</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Preencha os dados iniciais para criar um orçamento profissional.
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <CardTitle className="text-lg font-semibold tracking-tight">Novo Orçamento</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Preencha os dados iniciais para criar um orçamento profissional.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 h-9 rounded-lg"
+                      onClick={() => setImportOpen(true)}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="hidden sm:inline">Importar</span>
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <QuoteClientForm
@@ -1181,6 +1197,12 @@ export default function GerarOrcamento() {
                   />
                 </CardContent>
               </Card>
+
+              <QuoteImportDialog
+                open={importOpen}
+                onOpenChange={setImportOpen}
+                onImported={(id) => navigate(nav.quote(id))}
+              />
             </TabsContent>
 
             <TabsContent value="list" className="mt-5">
