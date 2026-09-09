@@ -39,6 +39,7 @@ import { ShareTripModal } from "@/components/trip/ShareTripModal";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
+import { ImportFullPackageIntoWalletDialog } from "@/components/trip/ImportFullPackageIntoWalletDialog";
 import { ImportQuoteAsNewWalletDialog } from "@/components/trip/ImportQuoteAsNewWalletDialog";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import { SupplierSelector, type SupplierSelectorValue } from "@/components/financial/SupplierSelector";
@@ -86,10 +87,12 @@ function TripServiceCategoryGrid({
   services,
   onSelect,
   onImportQuote,
+  onImportPackage,
 }: {
   services: TripService[];
   onSelect: (type: TripServiceType) => void;
   onImportQuote: () => void;
+  onImportPackage: () => void;
 }) {
   const countByType = services.reduce<Record<string, number>>((acc, s) => {
     acc[s.service_type] = (acc[s.service_type] || 0) + 1;
@@ -137,6 +140,19 @@ function TripServiceCategoryGrid({
       >
         <FileTextIcon className="h-6 w-6 text-fuchsia-500" />
         <span className="text-center leading-tight px-1">Importar orçamento</span>
+      </button>
+      <button
+        type="button"
+        onClick={onImportPackage}
+        aria-label="Importar pacote com IA"
+        className={cn(
+          "group relative flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
+          "bg-gradient-to-br from-violet-100 to-violet-50 text-violet-700",
+          "border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/60",
+        )}
+      >
+        <Sparkles className="h-6 w-6 text-violet-500" />
+        <span className="text-center leading-tight px-1">Importar pacote com IA</span>
       </button>
     </div>
   );
@@ -474,6 +490,7 @@ function TripWalletContent() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
   const [showImportQuote, setShowImportQuote] = useState(false);
+  const [showImportPackage, setShowImportPackage] = useState(false);
   const [showImportQuoteAsNew, setShowImportQuoteAsNew] = useState(false);
   const [accordionValue, setAccordionValue] = useState<string[]>([]);
 
@@ -1051,6 +1068,7 @@ function TripWalletContent() {
               services={trip.services || []}
               onSelect={(type) => setSelectedServiceType(type)}
               onImportQuote={() => setShowImportQuote(true)}
+              onImportPackage={() => setShowImportPackage(true)}
             />
           </CardContent>
         </Card>
@@ -1728,6 +1746,12 @@ function TripWalletContent() {
           open={showAIImport}
           onOpenChange={setShowAIImport}
           onImport={handleAIImport}
+        />
+        <ImportFullPackageIntoWalletDialog
+          open={showImportPackage}
+          onOpenChange={setShowImportPackage}
+          tripId={trip.id}
+          currentServiceCount={trip.services?.length || 0}
         />
         <ImportQuoteIntoWalletDialog
           open={showImportQuote}
