@@ -7,34 +7,37 @@ const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf-8");
 const wallet = read("src/pages/TripWallet.tsx");
 const quote = read("src/pages/GerarOrcamento.tsx");
 const itinerary = read("src/pages/CriarRoteiro.tsx");
-const helper = read("src/lib/openInNewTab.ts");
+const helper = read("src/workspace/useOpenInternalWindow.ts");
 
-describe("Nova aba para as listagens contextuais", () => {
-  it("helper usa window.open com _blank e noopener,noreferrer", () => {
-    expect(helper).toContain('window.open(path, "_blank", "noopener,noreferrer")');
+describe("Nova janela interna do sistema para as listagens contextuais", () => {
+  it("helper usa as abas do workspace e nunca window.open", () => {
+    expect(helper).toContain("workspace.openOrActivateTab");
+    expect(helper).not.toContain("window.open");
   });
 
-  it("Minhas Carteiras abre nav.projects('carteiras') em nova aba", () => {
-    expect(wallet).toContain('openInNewTab(nav.projects("carteiras"))');
+  it("Minhas Carteiras abre nav.projects('carteiras') em janela interna", () => {
+    expect(wallet).toContain('openInternalWindow(nav.projects("carteiras"))');
     expect(wallet).not.toContain('navigate(nav.projects("carteiras"))');
   });
 
-  it("Meus Orçamentos abre nav.projects('orcamentos') em nova aba", () => {
-    expect(quote).toContain('openInNewTab(nav.projects("orcamentos"))');
+  it("Meus Orçamentos abre nav.projects('orcamentos') em janela interna", () => {
+    expect(quote).toContain('openInternalWindow(nav.projects("orcamentos"))');
     expect(quote).not.toContain('navigate(nav.projects("orcamentos"))');
   });
 
-  it("Meus Roteiros abre nav.projects('roteiros') em nova aba", () => {
-    expect(itinerary).toContain('openInNewTab(nav.projects("roteiros"))');
+  it("Meus Roteiros abre nav.projects('roteiros') em janela interna", () => {
+    expect(itinerary).toContain('openInternalWindow(nav.projects("roteiros"))');
     expect(itinerary).not.toContain('navigate(nav.projects("roteiros"))');
   });
 
-  it("as três páginas importam o helper", () => {
+  it("as três páginas usam o hook de janela interna", () => {
     for (const f of [wallet, quote, itinerary]) {
-      expect(f).toContain('from "@/lib/openInNewTab"');
+      expect(f).toContain('from "@/workspace/useOpenInternalWindow"');
+      expect(f).toContain("const openInternalWindow = useOpenInternalWindow();");
     }
   });
 });
+
 
 describe("Carteira Digital — cabeçalho compacto", () => {
   it("botão de importar orçamento fica no CardHeader, antes do formulário", () => {
