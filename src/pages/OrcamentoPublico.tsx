@@ -57,6 +57,7 @@ import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog"
 import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { publicAirportText } from "@/lib/airportDisplay";
 
 function getServiceLabel(service: QuoteService): string {
   if (service.service_type === "other") {
@@ -332,9 +333,9 @@ function FlightLegRow({ leg }: { leg: any }) {
           <span className="text-base font-semibold tabular-nums tracking-tight">{arr}</span>
         </div>
         <div className="mt-0.5 text-xs text-muted-foreground tracking-wide">
-          <span className="font-medium text-foreground/80">{leg.airport_origin || "—"}</span>
+          <span className="font-medium text-foreground/80">{publicAirportText({ code: leg.airport_origin, customName: leg.origin_airport_name, city: leg.origin_city }) || "—"}</span>
           <span className="mx-1.5 opacity-50">→</span>
-          <span className="font-medium text-foreground/80">{leg.airport_destination || "—"}</span>
+          <span className="font-medium text-foreground/80">{publicAirportText({ code: leg.airport_destination, customName: leg.destination_airport_name, city: leg.destination_city }) || "—"}</span>
           {leg.flight_number && <span className="ml-2 opacity-70">• Voo {leg.flight_number}</span>}
         </div>
       </div>

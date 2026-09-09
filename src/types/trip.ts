@@ -59,6 +59,9 @@ export interface TripFlightSegment {
   origin_city: string;
   destination_airport: string;
   destination_city: string;
+  /** Nome público do aeroporto editado pelo agente (nunca sobrescrito). */
+  origin_airport_name?: string;
+  destination_airport_name?: string;
   flight_date: string;
   departure_time: string;
   arrival_time: string;

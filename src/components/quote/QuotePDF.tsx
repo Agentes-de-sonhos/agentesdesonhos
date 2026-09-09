@@ -12,6 +12,7 @@ import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
 import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
 import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
+import { publicAirportText } from "@/lib/airportDisplay";
 import {
   getEffectiveQuoteTotal,
   hidesIndividualAmounts,
@@ -256,7 +257,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
         const parts: string[] = [];
         if (ob.leg_date) parts.push(formatDate(ob.leg_date));
         if (ob.flight_number) parts.push(`${t("voo")} ${ob.flight_number}`);
-        if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
+        if (ob.airport_origin && ob.airport_destination) parts.push(`${publicAirportText({ code: ob.airport_origin, customName: ob.origin_airport_name, city: ob.origin_city })} → ${publicAirportText({ code: ob.airport_destination, customName: ob.destination_airport_name, city: ob.destination_city })}`);
         if (ob.departure_time) parts.push(`${t("saida")}: ${ob.departure_time}`);
         if (ob.arrival_time) parts.push(`${t("chegada")}: ${ob.arrival_time}`);
         const label = outLegs.length > 1 ? `✈ Ida (trecho ${i + 1})` : `✈ Ida`;
@@ -266,7 +267,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
         const parts: string[] = [];
         if (it.leg_date) parts.push(formatDate(it.leg_date));
         if (it.flight_number) parts.push(`${t("voo")} ${it.flight_number}`);
-        if (it.airport_origin && it.airport_destination) parts.push(`${it.airport_origin} → ${it.airport_destination}`);
+        if (it.airport_origin && it.airport_destination) parts.push(`${publicAirportText({ code: it.airport_origin, customName: it.origin_airport_name, city: it.origin_city })} → ${publicAirportText({ code: it.airport_destination, customName: it.destination_airport_name, city: it.destination_city })}`);
         if (it.departure_time) parts.push(`${t("saida")}: ${it.departure_time}`);
         if (it.arrival_time) parts.push(`${t("chegada")}: ${it.arrival_time}`);
         const label = intLegs.length > 1 ? `✈ Trecho interno (${i + 1})` : `✈ Trecho interno`;
@@ -276,7 +277,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
         const parts: string[] = [];
         if (rt.leg_date) parts.push(formatDate(rt.leg_date));
         if (rt.flight_number) parts.push(`${t("voo")} ${rt.flight_number}`);
-        if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
+        if (rt.airport_origin && rt.airport_destination) parts.push(`${publicAirportText({ code: rt.airport_origin, customName: rt.origin_airport_name, city: rt.origin_city })} → ${publicAirportText({ code: rt.airport_destination, customName: rt.destination_airport_name, city: rt.destination_city })}`);
         if (rt.departure_time) parts.push(`${t("saida")}: ${rt.departure_time}`);
         if (rt.arrival_time) parts.push(`${t("chegada")}: ${rt.arrival_time}`);
         const label = retLegs.length > 1 ? `✈ Volta (trecho ${i + 1})` : `✈ Volta`;

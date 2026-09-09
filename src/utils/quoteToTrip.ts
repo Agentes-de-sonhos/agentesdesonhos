@@ -34,8 +34,10 @@ function mapFlight(d: FlightData): { type: TripServiceType; data: TripServiceDat
   outbound.forEach((leg, i) => {
     segments.push({
       origin_airport: leg.airport_origin || "",
+      origin_airport_name: leg.origin_airport_name || undefined,
       origin_city: i === 0 ? (d.origin_city || "") : "",
       destination_airport: leg.airport_destination || "",
+      destination_airport_name: leg.destination_airport_name || undefined,
       destination_city: i === outbound.length - 1 ? (d.destination_city || "") : "",
       flight_date: leg.leg_date || d.departure_date || "",
       departure_time: leg.departure_time || "",
@@ -50,8 +52,10 @@ function mapFlight(d: FlightData): { type: TripServiceType; data: TripServiceDat
   internal.forEach((leg) => {
     segments.push({
       origin_airport: leg.airport_origin || "",
+      origin_airport_name: leg.origin_airport_name || undefined,
       origin_city: "",
       destination_airport: leg.airport_destination || "",
+      destination_airport_name: leg.destination_airport_name || undefined,
       destination_city: "",
       flight_date: leg.leg_date || "",
       departure_time: leg.departure_time || "",
@@ -66,8 +70,10 @@ function mapFlight(d: FlightData): { type: TripServiceType; data: TripServiceDat
   ret.forEach((leg, i) => {
     segments.push({
       origin_airport: leg.airport_origin || "",
+      origin_airport_name: leg.origin_airport_name || undefined,
       origin_city: i === 0 ? (d.destination_city || "") : "",
       destination_airport: leg.airport_destination || "",
+      destination_airport_name: leg.destination_airport_name || undefined,
       destination_city: i === ret.length - 1 ? (d.origin_city || "") : "",
       flight_date: leg.leg_date || d.return_date || "",
       departure_time: leg.departure_time || "",

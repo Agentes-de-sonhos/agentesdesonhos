@@ -121,6 +121,9 @@ export interface FlightLegDetail {
   airline?: string;
   origin_city?: string;
   destination_city?: string;
+  /** Nome público do aeroporto editado pelo agente (nunca sobrescrito). */
+  origin_airport_name?: string;
+  destination_airport_name?: string;
   duration?: string;          // "HH:mm"
   stops?: number;
   equipment?: string;
