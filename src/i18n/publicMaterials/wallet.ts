@@ -465,6 +465,7 @@ const dict = {
     mapWaze: "Waze",
     diasCountLabel: "dias",
     fldDecolou: "Decolou",
+    ctaSiteOficialHotel: "Site oficial do hotel",
     sectionOrientacoesEmbarquePlain: "Orientações de embarque",
 
     calMesAnterior: "Mês anterior",
@@ -1271,6 +1272,7 @@ const dict = {
     mapWaze: "Waze",
     diasCountLabel: "giorni",
     fldDecolou: "Decollato",
+    ctaSiteOficialHotel: "Sito ufficiale dell'hotel",
     sectionOrientacoesEmbarquePlain: "Istruzioni per l'imbarco",
 
     calMesAnterior: "Mese precedente",
