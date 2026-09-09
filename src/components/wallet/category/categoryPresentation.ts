@@ -127,11 +127,11 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
       const arrival = formatFriendlyTime(last?.arrival_time);
       const times =
         departure && arrival
-          ? `Partida ${departure} · Chegada ${arrival}`
+          ? `${t("fldPartida")} ${departure} · ${t("fldChegada")} ${arrival}`
           : departure
-            ? `Partida ${departure}`
+            ? `${t("fldPartida")} ${departure}`
             : arrival
-              ? `Chegada ${arrival}`
+              ? `${t("fldChegada")} ${arrival}`
               : null;
 
       return {
@@ -354,9 +354,9 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
         departure && arrival
           ? `${departure} → ${arrival}`
           : departure
-            ? `Partida ${departure}`
+            ? `${t("fldPartida")} ${departure}`
             : arrival
-              ? `Chegada ${arrival}`
+              ? `${t("fldChegada")} ${arrival}`
               : null;
       const stations = routeLabel(d.origin_station, d.destination_station);
 
